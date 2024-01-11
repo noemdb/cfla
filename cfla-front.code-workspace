@@ -1,6 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "public",
+			"path": "public"
+		},
+		{
+			"name": "resources",
 			"path": "resources"
 		}
 	],
