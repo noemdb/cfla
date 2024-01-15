@@ -1,10 +1,6 @@
 import "./bootstrap";
 
-import Alpine from "alpinejs";
-import Intersect from "@alpinejs/intersect";
+// Initialization for ES Users
+import { Tooltip, Tab, Carousel, Ripple, Animate, initTE } from "tw-elements";
+initTE({ Tooltip, Tab, Carousel, Ripple, Animate });
 
-Alpine.plugin(Intersect);
-
-Alpine.start();
-
-window.Alpine = Alpine;
