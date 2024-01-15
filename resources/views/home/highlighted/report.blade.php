@@ -10,7 +10,7 @@
     </div>
     <div class="p-6">
         <h5 class="mb-2 text-xl font-medium leading-tight text-neutral-800 dark:text-neutral-50">
-            Payment
+            Report
         </h5>
         <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
             Some quick example text to build on the card title and make up the

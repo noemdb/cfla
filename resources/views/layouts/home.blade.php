@@ -17,13 +17,13 @@
 
 </head>
 
-<body>
+<body class="bg-white dark:bg-black">
 
     <livewire:home />
 
     <div id="header"> @yield('header') </div>
 
-    <div id="aside" class="p-2"> @yield('aside') </div>
+    {{-- <div id="aside" class="p-2"> @yield('aside') </div> --}}
     
     <div id="hero" class="p-2"> @yield('hero') </div>    
 
