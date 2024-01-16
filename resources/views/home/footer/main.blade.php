@@ -14,8 +14,8 @@
     </div>
 
     <div class="bg-green-200 p-6 text-center dark:bg-green-700">
-        <span>© 2023 Copyright:</span>
-        <a class="font-semibold text-green-100 dark:text-green-400" href="https://tw-elements.com/">TW elements</a>
+        <span class="text-green-900">© 2024 Copyright:</span>
+        <a class="font-semibold text-green-900 dark:text-green-400" href="https://github.com/noemdb">@noemdb</a>
     </div>
 
     @include('home.footer.buttonTop')

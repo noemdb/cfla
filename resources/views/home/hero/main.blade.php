@@ -1,4 +1,3 @@
-<!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->
 <div id="carouselExampleCaptions" class="relative" data-te-carousel-init data-te-ride="carousel">
     <!--Carousel indicators-->
     <div class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0"

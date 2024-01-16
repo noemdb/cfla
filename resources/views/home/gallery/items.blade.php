@@ -1,4 +1,3 @@
-<!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->
 <div id="carouselExampleGallery" class="relative" data-te-carousel-init data-te-carousel-slide>
     <div class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0"
         data-te-carousel-indicators>
@@ -16,7 +15,7 @@
         <div class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
             data-te-carousel-active data-te-carousel-item style="backface-visibility: hidden">
             <div class="relative overflow-hidden bg-cover bg-no-repeat" style="background-position: 50%">
-                <img src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(123).jpg" class="block w-full" />
+                <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(123).jpg" data-te-lazy-load-init class="block w-full" />
                 <div
                     class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50">
                 </div>
@@ -31,7 +30,7 @@
         <div class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
             data-te-carousel-item style="backface-visibility: hidden">
             <div class="relative overflow-hidden bg-cover bg-no-repeat" style="background-position: 50%">
-                <img src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(124).jpg" class="block w-full" />
+                <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(124).jpg" data-te-lazy-load-init class="block w-full" />
                 <div
                     class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50">
                 </div>
@@ -46,7 +45,7 @@
         <div class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
             data-te-carousel-item style="backface-visibility: hidden">
             <div class="relative overflow-hidden bg-cover bg-no-repeat" style="background-position: 50%">
-                <img src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(125).jpg" class="block w-full" />
+                <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(125).jpg" data-te-lazy-load-init class="block w-full" />
                 <div
                     class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50">
                 </div>

@@ -23,7 +23,7 @@
 
     <div id="header"> @yield('header') </div>
 
-    {{-- <div id="aside" class="p-2"> @yield('aside') </div> --}}
+    <div id="aside"> @yield('aside') </div>
     
     <div id="hero" class="p-2"> @yield('hero') </div>    
 
@@ -35,14 +35,21 @@
 
     <div id="gallery" class="p-2"> @yield('gallery') </div>
 
+    <div id="services" class="p-2"> @yield('services') </div>
+
     <div id="autority" class="p-2"> @yield('autority') </div>
+
+    <div id="workers" class="p-2"> @yield('workers') </div>
 
     <div id="testimonials" class="p-2"> @yield('testimonials') </div>
 
     <div id="timeline" class="p-2"> @yield('timeline') </div>
 
+    <div id="graphs" class="p-2"> @yield('graphs') </div>
+
     <div id="contacs" class="p-2"> @yield('contacs') </div>
 
+    <div id="socials" class="p-2"> @yield('socials') </div>
     
     <div id="container" class="p-2"> @yield('content') </div>
 
