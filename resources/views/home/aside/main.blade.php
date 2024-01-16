@@ -1,11 +1,12 @@
+<!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->
 <div class="flex space-x-2">
     <div>
         {{-- <a class="mr-1.5 inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
             data-te-offcanvas-toggle href="#offcanvasExample" role="button" aria-controls="offcanvasExample"
             data-te-ripple-init data-te-ripple-color="light">
             Link with href
-        </a> --}}
-        {{-- <button
+        </a>
+        <button
             class="inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
             type="button" data-te-offcanvas-toggle data-te-target="#offcanvasExample" aria-controls="offcanvasExample"
             data-te-ripple-init data-te-ripple-color="light">
@@ -16,7 +17,7 @@
             tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel" data-te-offcanvas-init>
             <div class="flex items-center justify-between p-4">
                 <h5 class="mb-0 font-semibold leading-normal" id="offcanvasExampleLabel">
-                    Offcanvas
+                    Explora nuestras secciones
                 </h5>
                 <button type="button"
                     class="box-content rounded-none border-none opacity-50 hover:no-underline hover:opacity-75 focus:opacity-100 focus:shadow-none focus:outline-none"
@@ -32,10 +33,15 @@
             </div>
             <div class="flex-grow overflow-y-auto p-4">
                 <div>
-                    Some text as placeholder. In real life you can have the elements
-                    you have chosen. Like, text, images, lists, etc.
+                    Haz un recorrido por nuestras secciones y aprende sobre nuestra institución, carisma y servicios.
                 </div>
-                <div class="relative mt-4" data-te-dropdown-ref>
+
+                <div class="ml-10 flex items-baseline space-x-4">
+                    <a href="#services" data-te-smooth-scroll-init class="text-gray-300 hover:bg-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Servicios</a>
+                    <a href="#featured" data-te-smooth-scroll-init class="text-gray-300 hover:bg-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Acerca de</a>
+                    <a href="#contacs" data-te-smooth-scroll-init class="text-gray-300 hover:bg-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contacto</a>
+                </div>
+                {{-- <div class="relative mt-4" data-te-dropdown-ref>
                     <button
                         class="flex items-center whitespace-nowrap rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] motion-reduce:transition-none"
                         type="button" id="dropdownMenuButton" data-te-dropdown-toggle-ref data-te-ripple-init
@@ -53,9 +59,7 @@
                     <ul class="absolute z-[1000] float-left m-0 hidden min-w-max list-none rounded-lg border-none bg-white bg-clip-padding py-2 text-left text-base shadow-lg dark:bg-neutral-700 dark:text-neutral-200 [&[data-te-dropdown-show]]:block"
                         aria-labelledby="dropdownMenuButton" data-te-dropdown-menu-ref>
                         <li>
-                            <a class="block w-full whitespace-nowrap bg-transparent px-4 py-2 text-sm font-normal text-neutral-700 hover:bg-neutral-100 active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-neutral-100 dark:hover:bg-neutral-500 dark:focus:bg-neutral-500"
-                                href="#" data-te-dropdown-item-ref>Action
-                            </a>
+                            <a href="#contacs" data-te-smooth-scroll-init class="text-gray-300 hover:bg-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contacto</a>
                         </li>
                         <li>
                             <a class="block w-full whitespace-nowrap bg-transparent px-4 py-2 text-sm font-normal text-neutral-700 hover:bg-neutral-100 active:text-neutral-800 active:no-underline disabled:pointer-events-none disabled:bg-transparent disabled:text-neutral-400 dark:text-neutral-100 dark:hover:bg-neutral-500 dark:focus:bg-neutral-500"
@@ -68,7 +72,7 @@
                             </a>
                         </li>
                     </ul>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

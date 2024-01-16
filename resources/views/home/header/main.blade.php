@@ -1,53 +1,34 @@
-<nav class="bg-green-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+<header>
+    <!-- Navigation bar -->
+    <nav class="relative flex w-full items-center justify-between bg-green-900 text-green-200 py-2 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 dark:text-neutral-200 md:flex-wrap md:justify-start"
+        data-te-navbar-ref>
+        <div class="flex w-full flex-wrap items-center justify-start px-3">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <!-- Logo de tu aplicación -->
-                    @include('home.header.icon')
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <!-- Elementos del menú -->
-                        @include('home.header.menu.items')
-                    </div>
-                </div>
-            </div>
-            <div class="-mr-2 flex md:hidden">
-                <!-- Botón para abrir el menú en dispositivos móviles -->
-                <button type="button"
-                    class=" bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:text-gray-400 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                    aria-controls="mobile-menu" aria-expanded="false" @click="isOpen = !isOpen">
-                    <span class="sr-only">Abrir menú principal</span>
-                    <!-- Icono para abrir el menú (por ejemplo, un ícono de hamburguesa) -->
-                    <x-icon name="menu" class="w-5 h-5" />
+                <!-- Hamburger menu button -->
+                <button
+                    class="text-green-200 border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-white dark:hover:text-white dark:focus:text-white md:hidden"
+                    type="button" data-te-collapse-init data-te-target="#navbarSupportedContentY"
+                    aria-controls="navbarSupportedContentY" aria-expanded="false" aria-label="Toggle navigation">
+                    <!-- Hamburger menu icon -->
+                    <span class="[&>svg]:w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="h-7 w-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </span>
                 </button>
             </div>
+
+            <!-- Navigation links -->
+            <div class="flex-shrink-0 mb-2 mr-2">
+                <!-- Logo de tu aplicación -->
+                @include('home.header.icon')
+            </div>
+            <div class="!visible hidden grow basis-[100%] items-center md:!flex md:basis-auto" id="navbarSupportedContentY" data-te-collapse-item>
+                @include('home.header.menu.items')                
+            </div>
         </div>
-    </div>
-
-    <!-- Menú desplegable en dispositivos móviles -->
-    <div class="hidden" id="mobile-menu" x-show="isOpen">
-        {{-- <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3"> --}}
-        <div class="space-x-4 border-2 border-white rounded">
-            <!-- Elementos del menú -->
-            @include('home.header.menu.items')
-        </div>
-    </div>
-</nav>
-
-@section('scripts')
-    @parent
-    <script>
-        // Agrega este script al final del archivo o en un archivo JavaScript separado
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileMenuButton = document.querySelector('[aria-controls="mobile-menu"]');
-            const mobileMenu = document.querySelector('#mobile-menu');
-        
-            mobileMenuButton.addEventListener('click', function () {
-                mobileMenu.classList.toggle('hidden');
-            });
-        });
-    </script>     
-@endsection
-
+    </nav>
+    
+</header>

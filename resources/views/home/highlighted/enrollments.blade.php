@@ -2,26 +2,31 @@
     <x-card class="p-4">
 
         <x-slot name="header">
-            <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-3xl font-bold text-neutral-800 dark:text-neutral-200">
-                Enrollment
+            <h3 class=" text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+                <div class="h-full flex items-center">
+                    <x-icon name="document-text" class="flex-none w-10 h-10" />
+                    <div class="flex-initial">Sólicitud actualización de matrícula.</div>
+                </div>
             </h3>
+            <span class="text-xs text-gray-400 text-right font-bold dark:text-neutral-200">Período Escolar 2023 -
+                2024</span>
         </x-slot>
 
-        <x-input label="Name" placeholder="your name" corner-hint="Ej: John">
+        <x-input label="Cédula del Representante" placeholder="Sólo números" corner-hint="Ej: 12345678">
             <x-slot name="append">
                 <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
                     <x-button class="h-full rounded-r-md" icon="search" primary flat squared />
                 </div>
             </x-slot>
-        </x-input>    
-        
+        </x-input>
+
         <hr class="my-2">
-        
-        {{-- <x-slot name="footer"> --}}
-            <div class="flex justify-between items-center">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Similique velit impedit molestias voluptas iusto earum eius, consequatur corrupti rem accusamus, explicabo repellendus eveniet blanditiis architecto numquam dignissimos! Sit, obcaecati quia?
-            </div>
-        {{-- </x-slot> --}}
-    
+
+        <div class="text-xs text-gray-200flex justify-between items-center">
+            La solicitud de actualización de matrícula es un documento que se utiliza para informar de los cambios que
+            se han producido en los datos de un estudiante. Estos cambios pueden referirse a la dirección, el teléfono,
+            la situación familiar o cualquier otra información relevante.
+        </div>
+
     </x-card>
 </div>
