@@ -1,1 +1,62 @@
 php artisan make:livewire Home
+
+php artisan make:livewire 'Home/HeaderComponent'
+
+php artisan make:livewire 'Home/HeroComponent'
+php artisan make:livewire 'Home/AsideComponent'
+php artisan make:livewire 'Home/HighlightedComponent'
+php artisan make:livewire 'Home/FeaturedComponent'
+php artisan make:livewire 'Home/CategoryComponent'
+php artisan make:livewire 'Home/GalleryComponent'
+php artisan make:livewire 'Home/ServicesComponent'
+php artisan make:livewire 'Home/AlliancesComponent'
+php artisan make:livewire 'Home/AutorityComponent'
+php artisan make:livewire 'Home/WorkersComponent'
+php artisan make:livewire 'Home/ContactsComponent'
+php artisan make:livewire 'Home/SocialsComponent'
+php artisan make:livewire 'Home/TestimonialsComponent'
+php artisan make:livewire 'Home/TimelineComponent'
+php artisan make:livewire 'Home/GraphsComponent'
+php artisan make:livewire 'Home/FooterComponent'
+php artisan make:livewire 'Home/ContentComponent'
+
+
+php artisan make:livewire 'App/Enrollment/IndexComponent'
+
+
+Hero
+Aside
+Highlighted
+Featured
+Category
+Gallery
+Services
+Alliances
+Autority
+Workers
+Contacts
+Socials
+Testimonials
+Timeline
+Graphs
+Footer
+Content
+
+header
+hero
+aside
+highlighted
+featured
+category
+gallery
+services
+alliances
+autority
+workers
+contacts
+socials
+testimonials
+timeline
+graphs
+footer
+content

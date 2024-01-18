@@ -2,12 +2,12 @@
     <div
         class="flex items-center justify-center border-b-2 border-green-200 p-6 dark:border-green-500 lg:justify-between">
         <div class="mr-12 hidden lg:block">
-            <span>Get connected with us on social networks:</span>
+            <span>Conéctate con nosotros en nuestras redes sociales:</span>
         </div>
         @include('home.footer.icons')
     </div>
 
-    <div class="mx-6 py-10 text-center md:text-left">
+    <div class="mx-6 py-10 text-center md:text-left text-xs">
         <div class="grid-1 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             @include('home.footer.elements')
         </div>

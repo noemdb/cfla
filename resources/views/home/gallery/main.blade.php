@@ -6,5 +6,7 @@
         </h3>
     @endslot
 
-    @include('home.gallery.items')
+    <div class=" lg:p-8">        
+        @include('home.gallery.items')
+    </div>
 </x-card>
