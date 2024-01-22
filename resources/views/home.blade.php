@@ -1,31 +1,11 @@
 @extends('layouts.home')
 
-@section('title', 'Landing Page')
+@section('title', 'Landing Page '.$enrollment)
 
-@section('header') <livewire:home.header-component /> @endsection
+@section('header') <livewire:home.header-component  /> @endsection
 {{-- @section('hero') <livewire:home.hero-component /> @endsection --}}
-@section('highlighted') <livewire:home.highlighted-component /> @endsection
+@section('highlighted') <livewire:home.highlighted-component :enrollment="$enrollment" /> @endsection
 
-{{-- 
-header
-hero
-aside
-highlighted
-featured
-category
-gallery
-services
-alliances
-autority
-workers
-contacts
-socials
-testimonials
-timeline
-graphs
-footer
-content
---}}
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
 

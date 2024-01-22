@@ -12,8 +12,7 @@
     @vite(['resources/js/app.js'])
 
     @livewireStyles
-
-    @wireUiScripts
+    <wireui:scripts />
 
 </head>
 
@@ -90,6 +89,8 @@
     <div id="footer"> @yield('footer') </div>
 
     @yield('scripts')
+
+    @livewireScripts
 
 </body>
 

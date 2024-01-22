@@ -1,0 +1,29 @@
+Learner
+php artisan make:model 'app\Learner\Estudiant'
+php artisan make:model 'app\Learner\Representant'
+
+Entity
+php artisan make:model 'app\Entity\Institucion'
+php artisan make:model 'app\Entity\Autoridad' 
+php artisan make:model 'app\Entity\Pescolar'
+
+Academy
+php artisan make:model 'app\Academy\Inscripcion'
+php artisan make:model 'app\Academy\Grado'
+php artisan make:model 'app\Academy\Lapso'
+php artisan make:model 'app\Academy\Peducativo'
+php artisan make:model 'app\Academy\Pestudio'
+php artisan make:model 'app\Academy\Profesor'
+php artisan make:model 'app\Academy\ProfesorGuia'
+php artisan make:model 'app\Academy\Seccion'
+php artisan make:model 'app\Academy\Census'
+php artisan make:model 'app\Academy\Enrollment'
+
+Admon
+php artisan make:model 'app\Admon\Administrativa'
+php artisan make:model 'app\Admon\PlanPago'
+
+Blog
+php artisan make:model 'app\Blog\Category'
+php artisan make:model 'app\Blog\Post'
+php artisan make:model 'app\Blog\PostFile'

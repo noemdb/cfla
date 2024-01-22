@@ -28,5 +28,7 @@
             la situación familiar o cualquier otra información relevante.
         </div>
 
+        
+
     </x-card>
 </div>

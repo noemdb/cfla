@@ -1,0 +1,6 @@
+php artisan make:component 'Elements\Alert'
+
+php artisan make:component notify.alert --view
+
+
+php artisan make:component Tw/Alert

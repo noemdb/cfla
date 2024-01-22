@@ -1,6 +1,7 @@
 <div>
     <div>
-        <livewire:app.enrollment.index-component />    
+
+        <livewire:app.enrollment.index-component :enrollment="$enrollment"/>    
         
     </div>
     
