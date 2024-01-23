@@ -152,6 +152,21 @@ class Enrollment extends Model
         'Otros' => 'Otros',
     ];
 
+    public static function list_blood_type()
+    {
+        return ['A+'=>'A+','A-'=>'A-','B+'=>'B+','B-'=>'B-','O+'=>'O+','O-'=>'O-'];
+    }
+
+    public static function list_relationship()
+    {
+        return ['Madre'=>'Madre','Padre'=>'Padre','Hermano(a)'=>'Hermano(a)','Abuelo(a)'=>'Abuelo(a)','Otro'=>'Otro'];
+    }
+
+    public static function list_laterality()
+    {
+        return ['IZQUIERDA'=>'IZQUIERDA','DERECHA'=>'DERECHA'];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -163,6 +178,11 @@ class Enrollment extends Model
     public function grado()
     {
         return $this->belongsTo(Grado::class, 'grado_id');
+    }
+
+    public function censuses()
+    {
+        return $this->hasOne(Census::class, 'pestudio_id');
     }
 
     public function getDayAttribute()
@@ -177,4 +197,6 @@ class Enrollment extends Model
     {
         return ($this->date_birth) ? Carbon::parse($this->date_birth)->format('Y') : null;
     }
+
+    
 }

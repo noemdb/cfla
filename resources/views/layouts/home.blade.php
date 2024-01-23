@@ -11,8 +11,8 @@
     @vite('resources/css/app.css')
     @vite(['resources/js/app.js'])
 
-    @livewireStyles
     <wireui:scripts />
+    @livewireStyles
 
 </head>
 

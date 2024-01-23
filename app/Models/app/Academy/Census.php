@@ -33,6 +33,11 @@ class Census extends Model
         return $this->belongsTo(Grado::class, 'grado_id');
     }
 
+    public function enrollments()
+    {
+        return $this->hasOne(Enrollment::class, 'pestudio_id');
+    }
+
     public function getDayAttribute()
     {
         return ($this->date_birth) ? Carbon::parse($this->date_birth)->format('d') : null;

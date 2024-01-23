@@ -3,10 +3,14 @@
 @switch($step)
     
     @case(1) @include('livewire.app.enrollment.steper.estudiant') @break
+    @case(2) @include('livewire.app.enrollment.steper.physical') @break
 
     @default
         
 @endswitch
+
+@include('livewire.app.enrollment.steper.button')
+
 
 {{-- 
 "user_id" => 34

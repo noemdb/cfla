@@ -18,6 +18,7 @@ php artisan make:model 'app\Academy\ProfesorGuia'
 php artisan make:model 'app\Academy\Seccion'
 php artisan make:model 'app\Academy\Census'
 php artisan make:model 'app\Academy\Enrollment'
+php artisan make:model 'app\Academy\Oinstitucion'
 
 Admon
 php artisan make:model 'app\Admon\Administrativa'

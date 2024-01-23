@@ -22,6 +22,7 @@ php artisan make:livewire 'Home/ContentComponent'
 
 
 php artisan make:livewire 'App/Enrollment/IndexComponent'
+php artisan livewire:form 'App/Livewire/Forms/EnrollmentForm'
 
 
 Hero

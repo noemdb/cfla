@@ -9,8 +9,6 @@ class HomeController extends Controller
 {
     public function home(Request $request)
     {
-        https://livewire.laravel.com/docs/forms#extracting-a-form-object
-        $enrollment = new Enrollment(); //dd($post);
-        return view('home',compact('enrollment'));
+        return view('home');
     }
 }
