@@ -21,7 +21,13 @@
 </div>
 
 <div class="pb-2">
-    @php $name = 'name_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
+    @php $name = 'phone_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
+    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
+    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+</div>
+
+<div class="pb-2">
+    @php $name = 'cellphone_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
     <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
     @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
 </div>
@@ -29,16 +35,12 @@
 <div class="pb-2">
     @php $name = 'relationship' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
     <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_relationship" wire:model="{{$model}}" option-key-value/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
 </div>
-
 
 <div class="pb-2">
     @php $name = 'profession_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_profession" wire:model="{{$model}}" option-key-value/>
 </div>
-
 
 <div class="pb-2">
     @php $name = 'email_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp

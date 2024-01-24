@@ -7,13 +7,10 @@
 "transport_other" => null
 --}}
 
-
 <div class="pb-2">
     @php $name = 'coexistence' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_coexistence" wire:model="{{$model}}" option-key-value/>
 </div>
-
 
 <div class="pb-2">
     @php $name = 'status_transport_private_vehicle' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp

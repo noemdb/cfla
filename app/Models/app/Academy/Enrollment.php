@@ -70,7 +70,7 @@ class Enrollment extends Model
         'relationship' => 'Parentesco',
         'profession_representant' => 'Profesión',
         'phone_representant' => 'Número de teléfono',
-        'cellphone_representant' => 'Número de teléfono celular [WhatsApp, Telegram]',
+        'cellphone_representant' => 'Número de teléfono celular [WhatsApp, Telegram, etc]',
         'email_representant' => 'Correo electrónico',
         'twitter' => 'Usuario Twitter',
         'instagram' => 'Usuario Instagram',
@@ -84,7 +84,7 @@ class Enrollment extends Model
         'status_transport_other' => 'Otro (especifique)',
         'transport_other' => 'Nombre del otro medio de transporte',
         'status_vaccination_schedule' => 'Esquema de vacunación',
-        'status_sports_potential' => 'Posee potencial deportivo/cultural u otro',
+        'status_sports_potential' => 'Posee algún potencial cultural o de otro tipo?',
         'sports_potential' => 'Especifique actividad deportiva/cultural u otro',
         'place_where_he_practices' => 'Lugar dónde practica',
         'status_illness_cardiovascular' => 'Cardiovascular',
@@ -151,6 +151,21 @@ class Enrollment extends Model
         'Instrumento músical' => 'Instrumento músical',
         'Otros' => 'Otros',
     ];
+
+    public static function list_coexistence()
+    {
+        return ["Con mis padres" => "Con mis padres", "Con mis abuelos" => "Con mis abuelos", "Con mis padres adoptivos" => "Con mis padres adoptivos", "Con mis hermanos" => "Con mis hermanos", "Con mis tíos o tías" => "Con mis tíos o tías", "Con mis primos" => "Con mis primos", "Con un tutor" => "Con un tutor", "Con un cuidador informal" => "Con un cuidador informal", "No vivo con nadie" => "No vivo con nadie"];
+    }
+
+    public static function list_sports_potential()
+    {
+        return ["Tenis"=>"Tenis","Futbol rápido"=>"Futbol rápido","Voleibol"=>"Voleibol","Baile"=>"Baile","Futbol soccer"=>"Futbol soccer","Instrumento músical"=>"Instrumento músical","Otros"=>"Otros","Karate do"=>"Karate do","Ciclismo"=>"Ciclismo","Beisbol"=>"Beisbol","Tae kwon do"=>"Tae kwon do","Canto"=>"Canto","Basquetbol"=>"Basquetbol","Natación"=>"Natación","Box"=>"Box","Tenis de mesa"=>"Tenis de mesa","Ajedrez"=>"Ajedrez","Halterofilia"=>"Halterofilia","Atletismo"=>"Atletismo"];
+    }
+
+    public static function list_profession()
+    {
+        return ["Músico"=>"Músico","Profesor"=>"Profesor","Médico"=>"Médico","Enfermero"=>"Enfermero","Policía"=>"Policía","Militar"=>"Militar","Bombero"=>"Bombero","Abogado"=>"Abogado","Juez"=>"Juez","Fiscal"=>"Fiscal","Funcionario de gobierno"=>"Funcionario de gobierno","Empresario"=>"Empresario","Gerente"=>"Gerente","Director"=>"Director","Ejecutivo"=>"Ejecutivo","Profesional técnico"=>"Profesional técnico","Profesional especializado"=>"Profesional especializado","Trabajador manual"=>"Trabajador manual","Trabajador no calificado"=>"Trabajador no calificado","Artista"=>"Artista","Escritor"=>"Escritor","Periodista"=>"Periodista","Deportista"=>"Deportista","Religioso"=>"Religioso","Voluntario"=>"Voluntario","Otro/a"=>"Otro/a"];
+    }
 
     public static function list_blood_type()
     {

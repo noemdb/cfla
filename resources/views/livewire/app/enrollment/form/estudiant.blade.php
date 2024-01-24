@@ -35,7 +35,6 @@
 <div class="pb-2">
     @php $name = 'gender' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
     <x-select label="{{$label}}" placeholder="Seleccionar" :options="['Masculino', 'Femenino']" wire:model="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
 </div>
 
 <div class="pb-2">
@@ -71,14 +70,14 @@
 
 <div class="pb-2">
     @php $name = 'grado_id' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_grado" wire:model="{{$model}}" option-key-value/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_grado" wire:model.live="{{$model}}" option-key-value/>
+    {{-- @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror --}}
 </div>
 
 <div class="pb-2">
     @php $name = 'institution' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
     <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_oinstitucions" wire:model="{{$model}}" option-key-value/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    {{-- @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror --}}
 </div>
 
 <div class="pb-2">
