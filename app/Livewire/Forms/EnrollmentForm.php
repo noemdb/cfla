@@ -10,13 +10,15 @@ class EnrollmentForm extends Form
 {
     public $list_comment = '';
 
-    // #[Validate('required|min:5','Cédula del Estudiante')]
-    public $ci_estudiant,$lastname,$name,$gender,$date_birth,$town_hall_birth,$state_birth,$country_birth,$dir_address,$pestudio_id,$grado_id,$institution,$pending_matter,$literal,$grupo_estable_id,$age,$blood_type,$weight,$height,$laterality,$order_born,$group_family,$status_brother,$ci_representant,$name_representant,$relationship,$phone_representant,$cellphone_representant,$profession_representant,$email_representant,$recommended_by,$coexistence,$status_transport_private_vehicle,$status_transport_public_vehicle,$status_transport_walking,$status_transport_other,$transport_other,$status_vaccination_schedule,$status_sports_potential,$sports_potential,$place_where_he_practices,$status_illness_cardiovascular,$status_illness_cancer,$status_illness_lupus,$status_illness_diabetes,$status_illness_renal_problems,$status_illness_overweight,$status_illness_other,$illness_other,$status_conditions_intellectual_disability,$status_conditions_motor_disability,$status_conditions_visual_disability,$status_conditions_hearing_impairment,$status_conditions_outstanding_attitudes,$status_conditions_autism,$status_conditions_other,$conditions_other,$status_treated_by_specialist,$specialist,$status_take_medication,$medication,$mother_name,$mother_lastname,$mother_ci,$mother_profession,$mother_phones,$mother_address,$father_name,$father_lastname,$father_ci,$father_profession,$father_phones,$father_address;
+    #[Validate]
+    public $user_id,$ci_estudiant,$lastname,$name,$photo,$gender,$date_birth,$town_hall_birth,$state_birth,$country_birth,$dir_address,$pestudio_id,$grado_id,$institution,$pending_matter,$literal,$grupo_estable_id,$age,$blood_type,$weight,$height,$laterality,$order_born,$group_family,$status_brother,$ci_representant,$name_representant,$relationship,$phone_representant,$cellphone_representant,$profession_representant,$email_representant,$recommended_by,$coexistence,$status_transport_private_vehicle,$status_transport_public_vehicle,$status_transport_walking,$status_transport_other,$transport_other,$status_vaccination_schedule,$status_sports_potential,$sports_potential,$place_where_he_practices,$status_illness_cardiovascular,$status_illness_cancer,$status_illness_lupus,$status_illness_diabetes,$status_illness_renal_problems,$status_illness_overweight,$status_illness_other,$illness_other,$status_conditions_intellectual_disability,$status_conditions_motor_disability,$status_conditions_visual_disability,$status_conditions_hearing_impairment,$status_conditions_outstanding_attitudes,$status_conditions_autism,$status_conditions_other,$conditions_other,$status_treated_by_specialist,$specialist,$status_take_medication,$medication,$mother_name,$mother_lastname,$mother_ci,$mother_profession,$mother_phones,$mother_address,$father_name,$father_lastname,$father_ci,$father_profession,$father_phones,$father_address;
 
     protected $rules = [
+        // 'user_id'=>'required|integer',
         'ci_estudiant'=>'required|unique:enrollments,ci_estudiant|digits_between:6,12',
         'lastname'=>'required',
         'name'=>'required',
+        'photo'=>'nullable',
         'gender'=>'required',
         'date_birth'=>'required',
         'town_hall_birth'=>'nullable',
@@ -25,17 +27,17 @@ class EnrollmentForm extends Form
         'dir_address'=>'nullable:string',
         'grado_id'=>'required|integer',
         'pestudio_id'=>'required|integer',
-        'institution'=>'nullable',
+        'institution'=>'required',
         'pending_matter'=>'nullable',
         'literal'=>'nullable',
         'grupo_estable_id'=>'nullable',
         'age'=>'required|integer',
         'blood_type'=>'required',
-        'weight'=>'required',
-        'height'=>'required',
+        'weight'=>'required|integer',
+        'height'=>'required|integer',
         'laterality'=>'required',
-        'order_born'=>'required',
-        'group_family'=>'required',
+        'order_born'=>'required|integer',
+        'group_family'=>'required|integer',
         'status_brother'=>'required',
         'ci_representant'=>'required',
         'name_representant'=>'required',
@@ -96,6 +98,7 @@ class EnrollmentForm extends Form
             'ci_estudiant' => $this->list_comment['ci_estudiant'],
             'lastname' => $this->list_comment['lastname'],
             'name' => $this->list_comment['name'],
+            'photo' => $this->list_comment['photo'],
             'gender' => $this->list_comment['gender'],
             'date_birth' => $this->list_comment['date_birth'],
             'town_hall_birth' => $this->list_comment['town_hall_birth'],

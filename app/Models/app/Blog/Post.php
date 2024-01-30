@@ -2,6 +2,7 @@
 
 namespace App\Models\app\Blog;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,11 +34,49 @@ class Post extends Model
         'status_banned'=>'Baneado',
         'status_active'=>'Activo',
         'status_published'=>'Publicado'
-    ];
+    ];    
 
     /*INI relaciones entre modelos*/
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class,'user_id');
     }
+    public function category()
+    {
+        return $this->belongsTo(Category::class,'category_id');
+    }
+    public function postfiles()
+    {
+        return $this->hasMany(PostFile::class, 'postfile_id');
+    }
+    /*FIN relaciones entre modelos*/
+
+    public static function getPriorityPosts($take=4)
+    {
+        $postsPriorities =
+            Post::select('posts.*')
+                ->pinned()
+                ->public()
+                ->where('posts.status_priority',true)
+                ->get()
+                ->take($take);
+        return $postsPriorities;
+    }
+
+    public function scopePinned($query)
+    {
+        return $query->orderByRaw('ISNULL(posts.order), posts.order ASC')->orderBy('posts.created_at','desc');
+    }
+
+    public function scopePublic($query)
+    {
+        $result = $query
+        ->join('categories', 'categories.id', '=', 'posts.category_id')
+        ->where('posts.status_active',true)
+        ->where('posts.status_published',true)
+        ->where('categories.status_active',true)
+        ->where('categories.status_published',true);
+        return $result;
+    }
+
 }

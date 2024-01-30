@@ -1,5 +1,5 @@
-<div class="p-2 border rounded shadow">
-    <x-card class="p-4">
+<div class="p-2 h-full">
+    <x-card class="p-4 h-full border-0">
 
         <x-slot name="header">
             <h3 class=" text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">

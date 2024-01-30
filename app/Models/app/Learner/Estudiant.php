@@ -9,7 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Estudiant extends Model
@@ -169,5 +169,17 @@ class Estudiant extends Model
                 }
             }
         }
+    }
+
+    public static function getStatusInscriptionsCI($ci)
+    {
+        $estudiant = DB::table('estudiants')
+        ->select('estudiants.*')
+        ->join('inscripcions', 'estudiants.id', '=', 'inscripcions.estudiant_id')
+        ->join('seccions', 'seccions.id', '=', 'inscripcions.seccion_id')
+        ->where('estudiants.ci_estudiant',$ci)
+        ->where('seccions.status_active', 'true')
+        ->first();
+        return ($estudiant) ? true : false;
     }
 }

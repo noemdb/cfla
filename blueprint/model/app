@@ -23,6 +23,13 @@ php artisan make:model 'app\Academy\Oinstitucion'
 Admon
 php artisan make:model 'app\Admon\Administrativa'
 php artisan make:model 'app\Admon\PlanPago'
+php artisan make:model 'app\Admon\MetodoPago'
+php artisan make:model 'app\Admon\Banco'
+php artisan make:model 'app\Admon\Ingreso'
+php artisan make:model 'app\Admon\Payment'
+php artisan make:model 'app\Admon\Currency'
+php artisan make:model 'app\Admon\ReferentialCurrency'
+php artisan make:model 'app\Admon\ExchangeRate'
 
 Blog
 php artisan make:model 'app\Blog\Category'

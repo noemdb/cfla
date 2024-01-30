@@ -9,6 +9,7 @@
                 <x-dynamic-component
                     :component="WireUi::component('label')"
                     :label="$label"
+                    :bold="true"
                     :has-error="$hasError"
                     :for="$id"
                 />
@@ -18,6 +19,8 @@
                 <x-dynamic-component
                     :component="WireUi::component('label')"
                     :label="$cornerHint"
+                    :opacity="true"
+                    :bold="false"
                     :has-error="$hasError"
                     :for="$id"
                 />

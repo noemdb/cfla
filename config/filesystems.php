@@ -44,6 +44,18 @@ return [
             'throw' => false,
         ],
 
+        'payments' => [
+            'driver' => 'local',
+            'root' => env('APP_ROOT_SAEFL').'/storage/app/public/payments',
+            'visibility' => 'public',
+        ],
+
+        'enrollments' => [
+            'driver' => 'local',
+            'root' => env('APP_ROOT_SAEFL').'/storage/app/public/enrollments',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

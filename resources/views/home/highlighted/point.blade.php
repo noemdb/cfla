@@ -1,16 +1,16 @@
-<x-card class="bg-gray-200 rounded shadow m-2 h-full">
+<x-card class="h-full">
 
     @slot('header')
-    <h3 class="text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+    <h3 class="text-green-950 bg-warning-100 rounded-t-xl p-2 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="credit-card" class="flex-none w-10 h-10" />
-            <div class="flex-initial">Punto de Venta Virtual</div>
+            <div class="flex-initial">Punto de Venta Virtual.</div>
         </div>
     </h3>
     @endslot
 
     <div
-        class="h-full block rounded-lg bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700">
+        class="h-full block bg-white dark:bg-neutral-700">
         <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
             <div class="flex justify-center">
                 <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/btnpayment.png')}}" alt="" />
@@ -29,7 +29,7 @@
                     .</div>
             </div>
         </div>
-        <div class="p-6">
+        <div class="text-xs text-gray-200flex justify-between items-center bg-orange-100 p-4 my-4 rounded-lg origin-bottom rotate-2">
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 Seguimos trabajando en la mejora de nuestros servicios, hemos agregado una nueva opción de pago aún más rápida a través de esta conexión.
             </div>
@@ -40,11 +40,14 @@
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 <span class="font-bold">Verificación, concialición y registro automático: </span>                
                 <span>Tus pagos son registrados automaticamente en el <span class=" text-green-950 font-bold">SAEFL</span>.</span>
-            </div>
-            <div class="flex justify-end">
-                <x-button positive label="Comenzar" />
-            </div>
+            </div>            
+        </div>
+        <div class="flex justify-end">
+            @php $url = env('APP_URL_SAEFL','.').'/service/payment/button/credicard'; @endphp
+            <x-button href="{{$url ?? null}}" target="_blank" label="Comenzar" warning class="w-full"/>
         </div>
     </div>
 
 </x-card>
+
+{{--  --}}

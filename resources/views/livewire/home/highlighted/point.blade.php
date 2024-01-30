@@ -1,10 +1,10 @@
 <x-card class="bg-gray-200 rounded shadow m-2 h-full">
 
     @slot('header')
-    <h3 class="text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+    <h3 class="text-green-950 bg-green-100 rounded-t-lg p-2 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="credit-card" class="flex-none w-10 h-10" />
-            <div class="flex-initial">Punto de Venta Virtual</div>
+            <div class="flex-initial">Punto de Venta Virtual.</div>
         </div>
     </h3>
     @endslot

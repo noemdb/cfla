@@ -38,6 +38,7 @@ class Enrollment extends Model
         'name' => 'Nombres',
         'fullname' => 'Nombre',
         'photo' => 'Foto',
+        'image' => 'Foto',
         'photo_url' => 'Foto',
         'cellphone' => 'Número de teléfono celular',
         'gender' => 'Género',
@@ -197,7 +198,7 @@ class Enrollment extends Model
 
     public function censuses()
     {
-        return $this->hasOne(Census::class, 'pestudio_id');
+        return $this->belongsTo(Census::class, 'ci_estudiant');
     }
 
     public function getDayAttribute()

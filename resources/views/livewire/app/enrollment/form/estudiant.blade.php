@@ -16,73 +16,62 @@
 
 <div class="pb-2">
     @php $name = 'ci_estudiant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="user" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-inputs.maskable label="{{$label}}" mask="##.###.###" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'name' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="user" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="user" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'lastname' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="user" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="user" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'gender' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-select label="{{$label}}" placeholder="Seleccionar" :options="['Masculino', 'Femenino']" wire:model="{{$model}}"/>
+    <x-select label="{{$label}}" placeholder="Seleccionar" :options="['Masculino', 'Femenino']" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'date_birth' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-datetime-picker label="{{$label}}" placeholder="{{$label}}" wire:model="{{$model}}" :min="now()->subYearss(30)" :max="now()" without-time="false"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-datetime-picker parse-format="YYYY-MM-DD" display-format="DD-MM-YYYY" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" :min="now()->subYearss(30)" :max="now()" without-time="false"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'town_hall_birth' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="table" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'state_birth' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="table" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'country_birth' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="table" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'dir_address' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-textarea right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-textarea right-icon="table" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 
 <div class="pb-2">
     @php $name = 'grado_id' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
     <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_grado" wire:model.live="{{$model}}" option-key-value/>
-    {{-- @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror --}}
 </div>
 
 <div class="pb-2">
     @php $name = 'institution' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_oinstitucions" wire:model="{{$model}}" option-key-value/>
-    {{-- @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror --}}
+    <x-select label="{{$label}}" placeholder="Seleccionar" :options="$list_oinstitucions" wire:model.live="{{$model}}" option-key-value/>
 </div>
 
 <div class="pb-2">
     @php $name = 'pending_matter' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-input right-icon="table" label="{{$label}}" wire:modeL="{{$model}}"/>
-    @error($model)<span class="text-red-600 small mb-2">{{ $message }}</span> @enderror
+    <x-input right-icon="table" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 

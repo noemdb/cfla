@@ -5,6 +5,7 @@
 @section('header') <livewire:home.header-component  /> @endsection
 {{-- @section('hero') <livewire:home.hero-component /> @endsection --}}
 @section('highlighted') <livewire:home.highlighted-component /> @endsection
+@section('hero') <livewire:home.hero-component /> @endsection
 
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
@@ -37,7 +38,7 @@
 
 {{-- @section('graphs')  @include('home.graphs.main') @endsection --}}
 
-{{-- @section('footer')  @include('home.footer.main') @endsection --}}
+@section('footer')  @include('home.footer.main') @endsection
 
 {{-- @section('content') <livewire:home /> @endsection --}}
 

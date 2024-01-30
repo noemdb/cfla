@@ -1,12 +1,26 @@
 <div>
-    <div>
 
-        <livewire:app.enrollment.index-component/>    
+    <x-card title="Aplicaciones">
         
-    </div>
+        <div class="grid grid-cols-12 gap-4">
+
+            <!-- Column -->
+            <div class="col-span-12 md:col-span-12 xl:col-span-4 border rounded-xl shadow-xl">
+                <livewire:app.enrollment.index-component />
+            </div>
     
-    <div class="grid md:grid-cols-2 gap-2 p-2">
-        {{-- <div class="h-full">@include('livewire.home.highlighted.report')</div> --}}
-        {{-- <div class="h-full">@include('livewire.home.highlighted.point')</div> --}}
-    </div>
+            <!-- Column -->
+            <div class="col-span-12 md:col-span-6 xl:col-span-4 border rounded-xl shadow-xl">
+                <livewire:app.payment.index-component />
+            </div>
+    
+            <!-- Column -->
+            <div class="col-span-12 md:col-span-6 xl:col-span-4 border rounded-xl shadow-xl">
+                @include('home.highlighted.point')
+            </div>
+    
+        </div>
+
+    </x-card>    
+
 </div>

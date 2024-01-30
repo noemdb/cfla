@@ -8,29 +8,42 @@ use App\Livewire\Forms\EnrollmentForm;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Oinstitucion;
 use App\Models\app\Academy\Pestudio;
+use App\Models\app\Learner\Estudiant;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use WireUi\Traits\Actions;
+use Livewire\Attributes\Validate;
 
 class IndexComponent extends Component
 {
     use Actions;
+    use WithFileUploads;
+    #[Validate('image|max:1024')] // 1MB Max
+    public $image;
+
     public Census $census;
     public EnrollmentForm $enrollment;
 
     public $ci;
     public $step = 0, $limit = 9;
-    public $modalAssistent, $simpleModal;
+    public $modalAssistent, $simpleModal, $modalSearch, $modalStart, $modalEmpty;
     public $list_comment;
     public $ci_estudiant;
     public $list_grado, $list_oinstitucions,$list_blood_type,$list_laterality,$list_relationship,$list_profession,$list_sports_potential,$list_coexistence;
+    public $status_enrollment_exists;
+
+    public function setStart()
+    {
+        $this->modalSearch = true;
+        $this->modalStart = false;
+        $this->modalAssistent = false;
+        $this->modalEmpty = false;
+    }
 
     public function mount()
     {
-        // $this->census = new Census();
-
-        // $this->ci = '14608133';
         $this->ci = '32446229';
-
         $this->list_comment = Enrollment::COLUMN_COMMENTS;
         $this->list_grado = Grado::list_inscripcion_grado();
         $this->list_oinstitucions = Oinstitucion::list_oinstitucions();
@@ -50,13 +63,23 @@ class IndexComponent extends Component
     public function search()
     {
         $this->resetValidation();
-        $census = Census::where('ci_estudiant', $this->ci)->whereDoesntHave('enrollments')->first();
+        $census = Census::where('ci_estudiant', $this->ci)->first(); 
+        $enrollment = Enrollment::where('ci_estudiant', $this->ci)->first();
+        $this->status_enrollment_exists = ($enrollment) ? true : false ;
         if ($census) {
             $this->census = $census;
             $this->step = 1;
-            $this->enrollment->fill($census->toArray()); //dd($this->enrollment);
-        }
-        $this->modalAssistent = true;
+            $this->enrollment->fill($census->toArray());
+            $this->modalAssistent = true;
+            $this->modalSearch = false;
+            $this->modalStart = false;
+            $this->modalEmpty = false;
+        } else {
+            $this->modalEmpty = true;
+            $this->modalSearch = false;
+            $this->modalStart = false;
+            $this->modalAssistent = false;
+        }        
     }
 
     public function getValidate($step)
@@ -77,7 +100,7 @@ class IndexComponent extends Component
                 $this->validateOnly('enrollment.pestudio_id');
                 $this->validateOnly('enrollment.institution');
                 $this->validateOnly('enrollment.pending_matter');
-                $this->next($step);               
+                $this->next($step); //dd($this->enrollment);         
                 break;
             case '2':
                 $this->validateOnly('enrollment.age');
@@ -173,25 +196,45 @@ class IndexComponent extends Component
         $this->step = ($step > 1) ? $step - 1 : 1;
     }
 
-    // #[On('enrollment-updated.{enrollment.grado_id}')] 
     public function updatedEnrollmentGradoId($grado_id)
     {
-        $$grado = Grado::find($grado_id);
-        $this->enrollment->pestudio_id = ($$grado) ? $grado->pestudio_id : 1 ;
+        $grado = Grado::find($grado_id);
+        $this->enrollment->pestudio_id = ($grado) ? $grado->pestudio_id : 1 ;
     }
 
     public function save()
     {
-        $this->validate(); //dd($this->enrollment->all());
+        $this->enrollment->user_id = Auth::id();
+        $this->enrollment->photo = $this->upLoadImage($this->image);
+        $this->validate();
         $enrollment = Enrollment::create($this->enrollment->all());
 
+        if ($enrollment) {
+            $title = "Datos guardados";
+            $description = "Toda la información ha sido guardada éxitosamente!";
+            $icon = "success";
+        } else {
+            $title = "No se han guardado los datos";
+            $description = "Ocurrieron errores";
+            $icon = "warning";
+        }        
+
         $this->notification()->send([
-            'title'       => 'Datos guardados',
-            'description' => 'Toda la información ha sido guardada éxitosamente!',
-            'icon'        => 'success'
+            'title'       => $title,
+            'description' => $description,
+            'icon'        => $icon
         ]);
 
+        $this->modalStart = true;
+        $this->modalEmpty = false;
+        $this->modalSearch = false;
         $this->modalAssistent = false;
+    }
+
+    public function upLoadImage($image)
+    {
+        $url = ($image) ? $image->store('images','enrollments') : null; //dd($url);
+        return ($url) ? 'storage/enrollments/'.$url : null;
     }
 
 }

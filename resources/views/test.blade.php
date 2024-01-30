@@ -8,7 +8,7 @@
 
 <hr>
 
-<x-select label="Select Status" placeholder="Select one status" :options="['Active', 'Pending', 'Stuck', 'Done']" wire:model.defer="model" />
+<x-select label="Select Status" placeholder="Select one status" :options="['Active', 'Pending', 'Stuck', 'Done']" wire:model.live="model" />
 
 <hr>
 
@@ -30,7 +30,7 @@
 
 <x-dialog />
 
-<x-modal wire:model.defer="simpleModal">
+<x-modal wire:model.live="simpleModal">
     <x-card title="Consent Terms">
         <p class="text-gray-600">
             Lorem Ipsum...

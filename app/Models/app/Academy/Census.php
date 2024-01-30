@@ -35,7 +35,7 @@ class Census extends Model
 
     public function enrollments()
     {
-        return $this->hasOne(Enrollment::class, 'pestudio_id');
+        return $this->belongsTo(Enrollment::class, 'ci_estudiant');
     }
 
     public function getDayAttribute()
@@ -57,6 +57,12 @@ class Census extends Model
     {
         return "{$this->lastname} {$this->name}";
     } 
+
+    public static function getStatusEstudiantEnable($ci)
+    {
+        $census = Census::where('ci_estudiant', $ci)->whereDoesntHave('enrollments')->first();
+        return ($census) ? true : false;
+    }
 
     const COLUMN_COMMENTS = [
         'user_id' => 'Usuario',
