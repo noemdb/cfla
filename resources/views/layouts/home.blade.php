@@ -14,6 +14,12 @@
     <wireui:scripts />
     @livewireStyles
 
+    <style>
+        .truncate-sm {
+            @apply text-overflow-ellipsis sm:hidden;
+        }
+    </style>
+
 </head>
 
 <body class="bg-white dark:bg-black">
