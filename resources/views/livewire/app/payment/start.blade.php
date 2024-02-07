@@ -29,9 +29,7 @@
 
             <div class="mt-2 text-xs text-gray-200flex justify-between items-center">
                 <span class="font-bold">Un proceso sencillo y rápido:</span>
-                El asistente de reporte de paso es una herramienta que facilita a los representantes de estudiantes de una
-                institución educativa el proceso de reportar un pago. Este asistente es fácil de usar y está diseñado para
-                ser lo más sencillo posible.
+                cfla.
             </div>
 
             <div class="mt-2">
