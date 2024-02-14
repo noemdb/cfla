@@ -63,6 +63,18 @@ class Post extends Model
         return $postsPriorities;
     }
 
+    public static function getFeaturePosts($take=4)
+    {
+        $postsPriorities =
+            Post::select('posts.*')
+                ->pinned()
+                ->public()
+                ->where('posts.status_feature',true)
+                ->get()
+                ->take($take);
+        return $postsPriorities;
+    }
+
     public function scopePinned($query)
     {
         return $query->orderByRaw('ISNULL(posts.order), posts.order ASC')->orderBy('posts.created_at','desc');

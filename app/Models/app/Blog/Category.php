@@ -54,4 +54,14 @@ class Category extends Model
 
         return $posts;
     }
+    public function getIconClassAttribute()
+    {
+        switch ($this->icon) {
+            case 'control': $icon = 'document-text'; break;
+            
+            default:  $icon = 'document'; break;
+        };
+
+        return $icon;
+    }
 }

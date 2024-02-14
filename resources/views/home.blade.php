@@ -3,9 +3,12 @@
 @section('title', 'Landing Page ')
 
 @section('header') <livewire:home.header-component  /> @endsection
+
 {{-- @section('hero') <livewire:home.hero-component /> @endsection --}}
-@section('highlighted') <livewire:home.highlighted-component /> @endsection
-@section('hero') <livewire:home.hero-component /> @endsection
+
+{{-- @section('highlighted') <livewire:home.highlighted-component /> @endsection --}}
+
+@section('featured') <livewire:home.featured-component /> @endsection
 
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
