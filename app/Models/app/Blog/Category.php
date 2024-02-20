@@ -22,7 +22,7 @@ class Category extends Model
         'descriptions'=>'Descripción',
         'color_class'=>'Color',
         'order'=>'Orden',
-        'status_navabar'=>'Barra Principal',//Disponible en el navabar del sitio
+        'status_navabar'=>'Barra Principal', //Disponible en el navabar del sitio
         'status_feature'=>'Destacados', //Disponible en los destacados
         'status_active'=>'Activa',
         'status_published'=>'Publicada'
@@ -57,11 +57,42 @@ class Category extends Model
     public function getIconClassAttribute()
     {
         switch ($this->icon) {
+            case 'institution': $icon = 'building-office'; break;
             case 'control': $icon = 'document-text'; break;
+            case 'administrator': $icon = 'folder-open'; break;
             
             default:  $icon = 'document'; break;
         };
 
         return $icon;
     }
+
+    public function getIconSvgAttribute()
+    {
+        $path = public_path().'image/categories/svg/'; ///home/nuser/code/cfla/public/image/categories/svg/building-gear.svg
+        switch ($this->icon) {
+            case 'institution': $svg = 'buildings.svg'; break;
+            case 'administrator': $svg = 'building-gear.svg'; break;
+            
+            default:  $svg = 'document'; break;
+        };
+        // return $path.$icon;
+        return $svg;
+    }
 }
+
+
+/*
+
+institution
+administrator
+academic
+Profesores
+Estudiantes
+Representantes
+Acerca
+Biblioteca
+Manuales
+GClassroom
+
+*/
