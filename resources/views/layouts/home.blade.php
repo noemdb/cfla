@@ -29,41 +29,41 @@
 
     <livewire:home />
 
-    <div id="header"> @yield('header') </div>
+    {{-- <div id="header"> @yield('header') </div> --}}
 
     {{-- <div id="aside"> @yield('aside') </div> --}}
 
-    <div id="hero" class="p-1"> @yield('hero') </div>
+    {{-- <div id="hero" class="p-1"> @yield('hero') </div> --}}
 
-    <div id="highlighted" class="p-1"> @yield('highlighted') </div>
+    {{-- <div id="highlighted" class="p-1"> @yield('highlighted') </div> --}}
 
-    <div id="featured" class="p-1"> @yield('featured') </div>
+    {{-- <div id="featured" class="p-1"> @yield('featured') </div> --}}
 
-    <div id="category" class="p-1"> @yield('category') </div>
+    {{-- <div id="category" class="p-1"> @yield('category') </div> --}}
 
-    <div id="gallery" class="p-1"> @yield('gallery') </div>
+    {{-- <div id="gallery" class="p-1"> @yield('gallery') </div> --}}
 
-    <div id="services" class="p-1"> @yield('services') </div>
+    {{-- <div id="services" class="p-1"> @yield('services') </div> --}}
 
-    <div id="alliances" class="p-1"> @yield('alliances') </div>
+    {{-- <div id="alliances" class="p-1"> @yield('alliances') </div> --}}
 
-    <div id="autority" class="p-1"> @yield('autority') </div>
+    {{-- <div id="autority" class="p-1"> @yield('autority') </div> --}}
 
-    <div id="workers" class="p-1"> @yield('workers') </div>
+    {{-- <div id="workers" class="p-1"> @yield('workers') </div> --}}
 
-    <div id="testimonials" class="p-1"> @yield('testimonials') </div>
+    {{-- <div id="testimonials" class="p-1"> @yield('testimonials') </div> --}}
 
-    <div id="timeline" class="p-1"> @yield('timeline') </div>
+    {{-- <div id="timeline" class="p-1"> @yield('timeline') </div> --}}
 
-    <div id="graphs" class="p-1"> @yield('graphs') </div>
+    {{-- <div id="graphs" class="p-1"> @yield('graphs') </div> --}}
 
-    <div id="contacts" class="p-1"> @yield('contacts') </div>
+    {{-- <div id="contacts" class="p-1"> @yield('contacts') </div> --}}
 
-    <div id="socials" class="p-1"> @yield('socials') </div>
+    {{-- <div id="socials" class="p-1"> @yield('socials') </div> --}}
 
-    <div id="container" class="p-1"> @yield('content') </div>
+    {{-- <div id="container" class="p-1"> @yield('content') </div> --}}
 
-    <div id="footer"> @yield('footer') </div>
+    {{-- <div id="footer"> @yield('footer') </div> --}}
 
     @yield('scripts')
 
