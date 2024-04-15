@@ -6,6 +6,7 @@ use Livewire\Component;
 
 class Home extends Component
 {
+    public $model;
     public function render()
     {
         return view('livewire.home');
