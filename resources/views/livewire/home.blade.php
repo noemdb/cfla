@@ -1,5 +1,5 @@
 <div>
-    <x-input wire:model="firstName" label="Name" placeholder="User's first name" />
+    {{-- <x-input wire:model="firstName" label="Name" placeholder="User's first name" />
 
     <x-select
         label="Select Status"
@@ -11,11 +11,10 @@
     alpine
     <div x-data="{ count: 0 }">
         <h2 x-text="count"></h2>    
-        {{-- <button class="" x-on:click="count++">+</button> --}}
         <x-button positive label="Incrementar" x-on:click="count++"/>
     </div>
 
-    <hr>
+    <hr> --}}
 
     Normal
     <div>
@@ -23,7 +22,7 @@
 
         <x-button positive label="Incrementar" wire:click="increment"/>
         <x-button negative label="Decrementar" wire:click="decrement"/>     
-     
+        
     </div>
 
 </div>
