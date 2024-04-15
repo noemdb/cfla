@@ -8,15 +8,22 @@
         wire:model.defer="model"
     />
     <hr>
-    <!-- Declare a JavaScript object of data... -->
+    alpine
     <div x-data="{ count: 0 }">
-        <!-- Render the current "count" value inside an element... -->
-        <h2 x-text="count"></h2>
-    
-        <!-- Increment the "count" value by "1" when a click event is dispatched... -->
+        <h2 x-text="count"></h2>    
         {{-- <button class="" x-on:click="count++">+</button> --}}
-
         <x-button positive label="Incrementar" x-on:click="count++"/>
+    </div>
+
+    <hr>
+
+    Normal
+    <div>
+        <h1>{{ $count }}</h1>
+     
+        <button wire:click="increment">+</button>
+     
+        <button wire:click="decrement">-</button>
     </div>
 
 </div>
