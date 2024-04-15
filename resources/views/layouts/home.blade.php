@@ -9,10 +9,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    @vite('resources/css/app.css')
-    @vite(['resources/js/app.js'])
+    {{-- @vite('resources/css/app.css') --}}
+    {{-- @vite(['resources/js/app.js']) --}}
 
-    <wireui:scripts />
+    {{-- <wireui:scripts /> --}}
     @livewireStyles
 
     <style>
@@ -25,7 +25,7 @@
 
 <body class="bg-white dark:bg-black">
 
-    <x-notifications />
+    {{-- <x-notifications /> --}}
 
     <livewire:home />
 
@@ -65,7 +65,7 @@
 
     {{-- <div id="footer"> @yield('footer') </div> --}}
 
-    @yield('scripts')
+    {{-- @yield('scripts') --}}
 
     @livewireScripts
 
