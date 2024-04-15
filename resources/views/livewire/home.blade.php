@@ -20,10 +20,10 @@
     Normal
     <div>
         <h1>{{ $count }}</h1>
+
+        <x-button positive label="Incrementar" wire:click="increment"/>
+        <x-button negative label="Decrementar" wire:click="decrement"/>     
      
-        <button wire:click="increment">+</button>
-     
-        <button wire:click="decrement">-</button>
     </div>
 
 </div>
