@@ -14,7 +14,9 @@
         <h2 x-text="count"></h2>
     
         <!-- Increment the "count" value by "1" when a click event is dispatched... -->
-        <button x-on:click="count++">+</button>
+        {{-- <button class="" x-on:click="count++">+</button> --}}
+
+        <x-button positive label="Incrementar" x-on:click="count++"/>
     </div>
 
 </div>

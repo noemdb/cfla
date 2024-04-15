@@ -6,9 +6,19 @@ use Livewire\Component;
 
 class Home extends Component
 {
-    public $model;
+    public $model,$count;
     public function render()
     {
         return view('livewire.home');
+    }
+ 
+    public function increment()
+    {
+        $this->count++;
+    }
+ 
+    public function decrement()
+    {
+        $this->count--;
     }
 }
