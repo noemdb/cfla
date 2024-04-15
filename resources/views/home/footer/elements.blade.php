@@ -22,10 +22,14 @@
         Planes de Formación
     </h6>
     <p class="mb-4">
+        <a href="#services" class="text-green-100 dark:text-green-200">Educación Inicial</a>
+    </p>
+    </h6>
+    <p class="mb-4">
         <a href="#services" class="text-green-100 dark:text-green-200">Educación Primaria</a>
     </p>
     <p class="mb-4">
-        <a href="#services" class="text-green-100 dark:text-green-200">MEdia General CIencia y Tecnología</a>
+        <a href="#services" class="text-green-100 dark:text-green-200">Media General CIencia y Tecnología</a>
     </p>
 </div>
 <!-- Useful links section -->

@@ -28,6 +28,9 @@ php artisan livewire:form 'App/Livewire/Forms/EnrollmentForm'
 php artisan make:livewire 'App/Payment/IndexComponent'
 php artisan livewire:form 'App/Livewire/Forms/PaymentForm'
 
+php artisan make:livewire 'App/Catchment/IndexComponent'
+php artisan livewire:form 'App/Livewire/Forms/CatchmentForm'
+
 
 Hero
 Aside

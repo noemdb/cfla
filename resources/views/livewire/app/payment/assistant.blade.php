@@ -15,11 +15,12 @@
     <div class="mb-6">
         <div class="{{($step==1) ? 'block' : 'hidden'}}" id="tabs-motive">
             @include('livewire.app.payment.stepper.motive')
-        </div>
-        <div class="{{($step==2) ? 'block' : 'hidden'}}" id="transactions">
             @include('livewire.app.payment.stepper.transactions')
         </div>
-        <div class="{{($step==3) ? 'block' : 'hidden'}}" id="confirm">
+        {{-- <div class="{{($step==2) ? 'block' : 'hidden'}}" id="transactions">
+            @include('livewire.app.payment.stepper.transactions')
+        </div> --}}
+        <div class="{{($step==2) ? 'block' : 'hidden'}}" id="confirm">
             @include('livewire.app.payment.stepper.confirm')
         </div>
     </div>

@@ -75,10 +75,12 @@ class IndexComponent extends Component
             $this->modalStart = false;
             $this->modalEmpty = false;
         } else {
+            
             $this->modalEmpty = true;
             $this->modalSearch = false;
             $this->modalStart = false;
             $this->modalAssistent = false;
+            //dd('$this->modalEmpty',$this->modalEmpty,'$this->modalSearch',$this->modalSearch,'$this->modalStart',$this->modalStart,'$this->modalAssistent',$this->modalAssistent);
         }        
     }
 

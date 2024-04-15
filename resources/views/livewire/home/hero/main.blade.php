@@ -17,7 +17,7 @@
     </div>
 
     <!--Carousel items-->
-    <div class="relative w-full overflow-hidden after:clear-both after:block after:content-['']">
+    <div class="relative rounded-lg w-full overflow-hidden after:clear-both after:block after:content-['']">
         <!-- items -->
         @foreach ($posts->take(4) as $item)
             @php $category = $item->category @endphp

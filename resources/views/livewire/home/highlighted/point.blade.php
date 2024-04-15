@@ -35,7 +35,7 @@
             </div>
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 <span class="font-bold">Tarjetas de débito aceptadas: </span>                
-                <span>Bancaribe, Banco del Tesoro, Mi Banco, Bancamiga, Bancrecer y BANFANB.</span>
+                <span>Banco de Venezuela, Bancaribe, Banco del Tesoro, Mi Banco, Bancamiga, Bancrecer y BANFANB.</span>
             </div>
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 <span class="font-bold">Verificación, concialición y registro automático: </span>                

@@ -73,8 +73,9 @@ class Category extends Model
         switch ($this->icon) {
             case 'institution': $svg = 'buildings.svg'; break;
             case 'administrator': $svg = 'building-gear.svg'; break;
+            case 'academic': $svg = 'folder.svg'; break;
             
-            default:  $svg = 'document'; break;
+            default:  $svg = 'document.svg'; break;
         };
         // return $path.$icon;
         return $svg;

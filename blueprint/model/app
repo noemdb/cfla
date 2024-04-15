@@ -30,6 +30,7 @@ php artisan make:model 'app\Admon\Payment'
 php artisan make:model 'app\Admon\Currency'
 php artisan make:model 'app\Admon\ReferentialCurrency'
 php artisan make:model 'app\Admon\ExchangeRate'
+php artisan make:model 'app\Academy\Catchment'
 
 Blog
 php artisan make:model 'app\Blog\Category'

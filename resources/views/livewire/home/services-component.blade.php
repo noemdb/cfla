@@ -1,3 +1,3 @@
 <div>
-    {{-- Be like water. --}}
+    @include('livewire.home.services.main')
 </div>

@@ -23,7 +23,7 @@ class IndexComponent extends Component
     public $image;
 
     public $ci;
-    public $step = 0, $limit = 3;
+    public $step = 0, $limit = 2;
     public $modalStart,$modalSearch,$modalAssistent,$modalEmpty;
     public Representant $representant;
     public PaymentForm $payment;
@@ -34,7 +34,7 @@ class IndexComponent extends Component
     {
         $this->payment->ci_representant = '14608133';
         $this->payment->type_pay = 'Mensualidad actual';
-        $this->payment->phone = '12345678';
+        $this->payment->phone = '1234567890';
         $this->payment->comment = '#####################';
         $this->payment->phone_1 = '12345678';
         $this->payment->number_i_pay_1 = rand(1000000,100000000);
@@ -43,8 +43,7 @@ class IndexComponent extends Component
         $this->payment->method_pay_id_1 = 3;
         $this->payment->date_transaction_1 = '2024-01-25';
         $this->payment->ammount_1 = '10000';
-        $this->payment->observation_1 = '#################';
-        
+        $this->payment->observation_1 = '#################';        
     }
 
     public function upLoadImage($image)
@@ -81,18 +80,20 @@ class IndexComponent extends Component
 
     public function mount()
     {
-        $this->ci = '14608133';
+        
         $this->modalStart = true;
 
         $this->banco_emisor_list = Payment::LIST_BANK_EMISOR; //dd($this->banco_emisor_list);
         $this->list_comment = Payment::COLUMN_COMMENTS;
         $this->list_bank = Banco::list_public_bancos();
-        $this->method_pay_list = MetodoPago::method_pay_list();
+        $this->method_pay_list = MetodoPago::method_pay_list(); //dd($this->method_pay_list);
         $this->type_pay_list = Payment::LIST_TYPE_PAY;
         $this->toDate = Carbon::now()->format('d F Y');
 
-        $this->loadTest();
+        // $this->ci = '14608133';
+        // $this->loadTest();
     }
+
 
     public function render()
     {

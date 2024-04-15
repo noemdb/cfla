@@ -1,14 +1,18 @@
 @extends('layouts.home')
 
-@section('title', 'Landing Page ')
+@section('title', 'C.E. Colegio Fray Luis Amigó')
 
 @section('header') <livewire:home.header-component  /> @endsection
 
-{{-- @section('hero') <livewire:home.hero-component /> @endsection --}}
+@section('hero') <livewire:home.hero-component /> @endsection
 
-{{-- @section('highlighted') <livewire:home.highlighted-component /> @endsection --}}
+@section('highlighted') <livewire:home.highlighted-component /> @endsection
 
 @section('featured') <livewire:home.featured-component /> @endsection
+
+@section('services') <livewire:home.services-component /> @endsection
+
+@section('testimonials')  @include('home.testimonials.main') @endsection
 
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
