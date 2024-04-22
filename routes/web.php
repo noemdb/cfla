@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/env', [HomeController::class, 'env'])->name('home');
+
+Livewire::setScriptRoute(function ($handle) {
+    return Route::get(env('APP_URL').'/livewire/livewire.js', $handle);
+});
