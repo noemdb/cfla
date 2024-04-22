@@ -17,9 +17,6 @@ class HomeController extends Controller
         /* Getting All Env Variables */
         $allEnvVar = $_ENV;
 
-        /* Getting All Env Variables */
-        $dbName = $_ENV['DB_DATABASE'];
-
-        dd($allEnvVar, $dbName);
+        dd($allEnvVar);
     }
 }
