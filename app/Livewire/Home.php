@@ -6,7 +6,7 @@ use Livewire\Component;
 
 class Home extends Component
 {
-    public $model,$count;
+    public $model,$count,$firstName;
     public function render()
     {
         return view('livewire.home');
