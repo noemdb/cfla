@@ -2,8 +2,8 @@
 
 <div
     @class([
-        // 'fixed inset-0 z-20 flex sm:w-full sm:justify-end items-end sm:z-10 sm:absolute sm:inset-auto',
-        'fixed inset-0 z-20 flex sm:w-full sm:z-10 sm:absolute sm:inset-auto',
+        'fixed inset-0 z-20 flex sm:w-full sm:justify-end items-end sm:z-10 sm:absolute sm:inset-auto',
+        // 'fixed inset-0 z-20 flex sm:w-full sm:z-10 sm:absolute sm:inset-auto',
         'pointer-events-none transition-all ease-linear duration-150',
         'sm:top-0 sm:right-0',
         $rootClass,
