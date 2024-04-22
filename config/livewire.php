@@ -113,6 +113,8 @@ return [
     |
     */
 
+    'asset_url' => env('APP_URL', null),
+
     'inject_assets' => true,
 
     /*
