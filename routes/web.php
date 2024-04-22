@@ -22,7 +22,7 @@ use Livewire\Livewire;
 
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/env', [HomeController::class, 'env'])->name('home');
+Route::get('/env', [HomeController::class, 'env'])->name('env');
 
 Livewire::setScriptRoute(function ($handle) {
     return Route::get(env('APP_URL').'/livewire/livewire.js', $handle);
