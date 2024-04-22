@@ -67,7 +67,7 @@
 
     {{-- @yield('scripts') --}}
 
-    @livewireScripts
+    {{-- @livewireScripts --}}
 
 </body>
 
