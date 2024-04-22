@@ -99,8 +99,8 @@ return [
     | deemed too "magical" and has therefore been put under a feature flag.
     |
     */
-    
-    'legacy_model_binding' => true, //false
+
+    'legacy_model_binding' => false,
 
     /*
     |---------------------------------------------------------------------------
