@@ -6,10 +6,6 @@
 
         <x-card title="{{$category->name}}" class="pb-4" id="feature">
 
-            {{-- <img src="{{asset('image/categories/svg/'.$category->icon_svg)}}" class="block w-12" alt="Wild Landscape" /> --}}
-
-            {{-- <x-icon name="{{$category->iconClass ?? null}}" class="w-12 h-12" /> --}}
-
             <div class="flex flex-col items-center sm:flex-row sm:items-start">
                 <div class="flex-shrink-0 mr-4 sm:mr-0 flex-items-center">
                     <img src="{{asset('image/categories/svg/'.$category->icon_svg)}}" class="block w-12" alt="Wild Landscape" />

@@ -7,7 +7,9 @@ use Livewire\Component;
 
 class HeroComponent extends Component
 {
-    // public $posts;
+    public $post;
+    public $modalShow = false;
+    protected $scrollTo = 'hero';
 
     public function render()
     {
@@ -15,5 +17,11 @@ class HeroComponent extends Component
         return view('livewire.home.hero-component',[
             'posts' => $posts,
         ]);
+    }
+
+    public function showItem($id)
+    {
+        $this->post = Post::find($id);
+        $this->modalShow = true;
     }
 }

@@ -56,6 +56,8 @@ class IndexComponent extends Component
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
+        // $this->validate();
+
         $payment = Payment::create($this->payment->all());
 
         if ($payment) {
@@ -128,34 +130,33 @@ class IndexComponent extends Component
 
     public function validatedForStep($step)
     {
-        $this->resetErrorBag();
+        
 
         switch ($step) {
             case '1':
 
                 $this->validateOnly("payment.ci_representant");
                 $this->validateOnly("payment.type_pay");
-                $this->validateOnly("payment.phone");
-                $this->validateOnly("payment.comment");
-                $this->next($step);
-                break;
-            case '2':
-                $this->validateOnly("payment.number_i_pay_1");
-                $this->validateOnly("payment.phone_1");
-                $this->validateOnly("payment.banco_id_1");
-                $this->validateOnly("payment.banco_emisor_1");
-                $this->validateOnly("payment.method_pay_id_1");
-                $this->validateOnly("payment.date_transaction_1");
                 $this->validateOnly("payment.ammount_1");
+                $this->validateOnly("payment.date_transaction_1");
+                $this->validateOnly("payment.banco_emisor_1");
+                $this->validateOnly("payment.banco_id_1");
+                $this->validateOnly("payment.number_i_pay_1");
+                $this->validateOnly("payment.method_pay_id_1");
+                $this->validateOnly("payment.phone");
+                $this->validateOnly("payment.phone_1");
                 $this->validateOnly("payment.observation_1");
+                $this->validateOnly("payment.comment");
                 $this->validateOnly("payment.image_1");
                 $this->next($step);
                 break;
-            case '3':
+            case '2':
                 $this->validate();
                 $this->next($step);
             break;
         }
+
+        $this->resetErrorBag();
     }
 
     public function next($step)

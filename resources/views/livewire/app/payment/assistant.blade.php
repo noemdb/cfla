@@ -1,4 +1,4 @@
-<x-modal.card title="Reportes de pago" blur wire:model="modalAssistent" max-width="2xl">
+<x-modal.card title="Reportes de pago" blur wire:model="modalAssistent" max-width="2xl" align="start">
 
     <div class=" my-2 ml-2 bg-green-100 p-2 rounded-sm flex justify-between items-center">
         <div class="text-green-600 font-bold">
