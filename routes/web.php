@@ -24,6 +24,10 @@ use Livewire\Livewire;
 Route::get('/', [HomeController::class, 'home'])->name('home');
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 
-// Livewire::setScriptRoute(function ($handle) {
-//     return Route::get('cfla/livewire/livewire.js', $handle);
-// });
+Livewire::setScriptRoute(function ($handle) {
+    return Route::get('cfla/livewire/livewire.js', $handle);
+});
+
+Livewire::setUpdateRoute(function ($handle) {
+    return Route::post('/cfla/livewire/update', $handle);
+});
