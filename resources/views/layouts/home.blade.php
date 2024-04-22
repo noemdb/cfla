@@ -69,6 +69,8 @@
 
     {{-- @livewireScripts --}}
 
+    @livewireScriptConfig
+
 </body>
 
 </html>
