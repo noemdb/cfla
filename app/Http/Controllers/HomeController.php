@@ -11,7 +11,7 @@ class HomeController extends Controller
     {
         return view('home');
     }
-    
+
     public function env(Request $request)
     {
         /* Getting All Env Variables */
@@ -20,6 +20,6 @@ class HomeController extends Controller
         /* Getting All Env Variables */
         $dbName = $_ENV['DB_DATABASE'];
 
-        dd($allEnvVar, $dbName);
+        // dd($allEnvVar, $dbName);
     }
 }
