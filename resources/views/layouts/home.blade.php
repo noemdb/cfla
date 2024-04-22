@@ -67,7 +67,10 @@
 
     {{-- @yield('scripts') --}}
 
+    @livewireAssets(['base_url' => env('APP_URL')]);
+
     @livewireScripts
+
 
     {{-- @livewireScriptConfig --}}
 
