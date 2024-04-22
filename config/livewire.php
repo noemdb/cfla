@@ -104,7 +104,7 @@ return [
 
     /*
     |---------------------------------------------------------------------------
-    | Auto-inject Frontend Assets
+    | Auto-inject Frontend Assets...
     |---------------------------------------------------------------------------
     |
     | By default, Livewire automatically injects its JavaScript and CSS into the
