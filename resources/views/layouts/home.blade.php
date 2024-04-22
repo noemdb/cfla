@@ -12,7 +12,7 @@
     @vite('resources/css/app.css')
     @vite(['resources/js/app.js'])
 
-    {{-- <wireui:scripts /> --}}
+    <wireui:scripts />
     @livewireStyles
 
     <style>
@@ -67,10 +67,7 @@
 
     {{-- @yield('scripts') --}}
 
-    @livewireAssets(['base_url' => env('APP_URL')]);
-
     @livewireScripts
-
 
     {{-- @livewireScriptConfig --}}
 
