@@ -2,7 +2,17 @@
     <!-- Navigation bar -->
     <nav class="relative flex w-full items-center justify-between bg-green-900 text-green-200 py-2 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 dark:text-neutral-200 md:flex-wrap md:justify-start"
         data-te-navbar-ref>
-        <div class="flex w-full flex-wrap items-center justify-start px-3">
+        <div class="flex w-full flex-wrap items-center px-3 justify-between">            
+
+            <!-- Navigation links -->
+            <div class="flex-shrink-0 mb-2 mr-2">
+                <!-- Logo de tu aplicación -->
+                @include('livewire.home.header.icon')
+            </div>
+            <div class="!visible hidden grow basis-[100%] items-center md:!flex md:basis-auto" id="navbarSupportedContentY" data-te-collapse-item>
+                @include('livewire.home.header.menu.items')                
+            </div>
+
             <div class="flex items-center">
                 <!-- Hamburger menu button -->
                 <button
@@ -20,14 +30,6 @@
                 </button>
             </div>
 
-            <!-- Navigation links -->
-            <div class="flex-shrink-0 mb-2 mr-2">
-                <!-- Logo de tu aplicación -->
-                @include('livewire.home.header.icon')
-            </div>
-            <div class="!visible hidden grow basis-[100%] items-center md:!flex md:basis-auto" id="navbarSupportedContentY" data-te-collapse-item>
-                @include('livewire.home.header.menu.items')                
-            </div>
         </div>
     </nav>
     
