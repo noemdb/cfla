@@ -1,7 +1,7 @@
 <x-card class="p-4 cursor-pointer" wire:click="setStart">
 
     <x-slot name="header">
-        <h3 class=" text-green-950 bg-green-100 rounded-t-xl p-2 text-xl font-bold dark:text-neutral-200">
+        <h3 class=" text-green-950 bg-green-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
             <div class="h-full flex items-center">
                 <x-icon name="document-text" class="flex-none w-10 h-10" />
                 <div class="flex-initial">Reporta tus pagos aquí.</div>
@@ -18,7 +18,7 @@
                 </a>
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-3xl text-gray-900">Reporte de pago </div>
+                <div class="text-lg md:text-xl text-gray-900">Reporte de pago </div>
                 <div class="text-md text-gray-600">Asistente</div>
                 <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo
                     este asistente.</div>

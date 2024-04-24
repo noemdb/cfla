@@ -41,7 +41,7 @@ return [
         |
     */
     'card' => [
-        'padding' => env('WIREUI_CARD_PADDING', 'px-2 py-2 md:px-4'),
+        'padding' => env('WIREUI_CARD_PADDING', 'px-1 py-1 md:px-4'),
         'shadow'  => env('WIREUI_CARD_SHADOW', 'shadow-sm'),
         'rounded' => env('WIREUI_CARD_ROUNDED', 'rounded-lg'),
         'color'   => env('WIREUI_CARD_COLOR', 'bg-white dark:bg-secondary-800'),

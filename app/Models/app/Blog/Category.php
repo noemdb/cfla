@@ -57,7 +57,7 @@ class Category extends Model
     public function getIconClassAttribute()
     {
         switch ($this->icon) {
-            case 'institution': $icon = 'building-office'; break;
+            case 'institution': $icon = 'office-building'; break;
             case 'control': $icon = 'document-text'; break;
             case 'administrator': $icon = 'folder-open'; break;
             

@@ -1,11 +1,11 @@
 <div>
 
-    <x-card class="p-4">
+    <x-card class="p-2">
 
         <x-slot name="header">
-            <h3 class=" text-indigo-950 bg-indigo-100 rounded-t-xl p-2 text-xl font-bold dark:text-neutral-200">
-                <div class="h-full flex items-center">
-                    <x-icon name="menu" class="flex-none w-10 h-10" />
+            <h3 class=" text-indigo-950 bg-indigo-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
+                <div class="h-full flex items-center gap-2">
+                    <x-icon name="menu" class="flex-none w-8 h-8" />
                     <div class="flex-initial">Proceso Matriculación Escolar 2024 2025</div>
                 </div>
             </h3>
@@ -15,13 +15,13 @@
             <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
                 <div class="flex justify-center">
                     {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}
-                    <x-icon name="menu" class="flex-none w-24 h-24" />
+                    <x-icon name="menu" class="flex-none max-w-14 max-h-14" />
                     <a href="#!">
                         <div class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-[hsla(0,0%,98%,0.15)] bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100"></div>
                     </a>
                 </div>
-                <div class="text-center  dark:text-neutral-200">
-                    <div class="text-3xl text-gray-900">Censo Escolar</div>
+                <div class="text-center dark:text-neutral-200">
+                    <div class="text-lg md:text-xl text-gray-900">Censo Escolar</div>
                     <div class="text-md text-gray-600">Asistente</div>
                     <div class="text-sm text-gray-400">Registra tu interes por pertenecer a nuestra institución educativa.</div>
                 </div>

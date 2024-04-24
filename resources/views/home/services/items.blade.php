@@ -4,7 +4,7 @@
         <p class="mb-6 pb-2 md:mb-12 md:pb-0">
             Nuestra Institución es un centro educativo privado de San Felipe, Yaracuy, Venezuela, está comprometida con
             la educación integral de sus estudiantes.
-            Ofrece dos planes de formación: Educación primaria y Media General Ciencia y Tecnología.
+            Ofrece tres planes de formación: Educación primaria y Media General Ciencia y Tecnología.
         </p>
     </div>
 

@@ -5,6 +5,7 @@ namespace App\Models\app\Blog;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 
 class Post extends Model
 {
@@ -89,6 +90,11 @@ class Post extends Model
         ->where('categories.status_active',true)
         ->where('categories.status_published',true);
         return $result;
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return (File::exists($this->file_url)) ? $this->file_url : 'image/gallery/notice/'.rand(1,3).'.jpg';
     }
 
 }

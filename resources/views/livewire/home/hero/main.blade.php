@@ -22,34 +22,36 @@
             @php $category = $item->category @endphp
             <div data-te-carousel-fade data-te-carousel-item
                 class="relative float-left -mr-[100%] w-full !transform-none opacity-0 transition-opacity duration-[600ms] ease-in-out motion-reduce:transition-none"
-                {{ ($loop->first) ? 'data-te-carousel-active' : null}}>
+                {{ ($loop->first) ? 'data-te-carousel-active' : null}}> 
+                
+                <div id="title" class="sm:hidden text-white border-b-2 border-green-800 p-4" style="background-color: #004400">
+                    @include('livewire.home.hero.title')
+                </div>
 
-                <img src="{{asset('image/categories/'.$category->icon.'.png')}}" class="block w-full" alt="Wild Landscape" />
+                <div class="relative min-h-64" style="background-color: #004400">               
 
-                <div class="absolute ml-2 w-1/2 top-2 py-2 text-start text-white">
+                    <img src="{{asset('image/categories/'.$category->icon.'.png')}}" class="block w-full" alt="Wild Landscape" />
 
-                    <h5 class="text-lg md:text-xl lg:text-2xl xl:text-3xl">{{$item->title ?? null}}</h5>
-                    <div class="text-sm md:text-md lg:text-lg xl:text-xl">{{$item->description ?? null}}</div>
-                    <div class="hidden sm:block md:py-2 lg:py-4 h-9 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
-                        {!!$item->body ?? null!!} 
-                    </div>
+                    <div class="absolute ml-2 w-1/2 top-2 py-2 text-start text-white">
+
+                        <div id="title" class="hidden sm:block border-b-2 border-green-800">
+                            @include('livewire.home.hero.title')
+                        </div>
+                        
+                        <div class="md:py-2 lg:py-4 min-h-9 max-h-48 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs mt-2 max-w-full overflow-hidden text-wrap word-break">
+                            {!!$item->body ?? null!!} 
+                        </div> 
+
+                        <div id="footer-into" class="hidden sm:block">
+                            @include('livewire.home.hero.footer')
+                        </div>                                           
+                        
+                    </div>                    
                     
-                    {{--
-                    <div class="text-sm border-t-2 mt-2 md:py-2 lg:py-4 hidden xl:block">
-                        {!!$item->insert ?? null!!}                        
-                    </div>
-                    --}}
+                </div>
 
-                    <div class="border-t-2 mt-4 text-xs md:text-sm lg:text-md xl:text-lg text-green-500 ">
-                        <div>{{$category->name ?? '098'}}</div>
-                        <div class="text-xs">Creado: {{$item->created_at ?? null}} || Actualizado: {{$item->updated_at ?? null}}</div>
-                    </div>
-
-                    <div class="flex justify-start">
-                        {{-- <a href="#">Más...</a> --}}
-                        <x-button sm info label="Más..." wire:click="showItem({{$item->id}})"/>
-                    </div>
-                    
+                <div id="footer-out" class="sm:hidden border-b-2 border-green-800 rounded-b">
+                    @include('livewire.home.hero.footer')
                 </div>
 
             </div>
