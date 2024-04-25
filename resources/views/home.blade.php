@@ -14,6 +14,16 @@
 
 @section('testimonials')  @include('home.testimonials.main') @endsection
 
+@section('gallery')  @include('home.gallery.main') @endsection
+
+@section('autority')  @include('home.autority.main') @endsection
+
+@section('workers') <livewire:home.workers-component /> @endsection
+
+@section('contacts') <livewire:home.contacts-component /> @endsection
+
+@section('socials')  @include('home.socials.main') @endsection
+
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
 
@@ -30,10 +40,6 @@
 {{-- @section('services')  @include('home.services.main') @endsection --}}
 
 {{-- @section('alliances')  @include('home.alliances.main') @endsection --}}
-
-{{-- @section('autority')  @include('home.autority.main') @endsection --}}
-
-{{-- @section('workers')  @include('home.workers.main') @endsection --}}
 
 {{-- @section('contacts')  @include('home.contacts.main') @endsection --}}
 

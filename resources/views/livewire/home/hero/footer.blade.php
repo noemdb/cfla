@@ -1,4 +1,4 @@
-<div class="p-2" style="background-color: #004400">
+<div class="p-2">
 
     <div class="text-xs md:text-sm lg:text-md xl:text-lg text-green-500 ">
         <div>{{$category->name ?? '098'}}</div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\app\Academy\Enrollment;
+use App\Models\app\Academy\Profesor;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller

@@ -50,7 +50,7 @@
                     
                 </div>
 
-                <div id="footer-out" class="sm:hidden border-b-2 border-green-800 rounded-b">
+                <div id="footer-out" class="sm:hidden border-b-2 border-green-800 rounded-b" style="background-color: #004400">
                     @include('livewire.home.hero.footer')
                 </div>
 
