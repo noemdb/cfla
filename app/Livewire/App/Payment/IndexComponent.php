@@ -19,7 +19,7 @@ class IndexComponent extends Component
     use Actions;
 
     use WithFileUploads;
-    #[Validate('image|max:1024')] // 1MB Max
+    #[Validate('image|max:1024|nullable')] // 1MB Max
     public $image;
 
     public $ci;
@@ -56,7 +56,7 @@ class IndexComponent extends Component
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
-        // $this->validate();
+        $this->validate();
 
         $payment = Payment::create($this->payment->all());
 
@@ -68,16 +68,19 @@ class IndexComponent extends Component
             $title = "No se han guardado los datos";
             $description = "Ocurrieron errores";
             $icon = "warning";
-        }        
+        }         
+
+        $this->modalAssistent = false;
+        $this->image = null;
+        $this->payment->image_1 = null;
+        $this->payment->number_i_pay_1 = null;
+        $this->payment->comment = null;
 
         $this->notification()->send([
             'title'       => $title,
             'description' => $description,
             'icon'        => $icon
         ]);
-
-        $this->modalAssistent = false;
-
     }    
 
     public function mount()

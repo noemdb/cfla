@@ -31,8 +31,15 @@ php artisan make:model 'app\Admon\Currency'
 php artisan make:model 'app\Admon\ReferentialCurrency'
 php artisan make:model 'app\Admon\ExchangeRate'
 php artisan make:model 'app\Academy\Catchment'
+php artisan make:model 'app\Academy\CatchmentInterview'
 
 Blog
 php artisan make:model 'app\Blog\Category'
 php artisan make:model 'app\Blog\Post'
 php artisan make:model 'app\Blog\PostFile'
+
+php artisan make:model 'app/Academy/Interrogation/Interview'
+php artisan make:model 'app/Academy/Interrogation/InterviewQuestion'
+php artisan make:model 'app/Academy/Interrogation/InterviewAnswer'
+php artisan make:model 'app/Academy/Interrogation/InterviewAttendee'
+

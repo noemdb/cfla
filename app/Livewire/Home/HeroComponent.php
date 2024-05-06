@@ -13,7 +13,7 @@ class HeroComponent extends Component
 
     public function render()
     {
-        $posts = Post::getPriorityPosts();
+        $posts = Post::getPriorityPosts(); //dd($posts);
         return view('livewire.home.hero-component',[
             'posts' => $posts,
         ]);

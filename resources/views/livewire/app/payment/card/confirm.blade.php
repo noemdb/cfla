@@ -7,10 +7,10 @@
         @php $name = 'type_pay'; $label = $list_comment[$name] @endphp
         <span class="text-gray-600">{{ $label ?? null}}:</span> <span class="text-gray-800 font-bold uppercase">{{$payment->$name ?? null}}</span>        
     </li>
-    <li class="w-full border-b-2 border-neutral-100 border-opacity-100 py-2 dark:border-opacity-50">
+    {{-- <li class="w-full border-b-2 border-neutral-100 border-opacity-100 py-2 dark:border-opacity-50">
         @php $name = 'phone'; $label = $list_comment[$name] @endphp
         <span class="text-gray-600">{{ $label ?? null}}:</span> <span class="text-gray-800 font-bold uppercase">{{$payment->$name ?? null}}</span>        
-    </li>
+    </li> --}}
     <li class="w-full border-b-2 border-neutral-100 border-opacity-100 py-2 dark:border-opacity-50">
         @php $name = 'comment'; $label = $list_comment[$name] @endphp
         <span class="text-gray-600">{{ $label ?? null}}:</span> <span class="text-gray-800 font-bold uppercase">{{$payment->$name ?? null}}</span>        
@@ -44,3 +44,16 @@
         <span class="text-gray-600">{{ $label ?? null}}:</span> <span class="text-gray-800 font-bold uppercase">Bs. {{ number_format($payment->ammount_1,2,',','.') ?? null}}</span>        
     </li>
 </ul>
+
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+@endif

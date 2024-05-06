@@ -72,12 +72,12 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/6.jpg') }}" data-te-lazy-load-init class="mx-auto mb-4 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/default_female.png') }}" data-te-lazy-load-init class="mx-auto mb-4 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
-                            <p class="dark:text-neutral-400">PROF.</p>
-                            <h5 class="text-xl font-bold leading-tight">Idalmis Mercedes Rubinetti Marquez</h5>
+                            <p class="dark:text-neutral-400">MSc.</p>
+                            <h5 class="text-xl font-bold leading-tight">Roxangel Rodríguez Peña</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADORA DE EVALUACIÓN</p>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <div class="bg-info-200 rounded h-full flex flex-col justify-end">
+    {{-- <div class="bg-info-200 rounded h-full flex flex-col justify-end">
         <div class="w-full">
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
@@ -103,7 +103,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <div class="bg-info-200 rounded h-full flex flex-col justify-end">
         <div class="w-full">

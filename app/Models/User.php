@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -22,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -42,4 +44,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getFullNameAttribute()
+    {
+        $user = DB::table('users')
+        ->selectRaw("CONCAT(profiles.firstname, ' ', profiles.lastname) as fullname")
+        ->join('profiles', 'users.id', '=', 'profiles.user_id')
+        ->where('users.id',$this->id)
+        ->first();
+
+        return ($user) ? $user->fullname : null ;
+    }
 }

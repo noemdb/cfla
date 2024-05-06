@@ -10,19 +10,23 @@
 
 @section('featured') <livewire:home.featured-component /> @endsection
 
-@section('services') <livewire:home.services-component /> @endsection
+{{-- @section('services') <livewire:home.services-component /> @endsection --}}
 
-@section('testimonials')  @include('home.testimonials.main') @endsection
+{{-- @section('testimonials') <livewire:home.testimonials-component /> @endsection --}}
 
-@section('gallery')  @include('home.gallery.main') @endsection
+{{-- @section('gallery') @include('home.gallery.main') @endsection --}}
 
-@section('autority')  @include('home.autority.main') @endsection
+{{-- @section('autority') @include('home.autority.main') @endsection --}}
 
-@section('workers') <livewire:home.workers-component /> @endsection
+{{-- @section('workers') <livewire:home.workers-component /> @endsection --}}
 
-@section('contacts') <livewire:home.contacts-component /> @endsection
+{{-- @section('contacts') <livewire:home.contacts-component /> @endsection --}}
 
-@section('socials')  @include('home.socials.main') @endsection
+{{-- @section('socials') @include('home.socials.main') @endsection --}}
+
+@section('footer')  @include('home.footer.main') @endsection
+
+{{-- -------------------------------------------------------- --}}
 
 
 {{-- @section('aside')  @include('home.aside.main') @endsection --}}
@@ -51,7 +55,7 @@
 
 {{-- @section('graphs')  @include('home.graphs.main') @endsection --}}
 
-@section('footer')  @include('home.footer.main') @endsection
+
 
 {{-- @section('content') <livewire:home /> @endsection --}}
 

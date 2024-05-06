@@ -18,8 +18,7 @@
                                 @include('livewire.home.featured.index')
                             </div>
                             <div class="ml-4 flex justify-center items-center h-full">
-                                <img src="{{asset($item->image_url)}}" class="block w-auto sm:w-auto rounded-lg shadow min-w-64" alt="Wild Landscape" />
-                                
+                                <img src="{{asset($item->saefl_image_url)}}" class="block w-auto sm:w-auto rounded-lg shadow min-w-64" alt="Wild Landscape" />                                
                             </div>
                         </div>
                     </x-card>

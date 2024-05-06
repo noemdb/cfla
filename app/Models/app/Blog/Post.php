@@ -54,14 +54,12 @@ class Post extends Model
 
     public static function getPriorityPosts($take=4)
     {
-        $postsPriorities =
-            Post::select('posts.*')
+        return Post::select('posts.*')
                 ->pinned()
                 ->public()
                 ->where('posts.status_priority',true)
                 ->get()
                 ->take($take);
-        return $postsPriorities;
     }
 
     public static function getFeaturePosts($take=4)
@@ -79,6 +77,7 @@ class Post extends Model
     public function scopePinned($query)
     {
         return $query->orderByRaw('ISNULL(posts.order), posts.order ASC')->orderBy('posts.created_at','desc');
+        // return $query->orderBy('posts.created_at','desc');
     }
 
     public function scopePublic($query)
@@ -95,6 +94,11 @@ class Post extends Model
     public function getImageUrlAttribute()
     {
         return (File::exists($this->file_url)) ? $this->file_url : 'image/gallery/notice/'.rand(1,3).'.jpg';
+    }
+    public function getSaeflImageUrlAttribute()
+    {
+        $url_saefl = env('APP_URLP_SAEFL').'/'.$this->file_url;
+        return $url_saefl;
     }
 
 }

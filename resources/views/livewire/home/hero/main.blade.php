@@ -38,9 +38,16 @@
                             @include('livewire.home.hero.title')
                         </div>
                         
-                        <div class="md:py-2 lg:py-4 min-h-9 max-h-48 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs mt-2 max-w-full overflow-hidden text-wrap word-break">
+                        {{-- <div class="md:py-2 lg:py-4 min-h-9  sm:h-24 md:h-44 lg:h-full xl:h-full text-xs xl:text-lg mt-2 max-w-full overflow-hidden text-wrap word-break"> --}}
+                        <div class="md:py-2 lg:py-4 min-h-9 max-h-64 md:max-h-72 lg:max-h-86 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs xl:text-lg mt-2 max-w-full overflow-hidden text-wrap word-break">
                             {!!$item->body ?? null!!} 
-                        </div> 
+                        </div>
+
+                        {{-- @if ($item->saefl_image_url)                            
+                            <div id="footer-out" class="hidden xl:block border-b-2 border-green-800 rounded-b max-w-48 rounded-lg" style="background-color: #004400">
+                                <img src="{{asset($item->saefl_image_url)}}" class="block w-full" alt="Wild Landscape" />
+                            </div> 
+                        @endif  --}}
 
                         <div id="footer-into" class="hidden sm:block">
                             @include('livewire.home.hero.footer')
