@@ -2,7 +2,7 @@
 module.exports = {
   darkMode: 'class',
   presets: [
-      require("./vendor/wireui/wireui/tailwind.config.js")
+    require("./vendor/wireui/wireui/tailwind.config.js")
   ],
   content: [
     "./resources/**/*.blade.php",

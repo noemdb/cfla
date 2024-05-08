@@ -4,6 +4,7 @@
     @foreach ($posts as $item)
 
         @php $category = $item->category; @endphp
+        @php $category_image_url = $item->category_image_url; @endphp
 
         <div class="flex flex-col sm:flex-row">
             <div id="div_iz" class="flex-1">

@@ -6,7 +6,7 @@
 
 @section('hero') <livewire:home.hero-component /> @endsection
 
-@section('highlighted') <livewire:home.highlighted-component /> @endsection
+{{-- @section('highlighted') <livewire:home.highlighted-component /> @endsection --}}
 
 @section('featured') <livewire:home.featured-component /> @endsection
 

@@ -72,7 +72,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/default_female.png') }}" data-te-lazy-load-init class="mx-auto mb-4 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/5.jpg') }}" data-te-lazy-load-init class="mx-auto mb-4 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">

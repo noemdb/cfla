@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
@@ -91,14 +92,21 @@ class Post extends Model
         return $result;
     }
 
-    public function getImageUrlAttribute()
+    public function getCategoryImageUrlAttribute()
     {
-        return (File::exists($this->file_url)) ? $this->file_url : 'image/gallery/notice/'.rand(1,3).'.jpg';
+        $directorio = public_path().'/image/categories/'.$this->category->icon;
+        $count = count(scandir($directorio)) - 2; //dd($directorio,$count);
+        return (File::exists($this->file_url)) ? $this->file_url : 'image/categories/'.$this->category->icon.'/'.rand(1,$count).'.png';
     }
+
     public function getSaeflImageUrlAttribute()
     {
-        $url_saefl = env('APP_URLP_SAEFL').'/'.$this->file_url;
-        return $url_saefl;
+        return env('APP_URLP_SAEFL').'/'.$this->file_url;
+    }
+
+    public function getImageCatAttribute()
+    {
+        return (File::exists($this->file_url)) ? $this->file_url : 'image/gallery/notice/'.rand(1,3).'.jpg';
     }
 
 }

@@ -28,9 +28,11 @@
                     @include('livewire.home.hero.title')
                 </div>
 
-                <div class="relative min-h-64" style="background-color: #004400">               
+                <div class="relative min-h-64" style="background-color: #004400">  
+                    
+                    @php $url = $item->category_image_url @endphp
 
-                    <img src="{{asset('image/categories/'.$category->icon.'.png')}}" class="block w-full" alt="Wild Landscape" />
+                    <img src="{{asset($url)}}" class="block w-full" alt="Wild Landscape" />
 
                     <div class="absolute ml-2 w-1/2 top-2 py-2 text-start text-white">
 
