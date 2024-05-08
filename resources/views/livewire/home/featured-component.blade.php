@@ -32,6 +32,6 @@
 
     {{ $posts->links(data: ['scrollTo' => '#feature-category']) }}
 
-    @includeWhen($modalShow,'livewire.home.featured.modal.post')
+    @includeWhen($modalShow,'livewire.home.featured.modal.post',['post'=>$item])
 
 </div>

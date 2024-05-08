@@ -20,9 +20,9 @@
         {!! $post->insert ?? null !!}
     </div>
 
-    @if ($item->saefl_image_url)                            
+    @if ($post->saefl_image_url)                            
         <div id="footer-out" class="flex justify-center">
-            <img src="{{asset($item->saefl_image_url)}}" class="border-b-2 block w-full max-w-48 rounded-lg shadow-lg" alt="Wild Landscape" />
+            <img src="{{asset($post->saefl_image_url)}}" class="border-b-2 block w-full max-w-48 rounded-lg shadow-lg" alt="Wild Landscape" />
         </div> 
     @endif 
 
