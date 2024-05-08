@@ -13,6 +13,6 @@
     <div class="text-xs">Creado: {{$item->created_at ?? null}} || Actualizado: {{$item->updated_at ?? null}}</div>
 </div>
 
-<div class="flex justify-start">
-    <x-button sm info label="Más..." wire:click="showItem({{$item->id ?? null}})"/>
+<div class="flex justify-end py-2">
+    <x-button sm info label="Más..." wire:click="showItem({{$item->id ?? null}})" class="w-full sm:w-auto"/>
 </div>
