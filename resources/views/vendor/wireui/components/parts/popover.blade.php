@@ -6,7 +6,7 @@
         // 'fixed inset-0 z-20 md:flex sm:w-full sm:justify-end sm:z-10 sm:absolute sm:inset-auto',
         // 'pointer-events-none transition-all ease-linear duration-150',
         // 'sm:top-0 sm:right-0',
-        'max-w-full fixed z-20 pointer-events-none transition-all ease-linear duration-150',
+        'max-w-full relative z-20 pointer-events-none transition-all ease-linear duration-150',
         $rootClass,
     ])
     style="display: none;"

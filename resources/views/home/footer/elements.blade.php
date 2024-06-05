@@ -53,7 +53,7 @@
 <!-- Contact section -->
 <div>
     <h6 class="mb-4 flex justify-center font-semibold uppercase md:justify-start">
-        Contact
+        Contacto
     </h6>
     <p class="mb-4 flex items-center justify-center md:justify-start">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mr-3 h-5 w-5">

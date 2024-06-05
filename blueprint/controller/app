@@ -1,1 +1,2 @@
 php artisan make:controller 'HomeController'
+php artisan make:controller 'Educational\CompetitionController'

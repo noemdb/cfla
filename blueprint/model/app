@@ -43,3 +43,18 @@ php artisan make:model 'app/Academy/Interrogation/InterviewQuestion'
 php artisan make:model 'app/Academy/Interrogation/InterviewAnswer'
 php artisan make:model 'app/Academy/Interrogation/InterviewAttendee'
 
+
+
+Educational
+php artisan make:model 'app/Educational/DebateCompetition' -m
+php artisan make:model 'app/Educational/Debate' -m
+php artisan make:model 'app/Educational/DebateQuestion' -m
+php artisan make:model 'app/Educational/DebateOption' -m
+php artisan make:model 'app/Educational/DebateAnswer' -m
+
+
+
+
+
+
+

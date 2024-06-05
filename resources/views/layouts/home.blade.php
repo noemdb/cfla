@@ -25,6 +25,8 @@
 
 <body class="bg-white dark:bg-black">
 
+    {{-- @livewire('order-status-notification') --}}
+
     <x-notifications />
 
     {{-- <livewire:home /> --}}
@@ -75,7 +77,7 @@
 
     <div id="footer"> @yield('footer') </div>
 
-    {{-- @yield('scripts') --}}
+    @yield('customScripts')
 
     @livewireScripts
 

@@ -31,4 +31,9 @@ class Seccion extends Model
     {
         return $this->hasMany(Inscripcion::class, 'grado_id');
     }
+
+    public function debateScore($debate_id)
+    {
+        return $this->hasMany(Inscripcion::class, 'grado_id');
+    }
 }

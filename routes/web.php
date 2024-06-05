@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
@@ -31,3 +32,15 @@ Livewire::setScriptRoute(function ($handle) {
 Livewire::setUpdateRoute(function ($handle) {
     return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
 });
+
+Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
+    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
+    Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
+    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
+});
+
+
+use App\Http\Controllers\OrderController;
+
+// Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
+Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);

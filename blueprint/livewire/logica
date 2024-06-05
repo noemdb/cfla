@@ -32,39 +32,31 @@ php artisan make:livewire 'App/Catchment/IndexComponent'
 php artisan livewire:form 'App/Livewire/Forms/CatchmentForm'
 
 
-Hero
-Aside
-Highlighted
-Featured
-Category
-Gallery
-Services
-Alliances
-Autority
-Workers
-Contacts
-Socials
-Testimonials
-Timeline
-Graphs
-Footer
-Content
+php artisan make:livewire 'App/Educational/DebateCompetition/IndexComponent'
+php artisan livewire:form 'App/Livewire/Forms/Educationa/DebateCompetition'
 
-header
-hero
-aside
-highlighted
-featured
-category
-gallery
-services
-alliances
-autority
-workers
-contacts
-socials
-testimonials
-timeline
-graphs
-footer
-content
+php artisan make:livewire 'App/Educational/DebateDashboard/IndexComponent'
+
+
+php artisan make:livewire 'App/General/Educational/Competition/Dashboard/IndexComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Dashboard/DebateComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Dashboard/QuestionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Dashboard/OptionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Dashboard/AnswerComponent'
+
+php artisan make:livewire 'App/General/Educational/Competition/Moderator/IndexComponent'
+
+php artisan make:livewire 'App/General/Educational/Competition/Moderator/DebateComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Moderator/QuestionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Moderator/OptionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Moderator/AnswerComponent'
+
+
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/IndexComponent'
+
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/CompetitionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/DebateComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/QuestionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/OptionComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/AnswerComponent'
+php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/ResultComponent'

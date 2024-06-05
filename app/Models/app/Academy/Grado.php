@@ -29,7 +29,7 @@ class Grado extends Model
     }
     public function seccions()
     {
-        return $this->hasMany(Seccion::class, 'seccion_id');
+        return $this->hasMany(Seccion::class);
     }
 
     //scope
@@ -58,5 +58,23 @@ class Grado extends Model
             $datas_grados->put($pestudio->code.'-'.$pestudio->name, $pestudio->getGradosActive()->pluck('name', 'id'));
         }
         return $datas_grados;
+    }
+
+    public static function list_grado_iu() /* usada para llenar los objetos de formularios select*/
+    {
+        $datas = [];
+        $pestudios = Pestudio::active('true')->get();
+        foreach ($pestudios as $pestudio) {
+            $grados = $pestudio->getGradosActive();
+            foreach ($grados as $grado) {
+                $datas [] = [
+                    'id'=> $grado->id,
+                    'name'=> $grado->name,
+                    'description'=> $pestudio->name,
+                ];
+                // $datas->put($arr);
+            }            
+        }
+        return $datas;
     }
 }

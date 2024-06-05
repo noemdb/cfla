@@ -197,7 +197,7 @@
             </div>
         </template>
 
-        <div class="max-h-64 sm:max-h-60 overflow-y-auto overscroll-contain soft-scrollbar select-none"
+        <div class="text-start max-h-64 sm:max-h-60 overflow-y-auto overscroll-contain soft-scrollbar select-none"
             tabindex="-1"
             x-ref="optionsContainer"
             name="wireui.select.options.{{ $name }}"
