@@ -30,7 +30,7 @@ class OptionComponent extends Component
     {   
         $this->competition = DebateCompetition::findOrFail($id);     
         $this->options = DebateOption::ActiveCompetitionId($id); //dd($this->competition,$this->options);
-        $this->question = DebateQuestion::ActiveCompetitionId($id);
+        $this->question = DebateQuestion::ActiveCompetitionId($id); //dd($this->question);
         $this->debate = Debate::ActiveCompetitionId($id);
 
         $this->grado = ($this->debate) ? $this->debate->grado : collect();

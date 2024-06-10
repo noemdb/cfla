@@ -81,35 +81,21 @@ class Debate extends Model
 
     public static function setActive($id)
     {
-        $debates = Debate::all();
-        foreach ($debates as $item) {
-            $debate = Debate::find($item->id);
-            $debate->status_active = ($debate->id == $id) ? true : false ;
-            $debate->save();
-        }
         DebateQuestion::setDesActiveAll();
+        Debate::query()->where('id', $id)->update(['status_active' => true]);
+        Debate::query()->where('id', '!=', $id)->update(['status_active' => false]);
         return Debate::find($id);
     }
     public static function setDesactive($id)
     {
-        $debates = Debate::all();
-        foreach ($debates as $item) {
-            $debate = Debate::find($item->id);
-            $debate->status_active = ($debate->id == $id) ? false : false ;
-            $debate->save();
-        }
         DebateQuestion::setDesActiveAll();
+        Debate::query()->where('id',$id)->update(['status_active' => false]);
         return Debate::find($id);
     }
     public static function setDesActiveAll()
     {
-        $debates = Debate::where('status_active',true)->get();
-        foreach ($debates as $item) {
-            $debate = Debate::find($item->id);
-            $debate->status_active = false ;
-            $debate->save();
-        }
         DebateQuestion::setDesActiveAll();
+        Debate::query()->update(['status_active' => false]);
     }
 
     public function getSeccionsAttribute()

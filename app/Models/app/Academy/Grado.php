@@ -65,8 +65,27 @@ class Grado extends Model
         $datas = [];
         $pestudios = Pestudio::active('true')->get();
         foreach ($pestudios as $pestudio) {
-            $grados = $pestudio->getGradosActive();
+            $grados = $pestudio->getGradosActive(); //dd($grados);
             foreach ($grados as $grado) {
+                $datas [] = [
+                    'id'=> $grado->id,
+                    'name'=> $grado->name,
+                    'description'=> $pestudio->name,
+                ];
+                // $datas->put($arr);
+            }            
+        }
+        return $datas;
+    }
+
+    public static function list_grado_iu2() /* usada para llenar los objetos de formularios select*/
+    {
+        $datas = []; //dd($datas);
+        $peducativos = Peducativo::active('true')->get(); //dd($peducativos);
+        foreach ($peducativos as $peducativo) {
+            $grados = $peducativo->grados; //dd($grados);
+            foreach ($grados as $grado) {
+                $pestudio = $grado->pestudio;
                 $datas [] = [
                     'id'=> $grado->id,
                     'name'=> $grado->name,

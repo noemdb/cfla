@@ -24,9 +24,9 @@
             </x-dropdown>
         </x-slot> 
 
-        <div class="py-2">
-            {{-- <x-select label="Seleccione una Categoría" placeholder="Seleccione una Categoría" wire:model.live="category" :options="$list_category"/> --}}
+        <div class="py-2 flex gap-2 border-b-2 border-gray-400 mb-2">
             <x-select placeholder="Seleccione una Categoría" wire:model.live="category" :options="$list_category"/>
+            <x-select placeholder="Seleccione una ponderación" wire:model.live="weighting" :options="$list_weighting"/>
         </div>
 
         @if ($questions->isNotEmpty())

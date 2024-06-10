@@ -16,7 +16,7 @@ class Pestudio extends Model
 
     public function getGradosActive()
     {
-        return $this->grados->where('status_active','true');
+        return $this->grados->sortBy('code_sm')->where('status_active','true');
     }
 
     public function scopeActive($query, $flag='true') {

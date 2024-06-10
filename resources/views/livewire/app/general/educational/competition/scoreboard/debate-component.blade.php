@@ -4,17 +4,17 @@
 
         @if ($debate)
 
-            <div class="flex justify-between border-b-2 border-l-2 rounded border-gray-200" >
+            <div class="flex justify-between border-b-2 border bg-slate-100 rounded border-gray-200 h-full" >
 
                 <div class="flex-1">
 
                     <h5 class="mb-2 px-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">                
                         <div class="text-green-950">
-                            <small class="block text-sm font-bold text-green-900">Área de Formación activo: </small>
+                            <small class="block text-sm font-bold text-green-900">Área de Formación activa: </small>
                             <small class="text-gray-200">{{$debate->id}}.</small> {{$debate->name}} 
                         </div> 
                     </h5>
-                    <div class="text-8xl text-green-200 font-bold">{{$debate->grado->name}}</div> 
+                    <div class="text-5xl text-green-600 font-bold">{{$debate->grado->name}}</div> 
 
                     <div class="text-sm font-light">
                         <div class="text-right">        

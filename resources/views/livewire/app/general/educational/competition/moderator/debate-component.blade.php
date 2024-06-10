@@ -1,9 +1,11 @@
 <div>
 
     @if ($debates->isNotEmpty())
+
         <div class="md:flex my-2">
 
             <ul class="flex-column space-y space-y-4 text-sm font-medium text-gray-500 dark:text-gray-400 md:me-4 mb-4 md:mb-0">
+                <li class=" bg-green-600 py-2 rounded">{{$grado->name}}</li>
                 @foreach ($debates as $item)        
                     <li>
                         <button type="button" wire:click="active({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white {{ ($item->id==$active_id) ? 'bg-blue-400 dark:bg-blue-400' : 'bg-blue-700 dark:bg-blue-600'}}  rounded-lg active w-full " aria-current="page">

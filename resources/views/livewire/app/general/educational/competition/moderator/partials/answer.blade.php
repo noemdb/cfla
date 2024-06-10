@@ -2,7 +2,7 @@
 
     <x-card class="border border-gray-600 rounded shadow" id="{{$question->id}}">
 
-        <div class="text-2xl font-bold">Gestión de Respuestas</div>
+        <div class="text-2xl font-bold">Gestión de Respuestas...</div>
 
         @if (! $question->status_over_time)
 
@@ -25,7 +25,8 @@
                     <div class="text-sm font-normal">
                         @if ($question->status_active)
                             @if ($timerActive)
-                                <x-button negative lg label="Pausar" wire:click="pause" class="w-full"/>                    
+                                <x-button warning lg label="Pausar" wire:click="pause" class="w-1/3 mx-1 px-1"/>                    
+                                <x-button negative lg label="Finalizar" wire:click="finished" class="w-1/3 mx-1 px-1"/>                    
                             @else
                                 <x-button positive lg label="Iniciar" wire:click="start" class="w-full"/>
                             @endif
@@ -56,26 +57,16 @@
 
                     @if ($question->status_answer)
                         <div class="flex justify-center items-center">
-                            @php $label = ($answer) ? $answer->seccion->name : null; @endphp
-                            Puntaje adjudicado[{{$question->weighting}}] a la sección: <x-badge outline lg positive label="{{$label}}" class="mx-2" /> 
+                            @php $score = ($answer->score) ? $answer->score : 0 ; @endphp
+                            Puntaje adjudicado <x-badge outline lg positive label="{{$score}} pts" class="mx-2 text-xl" /> 
                         </div>
                     @else
 
-                        <div class="flex justify-center items-center">
-                            @forelse ($seccions as $item)
-                                <div class="pr-2 mr-2">
-                                    <x-button positive label="{{$item->name}}" wire:click="save({{$item->id}})"/>
-                                </div>
-                            @empty
-                                <div>No hay secciones</div>
-                            @endforelse
-                        </div>
-
-                        @if (! $seccions->empty())
-                            @php $seccion = $seccions->first(); @endphp
-                            <div> <x-button positive label="Correcto" wire:click="save({{$seccion->id}})"/></div>
+                        @if ($question->exist_option_correct)
+                            <x-button positive label="Respuesta Correcta" wire:click="saveAnswer({{$grado->id}},true)"/>
+                            <x-button negative label="Respuesta Incorrecta" wire:click="saveAnswer({{$grado->id}},false)"/>
                         @else
-                            <div>No hay secciones</div>
+                            <div class="text-red-800 font-semibold text-xl">No hay registrada una respuesta coreecta</div>
                         @endif
                         
                     @endif

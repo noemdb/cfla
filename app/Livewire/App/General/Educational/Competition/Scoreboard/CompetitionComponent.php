@@ -11,7 +11,8 @@ class CompetitionComponent extends Component
 
     public function mount($id)
     {        
-        $this->competition = DebateCompetition::where('id',$id)->where('status_active',true)->first(); //dd($this->competition);
+        // $this->competition = DebateCompetition::where('id',$id)->where('status_active',true)->first();
+        $this->competition = DebateCompetition::where('id',$id)->first();
     }
 
     public function render()

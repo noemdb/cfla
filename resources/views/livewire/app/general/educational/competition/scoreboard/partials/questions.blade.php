@@ -13,7 +13,7 @@
                             <div class="grow px-1">
                                 @php $bg = 'bg-'.$item->color.'-200'; @endphp
                                 <button class="text-start" wire:click="active({{$item->id}})">
-                                    {{$loop->iteration}}. {{$item->text}}
+                                    {{$loop->iteration}}. {!!$item->text!!}
                                 </button>
                             </div>
                             <div class="flex-none px-1 text-sm">

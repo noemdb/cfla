@@ -2,6 +2,8 @@
 
 namespace App\Models\app\Educational;
 
+use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pestudio;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,6 +47,35 @@ class DebateCompetition extends Model
     }
 
     // Método para obtener el puntaje total de la sección
+    public function getPestudiosAttribute()
+    {
+        return Pestudio::select('pestudios.*')
+            ->join('grados', 'pestudios.id', '=', 'grados.pestudio_id')
+            ->join('debates', 'grados.id', '=', 'debates.grado_id')
+            ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
+            ->where('debate_competitions.id', $this->id)
+            ->where('pestudios.status_active', "true")
+            ->where('grados.status_active', "true")
+            ->groupBy('pestudios.id')
+            ->get();
+    }
+
+    public function getPeducativosAttribute()
+    {
+        return Peducativo::select('peducativos.*')
+            ->join('pestudios', 'peducativos.id', '=', 'pestudios.peducativo_id')
+            ->join('grados', 'pestudios.id', '=', 'grados.pestudio_id')
+            ->join('debates', 'grados.id', '=', 'debates.grado_id')
+            ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
+            ->where('debate_competitions.id', $this->id)
+            ->where('peducativos.status_active', "true")
+            ->where('pestudios.status_active', "true")
+            ->where('grados.status_active', "true")
+            ->groupBy('peducativos.id')
+            ->get();
+    }
+
+    // Método para obtener el puntaje total de la sección
     public function getTotalScoreForSection($seccionId)
     {
         return DB::table('debate_answers')
@@ -53,6 +84,17 @@ class DebateCompetition extends Model
             ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
             ->where('debate_competitions.id', $this->id)
             ->where('debate_answers.seccion_id', $seccionId)
+            ->sum('score');
+    }
+
+    public function getTotalScoreForGrado($gradoId)
+    {
+        return DB::table('debate_answers')
+            ->join('debate_questions', 'debate_questions.id', '=', 'debate_answers.question_id')
+            ->join('debates', 'debates.id', '=', 'debate_questions.debate_id')
+            ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
+            ->where('debate_competitions.id', $this->id)
+            ->where('debate_answers.grado_id', $gradoId)
             ->sum('score');
     }
 

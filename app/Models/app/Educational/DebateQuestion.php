@@ -92,7 +92,12 @@ class DebateQuestion extends Model
     // Accessor para obtener la respuesta correcta
     public function getOptionCorrectAttribute()
     {
-        return $this->options()->where('status_option_correct', true)->first();
+        return DebateOption::where('question_id',$this->id)->where('status_option_correct',true)->first();
+    }
+    // Existe una respuesta correcta
+    public function getExistOptionCorrectAttribute()
+    {
+        return ($this->option_correct) ? true : false;
     }
 
     public function getAttachmentUrlAttribute()
@@ -125,36 +130,27 @@ class DebateQuestion extends Model
         return $this->time - $this->time_elapsed ;
     }
 
+    public function getStatusOptionCorrectAttribute()
+    {
+        return $this->time - $this->time_elapsed ;
+    }
+
     public static function setActive($id)
     {
-        $questions = DebateQuestion::all();
-        foreach ($questions as $item) {
-            $question = DebateQuestion::find($item->id);
-            $question->status_active = ($question->id == $id) ? true : false ;
-            $question->save();
-        }
+        DebateQuestion::query()->where('id',$id)->update(['status_active' => true]);
+        DebateQuestion::query()->where('id','<>',$id)->update(['status_active' => false]);
         return DebateQuestion::find($id);
     }
 
     public static function setDesActive($id)
     {
-        $questions = DebateQuestion::all();
-        foreach ($questions as $item) {
-            $question = DebateQuestion::find($item->id);
-            $question->status_active = ($question->id == $id) ? false : false ;
-            $question->save();
-        }
+        DebateQuestion::query()->where('id',$id)->update(['status_active' => false]);
         return DebateQuestion::find($id);
     }
 
     public static function setDesActiveAll()
     {
-        $questions = DebateQuestion::where('status_active',true)->get();
-        foreach ($questions as $item) {
-            $question = DebateQuestion::find($item->id);
-            $question->status_active = false ;
-            $question->save();
-        }
+        DebateQuestion::query()->update(['status_active' => false]);
     }
 
     public static function ActiveCompetitionId($CompetitionId = null)
@@ -166,5 +162,25 @@ class DebateQuestion extends Model
             ->where('debate_questions.status_active',true)
             ->orderby('debate_questions.created_at')
             ->first();
+    }
+
+    public static function list_weighting()
+    {
+        return DebateQuestion::query()
+            ->select('debate_questions.weighting')
+            // ->where('debate_questions.id',$this->id)
+            ->orderby('debate_questions.weighting')
+            ->distinct()
+            ->pluck('weighting','weighting');
+    }
+
+    public static function list()
+    {
+        return DB::table('debate_questions')
+            ->select('debate_questions.id')
+            ->join('debates', 'debates.id', '=', 'debate_questions.debate_id')
+            ->where('debate_questions.weighting','>=',100)
+            ->where('debates.graod_id',8)
+            ->get();
     }
 }

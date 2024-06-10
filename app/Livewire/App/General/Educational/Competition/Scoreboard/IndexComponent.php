@@ -62,5 +62,10 @@ class IndexComponent extends Component
     {
         $this->question = ($this->question) ? DebateQuestion::find($this->question_id) : null;
     }
+
+    public function updateScoreBoard($id)
+    {
+        $this->competition = DebateCompetition::findOrFail($id);
+    }
 }
 

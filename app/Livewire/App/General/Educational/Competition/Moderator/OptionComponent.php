@@ -3,6 +3,7 @@
 namespace App\Livewire\App\General\Educational\Competition\Moderator;
 //livewire.app.general.educational.competition.moderator.option-component
 
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Educational\DebateAnswer;
 use App\Models\app\Educational\DebateOption;
@@ -74,6 +75,13 @@ class OptionComponent extends Component
         $this->question->save();
         // $this->dispatch('startTimer', active: $this->timerActive); 
     }
+
+    public function finished()
+    {
+        $this->timerActive = false;
+        $this->question->time_elapsed = $this->question->time;
+        $this->question->save();
+    }
     public function decrementCount()
     {
         if ($this->timeRemaining > 0) {
@@ -95,11 +103,11 @@ class OptionComponent extends Component
         $this->seccions = ($this->question) ? $this->question->seccions->where('status_inscription_affects','true') : null ;
     }
 
-    public function save($seccio_id)
+    public function saveAnswer($grado_id,$correct)
     {
-        $seccion = Seccion::findOrFail($seccio_id);
-        $grado = $seccion->grado; //dd($grado);
-        $question = DebateQuestion::findOrFail($this->question->id);
+        $grado = Grado::findOrFail($grado_id);
+        // $seccion = $grado->seccions->first();
+        $question = DebateQuestion::findOrFail($this->question->id); //dd($question);
         $option = DebateOption::option_correct($this->question->id);
 
         $answers = DebateAnswer::where('question_id',$this->question->id)->where('option_id',$option->id)->get();
@@ -110,16 +118,18 @@ class OptionComponent extends Component
             }
         }
 
+        $weighting = ($correct) ? $question->weighting : null ;
+
         $arr = [
             'question_id'=>$question->id,
             'option_id'=>$option->id,
             'grado_id'=>$grado->id,
-            'seccion_id'=>$seccion->id,
+            // 'seccion_id'=>$seccion->id,
             'status_claim'=>false,
-            'score'=>$question->weighting,
+            'score'=>$weighting,
         ]; //dd($arr);
 
-        $answers = DebateAnswer::create($arr);
+        $this->answer = DebateAnswer::create($arr);
 
         $question->status_answer = true;
         $question->save();

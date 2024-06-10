@@ -12,15 +12,15 @@ use Livewire\Attributes\On;
 
 class DebateComponent extends Component
 {
-    public $competition_id,$debates,$debate,$active_id,$grado_id,$question;
+    public $competition_id,$debates,$debate,$active_id,$grado,$grado_id,$question;
 
     #[On('grado-active')] 
     public function updateDebatesList($id)
     {
-        $grado = Grado::findOrFail($id);
-        $this->grado_id = $grado->id; 
+        $this->grado = Grado::findOrFail($id);
+        $this->grado_id = $this->grado->id; 
         $this->debates = Debate::query(); 
-        $this->debates = ($this->competition_id) ? Debate::where('competition_id',$this->competition_id)->where('grado_id',$grado->id) : $this->debates;
+        $this->debates = ($this->competition_id) ? Debate::where('competition_id',$this->competition_id)->where('grado_id',$this->grado->id) : $this->debates;
         $this->debates = $this->debates->get();
         $this->loadActive();
     }
@@ -47,6 +47,7 @@ class DebateComponent extends Component
 
     public function render()
     {
+        $this->debates = $this->debates->sortByDesc('status_active');
         return view('livewire.app.general.educational.competition.moderator.debate-component');
     }
 
