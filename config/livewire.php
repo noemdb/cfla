@@ -113,7 +113,8 @@ return [
     |
     */
 
-    'inject_assets' => true,
+    // 'inject_assets' => true,
+    'inject_assets' => false,
 
     // 'asset_url' => 'null',
 
