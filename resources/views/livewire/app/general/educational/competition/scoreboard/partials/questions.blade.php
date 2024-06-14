@@ -20,9 +20,7 @@
                                 @if ($item->status_over_time) <x-badge.circle outline icon="check" /> @endif
                                 @if ($item->status_answer) <x-badge.circle flat icon="check" /> @endif
                             </div>
-                        </div>
-
-                        
+                        </div>                        
                     </li>
                 @empty
                     <li class="me-2">

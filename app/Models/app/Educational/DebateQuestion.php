@@ -58,12 +58,12 @@ class DebateQuestion extends Model
         '[31059] Craneos'=>'Craneos',
     ];
 
-    const tailwindColors = ['gray','neutral','red','orange','yellow','green','cyan','indigo'];
+    const tailwindColors = ['gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo','gray','neutral','red','orange','yellow','green','cyan','indigo'];
 
     // Relación
     public function options() { return $this->hasMany(DebateOption::class,'question_id'); }
     public function answers() { return $this->hasMany(DebateAnswer::class,'question_id'); }
-    public function debate() { return $this->belongsTo(Debate::class); }
+    public function debate() { return $this->belongsTo(Debate::class,'debate_id'); }
 
     public function getGradoAttribute()
     {

@@ -22,14 +22,14 @@
                     </div>
                 </div>
                 <div class="col-span-2">
-                    <div class="text-sm font-normal">
+                    <div class="text-sm font-normal flex">
                         @if ($question->status_active)
                             @if ($timerActive)
-                                <x-button warning lg label="Pausar" wire:click="pause" class="w-1/3 mx-1 px-1"/>                    
-                                <x-button negative lg label="Finalizar" wire:click="finished" class="w-1/3 mx-1 px-1"/>                    
+                                <x-button warning lg label="Pausar" wire:click="pause" class="w-1/2 ml-1"/> 
                             @else
-                                <x-button positive lg label="Iniciar" wire:click="start" class="w-full"/>
+                                <x-button positive lg label="Iniciar" wire:click="start" class="w-1/2 ml-1"/>
                             @endif
+                            <x-button negative lg label="Finalizar" wire:click="finished" class="w-1/2 ml-1"/>
                         @else
                             <div class="flex justify-center items-center">
                                 La pregunta no está activa                               
@@ -58,13 +58,20 @@
                     @if ($question->status_answer)
                         <div class="flex justify-center items-center">
                             @php $score = ($answer->score) ? $answer->score : 0 ; @endphp
-                            Puntaje adjudicado <x-badge outline lg positive label="{{$score}} pts" class="mx-2 text-xl" /> 
+                            Puntaje adjudicado <x-badge outline lg positive label="{{$score}} pts" class="mx-2 text-xl" />
+                            
+                            @if ($score)
+                                <span class="p-2 bg-yellow-600 border border-gray-400 rounded cursor-pointer" wire:click="setPoin({{$answer->id}},0)">Anular</span>
+                            @else
+                                <span class="p-2 bg-green-600 border border-gray-400 rounded cursor-pointer" wire:click="setPoin({{$answer->id}},{{$question->weighting}})">Puntuar</span>
+                            @endif
+
                         </div>
                     @else
 
                         @if ($question->exist_option_correct)
-                            <x-button positive label="Respuesta Correcta" wire:click="saveAnswer({{$grado->id}},true)"/>
-                            <x-button negative label="Respuesta Incorrecta" wire:click="saveAnswer({{$grado->id}},false)"/>
+                            <x-button lg positive label="Respuesta Correcta" wire:click="saveAnswer({{$grado->id}},true)"/>
+                            <x-button lg negative label="Respuesta Incorrecta" wire:click="saveAnswer({{$grado->id}},false)"/>
                         @else
                             <div class="text-red-800 font-semibold text-xl">No hay registrada una respuesta coreecta</div>
                         @endif

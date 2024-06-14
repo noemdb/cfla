@@ -1,7 +1,7 @@
 <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-        <div class="col-span-1 text-start">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+        <div class="col-span-5 text-start">
             Preguntas:..
             <ul class="">
                 @forelse ($questions->sortBy('category') as $item)
@@ -10,12 +10,25 @@
                         
                         <div class="flex items-center">
                             <div class="grow px-2">
-                                <button class="text-start" wire:click="active({{$item->id}})">
-                                    {{$loop->iteration}}. {{$item->text}}. 
-                                    <div class="flex justify-end">
-                                        <small>{{$item->category}}</small> || <small>[<b>{{$item->time}}</b>seg]</small> <small>[<b>{{$item->weighting}}</b>pts]</small>
+                                <div class="flex justify-between">
+                                    <div>
+                                        <button class="text-start" wire:click="active({{$item->id}})">
+                                            {{$loop->iteration}}. {{$item->text}}. 
+                                            <div class="flex justify-end">
+                                                <small>{{$item->category}}</small> || <small>[<b>{{$item->time}}</b>seg]</small> <small>[<b>{{$item->weighting}}</b>pts]</small>
+                                            </div>
+                                        </button>
                                     </div>
-                                </button>
+
+                                    {{-- @if (! $item->status_active)                                        
+                                        <div class=" bg-red-500 rounded shadow flex items-center justify-center h-auto">
+                                            <button type="button" wire:click="activeOnline({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white rounded-lg active w-full " aria-current="page">
+                                                Activar
+                                            </button>
+                                        </div>
+                                    @endif --}}
+                                </div>
+                                
                             </div>
                             <div class="flex-none px-2 text-sm">
                                 <div class="flex">
@@ -36,7 +49,7 @@
                 @endforelse
             </ul> 
         </div>
-        <div class="col-span-3 ">
+        <div class="col-span-7 ">
 
             @if ($active_id)   
                 @php $key = "competition-moderator-option-component-".$active_id; @endphp             

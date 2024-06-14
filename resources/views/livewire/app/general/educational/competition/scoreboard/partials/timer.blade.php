@@ -45,7 +45,10 @@
         <div class="p-2 m-2">
             {{$question ?? 'fail'}}
             <span class="border border-gray-300 rounded p-2">Tiempo finalizado</span>
-            @if ($question->status_answer) <span class="border border-gray-300 rounded p-2">Puntaje adjudicado</span> @endif
+            @if ($question->status_answer) 
+                <span class="border border-gray-300 rounded p-2">Puntaje adjudicado</span>
+                
+            @endif
         </div>
     @endif
 

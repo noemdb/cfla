@@ -61,6 +61,7 @@ class QuestionComponent extends Component
     public function active($id)
     {
         $question = DebateQuestion::findOrFail($id);
+        $this->debate = $question->debate;
         $this->question = $question;
         $this->active_id = $question->id ;
         $this->dispatch('question-active',id: $id);
@@ -70,7 +71,7 @@ class QuestionComponent extends Component
 
     public function updatedCategory($category)
     {
-        $this->questions = DebateQuestion::where('debate_id',$this->debate->id)->where('category','like','%'.$category.'%');
+        $this->questions =  DebateQuestion::where('debate_id',$this->debate->id)->where('category','like','%'.$category.'%');
         $this->questions = ($this->weighting) ? $this->questions->where('weighting',$this->weighting) : $this->questions;
         $this->questions = $this->questions->inRandomOrder()->get();
     }
@@ -123,6 +124,13 @@ class QuestionComponent extends Component
     {
         $this->question = DebateQuestion::setDesActive($id);
         $this->active_id = null;
+    }
+
+    public function activeOnline($id)
+    {
+        // $this->question = DebateQuestion::find($id);
+        $this->question = DebateQuestion::setActive($id);
+        $this->questions =  DebateQuestion::where('debate_id',$this->question->debate_id)->get();
     }
 
 }

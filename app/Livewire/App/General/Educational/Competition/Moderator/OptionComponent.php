@@ -39,8 +39,8 @@ class OptionComponent extends Component
     public function mount($question_id)
     {
         $this->updateOptionList($question_id);
-        $this->literal = ['A','B','C','D','E','F'];     
-        $this->colors = ['primary','secondary','positive','negative','warning','info'];  
+        $this->literal = ['A','B','C','D','E','F','G','H','I'];     
+        $this->colors = ['primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info','primary','secondary','positive','negative','warning','info'];  
         
         //timer
         $this->timerActive = false;
@@ -157,6 +157,14 @@ class OptionComponent extends Component
         $this->question = DebateQuestion::setDesActive($id);
         $this->active_id = null;
         $this->dispatch('question-online',id: $id);
+    }
+
+    public function setPoin($id,$score)
+    {
+        $this->answer = DebateAnswer::find($id);
+        $this->answer->score = $score;
+        $this->answer->save();
+        $this->answer = DebateAnswer::find($id);
     }
 
 }

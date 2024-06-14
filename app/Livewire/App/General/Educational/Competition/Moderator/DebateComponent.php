@@ -18,10 +18,8 @@ class DebateComponent extends Component
     public function updateDebatesList($id)
     {
         $this->grado = Grado::findOrFail($id);
-        $this->grado_id = $this->grado->id; 
-        $this->debates = Debate::query(); 
-        $this->debates = ($this->competition_id) ? Debate::where('competition_id',$this->competition_id)->where('grado_id',$this->grado->id) : $this->debates;
-        $this->debates = $this->debates->get();
+        $this->grado_id = $this->grado->id;
+        $this->loadDebate($this->competition_id);
         $this->loadActive();
     }
 
@@ -47,15 +45,23 @@ class DebateComponent extends Component
 
     public function render()
     {
-        $this->debates = $this->debates->sortByDesc('status_active');
+        // $this->debates = $this->debates->sortByDesc('status_active');
+        $this->debates = $this->debates->sort();
         return view('livewire.app.general.educational.competition.moderator.debate-component');
     }
 
     public function active($id)
     {
         $this->debate = Debate::findOrFail($id);
-        $this->active_id = $this->debate->id ;
+        $this->active_id = $this->debate->id ;        
         $this->dispatch('detabe-active',id: $id);
+    }
+
+    public function activeOnline($id)
+    {
+        $this->active($id);
+        $this->setOnline($id);
+        $this->loadDebate($this->competition_id);
     }
 
     public function setOnline($id)
@@ -68,6 +74,13 @@ class DebateComponent extends Component
     {
         $this->debate = Debate::setDesActive($id);
         $this->active_id = null;
+    }
+
+    public function loadDebate($competition_id)
+    {
+        $this->debates = Debate::query(); 
+        $this->debates = ($competition_id) ? Debate::where('competition_id',$competition_id)->where('grado_id',$this->grado->id) : $this->debates;
+        $this->debates = $this->debates->get(); 
     }
     
 }

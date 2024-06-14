@@ -8,22 +8,32 @@
                 <li class=" bg-green-600 py-2 rounded">{{$grado->name}}</li>
                 @foreach ($debates as $item)        
                     <li>
-                        <button type="button" wire:click="active({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white {{ ($item->id==$active_id) ? 'bg-blue-400 dark:bg-blue-400' : 'bg-blue-700 dark:bg-blue-600'}}  rounded-lg active w-full " aria-current="page">
-                            <div class="block text-start">
-
-                                <div class="flex">
-                                    <div class="px-2">
-                                        <div class="block">{{$item->name}}</div>
-                                        <div class="text-xs text-gray-800 font-light">{{$item->full_grado}}</div>
+                        <div class="flex justify-between">
+                            <div class="mx-2">
+                                <button type="button" wire:click="active({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white {{ ($item->id==$active_id) ? 'bg-blue-400 dark:bg-blue-400' : 'bg-blue-700 dark:bg-blue-600'}}  rounded-lg active w-full " aria-current="page">
+                                    <div class="block text-start">
+        
+                                        <div class="flex">
+                                            <div class="px-2">
+                                                <div class="block">{{$item->name}}</div>
+                                                <div class="text-xs text-gray-800 font-light">{{$item->full_grado}}</div>
+                                            </div>
+        
+                                            @if ($item->status_active)
+                                                <x-badge.circle negative icon="pause" class="ms-2 px-2 animate-pulse"/>
+                                            @endif
+                                        </div>
+                                        
                                     </div>
-
-                                    @if ($item->status_active)
-                                        <x-badge.circle negative icon="pause" class="ms-2 px-2 animate-pulse"/>
-                                    @endif
-                                </div>
-                                
+                                </button>
                             </div>
-                        </button>
+                            <div class=" bg-red-500 rounded shadow flex items-center justify-center h-auto">
+                                <button type="button" wire:click="activeOnline({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white rounded-lg active w-full " aria-current="page">
+                                    Activar
+                                </button>
+                            </div>
+                        </div>
+                        
                     </li>
                 @endforeach
             </ul>
