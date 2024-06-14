@@ -26,12 +26,16 @@ Route::get('/', [HomeController::class, 'home'])->name('home');
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 
 Livewire::setScriptRoute(function ($handle) {
-    return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
+    return Route::get('/cfla/livewire/livewire.js', $handle);
 });
 
-Livewire::setUpdateRoute(function ($handle) {
-    return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
-});
+// Livewire::setScriptRoute(function ($handle) {
+//     return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
+// });
+
+// Livewire::setUpdateRoute(function ($handle) {
+//     return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
+// });
 
 Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
     Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
