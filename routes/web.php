@@ -30,7 +30,7 @@ Livewire::setScriptRoute(function ($handle) {
 });
 
 Livewire::setUpdateRoute(function ($handle) {
-    return Route::post('cfla/livewire/update', $handle);
+    return Route::post('/cfla/livewire/update', $handle);
 });
 
 // Livewire::setScriptRoute(function ($handle) {
