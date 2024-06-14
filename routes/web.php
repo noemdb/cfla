@@ -29,6 +29,10 @@ Livewire::setScriptRoute(function ($handle) {
     return Route::get('/cfla/livewire/livewire.js', $handle);
 });
 
+Livewire::setUpdateRoute(function ($handle) {
+    return Route::post('cfla/livewire/update', $handle);
+});
+
 // Livewire::setScriptRoute(function ($handle) {
 //     return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
 // });
