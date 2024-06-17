@@ -46,7 +46,7 @@ return [
 
         'payments' => [
             'driver' => 'local',
-            'root' => env('APP_ROOT_SAEFL').'/storage/app/public/payments',
+            'root' => env('APP_ROOT_SAEFL').'/storage/app/public/payment',
             'visibility' => 'public',
         ],
 

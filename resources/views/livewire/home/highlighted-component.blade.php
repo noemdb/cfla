@@ -8,11 +8,6 @@
             <div class="col-span-12 md:col-span-6 lg:col-span-6 xl:col-span-4 border rounded-xl shadow-xl">
                 <livewire:app.catchment.index-component />
             </div>
-
-            <!-- Column -->
-            {{-- <div class="col-span-12 md:col-span-6 lg:col-span-6 xl:col-span-4 border rounded-xl shadow-xl"> --}}
-                {{-- <livewire:app.enrollment.index-component /> --}}
-            {{-- </div> --}}
     
             <!-- Column -->
             <div class="col-span-12 md:col-span-6 lg:col-span-6 xl:col-span-4 border rounded-xl shadow-xl">
