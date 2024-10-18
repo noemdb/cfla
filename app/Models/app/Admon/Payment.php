@@ -219,8 +219,8 @@ class Payment extends Model
     ];
     
     const LIST_TYPE_PAY = [
-        'Inscripción Período Escolar 2023-2024'=>'Inscripción Período Escolar 2023-2024',
-        'Deuda pendiente del Período Escolar 2022 - 2023'=>'Deuda pendiente del Período Escolar 2022 - 2023',
+        'Inscripción Período Escolar 2024-2025'=>'Inscripción Período Escolar 2024-2025',
+        'Deuda pendiente del Período Escolar 2023 - 2024'=>'Deuda pendiente del Período Escolar 2023 - 2024',
         // 'Inscripción Período Escolar 2020'=>'Inscripción Período Escolar 2020 - 2021',
         'Mensualidad(es) anterior(es)'=>'Mensualidad(es) anterior(es)',
         'Mensualidad actual'=>'Mensualidad actual',

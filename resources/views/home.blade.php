@@ -12,11 +12,11 @@
 
 @section('services') <livewire:home.services-component /> @endsection
 
-@section('testimonials') <livewire:home.testimonials-component /> @endsection
+{{-- @section('testimonials') <livewire:home.testimonials-component /> @endsection --}}
 
 @section('gallery') @include('home.gallery.main') @endsection
 
-@section('autority') @include('home.autority.main') @endsection
+{{-- @section('autority') @include('home.autority.main') @endsection --}}
 
 @section('workers') <livewire:home.workers-component /> @endsection
 
