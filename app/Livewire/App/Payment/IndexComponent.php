@@ -56,7 +56,7 @@ class IndexComponent extends Component
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
-        $this->validate();
+        $this->validate(); dd($this->payment);
 
         $payment = Payment::create($this->payment->all());
 
@@ -114,6 +114,7 @@ class IndexComponent extends Component
             $this->step = 1;
             $this->payment->ci_representant = $representant->ci_representant;
             $this->payment->representant_id = $representant->representant_id;
+            $this->payment->name_representant = $representant->name;
             $this->modalAssistent = true;
         } else {
             $this->modalEmpty = true;
@@ -137,7 +138,7 @@ class IndexComponent extends Component
 
         switch ($step) {
             case '1':
-
+                $this->validateOnly("payment.name_representant");
                 $this->validateOnly("payment.ci_representant");
                 $this->validateOnly("payment.type_pay");
                 $this->validateOnly("payment.ammount_1");
