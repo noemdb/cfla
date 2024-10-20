@@ -10,7 +10,7 @@
         <div class="grid grid-cols-12 gap-x-4">
 
             <!-- Column -->
-            <div class="col-span-12 md:col-span-6 xl:col-span-6 border rounded shadow">
+            <div class="col-span-12 md:col-span-12 xl:col-span-12 border rounded shadow">
                 <section id="contact" class="bg-gray-100 py-12">
                     <div class="container mx-auto px-4">
 
@@ -68,7 +68,7 @@
             </div>
 
             <!-- Column -->
-            <div class="col-span-12 md:col-span-6 xl:col-span-6 border rounded shadow">
+            {{-- <div class="col-span-12 md:col-span-6 xl:col-span-6 border rounded shadow">
 
                 <x-card title="Localízanos">
                     @slot('header')
@@ -81,7 +81,7 @@
                         frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
                 </x-card>
 
-            </div>
+            </div> --}}
 
         </div>
 

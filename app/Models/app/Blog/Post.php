@@ -96,7 +96,7 @@ class Post extends Model
     {
         $directorio = public_path().'/image/categories/'.$this->category->icon;
         $count = count(scandir($directorio)) - 2; //dd($directorio,$count);
-        return (File::exists($this->file_url)) ? $this->file_url : 'image/categories/'.$this->category->icon.'/'.rand(1,$count).'.png';
+        return (File::exists($this->file_url)) ? $this->file_url : 'image/categories/'.$this->category->icon.'/'.rand(1,$count).'.jpg';
     }
 
     public function getSaeflImageUrlAttribute()
