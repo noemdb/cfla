@@ -56,7 +56,7 @@ class IndexComponent extends Component
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
-        $this->validate(); dd($this->payment);
+        $this->validate(); //dd($this->payment);
 
         $payment = Payment::create($this->payment->all());
 
