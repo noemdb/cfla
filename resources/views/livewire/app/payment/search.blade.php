@@ -14,7 +14,7 @@
             <div class="text-center">
                 <div class="font-bold">Asistente</div>
                 <div class="py-0 my-0 text-green-950 opacity-50 text-sm dark:text-neutral-200">
-                    Período Escolar 2023 - 2024
+                    Período Escolar 2024 - 2025
                 </div>
             </div>            
         </x-slot>
