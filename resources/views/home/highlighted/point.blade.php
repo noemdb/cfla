@@ -29,7 +29,7 @@
                     .</div>
             </div>
         </div>
-        <div class="text-xs text-gray-200flex justify-between items-center bg-orange-100 p-4 my-4 rounded-lg origin-bottom rotate-2">
+        <div class="text-xs text-gray-200flex justify-between items-center bg-orange-100 p-4 my-4 rounded-lg origin-bottom">
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 Seguimos trabajando en la mejora de nuestros servicios, hemos agregado una nueva opción de pago aún más rápida a través de esta conexión.
             </div>

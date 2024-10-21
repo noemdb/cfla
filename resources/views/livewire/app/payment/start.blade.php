@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <div class="text-xs text-gray-200flex justify-between items-center bg-green-100 p-4 my-4 rounded-lg origin-bottom rotate-2">
+        <div class="text-xs text-gray-200flex justify-between items-center bg-green-100 p-4 my-4 rounded-lg origin-bottom">
 
             <div class="mt-2 text-xs text-gray-200flex justify-between items-center">
                 <span class="font-bold">Un proceso sencillo y rápido:</span>
