@@ -18,7 +18,7 @@
 
 {{-- @section('autority') @include('home.autority.main') @endsection --}}
 
-@section('workers') <livewire:home.workers-component /> @endsection
+{{-- @section('workers') <livewire:home.workers-component /> @endsection --}}
 
 @section('contacts') <livewire:home.contacts-component /> @endsection
 
