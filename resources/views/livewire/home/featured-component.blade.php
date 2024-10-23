@@ -12,13 +12,13 @@
                 <div class="item p-2">
                     <x-card title="{{$category->name}}" class="pb-4" id="feature">
                         <div class="flex flex-col items-center sm:flex-row sm:items-start">
-                            <div class="flex-shrink-0 mr-4 sm:mr-0 flex-items-center">
+                            <div class="flex-none mr-4 sm:mr-0 flex-items-center">
                                 <img src="{{asset('image/categories/svg/'.$category->icon_svg)}}" class="block w-12" alt="Wild Landscape" />
                             </div>
-                            <div class="text-lg  ml-4 font-bold text-gray-700">
+                            <div class="text-lg grow ml-4 font-bold text-gray-700">
                                 @include('livewire.home.featured.index')
                             </div>
-                            <div class="ml-4 flex justify-center items-center h-full">
+                            <div class="ml-4 flex-none justify-center items-center h-full">
                                 <img src="{{asset($item->saefl_image_url)}}" class="block w-auto sm:w-auto rounded-lg shadow min-w-64" alt="Wild Landscape" />                                
                             </div>
                         </div>
