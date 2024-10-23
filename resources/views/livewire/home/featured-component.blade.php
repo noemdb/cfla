@@ -18,9 +18,11 @@
                             <div class="text-lg grow ml-4 font-bold text-gray-700">
                                 @include('livewire.home.featured.index')
                             </div>
+                            @if ($item->file_exist)                                
                             <div class="ml-4 flex-none justify-center items-center h-full">
                                 <img src="{{asset($item->saefl_image_url)}}" class="block w-auto sm:w-auto rounded-lg shadow min-w-64" alt="Wild Landscape" />                                
                             </div>
+                            @endif
                         </div>
                     </x-card>
                 </div>

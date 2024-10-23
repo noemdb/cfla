@@ -109,4 +109,9 @@ class Post extends Model
         return (File::exists($this->file_url)) ? $this->file_url : 'image/gallery/notice/'.rand(1,3).'.jpg';
     }
 
+    public function getFileExistAttribute()
+    {
+        return (File::exists($this->file_url)) ? true : false;
+    }
+
 }
