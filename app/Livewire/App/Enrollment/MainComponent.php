@@ -28,6 +28,10 @@ class MainComponent extends Component
         $url = env('APP_URL_SAEFL','.').'/general/enrollments/index/'.$this->ci;
 
         $this->dispatch('redireccionar', $url);
-        // return redirect()->to(env('APP_URL_SAEFL','.').'/general/enrollments/index/'.$this->ci);
+
+        $this->modalSearch = false;
+        $this->modalStart = false;
+        $this->modalAssistent = false;
+        $this->modalEmpty = false;
     }
 }

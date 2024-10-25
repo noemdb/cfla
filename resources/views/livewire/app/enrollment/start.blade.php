@@ -4,7 +4,7 @@
         <h3 class=" text-green-950 bg-primary-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
             <div class="h-full flex items-center">
                 <x-icon name="document" class="flex-none w-10 h-10" />
-                <div class="flex-initial">Actualización de matrícula.</div>
+                <div class="flex-initial">Solicitud de matrícula.</div>
             </div>
         </h3>
     </x-slot>
