@@ -81,6 +81,9 @@
 
     @livewireScripts
 
+
+    @yield('scriptsLivewire')
+
     {{-- @livewireScriptConfig --}}
 
 </body>

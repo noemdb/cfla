@@ -27,14 +27,5 @@ class Profesor extends Model
         ->groupBy('profesors.id','profesors.ci_profesor','profesors.name', 'profesors.lastname','profesors.date_birth')
         ->get();
     }
-
-    // public function scopeAcademic($query, $flag="true")
-    // {
-    //     $query = $query->select('profesors.*')
-    //         ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
-    //         ->where('profesors.status_active', $flag)
-    //         ->wherenull('pevaluacions.deleted_at')
-    //         ->groupby('profesors.id');
-    //     return $query;
-    // }
+    
 }
