@@ -31,48 +31,48 @@
         <div class="text-xs text-gray-200flex justify-between items-center bg-info-100 p-4 my-4 rounded-lg origin-bottom">
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
                 <span class="font-bold">TITULAR: Asociación de terciarios capuchinos de Venezuela C.A </span>                
-                <span>
+                <div>
                     BANCO DEL TESORO - Bs<br>
                     CUENTA CORRIENTE<br>
                     RIF: J000570167<br>
                     0163-0246-51-2463000279<br>
-                </span>
+                </div>
             </div>
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <span>
+                <div>
                     BANCARIBE - Bs<br>
                     CUENTA CORRIENTE<br>
                     RIF: J000570167<br>
                     0114-0270-40-2700047221<br>
-                </span>
+                </div>
             </div>            
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <span>
+                <div>
                     BANCARIBE - Divisas<br>
                     CUENTA CORRIENTE<br>
                     RIF: J000570167<br>
                     0114-0270-40-2704003083<br>
-                </span>
+                </div>
             </div>            
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <span>
+                <div>
                     PAGO MÓVIL<br>
                     Banco del Tesoro (0163)<br>
                     RIF: J000570167<br>
                     04245891682<br>
-                </span>
+                </div>
             </div>            
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <span>
+                <div>
                     EFECTIVO<br>
                     En las oficinas administrativas de la institución. 
-                </span>
+                </div>
             </div>  
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <span>
+                <div>
                     PUNTO DE VENTA <br>
                     En la taquilla de Administración. 
-                </span>
+                </div>
             </div>           
         </div>
     </div>
