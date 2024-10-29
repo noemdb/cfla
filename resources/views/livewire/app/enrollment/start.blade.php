@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <div class="text-xs text-gray-200flex justify-between items-center bg-primary-100 p-4 my-4 rounded-lg origin-bottom rotate-2">
+        <div class="text-xs text-gray-200flex justify-between items-center bg-primary-100 p-4 my-4 rounded-lg origin-bottom">
             <span class="font-bold">Actualizar información del estudiante:</span>
             La solicitud de actualización de matrícula es un documento que se utiliza para informar de los cambios que
             se han producido en los datos de un estudiante. Estos cambios pueden referirse a la dirección, el teléfono,
