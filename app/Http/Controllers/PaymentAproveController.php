@@ -25,11 +25,10 @@ class PaymentAproveController extends Controller
         $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
 
         $subject = 'Reporte de Pago - Representante';
-        $allEmails = array();
         $dataEmail = [
             'subject' => $subject,
-            'address' => $email,
-            // 'address' => 'tester.saefl@gmail.com',
+            // 'address' => $email,
+            'address' => 'noemdb@gmail.com',
             'mailCCAddress' => env('MAIL_CC_ADDRESS', 'hello@example.com'),
             'representant' => $representant,
             'inputs' => $inputs,
@@ -40,7 +39,7 @@ class PaymentAproveController extends Controller
         ]; 
 
         $template = new SendEmailPayment($dataEmail, $subject);
-        SendEmailJobPayment::dispatch($dataEmail['email'], $template)->delay($time->addSeconds(30));
+        SendEmailJobPayment::dispatch($dataEmail['address'], $template)->delay($time->addSeconds(30));
 
         return $dataEmail;
 

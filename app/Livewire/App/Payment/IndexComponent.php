@@ -9,11 +9,20 @@ use App\Models\app\Admon\Payment;
 use App\Models\app\Learner\Representant;
 use App\Http\Controllers\Email\SendPaymentController;
 use App\Http\Controllers\PaymentAproveController;
+use App\Jobs\SendWelcomeEmail;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Validate;
 use WireUi\Traits\Actions;
+
+use App\Mail\WelcomeEmail;
+use App\Models\app\Entity\Autoridad;
+use App\Models\app\Entity\Institucion;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Mail;
 
 class IndexComponent extends Component
 {
@@ -62,20 +71,46 @@ class IndexComponent extends Component
         $payment = Payment::create($this->payment->all());
         $representant = $this->representant;
 
-        if ($payment) {
+        if ($payment && $representant) {
             $title = "Datos guardados";
             $description = "Toda la información ha sido guardada éxitosamente!";
             $icon = "success";
 
             $inputs['id'] = $payment->id; //dd($inputs);
             $inputs['representant_name'] = $representant->name; //dd($inputs);
-            $inputs['number_i_pay'] = $this->number_i_pay_1; //dd($inputs);
-            $inputs['ammount'] = $this->ammount_1; //dd($inputs);
-            $inputs['type_pay'] = $this->type_pay; //dd($inputs);
+            $inputs['number_i_pay'] = $this->payment->number_i_pay_1; //dd($inputs);
+            $inputs['ammount'] = $this->payment->ammount_1; //dd($inputs);
+            $inputs['type_pay'] = $this->payment->type_pay; //dd($inputs);
             $inputs['date'] = Carbon::now()->format('d-m-Y h:i'); //dd($inputs);
 
-            $mail = New PaymentAproveController;
-            $mail->SendPaymentRegistered($representant->id,$inputs);
+            // Mail::to($representant->email)->send(new WelcomeEmail($representant));
+
+            $email = $representant->email;
+            $time = Carbon::now();
+            $toDate = Date::now()->format('d F Y');
+
+            $institucion = Institucion::OrderBy('created_at','DESC')->first();
+            $autoridad1 = Autoridad::getTipoAuthority('2');//director
+            $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
+            $data = [
+                'email'=>$representant->email,
+                'name'=>$representant->name,
+                // 'subject' => $this->mailData['subject'],
+                'representant' => $representant,
+                'inputs' => $inputs,
+                'institucion' => $institucion,
+                'autoridad1' => $autoridad1,
+                'autoridad2' => $autoridad2,
+                'toDate' => $toDate,
+            ];
+
+            $dataObj = (object) $data; //dd($dataObj);
+
+            // SendWelcomeEmail::dispatch($dataObj);
+            // SendWelcomeEmail::dispatch($representant);
+
+            $user = $representant;
+            SendWelcomeEmail::dispatch($dataObj);
 
         } else {
             $title = "No se han guardado los datos";
@@ -108,8 +143,8 @@ class IndexComponent extends Component
         $this->type_pay_list = Payment::LIST_TYPE_PAY;
         $this->toDate = Carbon::now()->format('d F Y');
 
-        // $this->ci = '14608133';
-        // $this->loadTest();
+        $this->ci = '14608133';
+        $this->loadTest();
     }
 
 
