@@ -7,7 +7,8 @@ use App\Models\app\Admon\Banco;
 use App\Models\app\Admon\MetodoPago;
 use App\Models\app\Admon\Payment;
 use App\Models\app\Learner\Representant;
-
+use App\Http\Controllers\Email\SendPaymentController;
+use App\Http\Controllers\PaymentAproveController;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -56,14 +57,26 @@ class IndexComponent extends Component
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
-        $this->validate(); //dd($this->payment);
+        $this->validate();
 
         $payment = Payment::create($this->payment->all());
+        $representant = $this->representant;
 
         if ($payment) {
             $title = "Datos guardados";
             $description = "Toda la información ha sido guardada éxitosamente!";
             $icon = "success";
+
+            $inputs['id'] = $payment->id; //dd($inputs);
+            $inputs['representant_name'] = $representant->name; //dd($inputs);
+            $inputs['number_i_pay'] = $this->number_i_pay_1; //dd($inputs);
+            $inputs['ammount'] = $this->ammount_1; //dd($inputs);
+            $inputs['type_pay'] = $this->type_pay; //dd($inputs);
+            $inputs['date'] = Carbon::now()->format('d-m-Y h:i'); //dd($inputs);
+
+            $mail = New PaymentAproveController;
+            $mail->SendPaymentRegistered($representant->id,$inputs);
+
         } else {
             $title = "No se han guardado los datos";
             $description = "Ocurrieron errores";
