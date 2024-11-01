@@ -92,8 +92,7 @@ class IndexComponent extends Component
             $autoridad1 = Autoridad::getTipoAuthority('2');//director
             $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
             $data = (object) [
-                // 'email'=>$representant->email,
-                'email'=>'intertronica@gmail.com',
+                'email'=>$representant->email,
                 'name'=>$representant->name,
                 'subject' => 'Notificaciones SAEFL',
                 'representant' => $representant,
@@ -106,7 +105,6 @@ class IndexComponent extends Component
             ];
 
             Mail::to($data->email)->send(new WelcomeEmail($data));
-
             // $time = Carbon::now()->addSeconds(30);
             // SendWelcomeEmail::dispatch($data)->delay($time);
 
