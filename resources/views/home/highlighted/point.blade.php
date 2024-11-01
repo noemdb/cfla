@@ -30,17 +30,19 @@
             </div>
         </div>
         <div class="text-xs text-gray-200flex justify-between items-center bg-orange-100 p-4 my-4 rounded-lg origin-bottom">
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
-                Seguimos trabajando en la mejora de nuestros servicios, hemos agregado una nueva opción de pago aún más rápida a través de esta conexión.
-            </div>
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
-                <span class="font-bold">Tarjetas de débito aceptadas: </span>                
-                <span>Banco de Venezuela, Bancaribe, Banco del Tesoro, Mi Banco, Bancamiga, Bancrecer y BANFANB.</span>
-            </div>
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
-                <span class="font-bold">Verificación, concialición y registro automático: </span>                
-                <span>Tus pagos son registrados automaticamente en el <span class=" text-green-950 font-bold">SAEFL</span>.</span>
-            </div>            
+            <div class="text-sm md:text-md lg:text-lg xl:text-xl">
+                <div class="mb-4 text-neutral-600 dark:text-neutral-200">
+                    Seguimos trabajando en la mejora de nuestros servicios, hemos agregado una nueva opción de pago aún más rápida a través de esta conexión.
+                </div>
+                <div class="mb-4 text-neutral-600 dark:text-neutral-200">
+                    <span class="font-bold">Tarjetas de débito aceptadas: </span>                
+                    <span>Banco de Venezuela, Bancaribe, Banco del Tesoro, Mi Banco, Bancamiga, Bancrecer y BANFANB.</span>
+                </div>
+                <div class="mb-4 text-neutral-600 dark:text-neutral-200">
+                    <span class="font-bold">Verificación, concialición y registro automático: </span>                
+                    <span>Tus pagos son registrados automaticamente en el <span class=" text-green-950 font-bold">SAEFL</span>.</span>
+                </div>  
+            </div>          
         </div>
         <div class="flex justify-end">
             @php $url = env('APP_URL_SAEFL','.').'/service/payment/button/credicard'; @endphp

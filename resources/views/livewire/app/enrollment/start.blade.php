@@ -18,7 +18,11 @@
                         <img class="rounded-t-lg w-24 h-24" src="{{asset('image/highlighted/matricula.png')}}" alt="" />
                     </div>
 
-                    <h5 class="mb-2 text-lg md:text-xl font-medium leading-tight border-b-2 border-b-blue-600">Actualización de datos</h5>
+                    {{-- <h5 class="mb-2 text-lg md:text-xl font-medium leading-tight border-b-2 border-b-blue-600">Actualización de datos</h5> --}}
+                    <div class="mb-2 text-lg md:text-2xl font-medium leading-tight border-b-2 border-b-blue-600">
+                        Actualización de datos
+                    </div>
+                    
                 </div>
                 <a href="#!" wire:click="setStart">
                     <div class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-[hsla(0,0%,98%,0.15)] bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100"></div>
@@ -26,11 +30,13 @@
             </div>
         </div>
 
-        <div class="text-xs text-gray-200flex justify-between items-center bg-primary-100 p-4 my-4 rounded-lg origin-bottom">
-            <span class="font-bold">Actualizar información del estudiante:</span>
-            La solicitud de actualización de matrícula es un documento que se utiliza para informar de los cambios que
-            se han producido en los datos de un estudiante. Estos cambios pueden referirse a la dirección, el teléfono,
-            la situación familiar o cualquier otra información relevante.
+        <div class="flex justify-between items-center bg-primary-100 p-4 my-4 rounded-lg origin-bottom">
+            <div class="text-sm md:text-md lg:text-lg xl:text-xl">
+                <span class="font-bold">Actualizar información del estudiante:</span>
+                La solicitud de actualización de matrícula es un documento que se utiliza para informar de los cambios que
+                se han producido en los datos de un estudiante. Estos cambios pueden referirse a la dirección, el teléfono,
+                la situación familiar o cualquier otra información relevante.
+            </div>
         </div>
 
         <div class="flex justify-end">

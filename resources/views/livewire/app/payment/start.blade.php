@@ -5,6 +5,7 @@
             <div class="h-full flex items-center">
                 <x-icon name="document-text" class="flex-none w-10 h-10" />
                 <div class="flex-initial">Reporta tus pagos aquí.</div>
+                
             </div>
         </h3>
     </x-slot>
@@ -18,7 +19,7 @@
                 </a>
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-lg md:text-xl text-gray-900">Reporte de pago </div>
+                <div class="text-lg md:text-2xl leading-tight text-gray-900 border-b-2 border-b-gray-400">Reporte de pago </div>
                 <div class="text-md text-gray-600">Asistente</div>
                 <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo
                     este asistente.</div>
@@ -27,7 +28,16 @@
 
         <div class="text-xs text-gray-200flex justify-between items-center bg-green-100 p-4 my-4 rounded-lg origin-bottom">
 
-            <div class="mt-2 text-xs text-gray-200flex justify-between items-center">
+            <div class="text-sm md:text-md lg:text-lg xl:text-xl">
+                <span class="font-bold">Un proceso sencillo y rápido:</span>
+                Usando esta opción es necesaria la verificación, concialición y registro de los datos ingresados,
+                    estas
+                    actividades cumplen con un lapso de tiempo (uno (1) o dos (2) días) para ser correctamente
+                    procesados en
+                    el <span class=" text-green-950 font-bold">SAEFL</span>.
+            </div>
+
+            {{-- <div class="mt-2 text-xs text-gray-200flex justify-between items-center">
                 <span class="font-bold">Un proceso sencillo y rápido:</span>
                 cfla.
             </div>
@@ -40,7 +50,7 @@
                     procesados en
                     el <span class=" text-green-950 font-bold">SAEFL</span>.
                 </p>
-            </div>            
+            </div>             --}}
 
         </div>
 

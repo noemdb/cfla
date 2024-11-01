@@ -6,7 +6,9 @@
 <div class=" font-normal text-gray-400 text-sm md:text-md lg:text-lg xl:text-xl">{{$item->description ?? null}}</div>
 
 <div class="font-normal sm:block md:py-2 lg:py-4 text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
-    {{ Str::limit($item->body,500,'...') ?? null }}
+    <div class="text-sm md:text-md lg:text-lg xl:text-xl">
+        {{ Str::limit($item->body,500,'...') ?? null }}
+    </div>
 </div>
 
 <div class="border-t-2 mt-1 text-xs md:text-sm lg:text-md xl:text-lg text-gray-400 ">
