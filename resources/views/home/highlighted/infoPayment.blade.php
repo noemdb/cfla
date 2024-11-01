@@ -75,7 +75,8 @@
             </div>  
             <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
                 <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    Punto de Venta <br>
+                    <strong>Punto de Venta</strong>
+                    <br>
                     En la taquilla de Administración. 
                 </div>
             </div>           
