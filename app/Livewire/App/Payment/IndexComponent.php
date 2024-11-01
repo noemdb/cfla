@@ -42,7 +42,7 @@ class IndexComponent extends Component
 
     public function loadTest()
     {
-        $this->payment->ci_representant = '14608133';
+        $this->payment->ci_representant = '14442948';
         $this->payment->type_pay = 'Mensualidad actual';
         $this->payment->phone = '1234567890';
         $this->payment->comment = '#####################';
@@ -76,41 +76,37 @@ class IndexComponent extends Component
             $description = "Toda la información ha sido guardada éxitosamente!";
             $icon = "success";
 
-            $inputs['id'] = $payment->id; //dd($inputs);
-            $inputs['representant_name'] = $representant->name; //dd($inputs);
-            $inputs['number_i_pay'] = $this->payment->number_i_pay_1; //dd($inputs);
-            $inputs['ammount'] = $this->payment->ammount_1; //dd($inputs);
-            $inputs['type_pay'] = $this->payment->type_pay; //dd($inputs);
-            $inputs['date'] = Carbon::now()->format('d-m-Y h:i'); //dd($inputs);
+            $inputs = (object) [
+                'id'=>$payment->id,
+                'representant_name'=>$representant->name,
+                'ci_representant'=>$representant->ci_representant,
+                'number_i_pay'=>$this->payment->number_i_pay_1,
+                'ammount'=>$this->payment->ammount_1,
+                'type_pay'=>$this->payment->type_pay,
+                'date'=>Carbon::now()->format('d-m-Y h:i'),
+            ];
 
-            // Mail::to($representant->email)->send(new WelcomeEmail($representant));
-
-            $email = $representant->email;
-            $time = Carbon::now();
+            
             $toDate = Date::now()->format('d F Y');
-
             $institucion = Institucion::OrderBy('created_at','DESC')->first();
             $autoridad1 = Autoridad::getTipoAuthority('2');//director
             $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
-            $data = [
-                'email'=>$representant->email,
+            $data = (object) [
+                // 'email'=>$representant->email,
+                'email'=>'intertronica@gmail.com',
                 'name'=>$representant->name,
-                // 'subject' => $this->mailData['subject'],
+                'subject' => 'Notificaciones SAEFL',
                 'representant' => $representant,
                 'inputs' => $inputs,
                 'institucion' => $institucion,
                 'autoridad1' => $autoridad1,
                 'autoridad2' => $autoridad2,
                 'toDate' => $toDate,
+                'view' => 'emails.welcome',
             ];
 
-            $dataObj = (object) $data; //dd($dataObj);
-
-            // SendWelcomeEmail::dispatch($dataObj);
-            // SendWelcomeEmail::dispatch($representant);
-
-            $user = $representant;
-            SendWelcomeEmail::dispatch($dataObj);
+            $time = Carbon::now()->addSeconds(30);
+            SendWelcomeEmail::dispatch($data)->delay($time);
 
         } else {
             $title = "No se han guardado los datos";
@@ -143,7 +139,7 @@ class IndexComponent extends Component
         $this->type_pay_list = Payment::LIST_TYPE_PAY;
         $this->toDate = Carbon::now()->format('d F Y');
 
-        $this->ci = '14608133';
+        $this->ci = '14442948';
         $this->loadTest();
     }
 
