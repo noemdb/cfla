@@ -141,8 +141,8 @@ class IndexComponent extends Component
         $this->type_pay_list = Payment::LIST_TYPE_PAY;
         $this->toDate = Carbon::now()->format('d F Y');
 
-        $this->ci = '14442948';
-        $this->loadTest();
+        // $this->ci = '14442948';
+        // $this->loadTest();
     }
 
 
