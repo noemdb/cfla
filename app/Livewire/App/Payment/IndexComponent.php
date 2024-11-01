@@ -105,8 +105,10 @@ class IndexComponent extends Component
                 'view' => 'emails.welcome',
             ];
 
-            $time = Carbon::now()->addSeconds(30);
-            SendWelcomeEmail::dispatch($data)->delay($time);
+            Mail::to($data->email)->send(new WelcomeEmail($data));
+
+            // $time = Carbon::now()->addSeconds(30);
+            // SendWelcomeEmail::dispatch($data)->delay($time);
 
         } else {
             $title = "No se han guardado los datos";
