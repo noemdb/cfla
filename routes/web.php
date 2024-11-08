@@ -23,15 +23,19 @@ use Livewire\Livewire;
 
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
+Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
+Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
+
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 
-Livewire::setScriptRoute(function ($handle) {
-    return Route::get('/cfla/livewire/livewire.js', $handle);
-});
+// Livewire::setScriptRoute(function ($handle) {
+//     return Route::get('/cfla/livewire/livewire.js', $handle);
+// });
 
-Livewire::setUpdateRoute(function ($handle) {
-    return Route::post('/cfla/livewire/update', $handle);
-});
+// Livewire::setUpdateRoute(function ($handle) {
+//     return Route::post('/cfla/livewire/update', $handle);
+// });
 
 // Livewire::setScriptRoute(function ($handle) {
 //     return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
