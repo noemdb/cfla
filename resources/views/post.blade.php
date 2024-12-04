@@ -22,7 +22,7 @@
             <div class="p-1 rounded-sm flex justify-between items-center">
                 <div class="text-blue-800">
                     <span class="text-lg font-light">
-                        {{$post->description ?? null}}.
+                        {{$post->description ?? null}}
                     </span>
                     <br>
                     <div class="text-xs text-gray-400 text-left">
