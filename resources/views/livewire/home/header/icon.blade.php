@@ -1,4 +1,4 @@
-<a href="#" class=" text-white">
+<a href="{{route('home')}}" class=" text-white">
     <div class="flex text-xl lg:text-2xl font-bold">
         <img src="{{asset('image/logo/cecfla.gif')}}" class="h-12 w-12 rounded-full shadow-lg">
         {{-- <x-avatar xl src="{{asset('image/logo/cecfla.gif')}}" class="h-12 w-12"/> --}}

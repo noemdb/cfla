@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\app\Academy\Enrollment;
 use App\Models\app\Academy\Profesor;
+use App\Models\app\Blog\Post;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -27,6 +28,12 @@ class HomeController extends Controller
     public function credicard(Request $request)
     {
         return view('credicard');
+    }
+
+    public function post($id)
+    {
+        $post = Post::findOrFail($id);
+        return view('post',compact('post'));
     }
 
     // public function env(Request $request)
