@@ -32,8 +32,9 @@
 
             <!-- Detalles de la transacción -->
             <div class="mt-4 border-t pt-4 text-sm text-gray-600">
-                <p><strong>ID de transacción:</strong> {{$payment->id ?? null}}</p>
-                {{-- <p><strong>Fecha:</strong> {{$payment->created_at->format('d-m-Y h:i A') ?? null}}</p> --}}
+                <p><strong>ID de registro:</strong> {{$payment->id ?? null}}</p>
+                <p><strong>Núm. de Referencia:</strong> {{$payment->number_i_pay_1 ?? null}}</p>
+                <p><strong>Fecha:</strong> {{ Carbon\Carbon::now()->format('d-m-Y h:i A') ?? null }}</p>
                 <p><strong>Monto:</strong>Bs. {{ number_format($payment->ammount_1,2,',','.') ?? null}}</p>
             </div>
 
