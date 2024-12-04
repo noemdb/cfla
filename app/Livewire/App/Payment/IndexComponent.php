@@ -34,7 +34,7 @@ class IndexComponent extends Component
 
     public $ci;
     public $step = 0, $limit = 2;
-    public $modalStart,$modalSearch,$modalAssistent,$modalEmpty;
+    public $modalStart,$modalOperOk,$modalSearch,$modalAssistent,$modalEmpty;
     public Representant $representant;
     public PaymentForm $payment;
     public $list_comment,$list_bank,$method_pay_list,$type_pay_list,$banco_emisor_list;
@@ -84,6 +84,7 @@ class IndexComponent extends Component
                 'ammount'=>$this->payment->ammount_1,
                 'type_pay'=>$this->payment->type_pay,
                 'date'=>Carbon::now()->format('d-m-Y h:i'),
+                'created_at'=>$payment->created_at,
             ];
 
             
@@ -125,13 +126,11 @@ class IndexComponent extends Component
             'description' => $description,
             'icon'        => $icon
         ]);
+        $this->modalOperOk = true;
     }    
 
     public function mount()
     {
-        
-        $this->modalStart = true;
-
         $this->banco_emisor_list = Payment::LIST_BANK_EMISOR; //dd($this->banco_emisor_list);
         $this->list_comment = Payment::COLUMN_COMMENTS;
         $this->list_bank = Banco::list_public_bancos();
@@ -142,7 +141,6 @@ class IndexComponent extends Component
         // $this->ci = '14442948';
         // $this->loadTest();
     }
-
 
     public function render()
     {
@@ -165,7 +163,7 @@ class IndexComponent extends Component
             $this->modalStart = true;
         }
         $this->modalSearch = false;
-        // $this->modalStart = false;        
+        $this->modalOperOk = false;       
     }
 
     public function setStart()
@@ -174,6 +172,7 @@ class IndexComponent extends Component
         $this->modalStart = false;
         $this->modalAssistent = false;
         $this->modalEmpty = false;
+        $this->modalOperOk = false;
     }
 
     public function validatedForStep($step)
@@ -215,5 +214,14 @@ class IndexComponent extends Component
     public function back($step)
     {
         $this->step = ($step > 1) ? $step - 1 : 1;
+    }
+
+    public function close()
+    {
+        $this->modalStart = false;
+        $this->modalOperOk = false;
+        $this->modalSearch = false;
+        $this->modalAssistent = false;
+        $this->modalEmpty = false;
     }
 }

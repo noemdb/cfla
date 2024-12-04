@@ -9,7 +9,7 @@ use Livewire\Form;
 class PaymentForm extends Form
 {
     #[Validate]
-    public $name_representant,$ci_representant,$representant_id,$type_pay,$method_pay_id,$number_i_pay,$phone,$date_transaction,$ammount,$observations,$comment,$status_approved,$status_apply,$banco_emisor_1,$phone_1,$banco_id_1,$method_pay_id_1,$number_i_pay_1,$date_transaction_1,$ammount_1,$observation_1,$image_1;
+    public $name_representant,$ci_representant,$representant_id,$type_pay,$method_pay_id,$number_i_pay,$phone,$date_transaction,$ammount,$observations,$comment,$status_approved,$status_apply,$banco_emisor_1,$phone_1,$banco_id_1,$method_pay_id_1,$number_i_pay_1,$date_transaction_1,$ammount_1,$observation_1,$image_1,$created_at;
     public $image;
     
     protected $rules = [
@@ -27,6 +27,7 @@ class PaymentForm extends Form
         'ammount_1' => 'required|numeric',
         'observation_1' => 'nullable|string',
         'image_1' => 'nullable|string',
+        'created_at' => 'nullable|date',
     ];
     protected $validationAttributes = [
         'name_representant'=>'Nombre del representante',
@@ -41,6 +42,7 @@ class PaymentForm extends Form
         'ammount_1'=>'Monto',
         'observation_1'=>'',
         'image_1'=>'Imagen',
+        'created_at'=>'Fecha de Creación',
     ];
 
     protected $messages = [

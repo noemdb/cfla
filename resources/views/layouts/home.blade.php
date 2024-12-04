@@ -27,7 +27,9 @@
 
     {{-- @livewire('order-status-notification') --}}
 
-    <x-notifications />
+    {{-- <x-notifications /> --}}
+
+    <x-notifications position="top-center" />
 
     {{-- <livewire:home /> --}}
 
