@@ -31,11 +31,11 @@
                 </div> 
             </div>
             
-            <div class="text-xs sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
+            <div class="text-sm sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
                 {{ $post->body,100 ?? null }}
             </div>
             
-            <div class="text-xs sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
+            <div class="text-sm sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
                 {!! $post->insert ?? null !!}
             </div>
             
