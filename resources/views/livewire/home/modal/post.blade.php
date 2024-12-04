@@ -21,7 +21,7 @@
     </div>
 
     @if ($post->saefl_image_url)                            
-        <div id="footer-out" class="flex justify-center">
+        <div id="footer-out" class="flex justify-center sm:p-2 border-t-2 mt-2">
             <img src="{{asset($post->saefl_image_url)}}" class="border-b-2 block rounded-lg shadow-lg" alt="Wild Landscape" />
         </div> 
     @endif 
