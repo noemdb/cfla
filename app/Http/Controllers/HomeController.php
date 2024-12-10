@@ -10,6 +10,14 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
 
+    public function studia(Request $request)
+    {
+        $testimonials = collect();
+        $faqs = collect();
+
+        return view('studia', compact('testimonials', 'faqs'));
+    }
+
     public function home(Request $request)
     {
         return view('home');

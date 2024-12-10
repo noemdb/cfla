@@ -20,6 +20,7 @@
         "@alpinejs/intersect": "^3.13.3",
         "@ryangjchandler/alpine-clipboard": "^2.3.0",
         "alpinejs": "^3.13.3",
+        "gsap": "^3.12.5",
         "laravel-echo": "^1.16.1",
         "pusher-js": "^8.4.0-rc2",
         "tw-elements": "^1.1.0"

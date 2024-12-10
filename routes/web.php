@@ -21,6 +21,8 @@ use Livewire\Livewire;
 // });
 // Route::get('/', function () { return view('home'); });
 
+Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
+
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
