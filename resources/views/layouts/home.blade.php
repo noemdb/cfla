@@ -91,6 +91,41 @@
 
     {{-- @livewireScriptConfig --}}
 
+    <script>
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            
+            //event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
+            deferredPrompt = event;
+
+            // Muestra el botón de instalación
+            const installButton = document.getElementById('installPWA');
+            installButton.style.display = 'block';
+
+            installButton.addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt(); // Muestra el diálogo de instalación
+
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('El usuario aceptó la instalación');
+                        } else {
+                            console.log('El usuario canceló la instalación');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada');
+            document.getElementById('installPWA').style.display = 'none';
+        });
+
+    </script>
+
 </body>
 
 </html>

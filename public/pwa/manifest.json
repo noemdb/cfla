@@ -1,7 +1,7 @@
 {
-  "name": "SAEFL App",
+  "name": "SAEFL. Software para la Educación",
   "short_name": "SAEFL",
-  "description": "Sistema para la gestión Escolar.",
+  "description": "Sistema para la Gestión Escolar Fray Luis Amigó.",
   "start_url": "/saefl/movile/android/welcome",
   // "display": "standalone",
   "display": "fullscreen",
@@ -26,6 +26,11 @@
     {
       "src": "icon_512.png",
       "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_1024.png",
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]
