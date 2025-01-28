@@ -95,15 +95,12 @@
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (event) => {
-
-            //event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
             
+            //event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
             deferredPrompt = event;
 
             // Muestra el botón de instalación
-            const startButton = document.getElementById('startPWA');
             const installButton = document.getElementById('installPWA');
-            startButton.style.display = 'none';
             installButton.style.display = 'block';
 
             installButton.addEventListener('click', () => {
@@ -125,7 +122,6 @@
         window.addEventListener('appinstalled', () => {
             console.log('PWA instalada');
             document.getElementById('installPWA').style.display = 'none';
-            document.getElementById('startPWA').style.display = 'show';
         });
 
     </script>
