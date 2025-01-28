@@ -125,6 +125,7 @@
 
     </script>
 
+    {{-- 
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register("{{ asset('/pwa/sw.js') }}").then(reg => {
@@ -143,7 +144,8 @@
                 };
             });
         }
-    </script>
+    </script> 
+    --}}
     
 
 </body>
