@@ -6,6 +6,9 @@
 
         <title>CE Colegio Fray Luis Amigó</title>
 
+        <link rel="manifest" href="{{ asset('pwa/manifest.json') }}">
+        <link rel="stylesheet" href="{{ asset('pwa/styles.css') }}">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
