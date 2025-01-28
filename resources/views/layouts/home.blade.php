@@ -125,6 +125,27 @@
 
     </script>
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("{{ asset('/pwa/sw.js') }}").then(reg => {
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            const updateBanner = document.createElement('div');
+                            updateBanner.innerHTML = `
+                                <p>Hay una nueva versión disponible.</p>
+                                <button onclick="location.reload();">Actualizar</button>
+                            `;
+                            document.body.appendChild(updateBanner);
+                        }
+                    };
+                };
+            });
+        }
+    </script>
+    
+
 </body>
 
 </html>
