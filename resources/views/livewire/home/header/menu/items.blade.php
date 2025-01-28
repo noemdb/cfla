@@ -19,7 +19,7 @@
                 </div>
             </x-slot>      
             <x-dropdown.item label="Escritorio" icon="desktop-computer" href="{{env('APP_URL_SAEFL')}}"/>
-            <x-dropdown.item separator label="Móviles" icon="device-tablet" href="{{env('APP_URL_SAEFL').'/movile/android/welcome'}}"/>
+            {{-- <x-dropdown.item separator label="Móviles" icon="device-tablet" href="{{env('APP_URL_SAEFL').'/movile/android/welcome'}}"/> --}}
         </x-dropdown>
     </li>
 
