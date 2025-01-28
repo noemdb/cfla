@@ -5,8 +5,9 @@
   "start_url": "/saefl/movile/android/welcome",
   // "display": "standalone",
   "display": "fullscreen",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#004000",
+  // "theme_color": "#000000",
+  "theme_color": "#004000",
   "icons": [
     {
       "src": "icon_48.png",
