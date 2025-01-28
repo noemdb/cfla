@@ -1,10 +1,11 @@
-const CACHE_NAME = 'saefl-cache-v1';
+const CACHE_NAME = 'saefl-cache-v1.1.0';
 const urlsToCache = [
   '/',
   '/styles.css',
   '/app.js',
   '/icon_48.png',
-  '/icon_128.png'
+  '/icon_128.png',
+  '/icon_512.png'
 ];
 
 self.addEventListener('install', (event) => {
