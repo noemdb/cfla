@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pwa-saefl-cache-v1.1.0'; // Cambia el número de versión
+const CACHE_NAME = 'pwa-saefl-cache-v1.1.1'; // Cambia el número de versión
 const urlsToCache = [
     '/',
     '/index.html',
