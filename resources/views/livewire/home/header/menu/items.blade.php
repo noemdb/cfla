@@ -30,7 +30,9 @@
 
     <li class="mb-4 md:mb-0 md:pr-2 border-b-2 border-green-200" data-te-nav-item-ref>
         <a id="installPWA" class="block transition duration-150 ease-in-out hover:text-green-700 focus:text-green-200 disabled:text-black/30 dark:hover:text-white dark:focus:text-white md:p-2 [&.active]:text-black/90"
-            href="#" data-te-nav-link-ref data-te-ripple-init data-te-ripple-color="light">Instalar App</a>
+            href="#" data-te-nav-link-ref data-te-ripple-init data-te-ripple-color="light">Instalar la App</a>
+        <a id="startPWA" class="block transition duration-150 ease-in-out hover:text-green-700 focus:text-green-200 disabled:text-black/30 dark:hover:text-white dark:focus:text-white md:p-2 [&.active]:text-black/90"
+            href="#" data-te-nav-link-ref data-te-ripple-init data-te-ripple-color="light">Iniciar la App</a>
     </li>
 
     <li class="mb-4 md:mb-0 md:pr-2 border-b-2 border-green-200" data-te-nav-item-ref>
