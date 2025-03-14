@@ -60,7 +60,7 @@
             <div class="space-y-2">
                 <x-button wire:click="validateStudent" xl black label="Verifica los datos" class="w-full my-2" />
             </div>
-            
+
         </div>
 
     </form>

@@ -24,7 +24,7 @@
 
         </div>
 
-        <x-errors />
+        {{-- <x-errors /> --}}
 
     </div>
 
