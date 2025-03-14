@@ -24,8 +24,6 @@
 
     <div class="text-red-500">Ocurrieron errores</div>
         
-    @endif
-
-    
+    @endif    
 
 </div>

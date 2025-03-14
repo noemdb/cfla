@@ -27,9 +27,9 @@ class EnrollmentWizard extends Component
     public $lastname; // Paso 2: Nombre completo del niño/a
     public $date_birth; // Paso 2: Fecha de nacimiento
     public $name_representant; // Paso 3: Nombre del representante
-    public $lastname_representant; // Paso 3: Nombre del representante
     public $ci_representant; // Paso 3: CI del representante
     public $phone_representant; // Paso 3: WhatsApp del representante
+    public $cellphone_representant; // Paso 3: Nombre del representante
     public $grado_id; // Paso 3: Grado/Nivel solicitado
 
     // Validaciones por paso
@@ -41,8 +41,8 @@ class EnrollmentWizard extends Component
         'date_birth' => 'required|date|before:today',
         'ci_representant' => 'required|numeric',
         'name_representant' => 'required|string|max:100',
-        'lastname_representant' => 'required|string|max:100',
         'phone_representant' => 'required|numeric|digits:12',
+        'cellphone_representant' => 'required|numeric|digits:12',
         'grado_id' => 'required|integer',
     ];
 
@@ -50,9 +50,9 @@ class EnrollmentWizard extends Component
     {
         $this->email="noemdb@gmail.com";
         $this->ci_representant="14608133";
-        $this->name_representant="noe";
-        $this->lastname_representant="dominguez";
+        $this->name_representant="noe dominguez";
         $this->phone_representant="584121234567";
+        $this->cellphone_representant="584121345678";
         $this->grado_id="11";
         $this->name="camila andreina".rand(1,1000);
         $this->lastname="dominguez".rand(1,1000);
@@ -66,14 +66,14 @@ class EnrollmentWizard extends Component
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
-        // $this->input_code = $this->verificationCode;
+        $this->input_code = $this->verificationCode;
 
         Session::put('email_code', $this->verificationCode); // Guardar en sesión
         
-        Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
-            $message->to($this->email)
-                    ->subject('Código de verificación');
-        });
+        // Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
+        //     $message->to($this->email)
+        //             ->subject('Código de verificación');
+        // });
 
         $this->notification()->success(
             $title = 'Excelente!',
@@ -130,8 +130,8 @@ class EnrollmentWizard extends Component
             'email_representant' => $this->email,
             'ci_representant' => $this->ci_representant,
             'name_representant' => $this->name_representant,
-            'lastname_representant' => $this->lastname_representant,
             'phone_representant' => $this->phone_representant,
+            'cellphone_representant' => $this->cellphone_representant,
             'grado_id' => $this->grado_id,
             'name' => $this->name,
             'lastname' => $this->lastname,
@@ -148,7 +148,6 @@ class EnrollmentWizard extends Component
         $this->currentStep = 4;
     }
 
-
     public function downloadPDF($emrollment_id)
     {
         $emrollment = Enrollment::findOrFail($emrollment_id);
@@ -160,9 +159,9 @@ class EnrollmentWizard extends Component
             'lastname' => $emrollment->lastname,
             'date_birth' => $emrollment->date_birth, 
             'name_representant' => $emrollment->name_representant,
-            'lastname_representant' => $emrollment->lastname_representant,
             'ci_representant' => $emrollment->ci_representant,
             'phone_representant' => $emrollment->phone_representant,
+            'cellphone_representant' => $emrollment->cellphone_representant,
             'grado_id' => $emrollment->grado_id,
             'institution' => $institution,
             'autoridad1' => $autoridad1,
@@ -184,7 +183,7 @@ class EnrollmentWizard extends Component
     {
         Enrollment::findOrFail($emrollment_id);
 
-        $pdfUrl = route('download.pdf',$emrollment_id); // Ruta que descarga el PDF
+        $pdfUrl = route('census.download.pdf',$emrollment_id); // Ruta que descarga el PDF
 
         return QrCode::size(200)->generate($pdfUrl);
     }
@@ -192,7 +191,7 @@ class EnrollmentWizard extends Component
     public function generateQrCodePDF($emrollment_id)
     {
         Enrollment::findOrFail($emrollment_id);
-        $pdfUrl = route('download.pdf',$emrollment_id); // Ruta que descarga el PDF
+        $pdfUrl = route('census.download.pdf',$emrollment_id); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
     }
 

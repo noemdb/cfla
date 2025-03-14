@@ -9,6 +9,11 @@
             font-family: Arial, sans-serif;
             font-size: 12px;
             margin: 20px;
+            text-transform: uppercase !important;
+        }
+
+        .text-div {
+            line-height: 1.2rem;
         }
 
         .header {
@@ -91,6 +96,7 @@
             <td width="76%">
                 <div class="header">{{ $institution->name }}</div>
                 <div class="sub-header">DIRECCIÓN ACADÉMICA</div>
+                <div class="sub-header">Censo Escolar 2025 2026</div>
             </td>
             <td width="12%">
                 <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}">
@@ -104,71 +110,33 @@
     <div class="header">Formato de Registro</div>
 
     <div class="section">
-        <p><strong>Nombre del Estudiante:</strong> {{ $name }} {{ $lastname }}</p>
-        <p><strong>Fecha de Nacimiento:</strong> {{ $date_birth }}</p>
-        <p><strong>Representante:</strong> {{ $name_representant }}</p>
-        <p><strong>Cédula:</strong> {{ $ci_representant }}</p>
-        <p><strong>WhatsApp:</strong> {{ $phone_representant }}</p>
-        <p>
-            <strong>Grado/Año Seleccionado:</strong> {{ $grado_id }}
+        <div class="text-div"><strong>Nombre del Estudiante:</strong> {{ $lastname }} {{ $name }} </div>
+        <div class="text-div"><strong>Fecha de Nacimiento:</strong> {{ $date_birth }}</div>
+        <div class="text-div"><strong>Representante:</strong> {{ $name_representant }}</div>
+        <div class="text-div"><strong>Cédula:</strong> {{ $ci_representant }}</div>
+        <div class="text-div"><strong>Teléfono:</strong> {{ $phone_representant }}</div>
+        <div class="text-div"><strong>Teléf. WhatsApp:</strong> {{ $cellphone_representant }}</div>
+        <div class="text-div">
+            <strong>Grado/Año Seleccionado:</strong>
             @switch($grado_id)
-                @case(22)
-                    1er Grupo Inicial
-                @break
-
-                @case(23)
-                    2do Grupo Inicial
-                @break
-
-                @case(24)
-                    3er Grupo Inicial
-                @break
-
-                @case(1)
-                    1er Grado
-                @break
-
-                @case(2)
-                    2do Grado
-                @break
-
-                @case(3)
-                    3er Grado
-                @break
-
-                @case(4)
-                    4to Grado
-                @break
-
-                @case(5)
-                    5to Grado
-                @break
-
-                @case(6)
-                    6to Grado
-                @break
-
-                @case(12)
-                    1er Año
-                @break
-
-                @case(13)
-                    2do Año
-                @break
-
-                @case(14)
-                    3er Año
-                @break
-
-                @case(10)
-                    4to Año
-                @break
-
-                @case(11)
-                    5to Año
-                @break
+                @case(22) 1er Grupo Inicial @break
+                @case(23) 2do Grupo Inicial @break
+                @case(24) 3er Grupo Inicial @break
+                @case(1)  1er Grado @break
+                @case(2)  2do Grado @break
+                @case(3)  3er Grado @break
+                @case(4)  4to Grado @break
+                @case(5)  5to Grado @break
+                @case(6)  6to Grado @break
+                @case(12) 1er Año @break
+                @case(13) 2do Año @break
+                @case(14) 3er Año @break
+                @case(10) 4to Año @break
+                @case(11) 5to Año @break
             @endswitch
-        </p>
+        </div>
+
+        <hr style="border: 1px #ccc solid">
 
         <div>
             Te invitamos cordialmente a visitar nuestro colegio en el día y horario de tu conveniencia, entre el 1 y el 10 de abril . Durante este período, se estarán llevando a cabo las actividades propias del Censo Escolar 2025 - 2026 . ¡Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso!
@@ -185,17 +153,18 @@
     <!-- Directivos -->
     <h4 class="sub-header">Directivos de la Institución</h4>
     <div class="section">
-        <p><strong>{{ $autoridad1->profile_professional }} {{ $autoridad1->fullname }}</strong></p>
-        <p>{{ $autoridad1->position }}</p>
-        <p><strong>{{ $autoridad2->profile_professional }} {{ $autoridad2->fullname }}</strong></p>
-        <p>{{ $autoridad2->position }}</p>
+        <div><strong>{{ $autoridad1->profile_professional }} {{ $autoridad1->fullname }}</strong></div>
+        <div>{{ $autoridad1->position }}</div>
+        <hr style="border: 1px #ccc solid">
+        <div><strong>{{ $autoridad2->profile_professional }} {{ $autoridad2->fullname }}</strong></div>
+        <div>{{ $autoridad2->position }}</div>
     </div>
 
     <hr class="divider">
 
     <div class="text-center section">
         <h3 class="sub-header">Escanea el código QR para descargar el PDF</h3>
-        <img src="{{ $qrCode }}" width="200">
+        <img src="{{ $qrCode }}" width="128">
     </div>
 
     <hr class="divider">

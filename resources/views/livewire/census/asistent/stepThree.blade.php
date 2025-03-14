@@ -49,6 +49,17 @@
             </div>
 
             <div class="space-y-2 mb-2">
+                <x-inputs.maskable
+                wire:model="cellphone_representant"
+                    label="Número de teléfono: Ej: 58 414 145-9834"
+                    mask="## ### ###-####"
+                    placeholder="Número WhatsApp"
+                    id="cellphone_representant"
+                    right-icon="chat-alt-2"
+                />
+            </div>
+
+            <div class="space-y-2 mb-2">
                 <x-button
                     wire:click="saveEnrollment" 
                     xl

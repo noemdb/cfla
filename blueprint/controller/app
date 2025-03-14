@@ -7,3 +7,5 @@ php artisan make:mail 'Queue\Payment\EmailPaymentForQueuing'
 
 
 php artisan make:controller 'CensusController'
+
+php artisan make:controller 'Census\EnrollmentPDFController'

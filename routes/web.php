@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Census\EnrollmentPDFController;
 use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\HomeController;
@@ -33,8 +34,7 @@ Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
-
-Route::get('/download-pdf/{enrollment_id}', [EnrollmentWizard::class, 'downloadPDF'])->name('download.pdf');
+Route::get('/census/download-pdf/{enrollment_id}', [EnrollmentPDFController::class, 'downloadPDF'])->name('census.download.pdf');
 
 
 
