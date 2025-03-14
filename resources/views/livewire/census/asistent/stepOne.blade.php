@@ -7,7 +7,7 @@
 
             <p class="mb-4 text-gray-400">Ingresa tu dirección de correo electrónico</p>
             <div class="space-y-2 mb-2">
-                <x-input wire:model="email" label="Correo Electrónico" placeholder="Tu dirección de correo electrónico"
+                <x-input wire:model="email" label="Correo Electrónico" placeholder="Tu email"
                     suffix="@mail.com" description="Inform your full name" />
             </div>
 
