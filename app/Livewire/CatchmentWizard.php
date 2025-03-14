@@ -11,6 +11,7 @@ use Livewire\Component;
 use WireUi\Traits\Actions;
 
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Storage;
 
@@ -126,7 +127,14 @@ class CatchmentWizard extends Component
     {
         $this->validate();
 
-        $Catchment = Catchment::create([
+        // $bytes = random_bytes(5); // Genera 5 bytes aleatorios
+        // $token = substr(str_pad(abs(hexdec(bin2hex($bytes))), 10, '0', STR_PAD_LEFT), 0, 10);
+
+        $time = Carbon::now()->timestamp;
+        $random = mt_rand(10000, 99999);
+        $token = substr($time . $random, -10);
+
+        $catchment = Catchment::create([
             'user_id' => auth()->id(),
             'email' => $this->email,
             'representant_ci' => $this->representant_ci,
@@ -137,9 +145,10 @@ class CatchmentWizard extends Component
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'date_birth' => $this->date_birth,
+            'token' => $token,
         ]);
 
-        $this->catchment_id = ($Catchment) ? $Catchment->id : null;
+        $this->catchment_id = ($catchment) ? $catchment->id : null;
         $this->notification()->success(
             $title = 'Excelente!',
             $description = 'Registro realizado con éxito.'
@@ -167,7 +176,7 @@ class CatchmentWizard extends Component
             'institution' => $institution,
             'autoridad1' => $autoridad1,
             'autoridad2' => $autoridad2,
-            'qrCode' => $this->generateQrCodePDF($catchment_id),
+            'qrCode' => $this->generateQrCodePDF($catchment->token),
         ];
 
         // Crear el PDF
@@ -189,10 +198,10 @@ class CatchmentWizard extends Component
         return QrCode::size(200)->generate($pdfUrl);
     }
 
-    public function generateQrCodePDF($catchment_id)
+    public function generateQrCodePDF($token)
     {
-        Catchment::findOrFail($catchment_id);
-        $pdfUrl = route('census.download.pdf',$catchment_id); // Ruta que descarga el PDF
+        Catchment::where('token', $token)->firstOrFail();
+        $pdfUrl = route('census.download.pdf',$token); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
     }
 
