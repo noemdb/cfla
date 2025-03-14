@@ -116,24 +116,10 @@
         <div class="text-div"><strong>Cédula:</strong> {{ $representant_ci }}</div>
         <div class="text-div"><strong>Teléfono:</strong> {{ $representant_phone }}</div>
         <div class="text-div"><strong>Teléf. WhatsApp:</strong> {{ $representant_cellphone }}</div>
+        <div class="text-div"><strong>Fecha seleccionada para acudir a la institucción:</strong> {{ $day_appointment }}</div>
         <div class="text-div">
             <strong>Grado/Año Seleccionado:</strong>
-            @switch($grado_id)
-                @case(22) 1er Grupo Inicial @break
-                @case(23) 2do Grupo Inicial @break
-                @case(24) 3er Grupo Inicial @break
-                @case(1)  1er Grado @break
-                @case(2)  2do Grado @break
-                @case(3)  3er Grado @break
-                @case(4)  4to Grado @break
-                @case(5)  5to Grado @break
-                @case(6)  6to Grado @break
-                @case(12) 1er Año @break
-                @case(13) 2do Año @break
-                @case(14) 3er Año @break
-                @case(10) 4to Año @break
-                @case(11) 5to Año @break
-            @endswitch
+            {{ $grado->name ?? null }}
         </div>
 
         <hr style="border: 1px #ccc solid">

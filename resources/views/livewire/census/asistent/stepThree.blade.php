@@ -51,6 +51,17 @@
                 />
             </div>
 
+            <div class="space-y-2">
+                <x-datetime-picker
+                    wire:model="day_appointment"
+                    label="Fecha en la que acudirá institucción"
+                    placeholder="Seleccione"
+                    without-time
+                    display-format="YYYY-MM-DD"
+                    class="mb-2"
+                />
+            </div>
+
             <div class="space-y-2 mb-2">
                 <x-button
                     wire:click="saveEnrollment" 

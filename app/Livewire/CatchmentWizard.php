@@ -32,7 +32,8 @@ class CatchmentWizard extends Component
     public $representant_ci; // Paso 3: CI del representante
     public $representant_phone; // Paso 3: WhatsApp del representante
     public $representant_cellphone; // Paso 3: Nombre del representante
-    public $grado_id; // Paso 3: Grado/Nivel solicitado
+    public $grade; // Paso 3: Grado/Nivel solicitado
+    public $day_appointment; // Dia de la cita
 
     // Validaciones por paso
     protected $rules = [
@@ -45,21 +46,23 @@ class CatchmentWizard extends Component
         'representant_name' => 'required|string|max:100',
         'representant_phone' => 'required|numeric|digits:12',
         'representant_cellphone' => 'required|numeric|digits:12',
-        'grado_id' => 'required|integer',
+        'grade' => 'required|integer',
+        'day_appointment' => 'required|after_or_equal:2025-04-01|before_or_equal:2025-04-10',
     ];
 
-    public function mount()
-    {
-        $this->email="noemdb@gmail.com";
-        $this->representant_ci="14608133";
-        $this->representant_name="noe dominguez";
-        $this->representant_phone="584121234567";
-        $this->representant_cellphone="584121345678";
-        $this->grado_id="11";
-        $this->firstname="camila andreina".rand(1,1000);
-        $this->lastname="dominguez".rand(1,1000);
-        $this->date_birth="2025-01-".rand(1,28);
-    }
+    // public function mount()
+    // {
+    //     $this->email="noemdb@gmail.com";
+    //     $this->representant_ci="14608133";
+    //     $this->representant_name="noe dominguez";
+    //     $this->representant_phone="584121234567";
+    //     $this->representant_cellphone="584121345678";
+    //     $this->grade="11";
+    //     $this->firstname="camila andreina".rand(1,1000);
+    //     $this->lastname="dominguez".rand(1,1000);
+    //     $this->date_birth="2025-01-".rand(1,28);
+    //     $this->day_appointment="2025-04-".rand(1,10);
+    // }
 
     // Paso 1: Enviar código al email
     public function sendEmailCode()
@@ -68,12 +71,12 @@ class CatchmentWizard extends Component
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
-        $this->input_code = $this->verificationCode;
+        // $this->input_code = $this->verificationCode;
 
-        // Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
-        //     $message->to($this->email)
-        //             ->subject('Código de verificación');
-        // });
+        Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
+            $message->to($this->email)
+                    ->subject('Código de verificación');
+        });
 
         Session::put('email_code', $this->verificationCode); // Guardar en sesión
 
@@ -127,9 +130,6 @@ class CatchmentWizard extends Component
     {
         $this->validate();
 
-        // $bytes = random_bytes(5); // Genera 5 bytes aleatorios
-        // $token = substr(str_pad(abs(hexdec(bin2hex($bytes))), 10, '0', STR_PAD_LEFT), 0, 10);
-
         $time = Carbon::now()->timestamp;
         $random = mt_rand(10000, 99999);
         $token = substr($time . $random, -10);
@@ -137,11 +137,12 @@ class CatchmentWizard extends Component
         $catchment = Catchment::create([
             'user_id' => auth()->id(),
             'email' => $this->email,
+            'day_appointment' => $this->day_appointment,
             'representant_ci' => $this->representant_ci,
             'representant_name' => $this->representant_name,
             'representant_phone' => $this->representant_phone,
             'representant_cellphone' => $this->representant_cellphone,
-            'grado_id' => $this->grado_id,
+            'grade' => $this->grade,
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'date_birth' => $this->date_birth,
@@ -172,7 +173,9 @@ class CatchmentWizard extends Component
             'representant_ci' => $catchment->representant_ci,
             'representant_phone' => $catchment->representant_phone,
             'representant_cellphone' => $catchment->representant_cellphone,
-            'grado_id' => $catchment->grado_id,
+            'day_appointment' => $catchment->day_appointment,
+            // 'grado_id' => $catchment->grado_id,
+            'grado' => $catchment->grado,
             'institution' => $institution,
             'autoridad1' => $autoridad1,
             'autoridad2' => $autoridad2,

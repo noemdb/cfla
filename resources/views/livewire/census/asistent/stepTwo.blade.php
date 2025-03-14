@@ -39,7 +39,7 @@
             </div>
 
             <div class="space-y-2">
-                <x-select wire:model="grado_id" label="Selecciona el grado/año" placeholder="Selecciona" class="mb-2">
+                <x-select wire:model="grade" label="Selecciona el grado/año" placeholder="Selecciona" class="mb-2">
                     <x-select.option label="1er Grupo Inicial" value="22" />
                     <x-select.option label="2do Grupo Inicial" value="23" />
                     <x-select.option label="3er Grupo Inicial" value="24" />
@@ -60,6 +60,7 @@
             <div class="space-y-2">
                 <x-button wire:click="validateStudent" xl black label="Verifica los datos" class="w-full my-2" />
             </div>
+            
         </div>
 
     </form>

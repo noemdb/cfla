@@ -11,7 +11,7 @@ class Catchment extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 'group_id','token', 'firstname', 'lastname','ci_estudiant', 'grade', 'date_birth','status_foreign','country_foreign','status_siblings_college','brothers', 'gender','origin', 'representant_name', 'representant_lastname','representant_date_birth', 'representant_ci', 'email', 'relationship', 'occupation', 'educational_level', 'representant_phone','representant_cellphone', 'direction', 'reason_catholic', 'reason_interest', 'aspects_valued', 'expectations', 'importance_education', 'expectations_education', 'participation_activities', 'skills_talents', 'interests', 'challenges','status_active','status_accept_terms'];
+    protected $fillable = [ 'group_id','token', 'firstname', 'lastname','ci_estudiant', 'grade', 'date_birth','status_foreign','country_foreign','status_siblings_college','brothers', 'gender','origin', 'representant_name', 'representant_lastname','representant_date_birth', 'representant_ci', 'email','day_appointment', 'relationship', 'occupation', 'educational_level', 'representant_phone','representant_cellphone', 'direction', 'reason_catholic', 'reason_interest', 'aspects_valued', 'expectations', 'importance_education', 'expectations_education', 'participation_activities', 'skills_talents', 'interests', 'challenges','status_active','status_accept_terms'];
 
     const COLUMN_COMMENTS = [
         'id' => 'Identificador del registro',
@@ -34,6 +34,7 @@ class Catchment extends Model
         'representant_date_birth' => 'Fecha de nacimiento del representante',
         'representant_ci' => 'Cédula de Identidad',
         'email' => 'Correo electrónico',
+        'day_appointment' => 'Dia de la Cita',
         'relationship' => 'Parentesco con el estudiante',
         'occupation' => 'Ocupación',
         'educational_level' => 'Nivel educativo',
