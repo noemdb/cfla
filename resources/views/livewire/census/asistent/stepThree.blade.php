@@ -10,32 +10,39 @@
             <div class="space-y-2 mb-2">
                 <x-input 
                     wire:model="name_representant"
-                    label="Nombrse" 
-                    placeholder="Nombres" 
-                    right-icon="user"
-                    class="mb-2"
-                />
-            </div>
-            <div class="space-y-2 mb-2">
-                <x-input 
-                    wire:model="lastname_representant"
-                    label="Apellidos" 
-                    placeholder="Apellidos" 
+                    label="Nombre completo" 
+                    placeholder="Nombre completo" 
                     right-icon="user"
                     class="mb-2"
                 />
             </div>
 
             <div class="space-y-2 mb-2">
-                <x-inputs.number 
+
+                <x-input 
                     wire:model="ci_representant"
+                    label="Cédula de Identidad" 
+                    placeholder="Cédula de Identidad" 
+                    right-icon="user"
+                    class="mb-2"
+                />
+
+                {{-- <x-inputs.number 
+                    wire:model="ci_representant" 
                     label="Cédula de identidad" 
                     placeholder="Cédula de identidad" 
-                    right-icon="credit-card"numeric
-                    class="mb-2"
-                />
-            </div>
+                    right-icon="credit-card"
+                /> --}}
 
+                {{-- <x-inputs.maskable
+                    wire:model="ci_representant"
+                    label="Cédula de Identidad"
+                    mask="A-########"
+                    placeholder="V-17890123"
+                    right-icon="credit-card"
+                    corner-hint="V: Venezolano, E: Extranjero"
+                /> --}}
+            </div>
             
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
@@ -51,7 +58,7 @@
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
                 wire:model="cellphone_representant"
-                    label="Número de teléfono: Ej: 58 414 145-9834"
+                    label="Número WhatsApp: Ej: 58 414 145-9834"
                     mask="## ### ###-####"
                     placeholder="Número WhatsApp"
                     id="cellphone_representant"
