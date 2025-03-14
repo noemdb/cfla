@@ -22,7 +22,7 @@ class CatchmentPDFController extends Controller
         $autoridad1 = Autoridad::getAuthority('DIRECTOR GENERAL Y ADMINISTRATIVO');
         $autoridad2 = Autoridad::getAuthority('DIRECTORA'); //dd($institution,$autoridad1,$autoridad2);
         $data = [
-            'name' => $catchment->name,
+            'firstname' => $catchment->firstname,
             'lastname' => $catchment->lastname,
             'date_birth' => $catchment->date_birth, 
             'name_representant' => $catchment->name_representant,
