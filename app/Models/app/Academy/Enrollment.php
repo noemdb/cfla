@@ -29,7 +29,15 @@ class Enrollment extends Model
         'mother_address', 'father_name', 'father_lastname', 'father_ci', 'father_profession', 'father_phones', 'father_address',
 
     ];
-    protected $dates = ['created_at', 'updated_at'];
+
+    // protected $dates = ['created_at', 'updated_at'];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    protected $with = ['user', 'pestudio', 'grado'];
 
     const COLUMN_COMMENTS = [
         'user_id' => 'Usuario',

@@ -1,0 +1,48 @@
+<div class="h-full w-full overflow-hidden rounded-[40px] bg-gradient-to-b from-green-400 via-green-600 to-black">
+    <div class="flex h-full flex-col items-center justify-center px-8 text-center text-white">
+        <div class="mb-2">
+            <h1 class="text-2xl font-semibold">Asistente</h1>
+        </div>
+        <h2 class="mb-2 text-4xl font-bold">C.E. Colegio Fray Luis Amigó</h2>
+        <p class="mb-12 text-lg"><span class=" font-bold">Censo Escolar</span><br>El primer paso hacia una educación
+            excelencia.</p>
+
+        <div class="w-full max-w-sm space-y-4">
+            <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                    <span
+                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 1 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">1</span>
+                    <span class="text-lg">Validacion del email</span>
+                </div>
+            </div>
+            <div class="rounded-lg {{ $currentStep == 2 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                    <span
+                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 2 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                        2
+                    </span>
+                    <span class="text-lg">Datos del estudiante</span>
+                </div>
+            </div>
+            <div class="rounded-lg {{ $currentStep == 3 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                    <span
+                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 3 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                        3
+                    </span>
+                    <span class="text-lg">Datos del representante</span>
+                </div>
+            </div>
+
+            <div class="rounded-lg {{ $currentStep == 4 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                    <span
+                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                        4
+                    </span>
+                    <span class="text-lg">Guarda tu planilla de registro</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

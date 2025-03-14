@@ -63,3 +63,8 @@ php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/Questi
 php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/OptionComponent'
 php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/AnswerComponent'
 php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/ResultComponent'
+
+
+
+
+php artisan make:livewire EnrollmentWizard

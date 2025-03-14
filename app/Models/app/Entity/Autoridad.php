@@ -11,6 +11,8 @@ class Autoridad extends Model
 {
     use HasFactory;
 
+    public $table = 'autoridads';
+
     protected $fillable = [
         'pescolar_id','institucion_id','user_id','tipo_id','name','lastname','ci','city_birth','town_hall_birth','state_birth','country_birth','position','profile_professional','photo','finicial','ffinal',
     ];

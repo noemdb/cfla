@@ -27,6 +27,8 @@ class Institucion extends Model
         'status_exchange_rate','ammount_exchange_rate','observation_default_bill','observation_default_billing_notice','txt_contract_study'
     ];
 
+    public $table = 'institucions';
+
     public function pescolar()
     {
         return $this->hasOne(Pescolar::class,'institucion_id');

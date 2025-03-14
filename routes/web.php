@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\HomeController;
+use App\Livewire\EnrollmentWizard;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 
@@ -29,6 +31,12 @@ Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
 Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
 Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
+
+Route::get('/censo', [CensusController::class, 'index'])->name('census');
+
+Route::get('/download-pdf/{enrollment_id}', [EnrollmentWizard::class, 'downloadPDF'])->name('download.pdf');
+
+
 
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 
