@@ -191,17 +191,15 @@ class CatchmentWizard extends Component
 
     public function generateQrCode($catchment_id)
     {
-        Catchment::findOrFail($catchment_id);
-
-        $pdfUrl = route('census.download.pdf',$catchment_id); // Ruta que descarga el PDF
-
+        $catchment = Catchment::findOrFail($catchment_id);
+        $pdfUrl = route('catchment.download.pdf',$catchment->token); // Ruta que descarga el PDF
         return QrCode::size(200)->generate($pdfUrl);
     }
 
     public function generateQrCodePDF($token)
     {
         Catchment::where('token', $token)->firstOrFail();
-        $pdfUrl = route('census.download.pdf',$token); // Ruta que descarga el PDF
+        $pdfUrl = route('catchment.download.pdf',$token); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
     }
 

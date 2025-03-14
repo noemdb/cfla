@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Census\EnrollmentPDFController;
+use App\Http\Controllers\Census\CatchmentPDFController;
 use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\HomeController;
@@ -35,7 +35,8 @@ Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
-Route::get('/census/download-pdf/{token}', [EnrollmentPDFController::class, 'downloadPDF'])->name('census.download.pdf');
+// Route::get('/census/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('census.download.pdf');
+Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
 
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 // Livewire::setScriptRoute(function ($handle) {

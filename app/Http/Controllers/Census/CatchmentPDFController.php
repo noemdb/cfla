@@ -13,7 +13,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
-class EnrollmentPDFController extends Controller
+class CatchmentPDFController extends Controller
 {
     public function downloadPDF($token)
     {
@@ -49,12 +49,7 @@ class EnrollmentPDFController extends Controller
     public function generateQrCodePDF($token)
     {
         Catchment::where('token', $token)->firstOrFail();
-        $pdfUrl = route('census.download.pdf',$token); // Ruta que descarga el PDF
+        $pdfUrl = route('catchment.download.pdf',$token); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
-    }
-
-    public function render()
-    {
-        return view('livewire.enrollment-wizard');
     }
 }
