@@ -48,18 +48,18 @@ class CatchmentWizard extends Component
         'grado_id' => 'required|integer',
     ];
 
-    public function mount()
-    {
-        $this->email="noemdb@gmail.com";
-        $this->representant_ci="14608133";
-        $this->representant_name="noe dominguez";
-        $this->representant_phone="584121234567";
-        $this->representant_cellphone="584121345678";
-        $this->grado_id="11";
-        $this->firstname="camila andreina".rand(1,1000);
-        $this->lastname="dominguez".rand(1,1000);
-        $this->date_birth="2025-01-".rand(1,28);
-    }
+    // public function mount()
+    // {
+    //     $this->email="noemdb@gmail.com";
+    //     $this->representant_ci="14608133";
+    //     $this->representant_name="noe dominguez";
+    //     $this->representant_phone="584121234567";
+    //     $this->representant_cellphone="584121345678";
+    //     $this->grado_id="11";
+    //     $this->firstname="camila andreina".rand(1,1000);
+    //     $this->lastname="dominguez".rand(1,1000);
+    //     $this->date_birth="2025-01-".rand(1,28);
+    // }
 
     // Paso 1: Enviar código al email
     public function sendEmailCode()
@@ -68,12 +68,12 @@ class CatchmentWizard extends Component
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
-        $this->input_code = $this->verificationCode;
+        // $this->input_code = $this->verificationCode;
 
-        // Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
-        //     $message->to($this->email)
-        //             ->subject('Código de verificación');
-        // });
+        Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
+            $message->to($this->email)
+                    ->subject('Código de verificación');
+        });
 
         Session::put('email_code', $this->verificationCode); // Guardar en sesión
 
