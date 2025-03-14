@@ -68,14 +68,14 @@ class CatchmentWizard extends Component
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
-        $this->input_code = $this->verificationCode;
+        // $this->input_code = $this->verificationCode;
 
         Session::put('email_code', $this->verificationCode); // Guardar en sesión
         
-        // Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
-        //     $message->to($this->email)
-        //             ->subject('Código de verificación');
-        // });
+        Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
+            $message->to($this->email)
+                    ->subject('Código de verificación');
+        });
 
         $this->notification()->success(
             $title = 'Excelente!',
