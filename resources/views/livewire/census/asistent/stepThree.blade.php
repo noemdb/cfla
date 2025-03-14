@@ -23,8 +23,9 @@
                     wire:model="representant_ci"
                     label="Cédula de Identidad" 
                     placeholder="Cédula de Identidad" 
-                    right-icon="user"
+                    {{-- right-icon="user" --}}
                     class="mb-2"
+                    suffix="#" 
                 />
             </div>
             
@@ -35,7 +36,7 @@
                     mask="## ### ###-####"
                     placeholder="Número de teléfono"
                     id="representant_phone"
-                    right-icon="chat-alt-2"
+                    right-icon="phone"
                 />
             </div>
 

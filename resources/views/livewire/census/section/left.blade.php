@@ -1,11 +1,10 @@
 <div class="h-full w-full overflow-hidden rounded-[40px] bg-gradient-to-b from-green-400 via-green-600 to-black">
-    <div class="flex h-full flex-col items-center justify-center px-8 text-center text-white">
+    <div class="flex h-full flex-col items-center justify-center px-8 text-center text-white">        
+        <h2 class="mb-2 text-4xl font-bold uppercase">C.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-2">
-            <h1 class="text-2xl font-semibold">Asistente</h1>
+            <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
-        <h2 class="mb-2 text-4xl font-bold">C.E. Colegio Fray Luis Amigó</h2>
-        <p class="mb-12 text-lg"><span class=" font-bold">Censo Escolar</span><br>El primer paso hacia una educación
-            excelencia.</p>
+        <p class="mb-12 text-lg">El primer paso hacia una educación excelencia.</p>
 
         <div class="w-full max-w-sm space-y-4">
             <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
