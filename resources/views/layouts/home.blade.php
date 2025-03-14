@@ -6,6 +6,8 @@
     {{-- <title>{{env('APP_NAME')}} - @yield('title')</title> --}}
     <title>@yield('title')</title>
 
+    <link rel="manifest" href="{{ asset('pwa/manifest.json') }}">
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -87,6 +89,64 @@
     @yield('scriptsLivewire')
 
     {{-- @livewireScriptConfig --}}
+
+    <script>
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            
+            //event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
+            deferredPrompt = event;
+
+            // Muestra el botón de instalación
+            const installButton = document.getElementById('installPWA');
+            installButton.style.display = 'block';
+
+            installButton.addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt(); // Muestra el diálogo de instalación
+
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('El usuario aceptó la instalación');
+                        } else {
+                            console.log('El usuario canceló la instalación');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada');
+            document.getElementById('installPWA').style.display = 'none';
+        });
+
+    </script>
+
+    {{-- 
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register("{{ asset('/pwa/sw.js') }}").then(reg => {
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            const updateBanner = document.createElement('div');
+                            updateBanner.innerHTML = `
+                                <p>Hay una nueva versión disponible.</p>
+                                <button onclick="location.reload();">Actualizar</button>
+                            `;
+                            document.body.appendChild(updateBanner);
+                        }
+                    };
+                };
+            });
+        }
+    </script> 
+    --}}
+    
 
 </body>
 
