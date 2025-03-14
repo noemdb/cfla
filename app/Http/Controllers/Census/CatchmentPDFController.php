@@ -25,7 +25,7 @@ class CatchmentPDFController extends Controller
             'firstname' => $catchment->firstname,
             'lastname' => $catchment->lastname,
             'date_birth' => $catchment->date_birth, 
-            'name_representant' => $catchment->name_representant,
+            'representant_name' => $catchment->representant_name,
             'representant_ci' => $catchment->representant_ci,
             'representant_phone' => $catchment->representant_phone,
             'representant_cellphone' => $catchment->representant_cellphone,
