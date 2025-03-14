@@ -9,7 +9,7 @@
 
             <div class="space-y-2 mb-2">
                 <x-input 
-                    wire:model="name_representant"
+                    wire:model="representant_name"
                     label="Nombre completo" 
                     placeholder="Nombre completo" 
                     right-icon="user"
@@ -20,48 +20,32 @@
             <div class="space-y-2 mb-2">
 
                 <x-input 
-                    wire:model="ci_representant"
+                    wire:model="representant_ci"
                     label="Cédula de Identidad" 
                     placeholder="Cédula de Identidad" 
                     right-icon="user"
                     class="mb-2"
                 />
-
-                {{-- <x-inputs.number 
-                    wire:model="ci_representant" 
-                    label="Cédula de identidad" 
-                    placeholder="Cédula de identidad" 
-                    right-icon="credit-card"
-                /> --}}
-
-                {{-- <x-inputs.maskable
-                    wire:model="ci_representant"
-                    label="Cédula de Identidad"
-                    mask="A-########"
-                    placeholder="V-17890123"
-                    right-icon="credit-card"
-                    corner-hint="V: Venezolano, E: Extranjero"
-                /> --}}
             </div>
             
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
-                wire:model="phone_representant"
+                wire:model="representant_phone"
                     label="Número de teléfono: Ej: 58 414 145-9834"
                     mask="## ### ###-####"
                     placeholder="Número de teléfono"
-                    id="phone_representant"
+                    id="representant_phone"
                     right-icon="chat-alt-2"
                 />
             </div>
 
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
-                wire:model="cellphone_representant"
+                wire:model="representant_cellphone"
                     label="Número WhatsApp: Ej: 58 414 145-9834"
                     mask="## ### ###-####"
                     placeholder="Número WhatsApp"
-                    id="cellphone_representant"
+                    id="representant_cellphone"
                     right-icon="chat-alt-2"
                 />
             </div>

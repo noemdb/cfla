@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Livewire\EnrollmentWizard;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,24 +35,18 @@ Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
-Route::get('/census/download-pdf/{enrollment_id}', [EnrollmentPDFController::class, 'downloadPDF'])->name('census.download.pdf');
-
-
+Route::get('/census/download-pdf/{token}', [EnrollmentPDFController::class, 'downloadPDF'])->name('census.download.pdf');
 
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
-
 // Livewire::setScriptRoute(function ($handle) {
 //     return Route::get('/cfla/livewire/livewire.js', $handle);
 // });
-
 // Livewire::setUpdateRoute(function ($handle) {
 //     return Route::post('/cfla/livewire/update', $handle);
 // });
-
 // Livewire::setScriptRoute(function ($handle) {
 //     return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
 // });
-
 // Livewire::setUpdateRoute(function ($handle) {
 //     return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
 // });
@@ -62,8 +57,6 @@ Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
     Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
 });
 
-
-use App\Http\Controllers\OrderController;
 
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
 Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);

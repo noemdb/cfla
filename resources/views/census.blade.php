@@ -20,7 +20,8 @@
 
     <x-notifications />
 
-    <livewire:enrollment-wizard  />    
+    {{-- <livewire:enrollment-wizard  />     --}}
+    <livewire:catchment-wizard  />    
 
     @livewireScripts
 

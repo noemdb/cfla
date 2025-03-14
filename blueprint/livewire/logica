@@ -68,3 +68,4 @@ php artisan make:livewire 'App/General/Educational/Competition/Scoreboard/Result
 
 
 php artisan make:livewire EnrollmentWizard
+php artisan make:livewire CatchmentWizard

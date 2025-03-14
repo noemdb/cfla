@@ -32,6 +32,9 @@ php artisan make:model 'app\Admon\ReferentialCurrency'
 php artisan make:model 'app\Admon\ExchangeRate'
 php artisan make:model 'app\Academy\Catchment'
 php artisan make:model 'app\Academy\CatchmentInterview'
+php artisan make:model 'app\Academy\CatchmentGroup'
+php artisan make:model 'app\Academy\CatchmentActivity'
+php artisan make:model 'app\Academy\CatchmentNotification'
 
 Blog
 php artisan make:model 'app\Blog\Category'
@@ -52,6 +55,9 @@ php artisan make:model 'app/Educational/DebateQuestion' -m
 php artisan make:model 'app/Educational/DebateOption' -m
 php artisan make:model 'app/Educational/DebateAnswer' -m
 
+
+php artisan make:model 'app\Enrollment\CatchmentGroup' -m
+php artisan make:model 'app\Enrollment\CatchmentActivity' -m
 
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Census;
 
 use App\Http\Controllers\Controller;
+use App\Models\app\Academy\Catchment;
 use App\Models\app\Academy\Enrollment;
 use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
@@ -14,41 +15,41 @@ use Illuminate\Support\Facades\Storage;
 
 class EnrollmentPDFController extends Controller
 {
-    public function downloadPDF($emrollment_id)
+    public function downloadPDF($token)
     {
-        $emrollment = Enrollment::findOrFail($emrollment_id);
+        $catchment = Catchment::where('token', $token)->firstOrFail();
         $institution = Institucion::first();
         $autoridad1 = Autoridad::getAuthority('DIRECTOR GENERAL Y ADMINISTRATIVO');
         $autoridad2 = Autoridad::getAuthority('DIRECTORA'); //dd($institution,$autoridad1,$autoridad2);
         $data = [
-            'name' => $emrollment->name,
-            'lastname' => $emrollment->lastname,
-            'date_birth' => $emrollment->date_birth, 
-            'name_representant' => $emrollment->name_representant,
-            'ci_representant' => $emrollment->ci_representant,
-            'phone_representant' => $emrollment->phone_representant,
-            'cellphone_representant' => $emrollment->cellphone_representant,
-            'grado_id' => $emrollment->grado_id,
+            'name' => $catchment->name,
+            'lastname' => $catchment->lastname,
+            'date_birth' => $catchment->date_birth, 
+            'name_representant' => $catchment->name_representant,
+            'representant_ci' => $catchment->representant_ci,
+            'representant_phone' => $catchment->representant_phone,
+            'representant_cellphone' => $catchment->representant_cellphone,
+            'grado_id' => $catchment->grado_id,
             'institution' => $institution,
             'autoridad1' => $autoridad1,
             'autoridad2' => $autoridad2,
-            'qrCode' => $this->generateQrCodePDF($emrollment_id),
+            'qrCode' => $this->generateQrCodePDF($token),
         ];
 
         // Crear el PDF
-        $pdf = Pdf::loadView('pdfs.enrollment-form', $data);
+        $pdf = Pdf::loadView('pdfs.catchment-form', $data);
 
         // Guardar temporalmente el archivo
-        $filename = 'formato_registro_censo_' . time() . '_' . $emrollment->ci_representant . '.pdf';
+        $filename = 'formato_registro_censo_' . time() . '_' . $catchment->representant_ci . '.pdf';
         Storage::disk('public')->put('pdfs/' . $filename, $pdf->output());
 
         return response()->download(storage_path('app/public/pdfs/' . $filename));
     }
 
-    public function generateQrCodePDF($emrollment_id)
+    public function generateQrCodePDF($token)
     {
-        Enrollment::findOrFail($emrollment_id);
-        $pdfUrl = route('census.download.pdf',$emrollment_id); // Ruta que descarga el PDF
+        Catchment::where('token', $token)->firstOrFail();
+        $pdfUrl = route('census.download.pdf',$token); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
     }
 

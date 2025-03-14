@@ -9,7 +9,7 @@
 
             <div class="space-y-2">
                 <x-input 
-                    wire:model="name"
+                    wire:model="firstname"
                     label="Nombres" 
                     placeholder="Nombres" 
                     right-icon="user"
