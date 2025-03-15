@@ -1,6 +1,6 @@
 <div class="flex flex-col min-h-screen bg-black lg:flex-row">
 
-    <div class="absolute inset-0 z-0 h-full w-full bg-[url('{{asset("image/bg/census.jpg")}}')] bg-cover bg-center opacity-10"></div>
+    <div style="background-image: url('{{asset("image/bg/census.jpg")}}')" class="absolute inset-0 z-0 h-full w-full bg-[url('{{asset("image/bg/census.jpg")}}')] bg-cover bg-center opacity-10"></div>
 
     <!-- Left Section -->
     <div class="relative block w-full p-8 lg:w-1/2 lg:block ">
