@@ -1,6 +1,6 @@
 <div class="h-full w-full overflow-hidden rounded-[40px] bg-gradient-to-b from-green-400 via-green-600 to-black">
     <div class="flex h-full flex-col items-center justify-center px-8 text-center text-white">        
-        <h2 class="mb-2 text-4xl font-bold uppercase mt-4">C.E. Colegio Fray Luis Amigó</h2>
+        <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">C.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-2">
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
