@@ -42,6 +42,16 @@
                     <span class="text-lg">Guarda tu planilla de registro</span>
                 </div>
             </div>
+
+            <div class="rounded-lg {{ $currentStep == 4 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4 cursor-pointer" wire:click="restart">
+                    <span
+                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                        <x-icon name="refresh" class="w-5 h-5" />
+                    </span>
+                    <span class="text-lg font-semibold">Empezar de nuevo</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

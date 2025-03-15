@@ -40,6 +40,11 @@ class CatchmentWizard extends Component
     public $day_appointment_end='2025-04-10'; // Dia de la cita final
     public $status_validate_code_email; // Dia de la cita final      
 
+    public function restart()
+    {
+        return redirect()->route('census');
+    }
+
     public function setStep($step)
     {
         $this->currentStep = ($this->status_validate_code_email) ? $step : $this->currentStep;
