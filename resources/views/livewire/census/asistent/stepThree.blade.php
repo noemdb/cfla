@@ -31,24 +31,34 @@
             
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
-                wire:model="representant_phone"
-                    label="Número de teléfono: Ej: 58 414 145-9834"
+                    wire:model="representant_phone"
+                    label="Número de teléfono"
                     mask="## ### ###-####"
-                    placeholder="Número de teléfono"
-                    id="representant_phone"
+                    placeholder="58 414 145-9834"
+                    corner-hint="Ej: 58 414 145-9834"
                     right-icon="phone"
-                />
+                    class="mb-2"
+                /> 
+                <x-inputs.maskable
+                    wire:model="representant_cellphone"
+                    label="Número WhatsApp"
+                    mask="## ### ###-####"
+                    placeholder="58 414 145-9834"
+                    corner-hint="Ej: 58 414 145-9834"
+                    right-icon="chat-alt-2"
+                    class="mb-2"
+                />               
             </div>
 
             <div class="space-y-2 mb-2">
-                <x-inputs.maskable
-                wire:model="representant_cellphone"
+                {{-- <x-inputs.maskable
+                    wire:model="representant_cellphone"
                     label="Número WhatsApp: Ej: 58 414 145-9834"
                     mask="## ### ###-####"
                     placeholder="Número WhatsApp"
                     id="representant_cellphone"
                     right-icon="chat-alt-2"
-                />
+                /> --}}                
             </div>
 
             <div class="space-y-2">
@@ -66,8 +76,8 @@
 
             <div class="space-y-2 mb-2">
                 <x-button
-                    wire:click="saveEnrollment" 
                     xl
+                    wire:click="saveEnrollment" 
                     positive 
                     label="Guarda tus datos" 
                     class="w-full my-2" 

@@ -22,7 +22,7 @@
                     wire:model="lastname"
                     label="Apellidos" 
                     placeholder="Apellidos" 
-                    right-icon="user"
+                    right-icon="users"
                     class="mb-2"
                 />
             </div>

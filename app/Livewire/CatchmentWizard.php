@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Storage;
 class CatchmentWizard extends Component
 {
     use Actions;
+    use CatchmentValidate;
+    use CatchmentUpdates;
 
     public $catchment_id; // ID de la censo
     public $currentStep = 1; // Paso actual del asistente
@@ -36,65 +38,27 @@ class CatchmentWizard extends Component
     public $day_appointment; // Dia de la cita
     public $day_appointment_start='2025-04-01'; // Dia de la cita inical
     public $day_appointment_end='2025-04-10'; // Dia de la cita final
-    public $status_validate_code_email; // Dia de la cita final
-
-    protected function rules()  // Validaciones por paso
-    {
-        return [
-            'email' => 'required|email',
-            'input_code' => 'required|size:6',
-            'firstname' => 'required|string|max:100',
-            'lastname' => 'required|string|max:100',
-            'date_birth' => 'required|date|before:today',
-            'representant_ci' => 'required|numeric',
-            'representant_name' => 'required|string|max:100',
-            'representant_phone' => 'required|numeric|digits:12',
-            'representant_cellphone' => 'required|numeric|digits:12',
-            'grade' => 'required|integer',
-            'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
-        ];
-    }
-
-    protected $validationAttributes = [
-        'email' => 'Correo electrónico',
-        'input_code' => 'Código de validación',
-        'firstname' => 'Nombre',
-        'lastname' => 'Apellido',
-        'date_birth' => 'Fecha de nacimiento',
-        'representant_ci' => 'Cédula del representante',
-        'representant_name' => 'Nombre del representante',
-        'representant_phone' => 'Teléfono del representante',
-        'representant_cellphone' => 'Celular del representante',
-        'grade' => 'Grado',
-        'day_appointment' => 'Fecha en la que acudirá a la institucción',
-    ];
-
-    public function updatedDayAppointment($value)
-    {
-        // $this->day_appointment = Carbon::createFromFormat("Y-m-d",$value)->addDay()->format('Y-m-d');
-    }
+    public $status_validate_code_email; // Dia de la cita final      
 
     public function setStep($step)
     {
         $this->currentStep = ($this->status_validate_code_email) ? $step : $this->currentStep;
     }
 
+    // public function mount()
+    // {
+    //     $this->email="noemdb@gmail.com";
+    //     $this->representant_ci="14608133";
+    //     $this->representant_name="noe dominguez";
+    //     $this->representant_phone="584121234567";
+    //     $this->representant_cellphone="584121345678";
+    //     $this->grade=rand(1,13);
+    //     $this->firstname="camila andreina".rand(1,1000);
+    //     $this->lastname="dominguez".rand(1,1000);
 
-
-    public function mount()
-    {
-        // $this->email="noemdb@gmail.com";
-        // $this->representant_ci="14608133";
-        // $this->representant_name="noe dominguez";
-        // $this->representant_phone="584121234567";
-        // $this->representant_cellphone="584121345678";
-        // $this->grade="11";
-        // $this->firstname="camila andreina".rand(1,1000);
-        // $this->lastname="dominguez".rand(1,1000);
-
-        // $this->date_birth="2025-01-".rand(1,28);
-        // $this->day_appointment="2025-04-".rand(1,10);
-    }
+    //     $this->date_birth="2025-01-".rand(1,28);
+    //     $this->day_appointment="2025-04-".rand(1,10);
+    // }
 
     // Paso 1: Enviar código al email
     public function sendEmailCode()

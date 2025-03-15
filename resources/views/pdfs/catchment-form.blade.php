@@ -148,7 +148,7 @@
 
     <hr class="divider">
 
-    <div class="text-center section">
+    <div class="section" style="text-align: center">
         <h3 class="sub-header">Escanea el código QR para descargar el PDF</h3>
         <img src="{{ $qrCode }}" width="128">
     </div>

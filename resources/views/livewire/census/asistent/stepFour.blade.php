@@ -12,9 +12,9 @@
                 <x-button wire:click="downloadPDF({{$catchment_id}})"  xl primary label="Descarga" class="w-full my-2" />
             </div>
             
-            <div class="mt-5 text-center">
+            <div class="mt-5 text-start">
                 <h3 class="text-md font-semibold">Escanea el código QR para descargar el PDF</h3>
-                <div class="mt-2">{!! $this->generateQrCode($catchment_id) !!}</div>
+                <div class="mt-2 justify-start text-start">{!! $this->generateQrCode($catchment_id) !!}</div>
             </div>
 
         </div>
@@ -24,6 +24,21 @@
 
     <div class="text-red-500">Ocurrieron errores</div>
         
-    @endif    
+    @endif 
+    
+    {{-- <div class=" border-spacing-y-2"></div> --}}
+
+    <hr class="mt-4 border-gray-400">
+    
+    <div class="space-y-2 mt-4 pt-4">
+
+        <x-button
+            {{-- positive --}}
+            href="{{route('census')}}"
+            label="Ir al Inicio"
+            teal
+        />
+        {{-- <x-button wire:click="downloadPDF({{$catchment_id}})"  xl primary label="Descarga" class="w-full my-2" /> --}}
+    </div>
 
 </div>
