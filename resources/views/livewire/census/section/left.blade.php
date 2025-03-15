@@ -4,7 +4,7 @@
         <div class="mb-2">
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
-        <p class="mb-12 text-lg">El primer paso hacia una educación excelencia.</p>
+        <p class="mb-12 text-lg">El primer paso hacia una educación de excelencia.</p>
 
         <div class="w-full max-w-sm space-y-4">
             <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
