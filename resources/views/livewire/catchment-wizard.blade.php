@@ -15,7 +15,7 @@
     </div>
     
     <!-- Left Section -->
-    <div class="relative block w-full p-8 lg:w-1/2 lg:block ">
+    <div class="relative block w-full p-2 sm:p-8 lg:w-1/2 lg:block ">
 
         {{-- <div class="absolute inset-0 z-0 h-full w-full bg-[url('{{asset("image/bg/census.jpg")}}')] bg-cover bg-center opacity-10"></div> --}}
 
