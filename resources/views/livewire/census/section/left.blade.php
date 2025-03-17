@@ -1,10 +1,11 @@
 <div class="h-full w-full overflow-hidden rounded-[40px] bg-gradient-to-b from-green-400 via-green-600 to-black">
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">        
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">C.E. Colegio Fray Luis Amigó</h2>
-        <div class="mb-2">
+        <div class="mb-1">
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
-        <p class="mb-12 text-lg">El primer paso hacia una educación de excelencia.</p>
+        <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
+        <div class="mb-8 font-semibold">1ra Jornada desde 1 hasta el 10 de abril 2025.</div>
 
         {{-- <div class="w-full max-w-sm space-y-4"> --}}
         <div class="w-full max-full space-y-4">

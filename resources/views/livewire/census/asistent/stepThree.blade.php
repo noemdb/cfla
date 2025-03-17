@@ -28,6 +28,8 @@
                     suffix="#" 
                 />
             </div>
+
+            
             
             <div class="space-y-2 mb-2">
                 <x-inputs.maskable
@@ -60,6 +62,8 @@
                     right-icon="chat-alt-2"
                 /> --}}                
             </div>
+
+            <div class="text-sm text-gray-400">Jornada desde 1 hasta el 10 de abril 2025.</div>
 
             <div class="space-y-2">
                 
