@@ -38,7 +38,14 @@ class CatchmentWizard extends Component
     public $day_appointment; // Dia de la cita
     public $day_appointment_start='2025-04-01'; // Dia de la cita inical
     public $day_appointment_end='2025-04-10'; // Dia de la cita final
-    public $status_validate_code_email; // Dia de la cita final      
+    public $status_validate_code_email; // Dia de la cita final 
+    
+    protected $listeners = ['hideVideo'];
+    public bool $showVideo = true; // Estado inicial: mostrar video
+    public function hideVideo()
+    {
+        $this->showVideo = false; // Ocultar video al finalizar
+    }
 
     public function restart()
     {
