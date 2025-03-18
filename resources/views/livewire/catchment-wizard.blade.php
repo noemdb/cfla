@@ -16,7 +16,7 @@
 
     @if ($showVideo)
         <!-- Pantalla de Video -->
-        <div class="fixed inset-0 flex items-center justify-center bg-black z-50 bg-[url('{{asset("image/bg/censusBlack.jpg")}}')] bg-cover bg-center" style="background-image: url('{{asset("image/bg/censusBlack.jpg")}}')">
+        <div class="fixed inset-0 p-4 rounded shadow flex items-center justify-center bg-black z-50 bg-[url('{{asset("image/bg/censusBlack.jpg")}}')] bg-cover bg-center" style="background-image: url('{{asset("image/bg/censusBlack.jpg")}}')">
             <video id="introVideo" class="max-w-full max-h-full w-auto h-auto object-contain" autoplay muted>
                 <source src="{{ asset('videos/census/newCatch.mp4') }}" type="video/mp4">
                 Tu navegador no soporta videos.

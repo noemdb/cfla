@@ -26,7 +26,6 @@ class CatchmentWizard extends Component
     public $email; // Paso 1: Correo electrónico
     public $verificationCode = null; // Código de verificación
     public $input_code; // Código generado para validar
-
     public $firstname; // Paso 2: Nombre completo del niño/a
     public $lastname; // Paso 2: Nombre completo del niño/a
     public $date_birth; // Paso 2: Fecha de nacimiento
@@ -47,14 +46,34 @@ class CatchmentWizard extends Component
         $this->showVideo = false; // Ocultar video al finalizar
     }
 
-    public function restart()
-    {
-        return redirect()->route('census');
-    }
+    // public function restart()
+    // {
+    //     return redirect()->route('census');
+    // }
 
     public function setStep($step)
     {
         $this->currentStep = ($this->status_validate_code_email) ? $step : $this->currentStep;
+    }
+
+    public function restart()
+    {
+        $this->currentStep=1;
+        $this->catchment_id=null;
+        $this->email=null;
+        $this->verificationCode=null;
+        $this->input_code=null;
+        $this->firstname=null;
+        $this->lastname=null;
+        $this->date_birth=null;
+        $this->representant_name=null;
+        $this->representant_ci=null;
+        $this->representant_phone = null;
+        $this->representant_cellphone = null;
+        $this->grade = null;
+        $this->day_appointment = null;
+        $this->status_validate_code_email = null;
+        
     }
 
     // public function mount()
