@@ -17,14 +17,14 @@
     @if ($showVideo)
         <!-- Pantalla de Video -->
         <div class="fixed inset-0 p-4 rounded shadow flex items-center justify-center bg-black z-50 bg-[url('{{asset("image/bg/censusBlack.jpg")}}')] bg-cover bg-center" style="background-image: url('{{asset("image/bg/censusBlack.jpg")}}')">
-            <!-- Indicador de Carga -->
+            {{-- <!-- Indicador de Carga -->
             <div id="loadingIndicator" class="absolute flex flex-col items-center justify-center text-white space-y-2">
                 <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <p class="text-lg font-semibold">Cargando...</p>
-            </div>
+            </div> --}}
             
             <video id="introVideo" class="max-w-full max-h-full w-auto h-auto object-contain" autoplay>
                 <source src="{{ asset('videos/census/newCatch.mp4') }}" type="video/mp4">
@@ -82,27 +82,27 @@
         let video = document.getElementById('introVideo');
         video.onended = function () {
             Livewire.dispatch('hideVideo'); // Llama a la función Livewire al terminar
-            console.log('close.video');
+            // console.log('close.video');
         };
 
-        const intro = document.getElementById('introVideo');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        // const intro = document.getElementById('introVideo');
+        // const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // Mostrar el indicador de carga al inicio
-        loadingIndicator.style.display = 'flex';
+        // // Mostrar el indicador de carga al inicio
+        // loadingIndicator.style.display = 'flex';
 
-        // Ocultar el indicador de carga cuando el video empiece a reproducirse
-        intro.addEventListener('canplay', function () {
-            loadingIndicator.style.display = 'none';
-            video.classList.remove('hidden'); // Mostrar el video
-        });
+        // // Ocultar el indicador de carga cuando el video empiece a reproducirse
+        // intro.addEventListener('canplay', function () {
+        //     loadingIndicator.style.display = 'none';
+        //     video.classList.remove('hidden'); // Mostrar el video
+        // });
 
-        // Manejar errores en caso de que el video no se pueda cargar
-        intro.addEventListener('error', function () {
-            loadingIndicator.innerHTML = `
-                <p class="text-lg font-semibold text-red-500">Error al cargar el video.</p>
-            `;
-        });
+        // // Manejar errores en caso de que el video no se pueda cargar
+        // intro.addEventListener('error', function () {
+        //     loadingIndicator.innerHTML = `
+        //         <p class="text-lg font-semibold text-red-500">Error al cargar el video.</p>
+        //     `;
+        // });
     });
 
 </script>
