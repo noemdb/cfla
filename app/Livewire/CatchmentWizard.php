@@ -46,6 +46,12 @@ class CatchmentWizard extends Component
         $this->showVideo = false; // Ocultar video al finalizar
     }
 
+    public $isVideoLoaded = false;
+    public function videoLoaded()
+    {
+        $this->isVideoLoaded = true;
+    }
+
     // public function restart()
     // {
     //     return redirect()->route('census');
