@@ -26,7 +26,7 @@
                 <p class="text-lg font-semibold">Cargando...</p>
             </div>
             
-            <video id="introVideo" class="max-w-full max-h-full w-auto h-auto object-contain" autoplay muted>
+            <video id="introVideo" class="max-w-full max-h-full w-auto h-auto object-contain" autoplay>
                 <source src="{{ asset('videos/census/newCatch.mp4') }}" type="video/mp4">
                 Tu navegador no soporta videos.
             </video>
