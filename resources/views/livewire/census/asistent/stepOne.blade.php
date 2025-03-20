@@ -8,7 +8,7 @@
             <p class="mb-4 text-gray-400">Ingresa tu dirección de correo electrónico</p>
             <div class="space-y-2 mb-2">
                 <x-input wire:model="email" label="Correo Electrónico" placeholder="Tu email"
-                    icon-right="mail" description="Inform your full name" />
+                    right-icon="at-symbol" description="Inform your full name" />
             </div>
 
             <div class="space-y-2 mb-2">
