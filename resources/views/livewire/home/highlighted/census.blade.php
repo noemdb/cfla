@@ -31,9 +31,9 @@
                     </div>
                 </a>                
             </div>
-            <div class="text-center  dark:text-neutral-200 border-t-2 mt-2">
+            <div class="text-center  dark:text-neutral-200 border-t-2 mt-2 pt-4">
                 <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
-                <div class="text-md text-gray-600">1ra Jornada desde 1 hasta el 10 de abril 2025, hora 2pn.</div>
+                <div class="text-md text-gray-600">1ra Jornada desde 1 hasta el 10 de abril 2025, hora 2pm.</div>
                 {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
             </div>
         </div>
