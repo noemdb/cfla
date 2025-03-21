@@ -11,7 +11,7 @@
     @endslot
 
     <div
-        class="h-full border-t-2 block rounded-lg bg-white dark:bg-neutral-700">
+        class="h-full block rounded-lg bg-white dark:bg-neutral-700">
         <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
             <div class="flex justify-center">
                 {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}                
@@ -29,7 +29,7 @@
                     </div>
                 </a>                
             </div>
-            <div class="text-center  dark:text-neutral-200 border-t-2 mt-6 pt-6">
+            <div class="text-center  dark:text-neutral-200 mt-6 pt-6">
                 <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
                 <div class="text-md text-gray-600">1ra Jornada desde 1 hasta el 10 de abril 2025, hora 2pm.</div>
                 {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
