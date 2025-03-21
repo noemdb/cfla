@@ -2,7 +2,7 @@
 <x-card class="bg-white rounded m-2 h-full">
 
     @slot('header')
-    <h3 class="text-green-950 bg-blue-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+    <h3 class="text-green-950 bg-blue-100 m-4 p-4 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="menu" class="flex-none w-10 h-10 mb-4" />
             <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>                    
@@ -14,9 +14,7 @@
         class="h-full border-t-2 block rounded-lg bg-white dark:bg-neutral-700">
         <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
             <div class="flex justify-center">
-                {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}
-
-                
+                {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}                
 
                 <div class="grid place-items-center h-24 ">
                     <p class="text-center bg-gray-200 rounded-full p-4">
