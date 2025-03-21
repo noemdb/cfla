@@ -11,7 +11,7 @@
     @endslot
 
     <div
-        class="h-full border-t-2 block rounded-lg bg-white shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700">
+        class="h-full border-t-2 block rounded-lg bg-white dark:bg-neutral-700">
         <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
             <div class="flex justify-center">
                 {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}
