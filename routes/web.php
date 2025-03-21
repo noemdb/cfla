@@ -37,6 +37,17 @@ Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
 Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
 
+
+Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
+    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
+    Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
+    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
+});
+
+// Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
+Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
+
+
 // Route::get('/env', [HomeController::class, 'env'])->name('env');
 // Livewire::setScriptRoute(function ($handle) {
 //     return Route::get('/cfla/livewire/livewire.js', $handle);
@@ -50,12 +61,3 @@ Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'd
 // Livewire::setUpdateRoute(function ($handle) {
 //     return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
 // });
-
-Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
-    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
-    Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
-    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
-});
-
-// Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
-Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
