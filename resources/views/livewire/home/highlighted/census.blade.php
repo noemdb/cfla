@@ -1,11 +1,20 @@
 
 <x-card class="bg-white rounded m-2 h-full">
 
-    @slot('header')
+    {{-- @slot('header')
     <h3 class="text-green-950 bg-blue-100 p-2 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="menu" class="flex-none w-10 h-10 mb-4" />
             <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>                    
+        </div>
+    </h3>
+    @endslot --}}
+
+    @slot('header')
+    <h3 class="text-green-950 bg-indigo-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
+        <div class="h-full flex items-center">
+            <x-icon name="menu" class="flex-none w-10 h-10" />
+            <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>
         </div>
     </h3>
     @endslot
