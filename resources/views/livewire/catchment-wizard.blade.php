@@ -25,7 +25,7 @@
 
             <!-- Botón para Saltar Intro -->
             <button wire:click="hideVideo"
-                class="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded opacity-50 hover:opacity-100 transition">
+                class="absolute top-4 right-4 bg-white text-black px-4 py-4 rounded opacity-50 hover:opacity-100 transition">
                 Saltar Intro
             </button>
         </div>
