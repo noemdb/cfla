@@ -198,6 +198,14 @@ class CatchmentWizard extends Component
         $this->currentStep = 4;
     }
 
+    public function updatedDayAppointment($value)
+    {
+        $this->day_appointment_start = $value;
+        $this->validate([
+            'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
+        ]);
+    }
+
     public function downloadPDF($catchment_id)
     {
         $catchment = Catchment::findOrFail($catchment_id);
