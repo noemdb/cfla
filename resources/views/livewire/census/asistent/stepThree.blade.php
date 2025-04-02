@@ -61,27 +61,30 @@
                     id="representant_cellphone"
                     right-icon="chat-alt-2"
                 /> --}}                
-            </div>
-
-            <div class="text-sm text-gray-400">Jornada desde 1 hasta el 10 de abril 2025.</div>
+            </div>            
 
             <div class="space-y-2">
-                
-                <x-datetime-picker
-                    wire:model.live="day_appointment"
-                    label="Fecha en la que acudirá institucción"
-                    placeholder="Seleccione"
-                    without-time
-                    display-format="YYYY-MM-DD"
-                    class="mb-2"
-                />               
 
+                @php 
+                    $start = DateTime::createFromFormat('Y-m-d', $day_appointment_start); $start = ($start) ? $start->format('d-m-Y') : null;
+                    $end = DateTime::createFromFormat('Y-m-d', $day_appointment_end); $end = ($end) ? $end->format('d-m-Y') : null;
+                    $label = "Jordana 1: Desde ".$start." hasta ".$end ;
+                @endphp
+                <div class="block text-sm text-gray-400 dark:text-gray-700 font-medium border-b-2 border-gray-400 dark:border-gray-700">{{$label}}</div>
+                
+                <x-input 
+                    wire:model="day_appointment"
+                    label="Fecha en la que acudirá institucción" 
+                    placeholder="año-mes-día" 
+                    class="mb-2"
+                    type="date"
+                />
             </div>
 
             <div class="space-y-2 mb-2">
                 <x-button
                     xl
-                    wire:click="saveEnrollment" 
+                    wire:click="saveCatchment" 
                     positive 
                     label="Guarda tus datos" 
                     class="w-full my-2" 

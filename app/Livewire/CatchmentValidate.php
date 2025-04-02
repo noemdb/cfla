@@ -19,7 +19,7 @@ trait CatchmentValidate
             'grade' => 'required|integer',
             'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
         ];
-    }
+    }   
 
     protected $validationAttributes = [
         'email' => 'Correo electrónico',

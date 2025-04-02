@@ -87,18 +87,18 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let video = document.getElementById('introVideo');
+        let video = document.getElementById('introVideo');
 
-            // When video has loaded enough to play
-            video.addEventListener('canplay', function() {
-                Livewire.emit('videoLoaded');
-            });
-
-            // When video ends
-            video.onended = function() {
-                Livewire.dispatch('hideVideo');
-                console.log('close.video');
-            };
+        // When video has loaded enough to play
+        video.addEventListener('canplay', function() {
+            Livewire.dispatch('videoLoaded');
         });
+
+        // When video ends
+        video.onended = function() {
+            Livewire.dispatch('hideVideo');
+            console.log('close.video');
+        };
+    });
     </script>
 @endsection

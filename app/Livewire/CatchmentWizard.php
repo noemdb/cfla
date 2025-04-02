@@ -84,17 +84,19 @@ class CatchmentWizard extends Component
 
     public function mount()
     {
+        $today = now()->toDateString();
+        $this->day_appointment = $today;
+        $this->day_appointment_start = ($today > $this->day_appointment_start) ? $today : $this->day_appointment_start;
+
         // $this->email="noemdb@gmail.com";
         // $this->representant_ci="14608133";
         // $this->representant_name="noe dominguez";
         // $this->representant_phone="584121234567";
         // $this->representant_cellphone="584121345678";
-        // $this->grade=rand(1,13);
+        // $this->grade=rand(2,13);
         // $this->firstname="camila andreina".rand(1,1000);
         // $this->lastname="dominguez".rand(1,1000);
-
         // $this->date_birth="2025-01-".rand(1,28);
-        // $this->day_appointment="2025-04-".rand(1,10);
     }
 
     // Paso 1: Enviar código al email
@@ -160,18 +162,13 @@ class CatchmentWizard extends Component
     }
 
     // Paso 4: Guardar inscripción
-    public function saveEnrollment()
+    public function saveCatchment()
     {
-        $this->validate();
-
-        $this->day_appointment = ($this->day_appointment=='2025-03-31') ? '2025-04-01' : $this->day_appointment ;
-
+        $date = $this->validate();
+        
         $time = Carbon::now()->timestamp;
         $random = mt_rand(10000, 99999);
         $token = substr($time . $random, -10);
-
-        $this->day_appointment = Carbon::createFromFormat("Y-m-d",$this->day_appointment)->subDay()->format('Y-m-d');
-        $this->date_birth = Carbon::createFromFormat("Y-m-d",$this->date_birth)->subDay()->format('Y-m-d');
 
         $catchment = Catchment::create([
             'user_id' => auth()->id(),
@@ -200,7 +197,7 @@ class CatchmentWizard extends Component
 
     public function updatedDayAppointment($value)
     {
-        $this->day_appointment_start = $value;
+        $this->day_appointment = $value;
         $this->validate([
             'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
         ]);
