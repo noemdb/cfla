@@ -32,6 +32,16 @@ class Grado extends Model
         return $this->hasMany(Seccion::class);
     }
 
+    /**
+     * Get the active sections for the grade.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function activeSeccions()
+    {
+        return $this->seccions()->where('status_active', true)->get();
+    }
+
     //scope
     public function scopeActive($query, $flag) {
         return $query->where('status_active', $flag);
@@ -80,18 +90,21 @@ class Grado extends Model
 
     public static function list_grado_iu2() /* usada para llenar los objetos de formularios select*/
     {
-        $datas = []; //dd($datas);
+        $datas = []; 
         $peducativos = Peducativo::active('true')->get(); //dd($peducativos);
         foreach ($peducativos as $peducativo) {
-            $grados = $peducativo->grados; //dd($grados);
+            $grados = $peducativo->grados;
             foreach ($grados as $grado) {
                 $pestudio = $grado->pestudio;
                 $datas [] = [
                     'id'=> $grado->id,
                     'name'=> $grado->name,
                     'description'=> $pestudio->name,
+                    'pestudio_description'=> $pestudio->description,
+                    'code'=> $pestudio->code,
+                    'pestudio_id'=> $pestudio->id,
+                    'code_oficial'=> $pestudio->code_oficial,
                 ];
-                // $datas->put($arr);
             }            
         }
         return $datas;

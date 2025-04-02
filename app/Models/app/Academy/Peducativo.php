@@ -18,6 +18,9 @@ class Peducativo extends Model
             ->where('peducativos.status_active', "true")
             ->where('pestudios.status_active', "true")
             ->where('grados.status_active', "true")
+            ->whereNull('peducativos.deleted_at')
+            ->whereNull('pestudios.deleted_at')
+            ->whereNull('grados.deleted_at')
             ->groupBy('grados.id')
             ->orderBy('grados.code_sm')
             ->get();

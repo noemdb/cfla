@@ -6,27 +6,19 @@
             <ul class="">
                 @forelse ($questions->sortBy('category') as $item)
                     @php $active = ($item->id == $active_id) ? true : false; @endphp
-                    <li class="me-2 my-4 mx-2 p-2 border-b-2 border-sky-600 font-normal {{($active) ? 'font-bold bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-400' : null}}">
+                    <li class="me-2 my-4 mx-2 p-2 border-b-2 border-primary-600 font-normal {{($active) ? 'font-bold bg-gray-50 hover:bg-gray-100 focus:outline-none dark:bg-gray-600 dark:hover:bg-gray-400' : null}}">
                         
                         <div class="flex items-center">
                             <div class="grow px-2">
-                                <div class="flex justify-between">
+                                <div class="w-full">
                                     <div>
-                                        <button class="text-start" wire:click="active({{$item->id}})">
-                                            {{$loop->iteration}}. {{$item->text}}. 
-                                            <div class="flex justify-end">
+                                        <button class="text-start w-full" wire:click="active({{$item->id}})">
+                                            {{$loop->iteration}}. {!!$item->text!!}. 
+                                            <div class="flex justify-end border-t-2 border-gray-400 dark:border-gray-700">
                                                 <small>{{$item->category}}</small> || <small>[<b>{{$item->time}}</b>seg]</small> <small>[<b>{{$item->weighting}}</b>pts]</small>
                                             </div>
                                         </button>
                                     </div>
-
-                                    {{-- @if (! $item->status_active)                                        
-                                        <div class=" bg-red-500 rounded shadow flex items-center justify-center h-auto">
-                                            <button type="button" wire:click="activeOnline({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white rounded-lg active w-full " aria-current="page">
-                                                Activar
-                                            </button>
-                                        </div>
-                                    @endif --}}
                                 </div>
                                 
                             </div>

@@ -18,7 +18,7 @@ class OptionComponent extends Component
     use Actions;
 
     public $question,$options,$answer,$active_id,$literal,$colors;
-    public $grado,$seccions,$timeRemaining,$timerActive,$pollingInterval,$timeElapsed;
+    public $grado,$seccions,$seccion_score,$timeRemaining,$timerActive,$pollingInterval,$timeElapsed;
 
     #[On('question-active')] 
     public function updateOptionList($id)
@@ -100,7 +100,51 @@ class OptionComponent extends Component
     public function setGradoSeccions()
     {
         $this->grado = ($this->question) ? $this->question->grado : null ;
+        $this->seccion_score = null;
         $this->seccions = ($this->question) ? $this->question->seccions->where('status_inscription_affects','true') : null ;
+    }
+
+    public function saveAnswerSeccion($seccion_id,$correct)
+    {
+        $seccion = Seccion::findOrFail($seccion_id);
+        $this->seccion_score = $seccion;
+        $grado = $seccion->grado;
+        $question = DebateQuestion::findOrFail($this->question->id);
+        $option = DebateOption::option_correct($this->question->id);
+
+        $answers = DebateAnswer::where('question_id',$this->question->id)->where('option_id',$option->id)->get();
+
+        if ($answers->isNotEmpty()) {
+            foreach ($answers as $answer) {
+                $answer->delete();
+            }
+        }
+
+        $weighting = ($correct) ? $question->weighting : null ;
+
+        $arr = [
+            'question_id'=>$question->id,
+            'option_id'=>$option->id,
+            'grado_id'=>$grado->id,
+            'seccion_id'=>$seccion->id,
+            'status_claim'=>false,
+            'score'=>$weighting,
+        ];
+
+        $this->answer = DebateAnswer::create($arr);
+
+        $question->status_answer = true;
+        $question->save();
+
+        $this->notification()->success(
+            $title = 'Respuesta registrada',
+            $description = 'El puntaje fué adjudicado correctamente!'
+        );
+
+        $this->updateOptionList($question->id);
+
+        $this->dispatch('update-score');
+
     }
 
     public function saveAnswer($grado_id,$correct)

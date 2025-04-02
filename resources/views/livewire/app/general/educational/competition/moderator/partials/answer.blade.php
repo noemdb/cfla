@@ -51,14 +51,23 @@
 
             <div class="bg-blue-900 rounded py-2 my-2">
 
-                <div class="text-lg">{{$grado->name}}</div>
+                <div class="text-lg">
+
+                    <x-badge lg gray label="{{$grado->name}}" class="p-4 text-2xl font-bold" />
+
+                    {{-- modificacion de la Mecanica Asignacion de punto por seccion --}}
+                    @if ($answer)
+                        @php $seccion_name = ($answer->seccion) ? $answer->seccion->name : null;@endphp
+                        <x-badge lg positive label="{{$seccion_name}}" class="p-4 text-3xl font-bold" />
+                    @endif
+                </div>
 
                 <div class="">
 
                     @if ($question->status_answer)
                         <div class="flex justify-center items-center">
                             @php $score = ($answer->score) ? $answer->score : 0 ; @endphp
-                            Puntaje adjudicado <x-badge outline lg positive label="{{$score}} pts" class="mx-2 text-xl" />
+                            Puntaje adjudicado sección: <x-badge outline lg positive label="{{$score}} pts" class="mx-2 text-xl" />
                             
                             @if ($score)
                                 <span class="p-2 bg-yellow-600 border border-gray-400 rounded cursor-pointer" wire:click="setPoin({{$answer->id}},0)">Anular</span>
@@ -70,10 +79,22 @@
                     @else
 
                         @if ($question->exist_option_correct)
-                            <x-button lg positive label="Respuesta Correcta" wire:click="saveAnswer({{$grado->id}},true)"/>
-                            <x-button lg negative label="Respuesta Incorrecta" wire:click="saveAnswer({{$grado->id}},false)"/>
+
+                            {{-- Mecanica Asignacion de punto por grado --}}
+                            {{-- <x-button lg positive label="Respuesta Correcta" wire:click="saveAnswer({{$grado->id}},true)"/> --}}
+                            {{-- <x-button lg negative label="Respuesta Incorrecta" wire:click="saveAnswer({{$grado->id}},false)"/> --}}
+
+                            {{-- modificacion de la Mecanica Asignacion de punto por seccion --}}
+                            <div class="pb-2 border-gray-400 dark:border-gray-700">Seleccione la sección que respondió correctamente</div>
+                            @php $seccions = $grado->activeSeccions() @endphp
+                            <div class="flex justify-around">                       
+                                @foreach ($seccions as $item)
+                                    <x-button lg positive label="Sección {{$item->name}}" wire:click="saveAnswerSeccion({{$item->id}},true)" class="p-1"/>
+                                @endforeach
+                            </div>
+
                         @else
-                            <div class="text-red-800 font-semibold text-xl">No hay registrada una respuesta coreecta</div>
+                            <div class="text-red-800 font-semibold text-xl">No hay na respuesta coreecta registrada</div>
                         @endif
                         
                     @endif

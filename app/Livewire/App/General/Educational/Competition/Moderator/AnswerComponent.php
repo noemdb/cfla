@@ -10,7 +10,7 @@ use Livewire\Attributes\On;
 
 class AnswerComponent extends Component
 {
-    public $question,$answer,$grado,$seccions,$question_id;
+    public $question,$answer,$grado,$seccions,$seccion,$question_id;
     public $timeRemaining,$timerActive,$pollingInterval,$timeElapsed;
     public $interval;
 
@@ -36,6 +36,8 @@ class AnswerComponent extends Component
         $this->pollingInterval = 100;
 
         $this->answer = DebateAnswer::where('question_id',$question_id)->first();
+        $this->seccion = ($this->answer) ? $this->answer->seccion : null ;
+
     }
 
     public function render()
