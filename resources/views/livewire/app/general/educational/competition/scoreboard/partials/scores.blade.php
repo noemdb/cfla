@@ -1,26 +1,37 @@
+{{-- filepath: /home/nuser/code/cfla/resources/views/livewire/app/general/educational/competition/scoreboard/partials/scores.blade.php --}}
 @php $peducativos = $competition->peducativos; @endphp
-<ul>
-    @forelse ($peducativos as $peducativo)    
-
-        <li class=" bg-lime-100 border-t-4 border-lime-600 p-2 my-2">
-            <div class="text-lg font-bold text-end">{{$peducativo->name}}</div>
+<div class="flex flex-wrap gap-3">
+    @forelse ($peducativos as $peducativo)
+        <div class="bg-lime-50 border-t-4 border-lime-500 p-3 rounded-md shadow-sm w-full">
+            <div class="text-lg font-semibold text-end mb-1">{{$peducativo->name}}</div>
 
             @php $grados = $peducativo->grados; @endphp
-            <ul>
+            <ul class="space-y-1">
                 @forelse ($grados as $grado)
-                    <li class="border-b-2 py-3">
-                        <div class="flex justify-between text-md items-center">
-                            <div class="">{{$grado->name}}</div>
-                            <div class="font-bold text-lg">{{$competition->getTotalScoreForGrado($grado->id)}} <small class=" text-gray-300">Pts</small></div>
+                    <li class="border-b py-1">
+                        <div class="flex justify-between items-center text-sm">
+                            <div>{{$grado->name}}</div>
+                            <div class="font-bold text-lime-700">{{$competition->getTotalScoreForGrado($grado->id)}} <small class="text-gray-400">Pts</small></div>
                         </div>
-                        
+
+                        {{-- Mostrar las secciones activas del grado --}}
+                        @php $secciones = $grado->activeSeccions(); @endphp
+                        <div class="flex flex-wrap gap-2 ml-2 mt-1">
+                            @forelse ($secciones as $seccion)
+                                <div class="bg-white border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 shadow-sm">
+                                    {{$seccion->name}}: {{$competition->getTotalScoreForSection($seccion->id)}} Pts
+                                </div>
+                            @empty
+                                <div class="text-gray-400 text-xs italic">No hay secciones activas</div>
+                            @endforelse
+                        </div>
                     </li>
                 @empty
-                    <li>no hay grados/años</li>
+                    <li class="text-gray-400 text-sm italic">No hay grados/años</li>
                 @endforelse
-            </ul>        
-        </li>        
+            </ul>
+        </div>
     @empty
-        <li>no hay planes de estudio</li>
+        <div class="text-gray-500 text-sm italic">No hay planes de estudio</div>
     @endforelse
-</ul>
+</div>

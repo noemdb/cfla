@@ -127,6 +127,11 @@
         <div>
             Te invitamos cordialmente a visitar nuestro colegio en el día de tu conveniencia, entre el 1 y el 10 de abril a las 2pm. Durante este período, se estarán llevando a cabo las actividades propias del Censo Escolar 2025 - 2026 . ¡Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso!
         </div>
+
+        <div>
+            Por favor asista a la cita acompañado del niño/a
+        </div>
+        
     </div>
 
     <div class="text-center">
