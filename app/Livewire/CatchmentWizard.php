@@ -52,11 +52,6 @@ class CatchmentWizard extends Component
         $this->isVideoLoaded = true;
     }
 
-    // public function restart()
-    // {
-    //     return redirect()->route('census');
-    // }
-
     public function setStep($step)
     {
         $this->currentStep = ($this->status_validate_code_email) ? $step : $this->currentStep;
@@ -254,4 +249,5 @@ class CatchmentWizard extends Component
     {
         return view('livewire.catchment-wizard');
     }
+    
 }
