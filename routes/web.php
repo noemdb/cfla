@@ -38,11 +38,11 @@ Route::get('/censo', [CensusController::class, 'index'])->name('census');
 Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
 
 
-// Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
-//     Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
-//     Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
-//     Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
-// });
+Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
+    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
+    Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
+    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
+});
 
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
 Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
