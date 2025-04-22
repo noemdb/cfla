@@ -26,7 +26,8 @@ class DebateComponent extends Component
     #[On('debate-online')] 
     public function updateDebateOnline($id)
     {
-        $this->debate = Debate::findOrFail($id);
+        // $this->debate = Debate::findOrFail($id);
+        $this->debate = Debate::find($id) ?? new Debate();
     }
 
     public function loadActive()

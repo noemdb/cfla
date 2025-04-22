@@ -23,10 +23,15 @@
                     
                         <div class="grid border border-gray-200 rounded-lg shadow-sm p-2 dark:border-gray-700 md:grid-cols-2 bg-white dark:bg-gray-800">
                             @forelse ($options as $item)
-                                @php $status_answer = ($item->status_option_correct && $question->status_over_time) ? true : false @endphp
-                                @php $status_noanswer = ($question->status_over_time && ! $item->status_option_correct) ? true : false @endphp
-                                <figure {{ ($status_answer) ? "style=background-color:#3cb992" : null}} class="text-gray-500  flex flex-col  items-center justify-start py-2 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">                    
-                                    <blockquote class="max-w-2xl mx-auto mb-2 lg:mb-2 dark:text-gray-400">
+
+                                @php
+                                    $wrong = ($item->status_wrong_answer && $question->status_over_time) ? "background-color:red;" : null;
+                                    $status_answer = ($item->status_option_correct && $question->status_over_time) ? true : false;
+                                    $status_noanswer = ($question->status_over_time && ! $item->status_option_correct) ? true : false;
+                                @endphp
+                                
+                                <figure style="{{ ($status_answer) ? "background-color:#3cb992;" : null}} {{$wrong ?? null}}"  class="text-gray-500  flex flex-col  items-center justify-start py-2 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">                    
+                                    <blockquote class="max-w-2xl mx-auto mb-2 lg:mb-2 dark:text-gray-400" >
                                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white pt-2">
                                             @if ($status_noanswer)
                                             <div class="rounded-full h-20 w-20 bg-gray-400 shadow-md hover:shadow-lg flex justify-center items-center">    

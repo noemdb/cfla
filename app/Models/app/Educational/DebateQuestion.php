@@ -25,10 +25,11 @@ class DebateQuestion extends Model
     ];
 
     const CATEGORY = [
-        '[21000] Lengua e Inglés'=>'Lengua e Inglés',
+        '[21000] Lengua'=>'Lengua',
+        '[21000] Inglés'=>'Inglés',
         '[21000] Matemática'=>'Matemática',
         '[21000] Ciencias Sociales'=>'Ciencias Sociales',
-        '[21000] Ciencias Naturales'=>'Ciencias Naturales',
+        '[21000] Ciencias Naturales y Robótica'=>'Ciencias Naturales y Robótica',
         '[21000] Estética'=>'Estética',
         '[21000] Cultura General'=>'Cultura General',
         '[21000] Educación Física'=>'Educación Física',
@@ -74,8 +75,8 @@ class DebateQuestion extends Model
     {
         $debate = $this->debate; //dd($debate);
         $grado = $debate->grado; //dd($grado);
-        $seccions = $grado->grado; //dd($grado);
-        return $this->grado->seccions->where('status_active',true);
+        // $seccions = $grado->seccions; dd($seccions);
+        return $this->grado->seccions->where('status_active','true')->where('status_inscription_affects','true');
     }
 
     // Scope para obtener las preguntas activas

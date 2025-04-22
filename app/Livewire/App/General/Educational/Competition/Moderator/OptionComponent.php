@@ -211,4 +211,98 @@ class OptionComponent extends Component
         $this->answer = DebateAnswer::find($id);
     }
 
+    public function answerNullSeccion($seccion_id,$option_id)
+    {
+        $seccion = Seccion::findOrFail($seccion_id);
+        $this->seccion_score = $seccion;
+        $grado = $seccion->grado;
+        $question = DebateQuestion::findOrFail($this->question->id);
+        $option = DebateOption::findOrFail($option_id);
+
+        $answers = DebateAnswer::where('question_id',$this->question->id)->where('option_id',$option->id)->get();
+
+        if ($answers->isNotEmpty()) {
+            foreach ($answers as $answer) {
+                $answer->delete();
+            }
+        }
+
+        $arr = [
+            'question_id'=>$question->id,
+            'option_id'=>$option->id,
+            'grado_id'=>$grado->id,
+            'seccion_id'=>$seccion->id,
+            'status_claim'=>false,
+            'score'=>null,
+        ];
+
+        $this->answer = DebateAnswer::create($arr);
+
+        $option = DebateOption::findOrFail($option_id);
+        $option->status_wrong_answer = true;
+        $option->status_option_correct = false;
+        $option->save();
+
+        $question->status_answer = true;
+        $question->time_elapsed = $question->time;
+        $question->save();
+
+        $this->notification()->success(
+            $title = 'Respuesta anulada',
+            $description = 'Puntaje anulado correctamente!'
+        );
+
+        $this->updateOptionList($question->id);
+
+        $this->dispatch('update-score');
+
+    }
+
+    public function answerScoreSeccion($seccion_id,$option_id)
+    {
+        $seccion = Seccion::findOrFail($seccion_id);
+        $this->seccion_score = $seccion;
+        $grado = $seccion->grado;
+        $question = DebateQuestion::findOrFail($this->question->id);
+        $option = DebateOption::findOrFail($option_id);
+
+        $answers = DebateAnswer::where('question_id',$this->question->id)->where('option_id',$option->id)->get();
+
+        if ($answers->isNotEmpty()) {
+            foreach ($answers as $answer) {
+                $answer->delete();
+            }
+        }
+
+        $arr = [
+            'question_id'=>$question->id,
+            'option_id'=>$option->id,
+            'grado_id'=>$grado->id,
+            'seccion_id'=>$seccion->id,
+            'status_claim'=>false,
+            'score'=>$question->weighting,
+        ];
+
+        $this->answer = DebateAnswer::create($arr);
+
+        $option = DebateOption::findOrFail($option_id);
+        $option->status_option_correct = true;
+        $option->status_wrong_answer = false;
+        $option->save();
+
+        $question->status_answer = true;
+        $question->time_elapsed = $question->time;
+        $question->save();
+
+        $this->notification()->success(
+            $title = 'Respuesta anulada',
+            $description = 'Puntaje anulado correctamente!'
+        );
+
+        $this->updateOptionList($question->id);
+
+        $this->dispatch('update-score');
+
+    }
+
 }

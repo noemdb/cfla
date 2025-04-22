@@ -57,16 +57,46 @@
         </div>
         <div class="grid mb-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-4 md:grid-cols-2 bg-white dark:bg-gray-800">
             @forelse ($options as $item)
-                <figure  {{ ($item->status_option_correct && $question->status_over_time) ? "style=background-color:darkolivegreen" : null}} class="flex flex-col items-center justify-start p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">                    
+                @php 
+                    $correct = ($item->status_option_correct && $question->status_over_time) ? "background-color:darkolivegreen;" : null;
+                    $wrong = ($item->status_wrong_answer && $question->status_over_time) ? "background-color:red;" : null;
+                @endphp
+                <figure style="{{$correct}} {{$wrong}}" class="relative flex flex-col items-center justify-start p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">
+
+                    @if (! $question->status_answer && $question->status_over_time && $question->status_active)
+
+                        @php $seccions = $question->seccions @endphp
+                        <div class="absolute top-2 right-2">
+
+                            <x-dropdown>
+                                <x-dropdown.header label="Puntuación">
+                                    @foreach ($seccions as $seccion)
+                                    <x-dropdown.item :label="$seccion->name" wire:click="answerScoreSeccion({{$seccion->id}},{{$item->id}})"/>
+                                    @endforeach
+                                </x-dropdown.header>
+                                <x-dropdown.item separator/>
+
+                                <x-dropdown.header label="Anulación">
+                                    @foreach ($seccions as $seccion)
+                                    <x-dropdown.item :label="$seccion->name" wire:click="answerNullSeccion({{$seccion->id}},{{$item->id}})"/>
+                                    @endforeach
+                                </x-dropdown.header>
+
+                            </x-dropdown>
+                            
+                        </div>
+                        
+                    @endif                    
+                
                     <blockquote class="max-w-2xl mx-auto mb-2 text-gray-500 lg:mb-2 dark:text-gray-400">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            @php $color=$colors[$loop->index]; @endphp
+                            @php $color = $colors[$loop->index]; @endphp
                             <x-badge.circle :$color lg label="{{$literal[$loop->index]}}"/>
                         </h3>
                     </blockquote>
-                    <figcaption class="flex items-center justify-center ">
+                    <figcaption class="flex items-center justify-center">
                         <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
-                            <div class="text-sm text-gray-500 dark:text-gray-400 ">
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
                                 {{$item->text}}
                             </div>
                         </div>

@@ -13,6 +13,7 @@ class DebateOption extends Model
         'text',
         'observation',
         'status_option_correct',
+        'status_wrong_answer',
         'attachment',
     ];
 
@@ -21,6 +22,7 @@ class DebateOption extends Model
         'text' => 'Texto',
         'observation' => 'Observación adicional',
         'status_option_correct' => 'Opción correcta',
+        'status_wrong_answer' => 'Opción erronea seleccionada',
         'attachment' => 'Archivo adjunto',
     ];    
     

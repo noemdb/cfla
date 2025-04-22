@@ -15,7 +15,7 @@ class QuestionComponent extends Component
     #[On('detabe-active')] 
     public function updateQuestionsList($id)
     {
-        $this->debate = Debate::findOrFail($id);
+        $this->debate = Debate::find($id) ?? new Debate();
         $this->questions = DebateQuestion::where('debate_id',$id);
         $this->questions = ($this->category) ? $this->questions->where('category',$this->category) : $this->questions ;    
         $this->questions = $this->questions->inRandomOrder()->get();
@@ -79,7 +79,7 @@ class QuestionComponent extends Component
     public function updatedListCategory($debate_id)
     {
         $this->list_category =  DebateQuestion::CATEGORY;
-        $pestudio = $this->debate->pestudio;
+        $pestudio = $this->debate->pestudio; //dd($pestudio);
         $filteredArray = [];
         foreach ($this->list_category as $key => $value) {
             if (strpos($key, '['.$pestudio->code_oficial.']') !== false) {
