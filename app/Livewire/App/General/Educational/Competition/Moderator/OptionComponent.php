@@ -23,17 +23,18 @@ class OptionComponent extends Component
     #[On('question-active')] 
     public function updateOptionList($id)
     {
-        $this->question = DebateQuestion::findOrFail($id);
+        // $this->question = DebateQuestion::findOrFail($id);
+        $this->question = DebateQuestion::find($id) ?? null;
         $this->options = DebateOption::where('question_id',$id)->inRandomOrder()->get();        
         $this->active_id = null;
 
         //timer
         $this->setGradoSeccions();
         $this->timerActive = false;
-        $this->timeRemaining = $this->question->TimeRemaining;
+        $this->timeRemaining = $this->question->TimeRemaining ?? null;
 
         //answer
-        $this->answer = DebateAnswer::where('question_id',$this->question->id)->first();
+        $this->answer = DebateAnswer::where('question_id',$this->question->id ?? null)->first();
     }
 
     public function mount($question_id)

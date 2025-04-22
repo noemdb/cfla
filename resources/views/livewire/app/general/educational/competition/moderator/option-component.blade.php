@@ -5,11 +5,13 @@
 
             <div class="m-1">
 
+                @if ($question)
+
                 <x-card>
             
                     <x-slot name="title">
                         <div class="flex">
-                            <div class="font-normal text-gray-500 px-2">Pregunta:</span> <span class="text-md ms-3 font-medium">{{$question->text}} </div> 
+                            <div class="font-normal text-gray-500 px-2">Pregunta:</span> <span class="text-md ms-3 font-medium">{{$question->text ?? null}} </div> 
                             @if ($question->status_active)
                                 <x-badge.circle negative icon="pause" class="ms-2 px-2 animate-pulse"/>
                             @endif
@@ -41,6 +43,12 @@
                     </div>
             
                 </x-card>
+
+                @else
+
+                <div class="me-2 text-muted">No hay pregunta activa</div>
+                    
+                @endif
             
             </div>            
 

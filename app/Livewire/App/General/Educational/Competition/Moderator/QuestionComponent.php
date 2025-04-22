@@ -33,7 +33,8 @@ class QuestionComponent extends Component
     #[On('question-online')] 
     public function updateQuestionOnline($id)
     {
-        $this->question = DebateQuestion::findOrFail($id);
+        // $this->question = DebateQuestion::findOrFail($id);
+        $this->question = DebateQuestion::find($id) ?? new DebateQuestion();
         $this->category = ($this->question) ? $this->question->category : null; 
     }
 

@@ -53,8 +53,9 @@ class DebateComponent extends Component
 
     public function active($id)
     {
-        $this->debate = Debate::findOrFail($id);
-        $this->active_id = $this->debate->id ;        
+        // $this->debate = Debate::findOrFail($id);
+        $this->debate = Debate::find($id) ?? new Debate();
+        $this->active_id = ($this->debate) ? $this->debate->id : null;        
         $this->dispatch('detabe-active',id: $id);
     }
 
@@ -63,6 +64,7 @@ class DebateComponent extends Component
         $this->active($id);
         $this->setOnline($id);
         $this->loadDebate($this->competition_id);
+        $this->dispatch('detabe-active',id: $id);
     }
 
     public function setOnline($id)
