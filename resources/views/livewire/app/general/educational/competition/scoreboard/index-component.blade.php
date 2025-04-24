@@ -18,7 +18,7 @@
                         </div>
                     </div>
                     <div class="col-span-2 border-l-2">
-                        <div class="bg-lime-200 border-t-4 border-green-600 p-1" wire:poll.5s="updateScoreBoard({{$competition->id}})">
+                        <div class="bg-lime-200 border-t-4  border-white p-1" wire:poll.5s="updateScoreBoard({{$competition->id}})">
                             <span class="text-lg font-bold">Resultados Preliminares:</span>
                         </div>
                         @include('livewire.app.general.educational.competition.scoreboard.partials.scores')
