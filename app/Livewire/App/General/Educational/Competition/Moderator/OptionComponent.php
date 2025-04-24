@@ -241,7 +241,7 @@ class OptionComponent extends Component
 
         $option = DebateOption::findOrFail($option_id);
         $option->status_wrong_answer = true;
-        $option->status_option_correct = false;
+        // $option->status_option_correct = false;
         $option->save();
 
         $question->status_answer = true;
