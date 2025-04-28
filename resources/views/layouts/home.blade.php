@@ -3,6 +3,16 @@
 <html class="scroll-smooth">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-47HF698FBL"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-47HF698FBL');
+    </script>
+
     {{-- <title>{{env('APP_NAME')}} - @yield('title')</title> --}}
     <title>@yield('title')</title>
 
