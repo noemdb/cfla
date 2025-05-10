@@ -3,6 +3,7 @@
 use App\Http\Controllers\Census\CatchmentPDFController;
 use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Educational\CompetitionController;
+use App\Http\Controllers\GmailController;
 use App\Http\Controllers\HomeController;
 use App\Livewire\EnrollmentWizard;
 use Illuminate\Support\Facades\Route;
@@ -39,25 +40,16 @@ Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'd
 
 
 Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
-    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class,'moderator'])->name('general.educational.competition.moderator');
-    Route::get('/educational/competition/board/{token}', [CompetitionController::class,'board'])->name('general.educational.competition.board');
-    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class,'scoreboard'])->name('general.educational.competition.scoreboard');
+    Route::get('/educational/competition/moderator/{token}', [CompetitionController::class, 'moderator'])->name('general.educational.competition.moderator');
+    Route::get('/educational/competition/board/{token}', [CompetitionController::class, 'board'])->name('general.educational.competition.board');
+    Route::get('/educational/competition/scoreboard/{token}', [CompetitionController::class, 'scoreboard'])->name('general.educational.competition.scoreboard');
 });
 
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
 Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
 
 
-// Route::get('/env', [HomeController::class, 'env'])->name('env');
-// Livewire::setScriptRoute(function ($handle) {
-//     return Route::get('/cfla/livewire/livewire.js', $handle);
-// });
-// Livewire::setUpdateRoute(function ($handle) {
-//     return Route::post('/cfla/livewire/update', $handle);
-// });
-// Livewire::setScriptRoute(function ($handle) {
-//     return Route::get(env('APP_URL_PRE','null').'/livewire/livewire.js', $handle);
-// });
-// Livewire::setUpdateRoute(function ($handle) {
-//     return Route::post(env('APP_URL_PRE','null').'/livewire/update', $handle);
-// });
+//Api Gmail
+Route::get('/auth/google', [GmailController::class, 'redirectToGoogle'])->name('google.auth');
+Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::get('/send-email', [GmailController::class, 'sendEmail']);

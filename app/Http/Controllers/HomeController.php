@@ -6,6 +6,7 @@ use App\Models\app\Academy\Enrollment;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Blog\Post;
 use Illuminate\Http\Request;
+use Google_Service_Gmail;
 
 class HomeController extends Controller
 {
@@ -41,13 +42,6 @@ class HomeController extends Controller
     public function post($id)
     {
         $post = Post::findOrFail($id);
-        return view('post',compact('post'));
+        return view('post', compact('post'));
     }
-
-    // public function env(Request $request)
-    // {
-    //     /* Getting All Env Variables */
-    //     $allEnvVar = $_ENV;
-    //     dd($allEnvVar);
-    // }
 }
