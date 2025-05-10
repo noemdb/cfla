@@ -84,7 +84,7 @@ class CatchmentWizard extends Component
     // Paso 1: Enviar código al email
     public function sendEmailCode()
     {
-        abort(500);
+        // abort(500);
 
         $this->validate(['email' => 'required|email']);
 
