@@ -5,15 +5,10 @@ namespace App\Livewire;
 use App\Models\app\Academy\Catchment;
 use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
-use App\Services\GmailService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use WireUi\Traits\Actions;
-use Google\Client;
-use Google\Service\Gmail;
-use Illuminate\Support\Facades\Storage;
-
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -23,13 +18,6 @@ class CatchmentWizard extends Component
     use Actions;
     use CatchmentValidate;
     use CatchmentUpdates;
-
-    protected $gmailService;
-
-    public function __construct()
-    {
-        $this->gmailService = new GmailService();
-    }
 
     public $catchment_id; // ID de la censo
     public $currentStep = 1; // Paso actual del asistente
@@ -91,45 +79,21 @@ class CatchmentWizard extends Component
         $today = now()->toDateString();
         $this->day_appointment = $today;
         $this->day_appointment_start = ($today > $this->day_appointment_start) ? $today : $this->day_appointment_start;
-
-        // $this->email="noemdb@gmail.com";
-        // $this->representant_ci="14608133";
-        // $this->representant_name="noe dominguez";
-        // $this->representant_phone="584121234567";
-        // $this->representant_cellphone="584121345678";
-        // $this->grade=rand(2,13);
-        // $this->firstname="camila andreina".rand(1,1000);
-        // $this->lastname="dominguez".rand(1,1000);
-        // $this->date_birth="2025-01-".rand(1,28);
-    }
-
-    private function getGoogleClient(): Client
-    {
-        $client = new Client();
-        $client->setApplicationName('Laravel Gmail API');
-        $client->setScopes(Gmail::GMAIL_SEND);
-        $client->setAuthConfig(storage_path('app/google/credentials.json'));
-        $client->setAccessType('offline');
-        $client->setPrompt('select_account consent');
-        $client->setRedirectUri(route('google.callback'));
-        return $client;
     }
 
     // Paso 1: Enviar código al email
     public function sendEmailCode()
     {
-        // abort(500);
         $this->validate(['email' => 'required|email']);
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
 
         try {
-            $this->gmailService->sendEmail(
-                $this->email,
-                'Código de verificación',
-                "Tu código de validación es: {$this->verificationCode}"
-            );
+            Mail::raw("Tu código de validación es: {$this->verificationCode}", function ($message) {
+                $message->to($this->email)
+                    ->subject('Código de verificación');
+            });
 
             Session::put('email_code', $this->verificationCode);
 
@@ -138,10 +102,8 @@ class CatchmentWizard extends Component
                 $description = 'Se ha enviado un código de validación a tu correo.'
             );
         } catch (\Exception $e) {
-            if (str_contains($e->getMessage(), 'nueva autenticación')) {
-                return redirect()->route('google.auth');
-            }
-
+            dd($e);
+            $this->verificationCode = null;
             $this->notification()->error(
                 $title = 'Error !!!',
                 $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
