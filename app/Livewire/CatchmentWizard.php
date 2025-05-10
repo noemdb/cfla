@@ -5,21 +5,31 @@ namespace App\Livewire;
 use App\Models\app\Academy\Catchment;
 use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
+use App\Services\GmailService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 use WireUi\Traits\Actions;
+use Google\Client;
+use Google\Service\Gmail;
+use Illuminate\Support\Facades\Storage;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Storage;
 
 class CatchmentWizard extends Component
 {
     use Actions;
     use CatchmentValidate;
     use CatchmentUpdates;
+
+    protected $gmailService;
+
+    public function __construct()
+    {
+        $this->gmailService = new GmailService();
+    }
 
     public $catchment_id; // ID de la censo
     public $currentStep = 1; // Paso actual del asistente
@@ -35,10 +45,10 @@ class CatchmentWizard extends Component
     public $representant_cellphone; // Paso 3: Nombre del representante
     public $grade; // Paso 3: Grado/Nivel solicitado
     public $day_appointment; // Dia de la cita
-    public $day_appointment_start='2025-05-19'; // Dia de la cita inical
-    public $day_appointment_end='2025-05-21'; // Dia de la cita final
-    public $status_validate_code_email; // Dia de la cita final 
-    
+    public $day_appointment_start = '2025-05-19'; // Dia de la cita inical
+    public $day_appointment_end = '2025-05-21'; // Dia de la cita final
+    public $status_validate_code_email; // Dia de la cita final
+
     protected $listeners = ['hideVideo'];
     public bool $showVideo = true; // Estado inicial: mostrar video
     public function hideVideo()
@@ -59,22 +69,21 @@ class CatchmentWizard extends Component
 
     public function restart()
     {
-        $this->currentStep=1;
-        $this->catchment_id=null;
-        $this->email=null;
-        $this->verificationCode=null;
-        $this->input_code=null;
-        $this->firstname=null;
-        $this->lastname=null;
-        $this->date_birth=null;
-        $this->representant_name=null;
-        $this->representant_ci=null;
+        $this->currentStep = 1;
+        $this->catchment_id = null;
+        $this->email = null;
+        $this->verificationCode = null;
+        $this->input_code = null;
+        $this->firstname = null;
+        $this->lastname = null;
+        $this->date_birth = null;
+        $this->representant_name = null;
+        $this->representant_ci = null;
         $this->representant_phone = null;
         $this->representant_cellphone = null;
         $this->grade = null;
         $this->day_appointment = null;
         $this->status_validate_code_email = null;
-        
     }
 
     public function mount()
@@ -94,6 +103,18 @@ class CatchmentWizard extends Component
         // $this->date_birth="2025-01-".rand(1,28);
     }
 
+    private function getGoogleClient(): Client
+    {
+        $client = new Client();
+        $client->setApplicationName('Laravel Gmail API');
+        $client->setScopes(Gmail::GMAIL_SEND);
+        $client->setAuthConfig(storage_path('app/google/credentials.json'));
+        $client->setAccessType('offline');
+        $client->setPrompt('select_account consent');
+        $client->setRedirectUri(route('google.callback'));
+        return $client;
+    }
+
     // Paso 1: Enviar código al email
     public function sendEmailCode()
     {
@@ -101,19 +122,30 @@ class CatchmentWizard extends Component
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
-        // $this->input_code = $this->verificationCode;
 
-        Mail::raw("Tu código de validación es: $this->verificationCode", function ($message) {
-            $message->to($this->email)
-                    ->subject('Código de verificación');
-        });
+        try {
+            $this->gmailService->sendEmail(
+                $this->email,
+                'Código de verificación',
+                "Tu código de validación es: {$this->verificationCode}"
+            );
 
-        Session::put('email_code', $this->verificationCode); // Guardar en sesión
+            Session::put('email_code', $this->verificationCode);
 
-        $this->notification()->success(
-            $title = 'Excelente!',
-            $description = 'Se ha enviado un código de validación a tu correo.'
-        );
+            $this->notification()->success(
+                $title = 'Excelente!',
+                $description = 'Se ha enviado un código de validación a tu correo.'
+            );
+        } catch (\Exception $e) {
+            if (str_contains($e->getMessage(), 'nueva autenticación')) {
+                return redirect()->route('google.auth');
+            }
+
+            $this->notification()->error(
+                $title = 'Error !!!',
+                $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+            );
+        }
     }
 
     // Validar código ingresado
@@ -144,13 +176,14 @@ class CatchmentWizard extends Component
 
         // Verificar si ya está registrado
         if (Catchment::where('firstname', $this->firstname)
-                    ->where('lastname', $this->lastname)
-                    ->where('date_birth', $this->date_birth)
-                    ->exists()) {
+            ->where('lastname', $this->lastname)
+            ->where('date_birth', $this->date_birth)
+            ->exists()
+        ) {
             $this->notification()->error(
                 $title = 'Error !!!',
                 $description = 'Este estudiante ya está registrado.'
-            );            
+            );
         } else {
             $this->currentStep = 3;
         }
@@ -160,7 +193,7 @@ class CatchmentWizard extends Component
     public function saveCatchment()
     {
         $date = $this->validate();
-        
+
         $time = Carbon::now()->timestamp;
         $random = mt_rand(10000, 99999);
         $token = substr($time . $random, -10);
@@ -194,7 +227,7 @@ class CatchmentWizard extends Component
     {
         $this->day_appointment = $value;
         $this->validate([
-            'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
+            'day_appointment' => 'required|after_or_equal:' . $this->day_appointment_start . '|before_or_equal:' . $this->day_appointment_end . '',
         ]);
     }
 
@@ -207,7 +240,7 @@ class CatchmentWizard extends Component
         $data = [
             'firstname' => $catchment->firstname,
             'lastname' => $catchment->lastname,
-            'date_birth' => $catchment->date_birth, 
+            'date_birth' => $catchment->date_birth,
             'representant_name' => $catchment->representant_name,
             'representant_ci' => $catchment->representant_ci,
             'representant_phone' => $catchment->representant_phone,
@@ -234,14 +267,14 @@ class CatchmentWizard extends Component
     public function generateQrCode($catchment_id)
     {
         $catchment = Catchment::findOrFail($catchment_id);
-        $pdfUrl = route('catchment.download.pdf',$catchment->token); // Ruta que descarga el PDF
+        $pdfUrl = route('catchment.download.pdf', $catchment->token); // Ruta que descarga el PDF
         return QrCode::size(200)->generate($pdfUrl);
     }
 
     public function generateQrCodePDF($token)
     {
         Catchment::where('token', $token)->firstOrFail();
-        $pdfUrl = route('catchment.download.pdf',$token); // Ruta que descarga el PDF
+        $pdfUrl = route('catchment.download.pdf', $token); // Ruta que descarga el PDF
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
     }
 
@@ -249,5 +282,4 @@ class CatchmentWizard extends Component
     {
         return view('livewire.catchment-wizard');
     }
-    
 }

@@ -9,6 +9,7 @@
 .env.backup
 .env.production
 .phpunit.result.cache
+docker-compose.override.yml
 Homestead.json
 Homestead.yaml
 auth.json
@@ -17,3 +18,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/storage/app/google/credentials.json
+/storage/app/google/token.json

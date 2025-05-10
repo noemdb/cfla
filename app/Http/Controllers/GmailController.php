@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\GmailService;
 use Google\Client;
 use Google\Service\Gmail;
 use Illuminate\Http\Request;
@@ -9,19 +10,22 @@ use Illuminate\Support\Facades\Storage;
 
 class GmailController extends Controller
 {
+    protected $gmailService;
+
+    public function __construct()
+    {
+        $this->gmailService = new GmailService();
+    }
+
     public function redirectToGoogle()
     {
-        $client = $this->getGoogleClient();
-        $authUrl = $client->createAuthUrl();
-        return redirect($authUrl);
+        return redirect($this->gmailService->getAuthUrl());
     }
 
     public function handleGoogleCallback(Request $request)
     {
-        $client = $this->getGoogleClient();
-        $token = $client->fetchAccessTokenWithAuthCode($request->code);
-        Storage::put('google/token.json', json_encode($token));
-        return 'Autenticado con Gmail';
+        $this->gmailService->handleCallback($request->code);
+        return redirect()->route('home')->with('success', 'Autenticación con Gmail completada');
     }
 
     public function sendEmail()
