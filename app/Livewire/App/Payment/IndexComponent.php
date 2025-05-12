@@ -34,11 +34,11 @@ class IndexComponent extends Component
 
     public $ci;
     public $step = 0, $limit = 2;
-    public $modalStart,$modalOperOk,$modalSearch,$modalAssistent,$modalEmpty;
+    public $modalStart, $modalOperOk, $modalSearch, $modalAssistent, $modalEmpty;
     public Representant $representant;
     public PaymentForm $payment;
-    public $list_comment,$list_bank,$method_pay_list,$type_pay_list,$banco_emisor_list;
-    public $toDate,$banco;
+    public $list_comment, $list_bank, $method_pay_list, $type_pay_list, $banco_emisor_list;
+    public $toDate, $banco;
 
     public function loadTest()
     {
@@ -47,19 +47,19 @@ class IndexComponent extends Component
         $this->payment->phone = '1234567890';
         $this->payment->comment = '#####################';
         $this->payment->phone_1 = '12345678';
-        $this->payment->number_i_pay_1 = rand(1000000,100000000);
+        $this->payment->number_i_pay_1 = rand(1000000, 100000000);
         $this->payment->banco_id_1 = 2;
         $this->payment->banco_emisor_1 = 'BANCO DE VENEZUELA';
         $this->payment->method_pay_id_1 = 3;
         $this->payment->date_transaction_1 = '2024-01-25';
         $this->payment->ammount_1 = '10000';
-        $this->payment->observation_1 = '#################';        
+        $this->payment->observation_1 = '#################';
     }
 
     public function upLoadImage($image)
     {
-        $url = ($image) ? $image->store('images','payments') : null; //dd($url);
-        return ($url) ? 'storage/payment/'.$url : null;
+        $url = ($image) ? $image->store('images', 'payments') : null; //dd($url);
+        return ($url) ? 'storage/payment/' . $url : null;
     }
 
     public function save()
@@ -77,24 +77,24 @@ class IndexComponent extends Component
             $icon = "success";
 
             $inputs = (object) [
-                'id'=>$payment->id,
-                'representant_name'=>$representant->name,
-                'ci_representant'=>$representant->ci_representant,
-                'number_i_pay'=>$this->payment->number_i_pay_1,
-                'ammount'=>$this->payment->ammount_1,
-                'type_pay'=>$this->payment->type_pay,
-                'date'=>Carbon::now()->format('d-m-Y h:i'),
-                'created_at'=>$payment->created_at,
+                'id' => $payment->id,
+                'representant_name' => $representant->name,
+                'ci_representant' => $representant->ci_representant,
+                'number_i_pay' => $this->payment->number_i_pay_1,
+                'ammount' => $this->payment->ammount_1,
+                'type_pay' => $this->payment->type_pay,
+                'date' => Carbon::now()->format('d-m-Y h:i'),
+                'created_at' => $payment->created_at,
             ];
 
-            
+
             $toDate = Date::now()->format('d F Y');
-            $institucion = Institucion::OrderBy('created_at','DESC')->first();
-            $autoridad1 = Autoridad::getTipoAuthority('2');//director
-            $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
+            $institucion = Institucion::OrderBy('created_at', 'DESC')->first();
+            $autoridad1 = Autoridad::getTipoAuthority('2'); //director
+            $autoridad2 = Autoridad::getTipoAuthority('4'); //ADMINISTRADOR
             $data = (object) [
-                'email'=>$representant->email,
-                'name'=>$representant->name,
+                'email' => $representant->email,
+                'name' => $representant->name,
                 'subject' => 'Notificaciones SAEFL',
                 'representant' => $representant,
                 'inputs' => $inputs,
@@ -105,15 +105,24 @@ class IndexComponent extends Component
                 'view' => 'emails.welcome',
             ];
 
-            Mail::to($data->email)->send(new WelcomeEmail($data));
-            // $time = Carbon::now()->addSeconds(30);
-            // SendWelcomeEmail::dispatch($data)->delay($time);
+            try {
+                Mail::to($data->email)->send(new WelcomeEmail($data));
 
+                $this->notification()->success(
+                    $title = 'Excelente!',
+                    $description = 'Se ha enviado la notificación a tu correo electrónico.'
+                );
+            } catch (\Exception $e) {
+                $this->notification()->error(
+                    $title = 'Error !!!',
+                    $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+                );
+            }
         } else {
             $title = "No se han guardado los datos";
             $description = "Ocurrieron errores";
             $icon = "warning";
-        }         
+        }
 
         $this->modalAssistent = false;
         $this->image = null;
@@ -127,7 +136,7 @@ class IndexComponent extends Component
             'icon'        => $icon
         ]);
         $this->modalOperOk = true;
-    }    
+    }
 
     public function mount()
     {
@@ -163,7 +172,7 @@ class IndexComponent extends Component
             $this->modalStart = true;
         }
         $this->modalSearch = false;
-        $this->modalOperOk = false;       
+        $this->modalOperOk = false;
     }
 
     public function setStart()
@@ -177,7 +186,7 @@ class IndexComponent extends Component
 
     public function validatedForStep($step)
     {
-        
+
 
         switch ($step) {
             case '1':
@@ -200,7 +209,7 @@ class IndexComponent extends Component
             case '2':
                 $this->validate();
                 $this->next($step);
-            break;
+                break;
         }
 
         $this->resetErrorBag();
