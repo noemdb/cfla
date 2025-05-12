@@ -12,6 +12,8 @@ use WireUi\Traits\Actions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\View;
 
 class CatchmentWizard extends Component
 {
@@ -84,27 +86,39 @@ class CatchmentWizard extends Component
     // Paso 1: Enviar código al email
     public function sendEmailCode()
     {
-        // abort(500);
-
         $this->validate(['email' => 'required|email']);
 
         // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
 
         try {
-            Mail::raw("Tu código de validación es: {$this->verificationCode}", function ($message) {
-                $message->to($this->email)
-                    ->subject('Código de verificación');
-            });
+            // Renderizar la vista del email
+            $html = View::make('emails.verification-code', [
+                'code' => $this->verificationCode
+            ])->render();
 
-            Session::put('email_code', $this->verificationCode);
+            // Enviar email usando Resend API
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . env('RESEND_API_KEY'),
+                'Content-Type' => 'application/json',
+            ])->post(env('RESEND_URL'), [
+                'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
+                'to' => $this->email,
+                'subject' => 'Código de verificación',
+                'html' => $html,
+            ]);
 
-            $this->notification()->success(
-                $title = 'Excelente!',
-                $description = 'Se ha enviado un código de validación a tu correo.'
-            );
+            if ($response->successful()) {
+                Session::put('email_code', $this->verificationCode);
+
+                $this->notification()->success(
+                    $title = 'Excelente!',
+                    $description = 'Se ha enviado un código de validación a tu correo.'
+                );
+            } else {
+                throw new \Exception('Error en la respuesta de Resend: ' . $response->body());
+            }
         } catch (\Exception $e) {
-            dd($e);
             $this->verificationCode = null;
             $this->notification()->error(
                 $title = 'Error !!!',
