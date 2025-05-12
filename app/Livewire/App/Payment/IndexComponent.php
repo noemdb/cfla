@@ -18,6 +18,8 @@ use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\View;
 
 class IndexComponent extends Component
 {
@@ -82,7 +84,6 @@ class IndexComponent extends Component
                 'created_at' => $payment->created_at,
             ];
 
-
             $toDate = Date::now()->format('d F Y');
             $institucion = Institucion::OrderBy('created_at', 'DESC')->first();
             $autoridad1 = Autoridad::getTipoAuthority('2'); //director
@@ -101,12 +102,28 @@ class IndexComponent extends Component
             ];
 
             try {
-                Mail::to($data->email)->send(new WelcomeEmail($data));
+                // Renderizar la vista del email
+                $html = View::make($data->view, ['data' => $data])->render();
 
-                $this->notification()->success(
-                    $title = 'Excelente!',
-                    $description = 'Se ha enviado la notificación a tu correo electrónico.'
-                );
+                // Enviar email usando Resend API
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . env('RESEND_API_KEY'),
+                    'Content-Type' => 'application/json',
+                ])->post(env('RESEND_URL'), [
+                    'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
+                    'to' => $data->email,
+                    'subject' => $data->subject,
+                    'html' => $html,
+                ]);
+
+                if ($response->successful()) {
+                    $this->notification()->success(
+                        $title = 'Excelente!',
+                        $description = 'Se ha enviado la notificación a tu correo electrónico.'
+                    );
+                } else {
+                    throw new \Exception('Error en la respuesta de Resend: ' . $response->body());
+                }
             } catch (\Exception $e) {
                 $this->notification()->error(
                     $title = 'Error !!!',
