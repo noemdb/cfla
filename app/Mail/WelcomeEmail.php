@@ -4,6 +4,8 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class WelcomeEmail extends Mailable
@@ -17,10 +19,26 @@ class WelcomeEmail extends Mailable
         $this->data = $data;
     }
 
-    public function build()
+    public function envelope(): Envelope
     {
-        $view = $this->data->view;
-        $subject = $this->data->subject;
-        return $this->view($view)->subject($subject);
+        return new Envelope(
+            from: config('mail.from.address'),
+            subject: $this->data->subject,
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: $this->data->view,
+            with: [
+                'data' => $this->data,
+            ],
+        );
+    }
+
+    public function attachments(): array
+    {
+        return [];
     }
 }

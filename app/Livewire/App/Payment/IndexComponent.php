@@ -7,9 +7,6 @@ use App\Models\app\Admon\Banco;
 use App\Models\app\Admon\MetodoPago;
 use App\Models\app\Admon\Payment;
 use App\Models\app\Learner\Representant;
-use App\Http\Controllers\Email\SendPaymentController;
-use App\Http\Controllers\PaymentAproveController;
-use App\Jobs\SendWelcomeEmail;
 use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -19,8 +16,6 @@ use WireUi\Traits\Actions;
 use App\Mail\WelcomeEmail;
 use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Mail;
 
