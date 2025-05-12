@@ -115,7 +115,6 @@ class IndexComponent extends Component
                     'subject' => $data->subject,
                     'html' => $html,
                 ]);
-                dd($response);
 
                 if ($response->successful()) {
                     $this->notification()->success(
