@@ -113,6 +113,7 @@ class IndexComponent extends Component
                     'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
                     'to' => $data->email,
                     'cc' => [env('MAIL_CC_ADDRESS_ADMON', null)],
+                    'bcc' => [env('MAIL_CC_ADDRESS', null)],
                     'subject' => $data->subject,
                     'html' => $html,
                 ]);
