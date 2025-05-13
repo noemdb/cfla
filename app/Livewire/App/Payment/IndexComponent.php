@@ -112,6 +112,7 @@ class IndexComponent extends Component
                 ])->post(env('RESEND_URL'), [
                     'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
                     'to' => $data->email,
+                    'cc' => [env('MAIL_CC_ADDRESS_ADMON', null)],
                     'subject' => $data->subject,
                     'html' => $html,
                 ]);

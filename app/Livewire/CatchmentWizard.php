@@ -105,6 +105,8 @@ class CatchmentWizard extends Component
             ])->post(env('RESEND_URL'), [
                 'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
                 'to' => $this->email,
+                'cc' => [env('MAIL_CC_ADDRESS_CONTROL', null)],
+                'bcc' => [env('MAIL_CC_ADDRESS', null)],
                 'subject' => 'Código de verificación',
                 'html' => $html,
             ]);
