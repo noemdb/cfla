@@ -1,26 +1,44 @@
-<div class="modal fade" id="ticketRegister" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-    <div class="" role="document">
-        <div class="modal-content">
-            <div class="card-header alert-success">
-                <h4 class="modal-title">Ticket de registro</h4>
-            </div>
-            <div class="card-body">
+<div style="font-family: 'Courier New', monospace; max-width: 300px; margin: 0 auto; padding: 15px; border: 1px dashed #ccc; background-color: #fff;">
+    <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+        <h4 style="margin: 0; font-size: 16px; font-weight: bold;">TICKET DE REGISTRO</h4>
+        <span style="font-size: 12px; color: #666;">{{ $inputs['date'] }}</span>
+    </div>
 
-                <span class="font-weight-bold p-2 text-success">Su información fue procesada y registrada exitosamente.</span>
+    <div style="text-align: center; margin: 10px 0;">
+        <span style="font-size: 14px; color: #28a745;">✓ Registro Exitoso</span>
+    </div>
 
-                <div class="text-success text-center">
-                    <i class="fa fa-check fa-4x border rounded-circle p-2 m-2" aria-hidden="true"></i>
-                </div>
-
-                <ul class="px-2">
-                    <li> <span class="font-weight-bold">Número de registro:</span>  {!! $inputs['id'] !!}</li>
-                    <li> <span class="font-weight-bold">Fecha:</span> {!! $inputs['date'] !!}</li>
-                    <li> <span class="font-weight-bold">Representante:</span> CI-{!! $inputs['ci_representant'] !!} - {!! $inputs['representant_name'] !!}</li>
-                    <li> <span class="font-weight-bold">Referencias:</span>  {!! $inputs['number_i_pay'] !!}</li>
-                    <li> <span class="font-weight-bold">Monto total:</span> Bs. {!! f_float($inputs['ammount']) !!}</li>
-                    <li> <span class="font-weight-bold">Tipo de pago:</span> {!! $inputs['type_pay'] !!}</li>
-                </ul>
-            </div>
+    <div style="font-size: 12px; line-height: 1.4;">
+        <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">No. Registro:</span>
+            <span style="float: right;">{{ $inputs['id'] }}</span>
         </div>
+        <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">Representante:</span>
+            <span style="float: right;">{{ $inputs['representant_name'] }}</span>
+        </div>
+        <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">CI:</span>
+            <span style="float: right;">{{ $inputs['ci_representant'] }}</span>
+        </div>
+        <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">Referencia:</span>
+            <span style="float: right;">{{ $inputs['number_i_pay'] }}</span>
+        </div>
+        <div style="margin-bottom: 5px;">
+            <span style="font-weight: bold;">Tipo:</span>
+            <span style="float: right;">{{ $inputs['type_pay'] }}</span>
+        </div>
+    </div>
+
+    <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px;">
+        <div style="font-size: 14px; font-weight: bold; text-align: right;">
+            <span>Total: Bs. {{ f_float($inputs['ammount']) }}</span>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #666;">
+        <div>¡Gracias por su pago!</div>
+        <div>Conserve este ticket</div>
     </div>
 </div>
