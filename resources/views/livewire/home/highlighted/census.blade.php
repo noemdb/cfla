@@ -40,7 +40,7 @@
             </div>
             <div class="text-center  dark:text-neutral-200 mt-6 pt-6">
                 <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
-                <div class="text-md text-gray-600">3ra Jornada desde 27 hasta el 30 de mayo 2025, hora 2pm.</div>
+                <div class="text-md text-gray-600">4ta Jornada desde 09 hasta el 13 de junio, hora 2pm.</div>
                 {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
             </div>
         </div>
