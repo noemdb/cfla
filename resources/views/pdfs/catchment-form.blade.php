@@ -131,7 +131,7 @@
         <div>
             Por favor asista a la cita acompañado del niño/a
         </div>
-        
+
     </div>
 
     <div class="text-center">
@@ -163,7 +163,7 @@
     <!-- Pie de página -->
     <footer class="footer">
         AV. LA PAZ CON AV. CEDEÑO FRENTE A LA PLAZA JUAN JOSE DE MAYA. SAN FELIPE, YARACUY, VENEZUELA<br>
-        Teléfonos: 0424-5891682 - 0414-5442298 | Correo: frayluisamigoyara@hotmail.com
+        Teléfonos: + 058 0424-5891682 || + 058 0414-5442298 || + 058 0424-5027880 | Correo: colegiofrayluisa@gmail.com || direcciónacadémica.c.e.cfla@gmail.com || controldeestudios.c.e.cfla@gmail.com
     </footer>
 
 </body>
