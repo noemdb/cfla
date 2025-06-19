@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">4ta Jornada desde 09 hasta el 13 de junio 2025, Hora: 2pm.</div>
+        <div class="mb-8 font-semibold">5ta Jornada desde 07 hasta el 11 de julio 2025, Hora: 2pm.</div>
 
         {{-- <div class="w-full max-w-sm space-y-4"> --}}
         <div class="w-full max-full space-y-4">
