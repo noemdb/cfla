@@ -21,6 +21,17 @@
             <!-- Header con Logo -->
             <div class="text-center mb-8">
                 <div class="flex flex-col items-center mb-6">
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl">C.E. Colegio Fray Luis Amigó</h3>
+
+
+                    <!-- Títulos -->
+                    <h1 class="text-2xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl">
+                        Prosecución Estudiantil
+                    </h1>
+                    <p class="text-green-200 text-lg md:text-xl">
+                        Censo Escolar 2024 - 2025
+                    </p>
+
                     <!-- Logo -->
                     <div class="mb-4">
                         <img
@@ -29,14 +40,6 @@
                             class="w-24 h-24 md:w-32 md:h-32 rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105"
                         >
                     </div>
-
-                    <!-- Títulos -->
-                    <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl">
-                        Prosecución Estudiantil
-                    </h1>
-                    <p class="text-green-200 text-lg md:text-xl">
-                        Censo Escolar 2024 - 2025
-                    </p>
 
                 </div>
             </div>
