@@ -38,6 +38,9 @@ Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
 Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
 
+// Ruta para la prosecución
+Route::get('/prosecucion', [HomeController::class, 'prosecucion'])->name('prosecucion');
+Route::get('/prosecucion/download/{id}', [HomeController::class, 'downloadProsecucionPDF'])->name('prosecucion.download.pdf');
 
 Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
     Route::get('/educational/competition/moderator/{token}', [CompetitionController::class, 'moderator'])->name('general.educational.competition.moderator');
@@ -53,3 +56,5 @@ Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, '
 Route::get('/auth/google', [GmailController::class, 'redirectToGoogle'])->name('google.auth');
 Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/send-email', [GmailController::class, 'sendEmail']);
+
+
