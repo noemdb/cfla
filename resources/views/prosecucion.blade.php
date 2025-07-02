@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Censo Escolar 2024 - 2025 || {{ config('app.name') }}</title>
+    <title>Período Escolar 2024 - 2025 || {{ config('app.name') }}</title>
 
     <!-- Livewire -->
     @livewireStyles
@@ -21,15 +21,15 @@
             <!-- Header con Logo -->
             <div class="text-center mb-8">
                 <div class="flex flex-col items-center mb-6">
-                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl">C.E. Colegio Fray Luis Amigó</h3>
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">C.E. Colegio Fray Luis Amigó</h3>
 
 
                     <!-- Títulos -->
-                    <h1 class="text-2xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl">
+                    <h1 class="text-2xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
                         Prosecución Estudiantil
                     </h1>
                     <p class="text-green-200 text-lg md:text-xl">
-                        Censo Escolar 2024 - 2025
+                        Período Escolar 2024 - 2025
                     </p>
 
                     <!-- Logo -->

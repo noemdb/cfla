@@ -40,6 +40,7 @@ Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'd
 
 // Ruta para la prosecución
 Route::get('/prosecucion', [HomeController::class, 'prosecucion'])->name('prosecucion');
+Route::get('/prosecucion/guia', [HomeController::class, 'prosecucion_guia'])->name('prosecucion_guia');
 Route::get('/prosecucion/download/{id}', [HomeController::class, 'downloadProsecucionPDF'])->name('prosecucion.download.pdf');
 
 Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {

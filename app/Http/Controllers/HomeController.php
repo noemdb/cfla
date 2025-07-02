@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\app\Academy\Enrollment;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Blog\Post;
+use App\Models\app\Entity\Autoridad;
+use App\Models\app\Entity\Institucion;
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -69,9 +71,19 @@ class HomeController extends Controller
             abort(404, 'No se encontraron estudiantes para prosecución');
         }
 
+        $time = Carbon::now();
+        $toDate = Carbon::now()->format('d F Y');
+
+        $institution = Institucion::OrderBy('created_at','DESC')->first();
+        $autoridad1 = Autoridad::getTipoAuthority('2');//director
+        $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
+
         $data = [
             'representant' => $representant,
             'estudiants' => $estudiants,
+            'institution' => $institution,
+            'autoridad1' => $autoridad1,
+            'autoridad2' => $autoridad2,
             'fecha_proceso' => Carbon::now()->format('d/m/Y'),
             'qrCode' => $this->generateQrCodePDF($id),
         ];
@@ -90,5 +102,10 @@ class HomeController extends Controller
     {
         $pdfUrl = route('prosecucion.download.pdf', $id);
         return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
+    }
+
+    public function prosecucion_guia(Request $request)
+    {
+        return view('prosecucion_guia');
     }
 }
