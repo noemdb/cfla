@@ -21,7 +21,7 @@
                         <input
                             wire:model="ci_representant"
                             type="text"
-                            placeholder="Ej: V-12345678"
+                            placeholder="Ej: 12345678"
                             class="w-full px-4 py-3 text-center text-lg bg-gray-800 border-2 border-green-700 rounded-lg text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200"
                         />
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
