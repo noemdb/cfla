@@ -447,7 +447,7 @@
                         </h3>
                         <p class="text-gray-300">
                             El período de confirmación está establecido por la institución. Consulta las fechas límite
-                            con la administración académica para no perder la oportunidad.
+                            con la dirección académica para no perder la oportunidad.
                         </p>
                     </div>
                 </div>
