@@ -490,7 +490,7 @@
                 <span class="text-white font-semibold">{{ config('app.name') }}</span>
             </div>
             <p class="text-gray-400 text-sm">
-                Sistema de Gestión Académica - Confirmación de Prosecución Estudiantil
+                Sistema de Escolar - Confirmación de Prosecución Estudiantil
             </p>
             <p class="text-gray-500 text-xs mt-2">
                 © {{ date('Y') }} Todos los derechos reservados
