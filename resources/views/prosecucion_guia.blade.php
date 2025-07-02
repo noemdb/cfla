@@ -399,7 +399,7 @@
                         </h3>
                         <p class="text-gray-300">
                             Si tu cédula no es reconocida, verifica que esté registrada como representante en la institución.
-                            Contacta a la administración académica para actualizar tus datos.
+                            Contacta a la dirección académica para actualizar tus datos.
                         </p>
                     </div>
                 </div>
