@@ -116,7 +116,7 @@
                                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-4 0V5a2 2 0 014 0v1"></path>
                                             </svg>
-                                            <span class="text-white font-mono">V-12345678</span>
+                                            <span class="text-white font-mono">12345678</span>
                                         </div>
                                     </div>
                                     <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-medium">
