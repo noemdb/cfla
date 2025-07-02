@@ -430,7 +430,7 @@
                             ¿Es obligatorio descargar la planilla?
                         </h3>
                         <p class="text-gray-300">
-                            Sí, es recomendable descargar y guardar la planilla como comprobante oficial de tu confirmación.
+                            Es recomendable descargar y guardar la planilla como comprobante oficial de tu confirmación.
                             Este documento puede ser requerido para trámites futuros.
                         </p>
                     </div>
