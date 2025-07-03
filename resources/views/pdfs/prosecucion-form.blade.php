@@ -255,7 +255,6 @@
                 <div class="institution-info">
                     <div class="institution-name">{{ $institution->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
                     <div class="institution-dept">DIRECCIÓN ACADÉMICA</div>
-                    <div class="period">CENSO ESCOLAR 2024-2025</div>
                 </div>
             </td>
             <td width="15%" style="text-align: right;">
@@ -267,7 +266,7 @@
     <!-- Título del documento -->
     <div class="document-title">
         <h1>Planilla de Confirmación de Prosecución</h1>
-        <p>Período Escolar 2024-2025</p>
+        <p>Período Escolar 2025-2026</p>
     </div>
 
     <!-- Datos del representante -->
