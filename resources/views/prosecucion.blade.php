@@ -24,13 +24,14 @@
                     <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">C.E. Colegio Fray Luis Amigó</h3>
 
 
-                    <!-- Títulos -->
+                    <!-- Títulos 
                     <h1 class="text-2xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
                         Prosecución Estudiantil
                     </h1>
                     <p class="text-green-200 text-lg md:text-xl">
                         Período Escolar 2024 - 2025
                     </p>
+-->
 
                     <!-- Logo -->
                     <div class="mb-4">
