@@ -85,12 +85,7 @@
                                         </svg>
                                         Ingresa tu número de cédula completo
                                     </li>
-                                    <li class="flex items-start">
-                                        <svg class="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        Incluye la letra (V, E, J) y el número
-                                    </li>
+                                    
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -121,7 +116,7 @@
                                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-4 0V5a2 2 0 014 0v1"></path>
                                             </svg>
-                                            <span class="text-white font-mono">V-12345678</span>
+                                            <span class="text-white font-mono">12345678</span>
                                         </div>
                                     </div>
                                     <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-medium">
@@ -404,7 +399,7 @@
                         </h3>
                         <p class="text-gray-300">
                             Si tu cédula no es reconocida, verifica que esté registrada como representante en la institución.
-                            Contacta a la administración académica para actualizar tus datos.
+                            Contacta a la dirección académica para actualizar tus datos.
                         </p>
                     </div>
                 </div>
@@ -435,7 +430,7 @@
                             ¿Es obligatorio descargar la planilla?
                         </h3>
                         <p class="text-gray-300">
-                            Sí, es recomendable descargar y guardar la planilla como comprobante oficial de tu confirmación.
+                            Es recomendable descargar y guardar la planilla como comprobante oficial de tu confirmación.
                             Este documento puede ser requerido para trámites futuros.
                         </p>
                     </div>
@@ -452,7 +447,7 @@
                         </h3>
                         <p class="text-gray-300">
                             El período de confirmación está establecido por la institución. Consulta las fechas límite
-                            con la administración académica para no perder la oportunidad.
+                            con la dirección académica para no perder la oportunidad.
                         </p>
                     </div>
                 </div>

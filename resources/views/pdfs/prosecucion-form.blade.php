@@ -330,7 +330,7 @@
             en mi condición de representante legal de {{ count($estudiants) == 1 ? 'el estudiante mencionado' : 'los estudiantes mencionados' }},
             <strong>CONFIRMO</strong> mediante la presente planilla mi decisión de que
             {{ count($estudiants) == 1 ? 'el mismo continúe' : 'los mismos continúen' }} sus estudios en esta institución
-            educativa durante el período escolar 2024-2025.</p>
+            educativa durante el período escolar 2025-2026.</p>
 
             <p>Esta confirmación se realiza de manera <strong>voluntaria y consciente</strong>, comprometiéndome a cumplir
             con el acuerdo de convivencia escolar comunitario y todas las normativas institucionales.</p>
