@@ -19,7 +19,7 @@ class Estudiant extends Model
     protected $fillable = [
         'user_id', 'planpago_id', 'grado_inicial_id', 'seccion_inicial', 'type_ci_id', 'ci_estudiant', 'ci_estudiant_temp', 'lastname', 'name', 'gender',
         'date_birth', 'city_birth', 'town_hall_birth', 'state_birth', 'country_birth', 'dir_address', 'phone', 'cellphone', 'email', 'gsemail', 'representant_ci',
-        'representant_id', 'status_active', 'status_blacklist','status_notice', 'status_blacklist', 'obs_resumen_final','token','status_prosecution',
+        'representant_id', 'status_active', 'status_blacklist','status_notice', 'status_blacklist', 'obs_resumen_final','token','status_prosecution','date_prosecution'
     ];
     const COLUMN_COMMENTS = [
         'user_id' => 'Usuario',
@@ -51,6 +51,7 @@ class Estudiant extends Model
         'obs_resumen_final' => 'Obs. Resumen Final',
         'token' => 'Token de autenticación',
         'status_prosecution' => 'Proseguir/continuar al siguiente periodo escolar',
+        'date_prosecution' => 'Fecha de la confirmación de la prosecución al siguiente periodo escolar',
     ];
 
     public function user()

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
+use Carbon\Carbon;
 use Livewire\Component;
 use WireUi\Traits\Actions;
 use Illuminate\Support\Str;
@@ -52,7 +53,7 @@ class ProsecucionWizard extends Component
             ->whereHas('inscripcion', function($query) {
                 $query->whereHas('seccion', function($subQuery) {
                     $subQuery->where('status_active', 'true')
-                             ->where('status_inscription_affects', 'true');
+                            ->where('status_inscription_affects', 'true');
                 });
             })
             ->with(['inscripcion.seccion.grado'])
@@ -112,7 +113,10 @@ class ProsecucionWizard extends Component
 
         if (!empty($newConfirmations)) {
             Estudiant::whereIn('id', $newConfirmations)
-                ->update(['status_prosecution' => true]);
+                ->update([
+                    'status_prosecution' => true,
+                    'date_prosecution' => now() // Agregar fecha y hora actual
+                ]);
 
             $this->notification()->info(
                 'Nuevas Confirmaciones',
