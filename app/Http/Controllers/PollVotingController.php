@@ -6,97 +6,144 @@ use App\Models\VotingPoll;
 use App\Models\VotingSession;
 use App\Models\VotingVote;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PollVotingController extends Controller
 {
-    public function show($accessToken)
+    public function show($token)
     {
-        $poll = VotingPoll::with('options')
-            ->where('access_token', $accessToken)
-            ->firstOrFail();
+        $poll = VotingPoll::where('access_token', $token)->first();
 
-        // Verificar si la encuesta ha expirado
-        if ($poll->isExpired()) {
-            $poll->update(['enable' => false]);
+        if (!$poll) {
+            abort(404, 'Encuesta no encontrada');
         }
 
-        // Verificar si el usuario ya tiene una sesión
-        $sessionId = session('vote_session_id');
-        $hasVoted = false;
-
-        if ($sessionId) {
-            try {
-                $decryptedSessionId = Crypt::decryptString($sessionId);
-                $session = VotingSession::where('uuid', $decryptedSessionId)
-                    ->where('poll_id', $poll->id)
-                    ->first();
-
-                if ($session) {
-                    $hasVoted = $session->voted;
-                }
-            } catch (\Exception $e) {
-                // Sesión inválida, crear nueva
-                session()->forget('vote_session_id');
-            }
-        }
-
-        return view('voting.poll', compact('poll', 'hasVoted'));
+        return view('voting.poll', [
+            'accessToken' => $token,
+            'poll' => $poll
+        ]);
     }
 
-    public function vote(Request $request, $accessToken)
+    public function showQR($uuid)
     {
-        $request->validate([
-            'option_id' => 'required|exists:voting_options,id',
+        $session = VotingSession::where('uuid', $uuid)->first();
+
+        if (!$session) {
+            abort(404, 'Sesión no encontrada');
+        }
+
+        $vote = VotingVote::where('session_uuid', $session->uuid)->first();
+
+        if (!$vote) {
+            abort(404, 'Voto no encontrado');
+        }
+
+        $participationUrl = route('poll.participation.show', ['uuid' => $session->uuid]);
+
+        $qrCode = QrCode::size(200)
+            ->margin(2)
+            ->generate($participationUrl);
+
+        return view('voting.showQR', [
+            'session' => $session,
+            'poll' => $session->poll,
+            'vote' => $vote,
+            'qrCode' => $qrCode,
+            'participationUrl' => $participationUrl
         ]);
+    }
 
-        $poll = VotingPoll::with('options')
-            ->where('access_token', $accessToken)
+    public function showParticipation($uuid)
+    {
+        $session = VotingSession::where('uuid', $uuid)->first();
+
+        if (!$session) {
+            abort(404, 'Sesión no encontrada');
+        }
+
+        $vote = VotingVote::where('session_uuid', $session->uuid)->first();
+
+        if (!$vote) {
+            abort(404, 'Voto no encontrado');
+        }
+
+        // Obtener estadísticas actuales de la encuesta
+        $poll = $session->poll;
+        $totalVotes = VotingVote::whereHas('session', function ($query) use ($poll) {
+            $query->where('poll_id', $poll->id);
+        })->count();
+
+        $optionStats = [];
+        foreach ($poll->options as $option) {
+            $optionVotes = VotingVote::where('option_id', $option->id)->count();
+            $percentage = $totalVotes > 0 ? round(($optionVotes / $totalVotes) * 100, 1) : 0;
+
+            $optionStats[] = [
+                'label' => $option->label,
+                'votes' => $optionVotes,
+                'percentage' => $percentage,
+                'is_user_choice' => $option->id === $vote->option_id
+            ];
+        }
+
+        return view('voting.participation', [
+            'session' => $session,
+            'poll' => $poll,
+            'vote' => $vote,
+            'totalVotes' => $totalVotes,
+            'optionStats' => $optionStats
+        ]);
+    }
+
+    /**
+     * Display a listing of active polls for voting
+     */
+    public function index()
+    {
+        // Obtener encuestas activas que no han expirado
+        $polls = VotingPoll::with(['options', 'options.votes'])
             ->where('enable', true)
-            ->firstOrFail();
+            ->where(function ($query) {
+                $query->whereNull('date')
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->where('date', '<=', now())
+                            ->where(function ($timeQuery) {
+                                $timeQuery->whereNull('time_active')
+                                    ->orWhereRaw('DATE_ADD(date, INTERVAL time_active MINUTE) > NOW()');
+                            });
+                    });
+            })
+            ->withCount(['options as votes_count' => function ($query) {
+                $query->join('voting_votes', 'voting_options.id', '=', 'voting_votes.option_id');
+            }])
+            ->orderBy('date', 'desc')
+            ->paginate(12);
 
-        // Verificar si la encuesta ha expirado
-        if ($poll->isExpired()) {
-            return redirect()->back()->with('error', 'La encuesta ha expirado.');
+        // Calcular estadísticas
+        $totalVotes = VotingVote::whereHas('option.poll', function ($query) {
+            $query->where('enable', true);
+        })->count();
+
+        $pollsWithTimeLimit = VotingPoll::where('enable', true)
+            ->whereNotNull('time_active')
+            ->count();
+
+        return view('voting.index', compact('polls', 'totalVotes', 'pollsWithTimeLimit'));
+    }
+
+    public function result($access_token)
+    {
+        $poll = VotingPoll::where('access_token', $access_token)
+            ->where('enable', true)
+            ->first();
+
+        if (!$poll) {
+            abort(404, 'Encuesta no encontrada o no está activa');
         }
 
-        // Verificar que la opción pertenece a esta encuesta
-        $option = $poll->options()->findOrFail($request->option_id);
-
-        // Obtener o crear sesión
-        $sessionId = session('vote_session_id');
-
-        if (!$sessionId) {
-            return redirect()->back()->with('error', 'Sesión inválida. Recarga la página.');
-        }
-
-        try {
-            $decryptedSessionId = Crypt::decryptString($sessionId);
-            $session = VotingSession::where('uuid', $decryptedSessionId)
-                ->where('poll_id', $poll->id)
-                ->firstOrFail();
-
-            if ($session->voted) {
-                return redirect()->back()->with('error', 'Ya has votado en esta encuesta.');
-            }
-
-            if ($session->isExpired()) {
-                return redirect()->back()->with('error', 'Tu sesión ha expirado.');
-            }
-
-            // Registrar el voto
-            VotingVote::create([
-                'session_uuid' => $session->uuid,
-                'option_id' => $option->id,
-            ]);
-
-            // Marcar sesión como votada
-            $session->update(['voted' => true]);
-
-            return redirect()->back()->with('success', '¡Tu voto ha sido registrado exitosamente!');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error al procesar el voto.');
-        }
+        return view('voting.result', [
+            'poll' => $poll,
+            'access_token' => $access_token
+        ]);
     }
 }

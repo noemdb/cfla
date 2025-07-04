@@ -140,10 +140,21 @@
                                             </button>
                                         </form>
                                     @endif
+
                                     <a href="{{ route('admin.voting.polls.edit', $poll) }}" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
                                         ✏️ Editar
                                     </a>
-                                    <form action="{{ route('admin.voting.polls.destroy', $poll) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro?')">
+
+                                    {{-- @if($poll->votes_count > 0) --}}
+                                        <form action="{{ route('admin.voting.polls.reset', $poll) }}" method="POST" class="inline" onsubmit="return confirmReset('{{ $poll->title }}', {{ $poll->votes_count }})">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors" title="Reiniciar encuesta (eliminar todos los votos)">
+                                                🔄 Reset
+                                            </button>
+                                        </form>
+                                    {{-- @endif --}}
+
+                                    <form action="{{ route('admin.voting.polls.destroy', $poll) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta encuesta?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
@@ -172,11 +183,22 @@
     </div>
 </div>
 
-{{-- @if(session('success'))
-    <x-notification
-        title="Éxito"
-        description="{{ session('success') }}"
-        icon="success"
-    />
-@endif --}}
+
+@endsection
+
+@section('script')
+    @parent
+    <script>
+        function confirmReset(pollTitle, voteCount) {
+            const message = `¿Estás seguro de que quieres REINICIAR la encuesta "${pollTitle}"?\n\n` +
+                        `Esta acción eliminará:\n` +
+                        `• ${voteCount} votos registrados\n` +
+                        `• Todas las sesiones de votación\n` +
+                        `• El historial de participación\n\n` +
+                        `La encuesta se detendrá y podrá iniciarse nuevamente desde cero.\n\n` +
+                        `Esta acción NO se puede deshacer.`;
+
+            return confirm(message);
+        }
+    </script>
 @endsection

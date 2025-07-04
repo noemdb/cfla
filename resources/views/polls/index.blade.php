@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.voting')
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
@@ -42,9 +42,9 @@
                                     </span>
                                 @endif
                             </div>
-                            
+
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $poll->title }}</h3>
-                            
+
                             <div class="flex items-center gap-4 text-sm text-gray-600 mb-4">
                                 <span class="flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

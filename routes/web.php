@@ -68,10 +68,22 @@ Route::get('/send-email', [GmailController::class, 'sendEmail']);
 
 
 // Rutas públicas de votación
+Route::get('/poll/voting/index', [PollVotingController::class, 'index'])
+    ->name('poll.voting.index');
+
 Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
     ->name('poll.voting.show');
-Route::post('/poll/voting/{access_token}', [PollVotingController::class, 'vote'])
-    ->name('poll.voting.vote');
+
+// Nueva ruta para resultados de encuesta
+Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])
+    ->name('poll.voting.result');
+
+// Nuevas rutas para QR y participación
+Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
+Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
+
+// Route::post('/poll/voting/{access_token}', [PollVotingController::class, 'vote'])
+//     ->name('poll.voting.vote');
 
 // API para fingerprinting
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
@@ -88,6 +100,9 @@ Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
         ->name('polls.start');
     Route::post('/polls/{poll}/stop', [VotingPollController::class, 'stop'])
         ->name('polls.stop');
+
+    Route::post('/polls/{poll}/reset', [VotingPollController::class, 'reset'])
+        ->name('polls.reset');
 });
 
 // Ruta para mostrar encuestas públicas
@@ -108,3 +123,6 @@ Route::get('/results', function () {
 
     return view('results.index', compact('polls'));
 })->name('results.index');
+
+
+// withVotesCount
