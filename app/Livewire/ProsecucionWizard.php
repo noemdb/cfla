@@ -66,7 +66,7 @@ class ProsecucionWizard extends Component
         if (empty($this->estudiants)) {
             $this->notification()->error(
                 'Error',
-                'No se encontraron estudiantes inscritos y habilitados para la prosecución asociados a este representante'
+                'No se encontraron estudiantes habilitados para prosecución asociados a este representante [CI: '.$this->ci_representant.']'
             );
             return;
         }
