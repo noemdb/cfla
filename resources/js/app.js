@@ -9,32 +9,52 @@ import { Tooltip, Tab, Carousel, Ripple, Animate, Chart, Offcanvas, Dropdown, Co
 initTE({ Tooltip, Tab, Carousel, Ripple, Animate, Chart, Offcanvas, Dropdown, Collapse, LazyLoad, SmoothScroll, Stepper });
 
 
-// import gsap from 'gsap';
+// Funciones globales para el sistema de votación
+window.VotingSystem = {
+    // Generar fingerprint del navegador
+    generateFingerprint() {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+        ctx.textBaseline = "top"
+        ctx.font = "14px Arial"
+        ctx.fillText("Fingerprint test", 2, 2)
 
-// document.addEventListener("DOMContentLoaded", function () {
+        return btoa(
+        JSON.stringify({
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            screen: screen.width + "x" + screen.height,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            canvas: canvas.toDataURL(),
+        }),
+        ).slice(0, 32)
+    },
 
-//     const splashScreen = document.getElementById("splash-screen");
-//     const appContent = document.getElementById("app");
+    // Actualizar tiempo restante
+    updateTimeRemaining(element, endTime) {
+        const updateTimer = () => {
+        const now = new Date().getTime()
+        const remaining = endTime - now
 
-//     // Fade-in para el splash screen
-//     gsap.fromTo(
-//         splashScreen,
-//         { opacity: 0 }, // Inicio: completamente invisible
-//         {
-//             opacity: 1, // Final: completamente visible
-//             duration: 1.5, // Duración del fade-in
-//             onComplete: () => {
-//                 // Delay de 3 segundos antes del fade-out
-//                 gsap.to(splashScreen, {
-//                     opacity: 0, // Desaparecer
-//                     duration: 1.5, // Duración del fade-out
-//                     delay: 3, // Tiempo visible del splash screen
-//                     onComplete: () => {
-//                         splashScreen.style.display = "none"; // Oculta el splash
-//                         appContent.classList.remove("hidden"); // Muestra el contenido
-//                     },
-//                 });
-//             },
-//         }
-//     );
-// });
+        if (remaining <= 0) {
+            element.textContent = "Expirada"
+            element.className = element.className.replace("text-orange-600", "text-red-600")
+            return
+        }
+
+        const hours = Math.floor(remaining / (1000 * 60 * 60))
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
+
+        if (hours > 0) {
+            element.textContent = `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+        } else {
+            element.textContent = `${minutes}:${seconds.toString().padStart(2, "0")}`
+        }
+        }
+
+        updateTimer()
+        return setInterval(updateTimer, 1000)
+    },
+}

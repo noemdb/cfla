@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use App\Http\Controllers\OrderController;
 
+use App\Http\Controllers\Admin\VotingDashboardController;
+use App\Http\Controllers\Admin\VotingPollController;
+use App\Http\Controllers\PollVotingController;
+use App\Http\Controllers\VotingFingerprintController;
+use App\Models\VotingPoll;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -59,3 +65,46 @@ Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])-
 Route::get('/send-email', [GmailController::class, 'sendEmail']);
 
 
+
+
+// Rutas públicas de votación
+Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
+    ->name('poll.voting.show');
+Route::post('/poll/voting/{access_token}', [PollVotingController::class, 'vote'])
+    ->name('poll.voting.vote');
+
+// API para fingerprinting
+Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
+    ->name('voting.store-fingerprint');
+
+// Rutas del panel administrativo
+Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
+    Route::get('/dashboard', [VotingDashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('polls', VotingPollController::class);
+
+    Route::post('/polls/{poll}/start', [VotingPollController::class, 'start'])
+        ->name('polls.start');
+    Route::post('/polls/{poll}/stop', [VotingPollController::class, 'stop'])
+        ->name('polls.stop');
+});
+
+// Ruta para mostrar encuestas públicas
+Route::get('/polls', function () {
+    $polls = VotingPoll::where('enable', true)
+        ->with('options')
+        ->withVotesCount()
+        ->get();
+
+    return view('polls.index', compact('polls'));
+})->name('polls.index');
+
+// Ruta para resultados
+Route::get('/results', function () {
+    $polls = VotingPoll::with(['options.votes'])
+        ->withVotesCount()
+        ->get();
+
+    return view('results.index', compact('polls'));
+})->name('results.index');

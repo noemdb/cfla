@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,7 +13,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        //
+        // Comentar o remover cualquier política de VotingPoll por ahora
+        // 'App\Models\VotingPoll' => 'App\Policies\VotingPollPolicy',
     ];
 
     /**
@@ -21,6 +22,11 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
+
+        // Definir gates si es necesario
+        // Gate::define('manage-polls', function ($user) {
+        //     return true; // Por ahora permitir a todos
+        // });
     }
 }
