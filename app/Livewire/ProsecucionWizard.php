@@ -53,7 +53,8 @@ class ProsecucionWizard extends Component
             ->whereHas('inscripcion', function($query) {
                 $query->whereHas('seccion', function($subQuery) {
                     $subQuery->where('status_active', 'true')
-                            ->where('status_inscription_affects', 'true');
+                            ->where('status_inscription_affects', 'true')
+                            ->whereNotIn('id', ['21','22','35','46','75','76','77','78']);
                 });
             })
             ->with(['inscripcion.seccion.grado'])
@@ -65,7 +66,7 @@ class ProsecucionWizard extends Component
         if (empty($this->estudiants)) {
             $this->notification()->error(
                 'Error',
-                'No se encontraron estudiantes inscritos y activos para este representante'
+                'No se encontraron estudiantes inscritos y habilitados para la prosecución asociados a este representante'
             );
             return;
         }

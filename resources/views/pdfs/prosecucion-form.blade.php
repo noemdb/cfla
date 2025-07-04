@@ -242,6 +242,16 @@
             body { margin: 10px; }
             .section { page-break-inside: avoid; }
         }
+
+        .wrap-normal {
+            white-space: normal; /* Valor por defecto, el texto se ajusta */
+            word-wrap: break-word; /* Rompe palabras largas si es necesario */
+            overflow-wrap: break-word; /* Alternativa moderna a word-wrap */
+        }
+        .no-wrap {
+            white-space: nowrap; /* Impide que el texto se divida en múltiples líneas */
+            overflow: hidden; /* Oculta el contenido que excede el contenedor */
+        }
     </style>
 </head>
 <body>
@@ -304,17 +314,19 @@
                     <th width="25%">Grado/Sección</th>
                     <th width="10%">Edad</th>
                     <th width="10%">Estado</th>
+                    <th width="10%" style="white-space: nowrap;">Fecha</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($estudiants as $index => $estudiant)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td><strong>{{ $estudiant->fullname }}</strong></td>
+                    <td style="white-space: nowrap;"><strong>{{ $estudiant->fullname }}</strong></td>
                     <td>{{ $estudiant->ci_estudiant }}</td>
                     <td>{{ $estudiant->full_inscripcion ?? 'No asignado' }}</td>
-                    <td>{{ $estudiant->age }} años</td>
+                    <td style="white-space: nowrap;">{{ $estudiant->age }} años</td>
                     <td style="color: #28a745; font-weight: bold;">CONFIRMADO</td>
+                    <td style="white-space: nowrap;">{{ $estudiant->date_prosecution_formatted_full }}</td>
                 </tr>
                 @endforeach
             </tbody>

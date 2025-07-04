@@ -5,6 +5,7 @@ namespace App\Models\app\Learner;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Admon\Administrativa;
+use App\Models\app\trait\Estudiant\Prosecucions;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 class Estudiant extends Model
 {
     use HasFactory;
+    use Prosecucions;
 
     protected $fillable = [
         'user_id', 'planpago_id', 'grado_inicial_id', 'seccion_inicial', 'type_ci_id', 'ci_estudiant', 'ci_estudiant_temp', 'lastname', 'name', 'gender',

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Período Escolar 2024 - 2025 || {{ config('app.name') }}</title>
+    <title>Prosecución Estudiantil || {{ config('app.name') }}</title>
 
     <!-- Livewire -->
     @livewireStyles
@@ -19,22 +19,25 @@
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
             <!-- Header con Logo -->
-            <div class="text-center mb-8">
-                <div class="flex flex-col items-center mb-6">
+            <div class="text-center mb-2">
+                <div class="flex flex-col items-center mb-2">
                     <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">C.E. Colegio Fray Luis Amigó</h3>
 
 
-                    <!-- Títulos 
+                    <!-- Títulos -->
                     <h1 class="text-2xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
                         Prosecución Estudiantil
                     </h1>
+
+                    <!--
                     <p class="text-green-200 text-lg md:text-xl">
                         Período Escolar 2024 - 2025
                     </p>
--->
+                    -->
+
 
                     <!-- Logo -->
-                    <div class="mb-4">
+                    <div class="mb-2">
                         <img
                             src="{{ asset('image/brand/512.png') }}"
                             alt="{{ config('app.name') }} Logo"
