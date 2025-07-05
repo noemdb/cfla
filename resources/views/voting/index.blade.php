@@ -73,25 +73,22 @@
                 </div>
             </div>
 
-            <!-- Botón para ver resultados -->
-            {{--
-            <div class="text-center mb-8">
-                <a href="{{ route('voting.results') }}"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
-                    </svg>
-                    Ver Resultados en Tiempo Real
-                </a>
-            </div>
-            --}}
+            <!-- Grid de encuestas -->
+            @php
+                $totalPolls = $polls->count();
 
-
+                // Determinamos las columnas dinámicas basadas en la cantidad de encuestas
+                if ($totalPolls === 1) {
+                    $gridClass = 'grid-cols-1';
+                } elseif ($totalPolls === 2) {
+                    $gridClass = 'grid-cols-1 sm:grid-cols-2';
+                } else {
+                    $gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+                }
+            @endphp
 
             <!-- Grid de encuestas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid {{ $gridClass }} gap-8">
                 @forelse($polls as $poll)
                     <div
                         class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
@@ -108,15 +105,12 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Contenido de la tarjeta -->
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-white mb-3 line-clamp-2">{{ $poll->title }}</h3>
-
                             @if ($poll->description)
                                 <p class="text-gray-300 text-sm mb-4 line-clamp-3">{{ $poll->description }}</p>
                             @endif
-
                             <!-- Opciones preview -->
                             <div class="mb-4">
                                 <p class="text-green-200 text-sm font-medium mb-2">Opciones disponibles:</p>
@@ -133,7 +127,6 @@
                                     @endif
                                 </div>
                             </div>
-
                             <!-- Estadísticas -->
                             <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-xl p-4 mb-4">
                                 <div class="grid grid-cols-2 gap-4 text-center">
@@ -147,7 +140,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Tiempo restante -->
                             @if ($poll->time_active)
                                 <div class="mb-4">
@@ -156,7 +148,6 @@
                                         $timeRemaining = $endTime->diffInMinutes(now());
                                         $isExpired = $endTime->isPast();
                                     @endphp
-
                                     @if (!$isExpired)
                                         <div
                                             class="flex items-center space-x-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-lg px-3 py-2 border border-amber-500/30">
@@ -193,7 +184,6 @@
                                     </div>
                                 </div>
                             @endif
-
                             <!-- Botones de acción -->
                             <div class="space-y-2">
                                 @php
@@ -201,7 +191,6 @@
                                         !$poll->time_active ||
                                         !\Carbon\Carbon::parse($poll->date)->addMinutes($poll->time_active)->isPast();
                                 @endphp
-
                                 @if ($canVote)
                                     <a href="{{ route('poll.voting.show', $poll->access_token) }}"
                                         class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-lg">
@@ -223,7 +212,6 @@
                                         No Disponible
                                     </button>
                                 @endif
-
                                 <a href="{{ route('poll.voting.result', $poll->access_token) }}"
                                     class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
