@@ -160,4 +160,9 @@ class PollVotingController extends Controller
             'polls' => $polls
         ]);
     }
+
+    public function guia()
+    {
+        return view('voting.guia');
+    }
 }

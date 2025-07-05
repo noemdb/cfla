@@ -3,8 +3,8 @@
 @section('title', 'Encuestas Disponibles')
 
 @section('content')
-    <div class="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 py-8 px-4">
-        <div class="container mx-auto max-w-7xl">
+    <div class="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 py-2 px-4">
+        <div class="container-fluid w-full">
             <!-- Header -->
             <div class="text-center mb-12">
                 <div
@@ -21,7 +21,7 @@
             </div>
 
             <!-- Estadísticas generales -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 <div class="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30">
                     <div class="flex items-center">
                         <div
@@ -74,6 +74,7 @@
             </div>
 
             <!-- Botón para ver resultados -->
+            {{--
             <div class="text-center mb-8">
                 <a href="{{ route('voting.results') }}"
                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
@@ -85,6 +86,9 @@
                     Ver Resultados en Tiempo Real
                 </a>
             </div>
+            --}}
+
+
 
             <!-- Grid de encuestas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -266,6 +270,19 @@
                     {{ $polls->links() }}
                 </div>
             @endif
+
+            <!-- Botones de navegación -->
+            <div class="flex justify-center space-x-4 my-4">
+                <button onclick="window.location.reload()"
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                    Actualizar Manualmente
+                </button>
+            </div>
         </div>
     </div>
 @endsection

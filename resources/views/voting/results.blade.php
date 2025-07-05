@@ -152,7 +152,9 @@
                     </div>
                 </div>
 
-                @if ($loop->last) </div> @endif
+                @if ($loop->last)
+        </div>
+        @endif
     @empty
         <!-- Estado sin encuestas -->
         <div class="text-center py-16">

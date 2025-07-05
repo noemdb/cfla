@@ -31,9 +31,9 @@
     class="font-sans antialiased bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 min-h-screen text-gray-100">
     <!-- Header minimalista -->
     <header class="bg-gray-900/80 backdrop-blur-sm border-b border-green-800/30 sticky top-0 z-10 shadow-lg">
-        <div class="container mx-auto px-4 py-4">
-            <h3 class="text-4xl text-center md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">C.E. Colegio Fray Luis Amigó</h3>
+        <div class="container-fluid mx-auto px-4 py-2">
             <div class="flex items-center justify-center">
+                <div class="text-lg text-center md:text-3xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">C.E. Colegio Fray Luis Amigó</div>
                 <div class="flex items-center space-x-3">
                     <!-- Logo -->
                     <div class="mb-2">
@@ -53,7 +53,7 @@
     </header>
 
     <!-- Contenido principal -->
-    <main class="flex-1 py-8">
+    <main class="flex-1 py-4">
         @yield('content')
     </main>
 
