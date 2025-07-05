@@ -14,12 +14,16 @@ class VotingPollResult extends Component
     public $totalVotes = 0;
     public $results = [];
     public $lastUpdated;
+    public $showTitle = true;
 
-    public function mount($access_token)
+    public function mount($access_token, $showTitle = true)
     {
         $this->access_token = $access_token;
+        $this->showTitle = $showTitle;
+
         $this->poll = VotingPoll::where('access_token', $access_token)
             ->where('enable', true)
+            ->with(['options'])
             ->first();
 
         if (!$this->poll) {
@@ -56,12 +60,12 @@ class VotingPollResult extends Component
     private function getColorForOption($optionId)
     {
         $colors = [
-            'from-green-600 to-green-700',
-            'from-emerald-600 to-emerald-700',
-            'from-teal-600 to-teal-700',
-            'from-green-500 to-green-600',
-            'from-emerald-500 to-emerald-600',
-            'from-teal-500 to-teal-600'
+            'from-emerald-500 to-green-500',
+            'from-green-500 to-emerald-600',
+            'from-teal-500 to-green-600',
+            'from-emerald-600 to-green-700',
+            'from-green-600 to-teal-600',
+            'from-teal-600 to-emerald-700'
         ];
 
         return $colors[$optionId % count($colors)];

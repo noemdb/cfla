@@ -100,35 +100,37 @@ class PollVotingController extends Controller
      */
     public function index()
     {
-        // Obtener encuestas activas que no han expirado
-        $polls = VotingPoll::with(['options', 'options.votes'])
-            ->where('enable', true)
-            ->where(function ($query) {
-                $query->whereNull('date')
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->where('date', '<=', now())
-                            ->where(function ($timeQuery) {
-                                $timeQuery->whereNull('time_active')
-                                    ->orWhereRaw('DATE_ADD(date, INTERVAL time_active MINUTE) > NOW()');
-                            });
-                    });
-            })
-            ->withCount(['options as votes_count' => function ($query) {
-                $query->join('voting_votes', 'voting_options.id', '=', 'voting_votes.option_id');
+        // Obtener encuestas activas con sus opciones y conteo de votos
+        $polls = VotingPoll::where('enable', true)
+            ->with(['options'])
+            ->withCount(['votes' => function($query) {
+                $query->whereHas('option', function($subQuery) {
+                    $subQuery->whereColumn('poll_id', 'voting_polls.id');
+                });
             }])
-            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        // Calcular estadísticas
-        $totalVotes = VotingVote::whereHas('option.poll', function ($query) {
-            $query->where('enable', true);
+        // Calcular estadísticas generales
+        $activePolls = VotingPoll::where('enable', true)->count();
+
+        $totalVotes = VotingVote::whereHas('option', function($query) {
+            $query->whereHas('poll', function($subQuery) {
+                $subQuery->where('enable', true);
+            });
         })->count();
 
         $pollsWithTimeLimit = VotingPoll::where('enable', true)
             ->whereNotNull('time_active')
+            ->where('time_active', '>', 0)
             ->count();
 
-        return view('voting.index', compact('polls', 'totalVotes', 'pollsWithTimeLimit'));
+        return view('voting.index', compact(
+            'polls',
+            'activePolls',
+            'totalVotes',
+            'pollsWithTimeLimit'
+        ));
     }
 
     public function result($access_token)
@@ -144,6 +146,18 @@ class PollVotingController extends Controller
         return view('voting.result', [
             'poll' => $poll,
             'access_token' => $access_token
+        ]);
+    }
+
+    public function results()
+    {
+        $polls = VotingPoll::where('enable', true)
+            ->with(['options'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('voting.results', [
+            'polls' => $polls
         ]);
     }
 }

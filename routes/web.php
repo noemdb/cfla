@@ -65,7 +65,8 @@ Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])-
 Route::get('/send-email', [GmailController::class, 'sendEmail']);
 
 
-
+/////////////////////////////////////////////////////////////
+//////////////// Encuestas Anonimas /////////////////////////
 
 // Rutas públicas de votación
 Route::get('/poll/voting/index', [PollVotingController::class, 'index'])
@@ -78,16 +79,16 @@ Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
 Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])
     ->name('poll.voting.result');
 
-// Nuevas rutas para QR y participación
+// Ruta para resultados de todas las encuestas
+Route::get('/voting/results', [PollVotingController::class, 'results'])
+    ->name('voting.results');
+
+// Rutas QR y participación
 Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
-// Route::post('/poll/voting/{access_token}', [PollVotingController::class, 'vote'])
-//     ->name('poll.voting.vote');
 
-// API para fingerprinting
-Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
-    ->name('voting.store-fingerprint');
+/////////////////////////////////////////////////////////////////////////////////////
 
 // Rutas del panel administrativo
 Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
@@ -103,26 +104,29 @@ Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
 
     Route::post('/polls/{poll}/reset', [VotingPollController::class, 'reset'])
         ->name('polls.reset');
+
+    // Ruta para resultados
+    Route::get('/results', function () {
+        $polls = VotingPoll::with(['options.votes'])
+            ->withVotesCount()
+            ->get();
+        return view('admin.voting.polls.results', compact('polls'));
+        // admin.voting.polls.results
+    })->name('results');
+
+    // Ruta para mostrar encuestas públicas
+    Route::get('/list', function () {
+        $polls = VotingPoll::where('enable', true)
+            ->with('options')
+            ->withVotesCount()
+            ->get();
+
+        return view('admin.voting.polls.list', compact('polls'));
+    })->name('list');
 });
 
-// Ruta para mostrar encuestas públicas
-Route::get('/polls', function () {
-    $polls = VotingPoll::where('enable', true)
-        ->with('options')
-        ->withVotesCount()
-        ->get();
 
-    return view('polls.index', compact('polls'));
-})->name('polls.index');
+// API para fingerprinting
+Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
+    ->name('voting.store-fingerprint');
 
-// Ruta para resultados
-Route::get('/results', function () {
-    $polls = VotingPoll::with(['options.votes'])
-        ->withVotesCount()
-        ->get();
-
-    return view('results.index', compact('polls'));
-})->name('results.index');
-
-
-// withVotesCount
