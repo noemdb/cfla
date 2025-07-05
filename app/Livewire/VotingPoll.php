@@ -67,7 +67,6 @@ class VotingPoll extends Component
             ]);
 
             $this->initializePoll();
-
         } catch (Exception $e) {
             Log::error('Error mounting VotingPoll component: ' . $e->getMessage(), [
                 'token' => $accessToken ?? 'unknown',
@@ -91,17 +90,16 @@ class VotingPoll extends Component
                 return;
             }
 
-            // Verificar sesión existente
-            $this->checkExistingSession();
+            // Verificar sesión existente ESPECÍFICA para esta poll
+            $this->checkExistingSessionForThisPoll();
 
             // Generar fingerprint si es necesario
             if (!$this->hasVoted && $this->canVote) {
-                $this->generateFingerprint();
+                $this->generateFingerprintForThisPoll();
             }
 
             // Actualizar tiempo restante
             $this->updateTimeRemaining();
-
         } catch (Exception $e) {
             Log::error('Error initializing poll: ' . $e->getMessage(), [
                 'token' => $this->accessToken,
@@ -157,10 +155,9 @@ class VotingPoll extends Component
                 'options_count' => $poll->options->count()
             ]);
 
-            $this->poll = $poll;
+            $this->poll = $this->getPoll();
 
             return true;
-
         } catch (Exception $e) {
             Log::error('Error loading poll: ' . $e->getMessage(), [
                 'token' => $this->accessToken,
@@ -214,7 +211,6 @@ class VotingPoll extends Component
             }
 
             return true;
-
         } catch (Exception $e) {
             Log::error('Error validating poll state: ' . $e->getMessage(), [
                 'poll_id' => $this->getPoll()?->id ?? 'unknown'
@@ -225,27 +221,37 @@ class VotingPoll extends Component
         }
     }
 
-    public function checkExistingSession()
+    // MÉTODO MODIFICADO: Verificar sesión específica para esta poll
+    public function checkExistingSessionForThisPoll()
     {
         try {
             $poll = $this->getPoll();
             if (!$poll) return;
 
-            $sessionId = session('vote_session_id');
+            // Buscar sesión específica para esta poll usando clave compuesta
+            $sessionKey = "vote_session_poll_{$poll->id}";
+            $sessionId = session($sessionKey);
 
             if (!$sessionId) {
+                Log::info('No existing session for this poll', [
+                    'poll_id' => $poll->id,
+                    'session_key' => $sessionKey
+                ]);
                 return;
             }
 
             $decryptedSessionId = Crypt::decryptString($sessionId);
             $session = VotingSession::where('uuid', $decryptedSessionId)
-                ->where('poll_id', $poll->id)
+                ->where('poll_id', $poll->id) // Validación específica por poll
                 ->first();
 
             if (!$session) {
-                // Sesión no encontrada, limpiar
-                session()->forget('vote_session_id');
-                Log::info('Invalid session cleared', ['session_id' => $decryptedSessionId]);
+                // Sesión no encontrada para esta poll específica, limpiar
+                session()->forget($sessionKey);
+                Log::info('Invalid session cleared for poll', [
+                    'session_id' => $decryptedSessionId,
+                    'poll_id' => $poll->id
+                ]);
                 return;
             }
 
@@ -256,10 +262,10 @@ class VotingPoll extends Component
                     'Sesión expirada',
                     'Tu sesión ha expirado. La página se recargará automáticamente.'
                 );
-                session()->forget('vote_session_id');
+                session()->forget($sessionKey);
                 $this->dispatch('refresh-page');
 
-                Log::info('Expired session detected', [
+                Log::info('Expired session detected for poll', [
                     'session_uuid' => $session->uuid,
                     'poll_id' => $poll->id
                 ]);
@@ -280,23 +286,25 @@ class VotingPoll extends Component
                     '¡Gracias! Ya has votado en esta encuesta. Tu voto fue registrado exitosamente.'
                 );
 
-                Log::info('User already voted', [
+                Log::info('User already voted in this poll', [
                     'session_uuid' => $session->uuid,
                     'poll_id' => $poll->id
                 ]);
             }
 
-            // Guardar solo el UUID como string en sesión
-            session(['current_session_uuid' => $session->uuid]);
-
+            // Guardar UUID de sesión específica para esta poll
+            session(["current_session_uuid_poll_{$poll->id}" => $session->uuid]);
         } catch (Exception $e) {
-            Log::error('Error checking existing session: ' . $e->getMessage(), [
+            Log::error('Error checking existing session for poll: ' . $e->getMessage(), [
                 'poll_id' => $this->getPoll()?->id ?? 'unknown',
                 'error_trace' => $e->getTraceAsString()
             ]);
 
             // Error al desencriptar o verificar sesión
-            session()->forget('vote_session_id');
+            $poll = $this->getPoll();
+            if ($poll) {
+                session()->forget("vote_session_poll_{$poll->id}");
+            }
             $this->notification()->warning(
                 'Sesión inválida',
                 'Se detectó una sesión inválida. Se creará una nueva sesión automáticamente.'
@@ -304,7 +312,8 @@ class VotingPoll extends Component
         }
     }
 
-    public function generateFingerprint()
+    // MÉTODO MODIFICADO: Generar fingerprint específico para esta poll
+    public function generateFingerprintForThisPoll()
     {
         try {
             $poll = $this->getPoll();
@@ -315,8 +324,8 @@ class VotingPoll extends Component
             $ip = request()->ip();
             $userAgent = request()->userAgent();
 
-            // Verificar si ya existe una sesión para esta IP
-            $existingSession = VotingSession::where('poll_id', $poll->id)
+            // CAMBIO CLAVE: Verificar si ya existe una sesión para esta IP EN ESTA POLL ESPECÍFICA
+            $existingSession = VotingSession::where('poll_id', $poll->id) // Filtro específico por poll
                 ->where('ip', $ip)
                 ->first();
 
@@ -332,10 +341,10 @@ class VotingPoll extends Component
 
                     $this->notification()->info(
                         'Ya has participado',
-                        'Desde esta conexión ya se ha votado en esta encuesta.'
+                        'Desde esta conexión ya se ha votado en esta encuesta específica.'
                     );
 
-                    Log::info('IP already voted', [
+                    Log::info('IP already voted in this specific poll', [
                         'ip' => $ip,
                         'poll_id' => $poll->id,
                         'session_uuid' => $existingSession->uuid
@@ -343,37 +352,40 @@ class VotingPoll extends Component
                     return;
                 }
 
+                // Usar sesión existente para esta poll específica
+                $sessionKey = "vote_session_poll_{$poll->id}";
                 $encryptedSessionId = Crypt::encryptString($existingSession->uuid);
-                session(['vote_session_id' => $encryptedSessionId]);
-                session(['current_session_uuid' => $existingSession->uuid]);
+                session([$sessionKey => $encryptedSessionId]);
+                session(["current_session_uuid_poll_{$poll->id}" => $existingSession->uuid]);
 
-                Log::info('Existing session found', [
+                Log::info('Existing session found for this specific poll', [
                     'session_uuid' => $existingSession->uuid,
                     'poll_id' => $poll->id
                 ]);
                 return;
             }
 
-            // Crear nueva sesión
+            // Crear nueva sesión ESPECÍFICA para esta poll
             $session = VotingSession::create([
                 'ip' => $ip,
-                'fingerprint' => $this->generateBrowserFingerprint(),
+                'fingerprint' => $this->generateBrowserFingerprintForPoll($poll->id),
                 'user_agent' => $userAgent,
-                'poll_id' => $poll->id,
+                'poll_id' => $poll->id, // Asociación específica con esta poll
             ]);
 
+            // Guardar sesión con clave específica por poll
+            $sessionKey = "vote_session_poll_{$poll->id}";
             $encryptedSessionId = Crypt::encryptString($session->uuid);
-            session(['vote_session_id' => $encryptedSessionId]);
-            session(['current_session_uuid' => $session->uuid]);
+            session([$sessionKey => $encryptedSessionId]);
+            session(["current_session_uuid_poll_{$poll->id}" => $session->uuid]);
 
-            Log::info('New session created', [
+            Log::info('New session created for specific poll', [
                 'session_uuid' => $session->uuid,
                 'poll_id' => $poll->id,
                 'ip' => $ip
             ]);
-
         } catch (Exception $e) {
-            Log::error('Error generating fingerprint: ' . $e->getMessage(), [
+            Log::error('Error generating fingerprint for poll: ' . $e->getMessage(), [
                 'poll_id' => $this->getPoll()?->id ?? 'unknown',
                 'ip' => request()->ip(),
                 'error_trace' => $e->getTraceAsString()
@@ -387,13 +399,16 @@ class VotingPoll extends Component
         }
     }
 
-    private function generateBrowserFingerprint()
+    // MÉTODO NUEVO: Generar fingerprint específico por poll
+    private function generateBrowserFingerprintForPoll($pollId)
     {
-        return hash('sha256',
+        return hash(
+            'sha256',
             request()->ip() .
-            request()->userAgent() .
-            request()->header('Accept-Language', '') .
-            date('Y-m-d')
+                request()->userAgent() .
+                request()->header('Accept-Language', '') .
+                $pollId . // INCLUIR poll_id en el fingerprint
+                date('Y-m-d')
         );
     }
 
@@ -407,7 +422,6 @@ class VotingPoll extends Component
                 ->generate($this->participationUrl);
 
             $this->showQRCode = true;
-
         } catch (Exception $e) {
             Log::error('Error generating QR code: ' . $e->getMessage(), [
                 'session_uuid' => $sessionUuid
@@ -451,18 +465,18 @@ class VotingPoll extends Component
                 throw new Exception('La opción seleccionada ya no está disponible.');
             }
 
-            // Obtener UUID de sesión desde session
-            $sessionUuid = session('current_session_uuid');
+            // CAMBIO: Obtener UUID de sesión específico para esta poll
+            $sessionUuid = session("current_session_uuid_poll_{$poll->id}");
             if (!$sessionUuid) {
-                throw new Exception('Sesión inválida. Recarga la página e intenta nuevamente.');
+                throw new Exception('Sesión inválida para esta encuesta. Recarga la página e intenta nuevamente.');
             }
 
             $session = VotingSession::where('uuid', $sessionUuid)
-                ->where('poll_id', $poll->id)
+                ->where('poll_id', $poll->id) // Validación específica por poll
                 ->first();
 
             if (!$session) {
-                throw new Exception('Tu sesión no fue encontrada. Recarga la página.');
+                throw new Exception('Tu sesión no fue encontrada para esta encuesta. Recarga la página.');
             }
 
             if ($session->voted) {
@@ -496,7 +510,7 @@ class VotingPoll extends Component
             $this->sessionUuid = $session->uuid;
             $this->generateQRCode($session->uuid);
 
-            Log::info('Vote registered successfully', [
+            Log::info('Vote registered successfully for specific poll', [
                 'session_uuid' => $session->uuid,
                 'poll_id' => $poll->id,
                 'option_id' => $option->id,
@@ -507,12 +521,11 @@ class VotingPoll extends Component
                 '¡Voto registrado exitosamente!',
                 'Tu voto ha sido registrado de forma segura y anónima. Aquí tienes tu código QR de participación.'
             );
-
         } catch (ModelNotFoundException $e) {
             Log::error('Model not found during voting: ' . $e->getMessage(), [
                 'poll_id' => $this->getPoll()?->id ?? 'unknown',
                 'selected_option' => $this->selectedOption,
-                'session_uuid' => session('current_session_uuid')
+                'session_uuid' => session("current_session_uuid_poll_{$this->getPoll()?->id}")
             ]);
 
             $this->notification()->error(
@@ -523,7 +536,7 @@ class VotingPoll extends Component
             Log::error('Error during voting: ' . $e->getMessage(), [
                 'poll_id' => $this->getPoll()?->id ?? 'unknown',
                 'selected_option' => $this->selectedOption,
-                'session_uuid' => session('current_session_uuid'),
+                'session_uuid' => session("current_session_uuid_poll_{$this->getPoll()?->id}"),
                 'error_trace' => $e->getTraceAsString()
             ]);
 
@@ -593,7 +606,6 @@ class VotingPoll extends Component
 
             $this->selectedOption = $optionId;
             $this->resetValidation();
-
         } catch (Exception $e) {
             Log::error('Error selecting option: ' . $e->getMessage(), [
                 'option_id' => $optionId,
@@ -646,7 +658,6 @@ class VotingPoll extends Component
             } else {
                 $this->timeRemaining = "{$minutes}m restantes";
             }
-
         } catch (Exception $e) {
             Log::error('Error updating time remaining: ' . $e->getMessage(), [
                 'poll_id' => $poll->id ?? 'unknown'
