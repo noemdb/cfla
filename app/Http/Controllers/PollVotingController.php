@@ -10,6 +10,16 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PollVotingController extends Controller
 {
+    public function asistent()
+    {
+        $polls = VotingPoll::where('enable', true)
+            ->with(['options'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('voting.asistent', compact('polls'));
+    }
+
     public function show($token)
     {
         $poll = VotingPoll::where('access_token', $token)->first();
@@ -95,9 +105,6 @@ class PollVotingController extends Controller
         ]);
     }
 
-    /**
-     * Display a listing of active polls for voting
-     */
     public function index()
     {
         // Obtener encuestas activas con sus opciones y conteo de votos

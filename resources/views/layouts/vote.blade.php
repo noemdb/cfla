@@ -88,7 +88,7 @@
                     </div>
                 </div>
                 <p class="text-xs text-gray-400">
-                    © {{ date('Y') }} Módulo de Votación. Todos los derechos reservados.
+                    © {{ date('Y') }} <strong>SAEFL</strong> Módulo de Votación. Todos los derechos reservados.
                 </p>
             </div>
         </div>

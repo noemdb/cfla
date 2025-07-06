@@ -71,13 +71,16 @@ Route::get('/send-email', [GmailController::class, 'sendEmail']);
 // Rutas públicas de votación
 Route::get('/voting/index', [PollVotingController::class, 'index'])
     ->name('poll.voting.index');
+
+// Ruta para el asistente de votación
+Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])->name('voting.asistent');
+
 // Ruta para guía del módulo de votación
 Route::get('/voting/guia', [PollVotingController::class, 'guia'])
     ->name('voting.guia');
 
 // Ruta para índice de votación
 Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
-
 
 Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
     ->name('poll.voting.show');
@@ -94,8 +97,6 @@ Route::get('/voting/results', [PollVotingController::class, 'results'])
 Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
-
-/////////////////////////////////////////////////////////////////////////////////////
 
 // Rutas del panel administrativo
 Route::prefix('admin/voting')->name('admin.voting.')->group(function () {

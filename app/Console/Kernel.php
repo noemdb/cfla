@@ -13,7 +13,13 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+
+        $schedule->command('voting-sessions:cleanup')->daily();
     }
+
+    protected $commands = [
+        \App\Console\Commands\CleanupVotingSessions::class,
+    ];
 
     /**
      * Register the commands for the application.

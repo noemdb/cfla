@@ -62,6 +62,19 @@ class VotingPoll extends Model
         return $this->votes()->count();
     }
 
+    public function isActive(): bool
+    {
+        if (!$this->enable || !$this->date) {
+            return false;
+        }
+
+        $startTime = $this->date;
+        $endTime = $this->date->addMinutes($this->time_active);
+        $now = now();
+
+        return $now->greaterThanOrEqualTo($startTime) && $now->lessThan($endTime);
+    }
+
     public function isExpired(): bool
     {
         if (!$this->enable || !$this->date) {
@@ -102,5 +115,27 @@ class VotingPoll extends Model
                 // No necesita condiciones adicionales
             }
         ]);
+    }
+
+    /**
+     * Verificar si un dispositivo puede votar en esta encuesta
+     */
+    public function canDeviceVote($fingerprint, $ip = null): bool
+    {
+        // Verificar si la encuesta está activa
+        if (!$this->isActive()) {
+            return false;
+        }
+
+        // Verificar si el dispositivo ya votó
+        return !VotingSession::hasVotedInPoll($this->id, $fingerprint, $ip);
+    }
+
+    /**
+     * Obtener estadísticas de participación única
+     */
+    public function getUniqueParticipantsCount(): int
+    {
+        return $this->sessions()->where('voted', true)->count();
     }
 }
