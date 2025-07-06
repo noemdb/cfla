@@ -228,48 +228,10 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <!-- Estilos para impresión -->
-    <style>
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-
-            .print-section,
-            .print-section * {
-                visibility: visible;
-            }
-
-            .print-section {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-
-            .bg-gradient-to-br,
-            .bg-gray-800\/90,
-            .bg-gradient-to-r {
-                background: white !important;
-                color: black !important;
-            }
-
-            .text-white,
-            .text-gray-300,
-            .text-emerald-300,
-            .text-emerald-200 {
-                color: black !important;
-            }
-
-            .border-gray-700,
-            .border-emerald-800\/50,
-            .border-gray-600 {
-                border-color: #ccc !important;
-            }
-        }
-    </style>
-
+@section('script')
+    @parent
     <script>
         async function shareResults() {
             const shareData = {
@@ -337,4 +299,48 @@
             }
         }, 30000);
     </script>
+@endsection
+
+@section('style')
+@parent
+<!-- Estilos para impresión -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .print-section,
+        .print-section * {
+            visibility: visible;
+        }
+
+        .print-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        .bg-gradient-to-br,
+        .bg-gray-800\/90,
+        .bg-gradient-to-r {
+            background: white !important;
+            color: black !important;
+        }
+
+        .text-white,
+        .text-gray-300,
+        .text-emerald-300,
+        .text-emerald-200 {
+            color: black !important;
+        }
+
+        .border-gray-700,
+        .border-emerald-800\/50,
+        .border-gray-600 {
+            border-color: #ccc !important;
+        }
+    }
+</style>
 @endsection

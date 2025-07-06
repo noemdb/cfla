@@ -48,7 +48,7 @@
         </div>
 
         <!-- Contenido Principal -->
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-4xl mx-auto py-8">
             @if ($polls->count() > 0)
                 <livewire:voting-poll-asistent :polls="$polls" />
             @else
@@ -118,7 +118,7 @@
                     </div>
 
                     <div class="text-gray-400 text-sm">
-                        <strong>SAEFL</strong> Módulo de Votación v2.0
+                        <strong>SAEFL</strong> Módulo de Votación v1.0
                     </div>
                 </div>
             </div>

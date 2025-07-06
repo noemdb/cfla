@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div>
     @if (!$isCompleted)
         <!-- Barra de progreso -->
         <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl p-6">
@@ -237,7 +237,7 @@
                         </svg>
                         Ver Resultados
                     </a>
-                    <a href="{{ route('voting.index') }}"
+                    <a href="{{ route('voting.asistent') }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-semibold rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

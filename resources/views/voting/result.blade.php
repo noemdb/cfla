@@ -61,7 +61,12 @@
         </div>
     </div>
 
-    <style>
+
+@endsection
+
+@section('content')
+@parent
+<style>
         @media print {
             .no-print {
                 display: none !important;
