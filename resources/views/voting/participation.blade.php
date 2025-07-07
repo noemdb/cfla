@@ -214,18 +214,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Botón para volver -->
-            {{-- <div class="text-center mt-8">
-                <a href="{{ route('poll.voting.index') }}"
-                    class="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Ver otras encuestas
-                </a>
-            </div> --}}
         </div>
     </div>
 @endsection
