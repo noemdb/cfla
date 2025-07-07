@@ -79,7 +79,7 @@ Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])->name(
 Route::get('/voting/guia', [PollVotingController::class, 'guia'])
     ->name('voting.guia');
 
-Route::get('/voting/proposal', [PollVotingController::class, 'proposal'])
+Route::get('/voting/proposal', [PollVotingController::class, 'guia'])
     ->name('voting.proposal');
 
 // Ruta para índice de votación
@@ -96,6 +96,7 @@ Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, '
 Route::get('/voting/results', [PollVotingController::class, 'results'])
     ->name('voting.results');
 
+Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Rutas del panel administrativo
