@@ -5,218 +5,208 @@ namespace App\Livewire;
 use App\Models\VotingPoll;
 use App\Models\VotingSession;
 use App\Models\VotingVote;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
-use Livewire\Component;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class VotingPollAsistent extends Component
 {
-    public $polls;
+    public $polls = [];
     public $currentPollIndex = 0;
-    public $selectedOption = null;
-    public $isVoting = false;
-    public $hasVoted = false;
-    public $voteMessage = '';
-    public $voteMessageType = 'success';
-    public $isCompleted = false;
-    public $completedSessions = [];
     public $currentPoll = null;
-    public $deviceFingerprint = null;
-    public $deviceIp = null;
+    public $totalPolls = 0;
+    public $selectedOption = null;
+    public $hasVoted = false;
+    public $isVoting = false;
+    public $isCompleted = false;
+    public $errorMessage = '';
+    public $successMessage = '';
+    public $fingerprint = '';
+    public $privateIp = '';
+    public $completedSessions;
+    public $votedCount = 0;
+    public $isLoadingFingerprint = true;
+    public $fingerprintAttempts = 0;
+    public $maxFingerprintAttempts = 3;
 
-    protected $listeners = ['refreshComponent' => '$refresh'];
+    // Modal properties
+    public $showParticipationModal = false;
+    public $selectedParticipation = null;
 
-    public function mount($polls)
+    protected $listeners = [
+        'setDeviceFingerprint' => 'handleFingerprintData'
+    ];
+
+    public function mount()
     {
-        $this->polls = $polls;
-        $this->initializeDevice();
-        $this->loadCurrentPoll();
+        $this->loadPolls();
     }
 
-    private function initializeDevice()
+    public function handleFingerprintData($fingerprint, $privateIp = null)
     {
-        $this->deviceIp = request()->ip();
-        $this->deviceFingerprint = $this->generateSecureFingerprint();
+        $this->fingerprint = $fingerprint;
+        $this->privateIp = $privateIp ?? 'unknown';
+        $this->isLoadingFingerprint = false;
+        $this->fingerprintAttempts = 0;
 
-        Log::info('Device initialized', [
-            'ip' => $this->deviceIp,
-            'fingerprint' => substr($this->deviceFingerprint, 0, 8) . '...',
-            'user_agent' => request()->userAgent()
-        ]);
-    }
-
-    public function loadCurrentPoll()
-    {
-        if ($this->currentPollIndex < $this->polls->count()) {
-            $this->currentPoll = $this->polls[$this->currentPollIndex];
-            $this->checkExistingVote();
+        if ($this->fingerprint) {
+            $this->checkCurrentPollStatus();
+            $this->successMessage = '';
+            $this->errorMessage = '';
         } else {
+            $this->handleFingerprintError('No se pudo generar el fingerprint del dispositivo');
+        }
+    }
+
+    public function handleFingerprintError($message = '')
+    {
+        $this->fingerprintAttempts++;
+        $this->isLoadingFingerprint = false;
+
+        if ($this->fingerprintAttempts >= $this->maxFingerprintAttempts) {
+            $this->errorMessage = 'No se pudo generar la identificación del dispositivo después de varios intentos. Por favor, recarga la página.';
+        } else {
+            $this->errorMessage = 'Error generando identificación del dispositivo. Reintentando...';
+        }
+    }
+
+    public function retryFingerprintGeneration()
+    {
+        if ($this->fingerprintAttempts < $this->maxFingerprintAttempts) {
+            $this->isLoadingFingerprint = true;
+            $this->errorMessage = '';
+        }
+    }
+
+    public function forceSetFingerprint()
+    {
+        $this->fingerprint = 'fallback_' . md5(request()->ip() . request()->userAgent() . time());
+        $this->privateIp = request()->ip();
+        $this->isLoadingFingerprint = false;
+        $this->checkCurrentPollStatus();
+    }
+
+    public function loadPolls()
+    {
+        $activePolls = VotingPoll::where('enable', true)
+            ->with('options')
+            ->orderBy('created_at')
+            ->get();
+
+        $this->polls = $activePolls->map(function ($poll) {
+            return [
+                'id' => $poll->id,
+                'title' => $poll->title,
+                'description' => $poll->description,
+                'options' => $poll->options->map(function ($option) {
+                    return [
+                        'id' => $option->id,
+                        'label' => $option->label
+                    ];
+                })->toArray()
+            ];
+        })->toArray();
+
+        $this->totalPolls = count($this->polls);
+
+        if ($this->totalPolls > 0) {
+            $this->currentPoll = $this->polls[0];
+            $this->currentPollIndex = 0;
+        } else {
+            $this->errorMessage = 'No hay encuestas activas en este momento.';
             $this->isCompleted = true;
         }
     }
 
-    public function checkExistingVote()
+    public function checkCurrentPollStatus()
     {
-        if (!$this->currentPoll || !$this->deviceFingerprint) {
+        if (!$this->currentPoll || !$this->fingerprint) {
             return;
         }
 
-        try {
-            // Verificar si el dispositivo ya votó en esta encuesta específica
-            $hasVoted = VotingSession::hasVotedInPoll(
-                $this->currentPoll->id,
-                $this->deviceFingerprint,
-                $this->deviceIp
-            );
+        $session = VotingSession::where('poll_id', $this->currentPoll['id'])
+            ->where('fingerprint', $this->fingerprint)
+            ->where('private_ip', $this->privateIp)
+            ->first();
 
-            if ($hasVoted) {
-                $this->hasVoted = true;
-                $this->voteMessage = 'Ya has participado en esta encuesta desde este dispositivo.';
-                $this->voteMessageType = 'info';
+        $this->hasVoted = $session !== null;
 
-                // Obtener la sesión existente para estadísticas
-                $existingSession = VotingSession::where('poll_id', $this->currentPoll->id)
-                    ->where(function ($query) {
-                        $query->where('fingerprint', $this->deviceFingerprint)
-                            ->orWhere('ip', $this->deviceIp);
-                    })
-                    ->where('voted', true)
-                    ->first();
-
-                if ($existingSession) {
-                    $this->completedSessions[] = $existingSession;
-                }
-            } else {
-                // Verificar si la encuesta está activa
-                if (!$this->currentPoll->isActive()) {
-                    $this->hasVoted = true;
-                    $this->voteMessage = 'Esta encuesta no está activa actualmente.';
-                    $this->voteMessageType = 'warning';
-                } else {
-                    $this->hasVoted = false;
-                    $this->voteMessage = '';
-                }
-            }
-
-            Log::info('Vote check completed', [
-                'poll_id' => $this->currentPoll->id,
-                'has_voted' => $this->hasVoted,
-                'is_active' => $this->currentPoll->isActive()
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error checking existing vote', [
-                'poll_id' => $this->currentPoll->id ?? null,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            $this->voteMessage = 'Error al verificar el estado de votación.';
-            $this->voteMessageType = 'error';
+        if ($this->hasVoted) {
+            $this->successMessage = '¡Ya has participado en esta encuesta!';
+            $this->selectedOption = null;
+        } else {
+            $this->successMessage = '';
+            $this->errorMessage = '';
         }
     }
 
     public function selectOption($optionId)
     {
-        if ($this->hasVoted || $this->isVoting || !$this->currentPoll) {
-            return;
-        }
-
-        // Verificar que la opción pertenece a la encuesta actual
-        $option = $this->currentPoll->options()->find($optionId);
-        if (!$option) {
-            $this->voteMessage = 'Opción de voto inválida.';
-            $this->voteMessageType = 'error';
+        if ($this->hasVoted || $this->isVoting || $this->isLoadingFingerprint) {
             return;
         }
 
         $this->selectedOption = $optionId;
-        $this->voteMessage = '';
+        $this->errorMessage = '';
     }
 
     public function submitVote()
     {
-        if (!$this->selectedOption || $this->hasVoted || $this->isVoting || !$this->currentPoll) {
+        if (!$this->selectedOption || $this->hasVoted || $this->isVoting) {
+            return;
+        }
+
+        if ($this->isLoadingFingerprint) {
+            $this->errorMessage = 'Espera mientras se genera la identificación del dispositivo...';
+            return;
+        }
+
+        if (!$this->fingerprint) {
+            $this->errorMessage = 'Error: No se pudo generar la identificación del dispositivo. Intenta recargar la página.';
             return;
         }
 
         $this->isVoting = true;
-        $this->voteMessage = 'Procesando voto...';
-        $this->voteMessageType = 'info';
+        $this->errorMessage = '';
 
         try {
-            // Usar transacción para asegurar consistencia
-            DB::transaction(function () {
-                // Verificación final de unicidad antes de votar
-                $hasVoted = VotingSession::hasVotedInPoll(
-                    $this->currentPoll->id,
-                    $this->deviceFingerprint,
-                    $this->deviceIp
-                );
+            $existingSession = VotingSession::where('poll_id', $this->currentPoll['id'])
+                ->where('fingerprint', $this->fingerprint)
+                ->where('private_ip', $this->privateIp)
+                ->first();
 
-                if ($hasVoted) {
-                    throw new \Exception('Ya has participado en esta encuesta desde este dispositivo.');
-                }
+            if ($existingSession) {
+                $this->errorMessage = 'Ya has participado en esta encuesta.';
+                $this->hasVoted = true;
+                $this->isVoting = false;
+                return;
+            }
 
-                // Verificar que la encuesta sigue activa
-                if (!$this->currentPoll->isActive()) {
-                    throw new \Exception('La encuesta ya no está activa.');
-                }
+            $session = VotingSession::create([
+                'poll_id' => $this->currentPoll['id'],
+                'fingerprint' => $this->fingerprint,
+                'private_ip' => $this->privateIp,
+                'uuid' => Str::uuid(),
+                'expires_at' => now()->addHours(24)
+            ]);
 
-                // Verificar que la opción es válida
-                $option = $this->currentPoll->options()->find($this->selectedOption);
-                if (!$option) {
-                    throw new \Exception('Opción de voto inválida.');
-                }
-
-                // Crear o recuperar sesión para este dispositivo
-                $session = VotingSession::createOrRetrieveForDevice(
-                    $this->currentPoll->id,
-                    $this->deviceFingerprint,
-                    $this->deviceIp,
-                    request()->userAgent()
-                );
-
-                // Verificar una vez más que no haya votado (por si acaso)
-                if ($session->voted) {
-                    throw new \Exception('Esta sesión ya ha sido utilizada para votar.');
-                }
-
-                // Registrar el voto
-                VotingVote::create([
-                    'session_uuid' => $session->uuid,
-                    'option_id' => $this->selectedOption,
-                ]);
-
-                // Marcar la sesión como votada
-                $session->update(['voted' => true]);
-
-                // Guardar la sesión completada
-                $this->completedSessions[] = $session;
-
-                Log::info('Vote submitted successfully', [
-                    'poll_id' => $this->currentPoll->id,
-                    'option_id' => $this->selectedOption,
-                    'session_uuid' => $session->uuid,
-                    'device_fingerprint' => substr($this->deviceFingerprint, 0, 8) . '...'
-                ]);
-            });
+            VotingVote::create([
+                'session_uuid' => $session->uuid,
+                'option_id' => $this->selectedOption,
+                'poll_id' => $this->currentPoll['id']
+            ]);
 
             $this->hasVoted = true;
-            $this->voteMessage = '¡Voto registrado exitosamente!';
-            $this->voteMessageType = 'success';
+            $this->successMessage = '¡Tu voto ha sido registrado exitosamente!';
             $this->selectedOption = null;
+            $this->votedCount++;
         } catch (\Exception $e) {
-            $this->voteMessage = $e->getMessage();
-            $this->voteMessageType = 'error';
-
-            Log::error('Error submitting vote', [
-                'poll_id' => $this->currentPoll->id ?? null,
-                'option_id' => $this->selectedOption,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            $this->errorMessage = 'Error al registrar el voto: ' . $e->getMessage();
+            Log::error('Error en votación: ' . $e->getMessage(), [
+                'fingerprint' => $this->fingerprint,
+                'poll_id' => $this->currentPoll['id'],
+                'option_id' => $this->selectedOption
             ]);
         } finally {
             $this->isVoting = false;
@@ -225,17 +215,23 @@ class VotingPollAsistent extends Component
 
     public function nextPoll()
     {
-        $this->currentPollIndex++;
-        $this->resetPollState();
-        $this->loadCurrentPoll();
+        if ($this->currentPollIndex < $this->totalPolls - 1) {
+            $this->currentPollIndex++;
+            $this->currentPoll = $this->polls[$this->currentPollIndex];
+            $this->resetPollState();
+            $this->checkCurrentPollStatus();
+        } else {
+            $this->completePollAssistant();
+        }
     }
 
     public function previousPoll()
     {
         if ($this->currentPollIndex > 0) {
             $this->currentPollIndex--;
+            $this->currentPoll = $this->polls[$this->currentPollIndex];
             $this->resetPollState();
-            $this->loadCurrentPoll();
+            $this->checkCurrentPollStatus();
         }
     }
 
@@ -248,75 +244,87 @@ class VotingPollAsistent extends Component
     {
         $this->selectedOption = null;
         $this->hasVoted = false;
-        $this->voteMessage = '';
+        $this->errorMessage = '';
+        $this->successMessage = '';
         $this->isVoting = false;
     }
 
-    public function generateQRCode($sessionUuid)
+    private function completePollAssistant()
+    {
+        $this->isCompleted = true;
+
+        // Cargar sesiones completadas con relaciones para mostrar en el resumen
+        if ($this->fingerprint) {
+            $this->completedSessions = VotingSession::where('fingerprint', $this->fingerprint)
+                ->where('private_ip', $this->privateIp)
+                ->with(['poll', 'votes.option'])
+                ->get();
+
+            $this->votedCount = $this->completedSessions->count();
+        }
+    }
+
+    /**
+     * Mostrar modal con detalles de participación
+     */
+    public function showParticipationDetails($sessionId)
+    {
+        $this->selectedParticipation = $this->completedSessions->find($sessionId);
+
+        if ($this->selectedParticipation) {
+            $this->showParticipationModal = true;
+        }
+    }
+
+    /**
+     * Cerrar modal de participación
+     */
+    public function closeParticipationModal()
+    {
+        $this->showParticipationModal = false;
+        $this->selectedParticipation = null;
+    }
+
+    /**
+     * Generar código QR para una sesión de votación
+     */
+    public function generateQRCode($uuid)
     {
         try {
-            $participationUrl = route('poll.participation.show', ['uuid' => $sessionUuid]);
-
-            return QrCode::size(150)
+            $url = route('poll.participation.show', $uuid);
+            return QrCode::size(144)
                 ->backgroundColor(255, 255, 255)
                 ->color(0, 0, 0)
-                ->margin(1)
-                ->generate($participationUrl);
+                ->generate($url);
         } catch (\Exception $e) {
-            Log::error('Error generating QR code', [
-                'session_uuid' => $sessionUuid,
-                'error' => $e->getMessage()
-            ]);
-            return null;
+            // Fallback si no se puede generar el QR
+            return '<div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center border">
+                        <div class="text-xs text-gray-800 font-mono">QR</div>
+                    </div>';
         }
     }
 
     /**
-     * Generar fingerprint seguro y único para el dispositivo
+     * Generar código QR grande para el modal
      */
-    private function generateSecureFingerprint()
+    public function generateLargeQRCode($uuid)
     {
-        $userAgent = request()->userAgent() ?? '';
-        $acceptLanguage = request()->header('Accept-Language', '');
-        $acceptEncoding = request()->header('Accept-Encoding', '');
-        $ip = request()->ip() ?? '';
-
-        // Agregar timestamp del día para permitir un voto por día si es necesario
-        // $dailySalt = date('Y-m-d');
-
-        // Crear fingerprint único basado en características del dispositivo
-        $fingerprintData = implode('|', [
-            $userAgent,
-            $acceptLanguage,
-            $acceptEncoding,
-            $ip,
-            // $dailySalt // Descomentar si se quiere permitir un voto por día
-        ]);
-
-        return hash('sha256', $fingerprintData);
-    }
-
-    /**
-     * Obtener estadísticas de la encuesta actual
-     */
-    public function getCurrentPollStats()
-    {
-        if (!$this->currentPoll) {
-            return null;
+        try {
+            $url = route('poll.participation.show', $uuid);
+            return QrCode::size(200)
+                ->backgroundColor(255, 255, 255)
+                ->color(0, 0, 0)
+                ->generate($url);
+        } catch (\Exception $e) {
+            // Fallback si no se puede generar el QR
+            return '<div class="w-48 h-48 bg-white rounded-lg flex items-center justify-center border">
+                        <div class="text-lg text-gray-800 font-mono">QR Code</div>
+                    </div>';
         }
-
-        return [
-            'total_votes' => $this->currentPoll->votes_count ?? 0,
-            'unique_participants' => $this->currentPoll->getUniqueParticipantsCount(),
-            'is_active' => $this->currentPoll->isActive(),
-            'time_remaining' => $this->currentPoll->time_remaining,
-        ];
     }
 
     public function render()
     {
-        return view('livewire.voting-poll-asistent', [
-            'pollStats' => $this->getCurrentPollStats()
-        ]);
+        return view('livewire.voting-poll-asistent');
     }
 }

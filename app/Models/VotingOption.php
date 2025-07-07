@@ -14,6 +14,11 @@ class VotingOption extends Model
     protected $fillable = [
         'poll_id',
         'label',
+        'votes_count',
+    ];
+
+    protected $casts = [
+        'votes_count' => 'integer',
     ];
 
     public function poll(): BelongsTo
@@ -26,8 +31,14 @@ class VotingOption extends Model
         return $this->hasMany(VotingVote::class, 'option_id');
     }
 
-    public function getVotesCountAttribute(): int
+    public function getPercentageAttribute(): float
     {
-        return $this->votes()->count();
+        $totalVotes = $this->poll->total_votes;
+
+        if ($totalVotes === 0) {
+            return 0.0;
+        }
+
+        return round(($this->votes_count / $totalVotes) * 100, 2);
     }
 }

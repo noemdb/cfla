@@ -11,7 +11,7 @@ class VotingDashboardController extends Controller
     public function index()
     {
         $polls = VotingPoll::with(['options', 'sessions'])
-            ->withVotesCount()
+            // ->withVotesCount()
             ->orderBy('created_at', 'desc')
             ->get();
 

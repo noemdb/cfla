@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('voting_polls', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('access_token')->unique();
+            $table->text('description')->nullable();
+            $table->string('access_token', 32)->unique();
             $table->boolean('enable')->default(false);
-            $table->dateTime('date')->nullable(); // inicio
-            $table->integer('time_active'); // duración en minutos
+            $table->timestamp('date')->nullable();
+            $table->integer('time_active')->default(60); // minutos
             $table->timestamps();
+
+            $table->index(['enable', 'date']);
+            $table->index('access_token');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('voting_polls');

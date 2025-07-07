@@ -15,29 +15,36 @@ class VotingFingerprintController extends Controller
         $request->validate([
             'fingerprint' => 'required|string|max:255',
             'poll_token' => 'required|string',
+            'private_ip' => 'nullable|string|max:45',
         ]);
 
         try {
             $poll = VotingPoll::where('access_token', $request->poll_token)->firstOrFail();
 
-            $ip = $request->ip();
+            $publicIp = $request->ip();
+            $privateIp = $request->private_ip;
             $userAgent = $request->userAgent();
             $fingerprint = $this->sanitizeFingerprint($request->fingerprint);
 
-            Log::info('Fingerprint store request', [
+            Log::info('Fingerprint store request with private IP', [
                 'poll_id' => $poll->id,
-                'ip' => $ip,
+                'public_ip' => $publicIp,
+                'private_ip' => $privateIp,
                 'fingerprint' => substr($fingerprint, 0, 8) . '...',
             ]);
 
-            // Verificar si el dispositivo ya votó en esta encuesta
-            $hasVoted = VotingSession::hasVotedInPoll($poll->id, $fingerprint, $ip);
+            // Verificar si el dispositivo específico ya votó en esta encuesta
+            $hasVoted = VotingSession::hasVotedInPoll($poll->id, $fingerprint, $privateIp, $publicIp);
 
             if ($hasVoted) {
                 $existingSession = VotingSession::where('poll_id', $poll->id)
-                    ->where(function ($query) use ($fingerprint, $ip) {
-                        $query->where('fingerprint', $fingerprint)
-                            ->orWhere('ip', $ip);
+                    ->where('fingerprint', $fingerprint)
+                    ->where(function ($query) use ($privateIp, $publicIp) {
+                        if ($privateIp) {
+                            $query->where('private_ip', $privateIp);
+                        } else {
+                            $query->where('ip', $publicIp);
+                        }
                     })
                     ->where('voted', true)
                     ->first();
@@ -64,19 +71,22 @@ class VotingFingerprintController extends Controller
                 ]);
             }
 
-            // Crear o recuperar sesión para este dispositivo
-            $session = DB::transaction(function () use ($poll, $fingerprint, $ip, $userAgent) {
+            // Crear o recuperar sesión para este dispositivo específico
+            $session = DB::transaction(function () use ($poll, $fingerprint, $publicIp, $privateIp, $userAgent) {
                 return VotingSession::createOrRetrieveForDevice(
                     $poll->id,
                     $fingerprint,
-                    $ip,
+                    $publicIp,
+                    $privateIp,
                     $userAgent
                 );
             });
 
-            Log::info('Session created/retrieved', [
+            Log::info('Session created/retrieved with private IP', [
                 'session_uuid' => $session->uuid,
                 'poll_id' => $poll->id,
+                'public_ip' => $publicIp,
+                'private_ip' => $privateIp,
                 'voted' => $session->voted,
             ]);
 
@@ -142,6 +152,8 @@ class VotingFingerprintController extends Controller
                     'voted' => $session->voted,
                     'expires_at' => $session->expires_at,
                     'is_expired' => $session->isExpired(),
+                    'public_ip' => $session->ip,
+                    'private_ip' => $session->private_ip,
                 ],
                 'poll' => [
                     'id' => $session->poll->id,

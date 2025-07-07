@@ -71,7 +71,7 @@ class PollVotingController extends Controller
             abort(404, 'Sesión no encontrada');
         }
 
-        $vote = VotingVote::where('session_uuid', $session->uuid)->first();
+        $vote = VotingVote::where('session_uuid', $session->uuid)->first(); //dd($uuid,$session,$vote );
 
         if (!$vote) {
             abort(404, 'Voto no encontrado');
@@ -104,6 +104,11 @@ class PollVotingController extends Controller
             'optionStats' => $optionStats
         ]);
     }
+
+    // public function showParticipation($uuid)
+    // {
+    //     dd("Método ejecutado con UUID: " . $uuid);
+    // }
 
     public function index()
     {

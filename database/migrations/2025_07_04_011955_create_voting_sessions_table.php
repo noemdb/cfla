@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('voting_sessions', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->string('ip', 45)->nullable(); // Soporte para IPv6
+            $table->string('ip', 45)->nullable(); // IP pública
+            $table->string('private_ip', 45)->nullable(); // IP privada de la red local
             $table->string('fingerprint', 64)->nullable(); // Hash SHA-256
             $table->text('user_agent')->nullable();
             $table->boolean('voted')->default(false);
@@ -21,13 +22,13 @@ return new class extends Migration
 
             $table->foreign('poll_id')->references('id')->on('voting_polls')->onDelete('cascade');
 
-            // Índices únicos para prevenir votos duplicados
-            $table->unique(['poll_id', 'fingerprint'], 'unique_poll_fingerprint');
-            $table->unique(['poll_id', 'ip'], 'unique_poll_ip');
+            // Índice único combinando poll_id, fingerprint y private_ip para permitir múltiples dispositivos por IP pública
+            $table->unique(['poll_id', 'fingerprint', 'private_ip'], 'unique_poll_device');
 
             // Índices para mejorar rendimiento
             $table->index(['poll_id', 'voted']);
             $table->index(['expires_at']);
+            $table->index(['ip', 'private_ip']);
         });
     }
 

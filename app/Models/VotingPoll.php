@@ -13,6 +13,7 @@ class VotingPoll extends Model
 
     protected $fillable = [
         'title',
+        'description',
         'access_token',
         'enable',
         'date',
@@ -22,6 +23,7 @@ class VotingPoll extends Model
     protected $casts = [
         'enable' => 'boolean',
         'date' => 'datetime',
+        'time_active' => 'integer',
     ];
 
     protected static function boot()
@@ -47,52 +49,38 @@ class VotingPoll extends Model
 
     public function votes()
     {
-        return $this->hasManyThrough(
-            VotingVote::class,
-            VotingOption::class,
-            'poll_id', // Foreign key on voting_options table
-            'option_id', // Foreign key on voting_votes table
-            'id', // Local key on voting_polls table
-            'id' // Local key on voting_options table
-        );
-    }
-
-    public function getVotesCountAttribute(): int
-    {
-        return $this->votes()->count();
+        return $this->hasManyThrough(VotingVote::class, VotingSession::class, 'poll_id', 'session_uuid', 'id', 'uuid');
     }
 
     public function isActive(): bool
     {
-        if (!$this->enable || !$this->date) {
-            return false;
-        }
-
-        $startTime = $this->date;
-        $endTime = $this->date->addMinutes($this->time_active);
-        $now = now();
-
-        return $now->greaterThanOrEqualTo($startTime) && $now->lessThan($endTime);
+        return $this->enable && !$this->isExpired();
     }
 
     public function isExpired(): bool
     {
-        if (!$this->enable || !$this->date) {
+        if (!$this->date) {
             return false;
         }
 
-        $endTime = $this->date->addMinutes($this->time_active);
+        $endTime = $this->date->copy()->addMinutes($this->time_active);
         return now()->greaterThan($endTime);
     }
 
     public function getTimeRemainingAttribute(): ?string
     {
-        if (!$this->enable || !$this->date) {
+        if (!$this->date || !$this->enable) {
             return null;
         }
 
-        $endTime = $this->date->addMinutes($this->time_active);
-        $remaining = now()->diffInMinutes($endTime, false);
+        $endTime = $this->date->copy()->addMinutes($this->time_active);
+        $now = now();
+
+        if ($now->greaterThan($endTime)) {
+            return 'Expirada';
+        }
+
+        $remaining = $now->diffInMinutes($endTime, false);
 
         if ($remaining <= 0) {
             return 'Expirada';
@@ -103,32 +91,29 @@ class VotingPoll extends Model
 
         if ($hours > 0) {
             return "{$hours}h {$minutes}m restantes";
+        } else {
+            return "{$minutes}m restantes";
         }
-
-        return "{$minutes}m restantes";
     }
 
-    public function scopeWithVotesCount($query)
+    public function getTotalVotesAttribute(): int
     {
-        return $query->withCount([
-            'votes' => function ($query) {
-                // No necesita condiciones adicionales
-            }
-        ]);
+        return $this->sessions()->where('voted', true)->count();
     }
 
-    /**
-     * Verificar si un dispositivo puede votar en esta encuesta
-     */
-    public function canDeviceVote($fingerprint, $ip = null): bool
+    public function getVotingUrlAttribute(): string
     {
-        // Verificar si la encuesta está activa
-        if (!$this->isActive()) {
-            return false;
-        }
+        return route('poll.vote', ['token' => $this->access_token]);
+    }
 
-        // Verificar si el dispositivo ya votó
-        return !VotingSession::hasVotedInPoll($this->id, $fingerprint, $ip);
+    public function getResultsUrlAttribute(): string
+    {
+        return route('poll.results', ['token' => $this->access_token]);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('enable', true);
     }
 
     /**
@@ -137,5 +122,50 @@ class VotingPoll extends Model
     public function getUniqueParticipantsCount(): int
     {
         return $this->sessions()->where('voted', true)->count();
+    }
+
+    /**
+     * Verificar si un dispositivo puede votar en esta encuesta
+     */
+    public function canDeviceVote($fingerprint, $privateIp = null, $publicIp = null): bool
+    {
+        // Verificar si la encuesta está activa
+        if (!$this->isActive()) {
+            return false;
+        }
+
+        // Verificar si el dispositivo ya votó
+        return !VotingSession::hasVotedInPoll($this->id, $fingerprint, $privateIp, $publicIp);
+    }
+
+    /**
+     * Obtener estadísticas detalladas de la encuesta
+     */
+    public function getDetailedStats(): array
+    {
+        $totalVotes = $this->getUniqueParticipantsCount();
+        $optionsWithVotes = $this->options()->with(['votes' => function ($query) {
+            $query->join('voting_sessions', 'voting_votes.session_uuid', '=', 'voting_sessions.uuid')
+                ->where('voting_sessions.voted', true);
+        }])->get();
+
+        $results = [];
+        foreach ($optionsWithVotes as $option) {
+            $voteCount = $option->votes->count();
+            $percentage = $totalVotes > 0 ? round(($voteCount / $totalVotes) * 100, 2) : 0;
+
+            $results[] = [
+                'option' => $option,
+                'votes' => $voteCount,
+                'percentage' => $percentage
+            ];
+        }
+
+        return [
+            'total_votes' => $totalVotes,
+            'results' => $results,
+            'is_active' => $this->isActive(),
+            'time_remaining' => $this->time_remaining
+        ];
     }
 }

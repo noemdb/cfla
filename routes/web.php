@@ -94,9 +94,14 @@ Route::get('/voting/results', [PollVotingController::class, 'results'])
     ->name('voting.results');
 
 // Rutas QR y participación
-Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
-Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
+// Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
+// Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
+// Route::get('/poll/participation/{uuid}', function () {
+//         dd('123');
+//     })->name('poll.participation.show');
+
+Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Rutas del panel administrativo
 Route::prefix('admin/voting')->name('admin.voting.')->group(function () {

@@ -142,6 +142,8 @@
         });
     </script>
 
+    @yield('script')
+
     <!-- Estilos adicionales para la experiencia de votación -->
     <style>
         /* Animaciones suaves */
