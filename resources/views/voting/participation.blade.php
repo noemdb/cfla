@@ -216,7 +216,7 @@
             </div>
 
             <!-- Botón para volver -->
-            <div class="text-center mt-8">
+            {{-- <div class="text-center mt-8">
                 <a href="{{ route('poll.voting.index') }}"
                     class="inline-flex items-center px-4 py-2 text-gray-400 hover:text-white transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +225,7 @@
                     </svg>
                     Ver otras encuestas
                 </a>
-            </div>
+            </div> --}}
         </div>
     </div>
 @endsection
