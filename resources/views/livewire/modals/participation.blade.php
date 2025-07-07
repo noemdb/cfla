@@ -251,7 +251,7 @@
                                     style="font-family: 'Courier New', monospace;">
                                     <!-- Header del Ticket -->
                                     <div class="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
-                                        <div class="text-lg font-bold text-gray-800">SISTEMA DE VOTACIONES</div>
+                                        <div class="text-lg font-bold text-gray-800">MÓDULO DE VOTACIONES</div>
                                         <div class="text-sm text-gray-600">Comprobante de Participación</div>
                                         <div class="text-xs text-gray-500 mt-1">{{ now()->format('d/m/Y H:i:s') }}
                                         </div>
