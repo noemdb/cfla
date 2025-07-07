@@ -79,6 +79,9 @@ Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])->name(
 Route::get('/voting/guia', [PollVotingController::class, 'guia'])
     ->name('voting.guia');
 
+Route::get('/voting/proposal', [PollVotingController::class, 'proposal'])
+    ->name('voting.proposal');
+
 // Ruta para índice de votación
 Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
 

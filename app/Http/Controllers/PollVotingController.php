@@ -177,4 +177,9 @@ class PollVotingController extends Controller
     {
         return view('voting.guia');
     }
+
+    public function proposal()
+    {
+        return view('voting.proposal');
+    }
 }
