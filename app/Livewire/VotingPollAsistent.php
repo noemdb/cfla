@@ -34,6 +34,10 @@ class VotingPollAsistent extends Component
     public $showParticipationModal = false;
     public $selectedParticipation = null;
 
+    // Alert properties
+    public $showVoteAlert = false;
+    public $voteAlertData = [];
+
     protected $listeners = [
         'setDeviceFingerprint' => 'handleFingerprintData'
     ];
@@ -191,6 +195,9 @@ class VotingPollAsistent extends Component
                 'expires_at' => now()->addHours(24)
             ]);
 
+            // Encontrar la opción seleccionada para mostrar en el alert
+            $selectedOptionData = collect($this->currentPoll['options'])->firstWhere('id', $this->selectedOption);
+
             VotingVote::create([
                 'session_uuid' => $session->uuid,
                 'option_id' => $this->selectedOption,
@@ -199,8 +206,27 @@ class VotingPollAsistent extends Component
 
             $this->hasVoted = true;
             $this->successMessage = '¡Tu voto ha sido registrado exitosamente!';
-            $this->selectedOption = null;
             $this->votedCount++;
+
+            // Calcular encuestas restantes
+            $remainingPolls = $this->totalPolls - ($this->currentPollIndex + 1);
+            $completedPolls = $this->currentPollIndex + 1;
+            $progressPercentage = round(($completedPolls / $this->totalPolls) * 100);
+
+            // Preparar datos para el alert
+            $this->voteAlertData = [
+                'pollTitle' => $this->currentPoll['title'],
+                'selectedOption' => $selectedOptionData['label'] ?? 'Opción seleccionada',
+                'remainingPolls' => $remainingPolls,
+                'completedPolls' => $completedPolls,
+                'totalPolls' => $this->totalPolls,
+                'progressPercentage' => $progressPercentage,
+                'isLastPoll' => $remainingPolls === 0
+            ];
+
+            // Mostrar alert
+            $this->showVoteAlert = true;
+            $this->selectedOption = null;
         } catch (\Exception $e) {
             $this->errorMessage = 'Error al registrar el voto: ' . $e->getMessage();
             Log::error('Error en votación: ' . $e->getMessage(), [
@@ -213,8 +239,26 @@ class VotingPollAsistent extends Component
         }
     }
 
+    public function closeVoteAlert()
+    {
+        $this->showVoteAlert = false;
+        $this->voteAlertData = [];
+    }
+
+    public function continueToNextPoll()
+    {
+        $this->closeVoteAlert();
+        $this->nextPoll();
+    }
+
     public function nextPoll()
     {
+        // Verificar si se ha votado en la encuesta actual antes de avanzar
+        if (!$this->hasVoted && $this->currentPoll) {
+            $this->errorMessage = 'Debes votar en esta encuesta antes de continuar a la siguiente.';
+            return;
+        }
+
         if ($this->currentPollIndex < $this->totalPolls - 1) {
             $this->currentPollIndex++;
             $this->currentPoll = $this->polls[$this->currentPollIndex];
@@ -237,6 +281,12 @@ class VotingPollAsistent extends Component
 
     public function skipPoll()
     {
+        // Verificar si se ha votado antes de permitir omitir
+        if (!$this->hasVoted && $this->currentPoll) {
+            $this->errorMessage = 'Debes votar en esta encuesta antes de omitir o continuar.';
+            return;
+        }
+
         $this->nextPoll();
     }
 
@@ -321,6 +371,11 @@ class VotingPollAsistent extends Component
                         <div class="text-lg text-gray-800 font-mono">QR Code</div>
                     </div>';
         }
+    }
+
+    public function getCanProceedProperty()
+    {
+        return $this->hasVoted || $this->isLoadingFingerprint;
     }
 
     public function render()

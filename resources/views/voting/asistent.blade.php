@@ -87,7 +87,7 @@
         <!-- Navegación inferior -->
         <div class="max-w-4xl mx-auto  bg-gray-800/90 backdrop-blur-sm border-t border-gray-700/50 mt-12">
             <div class="px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
                     <div class="flex items-center space-x-6">
                         <a href="{{ route('voting.index') }}"
                             class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">

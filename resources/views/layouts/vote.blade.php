@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
 <head>
     <meta charset="utf-8">
@@ -33,16 +33,16 @@
     <header class="bg-gray-900/80 backdrop-blur-sm border-b border-green-800/30 sticky top-0 z-10 shadow-lg">
         <div class="container-fluid mx-auto px-4 py-2">
             <div class="flex items-center justify-center">
-                <div class="text-lg text-center md:text-3xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">C.E. Colegio Fray Luis Amigó</div>
+                <div
+                    class="text-lg text-center md:text-3xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">
+                    C.E. Colegio Fray Luis Amigó</div>
                 <div class="flex items-center space-x-3">
                     <!-- Logo -->
                     <div class="mb-2">
-                        <img
-                            src="{{ asset('image/brand/512.png') }}"
-                            alt="{{ config('app.name') }} Logo"
-                            class="w-24 h-24 md:w-32 md:h-32 rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105"
-                        >
+                        <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                            class="w-32 max-w-full sm:w-18 md:w-24 h-auto rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105 object-contain">
                     </div>
+
                     <div>
                         <h1 class="text-lg font-bold text-white">Módulo de Votación</h1>
                         <p class="text-xs text-emerald-300">Votación segura y anónima</p>

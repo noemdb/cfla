@@ -27,14 +27,14 @@
                             class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm transition-colors">
                             Reintentar
                         </button>
-                        <button wire:click="forceSetFingerprint"
+                        {{-- <button wire:click="forceSetFingerprint"
                             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors">
                             Continuar sin identificación avanzada
-                        </button>
+                        </button> --}}
                     </div>
-                    <div class="text-xs text-yellow-500 mt-2">
+                    {{-- <div class="text-xs text-yellow-500 mt-2">
                         Si el problema persiste, puedes continuar con identificación básica
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         @endif
@@ -180,12 +180,16 @@
                         <div class="flex space-x-3">
                             @if (!$hasVoted && !$isLoadingFingerprint)
                                 <button wire:click="skipPoll"
-                                    class="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg hover:border-gray-500 transition-all duration-200">
+                                    class="px-4 py-2 text-gray-400 border border-gray-600 rounded-lg transition-all duration-200 opacity-50 cursor-not-allowed"
+                                    disabled title="Debes votar antes de omitir esta encuesta">
                                     Omitir
                                 </button>
                             @endif
+
                             <button wire:click="nextPoll"
-                                class="flex items-center px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                                class="flex items-center px-6 py-2 rounded-lg transition-all duration-200 {{ $hasVoted || $isLoadingFingerprint ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800' : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' }}"
+                                {{ !$hasVoted && !$isLoadingFingerprint ? 'disabled' : '' }}
+                                title="{{ !$hasVoted && !$isLoadingFingerprint ? 'Debes votar antes de continuar' : '' }}">
                                 {{ $currentPollIndex == $totalPolls - 1 ? 'Finalizar' : 'Siguiente' }}
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -195,6 +199,20 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        @endif
+
+        @if (!$hasVoted && !$isLoadingFingerprint && $currentPoll)
+            <div class="mt-4 p-3 bg-yellow-700/20 border border-yellow-700/30 rounded-lg">
+                <p class="text-yellow-200 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <strong>Información:</strong> Debes confirmar tu voto antes de poder continuar a la siguiente
+                    encuesta.
+                </p>
             </div>
         @endif
     @else
@@ -242,7 +260,7 @@
                                             </p>
                                         @endif
                                     </div>
-                                    <div class="p-2 bg-white rounded-lg">
+                                    <div class="m-2 p-2 bg-white rounded-lg">
                                         {!! $this->generateQRCode($session->uuid) !!}
                                     </div>
                                 </div>
@@ -275,6 +293,175 @@
                             Volver al Inicio
                         </a>
                     @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Alert de Voto Confirmado -->
+    @if ($showVoteAlert)
+        <div x-data="{ show: @entangle('showVoteAlert') }" x-show="show" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
+            style="display: none;">
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" x-show="show"
+                x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            </div>
+
+            <!-- Alert Content -->
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="inline-block w-full max-w-lg my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-800 shadow-2xl rounded-2xl border border-gray-700"
+                    x-show="show" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" @click.stop>
+
+                    <!-- Header del Alert -->
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-lg font-bold text-white">¡Voto Registrado Exitosamente!</h3>
+                                <p class="text-green-100 text-sm">Tu participación ha sido confirmada</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenido del Alert -->
+                    <div class="px-6 py-4">
+                        <!-- Información del voto -->
+                        <div class="mb-4">
+                            <h4 class="text-white font-semibold mb-2">{{ $voteAlertData['pollTitle'] ?? '' }}</h4>
+                            <div class="bg-green-900/30 border border-green-700 rounded-lg p-3">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span
+                                        class="text-green-300 text-sm">{{ $voteAlertData['selectedOption'] ?? '' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progreso -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-300 text-sm">Progreso del Asistente</span>
+                                <span
+                                    class="text-white text-sm font-semibold">{{ $voteAlertData['progressPercentage'] ?? 0 }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
+                                    style="width: {{ $voteAlertData['progressPercentage'] ?? 0 }}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                <span>{{ $voteAlertData['completedPolls'] ?? 0 }} completadas</span>
+                                <span>{{ $voteAlertData['remainingPolls'] ?? 0 }} restantes</span>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-400">
+                                    {{ $voteAlertData['completedPolls'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-400">Completadas</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-400">
+                                    {{ $voteAlertData['remainingPolls'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-400">Restantes</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-400">
+                                    {{ $voteAlertData['totalPolls'] ?? 0 }}</div>
+                                <div class="text-xs text-gray-400">Total</div>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje según el estado -->
+                        @if (isset($voteAlertData['isLastPoll']) && $voteAlertData['isLastPoll'])
+                            <div class="bg-purple-900/30 border border-purple-700 rounded-lg p-4 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-purple-400 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12z"></path>
+                                    </svg>
+                                    <span class="text-purple-300 text-sm font-medium">¡Felicidades! Has completado
+                                        todas las encuestas disponibles.</span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mb-4">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-blue-400 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-blue-300 text-sm">
+                                        @if (($voteAlertData['remainingPolls'] ?? 0) == 1)
+                                            Queda <strong>1 encuesta</strong> más por participar.
+                                        @else
+                                            Quedan <strong>{{ $voteAlertData['remainingPolls'] ?? 0 }}
+                                                encuestas</strong> más por participar.
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Footer del Alert -->
+                    <div class="bg-gray-700/30 px-6 py-4 border-t border-gray-600">
+                        <div
+                            class="flex flex-col sm:flex-row items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                            @if (isset($voteAlertData['isLastPoll']) && $voteAlertData['isLastPoll'])
+                                <button wire:click="continueToNextPoll"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12z"></path>
+                                    </svg>
+                                    Ver Resumen Final
+                                </button>
+                            @else
+                                <button wire:click="closeVoteAlert"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
+                                    Quedarse Aquí
+                                </button>
+                                <button wire:click="continueToNextPoll"
+                                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                    Continuar a la Siguiente
+                                </button>
+                            @endif
+                        </div>
+
+                        <!-- Mensaje informativo -->
+                        <div class="mt-3 text-center">
+                            <p class="text-gray-400 text-xs">
+                                💡 Ahora puedes continuar a la siguiente encuesta o quedarte para revisar los resultados
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
