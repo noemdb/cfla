@@ -62,10 +62,10 @@
         <!-- Encuesta actual -->
         @if ($currentPoll)
             <div
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-2xl overflow-hidden {{ $isLoadingFingerprint ? 'opacity-50 pointer-events-none' : '' }}">
+                class="bg-gray-800/90 mt-2 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-2xl overflow-hidden {{ $isLoadingFingerprint ? 'opacity-50 pointer-events-none' : '' }}">
                 <!-- Header de la encuesta -->
                 <div class="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-2">
                         <div>
                             <h2 class="text-2xl font-bold text-white mb-2">{{ $currentPoll['title'] }}</h2>
                             <div class="flex items-center space-x-4 text-green-100">
@@ -411,7 +411,7 @@
                         </div>
 
                         <!-- Progreso -->
-                        <div class="mb-6">
+                        <div class="my-6">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-gray-300 text-sm">Progreso del Asistente</span>
                                 <span
