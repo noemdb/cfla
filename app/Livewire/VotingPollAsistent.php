@@ -251,10 +251,24 @@ class VotingPollAsistent extends Component
         $this->nextPoll();
     }
 
+    /**
+     * Verificar si la encuesta actual está expirada
+     */
+    private function isCurrentPollExpired()
+    {
+        if (!$this->currentPoll) {
+            return false;
+        }
+
+        $currentPollModel = VotingPoll::find($this->currentPoll['id']);
+        return $currentPollModel ? $currentPollModel->isExpired() : false;
+    }
+
     public function nextPoll()
     {
         // Verificar si se ha votado en la encuesta actual antes de avanzar
-        if (!$this->hasVoted && $this->currentPoll) {
+        // EXCEPCIÓN: Si la encuesta está expirada, permitir avanzar sin votar
+        if (!$this->hasVoted && $this->currentPoll && !$this->isCurrentPollExpired()) {
             $this->errorMessage = 'Debes votar en esta encuesta antes de continuar a la siguiente.';
             return;
         }
@@ -282,12 +296,29 @@ class VotingPollAsistent extends Component
     public function skipPoll()
     {
         // Verificar si se ha votado antes de permitir omitir
-        if (!$this->hasVoted && $this->currentPoll) {
+        // EXCEPCIÓN: Si la encuesta está expirada, permitir omitir sin votar
+        if (!$this->hasVoted && $this->currentPoll && !$this->isCurrentPollExpired()) {
             $this->errorMessage = 'Debes votar en esta encuesta antes de omitir o continuar.';
             return;
         }
 
         $this->nextPoll();
+    }
+
+    /**
+     * Método específico para saltar encuestas expiradas
+     */
+    public function skipExpiredPoll()
+    {
+        // Este método permite saltar encuestas expiradas sin restricciones
+        if ($this->currentPollIndex < $this->totalPolls - 1) {
+            $this->currentPollIndex++;
+            $this->currentPoll = $this->polls[$this->currentPollIndex];
+            $this->resetPollState();
+            $this->checkCurrentPollStatus();
+        } else {
+            $this->completePollAssistant();
+        }
     }
 
     private function resetPollState()

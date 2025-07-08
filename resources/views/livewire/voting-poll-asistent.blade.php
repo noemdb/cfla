@@ -27,14 +27,16 @@
                             class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm transition-colors">
                             Reintentar
                         </button>
-                        {{-- <button wire:click="forceSetFingerprint"
+                        {{--
+                        <button wire:click="forceSetFingerprint"
                             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors">
                             Continuar sin identificación avanzada
-                        </button> --}}
+                        </button>
+                        --}}
                     </div>
-                    {{-- <div class="text-xs text-yellow-500 mt-2">
+                    <div class="text-xs text-yellow-500 mt-2">
                         Si el problema persiste, puedes continuar con identificación básica
-                    </div> --}}
+                    </div>
                 </div>
             </div>
         @endif
@@ -90,6 +92,35 @@
                     </div>
                 </div>
 
+                <!-- Verificación de expiración -->
+                @php
+                    $currentPollModel = \App\Models\VotingPoll::find($currentPoll['id']);
+                    $isExpired = $currentPollModel ? $currentPollModel->isExpired() : false;
+                @endphp
+
+                @if ($isExpired)
+                    <div class="bg-red-900/50 border border-red-700 rounded-lg p-4 my-6 mx-4">
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <h4 class="text-red-300 font-semibold">⏰ Encuesta Expirada</h4>
+                                <p class="text-red-200 text-sm">Esta encuesta ha finalizado y ya no acepta nuevas
+                                    participaciones.</p>
+                                @if ($currentPollModel->date && $currentPollModel->time_active)
+                                    <p class="text-red-200 text-xs mt-1">
+                                        Finalizó el:
+                                        {{ $currentPollModel->date->addMinutes($currentPollModel->time_active)->format('d/m/Y H:i') }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Contenido de la encuesta -->
                 <div class="p-8">
                     @if ($successMessage || $errorMessage)
@@ -113,7 +144,7 @@
                         </div>
                     @endif
 
-                    @if (!$hasVoted && !$isLoadingFingerprint)
+                    @if (!$hasVoted && !$isLoadingFingerprint && !$isExpired)
                         <!-- Opciones de votación -->
                         <div class="space-y-3 mb-8">
                             @foreach ($currentPoll['options'] as $option)
@@ -163,6 +194,13 @@
                                 @endif
                             </button>
                         @endif
+                    @elseif($isExpired)
+                        <!-- Mensaje para encuesta expirada -->
+                        <div class="text-center py-8">
+                            <div class="text-6xl mb-4">⏰</div>
+                            <h3 class="text-xl font-semibold text-gray-300 mb-2">Encuesta Finalizada</h3>
+                            <p class="text-gray-400">Esta encuesta ha expirado y ya no acepta participaciones.</p>
+                        </div>
                     @endif
 
                     <!-- Navegación -->
@@ -178,18 +216,23 @@
                         </button>
 
                         <div class="flex space-x-3">
-                            @if (!$hasVoted && !$isLoadingFingerprint)
+                            @if (!$hasVoted && !$isLoadingFingerprint && !$isExpired)
                                 <button wire:click="skipPoll"
                                     class="px-4 py-2 text-gray-400 border border-gray-600 rounded-lg transition-all duration-200 opacity-50 cursor-not-allowed"
                                     disabled title="Debes votar antes de omitir esta encuesta">
                                     Omitir
                                 </button>
+                            @elseif($isExpired)
+                                <button wire:click="skipExpiredPoll"
+                                    class="px-4 py-2 text-orange-300 border border-orange-600 rounded-lg hover:bg-orange-600/20 transition-all duration-200">
+                                    Saltar Expirada
+                                </button>
                             @endif
 
                             <button wire:click="nextPoll"
-                                class="flex items-center px-6 py-2 rounded-lg transition-all duration-200 {{ $hasVoted || $isLoadingFingerprint ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800' : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' }}"
-                                {{ !$hasVoted && !$isLoadingFingerprint ? 'disabled' : '' }}
-                                title="{{ !$hasVoted && !$isLoadingFingerprint ? 'Debes votar antes de continuar' : '' }}">
+                                class="flex items-center px-6 py-2 rounded-lg transition-all duration-200 {{ $hasVoted || $isLoadingFingerprint || $isExpired ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800' : 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' }}"
+                                {{ !$hasVoted && !$isLoadingFingerprint && !$isExpired ? 'disabled' : '' }}
+                                title="{{ !$hasVoted && !$isLoadingFingerprint && !$isExpired ? 'Debes votar antes de continuar' : '' }}">
                                 {{ $currentPollIndex == $totalPolls - 1 ? 'Finalizar' : 'Siguiente' }}
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -202,9 +245,9 @@
             </div>
         @endif
 
-        @if (!$hasVoted && !$isLoadingFingerprint && $currentPoll)
+        @if (!$hasVoted && !$isLoadingFingerprint && $currentPoll && !$isExpired)
             <div class="mt-4 p-3 bg-yellow-700/20 border border-yellow-700/30 rounded-lg">
-                <p class="text-yellow-200 text-sm flex items-center gap-2">
+                <p class="text-yellow-200 text-sm flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -212,6 +255,18 @@
                     </svg>
                     <strong>Información:</strong> Debes confirmar tu voto antes de poder continuar a la siguiente
                     encuesta.
+                </p>
+            </div>
+        @elseif($isExpired && $currentPoll)
+            <div class="mt-4 p-3 bg-red-700/20 border border-red-700/30 rounded-lg">
+                <p class="text-red-200 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <strong>Encuesta Expirada:</strong> Esta encuesta ha finalizado. Puedes continuar a la siguiente
+                    encuesta disponible.
                 </p>
             </div>
         @endif
@@ -524,6 +579,24 @@
                 }
             }
 
+            // Función para verificar si una IP es privada
+            function isPrivateIP(ip) {
+                const parts = ip.split('.').map(Number);
+
+                return (
+                    // 10.0.0.0/8
+                    (parts[0] === 10) ||
+                    // 172.16.0.0/12
+                    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+                    // 192.168.0.0/16
+                    (parts[0] === 192 && parts[1] === 168) ||
+                    // 169.254.0.0/16 (APIPA)
+                    (parts[0] === 169 && parts[1] === 254) ||
+                    // 127.0.0.0/8 (Loopback)
+                    (parts[0] === 127)
+                );
+            }
+
             // Método 1: WebRTC con múltiples servidores STUN
             function detectPrivateIPWebRTC() {
                 return new Promise((resolve) => {
@@ -745,24 +818,6 @@
                         resolve(null);
                     }
                 });
-            }
-
-            // Función para verificar si una IP es privada
-            function isPrivateIP(ip) {
-                const parts = ip.split('.').map(Number);
-
-                return (
-                    // 10.0.0.0/8
-                    (parts[0] === 10) ||
-                    // 172.16.0.0/12
-                    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
-                    // 192.168.0.0/16
-                    (parts[0] === 192 && parts[1] === 168) ||
-                    // 169.254.0.0/16 (APIPA)
-                    (parts[0] === 169 && parts[1] === 254) ||
-                    // 127.0.0.0/8 (Loopback)
-                    (parts[0] === 127)
-                );
             }
 
             // Función principal para detectar IP privada con múltiples métodos
