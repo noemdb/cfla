@@ -83,7 +83,7 @@ Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
     ->name('poll.voting.show');
 
 // Nueva ruta para resultados de encuesta
-// Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])->name('poll.voting.result');
+Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])->name('poll.voting.result');
 
 // Ruta para resultados de todas las encuestas
 Route::get('/voting/results', [PollVotingController::class, 'results'])->name('voting.results');
