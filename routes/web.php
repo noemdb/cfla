@@ -68,7 +68,7 @@ Route::get('/send-email', [GmailController::class, 'sendEmail']);
 /////////////////////////////////////////////////////////////
 //////////////// Encuestas Anonimas /////////////////////////
 
-// Rutas públicas de votación
+// Rutas públicas (activas) de votación
 Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
 
 // Ruta para el asistente de votación
@@ -82,7 +82,7 @@ Route::get('/voting/proposal', [PollVotingController::class, 'guia'])
     ->name('voting.proposal');
 
 // Ruta para índice de votación
-Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
+// Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
 
 Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
     ->name('poll.voting.show');
