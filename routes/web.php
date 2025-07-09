@@ -69,24 +69,31 @@ Route::get('/send-email', [GmailController::class, 'sendEmail']);
 //////////////// Encuestas Anonimas /////////////////////////
 
 // Rutas públicas de votación
-// Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
+Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
 
 // Ruta para el asistente de votación
 Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])->name('voting.asistent');
 
 // Ruta para guía del módulo de votación
-Route::get('/voting/guia', [PollVotingController::class, 'guia'])->name('voting.guia');
+Route::get('/voting/guia', [PollVotingController::class, 'guia'])
+    ->name('voting.guia');
 
-Route::get('/voting/proposal', [PollVotingController::class, 'guia'])->name('voting.proposal');
+Route::get('/voting/proposal', [PollVotingController::class, 'guia'])
+    ->name('voting.proposal');
+
+// Ruta para índice de votación
+Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
 
 Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])
     ->name('poll.voting.show');
 
 // Nueva ruta para resultados de encuesta
-Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])->name('poll.voting.result');
+Route::get('/poll/voting/result/{access_token}', [PollVotingController::class, 'result'])
+    ->name('poll.voting.result');
 
 // Ruta para resultados de todas las encuestas
-Route::get('/voting/results', [PollVotingController::class, 'results'])->name('voting.results');
+Route::get('/voting/results', [PollVotingController::class, 'results'])
+    ->name('voting.results');
 
 Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
