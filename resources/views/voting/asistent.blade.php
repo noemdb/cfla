@@ -67,6 +67,7 @@
                         <p class="text-gray-400 text-lg mb-8">
                             Actualmente no hay encuestas disponibles para participar.
                         </p>
+                        {{--
                         <div class="space-y-4">
                             <a href="{{ route('voting.index') }}"
                                 class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
@@ -79,6 +80,7 @@
                                 Ver Todas las Encuestas
                             </a>
                         </div>
+                        --}}
                     </div>
                 </div>
             @endif
@@ -89,6 +91,7 @@
             <div class="px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
                     <div class="flex items-center space-x-6">
+                        {{--
                         <a href="{{ route('voting.index') }}"
                             class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,6 +100,7 @@
                             </svg>
                             Todas las Encuestas
                         </a>
+                        --}}
                         <a href="{{ route('voting.results') }}"
                             class="flex items-center text-gray-300 hover:text-white transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
