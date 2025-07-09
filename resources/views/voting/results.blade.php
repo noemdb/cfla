@@ -178,6 +178,7 @@
                             <h3 class="text-2xl font-bold text-white mb-4">No hay encuestas activas</h3>
                             <p class="text-gray-300 mb-6">Actualmente no hay encuestas disponibles para mostrar resultados.
                             </p>
+                            {{--
                             <a href="{{ route('poll.voting.index') }}"
                                 class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,6 +187,7 @@
                                 </svg>
                                 Ver Encuestas Disponibles
                             </a>
+                            --}}
                         </div>
                     </div>
                 @endforelse
