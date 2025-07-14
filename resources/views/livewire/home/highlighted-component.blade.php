@@ -39,13 +39,13 @@
 
             <!-- Column -->
             <div class="col-span-12 md:col-span-6 lg:col-span-6 xl:col-span-3 border rounded-xl shadow-xl h-full">
-                {{-- @include('home.highlighted.point') --}}
-                @include('home.highlighted.suspended.point')
+                @include('home.highlighted.infoPayment')
             </div>
 
             <!-- Column -->
             <div class="col-span-12 md:col-span-6 lg:col-span-6 xl:col-span-3 border rounded-xl shadow-xl h-full">
-                @include('home.highlighted.infoPayment')
+                {{-- @include('home.highlighted.point') --}}
+                @include('home.highlighted.suspended.point')
             </div>
 
         </div>
