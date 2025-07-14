@@ -103,6 +103,7 @@
             <!-- Resultados de cada encuesta - Grid Layout (Deck Cards) -->
             @php
                 $totalPolls = $polls->count();
+                $gridClass = 'grid-cols-1';
 
                 // Determinamos las columnas dinámicas basadas en la cantidad de encuestas
                 if ($totalPolls === 1) {
@@ -178,16 +179,6 @@
                             <h3 class="text-2xl font-bold text-white mb-4">No hay encuestas activas</h3>
                             <p class="text-gray-300 mb-6">Actualmente no hay encuestas disponibles para mostrar resultados.
                             </p>
-                            {{--
-                            <a href="{{ route('poll.voting.index') }}"
-                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                                </svg>
-                                Ver Encuestas Disponibles
-                            </a>
-                            --}}
                         </div>
                     </div>
                 @endforelse
@@ -196,16 +187,6 @@
 
             <!-- Botones de navegación -->
             <div class="flex justify-center space-x-4 mt-12">
-                {{--
-                <a href="{{ route('poll.voting.index') }}"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500/50 shadow-lg">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Volver a Encuestas
-                </a>
-                --}}
 
                 <button onclick="window.location.reload()"
                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
