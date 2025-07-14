@@ -223,11 +223,11 @@
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300 ${
-    type === 'success' ? 'bg-green-600 text-white' :
-    type === 'error' ? 'bg-red-600 text-white' :
-    type === 'info' ? 'bg-blue-600 text-white' :
-    'bg-gray-600 text-white'
-}`;
+                type === 'success' ? 'bg-green-600 text-white' :
+                type === 'error' ? 'bg-red-600 text-white' :
+                type === 'info' ? 'bg-blue-600 text-white' :
+                'bg-gray-600 text-white'
+            }`;
             notification.textContent = message;
 
             document.body.appendChild(notification);
