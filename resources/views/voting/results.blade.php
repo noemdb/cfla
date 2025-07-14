@@ -108,10 +108,10 @@
                 // Determinamos las columnas dinámicas basadas en la cantidad de encuestas
                 if ($totalPolls === 1) {
                     $gridClass = 'grid-cols-1';
-                } elseif ($totalPolls === 2) {
+                } elseif ($totalPolls === 2 || $totalPolls === 3 || $totalPolls === 4) {
                     $gridClass = 'grid-cols-1 sm:grid-cols-2';
                 } else {
-                    $gridClass = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+                    $gridClass = 'grid-cols-1';
                 }
             @endphp
             <div class="grid {{ $gridClass }} gap-8">
