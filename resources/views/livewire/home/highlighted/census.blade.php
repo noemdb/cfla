@@ -5,7 +5,7 @@
     <h3 class="text-green-950 bg-blue-100 p-2 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="menu" class="flex-none w-10 h-10 mb-4" />
-            <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>                    
+            <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>
         </div>
     </h3>
     @endslot --}}
@@ -23,7 +23,7 @@
         class="h-full block rounded-lg bg-white dark:bg-neutral-700 pt-4 mt-4">
         <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
             <div class="flex justify-center">
-                {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}                
+                {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}
 
                 <div class="grid place-items-center h-24 ">
                     <p class="text-center bg-gray-200 rounded-full p-4">
@@ -31,16 +31,16 @@
                     </p>
                 </div>
 
-                
+
                 <a href="#!">
                     <div
                         class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-[hsla(0,0%,98%,0.15)] bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100">
                     </div>
-                </a>                
+                </a>
             </div>
             <div class="text-center  dark:text-neutral-200 mt-6 pt-6">
                 <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
-                <div class="text-md text-gray-600">5ta Jornada desde 07 hasta el 11 de julio, hora 2pm.</div>
+                <div class="text-md text-gray-600">6ta Jornada desde 15 hasta el 16 de julio, hora 2pm.</div>
                 {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
             </div>
         </div>
