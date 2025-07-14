@@ -36,5 +36,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
+
+        RateLimiter::for('voting-asistent', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
     }
 }

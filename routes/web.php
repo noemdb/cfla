@@ -72,7 +72,9 @@ Route::get('/send-email', [GmailController::class, 'sendEmail']);
 // Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
 
 // Ruta para el asistente de votación
-Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])->name('voting.asistent');
+Route::get('/voting/asistent', [PollVotingController::class, 'asistent'])
+    ->name('voting.asistent')
+    ->middleware('throttle:voting-asistent'); // limitar el peticiones por IP
 
 // Ruta para guía del módulo de votación
 Route::get('/voting/guia', [PollVotingController::class, 'guia'])->name('voting.guia');
