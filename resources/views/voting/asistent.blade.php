@@ -10,7 +10,7 @@
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
                         <h1 class="text-3xl font-bold text-white mb-2">
-                            🎯 Asistente de Participación
+                            Asistente de Participación
                         </h1>
                         <p class="text-gray-300 text-lg">
                             Participa en todas las encuestas activas de manera guiada y secuencial
