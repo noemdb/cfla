@@ -22,6 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \Illuminate\Routing\Middleware\ThrottleRequests::class . ':global',
+        // 'isAdmin' => \App\Http\Middleware\IsAdmin::class,
 
     ];
 

@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 
 use App\Http\Controllers\Admin\VotingDashboardController;
 use App\Http\Controllers\Admin\VotingPollController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
 use App\Models\VotingPoll;
@@ -135,3 +136,17 @@ Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
     ->name('voting.store-fingerprint');
 
+
+
+// Auth Routes
+// Route::middleware('guest')->group(function () {
+//     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+//     Route::post('/login', [LoginController::class, 'login']);
+// });
+
+// Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+
+// // Admin Routes
+// Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+//     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+// });
