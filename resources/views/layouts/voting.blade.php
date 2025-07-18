@@ -121,6 +121,12 @@
                             </svg>
                             Admin
                         </a>
+                        <div class="flex items-center space-x-4">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="bg-gray-100 text-gray-400 px-4 py-2 rounded hover:bg-red-700">Salir</button>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Botón menú móvil -->
