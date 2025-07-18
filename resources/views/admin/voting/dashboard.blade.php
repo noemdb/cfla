@@ -1,6 +1,7 @@
 @extends('layouts.voting')
 
 @section('content')
+
     <div class="min-h-screen bg-gray-50">
         <!-- Header -->
         <div class="bg-white shadow-sm border-b">
@@ -23,6 +24,7 @@
         </div>
 
         <div class="container mx-auto px-4 py-8">
+
             <!-- Estadísticas generales -->
             <div class="grid md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-lg shadow p-6">
@@ -203,6 +205,10 @@
                         </div>
                     @endforeach
                 @endif
+            </div>
+
+            <div class="p-5 bg-white rounded-lg shadow">
+                <livewire:visits-dashboard />
             </div>
 
         </div>

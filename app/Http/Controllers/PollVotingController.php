@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Visit;
 use App\Models\VotingPoll;
 use App\Models\VotingSession;
 use App\Models\VotingVote;
@@ -12,6 +13,8 @@ class PollVotingController extends Controller
 {
     public function asistent()
     {
+        Visit::logFromRequest(request());
+
         $polls = VotingPoll::where('enable', true)
             ->with(['options'])
             ->orderBy('created_at', 'desc')
