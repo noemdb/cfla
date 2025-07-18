@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('country', 50)->nullable();
             $table->string('city', 50)->nullable();
             $table->boolean('is_robot')->default(false);
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('session_id', 255)->nullable();
             $table->timestamps();
 
