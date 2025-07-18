@@ -134,7 +134,7 @@
             @empty
                 <div class="p-8 text-center">
                     <div class="flex flex-col items-center justify-center">
-                        <x-icon name="document-magnifying-glass" class="w-10 h-10 text-gray-400" />
+                        {{-- <x-icon name="document-magnifying-glass" class="w-10 h-10 text-gray-400" /> --}}
                         <span class="mt-3 text-sm font-medium text-gray-500">
                             No se encontraron visitas con los filtros actuales
                         </span>
