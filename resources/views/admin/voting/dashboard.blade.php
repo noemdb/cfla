@@ -73,7 +73,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Finalizadas</p>
+                        <p class="text-sm font-medium text-gray-600">Desactivas</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $stats['finished_polls'] }}</p>
                     </div>
                 </div>

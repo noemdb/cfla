@@ -5,34 +5,15 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class IsAdmin
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
-        // Verificar si el usuario está autenticado
-        if (!Auth::check()) {
-            return redirect()->route('login');
+        if (Auth::check() && Auth::user()->is_admin) {
+            return $next($request);
         }
 
-        // Verificar si el usuario es administrador
-        if (!Auth::user()->is_admin) {
-            // Cerrar sesión si no es admin
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()->route('login')->withErrors([
-                'email' => 'Acceso denegado. Solo administradores.'
-            ]);
-        }
-
-        return $next($request);
+        abort(403, 'No tienes permiso para acceder aquí.');
     }
 }

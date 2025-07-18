@@ -30,9 +30,16 @@
                     <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                    Activa
-                                </span>
+                                @if($poll->enable)
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                        Activa
+                                    </span>
+                                @else
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                                        Desactiva
+                                    </span>
+                                @endif
+
                                 @if($poll->time_remaining)
                                     <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
                                         <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,12 +83,14 @@
                                 </div>
                             </div>
 
+                            {{--
                             <a href="{{ route('poll.voting.show', $poll->access_token) }}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 Votar ahora
                                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
                             </a>
+                            --}}
                         </div>
                     </div>
                 @endforeach

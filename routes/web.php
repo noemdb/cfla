@@ -85,6 +85,7 @@ Route::get('/voting/proposal', [PollVotingController::class, 'guia'])->name('vot
 // Ruta para índice de votación
 // Route::get('/voting', [PollVotingController::class, 'index'])->name('voting.index');
 
+// Ruta para votacion, sin verificaciones de unicidad de voto
 Route::get('/poll/voting/{access_token}', [PollVotingController::class, 'show'])->name('poll.voting.show');
 
 // Nueva ruta para resultados de encuesta
@@ -97,7 +98,13 @@ Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('po
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Rutas del panel administrativo
-Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
+
+Route::get('/admin', function () {
+    return view('admin.index');
+})->middleware(['auth', 'isAdmin'])->name('admin.index');
+
+// Rutas del panel administrativo para los voting
+Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdmin'])->group(function () {
     Route::get('/dashboard', [VotingDashboardController::class, 'index'])
         ->name('dashboard');
 
@@ -117,11 +124,11 @@ Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
             ->withVotesCount()
             ->get();
         return view('admin.voting.polls.results', compact('polls'));
-        // admin.voting.polls.results
     })->name('results');
 
     // Ruta para mostrar encuestas públicas
     Route::get('/list', function () {
+        // $polls = VotingPoll::query()
         $polls = VotingPoll::where('enable', true)
             ->with('options')
             ->withVotesCount()
@@ -131,22 +138,19 @@ Route::prefix('admin/voting')->name('admin.voting.')->group(function () {
     })->name('list');
 });
 
-
 // API para fingerprinting
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
     ->name('voting.store-fingerprint');
 
 
+// Mostrar formulario de login
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 
-// Auth Routes
-// Route::middleware('guest')->group(function () {
-//     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-//     Route::post('/login', [LoginController::class, 'login']);
-// });
+// Procesar login
+Route::post('/login', [LoginController::class, 'login']);
 
-// Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+// Logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// // Admin Routes
-// Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
-//     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
-// });
+
+

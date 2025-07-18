@@ -52,6 +52,15 @@ class VotingPoll extends Model
         return $this->hasManyThrough(VotingVote::class, VotingSession::class, 'poll_id', 'session_uuid', 'id', 'uuid');
     }
 
+    public function scopeWithVotesCount($query)
+    {
+        return $query->withCount([
+            'sessions as votes_count' => function ($q) {
+                //$q->where('voted', true);
+            }
+        ]);
+    }
+
     public function isActive(): bool
     {
         return $this->enable && !$this->isExpired();
