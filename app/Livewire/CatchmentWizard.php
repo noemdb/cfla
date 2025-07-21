@@ -11,6 +11,7 @@ use Livewire\Component;
 use WireUi\Traits\Actions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -36,8 +37,8 @@ class CatchmentWizard extends Component
     public $representant_cellphone; // Paso 3: Nombre del representante
     public $grade; // Paso 3: Grado/Nivel solicitado
     public $day_appointment; // Dia de la cita
-    public $day_appointment_start = '2025-07-15'; // Dia de la cita inical
-    public $day_appointment_end = '2025-07-16'; // Dia de la cita final
+    public $day_appointment_start = '2025-07-22'; // Dia de la cita inical
+    public $day_appointment_end = '2025-07-23'; // Dia de la cita final
     public $status_validate_code_email; // Dia de la cita final
 
     protected $listeners = ['hideVideo'];
@@ -79,6 +80,7 @@ class CatchmentWizard extends Component
 
     public function mount()
     {
+        // $catchments = DB::connection('s2526')->table('catchments')->get(); dd($catchments);
         $today = now()->toDateString();
         $this->day_appointment = $today;
         $this->day_appointment_start = ($today > $this->day_appointment_start) ? $today : $this->day_appointment_start;

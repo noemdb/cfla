@@ -11,6 +11,9 @@ class Catchment extends Model
 {
     use HasFactory;
 
+    protected $table = 'catchments';
+    protected $connection = 's2526';
+
     protected $fillable = [ 'group_id','token', 'firstname', 'lastname','ci_estudiant', 'grade', 'date_birth','status_foreign','country_foreign','status_siblings_college','brothers', 'gender','origin', 'representant_name', 'representant_lastname','representant_date_birth', 'representant_ci', 'email','day_appointment', 'relationship', 'occupation', 'educational_level', 'representant_phone','representant_cellphone', 'direction', 'reason_catholic', 'reason_interest', 'aspects_valued', 'expectations', 'importance_education', 'expectations_education', 'participation_activities', 'skills_talents', 'interests', 'challenges','status_active','status_accept_terms'];
 
     const COLUMN_COMMENTS = [
