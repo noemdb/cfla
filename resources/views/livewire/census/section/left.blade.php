@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">7ma Jornada desde 22 hasta el 23 de julio 2025, Hora: 2pm.</div>
+        <div class="mb-8 font-semibold">8va Jornada desde el 28 hasta el 30 de julio a las 2pm</div>
 
         {{-- <div class="w-full max-w-sm space-y-4"> --}}
         <div class="w-full max-full space-y-4">
