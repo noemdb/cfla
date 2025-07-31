@@ -40,7 +40,7 @@
             </div>
             <div class="text-center  dark:text-neutral-200 mt-6 pt-6">
                 <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
-                <div class="mb-8 font-semibold">8va Jornada desde el 28 hasta el 30 de julio a las 2pm</div>
+                <div class="mb-8 font-semibold">9na Jornada desde el 31 de julio hasta el 15 de agosto, a partir de las 8am</div>
                 {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
             </div>
         </div>
