@@ -6,7 +6,7 @@
         </h3>
         <small>
 
-            En la C.E Colegio Fray Luis Amigó, ofrecemos una educación de excelencia en Educación Inicial, Educación Primaria y Media General en Ciencia y Tecnología, diseñada para desarrollar habilidades académicas, personales y sociales en cada estudiante.
+            En el C.E Colegio Fray Luis Amigó, ofrecemos una educación de excelencia en Educación Inicial, Educación Primaria y Media General en Ciencia y Tecnología, diseñada para desarrollar habilidades académicas, personales y sociales en cada estudiante.
         </small>
     @endslot
 
