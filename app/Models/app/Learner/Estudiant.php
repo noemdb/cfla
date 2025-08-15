@@ -18,6 +18,9 @@ class Estudiant extends Model
     use HasFactory;
     use Prosecucions;
 
+    // protected $connection = 's2526';
+    // protected $table = 'estudiants';
+
     protected $fillable = [
         'user_id', 'planpago_id', 'grado_inicial_id', 'seccion_inicial', 'type_ci_id', 'ci_estudiant', 'ci_estudiant_temp', 'lastname', 'name', 'gender',
         'date_birth', 'city_birth', 'town_hall_birth', 'state_birth', 'country_birth', 'dir_address', 'phone', 'cellphone', 'email', 'gsemail', 'representant_ci',

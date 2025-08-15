@@ -10,6 +10,9 @@ class Representant extends Model
 {
     use HasFactory;
 
+    // protected $connection = 's2526';
+    // protected $table = 'representants';
+
     protected $fillable = ['user_id', 'ci_representant', 'name', 'phone', 'cellphone', 'pmovilphone', 'email', 'gsemail', 'status_active', 'status_blacklist', 'status_adviders'];
 
     public function user()

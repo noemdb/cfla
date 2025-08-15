@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">9na Jornada desde el 31 de julio hasta el 15 de agosto, a partir de las 8am</div>
+        <div class="mb-8 font-semibold">9na Jornada, desde el 31 de julio hasta el 15 de agosto de 8am a 2pm.</div>
 
         {{-- <div class="w-full max-w-sm space-y-4"> --}}
         <div class="w-full max-full space-y-4">

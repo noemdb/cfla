@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    // protected $connection = 's2526';
+    // protected $table = 'payments';
+
     use HasFactory;
 
     protected $dates = ['created_at','updated_at'];
