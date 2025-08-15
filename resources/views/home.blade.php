@@ -8,6 +8,8 @@
 
 @section('highlighted') <livewire:home.highlighted-component /> @endsection
 
+@section('pensums') @include('home.pensums.main') @endsection
+
 @section('featured') <livewire:home.featured-component /> @endsection
 
 @section('services') <livewire:home.services-component /> @endsection

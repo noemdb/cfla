@@ -53,17 +53,19 @@
 
     <div id="highlighted" class="p-0"> @yield('highlighted') </div>
 
+    <div id="pensums" class="p-0"> @yield('pensums') </div>
+
     <div id="featured" class="p-0"> @yield('featured') </div>
 
     {{-- <div id="category" class="p-0"> @yield('category') </div> --}}
 
-    
+
 
     <div id="services" class="p-0"> @yield('services') </div>
 
     {{-- <div id="alliances" class="p-0"> @yield('alliances') </div> --}}
 
-    
+
 
     <div id="testimonials" class="p-0"> @yield('testimonials') </div>
 
@@ -77,7 +79,7 @@
 
     <div id="socials" class="p-0"> @yield('socials') </div>
 
-    
+
 
     {{-- <div id="container" class="p-0"> @yield('content') </div> --}}
 
@@ -85,9 +87,9 @@
 
     {{-- <div id="graphs" class="p-0"> @yield('graphs') </div> --}}
 
-    
 
-    
+
+
 
     <div id="footer"> @yield('footer') </div>
 
@@ -104,7 +106,7 @@
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (event) => {
-            
+
             //event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
             deferredPrompt = event;
 
@@ -135,7 +137,7 @@
 
     </script>
 
-    {{-- 
+    {{--
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register("{{ asset('/pwa/sw.js') }}").then(reg => {
@@ -154,9 +156,9 @@
                 };
             });
         }
-    </script> 
+    </script>
     --}}
-    
+
 
 </body>
 
