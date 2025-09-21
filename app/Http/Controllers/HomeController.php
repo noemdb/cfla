@@ -19,6 +19,11 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class HomeController extends Controller
 {
 
+    public function diagnostico(Request $request)
+    {
+        return view('diagnostico');
+    }
+
     public function studia(Request $request)
     {
         $testimonials = collect();

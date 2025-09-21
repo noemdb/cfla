@@ -4,7 +4,7 @@ php artisan make:model 'app\Learner\Representant'
 
 Entity
 php artisan make:model 'app\Entity\Institucion'
-php artisan make:model 'app\Entity\Autoridad' 
+php artisan make:model 'app\Entity\Autoridad'
 php artisan make:model 'app\Entity\Pescolar'
 
 Academy
@@ -58,6 +58,17 @@ php artisan make:model 'app/Educational/DebateAnswer' -m
 
 php artisan make:model 'app\Enrollment\CatchmentGroup' -m
 php artisan make:model 'app\Enrollment\CatchmentActivity' -m
+
+
+
+php artisan make:model 'app\Instrument\DiagAnswer'
+php artisan make:model 'app\Instrument\DiagOption'
+php artisan make:model 'app\Instrument\DiagQuestion'
+php artisan make:model 'app\Instrument\DiagSession'
+
+
+php artisan make:model 'app\Academy\Pensum'
+php artisan make:model 'app\Academy\Asignatura'
 
 
 

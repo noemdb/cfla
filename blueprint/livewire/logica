@@ -73,3 +73,4 @@ php artisan make:livewire ProsecucionWizard
 php artisan make:livewire VotingPoll
 php artisan make:livewire VotingPollResult
 php artisan make:livewire VotingPollAsistent
+php artisan make:livewire Diagnostic

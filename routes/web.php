@@ -34,6 +34,7 @@ use App\Models\VotingPoll;
 // Route::get('/', function () { return view('home'); });
 
 Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
+Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
 
 
 Route::get('/', [HomeController::class, 'home'])->name('home');

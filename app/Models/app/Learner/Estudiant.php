@@ -4,6 +4,7 @@ namespace App\Models\app\Learner;
 
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Inscripcion;
+use App\Models\app\Academy\Pensum;
 use App\Models\app\Admon\Administrativa;
 use App\Models\app\trait\Estudiant\Prosecucions;
 use App\Models\User;
@@ -140,7 +141,7 @@ class Estudiant extends Model
     {
         $inscripcion = $this->inscripcion;
         if (!empty($inscripcion)) {
-            $seccion = $this->seccion;
+            $seccion = $this->inscripcion->seccion;
             if (!empty($seccion)) {
                 if ($seccion->status_active == "true") {
                     return $seccion;
@@ -153,7 +154,7 @@ class Estudiant extends Model
     {
         $inscripcion = $this->inscripcion;
         if (!empty($inscripcion)) {
-            $seccion = $this->seccion;
+            $seccion = $this->inscripcion->seccion;
             if (!empty($seccion)) {
                 if ($seccion->status_active == "true" && $seccion->status_inscription_affects == "true") {
                     $grado = $seccion->grado;
@@ -191,5 +192,28 @@ class Estudiant extends Model
         ->where('seccions.status_active', 'true')
         ->first();
         return ($estudiant) ? true : false;
+    }
+
+
+    public function getPensumsAttribute()
+    {
+        return Pensum::select('pensums.*')
+        ->join('grados', 'grados.id', '=', 'pensums.grado_id')
+        ->join('seccions', 'grados.id', '=', 'seccions.grado_id')
+        ->join('inscripcions', 'seccions.id', '=', 'inscripcions.seccion_id')
+        ->join('estudiants', 'estudiants.id', '=', 'inscripcions.estudiant_id')
+        ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
+        ->join('asignaturas', 'asignaturas.id', '=', 'pensums.asignatura_id')
+
+        ->Where('estudiants.id',$this->id)
+
+        ->wherenull('pensums.deleted_at')
+        ->wherenull('grados.deleted_at')
+        ->wherenull('seccions.deleted_at')
+        ->wherenull('inscripcions.deleted_at')
+        ->wherenull('estudiants.deleted_at')
+
+        ->groupby('pensums.id')
+        ->get();
     }
 }
