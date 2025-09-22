@@ -109,21 +109,21 @@
                 </div>
 
                 <!-- Difficulty Distribution -->
-                <div class="mb-3">
-                    <div class="flex items-center mb-2">
+                <div class="mb-2">
+                    <div class="flex items-center mb-1">
                         <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         <span class="text-xs text-gray-400 font-medium">Distribución por dificultad</span>
                     </div>
                     <!-- Added container for bars and labels -->
-                    <div class="space-y-2">
+                    <div class="space-y-1">
                         <!-- Progress bars -->
-                        <div class="flex space-x-2">
+                        <div class="flex space-x-1">
                             @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
                                 @if (isset($pensum['difficulty_distribution'][$level]))
-                                    <div class="flex-1 bg-gray-700 rounded-full h-2">
-                                        <div class="@if($level === 'easy') bg-gradient-to-r from-green-500 to-green-400 @elseif($level === 'medium') bg-gradient-to-r from-yellow-500 to-yellow-400 @else bg-gradient-to-r from-red-500 to-red-400 @endif h-2 rounded-full"
+                                    <div class="flex-1 bg-gray-700 rounded-full h-1.5">
+                                        <div class="@if($level === 'easy') bg-gradient-to-r from-green-500 to-green-400 @elseif($level === 'medium') bg-gradient-to-r from-yellow-500 to-yellow-400 @else bg-gradient-to-r from-red-500 to-red-400 @endif h-1.5 rounded-full"
                                             style="width: {{ ($pensum['difficulty_distribution'][$level] / $pensum['total_questions']) * 100 }}%">
                                         </div>
                                     </div>
@@ -131,14 +131,14 @@
                             @endforeach
                         </div>
                         <!-- Added text labels below progress bars -->
-                        <div class="flex space-x-2">
+                        <div class="flex space-x-1">
                             @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
                                 @if (isset($pensum['difficulty_distribution'][$level]))
                                     <div class="flex-1 text-center">
                                         <span class="text-xs @if($level === 'easy') text-green-400 @elseif($level === 'medium') text-yellow-400 @else text-red-400 @endif font-medium">
                                             {{ $label }}
                                         </span>
-                                        <div class="text-xs text-gray-500 mt-1">
+                                        <div class="text-xs text-gray-500">
                                             {{ $pensum['difficulty_distribution'][$level] }}
                                         </div>
                                     </div>
