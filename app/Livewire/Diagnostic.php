@@ -17,8 +17,8 @@ use WireUi\Traits\Actions;
 class Diagnostic extends Component
 {
     use Actions;
-
-    public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary
+    
+    public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary, guide
     public $studentCi = '';
     public $currentStudent = null;
     public $isStudentVerified = false;
@@ -39,6 +39,9 @@ class Diagnostic extends Component
     public $unansweredQuestions;
     public $answeredQuestions;
     public $showAnsweredModal = false; // Added property for modal state
+
+    // Guide
+    public $activeTab = 'overview'; // overview, process, questions, tips
 
     // Datos
     public $pensums = [];
@@ -83,7 +86,8 @@ class Diagnostic extends Component
     public function mount()
     {
         $this->currentView = 'student-identification';
-        // $this->studentCi = '34120933';
+        $this->studentCi = '34120933';
+        $this->activeTab = 'overview';
     }
 
     public function verifyStudent()
@@ -94,14 +98,11 @@ class Diagnostic extends Component
 
         try {
             // Search for student by CI
-            $student = Estudiant::query()
-            ->join('inscripcions', 'estudiants.id', '=', 'inscripcions.estudiant_id')
-            ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
-            ->where('ci_estudiant', $this->studentCi)
-            ->first();
+            $student = Estudiant::where('ci_estudiant', $this->studentCi)
+                ->first();
 
             if (!$student) {
-                $this->addError('studentCi', 'No se encontró un estudiante formalmente inscrito con esta cédula.');
+                $this->addError('studentCi', 'No se encontró un estudiante con esta cédula.');
                 return;
             }
 
@@ -122,7 +123,7 @@ class Diagnostic extends Component
 
             $this->notification()->success(
                 'Bienvenido/a',
-                'Hola ' . $student->fullname . '. Puedes comenzar tu diagnóstico.'
+                'Hola ' . $student->user->name . '. Puedes comenzar tu diagnóstico.'
             );
         } catch (Exception $e) {
             session()->flash('error', 'Error al verificar estudiante: ' . $e->getMessage());
@@ -616,6 +617,12 @@ class Diagnostic extends Component
         });
 
         $this->unansweredQuestions = $this->unansweredQuestions->shuffle();
+    }
+
+    public function showGuide()
+    {
+        $this->currentView = 'guide';
+        $this->activeTab = 'overview';
     }
 
     public function render()
