@@ -113,16 +113,35 @@
                         </svg>
                         <span class="text-xs text-gray-400 font-medium">Distribución por dificultad</span>
                     </div>
-                    <div class="flex space-x-2">
-                        @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
-                            @if (isset($pensum['difficulty_distribution'][$level]))
-                                <div class="flex-1 bg-gray-700 rounded-full h-2">
-                                    <div class="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full"
-                                        style="width: {{ ($pensum['difficulty_distribution'][$level] / $pensum['total_questions']) * 100 }}%">
+                    <!-- Added container for bars and labels -->
+                    <div class="space-y-2">
+                        <!-- Progress bars -->
+                        <div class="flex space-x-2">
+                            @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
+                                @if (isset($pensum['difficulty_distribution'][$level]))
+                                    <div class="flex-1 bg-gray-700 rounded-full h-2">
+                                        <div class="@if($level === 'easy') bg-gradient-to-r from-green-500 to-green-400 @elseif($level === 'medium') bg-gradient-to-r from-yellow-500 to-yellow-400 @else bg-gradient-to-r from-red-500 to-red-400 @endif h-2 rounded-full"
+                                            style="width: {{ ($pensum['difficulty_distribution'][$level] / $pensum['total_questions']) * 100 }}%">
+                                        </div>
                                     </div>
-                                </div>
-                            @endif
-                        @endforeach
+                                @endif
+                            @endforeach
+                        </div>
+                        <!-- Added text labels below progress bars -->
+                        <div class="flex space-x-2">
+                            @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
+                                @if (isset($pensum['difficulty_distribution'][$level]))
+                                    <div class="flex-1 text-center">
+                                        <span class="text-xs @if($level === 'easy') text-green-400 @elseif($level === 'medium') text-yellow-400 @else text-red-400 @endif font-medium">
+                                            {{ $label }}
+                                        </span>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ $pensum['difficulty_distribution'][$level] }}
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
