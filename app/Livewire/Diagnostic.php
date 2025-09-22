@@ -86,7 +86,6 @@ class Diagnostic extends Component
     public function mount()
     {
         $this->currentView = 'student-identification';
-        $this->studentCi = '34120933';
         $this->activeTab = 'overview';
     }
 
