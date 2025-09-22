@@ -48,28 +48,6 @@
                             académica personalizada</p>
                     </div>
                 </div>
-
-                <!-- Información del usuario -->
-                @auth
-                    <div class="flex items-center space-x-4">
-                        <div class="hidden md:block text-right">
-                            <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-emerald-300">{{ Auth::user()->estudiant->ci_estudiant ?? 'Estudiante' }}
-                            </p>
-                        </div>
-
-                        <div class="relative">
-                            <button
-                                class="flex items-center space-x-2 bg-emerald-800/50 hover:bg-emerald-700/50 px-3 py-2 rounded-lg transition-colors">
-                                <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
-                                    <span class="text-sm font-semibold text-white">
-                                        {{ substr(Auth::user()->name, 0, 1) }}
-                                    </span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                @endauth
             </div>
         </div>
     </header>

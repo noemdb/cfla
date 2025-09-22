@@ -9,10 +9,10 @@
                 </svg>
             </div>
             <h2 class="text-3xl font-bold text-white mb-2">
-                Identificación de Estudiante
+                Identificación de Estudiante.
             </h2>
             <p class="text-gray-400">
-                Ingresa tu número de cédula para acceder al diagnóstico académico
+                Ingresa tu número de cédula para acceder al diagnóstico educativo
             </p>
         </div>
 

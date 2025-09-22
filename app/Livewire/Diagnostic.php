@@ -94,11 +94,14 @@ class Diagnostic extends Component
 
         try {
             // Search for student by CI
-            $student = Estudiant::where('ci_estudiant', $this->studentCi)
-                ->first();
+            $student = Estudiant::query()
+            ->join('inscripcions', 'estudiants.id', '=', 'inscripcions.estudiant_id')
+            ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
+            ->where('ci_estudiant', $this->studentCi)
+            ->first();
 
             if (!$student) {
-                $this->addError('studentCi', 'No se encontró un estudiante con esta cédula.');
+                $this->addError('studentCi', 'No se encontró un estudiante formalmente inscrito con esta cédula.');
                 return;
             }
 
