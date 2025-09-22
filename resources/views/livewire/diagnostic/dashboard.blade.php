@@ -1,12 +1,24 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
-    <div class="text-center mb-4">
+    <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-white mb-4">
             Diagnóstico Académico
         </h1>
-        <p class="text-gray-300 text-lg">
+        <p class="text-gray-300 text-lg mb-6">
             Comprueba tus conocimientos en las diferentes áreas de formación
         </p>
+        
+        <!-- Added guide button in header section -->
+        <div class="flex justify-center">
+            <button 
+                wire:click="showGuide" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-semibold flex items-center space-x-2 shadow-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Guía de Participación</span>
+            </button>
+        </div>
     </div>
 
     <!-- Stats Cards -->
@@ -32,15 +44,9 @@
     @endif
 
     <!-- Areas de Formación -->
-    <p class="text-gray-300 text-lg">
-        Bienvenido/a <strong>{{ $currentStudent->full_name }}</strong> . Puedes realizar tu diagnóstico.
-    </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-
-
         @forelse($pensums as $pensum)
-            <div class="diagnostic-card rounded-xl p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
+            <div class="diagnostic-card rounded-xl p-6 border @if($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
                 wire:click="startDiagnostic({{ $pensum['id'] }})">
 
                 <!-- Progress Ring -->
@@ -51,11 +57,9 @@
                             <h3 class="text-xl font-semibold text-white">
                                 {{ $pensum['name'] }}
                             </h3>
-                            @if ($pensum['is_completed'])
+                            @if($pensum['is_completed'])
                                 <svg class="w-5 h-5 text-green-400 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd"></path>
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             @endif
                         </div>
@@ -69,15 +73,13 @@
                             <path class="text-gray-700" stroke="currentColor" stroke-width="3" fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <!-- Enhanced progress ring color for completed areas -->
-                            <path
-                                class="@if ($pensum['is_completed']) text-green-400 @else text-green-500 @endif progress-ring"
-                                stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
+                            <path class="@if($pensum['is_completed']) text-green-400 @else text-green-500 @endif progress-ring" stroke="currentColor" stroke-width="3"
+                                fill="none" stroke-linecap="round"
                                 stroke-dasharray="{{ $pensum['progress_percentage'] }}, 100"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <span
-                                class="text-xs font-semibold @if ($pensum['is_completed']) text-green-300 @else text-white @endif">
+                            <span class="text-xs font-semibold @if($pensum['is_completed']) text-green-300 @else text-white @endif">
                                 {{ $pensum['progress_percentage'] }}%
                             </span>
                         </div>
@@ -87,8 +89,7 @@
                 <!-- Stats -->
                 <div class="flex justify-between items-center mb-4">
                     <div class="text-sm text-gray-400">
-                        <span
-                            class="@if ($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
+                        <span class="@if($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
                         / {{ $pensum['total_questions'] }} preguntas
                     </div>
 
@@ -121,7 +122,7 @@
                     <!-- Modified button to prevent event bubbling and call specific methods -->
                     <button
                         wire:click.stop="@if ($pensum['is_completed']) reviewAnswers({{ $pensum['id'] }}) @else startDiagnostic({{ $pensum['id'] }}) @endif"
-                        class="@if ($pensum['is_completed']) bg-green-500 hover:bg-green-600 @else bg-green-600 hover:bg-green-700 @endif text-white px-6 py-2 rounded-lg transition-colors font-semibold">
+                        class="@if($pensum['is_completed']) bg-green-500 hover:bg-green-600 @else bg-green-600 hover:bg-green-700 @endif text-white px-6 py-2 rounded-lg transition-colors font-semibold">
                         @if ($pensum['is_completed'])
                             Ver Respuestas
                         @else
