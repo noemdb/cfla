@@ -12,9 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use WireUi\Traits\Actions;
 
 class Diagnostic extends Component
 {
+    use Actions;
+
     public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary
     public $studentCi = '';
     public $currentStudent = null;
@@ -114,7 +117,10 @@ class Diagnostic extends Component
             // Move to dashboard
             $this->currentView = 'dashboard';
 
-            session()->flash('success', 'Bienvenido/a ' . $student->user->name . '. Puedes comenzar tu diagnóstico.');
+            $this->notification()->success(
+                'Bienvenido/a',
+                'Hola ' . $student->fullname . '. Puedes comenzar tu diagnóstico.'
+            );
         } catch (Exception $e) {
             session()->flash('error', 'Error al verificar estudiante: ' . $e->getMessage());
         }
@@ -248,6 +254,8 @@ class Diagnostic extends Component
             return !in_array($question->id, $answeredQuestionIds);
         });
 
+        $this->unansweredQuestions = $this->unansweredQuestions->shuffle();
+
         $this->answeredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
             return in_array($question->id, $answeredQuestionIds);
         });
@@ -332,6 +340,8 @@ class Diagnostic extends Component
 
             $this->answers[$this->currentQuestionIndex] = $this->selectedAnswer;
             $this->updateProgress();
+
+            $this->refreshAnsweredQuestions();
 
             DB::commit();
         } catch (Exception $e) {
@@ -559,27 +569,7 @@ class Diagnostic extends Component
     {
         try {
             $this->selectedPensum = Pensum::with('asignatura')->findOrFail($pensumId);
-            $this->isReviewMode = true;
-            $this->showAnsweredQuestions = true;
-
-            $allQuestions = DiagQuestion::with('options')
-                ->where('pensum_id', $pensumId)
-                ->where('activo', true)
-                ->orderBy('orden')
-                ->get();
-
-            $this->filterQuestionsByAnsweredStatus($allQuestions);
-
-            if ($this->answeredQuestions->isEmpty()) {
-                session()->flash('info', 'No hay respuestas guardadas para esta área.');
-                return;
-            }
-
-            $this->questions = $this->answeredQuestions->values();
-            $this->currentQuestionIndex = 0;
-            $this->setCurrentQuestion();
-            $this->loadExistingAnswers();
-            $this->currentView = 'wizard';
+            $this->showAnsweredModal = true;
         } catch (Exception $e) {
             session()->flash('error', 'Error al cargar respuestas: ' . $e->getMessage());
         }
@@ -593,6 +583,36 @@ class Diagnostic extends Component
     public function closeAnsweredQuestionsModal()
     {
         $this->showAnsweredModal = false;
+    }
+
+    private function refreshAnsweredQuestions()
+    {
+        if (!$this->selectedPensum) {
+            return;
+        }
+
+        $allQuestions = DiagQuestion::with('options')
+            ->where('pensum_id', $this->selectedPensum->id)
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
+
+        $answeredQuestionIds = DiagAnswer::where('estudiant_id', $this->currentStudent->id)
+            ->whereHas('question', function ($query) {
+                $query->where('pensum_id', $this->selectedPensum->id);
+            })
+            ->pluck('question_id')
+            ->toArray();
+
+        $this->answeredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
+            return in_array($question->id, $answeredQuestionIds);
+        });
+
+        $this->unansweredQuestions = $allQuestions->filter(function ($question) use ($answeredQuestionIds) {
+            return !in_array($question->id, $answeredQuestionIds);
+        });
+
+        $this->unansweredQuestions = $this->unansweredQuestions->shuffle();
     }
 
     public function render()

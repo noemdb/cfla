@@ -10,8 +10,7 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'/></svg>">
-
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z'/><circle cx='9' cy='9' r='2'/><path d='M13 19c0 1.105.895 2 2 2s2-.895 2-2-2-4.5-2-4.5S13 17.895 13 19z'/></svg>">
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @wireUiScripts
@@ -30,6 +29,8 @@
 <body
     class="font-sans antialiased bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 min-h-screen text-gray-100">
 
+    <x-notifications />
+
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm border-b border-emerald-800/30 sticky top-0 z-10 shadow-lg">
         <div class="container-fluid mx-auto px-4 py-3">
@@ -43,7 +44,8 @@
 
                     <div class="flex flex-col">
                         <h1 class="text-lg md:text-2xl font-bold text-white">C.E. COLEGIO FRAY LUIS AMIGÓ</h1>
-                        <p class="sm:block text-sm text-emerald-300"><strong>Diagnóstico Educativo.</strong> Evaluación académica personalizada</p>
+                        <p class="sm:block text-sm text-emerald-300"><strong>Diagnóstico Educativo.</strong> Evaluación
+                            académica personalizada</p>
                     </div>
                 </div>
 
@@ -52,7 +54,8 @@
                     <div class="flex items-center space-x-4">
                         <div class="hidden md:block text-right">
                             <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-emerald-300">{{ Auth::user()->estudiant->codigo ?? 'Estudiante' }}</p>
+                            <p class="text-xs text-emerald-300">{{ Auth::user()->estudiant->ci_estudiant ?? 'Estudiante' }}
+                            </p>
                         </div>
 
                         <div class="relative">
@@ -90,14 +93,14 @@
                         </svg>
                         <span>Evaluación personalizada</span>
                     </div>
-                    <div class="flex items-center space-x-1">
+                    {{-- <div class="flex items-center space-x-1">
                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z">
                             </path>
                         </svg>
                         <span>Resultados inmediatos</span>
-                    </div>
+                    </div> --}}
                     <div class="flex items-center space-x-1">
                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -118,8 +121,8 @@
 
                 <!-- Copyright -->
                 <p class="text-xs text-gray-400">
-                    © {{ date('Y') }} <strong>SAEFL</strong> Sistema de Diagnóstico Académico. Todos los derechos
-                    reservados.
+                    © {{ date('Y') }} <strong>SAEFL</strong> @noemdb | Módulo de Diagnóstico Educativo. Todos los
+                    derechos reservados.
                 </p>
             </div>
         </div>

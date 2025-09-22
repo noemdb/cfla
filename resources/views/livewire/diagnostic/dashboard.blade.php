@@ -1,6 +1,6 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
-    <div class="text-center mb-12">
+    <div class="text-center mb-4">
         <h1 class="text-4xl font-bold text-white mb-4">
             Diagnóstico Académico
         </h1>
@@ -32,17 +32,33 @@
     @endif
 
     <!-- Areas de Formación -->
+    <p class="text-gray-300 text-lg">
+        Bienvenido/a <strong>{{ $currentStudent->full_name }}</strong> . Puedes realizar tu diagnóstico.
+    </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+
+
         @forelse($pensums as $pensum)
-            <div class="diagnostic-card rounded-xl p-6 border border-gray-700 hover:border-green-500 cursor-pointer"
+            <div class="diagnostic-card rounded-xl p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
                 wire:click="startDiagnostic({{ $pensum['id'] }})">
 
                 <!-- Progress Ring -->
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-white mb-2">
-                            {{ $pensum['name'] }}
-                        </h3>
+                        <!-- Added completion icon for completed areas -->
+                        <div class="flex items-center mb-2">
+                            <h3 class="text-xl font-semibold text-white">
+                                {{ $pensum['name'] }}
+                            </h3>
+                            @if ($pensum['is_completed'])
+                                <svg class="w-5 h-5 text-green-400 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            @endif
+                        </div>
                         {{-- <p class="text-gray-400 text-sm">
                             {{ $pensum['description'] }}
                         </p> --}}
@@ -52,13 +68,16 @@
                         <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-gray-700" stroke="currentColor" stroke-width="3" fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="text-green-500 progress-ring" stroke="currentColor" stroke-width="3"
-                                fill="none" stroke-linecap="round"
+                            <!-- Enhanced progress ring color for completed areas -->
+                            <path
+                                class="@if ($pensum['is_completed']) text-green-400 @else text-green-500 @endif progress-ring"
+                                stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
                                 stroke-dasharray="{{ $pensum['progress_percentage'] }}, 100"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-xs font-semibold text-white">
+                            <span
+                                class="text-xs font-semibold @if ($pensum['is_completed']) text-green-300 @else text-white @endif">
                                 {{ $pensum['progress_percentage'] }}%
                             </span>
                         </div>
@@ -68,13 +87,15 @@
                 <!-- Stats -->
                 <div class="flex justify-between items-center mb-4">
                     <div class="text-sm text-gray-400">
-                        <span class="text-green-400">{{ $pensum['completed_questions'] }}</span>
+                        <span
+                            class="@if ($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
                         / {{ $pensum['total_questions'] }} preguntas
                     </div>
 
                     @if ($pensum['is_completed'])
-                        <span class="bg-green-600 text-white px-2 py-1 rounded-full text-xs">
-                            Completado
+                        <!-- Enhanced completed badge styling -->
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                            ✓ Completado
                         </span>
                     @else
                         <span class="bg-yellow-600 text-white px-2 py-1 rounded-full text-xs">
@@ -97,12 +118,12 @@
                 </div>
 
                 <div class="mt-4 text-center">
-                    <!-- Added wire:click actions for review and continue buttons -->
+                    <!-- Modified button to prevent event bubbling and call specific methods -->
                     <button
-                        wire:click="@if ($pensum['is_completed']) reviewAnswers({{ $pensum['id'] }}) @else startDiagnostic({{ $pensum['id'] }}) @endif"
-                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
+                        wire:click.stop="@if ($pensum['is_completed']) reviewAnswers({{ $pensum['id'] }}) @else startDiagnostic({{ $pensum['id'] }}) @endif"
+                        class="@if ($pensum['is_completed']) bg-green-500 hover:bg-green-600 @else bg-green-600 hover:bg-green-700 @endif text-white px-6 py-2 rounded-lg transition-colors font-semibold">
                         @if ($pensum['is_completed'])
-                            Revisar Respuestas
+                            Ver Respuestas
                         @else
                             Continuar Diagnóstico
                         @endif
@@ -117,4 +138,122 @@
             </div>
         @endforelse
     </div>
+
+    <!-- Added modal for reviewing answers -->
+    @if ($showAnsweredModal && $selectedPensum)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            wire:click="closeAnsweredQuestionsModal">
+            <div class="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" wire:click.stop>
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">
+                        Respuestas - {{ $selectedPensum->asignatura->full_name ?? 'Área' }}
+                    </h2>
+                    <button wire:click="closeAnsweredQuestionsModal" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Questions and Answers List -->
+                <div class="space-y-4">
+                    @php
+                        $answeredQuestions = $this->getAnsweredQuestionsWithAnswers();
+                    @endphp
+
+                    @forelse($answeredQuestions as $index => $item)
+                        <div class="bg-gray-700 rounded-lg p-4">
+                            <!-- Question -->
+                            <div class="mb-3">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h4 class="text-lg font-semibold text-white">
+                                        Pregunta {{ $index + 1 }}
+                                    </h4>
+                                    <div class="flex items-center space-x-2">
+                                        @if ($item['question']->difficulty)
+                                            @php
+                                                $difficultyClasses = match ($item['question']->difficulty) {
+                                                    'easy' => 'bg-green-600 text-white',
+                                                    'medium' => 'bg-yellow-600 text-white',
+                                                    default => 'bg-red-600 text-white',
+                                                };
+                                            @endphp
+                                            <span class="px-2 py-1 rounded-full text-xs {{ $difficultyClasses }}">
+                                                {{ ucfirst($item['question']->difficulty) }}
+                                            </span>
+                                        @endif
+                                        <span class="text-xs text-gray-400">
+                                            {{ \Carbon\Carbon::parse($item['completed_at'])->format('d/m/Y H:i') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-300">{{ $item['question']->pregunta }}</p>
+                            </div>
+
+                            <!-- Answer -->
+                            <div class="border-t border-gray-600 pt-3">
+                                <div class="flex items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-400 mr-2">Tu respuesta:</span>
+                                </div>
+
+                                @if ($item['question']->tipo_pregunta === 'multiple')
+                                    <!-- Multiple choice answer -->
+                                    <div class="space-y-2">
+                                        @foreach ($item['question']->options as $option)
+                                            @php
+                                                $isSelected = $option->opcion === $item['answer'];
+                                                $bgClass = $isSelected
+                                                    ? 'bg-green-600 text-white'
+                                                    : 'bg-gray-600 text-gray-300';
+                                                $borderClass = $isSelected
+                                                    ? 'border-white bg-white'
+                                                    : 'border-gray-400';
+                                            @endphp
+
+                                            <div class="flex items-center p-2 rounded {{ $bgClass }}">
+                                                <span
+                                                    class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3 {{ $borderClass }}">
+                                                    @if ($isSelected)
+                                                        <svg class="w-3 h-3 text-green-600" fill="currentColor"
+                                                            viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    @endif
+                                                </span>
+                                                {{ $option->opcion }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @elseif($item['question']->tipo_pregunta === 'scale')
+                                    <!-- Scale answer -->
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-2xl font-bold text-green-400">{{ $item['answer'] }}</span>
+                                        <span class="text-gray-400">/ 10</span>
+                                        <div class="flex-1 bg-gray-600 rounded-full h-2 ml-4">
+                                            <div class="bg-green-500 h-2 rounded-full"
+                                                style="width: {{ ($item['answer'] / 10) * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- Open text answer -->
+                                    <div class="bg-gray-600 p-3 rounded">
+                                        <p class="text-white">{{ $item['answer'] }}</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-8">
+                            <p class="text-gray-400">No hay respuestas guardadas para esta área.</p>
+                        </div>
+                    @endforelse
+                </div>
+
+            </div>
+        </div>
+    @endif
 </div>

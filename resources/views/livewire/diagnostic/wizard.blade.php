@@ -1,65 +1,73 @@
 <div class="min-h-screen flex flex-col">
     <!-- Header con progreso -->
-    <div class="bg-gray-800 border-b border-gray-700 p-4">
-        <div class="container mx-auto">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-xl font-semibold text-white">
-                        {{ $selectedPensum->asignatura->full_name ?? 'Diagnóstico' }}
-                        @if ($isReviewMode)
-                            <span class="ml-2 text-sm bg-blue-600 px-2 py-1 rounded">Modo Revisión</span>
-                        @elseif($showAnsweredQuestions)
-                            <span class="ml-2 text-sm bg-green-600 px-2 py-1 rounded">Preguntas Contestadas</span>
-                        @else
-                            <span class="ml-2 text-sm bg-orange-600 px-2 py-1 rounded">Preguntas Pendientes</span>
-                        @endif
-                    </h2>
-                    <!-- Fixed question count display logic to show correct counts -->
-                    <p class="text-gray-400">
-                        @if ($showAnsweredQuestions)
-                            Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($answeredQuestions) }}
-                            ({{ count($answeredQuestions) }} contestadas)
-                        @else
-                            Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($unansweredQuestions) }}
-                            ({{ count($unansweredQuestions) }} pendientes)
-                        @endif
-                    </p>
-                </div>
-
-                <div class="flex space-x-2">
-                    <!-- Fixed modal button to use correct Livewire method -->
-                    @if (!$isReviewMode && count($answeredQuestions) > 0)
-                        <button wire:click="openAnsweredQuestionsModal"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>Ver Contestadas ({{ count($answeredQuestions) }})</span>
-                        </button>
+    <!-- Updated header to use rounded card styling consistent with other sections -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-gray-800 rounded-xl p-8 mb-8">
+                <!-- Added status indicator to top right of container -->
+                <div class="flex justify-end mb-4">
+                    @if ($isReviewMode)
+                        <span class="text-sm bg-blue-600 px-3 py-1 rounded-lg">Modo Revisión</span>
+                    @elseif($showAnsweredQuestions)
+                        <span class="text-sm bg-green-600 px-3 py-1 rounded-lg">Preguntas Contestadas</span>
+                    @else
+                        <span class="text-sm bg-orange-600 px-3 py-1 rounded-lg">Preguntas Pendientes</span>
                     @endif
-
-                    <button wire:click="backToDashboard"
-                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
-                        Salir
-                    </button>
                 </div>
-            </div>
 
-            <!-- Barra de progreso -->
-            <div class="w-full bg-gray-700 rounded-full h-3">
-                <div class="bg-gradient-to-r from-green-500 to-green-400 h-3 rounded-full transition-all duration-500"
-                    style="width: {{ $progress }}%">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <!-- Removed status spans from h2 title -->
+                        <h2 class="text-xl font-semibold text-white">
+                            {{ $selectedPensum->asignatura->full_name ?? 'Diagnóstico' }}
+                        </h2>
+                        <!-- Fixed question count display logic to show correct counts -->
+                        <p class="text-gray-400 mt-1">
+                            @if ($showAnsweredQuestions)
+                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($answeredQuestions) }}
+                                ({{ count($answeredQuestions) }} contestadas)
+                            @else
+                                Pregunta {{ $currentQuestionIndex + 1 }} de {{ count($unansweredQuestions) }}
+                                ({{ count($unansweredQuestions) }} pendientes)
+                            @endif
+                        </p>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <!-- Fixed modal button to use correct Livewire method -->
+                        @if (!$isReviewMode && count($answeredQuestions) > 0)
+                            <button wire:click="openAnsweredQuestionsModal"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Ver Contestadas ({{ count($answeredQuestions) }})</span>
+                            </button>
+                        @endif
+
+                        <button wire:click="backToDashboard"
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                            Salir
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="text-right text-sm text-gray-400 mt-1">
-                {{ $progress }}% completado
+
+                <!-- Barra de progreso -->
+                <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+                    <div class="bg-gradient-to-r from-green-500 to-green-400 h-3 rounded-full transition-all duration-500"
+                        style="width: {{ $progress }}%">
+                    </div>
+                </div>
+                <div class="text-right text-sm text-gray-400">
+                    {{ $progress }}% completado
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Contenido de la pregunta -->
-    <div class="flex-1 container mx-auto px-4 py-8">
+    <div class="flex-1 container mx-auto px-4 py-2">
         @if ($currentQuestion)
             <div class="max-w-4xl mx-auto">
                 <!-- Pregunta -->
@@ -251,86 +259,110 @@
 
     <!-- Updated modal to use Livewire properties and methods -->
     @if ($showAnsweredModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                    wire:click="closeAnsweredQuestionsModal"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-6 border-b border-gray-700">
+                    <h3 class="text-xl font-semibold">Respuestas Detalladas</h3>
+                    <button wire:click="closeAnsweredQuestionsModal"
+                        class="text-gray-400 hover:text-white transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
 
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="flex items-center justify-between mb-6">
-                            <h2 class="text-xl font-semibold text-gray-900">
-                                Preguntas Contestadas - {{ $selectedPensum->asignatura->full_name ?? 'Área' }}
-                            </h2>
-                            <button wire:click="closeAnsweredQuestionsModal"
-                                class="text-gray-400 hover:text-gray-600">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div class="max-h-96 overflow-y-auto space-y-4">
+                <!-- Modal Content -->
+                <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                    @if (count($this->getAnsweredQuestionsWithAnswers()) > 0)
+                        <div class="space-y-6">
                             @foreach ($this->getAnsweredQuestionsWithAnswers() as $index => $item)
-                                <div class="bg-gray-50 rounded-lg p-4 border">
-                                    <div class="flex items-start space-x-3 mb-3">
-                                        <div
-                                            class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold">
-                                            {{ $index + 1 }}
-                                        </div>
+                                <div class="bg-gray-700 rounded-lg p-4">
+                                    <!-- Question Header -->
+                                    <div class="flex items-start justify-between mb-3">
                                         <div class="flex-1">
-                                            <h4 class="font-medium text-gray-900 mb-2">
-                                                {{ $item['question']->pregunta }}
-                                            </h4>
-                                            <div class="flex space-x-2 text-xs text-gray-500 mb-2">
-                                                <span class="bg-gray-200 px-2 py-1 rounded">
-                                                    {{ ucfirst($item['question']->difficulty) }}
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                                                    Pregunta {{ $index + 1 }}
                                                 </span>
-                                                <span class="bg-gray-200 px-2 py-1 rounded">
-                                                    {{ ucfirst($item['question']->tipo_pregunta) }}
-                                                </span>
+                                                @if ($item['question']->difficulty)
+                                                    @php
+                                                        $difficultyClass = match ($item['question']->difficulty) {
+                                                            'easy' => 'bg-green-600 text-white',
+                                                            'medium' => 'bg-yellow-600 text-white',
+                                                            'hard' => 'bg-red-600 text-white',
+                                                            default => 'bg-gray-600 text-white',
+                                                        };
+                                                    @endphp
+                                                    <span class="text-xs px-2 py-1 rounded {{ $difficultyClass }}">
+                                                        {{ ucfirst($item['question']->difficulty) }}
+                                                    </span>
+                                                @endif
                                             </div>
+                                            <h4 class="font-medium text-white mb-2">{{ $item['question']->pregunta }}
+                                            </h4>
                                         </div>
+                                        <span class="text-xs text-gray-400 ml-4">
+                                            {{ \Carbon\Carbon::parse($item['completed_at'])->format('d/m/Y H:i') }}
+                                        </span>
                                     </div>
 
-                                    <div class="ml-9">
-                                        <div class="bg-green-100 border-l-4 border-green-500 p-3 rounded">
-                                            <p class="text-sm font-medium text-green-800">Respuesta:</p>
-                                            <p class="text-green-700">{{ $item['answer'] }}</p>
-                                            <p class="text-xs text-green-600 mt-1">
-                                                Contestada el
-                                                {{ \Carbon\Carbon::parse($item['completed_at'])->format('d/m/Y H:i') }}
-                                            </p>
-                                        </div>
+                                    <!-- Answer Section -->
+                                    <div class="bg-gray-600 rounded p-3">
+                                        <div class="text-sm text-gray-300 mb-1">Tu respuesta:</div>
+
+                                        @if ($item['question']->tipo_pregunta === 'multiple')
+                                            <div class="text-white font-medium">{{ $item['answer'] }}</div>
+
+                                            @if ($item['question']->options->count() > 0)
+                                                <div class="mt-3">
+                                                    <div class="text-xs text-gray-400 mb-2">Opciones disponibles:</div>
+                                                    <div class="space-y-1">
+                                                        @foreach ($item['question']->options as $option)
+                                                            <div
+                                                                class="flex items-center text-sm
+                                                            {{ $option->opcion === $item['answer'] ? 'text-green-400 font-medium' : 'text-gray-400' }}">
+                                                                <span
+                                                                    class="w-2 h-2 rounded-full mr-2
+                                                                {{ $option->opcion === $item['answer'] ? 'bg-green-400' : 'bg-gray-500' }}">
+                                                                </span>
+                                                                {{ $option->opcion }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @elseif($item['question']->tipo_pregunta === 'scale')
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="text-white font-medium text-lg">{{ $item['answer'] }}</span>
+                                                <span class="text-gray-400">/ 10</span>
+                                                <div class="flex-1 bg-gray-700 rounded-full h-2 ml-3">
+                                                    <div class="bg-blue-500 h-2 rounded-full"
+                                                        style="width: {{ ($item['answer'] / 10) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                        @elseif($item['question']->tipo_pregunta === 'open')
+                                            <div class="text-white bg-gray-700 rounded p-2 italic">
+                                                "{{ $item['answer'] }}"
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
                         </div>
-
-                        @if (count($this->getAnsweredQuestionsWithAnswers()) === 0)
-                            <div class="text-center py-8">
-                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                </svg>
-                                <p class="text-gray-500">No hay preguntas contestadas en esta área.</p>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button wire:click="closeAnsweredQuestionsModal"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cerrar
-                        </button>
-                    </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg class="w-16 h-16 text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            <p class="text-gray-400">No se encontraron respuestas para mostrar.</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
