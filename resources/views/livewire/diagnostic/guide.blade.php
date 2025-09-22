@@ -98,16 +98,6 @@
                         <h3 class="text-xl font-semibold text-white mb-2">Resultados Inmediatos</h3>
                         <p class="text-gray-300">Obtén retroalimentación instantánea sobre tu desempeño.</p>
                     </div>
-
-                    <div class="bg-gradient-to-br from-green-900/50 to-green-800/30 p-6 rounded-xl border border-green-700/50">
-                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Plan de Mejora</h3>
-                        <p class="text-gray-300">Recibe recomendaciones específicas para fortalecer tus conocimientos.</p>
-                    </div>
                 </div>
             </div>
 
@@ -314,11 +304,11 @@
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
                                 <span class="text-yellow-400 mr-2">•</span>
-                                No hay límite de tiempo, tómate el que necesites
+                                El límite de tiempo es el indicado por el docente.
                             </li>
                             <li class="flex items-start">
                                 <span class="text-yellow-400 mr-2">•</span>
-                                Puedes pausar y continuar cuando desees
+                                Puedes pausar y continuar cuando desees, dentro de las indicaciones del docente.
                             </li>
                             <li class="flex items-start">
                                 <span class="text-yellow-400 mr-2">•</span>
@@ -389,15 +379,15 @@
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
                                 <span class="text-purple-400 mr-2">•</span>
-                                Revisa tus respuestas y reflexiona sobre ellas
+                                Visualiza tus respuestas y reflexiona sobre ellas
                             </li>
                             <li class="flex items-start">
                                 <span class="text-purple-400 mr-2">•</span>
-                                Identifica las áreas que necesitas reforzar
+                                Con ayuda del docente, puedes identificar las áreas que necesitas reforzar.
                             </li>
                             <li class="flex items-start">
                                 <span class="text-purple-400 mr-2">•</span>
-                                Crea un plan de estudio basado en los resultados
+                                Puedes crea un plan de estudio basado en los resultados con la asesoría del docente.
                             </li>
                         </ul>
                     </div>
@@ -414,7 +404,7 @@
                         <div>
                             <h3 class="text-xl font-semibold text-white mb-2">Importante Recordar</h3>
                             <p class="text-gray-300">
-                                Este diagnóstico es una herramienta de autoevaluación diseñada para ayudarte a identificar tus fortalezas y áreas de oportunidad. 
+                                Este diagnóstico es una herramienta de evaluación diseñada para ayudarnos a identificar tus fortalezas y áreas de oportunidad. 
                                 Los resultados no son una calificación, sino una guía para tu proceso de aprendizaje continuo.
                             </p>
                         </div>
