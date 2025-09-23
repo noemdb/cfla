@@ -17,7 +17,7 @@ use WireUi\Traits\Actions;
 class Diagnostic extends Component
 {
     use Actions;
-    
+
     public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary, guide
     public $studentCi = '';
     public $currentStudent = null;
@@ -321,6 +321,16 @@ class Diagnostic extends Component
     {
         if (!$this->selectedAnswer || !$this->currentQuestion) {
             return;
+        }
+
+        if ($this->currentQuestion->tipo_pregunta === 'open') {
+            if (strlen(trim($this->selectedAnswer)) < 3) {
+                $this->notification()->error(
+                    'Respuesta muy corta',
+                    'Para preguntas abiertas, la respuesta debe tener al menos 3 caracteres.'
+                );
+                return;
+            }
         }
 
         try {
