@@ -338,9 +338,24 @@ class Diagnostic extends Component
 
             $estudiantId = $this->currentStudent->id;
 
-            // Obtener valor numérico según el tipo de pregunta
-            $valorNumerico = $this->calculateNumericValue();
+            // 🔹 Inicializamos option_id en null
+            $optionId = null;
 
+            // Obtener valor numérico y option_id si corresponde
+            if ($this->currentQuestion->tipo_pregunta === 'multiple') {
+                $option = $this->currentQuestion->options
+                    ->where('opcion', $this->selectedAnswer)
+                    ->first();
+
+                $valorNumerico = $option ? $option->valor : 0;
+                $optionId = $option ? $option->id : null;
+            } elseif ($this->currentQuestion->tipo_pregunta === 'scale') {
+                $valorNumerico = (int) $this->selectedAnswer;
+            } else {
+                $valorNumerico = 0;
+            }
+
+            // 🔹 Guardar respuesta con option_id
             DiagAnswer::updateOrCreate([
                 'estudiant_id' => $estudiantId,
                 'question_id' => $this->currentQuestion->id,
@@ -348,12 +363,12 @@ class Diagnostic extends Component
             ], [
                 'respuesta' => $this->selectedAnswer,
                 'valor_numerico' => $valorNumerico,
+                'option_id' => $optionId,
                 'completado_at' => now()
             ]);
 
             $this->answers[$this->currentQuestionIndex] = $this->selectedAnswer;
             $this->updateProgress();
-
             $this->refreshAnsweredQuestions();
 
             DB::commit();
