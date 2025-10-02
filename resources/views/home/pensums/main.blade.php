@@ -14,11 +14,6 @@
         @include('home.pensums.items')
     </div>
 
-    <iframe 
-      src="https://makeform.ai/e/cjO2oCgV"
-      height="333"
-      width="100%"
-      style="border: none; margin: 0; padding: 0;"
-    ></iframe>
+    
 
 </x-card>
