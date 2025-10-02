@@ -68,10 +68,6 @@
     </div>
 </div>
 
-@section('customScripts')
-@parent
-<script async src="https://www.makeform.ai/widgets/embed.js"></script>
-@endsection
     
 
 </x-card>
