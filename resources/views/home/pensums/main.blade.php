@@ -19,7 +19,7 @@
 <div x-data="{ open: false }" class="text-center mt-6">
     <button 
         @click="open = true"
-        class="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow transition"
+        class="text-gray-800 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow transition"
     >
         Inscribirse a Danzas Joropo Recio
     </button>
