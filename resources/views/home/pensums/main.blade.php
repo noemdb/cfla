@@ -14,6 +14,23 @@
         @include('home.pensums.items')
     </div>
 
+
+
+<div class="border border-gray-200">
+      <iframe
+        src="https://makeform.ai/e/cjO2oCgV"
+        width="100%"
+        height="333"
+        style="border: none; margin: 0; padding: 0;"
+        title="Formulario de inscripción - Danzas Joropo Recio"
+        loading="lazy"
+      ></iframe>
+</div>
+
+@section('customScripts')
+@parent
+<script async src="https://www.makeform.ai/widgets/embed.js"></script>
+@endsection
     
 
 </x-card>
