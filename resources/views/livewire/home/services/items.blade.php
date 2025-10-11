@@ -42,7 +42,7 @@
                     </p>
                     <hr class="my-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
                     <div class="flex justify-center items-center gap-2">
-                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$90 " />
+                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$120 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
                     </div>                   
 
@@ -95,7 +95,7 @@
                     </p>
                     <hr class="my-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
                     <div class="flex justify-center items-center gap-2">
-                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$90 " />
+                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$120 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
                     </div>                   
 
@@ -149,7 +149,7 @@
                     </p>
                     <hr class="my-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
                     <div class="flex justify-center items-center gap-2">
-                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$90 " />
+                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$120 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
                     </div>
                 </div>
