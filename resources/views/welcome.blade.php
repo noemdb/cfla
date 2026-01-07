@@ -277,9 +277,13 @@
     </section>
 
     <!-- Problem/Solution Section -->
-    <section class="bg-white dark:bg-gray-800/50 py-20" id="about">
+    <section class="bg-white dark:bg-gray-800/50 py-20" id="about" x-data="{ shown: false }"
+        x-init="let observer = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) { shown = true;
+                observer.disconnect(); } }, { threshold: 0.2 });
+        observer.observe($el)">
         <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
-            <div class="max-w-3xl mx-auto text-center mb-16">
+            <div class="max-w-3xl mx-auto text-center mb-16 transition-all duration-1000 transform"
+                :class="shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'">
                 <h2 class="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl">La
                     evolución de la gestión educativa</h2>
                 <p class="text-gray-500 dark:text-gray-400 sm:text-lg">
@@ -289,12 +293,15 @@
             </div>
 
             <div class="grid md:grid-cols-2 gap-12 items-center">
-                <div class="relative">
+                <!-- Problem Column -->
+                <div class="relative transition-all duration-1000 delay-300 transform"
+                    :class="shown ? 'opacity-100 -translate-x-0' : 'opacity-0 -translate-x-10'">
                     <div
-                        class="absolute -left-4 -top-4 w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full -z-10">
+                        class="absolute -left-4 -top-4 w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-full -z-10 animate-pulse">
                     </div>
                     <div class="space-y-6">
-                        <div class="flex gap-4">
+                        <div
+                            class="flex gap-4 p-4 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors duration-300">
                             <div
                                 class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,7 +316,8 @@
                                     consumen tiempo valioso de docentes y directivos.</p>
                             </div>
                         </div>
-                        <div class="flex gap-4">
+                        <div
+                            class="flex gap-4 p-4 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-900/10 transition-colors duration-300">
                             <div
                                 class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +336,9 @@
                     </div>
                 </div>
 
-                <div class="max-w-lg">
+                <!-- Solution Column -->
+                <div class="max-w-lg transition-all duration-1000 delay-500 transform"
+                    :class="shown ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'">
                     <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">La Solución EDUSYS</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
                         EDUSYS es una plataforma integral diseñada para automatizar, centralizar y optimizar los
@@ -953,7 +963,7 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-gray-900 dark:text-white">Email</h4>
-                                <p class="text-gray-500 dark:text-gray-400">noemdb@gmail.com</p>
+                                <p class="text-gray-500 dark:text-gray-400">soporte.edusys.ve@gmail.com</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
@@ -970,6 +980,20 @@
                             <div>
                                 <h4 class="font-bold text-gray-900 dark:text-white">Ubicación</h4>
                                 <p class="text-gray-500 dark:text-gray-400">San Felipe, Edo. Yaracuy, Venezuela</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white">WhatsApp</h4>
+                                <p class="text-gray-500 dark:text-gray-400">+58 412 1560804</p>
                             </div>
                         </div>
                     </div>
@@ -1064,7 +1088,16 @@
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                <span>noemdb@gmail.com</span>
+                                <span>soporte.edusys.ve@gmail.com</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                    </path>
+                                </svg>
+                                <span>+58 412 1560804</span>
                             </li>
                         </ul>
                     </div>
