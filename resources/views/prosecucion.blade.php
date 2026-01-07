@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,6 +14,7 @@
 
     @yield('styles')
 </head>
+
 <body class="bg-gradient-to-br from-gray-900 via-green-900 to-slate-900 min-h-screen">
     <x-notifications />
 
@@ -21,7 +23,8 @@
             <!-- Header con Logo -->
             <div class="text-center mb-2">
                 <div class="flex flex-col items-center mb-2">
-                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">C.E. Colegio Fray Luis Amigó</h3>
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">CENTRO
+                        EDUCATIVO</h3>
 
 
                     <!-- Títulos -->
@@ -38,11 +41,8 @@
 
                     <!-- Logo -->
                     <div class="mb-2">
-                        <img
-                            src="{{ asset('image/brand/512.png') }}"
-                            alt="{{ config('app.name') }} Logo"
-                            class="w-24 h-24 md:w-32 md:h-32 rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105"
-                        >
+                        <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                            class="w-24 h-24 md:w-32 md:h-32 rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105">
                     </div>
 
                 </div>
@@ -55,4 +55,5 @@
     @livewireScripts
     @yield('scripts')
 </body>
+
 </html>

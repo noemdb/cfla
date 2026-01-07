@@ -37,7 +37,8 @@ Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
 Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
 
 
-Route::get('/', [HomeController::class, 'home'])->name('home');
+// Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
 Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
 Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
 Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
@@ -152,6 +153,3 @@ Route::post('/login', [LoginController::class, 'login']);
 
 // Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-
-

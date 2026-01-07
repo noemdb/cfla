@@ -35,7 +35,7 @@
             <div class="flex items-center justify-center">
                 <div
                     class="text-lg text-center md:text-3xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">
-                    C.E. Colegio Fray Luis Amigó</div>
+                    CENTRO EDUCATIVO</div>
                 <div class="flex items-center space-x-3">
                     <!-- Logo -->
                     <div class="mb-2">

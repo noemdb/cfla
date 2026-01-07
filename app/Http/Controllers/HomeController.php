@@ -32,6 +32,11 @@ class HomeController extends Controller
         return view('studia', compact('testimonials', 'faqs'));
     }
 
+    public function welcome(Request $request)
+    {
+        return view('welcome');
+    }
+
     public function home(Request $request)
     {
         return view('home');
@@ -79,9 +84,9 @@ class HomeController extends Controller
         $time = Carbon::now();
         $toDate = Carbon::now()->format('d F Y');
 
-        $institution = Institucion::OrderBy('created_at','DESC')->first();
-        $autoridad1 = Autoridad::getTipoAuthority('2');//director
-        $autoridad2 = Autoridad::getTipoAuthority('4');//ADMINISTRADOR
+        $institution = Institucion::OrderBy('created_at', 'DESC')->first();
+        $autoridad1 = Autoridad::getTipoAuthority('2'); //director
+        $autoridad2 = Autoridad::getTipoAuthority('4'); //ADMINISTRADOR
 
         $data = [
             'representant' => $representant,

@@ -1,8 +1,8 @@
 @extends('layouts.home')
 
-@section('title', 'C.E. Colegio Fray Luis Amigó')
+@section('title', 'CENTRO EDUCATIVO')
 
-@section('header') <livewire:home.header-component  /> @endsection
+@section('header') <livewire:home.header-component /> @endsection
 
 @section('hero') <livewire:home.hero-component /> @endsection
 
@@ -26,7 +26,7 @@
 
 {{-- @section('socials') @include('home.socials.main') @endsection --}}
 
-@section('footer')  @include('home.footer.main') @endsection
+@section('footer') @include('home.footer.main') @endsection
 
 {{-- -------------------------------------------------------- --}}
 
@@ -60,4 +60,3 @@
 
 
 {{-- @section('content') <livewire:home /> @endsection --}}
-
