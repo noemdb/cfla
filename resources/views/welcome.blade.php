@@ -148,24 +148,128 @@
                 </div>
                 <!-- Abstract UI Representation -->
                 <div
-                    class="relative w-full h-full bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-4 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500">
-                    <div class="flex items-center gap-2 mb-4 border-b border-gray-700 pb-2">
-                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="bg-gray-700/50 h-24 rounded-lg animate-pulse"></div>
-                        <div class="bg-gray-700/50 h-24 rounded-lg animate-pulse delay-75"></div>
-                    </div>
-                    <div class="h-4 bg-gray-700/50 rounded w-3/4 mb-2"></div>
-                    <div class="h-4 bg-gray-700/50 rounded w-1/2 mb-4"></div>
-                    <div class="space-y-2">
-                        <div class="h-8 bg-emerald-600/20 rounded w-full flex items-center px-2">
-                            <div class="w-2 h-2 bg-emerald-500 rounded-full mr-2"></div>
+                    class="relative w-full h-full bg-gray-900/80 backdrop-blur-xl rounded-2xl border border-gray-700 p-5 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500 flex flex-col overflow-hidden group">
+                    <!-- Window Controls & Header -->
+                    <div class="flex items-center justify-between mb-5 border-b border-gray-700 pb-3">
+                        <div class="flex gap-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
                         </div>
-                        <div class="h-8 bg-gray-700/20 rounded w-full"></div>
-                        <div class="h-8 bg-gray-700/20 rounded w-full"></div>
+                        <div class="h-2 w-20 bg-gray-700 rounded-full"></div>
+                    </div>
+
+                    <div class="flex flex-1 gap-4 overflow-hidden">
+                        <!-- Sidebar -->
+                        <div class="w-16 flex-none flex flex-col gap-3 border-r border-gray-800 pr-3">
+                            <div class="h-8 w-full bg-gray-800 rounded-lg mb-2"></div>
+                            <div class="h-2 w-10 bg-gray-700 rounded mx-auto"></div>
+                            <div class="h-2 w-8 bg-gray-700/50 rounded mx-auto"></div>
+                            <div class="h-2 w-10 bg-gray-700/50 rounded mx-auto"></div>
+                            <div
+                                class="mt-auto h-8 w-8 bg-emerald-600/20 rounded-full mx-auto flex items-center justify-center">
+                                <div class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="flex-1 flex flex-col gap-3">
+                            <!-- Header with Avatar (Image) -->
+                            <div class="flex justify-between items-center">
+                                <div class="h-2 w-24 bg-gray-700/50 rounded"></div>
+                                <div
+                                    class="w-6 h-6 rounded-full bg-gray-600 border border-gray-500 overflow-hidden relative">
+                                    <div class="absolute inset-0 bg-gradient-to-tr from-gray-500 to-gray-400"></div>
+                                </div>
+                            </div>
+
+                            <!-- Metrics Grid: Pie Chart & Progress -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Pie Chart -->
+                                <div
+                                    class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-700/30 flex items-center gap-2">
+                                    <div class="relative w-10 h-10 flex-shrink-0">
+                                        <svg class="w-full h-full transform -rotate-90">
+                                            <circle cx="20" cy="20" r="16" stroke="currentColor"
+                                                stroke-width="6" fill="none" class="text-gray-700" />
+                                            <circle cx="20" cy="20" r="16" stroke="currentColor"
+                                                stroke-width="6" fill="none" class="text-emerald-500"
+                                                stroke-dasharray="70, 100" />
+                                            <circle cx="20" cy="20" r="16" stroke="currentColor"
+                                                stroke-width="6" fill="none" class="text-blue-500"
+                                                stroke-dasharray="25, 100" stroke-dashoffset="-70" />
+                                        </svg>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="h-1.5 w-12 bg-gray-600 rounded"></div>
+                                        <div class="h-1.5 w-8 bg-gray-700 rounded"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Progress -->
+                                <div
+                                    class="p-2.5 rounded-lg bg-gray-800/40 border border-gray-700/30 flex flex-col justify-center gap-2">
+                                    <div class="flex justify-between items-center">
+                                        <div class="h-1.5 w-8 bg-gray-600 rounded"></div>
+                                        <div class="h-1.5 w-4 bg-emerald-500/50 rounded"></div>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Graphics: Bar Chart -->
+                            <div class="p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 flex-1 min-h-0">
+                                <div class="flex justify-between items-end h-full gap-2">
+                                    <div
+                                        class="w-full bg-gray-700/30 rounded-t-sm h-[40%] relative overflow-hidden group-hover:h-[60%] transition-all duration-700">
+                                        <div
+                                            class="absolute bottom-0 inset-x-0 h-full bg-gradient-to-t from-emerald-600 to-emerald-400 opacity-60">
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="w-full bg-gray-700/30 rounded-t-sm h-[70%] relative overflow-hidden group-hover:h-[50%] transition-all duration-700 delay-75">
+                                        <div
+                                            class="absolute bottom-0 inset-x-0 h-full bg-gradient-to-t from-emerald-600 to-emerald-400 opacity-80">
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="w-full bg-gray-700/30 rounded-t-sm h-[50%] relative overflow-hidden group-hover:h-[80%] transition-all duration-700 delay-150">
+                                        <div
+                                            class="absolute bottom-0 inset-x-0 h-full bg-gradient-to-t from-emerald-600 to-emerald-400 opacity-70">
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="w-full bg-gray-700/30 rounded-t-sm h-[85%] relative overflow-hidden group-hover:h-[65%] transition-all duration-700 delay-200">
+                                        <div
+                                            class="absolute bottom-0 inset-x-0 h-full bg-gradient-to-t from-emerald-600 to-emerald-400">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Report/List with Images -->
+                            <div class="space-y-2">
+                                <div
+                                    class="flex items-center gap-3 p-1.5 rounded-lg bg-gray-800/30 border border-gray-700/30">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-gray-600 border border-gray-500 overflow-hidden relative flex-shrink-0">
+                                        <!-- Abstract Image Avatar -->
+                                        <div class="absolute inset-x-1 bottom-0 h-2 bg-gray-400 rounded-t-lg"></div>
+                                        <div class="absolute inset-x-1.5 top-1 h-2 bg-gray-400 rounded-full"></div>
+                                    </div>
+                                    <div class="flex-1 space-y-1">
+                                        <div class="h-1.5 w-20 bg-gray-600 rounded"></div>
+                                        <div class="h-1 w-12 bg-gray-700 rounded"></div>
+                                    </div>
+                                    <div class="h-1.5 w-6 bg-emerald-500/50 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -641,15 +745,6 @@
                                 <h4 class="text-lg font-bold text-gray-900 dark:text-white">Panel de Moderador</h4>
                                 <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Gestiona rondas, preguntas y
                                     tiempos con control total sobre la dinámica de la clase.</p>
-                                <a href="#"
-                                    class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center transition-colors">
-                                    Acceder al Panel
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
 
@@ -667,27 +762,28 @@
                                 <h4 class="text-lg font-bold text-gray-900 dark:text-white">Pizarra en Vivo</h4>
                                 <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Visualización de puntajes y
                                     rankings en tiempo real para mantener la emoción y el compromiso.</p>
-                                <a href="#"
-                                    class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center transition-colors">
-                                    Ver Pizarra
-                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
                     </div>
 
                     <!-- New CTA Element: Join Session Input -->
-                    <div
+                    <div x-data="{ token: '', role: 'moderator' }"
                         class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
-                        <input type="text" placeholder="Ingresa código de competencia..."
+                        <select x-model="role"
+                            class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
+                            <option value="moderator"
+                                class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Moderador</option>
+                            {{-- <option value="board" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Participante</option> --}}
+                            <option value="scoreboard"
+                                class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra</option>
+                        </select>
+                        <input x-model="token" type="text" placeholder="Ingresa código..."
                             class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
                         <button
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg px-6 py-2.5 transition-colors sm:mt-0 mt-2 shadow-md">
-                            Unirse Ahora
+                            @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg px-6 py-2.5 transition-colors sm:mt-0 mt-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="!token">
+                            Ingresar Ahora
                         </button>
                     </div>
                 </div>
@@ -706,18 +802,27 @@
                     Generales</span>
                 <span
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
+                    de Censo
+                    Escolar</span>
+                <span
+                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
                     de Estudiantes</span>
                 <span
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
                     de Representantes</span>
                 <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Control
-                    de Asistencia</span>
+                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Planificación
+                    Docente</span>
                 <span
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Inscripciones</span>
                 <span
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Bienestar
                     Estudiantil</span>
+
+                <span
+                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Informe
+                    de
+                    Notas</span>
                 <span
                     class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Histórico
                     de Notas</span>
