@@ -7,12 +7,12 @@
     <title>EDUSYS - Sistema Automatizado de Gestión Escolar</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
     </style>
+    @livewireStyles
 </head>
 <script>
     if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
@@ -50,10 +50,10 @@
                     </svg>
                 </button>
 
-                <button type="button"
+                <a href="#contact"
                     class="text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:outline-none focus:ring-emerald-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105">
                     Solicitar Demo
-                </button>
+                </a>
                 <button @click="open = !open" type="button"
                     class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                     aria-controls="navbar-sticky" aria-expanded="false">
@@ -116,7 +116,7 @@
                     procesos académicos, administrativos y financieros con EDUSYS.
                 </p>
                 <div class="flex flex-col space-y-4 sm:flex-row sm:justify-start sm:space-y-0 sm:space-x-4">
-                    <a href="#"
+                    <a href="{{ env('APP_URL_APP') }}" target="_blank"
                         class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-900 shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1">
                         Empezar Ahora
                         <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -833,78 +833,327 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-        <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-            <div class="sm:flex sm:items-center sm:justify-between">
-                <a href="#" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                    <span
-                        class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600">EDUSYS</span>
-                </a>
-                <ul
-                    class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">Inicio</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">Política de Privacidad</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline me-4 md:me-6">Licencia</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:underline">Contacto</a>
-                    </li>
-                </ul>
+    <!-- Legal & License Section -->
+    <section class="bg-white dark:bg-gray-800 py-20 border-t border-gray-200 dark:border-gray-700" id="legal">
+        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">Información</h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">Transparencia y seguridad para tu institución.</p>
             </div>
-            <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-            <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ date('Y') }} <a
-                    href="#" class="hover:underline">EDUSYS™</a>. Todos los derechos reservados.</span>
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Privacy Policy -->
+                <div class="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <div
+                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Política de Privacidad</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                        En EDUSYS, la privacidad de los datos escolares es nuestra prioridad. Cumplimos con estrictos
+                        estándares de protección de datos para garantizar que la información de estudiantes, docentes y
+                        representantes permanezca segura y confidencial.
+                    </p>
+                    <ul class="space-y-2 text-gray-500 dark:text-gray-400 mb-6">
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Encriptación de datos extremo a extremo</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Copias de seguridad automáticas</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Control de acceso basado en roles</li>
+                    </ul>
+                    <a href="#"
+                        class="text-emerald-600 hover:text-emerald-700 font-medium inline-flex items-center">
+                        Leer política completa
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- License -->
+                <div class="bg-gray-50 dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-700">
+                    <div
+                        class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Licencia de Uso</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                        EDUSYS se distribuye bajo una licencia de software como servicio (SaaS). El uso de la plataforma
+                        está sujeto a nuestros términos y condiciones, garantizando el soporte continuo y las
+                        actualizaciones del sistema.
+                    </p>
+                    <ul class="space-y-2 text-gray-500 dark:text-gray-400 mb-6">
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Licencia escalable por institución</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Actualizaciones y mejoras incluidas</li>
+                        <li class="flex items-center"><svg class="w-4 h-4 mr-2 text-green-500" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>Soporte técnico preferencial</li>
+                    </ul>
+                    <a href="#"
+                        class="text-emerald-600 hover:text-emerald-700 font-medium inline-flex items-center">
+                        Ver términos de licencia
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
         </div>
-    </footer>
-    <script>
-        var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    </section>
 
-        // Change the icons inside the button based on previous settings
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
-                '(prefers-color-scheme: dark)').matches)) {
-            themeToggleLightIcon.classList.remove('hidden');
-        } else {
-            themeToggleDarkIcon.classList.remove('hidden');
-        }
+    <!-- Contact Section -->
+    <section class="bg-gray-50 dark:bg-gray-900 py-24" id="contact">
+        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white md:text-4xl mb-6">¿Listo para
+                        transformar tu institución?</h2>
+                    <p class="text-lg text-gray-500 dark:text-gray-400 mb-8">
+                        Nuestro equipo está listo para ayudarte a implementar EDUSYS en tu colegio. Contáctanos para una
+                        demostración personalizada.
+                    </p>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white">Email</h4>
+                                <p class="text-gray-500 dark:text-gray-400">noemdb@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white">Ubicación</h4>
+                                <p class="text-gray-500 dark:text-gray-400">San Felipe, Edo. Yaracuy, Venezuela</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <livewire:landing.contact-component />
+            </div>
+        </div>
 
-        var themeToggleBtn = document.getElementById('theme-toggle');
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8">
+            <div class="max-w-screen-xl mx-auto px-4 lg:px-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    <!-- Brand & CTA -->
+                    <div class="space-y-4">
+                        <a href="#" class="flex items-center space-x-2">
+                            <span
+                                class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600">EDUSYS</span>
+                        </a>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                            El sistema definitivo de gestión escolar. Simplifica procesos, conecta comunidades y
+                            potencia la educación con tecnología de vanguardia.
+                        </p>
+                        <div class="pt-2">
+                            <a href="#contact"
+                                class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-800 transition-colors shadow-lg shadow-emerald-500/30">
+                                Solicitar Demo
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
 
-        themeToggleBtn.addEventListener('click', function() {
+                    <!-- Portal Links -->
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Portal</h3>
+                        <ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+                            <li><a href="#"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Inicio</a>
+                            </li>
+                            <li><a href="#features"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Características</a>
+                            </li>
+                            <li><a href="#modules"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Módulos</a>
+                            </li>
+                            <li><a href="{{ route('diagnostico') }}"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Diagnóstico
+                                    IA</a></li>
+                        </ul>
+                    </div>
 
-            // toggle icons inside button
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
+                    <!-- Resources & Legal -->
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Recursos</h3>
+                        <ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+                            <li><a href="#legal"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Política
+                                    de Privacidad</a></li>
+                            <li><a href="#legal"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Licencia
+                                    de Uso</a></li>
+                            <li><a href="#"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Soporte
+                                    Técnico</a></li>
+                            <li><a href="#"
+                                    class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Documentación</a>
+                            </li>
+                        </ul>
+                    </div>
 
-            // if set via local storage previously
-            if (localStorage.getItem('color-theme')) {
-                if (localStorage.getItem('color-theme') === 'light') {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                }
+                    <!-- Contact Info -->
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Contacto</h3>
+                        <ul class="space-y-3 text-sm text-gray-500 dark:text-gray-400">
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>San Felipe, Edo. Yaracuy,<br>Venezuela</span>
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                <span>noemdb@gmail.com</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-                // if NOT set via local storage previously
+                <!-- Bottom Footer: Copyright & Social -->
+                <div
+                    class="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">© {{ date('Y') }} EDUSYS™. Todos los
+                        derechos reservados.</span>
+                    <div class="flex space-x-6 sm:justify-center">
+                        {{-- <a href="#"
+                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 8 19">
+                                <path fill-rule="evenodd"
+                                    d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Facebook page</span>
+                        </a>
+                        <a href="#"
+                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                    d="M22 6c0-1.1-.9-2-2-2h-2V2a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2v2a2 2 0 0 0 2 2v2a2 2 0 0 0 2 2v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2a2 2 0 0 0 2-2v-2a2 2 0 0 0 2-2v-2a2 2 0 0 0 2-2V6zm-5 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM9 4h6v2H9V4zm10 16H5v-6h14v6zm0-8H5V8h14v4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Instagram page</span>
+                        </a> --}}
+                        <a href="https://github.com/noemdb" target="_blank"
+                            class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 5.405 6.3a4.018 4.018 0 0 1 .46-2.901s.915-.293 3.001 1.12a10.418 10.418 0 0 1 5.463 0c2.086-1.413 3.003-1.12 3.003-1.12a4.016 4.016 0 0 1 .461 2.901 3.847 3.847 0 0 1 1.63 2.93c0 3.805-2.32 4.646-4.53 4.892.28.243.527.68.527 1.372 0 .99-.01 1.793-.01 2.051 0 .27.178.581.693.483A9.911 9.911 0 0 0 10 .333Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">GitHub account</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script>
+            var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+            var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+            // Change the icons inside the button based on previous settings
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+                    '(prefers-color-scheme: dark)').matches)) {
+                themeToggleLightIcon.classList.remove('hidden');
             } else {
-                if (document.documentElement.classList.contains('dark')) {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('color-theme', 'light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('color-theme', 'dark');
-                }
+                themeToggleDarkIcon.classList.remove('hidden');
             }
 
-        });
-    </script>
+            var themeToggleBtn = document.getElementById('theme-toggle');
+
+            themeToggleBtn.addEventListener('click', function() {
+
+                // toggle icons inside button
+                themeToggleDarkIcon.classList.toggle('hidden');
+                themeToggleLightIcon.classList.toggle('hidden');
+
+                // if set via local storage previously
+                if (localStorage.getItem('color-theme')) {
+                    if (localStorage.getItem('color-theme') === 'light') {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    }
+
+                    // if NOT set via local storage previously
+                } else {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    }
+                }
+
+            });
+        </script>
+        @livewireScripts
 </body>
 
 </html>
