@@ -15,11 +15,10 @@
     @livewireStyles
 </head>
 <script>
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
-            '(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+    if (localStorage.getItem('color-theme') === 'light') {
+        document.documentElement.classList.remove('dark');
     } else {
-        document.documentElement.classList.remove('dark')
+        document.documentElement.classList.add('dark');
     }
 </script>
 
@@ -278,8 +277,12 @@
 
     <!-- Problem/Solution Section -->
     <section class="bg-white dark:bg-gray-800/50 py-20" id="about" x-data="{ shown: false }"
-        x-init="let observer = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) { shown = true;
-                observer.disconnect(); } }, { threshold: 0.2 });
+        x-init="let observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                shown = true;
+                observer.disconnect();
+            }
+        }, { threshold: 0.2 });
         observer.observe($el)">
         <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
             <div class="max-w-3xl mx-auto text-center mb-16 transition-all duration-1000 transform"
@@ -1060,9 +1063,9 @@
                             <li><a href="#"
                                     class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Soporte
                                     Técnico</a></li>
-                            <li><a href="#"
+                            {{-- <li><a href="#"
                                     class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Documentación</a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
 
