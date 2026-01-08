@@ -1001,7 +1001,9 @@
                         </div>
                     </div>
                 </div>
-                <livewire:landing.contact-component />
+                <div class="py-5">
+                    <livewire:landing.contact-component />
+                </div>
             </div>
         </div>
 
