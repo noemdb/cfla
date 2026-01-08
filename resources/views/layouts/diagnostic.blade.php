@@ -39,7 +39,7 @@
                 <!-- Logo y título principal -->
                 <div class="flex items-center space-x-6">
                     <div class="flex-shrink-0">
-                        <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        <img src="{{ asset('image/brand/edusys.png') }}" alt="{{ config('app.name') }} Logo"
                             class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                     </div>
 
