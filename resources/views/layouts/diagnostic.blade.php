@@ -100,7 +100,7 @@
 
                 <!-- Copyright -->
                 <p class="text-xs text-gray-400">
-                    © {{ date('Y') }} <strong>SAEFL</strong> @noemdb | Módulo de Diagnóstico Educativo. Todos los
+                    © {{ date('Y') }} <strong>EDUSYS.VE</strong> @noemdb | Módulo de Diagnóstico Educativo. Todos los
                     derechos reservados.
                 </p>
             </div>
