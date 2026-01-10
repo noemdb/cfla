@@ -1,22 +1,23 @@
-<footer class="mt-auto bg-white rounded-lg shadow dark:bg-gray-800">
-    <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
-        <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">
-            © 2024 <a href="https://edusys.click/saefl" class="hover:underline font-extrabold">SAEFL</a>. Todos los
-            derechos reservados.
-        </span>
-        <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
-            <li>
-                <a href="#" class="hover:underline me-4 md:me-6">Acerca de...</a>
-            </li>
-            <li>
-                <a href="#" class="hover:underline me-4 md:me-6">Políticas</a>
-            </li>
-            <li>
-                <a href="#" class="hover:underline me-4 md:me-6">Licencias</a>
-            </li>
-            <li>
-                <a href="#" class="hover:underline">Contacto</a>
-            </li>
-        </ul>
+<footer class="bg-gray-900/60 backdrop-blur-sm border-t border-emerald-800/30 mt-auto">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+            <div class="flex flex-col items-center md:items-start space-y-1">
+                <p class="text-sm text-gray-400">
+                    © {{ date('Y') }} <strong>EDUSYS.VE</strong> @noemdb | Módulo Educativo
+                </p>
+                <div class="flex items-center space-x-4 text-xs text-emerald-400/80">
+                    <span>Educación Dinámica</span>
+                    <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                    <span>Competición Sana</span>
+                </div>
+            </div>
+
+            <ul class="flex flex-wrap items-center justify-center space-x-6 text-sm font-medium text-gray-400">
+                <li><a href="#" class="hover:text-emerald-400 transition-colors">Acerca de</a></li>
+                <li><a href="#" class="hover:text-emerald-400 transition-colors">Políticas</a></li>
+                <li><a href="#" class="hover:text-emerald-400 transition-colors">Ayuda</a></li>
+                <li><a href="#" class="hover:text-emerald-400 transition-colors">Contacto</a></li>
+            </ul>
+        </div>
     </div>
 </footer>

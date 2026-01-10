@@ -1,26 +1,26 @@
-<nav class="bg-white border-gray-200 dark:bg-gray-900">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-2">
-        <a href="https://edusys.click/" class="flex items-center space-x-3 rtl:space-x-reverse">
-            {{-- <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo" /> --}}
-            <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">C.EDUC</span>
-        </a>
+<header class="bg-gray-900/80 backdrop-blur-sm border-b border-emerald-800/30 sticky top-0 z-10 shadow-lg">
+    <div class="container-fluid mx-auto px-4 py-3">
+        <div class="flex items-center justify-between">
+            <!-- Logo y título principal -->
+            <div class="flex items-center space-x-6">
+                <div class="flex-shrink-0">
+                    <img src="{{ asset('image/brand/edusys.png') }}" alt="{{ config('app.name') }} Logo"
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
+                </div>
 
-        <div class="font-bold">Competiciones <span class="hidden sm:inline-flex">Estudiantiles, Preguntas y
-                respuestas</span></div>
-        <button data-collapse-toggle="navbar-default" type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            aria-controls="navbar-default" aria-expanded="false">
-            <span class="sr-only">Abrir menú</span>
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 17 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M1 1h15M1 7h15M1 13h15" />
-            </svg>
-        </button>
+                <div class="flex flex-col">
+                    <h1 class="text-lg md:text-2xl font-bold text-white uppercase">C.EDUC - Moderador</h1>
+                    <p class="sm:block text-sm text-emerald-300 font-bold"><strong>Competiciones Estudiantiles.</strong>
+                        Preguntas y respuestas</p>
+                </div>
+            </div>
 
-        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-            <div class="font-bold border rounded p-2 dark:bg-gray-800">Moderador</div>
+            <div class="hidden w-full md:block md:w-auto">
+                <div
+                    class="font-bold border border-emerald-500/30 rounded-lg px-4 py-2 bg-emerald-900/20 text-emerald-400 backdrop-blur-md">
+                    Panel de Moderación
+                </div>
+            </div>
         </div>
-
     </div>
-</nav>
+</header>

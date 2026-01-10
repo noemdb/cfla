@@ -1,4 +1,4 @@
-<html class="scroll-smooth">
+<html class="dark scroll-smooth">
 
 <head>
 
@@ -12,10 +12,11 @@
 
     <wireui:scripts />
     @livewireStyles
-
+    @include('general.educational.competition.partials.styles')
 </head>
 
-<body class="flex flex-col min-h-screen bg-white dark:bg-black">
+<body
+    class="font-sans antialiased bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 min-h-screen text-gray-100 flex flex-col">
 
     <x-notifications />
 

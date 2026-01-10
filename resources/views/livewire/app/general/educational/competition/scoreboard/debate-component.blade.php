@@ -3,41 +3,36 @@
         {{-- <div class="m-1 w-full"> --}}
 
         @if ($debate)
-            <div class="flex justify-between border-b-2 border bg-slate-100 rounded border-gray-200 h-full">
-
+            <div class="flex justify-between items-center bg-transparent border-b border-emerald-500/10 h-full p-2">
                 <div class="flex-1">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span
+                            class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">DEBATE:
+                            {{ $debate->id }}</span>
+                        <span
+                            class="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full font-bold tracking-tighter uppercase">{{ $debate->grado->name ?? 'Grado general' }}</span>
+                    </div>
 
-                    <h5 class="mb-2 px-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        <div class="text-green-950">
-                            <small class="block text-sm font-bold text-green-900">Área de Formación activa: </small>
-                            <small class="text-gray-200">{{ $debate->id }}.</small> {{ $debate->name }}
-                        </div>
+                    <h5 class="text-2xl font-black tracking-tight text-white uppercase group">
+                        {{ $debate->name }}
                     </h5>
-                    <div class="text-5xl text-green-600 font-bold">{{ $debate->grado->name ?? 'Grado no asignado' }}
-                    </div>
 
-                    <div class="text-sm font-light">
-                        <div class="text-right">
-                            <div x-data="{ open: false }">
-                                <button class="text-sm font-light" @click="open = ! open">Leer más</button>
-                                <div x-show="open" @click.outside="open = false">
-                                    <p class="text-start mb-1 font-normal text-gray-700 dark:text-gray-400 ">
-                                        {{ $debate->description }}
-
-                                    </p>
-                                </div>
-                            </div>
+                    <div x-data="{ open: false }" class="mt-2">
+                        <button
+                            class="text-xs font-bold text-emerald-400/60 hover:text-emerald-400 transition-colors uppercase tracking-widest"
+                            @click="open = ! open">Ver detalles <span x-text="open ? '-' : '+'"></span></button>
+                        <div x-show="open" x-collapse @click.outside="open = false"
+                            class="mt-2 text-sm text-gray-400 italic">
+                            {{ $debate->description }}
                         </div>
                     </div>
-
                 </div>
 
                 <div class="flex-none">
-                    <x-dropdown>
-                        <x-dropdown.item label="Planilla de Resultados" />
+                    <x-dropdown icon="adjustments" class="text-emerald-400">
+                        <x-dropdown.item label="Estadísticas de Debate" icon="chart-bar" />
                     </x-dropdown>
                 </div>
-
             </div>
         @else
             <div>Espere... No hay un debate activo</div>
