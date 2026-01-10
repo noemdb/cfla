@@ -11,14 +11,14 @@ use Livewire\Component;
 class OptionComponent extends Component
 {
 
-    public $literal,$debate,$grado,$seccions,$colors,$competition,$options,$question,$timeRemaining;
+    public $literal, $debate, $grado, $seccions, $colors, $competition, $options, $question, $timeRemaining;
 
     public function mount($id) // ID de la competición
     {
         $this->updateOptions($id);
 
-        $this->literal = ['A','B','C','D','E','F']; 
-        $this->colors = ['primary','secondary','positive','negative','warning','info'];
+        $this->literal = ['A', 'B', 'C', 'D', 'E', 'F'];
+        $this->colors = ['primary', 'secondary', 'positive', 'negative', 'warning', 'info'];
     }
 
     public function render()
@@ -27,10 +27,10 @@ class OptionComponent extends Component
     }
 
     public function updateOptions($id) // ID de la competición
-    {   
-        $this->competition = DebateCompetition::findOrFail($id);     
-        $this->options = DebateOption::ActiveCompetitionId($id); //dd($this->competition,$this->options);
-        $this->question = DebateQuestion::ActiveCompetitionId($id); //dd($this->question);
+    {
+        $this->competition = DebateCompetition::findOrFail($id);
+        $this->question = DebateQuestion::ActiveCompetitionId($id);
+        $this->options = ($this->question) ? $this->question->options : collect();
         $this->debate = Debate::ActiveCompetitionId($id);
 
         $this->grado = ($this->debate) ? $this->debate->grado : collect();
@@ -38,6 +38,6 @@ class OptionComponent extends Component
     }
     public function updateTimetimeRemaining()
     {
-        $this->timeRemaining = ($this->question) ? $this->question->timeRemaining : null;       
+        $this->timeRemaining = ($this->question) ? $this->question->timeRemaining : null;
     }
 }

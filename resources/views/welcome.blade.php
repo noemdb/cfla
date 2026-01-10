@@ -11,6 +11,48 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
+        @keyframes blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: blob 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dark .glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
     @livewireStyles
 </head>
@@ -780,7 +822,7 @@
                     </div>
 
                     <!-- New CTA Element: Join Session Input -->
-                    <div x-data="{ token: '', role: 'moderator' }"
+                    <div x-data="{ token: 'edusys', role: 'moderator' }"
                         class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
                         <select x-model="role"
                             class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
@@ -790,7 +832,7 @@
                             <option value="scoreboard"
                                 class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra</option>
                         </select>
-                        <input x-model="token" type="text" placeholder="Ingresa código..."
+                        <input x-model="token" type="text" placeholder="Ingresa código..." value="edusys"
                             class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
                         <button
                             @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
@@ -805,43 +847,439 @@
     </section>
 
 
-    <!-- Modules List (Compact) -->
-    <section class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-16" id="modules">
-        <div class="max-w-screen-xl px-4 mx-auto text-center">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">Ecosistema Modular Completo</h3>
-            <div class="flex flex-wrap justify-center gap-3">
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Configuraciones
-                    Generales</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
-                    de Censo
-                    Escolar</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
-                    de Estudiantes</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Gestión
-                    de Representantes</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Planificación
-                    Docente</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Inscripciones</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Bienestar
-                    Estudiantil</span>
 
+
+    <!-- EDUSYS Intelligence: High Impact UI Section -->
+    <section class="bg-white dark:bg-gray-800 py-32 relative overflow-hidden">
+        <!-- Parallax/Floating elements -->
+        <div class="absolute top-10 left-10 w-20 h-20 bg-emerald-500/20 rounded-full animate-blob filter blur-xl">
+        </div>
+        <div
+            class="absolute bottom-20 right-10 w-32 h-32 bg-blue-500/20 rounded-full animate-blob animation-delay-2000 filter blur-xl">
+        </div>
+
+        <div class="max-w-screen-xl px-4 mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <div>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 mb-4 tracking-widest uppercase">
+                            Nueva Era Educativa
+                        </span>
+                        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white md:text-6xl leading-tight">
+                            Inteligencia <br>
+                            <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">Aumentada</span>
+                        </h2>
+                    </div>
+
+                    <p class="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
+                        No es solo software; es un ecosistema que aprende y evoluciona. EDUSYS integra modelos para
+                        transformar la pedagogía tradicional en una experiencia interactiva eficiente.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div
+                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all duration-300 group">
+                            <div class="text-3xl font-bold text-emerald-600 mb-2">99%</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
+                                Precisión</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">En análisis de datos y reportes
+                                automáticos.</div>
+                        </div>
+                        <div
+                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-blue-500/50 transition-all duration-300 group">
+                            <div class="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
+                                Automatización</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Mensajería y procesos administrativos
+                                siempre activos.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <!-- Glass Interactive Card -->
+                    <div
+                        class="relative z-20 glass p-2 rounded-[2rem] shadow-2xl transition-transform duration-700 group-hover:rotate-0 rotate-2">
+                        <div
+                            class="bg-gray-900 rounded-[1.8rem] overflow-hidden p-8 min-h-[400px] flex flex-col justify-between">
+                            <div class="flex justify-between items-start mb-8">
+                                <div class="space-y-2">
+                                    <div class="h-1.5 w-24 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <div class="h-1.5 w-16 bg-gray-700 rounded-full"></div>
+                                </div>
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-700"></div>
+                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-600"></div>
+                                    <div
+                                        class="w-8 h-8 rounded-full border-2 border-gray-900 bg-emerald-600 flex items-center justify-center text-[10px] text-white font-bold">
+                                        +5</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6 flex-1">
+                                <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50 space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        <div class="h-2 w-32 bg-gray-600 rounded"></div>
+                                    </div>
+                                    <div class="pl-5 space-y-2">
+                                        <div class="h-2 w-full bg-gray-700/50 rounded"></div>
+                                        <div class="h-2 w-4/5 bg-gray-700/50 rounded"></div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="p-4 rounded-xl bg-emerald-600/10 border border-emerald-500/20 space-y-3 relative overflow-hidden group/item cursor-pointer hover:bg-emerald-600/20 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
+                                        </div>
+                                        <div class="h-2 w-40 bg-emerald-400/50 rounded"></div>
+                                    </div>
+                                    <div class="pl-5 h-2 w-full bg-emerald-400/20 rounded"></div>
+                                    <div
+                                        class="absolute -right-4 -bottom-4 w-12 h-12 bg-emerald-500/10 rounded-full blur-xl group-hover/item:scale-150 transition-transform">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex items-center justify-between border-t border-gray-800 pt-6">
+                                <div class="text-xs font-mono text-gray-500">SYSTEM_STATUS: <span
+                                        class="text-emerald-500">OPTIMAL</span></div>
+                                <div
+                                    class="px-4 py-2 bg-emerald-600 rounded-lg text-white text-xs font-bold cursor-pointer hover:bg-emerald-500 transition-colors">
+                                    EJECUTAR ANÁLISIS
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative elements behind card -->
+                    <div
+                        class="absolute -top-10 -right-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000">
+                    </div>
+                    <div
+                        class="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -z-10 group-hover:translate-x-10 transition-transform duration-1000">
+                    </div>
+
+                    <!-- Floating Badge -->
+                    <div
+                        class="absolute -right-4 top-1/2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl z-30 border border-gray-100 dark:border-gray-700 animate-bounce cursor-default">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">IA Activa
+                                </div>
+                                <div class="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">Procesando
+                                    Competencia...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Modules Explorer -->
+    <section
+        class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-24 relative overflow-hidden"
+        id="modules" x-data="{ activeCategory: 'academic' }">
+        <!-- Background Blobs for specific section -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-blob"></div>
+        <div
+            class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000">
+        </div>
+
+        <div class="max-w-screen-xl px-4 mx-auto relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
                 <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Informe
-                    de
-                    Notas</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Histórico
-                    de Notas</span>
-                <span
-                    class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 shadow-sm hover:border-emerald-500 hover:text-emerald-500 transition-colors cursor-default">Promociones
-                    y Títulos</span>
+                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Ecosistema
+                    EDUSYS</span>
+                <h2 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-5xl mb-6">
+                    Módulos Adaptados a la <span
+                        class="text-emerald-600 dark:text-emerald-500 italic">Excelencia</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">
+                    Nuestra arquitectura modular permite una gestión integral 360°, cubriendo gran cantidad de aristas
+                    del
+                    proceso educativo y administrativo.
+                </p>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex flex-wrap justify-center gap-4 mb-16">
+                <button @click="activeCategory = 'academic'"
+                    :class="activeCategory === 'academic' ?
+                        'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105' :
+                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
+                    class="px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                        </path>
+                    </svg>
+                    Académico
+                </button>
+                <button @click="activeCategory = 'admin'"
+                    :class="activeCategory === 'admin' ?
+                        'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105' :
+                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
+                    class="px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                    Administrativo
+                </button>
+                <button @click="activeCategory = 'innovation'"
+                    :class="activeCategory === 'innovation' ?
+                        'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105' :
+                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
+                    class="px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Innovación AI
+                </button>
+                <button @click="activeCategory = 'institutional'"
+                    :class="activeCategory === 'institutional' ?
+                        'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 scale-105' :
+                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
+                    class="px-8 py-3 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                        </path>
+                    </svg>
+                    Institucional
+                </button>
+            </div>
+
+
+            <!-- Modules Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[500px]">
+
+                <!-- Academic Modules -->
+                <template x-if="activeCategory === 'academic'">
+                    <div class="contents">
+                        @php
+                            $acadModules = [
+                                [
+                                    'title' => 'Gestión de Carga Académica',
+                                    'desc' => 'Asignación eficiente de materias y secciones a profesores.',
+                                ],
+                                [
+                                    'title' => 'Plan de Evaluación',
+                                    'desc' => 'Estructuración por momentos, indicadores y criterios pedagógicos.',
+                                ],
+                                [
+                                    'title' => 'Carga de Notas & Promedios',
+                                    'desc' => 'Cálculo automatizado sin redondeo y control de lapsos.',
+                                ],
+                                [
+                                    'title' => 'Puntos de Ajuste',
+                                    'desc' => 'Módulo especializado para correcciones y escalas de valoración.',
+                                ],
+                                [
+                                    'title' => 'Informe de Notas',
+                                    'desc' => 'Generación de reportes de rendimiento y boletas dinámicas.',
+                                ],
+                                [
+                                    'title' => 'Histórico & Certificación',
+                                    'desc' => 'Respaldo de calificaciones y emisión de títulos oficiales.',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($acadModules as $index => $module)
+                            <div x-show="true"
+                                x-transition:enter="transition ease-out duration-500 delay-[{{ $index * 100 }}ms]"
+                                x-transition:enter-start="opacity-0 translate-y-8"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="glass p-8 rounded-3xl group hover:border-emerald-500 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/5">
+                                <div
+                                    class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ $module['title'] }}
+                                </h3>
+                                <p class="text-gray-500 dark:text-gray-400 leading-relaxed">{{ $module['desc'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </template>
+
+                <!-- Admin Modules -->
+                <template x-if="activeCategory === 'admin'">
+                    <div class="contents">
+                        @php
+                            $adminModules = [
+                                [
+                                    'title' => 'Procesamiento de Pagos',
+                                    'desc' => 'Registro tripartito: EDUSYS, POS/Bancos y estado bancario.',
+                                ],
+                                [
+                                    'title' => 'Conciliación Diaria',
+                                    'desc' => 'Alertas automáticas de inconsistencias y auditoría de ingresos.',
+                                ],
+                                [
+                                    'title' => 'Gestión de Morosidad',
+                                    'desc' => 'Cálculo de intereses y restricciones administrativas automáticas.',
+                                ],
+                                [
+                                    'title' => 'Inscripciones Administrativas',
+                                    'desc' => 'Control de solvencia y aseguramiento de matrícula escolar.',
+                                ],
+                                [
+                                    'title' => 'Dashboard Financiero',
+                                    'desc' => 'Métricas en tiempo real de ingresos y métodos de pago.',
+                                ],
+                                [
+                                    'title' => 'Censo & Renovación',
+                                    'desc' => 'Gestión del proceso de selección y actualización de datos.',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($adminModules as $index => $module)
+                            <div x-show="true"
+                                x-transition:enter="transition ease-out duration-500 delay-[{{ $index * 100 }}ms]"
+                                x-transition:enter-start="opacity-0 translate-y-8"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="glass p-8 rounded-3xl group hover:border-blue-500 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:bg-blue-900/5">
+                                <div
+                                    class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ $module['title'] }}
+                                </h3>
+                                <p class="text-gray-500 dark:text-gray-400 leading-relaxed">{{ $module['desc'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </template>
+
+                <!-- Innovation Modules -->
+                <template x-if="activeCategory === 'innovation'">
+                    <div class="contents">
+                        @php
+                            $innovModules = [
+                                [
+                                    'title' => 'Debates Académicos IA',
+                                    'desc' => 'Fomento del pensamiento crítico con moderación inteligente.',
+                                ],
+                                [
+                                    'title' => 'Gamificación Educativa',
+                                    'desc' => 'Sistemas de recompensas y rankings impulsados por IA.',
+                                ],
+                                [
+                                    'title' => 'Mensajería WhatsApp',
+                                    'desc' => 'Notificaciones automáticas de cobranza y comunicados oficiales.',
+                                ],
+                                [
+                                    'title' => 'Votaciones Anónimas',
+                                    'desc' => 'Procesos de consulta seguros y transparentes para la comunidad.',
+                                ],
+                                [
+                                    'title' => 'Entrevistas Interactivas',
+                                    'desc' => 'Gestión digital de encuentros de Bienestar Estudiantil.',
+                                ],
+                                [
+                                    'title' => 'Acción Comunitaria',
+                                    'desc' => 'Trazabilidad de servicios ejecutados y labor social.',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($innovModules as $index => $module)
+                            <div x-show="true"
+                                x-transition:enter="transition ease-out duration-500 delay-[{{ $index * 100 }}ms]"
+                                x-transition:enter-start="opacity-0 translate-y-8"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="glass p-8 rounded-3xl group hover:border-purple-500 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 dark:hover:bg-purple-900/5">
+                                <div
+                                    class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-2xl flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                                    {{ $module['title'] }}</h3>
+                                <p class="text-gray-500 dark:text-gray-400 leading-relaxed">{{ $module['desc'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </template>
+
+                <!-- Institutional Modules -->
+                <template x-if="activeCategory === 'institutional'">
+                    <div class="contents">
+                        @php
+                            $instModules = [
+                                [
+                                    'title' => 'Gestión de Estudiantes',
+                                    'desc' => 'Expediente digital completo con historial médico y social.',
+                                ],
+                                [
+                                    'title' => 'Control de Asistencia',
+                                    'desc' => 'Seguimiento biométrico y secuencial para personal y alumnos.',
+                                ],
+                                [
+                                    'title' => 'Representantes & Tutores',
+                                    'desc' => 'Centralización de datos de contacto y responsabilidad legal.',
+                                ],
+                                [
+                                    'title' => 'Pases Escolares',
+                                    'desc' => 'Control de entradas/salidas y reportes de puntualidad.',
+                                ],
+                                [
+                                    'title' => 'Bienestar Estudiantil',
+                                    'desc' => 'Seguimiento de incidencias, acuerdos y correctivos.',
+                                ],
+                                [
+                                    'title' => 'Configuración Global',
+                                    'desc' => 'Personalización total del sistema según requerimientos.',
+                                ],
+                            ];
+                        @endphp
+                        @foreach ($instModules as $index => $module)
+                            <div x-show="true"
+                                x-transition:enter="transition ease-out duration-500 delay-[{{ $index * 100 }}ms]"
+                                x-transition:enter-start="opacity-0 translate-y-8"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                class="glass p-8 rounded-3xl group hover:border-emerald-500 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/5">
+                                <div
+                                    class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/50 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                                    {{ $module['title'] }}</h3>
+                                <p class="text-gray-500 dark:text-gray-400 leading-relaxed">{{ $module['desc'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </template>
+
             </div>
         </div>
     </section>

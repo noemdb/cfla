@@ -17,7 +17,12 @@ class GmailService
         $this->client = new Client();
         $this->client->setApplicationName('Laravel Gmail API');
         $this->client->setScopes(Gmail::GMAIL_SEND);
-        $this->client->setAuthConfig(storage_path('app/google/credentials.json'));
+
+        $authConfig = storage_path('app/google/credentials.json');
+        if (file_exists($authConfig)) {
+            $this->client->setAuthConfig($authConfig);
+        }
+
         $this->client->setAccessType('offline');
         $this->client->setPrompt('select_account consent');
         $this->client->setRedirectUri(route('google.callback'));

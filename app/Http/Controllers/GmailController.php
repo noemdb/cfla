@@ -30,7 +30,17 @@ class GmailController extends Controller
 
     public function sendEmail()
     {
+        $authConfig = storage_path('app/google/credentials.json');
+        if (!file_exists($authConfig)) {
+            return 'Error: Archivo de credenciales de Google no encontrado en ' . $authConfig;
+        }
+
         $client = $this->getGoogleClient();
+
+        if (!Storage::exists('google/token.json')) {
+            return 'Error: Token no encontrado. Vuelve a autenticar.';
+        }
+
         $token = json_decode(Storage::get('google/token.json'), true);
         $client->setAccessToken($token);
 
@@ -60,7 +70,12 @@ class GmailController extends Controller
         $client = new Client();
         $client->setApplicationName('Laravel Gmail API');
         $client->setScopes(Gmail::GMAIL_SEND);
-        $client->setAuthConfig(storage_path('app/google/credentials.json'));
+
+        $authConfig = storage_path('app/google/credentials.json');
+        if (file_exists($authConfig)) {
+            $client->setAuthConfig($authConfig);
+        }
+
         $client->setAccessType('offline');
         $client->setPrompt('select_account consent');
         $client->setRedirectUri(route('google.callback'));
