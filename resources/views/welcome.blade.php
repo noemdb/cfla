@@ -536,8 +536,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Expediente Digital</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Historial completo del estudiante y
-                        docente, centralizando logros, incidencias y documentación importante.</p>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Historial del estudiante, centralizando logros, incidencias y documentación importante.</p>
                 </div>
 
                 <!-- Feature 5 -->
@@ -850,7 +849,7 @@
                                 class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra</option>
                         </select>
                         <input x-model="token" type="text" placeholder="Ingresa código..."
-                            value="<strong>EDUSYS</strong>"
+                            value="edusys"
                             class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
                         <button
                             @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
