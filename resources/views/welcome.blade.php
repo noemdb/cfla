@@ -72,7 +72,7 @@
         <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
                 <span
-                    class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600">EDUSYS</span>
+                    class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600"><strong>EDUSYS</strong></span>
             </a>
             <div class="flex md:order-2 space-x-3 md:space-x-2 rtl:space-x-reverse items-center">
 
@@ -139,7 +139,7 @@
                 <div
                     class="inline-flex items-center justify-between px-1 py-1 pr-4 mb-7 text-sm text-emerald-700 bg-emerald-100 rounded-full dark:bg-emerald-900/30 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors cursor-pointer">
                     <span class="text-xs bg-emerald-600 rounded-full text-white px-3 py-1.5 mr-3">Nuevo</span> <span
-                        class="text-sm font-medium">EDUSYS 2.0 ya está disponible</span>
+                        class="text-sm font-medium"><strong>EDUSYS</strong> 2.0 ya está disponible</span>
                     <svg class="w-2.5 h-2.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 6 10">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -154,7 +154,7 @@
                 </h1>
                 <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
                     Optimiza la gestión institucional, reduce las cargas operativas y asegura el control total de los
-                    procesos académicos, administrativos y financieros con EDUSYS.
+                    procesos académicos y administrativos con <strong>EDUSYS</strong>.
                 </p>
                 <div class="flex flex-col space-y-4 sm:flex-row sm:justify-start sm:space-y-0 sm:space-x-4">
                     <a href="{{ env('APP_URL_APP') }}" target="_blank"
@@ -332,8 +332,9 @@
                 <h2 class="mb-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl">La
                     evolución de la gestión educativa</h2>
                 <p class="text-gray-500 dark:text-gray-400 sm:text-lg">
-                    La gestión escolar tradicional está llena de procesos manuales, desconectados y burocráticos. EDUSYS
-                    centraliza y automatiza todo en una sola plataforma.
+                    La gestión escolar tradicional está llena de procesos manuales, desconectados y burocráticos.
+                    <strong>EDUSYS</strong>
+                    centraliza y automatiza una gran cantidad de procesos en una sola plataforma.
                 </p>
             </div>
 
@@ -358,7 +359,7 @@
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Carga Administrativa
                                 </h3>
                                 <p class="text-gray-500 dark:text-gray-400">Procesos manuales y repetitivos que
-                                    consumen tiempo valioso de docentes y directivos.</p>
+                                    consumen tiempo valioso de docentes, estudiantes, representantes, etc.</p>
                             </div>
                         </div>
                         <div
@@ -384,37 +385,53 @@
                 <!-- Solution Column -->
                 <div class="max-w-lg transition-all duration-1000 delay-500 transform"
                     :class="shown ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'">
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">La Solución EDUSYS</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">La Solución
+                        <strong>EDUSYS</strong>
+                    </h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
-                        EDUSYS es una plataforma integral diseñada para automatizar, centralizar y optimizar los
+                        <strong>EDUSYS</strong> es una plataforma integral diseñada para automatizar, centralizar y
+                        optimizar los
                         procesos
-                        académicos, administrativos y financieros. Su enfoque sistémico permite que toda la comunidad
-                        educativa se concentre en lo más importante: la educación.
+                        académicos y administrativos. Su arquitectura permite que toda la comunidad educativa se
+                        concentre en lo más importante: <strong>La educación</strong>.
                     </p>
-                    <ul class="space-y-3 text-gray-500 dark:text-gray-400">
-                        <li class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Gestión financiera y control de ingresos
+                    <ul class="space-y-4 text-gray-500 dark:text-gray-400">
+                        <li class="flex items-start gap-3">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <span><strong>Trazabilidad & Control:</strong> Registro auditable de cada evento (pagos,
+                                notas, asistencias) para una gobernanza escolar efectiva.</span>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Expediente digital y gestión de incidencias
+                        <li class="flex items-start gap-3">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <span><strong>Transparencia Institucional:</strong> Evidencia documental y reportes claros
+                                que fortalecen la confianza con representantes y entes rectores.</span>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Comunicación efectiva con representantes
+                        <li class="flex items-start gap-3">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <span><strong>Eficiencia Operativa:</strong> Reducción drástica de la carga administrativa
+                                mediante la automatización de procesos repetitivos.</span>
                         </li>
                     </ul>
                 </div>
@@ -822,7 +839,7 @@
                     </div>
 
                     <!-- New CTA Element: Join Session Input -->
-                    <div x-data="{ token: 'edusys', role: 'moderator' }"
+                    <div x-data="{ token: '<strong>EDUSYS</strong>', role: 'moderator' }"
                         class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
                         <select x-model="role"
                             class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
@@ -832,7 +849,8 @@
                             <option value="scoreboard"
                                 class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra</option>
                         </select>
-                        <input x-model="token" type="text" placeholder="Ingresa código..." value="edusys"
+                        <input x-model="token" type="text" placeholder="Ingresa código..."
+                            value="<strong>EDUSYS</strong>"
                             class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
                         <button
                             @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
@@ -849,7 +867,7 @@
 
 
 
-    <!-- EDUSYS Intelligence: High Impact UI Section -->
+    <!-- <strong>EDUSYS</strong> Intelligence: High Impact UI Section -->
     <section class="bg-white dark:bg-gray-800 py-32 relative overflow-hidden">
         <!-- Parallax/Floating elements -->
         <div class="absolute top-10 left-10 w-20 h-20 bg-emerald-500/20 rounded-full animate-blob filter blur-xl">
@@ -874,7 +892,8 @@
                     </div>
 
                     <p class="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
-                        No es solo software; es un ecosistema que aprende y evoluciona. EDUSYS integra modelos para
+                        No es solo software; es un ecosistema que aprende y evoluciona. <strong>EDUSYS</strong> integra
+                        modelos para
                         transformar la pedagogía tradicional en una experiencia interactiva eficiente.
                     </p>
 
@@ -1002,7 +1021,7 @@
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <span
                     class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Ecosistema
-                    EDUSYS</span>
+                    <strong>EDUSYS</strong></span>
                 <h2 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-5xl mb-6">
                     Módulos Adaptados a la <span
                         class="text-emerald-600 dark:text-emerald-500 italic">Excelencia</span>
@@ -1084,7 +1103,7 @@
                                 ],
                                 [
                                     'title' => 'Carga de Notas & Promedios',
-                                    'desc' => 'Cálculo automatizado sin redondeo y control de lapsos.',
+                                    'desc' => 'Cálculo automatizado sin redondeo y control estricto de lapsos.',
                                 ],
                                 [
                                     'title' => 'Puntos de Ajuste',
@@ -1096,7 +1115,7 @@
                                 ],
                                 [
                                     'title' => 'Histórico & Certificación',
-                                    'desc' => 'Respaldo de calificaciones y emisión de títulos oficiales.',
+                                    'desc' => 'Respaldo de calificaciones y emisión de documentos probatorios.',
                                 ],
                             ];
                         @endphp
@@ -1129,27 +1148,28 @@
                             $adminModules = [
                                 [
                                     'title' => 'Procesamiento de Pagos',
-                                    'desc' => 'Registro tripartito: EDUSYS, POS/Bancos y estado bancario.',
+                                    'desc' =>
+                                        'Registro tripartito: <strong>EDUSYS</strong>, soportes físicos y conciliación bancaria.',
                                 ],
                                 [
                                     'title' => 'Conciliación Diaria',
-                                    'desc' => 'Alertas automáticas de inconsistencias y auditoría de ingresos.',
+                                    'desc' => 'Trazabilidad completa entre registros internos y movimientos bancarios.',
                                 ],
                                 [
                                     'title' => 'Gestión de Morosidad',
-                                    'desc' => 'Cálculo de intereses y restricciones administrativas automáticas.',
+                                    'desc' => 'Cálculo automático de recargos y control de solvencia institucional.',
                                 ],
                                 [
                                     'title' => 'Inscripciones Administrativas',
-                                    'desc' => 'Control de solvencia y aseguramiento de matrícula escolar.',
+                                    'desc' => 'Gestión de expedientes económicos y aseguramiento de matrícula.',
                                 ],
                                 [
                                     'title' => 'Dashboard Financiero',
-                                    'desc' => 'Métricas en tiempo real de ingresos y métodos de pago.',
+                                    'desc' => 'Métricas clave para auditoría y toma de decisiones directivas.',
                                 ],
                                 [
                                     'title' => 'Censo & Renovación',
-                                    'desc' => 'Gestión del proceso de selección y actualización de datos.',
+                                    'desc' => 'Gestión del proceso de selección y actualización masiva de datos.',
                                 ],
                             ];
                         @endphp
@@ -1186,23 +1206,23 @@
                                 ],
                                 [
                                     'title' => 'Gamificación Educativa',
-                                    'desc' => 'Sistemas de recompensas y rankings impulsados por IA.',
+                                    'desc' => 'Sistemas de recompensas y rankings para potenciar el interés.',
+                                ],
+                                [
+                                    'title' => 'Horas Comunitarias',
+                                    'desc' => 'Gestión de servicios ejecutados y labor social certificable.',
                                 ],
                                 [
                                     'title' => 'Mensajería WhatsApp',
-                                    'desc' => 'Notificaciones automáticas de cobranza y comunicados oficiales.',
+                                    'desc' => 'Notificaciones automáticas y recordatorios institucionales.',
                                 ],
                                 [
                                     'title' => 'Votaciones Anónimas',
-                                    'desc' => 'Procesos de consulta seguros y transparentes para la comunidad.',
+                                    'desc' => 'Consultas transparentes para la comunidad educativa.',
                                 ],
                                 [
-                                    'title' => 'Entrevistas Interactivas',
-                                    'desc' => 'Gestión digital de encuentros de Bienestar Estudiantil.',
-                                ],
-                                [
-                                    'title' => 'Acción Comunitaria',
-                                    'desc' => 'Trazabilidad de servicios ejecutados y labor social.',
+                                    'title' => 'Entrevistas Digitales',
+                                    'desc' => 'Registro de encuentros de bienestar y acuerdos mutuos.',
                                 ],
                             ];
                         @endphp
@@ -1233,28 +1253,28 @@
                         @php
                             $instModules = [
                                 [
-                                    'title' => 'Gestión de Estudiantes',
-                                    'desc' => 'Expediente digital completo con historial médico y social.',
+                                    'title' => 'Expediente Estudiantil',
+                                    'desc' => 'Ficha digital con historial médico, incidencias y documentos.',
                                 ],
                                 [
-                                    'title' => 'Control de Asistencia',
-                                    'desc' => 'Seguimiento biométrico y secuencial para personal y alumnos.',
+                                    'title' => 'Control de Asistencia Biométrico',
+                                    'desc' => 'Registro preciso de jornada escolar para personal y alumnos.',
+                                ],
+                                [
+                                    'title' => 'Pases Estudiantiles',
+                                    'desc' => 'Autorización formal de entrada/salida bajo control institucional.',
                                 ],
                                 [
                                     'title' => 'Representantes & Tutores',
-                                    'desc' => 'Centralización de datos de contacto y responsabilidad legal.',
+                                    'desc' => 'Centralización de responsabilidad legal y datos de contacto.',
                                 ],
                                 [
-                                    'title' => 'Pases Escolares',
-                                    'desc' => 'Control de entradas/salidas y reportes de puntualidad.',
+                                    'title' => 'Resumen de Bienestar',
+                                    'desc' => 'Seguimiento de incidencias, correctivos y acuerdos escolares.',
                                 ],
                                 [
-                                    'title' => 'Bienestar Estudiantil',
-                                    'desc' => 'Seguimiento de incidencias, acuerdos y correctivos.',
-                                ],
-                                [
-                                    'title' => 'Configuración Global',
-                                    'desc' => 'Personalización total del sistema según requerimientos.',
+                                    'title' => 'Configuración Institucional',
+                                    'desc' => 'Personalización según normas del colegio y entes rectores.',
                                 ],
                             ];
                         @endphp
@@ -1284,6 +1304,141 @@
         </div>
     </section>
 
+    <!-- Institutional Roles Section -->
+    <section
+        class="bg-white dark:bg-gray-800 py-24 relative overflow-hidden border-t border-gray-100 dark:border-gray-700">
+        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Perfiles
+                    & Responsabilidades</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">Una
+                    solución para cada <span class="text-emerald-600 dark:text-emerald-500">actor</span> del sistema
+                </h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Role: Directivo -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Directivos</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toma de decisiones estratégica basada en
+                        indicadores de gestión e inteligencia institucional.</p>
+                </div>
+
+                <!-- Role: Subdirección Académica -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Subdirección Académica</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Supervisión integral de metas pedagógicas,
+                        rendimiento docente y cumplimiento de objetivos educativos.</p>
+                </div>
+
+                <!-- Role: Coordinaciones -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Coordinaciones</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong>Evaluación y Control de
+                            Estudios:</strong> Gestión de registros, validación de actas y certificación oficial.</p>
+                </div>
+
+                <!-- Role: Jefaturas -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Jefaturas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Liderazgo por <strong>Áreas de
+                            Conocimiento</strong> y <strong>Niveles</strong> (Preescolar, Primaria y Bachillerato)
+                        asegurando la coherencia curricular.</p>
+                </div>
+
+                <!-- Role: Administrativo -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Administrativos</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Control de ingresos, conciliación y solvencia,
+                        optimizando los tiempos de respuesta institucional.</p>
+                </div>
+
+                <!-- Role: Docente -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Docentes</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Carga automatizada de planes de evaluación y
+                        seguimiento pedagógico preciso de cada estudiante.</p>
+                </div>
+
+                <!-- Role: Representante -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all lg:col-span-3">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div
+                            class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Representantes</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Tranquilidad y transparencia mediante
+                                el acceso remoto a estados de pago, notas en tiempo real y comunicados oficiales
+                                directos a su dispositivo móvil.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Legal & License Section -->
     <section class="bg-white dark:bg-gray-800 py-20 border-t border-gray-200 dark:border-gray-700" id="legal">
         <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
@@ -1304,7 +1459,8 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Política de Privacidad</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        En EDUSYS, la privacidad de los datos escolares es nuestra prioridad. Cumplimos con estrictos
+                        En <strong>EDUSYS</strong>, la privacidad de los datos escolares es nuestra prioridad. Cumplimos
+                        con estrictos
                         estándares de protección de datos para garantizar que la información de estudiantes, docentes y
                         representantes permanezca segura y confidencial.
                     </p>
@@ -1347,7 +1503,8 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Licencia de Uso</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        EDUSYS se distribuye bajo una licencia de software como servicio (SaaS). El uso de la plataforma
+                        <strong>EDUSYS</strong> se distribuye bajo una licencia de software como servicio (SaaS). El uso
+                        de la plataforma
                         está sujeto a nuestros términos y condiciones, garantizando el soporte continuo y las
                         actualizaciones del sistema.
                     </p>
@@ -1389,7 +1546,8 @@
                     <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white md:text-4xl mb-6">¿Listo para
                         transformar tu institución?</h2>
                     <p class="text-lg text-gray-500 dark:text-gray-400 mb-8">
-                        Nuestro equipo está listo para ayudarte a implementar EDUSYS en tu colegio. Contáctanos para una
+                        Nuestro equipo está listo para ayudarte a implementar <strong>EDUSYS</strong> en tu colegio.
+                        Contáctanos para una
                         demostración personalizada.
                     </p>
                     <div class="space-y-6">
@@ -1404,7 +1562,8 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-gray-900 dark:text-white">Email</h4>
-                                <p class="text-gray-500 dark:text-gray-400">soporte.edusys.ve@gmail.com</p>
+                                <p class="text-gray-500 dark:text-gray-400">
+                                    soporte.<strong>EDUSYS</strong>.ve@gmail.com</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
@@ -1453,7 +1612,7 @@
                     <div class="space-y-4">
                         <a href="#" class="flex items-center space-x-2">
                             <span
-                                class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600">EDUSYS</span>
+                                class="self-center text-2xl font-bold whitespace-nowrap dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-green-600"><strong>EDUSYS</strong></span>
                         </a>
                         <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                             El sistema definitivo de gestión escolar. Simplifica procesos, conecta comunidades y
@@ -1531,7 +1690,7 @@
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                <span>soporte.edusys.ve@gmail.com</span>
+                                <span>soporte.<strong>EDUSYS</strong>.ve@gmail.com</span>
                             </li>
                             <li class="flex items-center">
                                 <svg class="w-5 h-5 mr-3 text-emerald-500 flex-shrink-0" fill="none"
@@ -1549,7 +1708,8 @@
                 <!-- Bottom Footer: Copyright & Social -->
                 <div
                     class="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <span class="text-sm text-gray-500 dark:text-gray-400">© {{ date('Y') }} EDUSYS™. Todos los
+                    <span class="text-sm text-gray-500 dark:text-gray-400">© {{ date('Y') }}
+                        <strong>EDUSYS</strong>™. Todos los
                         derechos reservados.</span>
                     <div class="flex space-x-6 sm:justify-center">
                         {{-- <a href="#"
