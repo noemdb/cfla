@@ -116,16 +116,20 @@
                             aria-current="page">Inicio</a>
                     </li>
                     <li>
-                        <a href="#features"
-                            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Características</a>
+                        <a href="#about"
+                            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Nosotros</a>
+                    </li>
+                    <li>
+                        <a href="#roles"
+                            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Perfiles</a>
                     </li>
                     <li>
                         <a href="#modules"
                             class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Módulos</a>
                     </li>
                     <li>
-                        <a href="#about"
-                            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Nosotros</a>
+                        <a href="#contact"
+                            class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-emerald-700 md:p-0 md:dark:hover:text-emerald-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Contacto</a>
                     </li>
                 </ul>
             </div>
@@ -450,13 +454,10 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Featured: Planificación Docente -->
+                <!-- Planificación Docente -->
                 <div
-                    class="p-8 bg-emerald-50 dark:bg-gray-800 rounded-2xl border-2 border-emerald-500 dark:border-emerald-500 hover:shadow-2xl transition-all group relative overflow-hidden md:col-span-2 lg:col-span-3">
-                    <div
-                        class="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                        Destacado</div>
-                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                    class="p-8 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all group relative overflow-hidden md:col-span-2 lg:col-span-2">
+                    <div class="flex flex-col items-start gap-6">
                         <div
                             class="flex-shrink-0 w-16 h-16 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,11 +471,25 @@
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
                                 Optimiza el proceso de enseñanza con herramientas bien estructuradas para la creación de
-                                planes de evaluación, seguimiento de objetivos y gestión de actividades académicas. Todo
-                                integrado en un solo lugar, según la normativa educativa vigente.
+                                planes de evaluación, seguimiento de objetivos y gestión de actividades académicas.
                             </p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Feature: Gamificación Educativa -->
+                <div
+                    class="p-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-purple-500/50 hover:shadow-xl transition-all group">
+                    <div
+                        class="w-12 h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Gamificación Educativa</h3>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Implementa sistemas de recompensas y
+                        rankings para potenciar el interés y la motivación estudiantil.</p>
                 </div>
 
                 <!-- Feature 1 -->
@@ -536,7 +551,8 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Expediente Digital</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Historial del estudiante, centralizando logros, incidencias y documentación importante.</p>
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Historial del estudiante, centralizando
+                        logros, incidencias y documentación importante.</p>
                 </div>
 
                 <!-- Feature 5 -->
@@ -567,438 +583,142 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Seguridad y Normativa</h3>
-                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Cumplimiento total de regulaciones
+                    <p class="text-gray-500 dark:text-gray-400 leading-relaxed">Cumplimiento de regulaciones
                         educativas vigentes y protección de datos sensible.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Diagnostic Module Highlight -->
-    <section class="bg-white dark:bg-gray-800 py-24 relative overflow-hidden">
-        <div class="absolute inset-0 bg-emerald-900/10 dark:bg-emerald-900/20"></div>
-        <div class="max-w-screen-xl px-4 mx-auto lg:px-6 relative">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div class="order-2 lg:order-1">
-                    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">
-                        Diagnóstico Académico Inteligente
-                    </h2>
-                    <p class="text-lg text-gray-500 dark:text-gray-300 mb-6">
-                        Evalúa, mide y potencia el conocimiento de tus estudiantes con nuestra potente herramienta de
-                        diagnóstico.
-                    </p>
-                    <ul class="space-y-4 mb-8">
-                        <li class="flex items-start">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
-                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Evaluación por Áreas
-                                </h4>
-                                <p class="text-gray-500 dark:text-gray-400">Pruebas personalizadas por materia y nivel
-                                    educativo.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
-                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Estadísticas en Tiempo
-                                    Real</h4>
-                                <p class="text-gray-500 dark:text-gray-400">Visualiza el progreso y rendimiento con
-                                    gráficos detallados.</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div
-                                class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
-                                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Retroalimentación
-                                    Instantánea</h4>
-                                <p class="text-gray-500 dark:text-gray-400">Resultados inmediatos para mejorar el
-                                    proceso de aprendizaje.</p>
-                            </div>
-                        </li>
-                    </ul>
-                    <a href="{{ route('diagnostico') }}"
-                        class="inline-flex items-center text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-lg px-6 py-3.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800 transition-all hover:-translate-y-1 shadow-lg shadow-emerald-500/30">
-                        Probar Diagnóstico
-                        <svg class="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                                clip-rule="evenodd"></path>
+    <!-- Institutional Roles Section -->
+    <section
+        class="bg-white dark:bg-gray-800 py-24 relative overflow-hidden border-t border-gray-100 dark:border-gray-700"
+        id="roles">
+        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Perfiles
+                    & Responsabilidades</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">Una
+                    solución para cada <span class="text-emerald-600 dark:text-emerald-500">actor</span> del sistema
+                </h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Role: Directivo -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
                         </svg>
-                    </a>
-                </div>
-                <div class="order-1 lg:order-2 flex justify-center">
-                    <!-- Abstract representation of the diagnostic dashboard -->
-                    <div class="relative w-full max-w-md aspect-square">
-                        <!-- Decorative blobs -->
-                        <div
-                            class="absolute top-0 right-0 w-72 h-72 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
-                        </div>
-                        <div
-                            class="absolute bottom-0 left-0 w-72 h-72 bg-green-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
-                        </div>
-
-                        <!-- UI Card -->
-                        <div
-                            class="relative bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl p-6 backdrop-blur-sm h-full flex flex-col justify-between transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                            <!-- Header -->
-                            <div class="flex items-center justify-between mb-8">
-                                <div class="h-4 w-1/3 bg-gray-700 rounded"></div>
-                                <div class="flex space-x-2">
-                                    <div class="h-3 w-3 rounded-full bg-red-500"></div>
-                                    <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
-                                    <div class="h-3 w-3 rounded-full bg-green-500"></div>
-                                </div>
-                            </div>
-
-                            <!-- Progress Rings -->
-                            <div class="grid grid-cols-2 gap-4 mb-8">
-                                <div
-                                    class="bg-gray-800 rounded-xl p-4 border border-gray-700 flex flex-col items-center">
-                                    <div class="relative w-20 h-20 mb-3">
-                                        <svg class="w-full h-full transform -rotate-90">
-                                            <circle cx="40" cy="40" r="36" stroke="currentColor"
-                                                stroke-width="8" fill="none" class="text-gray-700" />
-                                            <circle cx="40" cy="40" r="36" stroke="currentColor"
-                                                stroke-width="8" fill="none" class="text-emerald-500"
-                                                stroke-dasharray="160, 251.2" stroke-linecap="round" />
-                                        </svg>
-                                        <div
-                                            class="absolute inset-0 flex items-center justify-center text-white font-bold">
-                                            75%</div>
-                                    </div>
-                                    <div class="h-2 w-16 bg-gray-700 rounded"></div>
-                                </div>
-                                <div
-                                    class="bg-gray-800 rounded-xl p-4 border border-gray-700 flex flex-col items-center">
-                                    <div class="relative w-20 h-20 mb-3">
-                                        <svg class="w-full h-full transform -rotate-90">
-                                            <circle cx="40" cy="40" r="36" stroke="currentColor"
-                                                stroke-width="8" fill="none" class="text-gray-700" />
-                                            <circle cx="40" cy="40" r="36" stroke="currentColor"
-                                                stroke-width="8" fill="none" class="text-blue-500"
-                                                stroke-dasharray="210, 251.2" stroke-linecap="round" />
-                                        </svg>
-                                        <div
-                                            class="absolute inset-0 flex items-center justify-center text-white font-bold">
-                                            92%</div>
-                                    </div>
-                                    <div class="h-2 w-16 bg-gray-700 rounded"></div>
-                                </div>
-                            </div>
-
-                            <!-- Chart lines -->
-                            <div class="space-y-3">
-                                <div class="h-2 bg-gray-700 rounded w-full">
-                                    <div class="h-full bg-emerald-500 rounded w-[60%]"></div>
-                                </div>
-                                <div class="h-2 bg-gray-700 rounded w-full">
-                                    <div class="h-full bg-green-500 rounded w-[85%]"></div>
-                                </div>
-                                <div class="h-2 bg-gray-700 rounded w-full">
-                                    <div class="h-full bg-teal-500 rounded w-[45%]"></div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Academic Debates Section -->
-    <section class="bg-gray-50 dark:bg-gray-900 py-24 relative overflow-hidden">
-        <div class="max-w-screen-xl px-4 mx-auto lg:px-6 relative z-10">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <!-- Visual Representation -->
-                <div class="order-1 relative">
-                    <div
-                        class="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl opacity-20 blur-2xl animate-pulse">
-                    </div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <!-- Scoreboard Header -->
-                        <div class="bg-gray-900 px-6 py-4 flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                                <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            </div>
-                            <span class="text-xs font-mono text-emerald-400">LIVE SCOREBOARD</span>
-                        </div>
-
-                        <!-- Scoreboard Content -->
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-8">
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1">Equipo A</div>
-                                    <div class="text-emerald-600 dark:text-emerald-400 font-mono text-2xl">850 pts
-                                    </div>
-                                </div>
-                                <div class="text-2xl font-bold text-gray-400">VS</div>
-                                <div class="text-center">
-                                    <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1">Equipo B</div>
-                                    <div class="text-blue-600 dark:text-blue-400 font-mono text-2xl">720 pts</div>
-                                </div>
-                            </div>
-
-                            <!-- Timer -->
-                            <div class="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4 text-center mb-6">
-                                <span class="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Tiempo
-                                    Restante</span>
-                                <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">04:59</div>
-                            </div>
-
-                            <!-- Activity Log -->
-                            <div class="space-y-3">
-                                <div class="flex items-center text-sm">
-                                    <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span>
-                                    <span class="text-gray-600 dark:text-gray-300">Moderador: Nueva pregunta
-                                        activada</span>
-                                </div>
-                                <div class="flex items-center text-sm">
-                                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                                    <span class="text-gray-600 dark:text-gray-300">Estudiante #42: Respuesta
-                                        registrada</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Directivos</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Toma de decisiones estratégica basada en
+                        indicadores de gestión e inteligencia institucional.</p>
                 </div>
 
-                <!-- Content -->
-                <div class="order-2">
-                    <span
-                        class="text-emerald-600 dark:text-emerald-500 font-bold tracking-wide uppercase text-sm mb-2 block">Aprendizaje
-                        Interactivo</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">
-                        Competiciones y Debates Educativos
-                    </h2>
-                    <p class="text-lg text-gray-500 dark:text-gray-300 mb-8">
-                        Lleva el aprendizaje al siguiente nivel con nuestra plataforma de debates y competiciones en
-                        tiempo real. Fomenta la participación activa y el pensamiento crítico.
-                    </p>
-
-                    <div class="space-y-6 mb-8">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <div
-                                    class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
-                                        </path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="ml-4 flex-1">
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Panel de Moderador</h4>
-                                <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Gestiona rondas, preguntas y
-                                    tiempos con control total sobre la dinámica de la clase.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <div
-                                    class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="ml-4 flex-1">
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Pizarra en Vivo</h4>
-                                <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Visualización de puntajes y
-                                    rankings en tiempo real para mantener la emoción y el compromiso.</p>
-                            </div>
-                        </div>
+                <!-- Role: Subdirección Académica -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
                     </div>
-
-                    <!-- New CTA Element: Join Session Input -->
-                    <div x-data="{ token: 'edusys', role: 'moderator' }"
-                        class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
-                        <select x-model="role"
-                            class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
-                            <option value="moderator"
-                                class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Moderador</option>
-                            {{-- <option value="board" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Participante</option> --}}
-                            <option value="scoreboard"
-                                class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra</option>
-                        </select>
-                        <input x-model="token" type="text" placeholder="Ingresa código..."
-                            value="edusys"
-                            class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
-                        <button
-                            @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg px-6 py-2.5 transition-colors sm:mt-0 mt-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="!token">
-                            Ingresar Ahora
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-
-
-    <!-- EDUSYS Intelligence: High Impact UI Section -->
-    <section class="bg-white dark:bg-gray-800 py-32 relative overflow-hidden">
-        <!-- Parallax/Floating elements -->
-        <div class="absolute top-10 left-10 w-20 h-20 bg-emerald-500/20 rounded-full animate-blob filter blur-xl">
-        </div>
-        <div
-            class="absolute bottom-20 right-10 w-32 h-32 bg-blue-500/20 rounded-full animate-blob animation-delay-2000 filter blur-xl">
-        </div>
-
-        <div class="max-w-screen-xl px-4 mx-auto relative z-10">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <div class="space-y-8">
-                    <div>
-                        <span
-                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 mb-4 tracking-widest uppercase">
-                            Nueva Era Educativa
-                        </span>
-                        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white md:text-6xl leading-tight">
-                            Inteligencia <br>
-                            <span
-                                class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">Aumentada</span>
-                        </h2>
-                    </div>
-
-                    <p class="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
-                        No es solo software; es un ecosistema que aprende y evoluciona. <strong>EDUSYS</strong> integra
-                        modelos para
-                        transformar la pedagogía tradicional en una experiencia interactiva eficiente.
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-6">
-                        <div
-                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all duration-300 group">
-                            <div class="text-3xl font-bold text-emerald-600 mb-2">99%</div>
-                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
-                                Precisión</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">En análisis de datos y reportes
-                                automáticos.</div>
-                        </div>
-                        <div
-                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-blue-500/50 transition-all duration-300 group">
-                            <div class="text-3xl font-bold text-blue-600 mb-2">24/7</div>
-                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
-                                Automatización</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Mensajería y procesos administrativos
-                                siempre activos.</div>
-                        </div>
-                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Subdirección Académica</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Supervisión integral de metas pedagógicas,
+                        rendimiento docente y cumplimiento de objetivos educativos.</p>
                 </div>
 
-                <div class="relative group">
-                    <!-- Glass Interactive Card -->
+                <!-- Role: Coordinaciones -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
                     <div
-                        class="relative z-20 glass p-2 rounded-[2rem] shadow-2xl transition-transform duration-700 group-hover:rotate-0 rotate-2">
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Coordinaciones</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong>Evaluación y Control de
+                            Estudios:</strong> Gestión de registros, validación de actas y certificación oficial.</p>
+                </div>
+
+                <!-- Role: Jefaturas -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Jefaturas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Liderazgo por <strong>Áreas de
+                            Conocimiento</strong> y <strong>Niveles</strong> (Preescolar, Primaria y Bachillerato)
+                        asegurando la coherencia curricular.</p>
+                </div>
+
+                <!-- Role: Administrativo -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Administrativos</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Control de ingresos, conciliación y solvencia,
+                        optimizando los tiempos de respuesta institucional.</p>
+                </div>
+
+                <!-- Role: Docente -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
+                    <div
+                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Docentes</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Carga automatizada de planes de evaluación y
+                        seguimiento pedagógico preciso de cada estudiante.</p>
+                </div>
+
+                <!-- Role: Representante -->
+                <div
+                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all lg:col-span-3">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
                         <div
-                            class="bg-gray-900 rounded-[1.8rem] overflow-hidden p-8 min-h-[400px] flex flex-col justify-between">
-                            <div class="flex justify-between items-start mb-8">
-                                <div class="space-y-2">
-                                    <div class="h-1.5 w-24 bg-emerald-500 rounded-full animate-pulse"></div>
-                                    <div class="h-1.5 w-16 bg-gray-700 rounded-full"></div>
-                                </div>
-                                <div class="flex -space-x-2">
-                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-700"></div>
-                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-600"></div>
-                                    <div
-                                        class="w-8 h-8 rounded-full border-2 border-gray-900 bg-emerald-600 flex items-center justify-center text-[10px] text-white font-bold">
-                                        +5</div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-6 flex-1">
-                                <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50 space-y-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                        <div class="h-2 w-32 bg-gray-600 rounded"></div>
-                                    </div>
-                                    <div class="pl-5 space-y-2">
-                                        <div class="h-2 w-full bg-gray-700/50 rounded"></div>
-                                        <div class="h-2 w-4/5 bg-gray-700/50 rounded"></div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="p-4 rounded-xl bg-emerald-600/10 border border-emerald-500/20 space-y-3 relative overflow-hidden group/item cursor-pointer hover:bg-emerald-600/20 transition-all">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
-                                        </div>
-                                        <div class="h-2 w-40 bg-emerald-400/50 rounded"></div>
-                                    </div>
-                                    <div class="pl-5 h-2 w-full bg-emerald-400/20 rounded"></div>
-                                    <div
-                                        class="absolute -right-4 -bottom-4 w-12 h-12 bg-emerald-500/10 rounded-full blur-xl group-hover/item:scale-150 transition-transform">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mt-8 flex items-center justify-between border-t border-gray-800 pt-6">
-                                <div class="text-xs font-mono text-gray-500">SYSTEM_STATUS: <span
-                                        class="text-emerald-500">OPTIMAL</span></div>
-                                <div
-                                    class="px-4 py-2 bg-emerald-600 rounded-lg text-white text-xs font-bold cursor-pointer hover:bg-emerald-500 transition-colors">
-                                    EJECUTAR ANÁLISIS
-                                </div>
-                            </div>
+                            class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
                         </div>
-                    </div>
-
-                    <!-- Decorative elements behind card -->
-                    <div
-                        class="absolute -top-10 -right-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000">
-                    </div>
-                    <div
-                        class="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -z-10 group-hover:translate-x-10 transition-transform duration-1000">
-                    </div>
-
-                    <!-- Floating Badge -->
-                    <div
-                        class="absolute -right-4 top-1/2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl z-30 border border-gray-100 dark:border-gray-700 animate-bounce cursor-default">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center text-white">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">IA Activa
-                                </div>
-                                <div class="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">Procesando
-                                    Competencia...</div>
-                            </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Representantes</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Tranquilidad y transparencia mediante
+                                el acceso remoto a estados de pago, notas en tiempo real y comunicados oficiales
+                                directos a su dispositivo móvil.</p>
                         </div>
                     </div>
                 </div>
@@ -1147,8 +867,7 @@
                             $adminModules = [
                                 [
                                     'title' => 'Procesamiento de Pagos',
-                                    'desc' =>
-                                        'Registro tripartito: EDUSYS, soportes físicos y conciliación bancaria.',
+                                    'desc' => 'Registro tripartito: EDUSYS, soportes físicos y conciliación bancaria.',
                                 ],
                                 [
                                     'title' => 'Conciliación Diaria',
@@ -1302,142 +1021,484 @@
             </div>
         </div>
     </section>
+    <!-- EDUSYS Intelligence: High Impact UI Section -->
+    <section class="bg-white dark:bg-gray-800 py-32 relative overflow-hidden">
+        <!-- Parallax/Floating elements -->
+        <div class="absolute top-10 left-10 w-20 h-20 bg-emerald-500/20 rounded-full animate-blob filter blur-xl">
+        </div>
+        <div
+            class="absolute bottom-20 right-10 w-32 h-32 bg-blue-500/20 rounded-full animate-blob animation-delay-2000 filter blur-xl">
+        </div>
 
-    <!-- Institutional Roles Section -->
-    <section
-        class="bg-white dark:bg-gray-800 py-24 relative overflow-hidden border-t border-gray-100 dark:border-gray-700">
-        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span
-                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Perfiles
-                    & Responsabilidades</span>
-                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">Una
-                    solución para cada <span class="text-emerald-600 dark:text-emerald-500">actor</span> del sistema
-                </h2>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Role: Directivo -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                            </path>
-                        </svg>
+        <div class="max-w-screen-xl px-4 mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <div>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 mb-4 tracking-widest uppercase">
+                            Nueva Era Educativa
+                        </span>
+                        <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white md:text-6xl leading-tight">
+                            Inteligencia <br>
+                            <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-blue-600">Aumentada</span>
+                        </h2>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Directivos</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Toma de decisiones estratégica basada en
-                        indicadores de gestión e inteligencia institucional.</p>
-                </div>
 
-                <!-- Role: Subdirección Académica -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Subdirección Académica</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Supervisión integral de metas pedagógicas,
-                        rendimiento docente y cumplimiento de objetivos educativos.</p>
-                </div>
+                    <p class="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
+                        No es solo software; es un ecosistema que aprende y evoluciona. <strong>EDUSYS</strong> integra
+                        modelos para
+                        transformar la pedagogía tradicional en una experiencia interactiva eficiente.
+                    </p>
 
-                <!-- Role: Coordinaciones -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Coordinaciones</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong>Evaluación y Control de
-                            Estudios:</strong> Gestión de registros, validación de actas y certificación oficial.</p>
-                </div>
-
-                <!-- Role: Jefaturas -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Jefaturas</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Liderazgo por <strong>Áreas de
-                            Conocimiento</strong> y <strong>Niveles</strong> (Preescolar, Primaria y Bachillerato)
-                        asegurando la coherencia curricular.</p>
-                </div>
-
-                <!-- Role: Administrativo -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Administrativos</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Control de ingresos, conciliación y solvencia,
-                        optimizando los tiempos de respuesta institucional.</p>
-                </div>
-
-                <!-- Role: Docente -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all">
-                    <div
-                        class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
-                            </path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Docentes</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Carga automatizada de planes de evaluación y
-                        seguimiento pedagógico preciso de cada estudiante.</p>
-                </div>
-
-                <!-- Role: Representante -->
-                <div
-                    class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all lg:col-span-3">
-                    <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="grid grid-cols-2 gap-6">
                         <div
-                            class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
-                                </path>
-                            </svg>
+                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-emerald-500/50 transition-all duration-300 group">
+                            <div class="text-3xl font-bold text-emerald-600 mb-2">99%</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
+                                Precisión</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">En análisis de datos y reportes
+                                automáticos.</div>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Representantes</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Tranquilidad y transparencia mediante
-                                el acceso remoto a estados de pago, notas en tiempo real y comunicados oficiales
-                                directos a su dispositivo móvil.</p>
+                        <div
+                            class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 hover:border-blue-500/50 transition-all duration-300 group">
+                            <div class="text-3xl font-bold text-blue-600 mb-2">24/7</div>
+                            <div class="text-sm font-bold text-gray-900 dark:text-white mb-1 uppercase tracking-tight">
+                                Automatización</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Mensajería y procesos administrativos
+                                siempre activos.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <!-- Glass Interactive Card -->
+                    <div
+                        class="relative z-20 glass p-2 rounded-[2rem] shadow-2xl transition-transform duration-700 group-hover:rotate-0 rotate-2">
+                        <div
+                            class="bg-gray-900 rounded-[1.8rem] overflow-hidden p-8 min-h-[400px] flex flex-col justify-between">
+                            <div class="flex justify-between items-start mb-8">
+                                <div class="space-y-2">
+                                    <div class="h-1.5 w-24 bg-emerald-500 rounded-full animate-pulse"></div>
+                                    <div class="h-1.5 w-16 bg-gray-700 rounded-full"></div>
+                                </div>
+                                <div class="flex -space-x-2">
+                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-700"></div>
+                                    <div class="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-600"></div>
+                                    <div
+                                        class="w-8 h-8 rounded-full border-2 border-gray-900 bg-emerald-600 flex items-center justify-center text-[10px] text-white font-bold">
+                                        +5</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6 flex-1">
+                                <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700/50 space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        <div class="h-2 w-32 bg-gray-600 rounded"></div>
+                                    </div>
+                                    <div class="pl-5 space-y-2">
+                                        <div class="h-2 w-full bg-gray-700/50 rounded"></div>
+                                        <div class="h-2 w-4/5 bg-gray-700/50 rounded"></div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="p-4 rounded-xl bg-emerald-600/10 border border-emerald-500/20 space-y-3 relative overflow-hidden group/item cursor-pointer hover:bg-emerald-600/20 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]">
+                                        </div>
+                                        <div class="h-2 w-40 bg-emerald-400/50 rounded"></div>
+                                    </div>
+                                    <div class="pl-5 h-2 w-full bg-emerald-400/20 rounded"></div>
+                                    <div
+                                        class="absolute -right-4 -bottom-4 w-12 h-12 bg-emerald-500/10 rounded-full blur-xl group-hover/item:scale-150 transition-transform">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex items-center justify-between border-t border-gray-800 pt-6">
+                                <div class="text-xs font-mono text-gray-500">SYSTEM_STATUS: <span
+                                        class="text-emerald-500">OPTIMAL</span></div>
+                                <div
+                                    class="px-4 py-2 bg-emerald-600 rounded-lg text-white text-xs font-bold cursor-pointer hover:bg-emerald-500 transition-colors">
+                                    EJECUTAR ANÁLISIS
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorative elements behind card -->
+                    <div
+                        class="absolute -top-10 -right-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-1000">
+                    </div>
+                    <div
+                        class="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl -z-10 group-hover:translate-x-10 transition-transform duration-1000">
+                    </div>
+
+                    <!-- Floating Badge -->
+                    <div
+                        class="absolute -right-4 top-1/2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl z-30 border border-gray-100 dark:border-gray-700 animate-bounce cursor-default">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-blue-500 flex items-center justify-center text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">IA Activa
+                                </div>
+                                <div class="text-sm font-bold text-gray-900 dark:text-white line-clamp-1">Procesando
+                                    Competencia...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    <!-- Módulos de Prueba Gratuita -->
+    <section class="bg-gray-50 dark:bg-gray-900 py-24 border-t border-gray-100 dark:border-gray-800">
+        <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span
+                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-widest uppercase text-xs mb-3 block">Experiencia
+                    Interactiva</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-4">
+                    Módulos de Prueba Gratuita
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400">
+                    Interactúa con algunas de nuestras herramientas más potentes y descubre cómo EDUSYS puede
+                    revolucionar tu institución.
+                </p>
+            </div>
 
+            <div class="space-y-24">
+                <!-- Diagnostic Module Highlight -->
+                <div
+                    class="relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
+                    <div class="absolute inset-0 bg-emerald-900/5 dark:bg-emerald-900/10"></div>
+                    <div class="px-6 py-16 lg:px-12 relative">
+                        <div class="grid lg:grid-cols-2 gap-12 items-center">
+                            <div class="order-2 lg:order-1">
+                                <h2
+                                    class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">
+                                    Diagnóstico Académico Inteligente
+                                </h2>
+                                <p class="text-lg text-gray-500 dark:text-gray-300 mb-6">
+                                    Evalúa, mide y potencia el conocimiento de tus estudiantes con nuestra potente
+                                    herramienta de
+                                    diagnóstico.
+                                </p>
+                                <ul class="space-y-4 mb-8">
+                                    <li class="flex items-start">
+                                        <div
+                                            class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
+                                            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Evaluación
+                                                por Áreas
+                                            </h4>
+                                            <p class="text-gray-500 dark:text-gray-400">Pruebas personalizadas por
+                                                materia y nivel
+                                                educativo.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div
+                                            class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
+                                            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                Estadísticas en Tiempo
+                                                Real</h4>
+                                            <p class="text-gray-500 dark:text-gray-400">Visualiza el progreso y
+                                                rendimiento con
+                                                gráficos detallados.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <div
+                                            class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mt-1">
+                                            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                Retroalimentación
+                                                Instantánea</h4>
+                                            <p class="text-gray-500 dark:text-gray-400">Resultados inmediatos para
+                                                mejorar el
+                                                proceso de aprendizaje.</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <a href="{{ route('diagnostico') }}" target="_blank"
+                                    class="inline-flex items-center text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-lg px-6 py-3.5 text-center dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus:ring-emerald-800 transition-all hover:-translate-y-1 shadow-lg shadow-emerald-500/30">
+                                    Probar Diagnóstico
+                                    <svg class="w-5 h-5 ml-2 -mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                            <div class="order-1 lg:order-2 flex justify-center">
+                                <!-- Abstract representation of the diagnostic dashboard -->
+                                <div class="relative w-full max-w-md aspect-square">
+                                    <!-- Decorative blobs -->
+                                    <div
+                                        class="absolute top-0 right-0 w-72 h-72 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
+                                    </div>
+                                    <div
+                                        class="absolute bottom-0 left-0 w-72 h-72 bg-green-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
+                                    </div>
+
+                                    <!-- UI Card -->
+                                    <div
+                                        class="relative bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl p-6 backdrop-blur-sm h-full flex flex-col justify-between transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                                        <!-- Header -->
+                                        <div class="flex items-center justify-between mb-8">
+                                            <div class="h-4 w-1/3 bg-gray-700 rounded"></div>
+                                            <div class="flex space-x-2">
+                                                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                                                <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                                                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress Rings -->
+                                        <div class="grid grid-cols-2 gap-4 mb-8">
+                                            <div
+                                                class="bg-gray-800 rounded-xl p-4 border border-gray-700 flex flex-col items-center">
+                                                <div class="relative w-20 h-20 mb-3">
+                                                    <svg class="w-full h-full transform -rotate-90">
+                                                        <circle cx="40" cy="40" r="36"
+                                                            stroke="currentColor" stroke-width="8" fill="none"
+                                                            class="text-gray-700" />
+                                                        <circle cx="40" cy="40" r="36"
+                                                            stroke="currentColor" stroke-width="8" fill="none"
+                                                            class="text-emerald-500" stroke-dasharray="160, 251.2"
+                                                            stroke-linecap="round" />
+                                                    </svg>
+                                                    <div
+                                                        class="absolute inset-0 flex items-center justify-center text-white font-bold">
+                                                        75%</div>
+                                                </div>
+                                                <div class="h-2 w-16 bg-gray-700 rounded"></div>
+                                            </div>
+                                            <div
+                                                class="bg-gray-800 rounded-xl p-4 border border-gray-700 flex flex-col items-center">
+                                                <div class="relative w-20 h-20 mb-3">
+                                                    <svg class="w-full h-full transform -rotate-90">
+                                                        <circle cx="40" cy="40" r="36"
+                                                            stroke="currentColor" stroke-width="8" fill="none"
+                                                            class="text-gray-700" />
+                                                        <circle cx="40" cy="40" r="36"
+                                                            stroke="currentColor" stroke-width="8" fill="none"
+                                                            class="text-blue-500" stroke-dasharray="210, 251.2"
+                                                            stroke-linecap="round" />
+                                                    </svg>
+                                                    <div
+                                                        class="absolute inset-0 flex items-center justify-center text-white font-bold">
+                                                        92%</div>
+                                                </div>
+                                                <div class="h-2 w-16 bg-gray-700 rounded"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Chart lines -->
+                                        <div class="space-y-3">
+                                            <div class="h-2 bg-gray-700 rounded w-full">
+                                                <div class="h-full bg-emerald-500 rounded w-[60%]"></div>
+                                            </div>
+                                            <div class="h-2 bg-gray-700 rounded w-full">
+                                                <div class="h-full bg-green-500 rounded w-[85%]"></div>
+                                            </div>
+                                            <div class="h-2 bg-gray-700 rounded w-full">
+                                                <div class="h-full bg-teal-500 rounded w-[45%]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Debates Section -->
+                <div
+                    class="relative overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
+                    <div class="absolute inset-0 bg-emerald-900/5 dark:bg-emerald-900/10"></div>
+                    <div class="px-6 py-16 lg:px-12 relative z-10">
+                        <div class="grid lg:grid-cols-2 gap-16 items-center">
+                            <!-- Visual Representation -->
+                            <div class="order-1 relative">
+                                <div
+                                    class="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl opacity-20 blur-2xl animate-pulse">
+                                </div>
+                                <div
+                                    class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                                    <!-- Scoreboard Header -->
+                                    <div class="bg-gray-900 px-6 py-4 flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                            <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                                        </div>
+                                        <span class="text-xs font-mono text-emerald-400">LIVE SCOREBOARD</span>
+                                    </div>
+
+                                    <!-- Scoreboard Content -->
+                                    <div class="p-6">
+                                        <div class="flex justify-between items-center mb-8">
+                                            <div class="text-center">
+                                                <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                                                    Equipo A</div>
+                                                <div class="text-emerald-600 dark:text-emerald-400 font-mono text-2xl">
+                                                    850 pts
+                                                </div>
+                                            </div>
+                                            <div class="text-2xl font-bold text-gray-400">VS</div>
+                                            <div class="text-center">
+                                                <div class="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                                                    Equipo B</div>
+                                                <div class="text-blue-600 dark:text-blue-400 font-mono text-2xl">720
+                                                    pts</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timer -->
+                                        <div class="bg-gray-100 dark:bg-gray-700/50 rounded-lg p-4 text-center mb-6">
+                                            <span
+                                                class="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">Tiempo
+                                                Restante</span>
+                                            <div class="text-3xl font-mono font-bold text-gray-900 dark:text-white">
+                                                04:59</div>
+                                        </div>
+
+                                        <!-- Activity Log -->
+                                        <div class="space-y-3">
+                                            <div class="flex items-center text-sm">
+                                                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-3"></span>
+                                                <span class="text-gray-600 dark:text-gray-300">Moderador: Nueva
+                                                    pregunta
+                                                    activada</span>
+                                            </div>
+                                            <div class="flex items-center text-sm">
+                                                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                                                <span class="text-gray-600 dark:text-gray-300">Estudiante #42:
+                                                    Respuesta
+                                                    registrada</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="order-2">
+                                <span
+                                    class="text-emerald-600 dark:text-emerald-500 font-bold tracking-wide uppercase text-sm mb-2 block">Aprendizaje
+                                    Interactivo</span>
+                                <h2
+                                    class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">
+                                    Competiciones y Debates Educativos
+                                </h2>
+                                <p class="text-lg text-gray-500 dark:text-gray-300 mb-8">
+                                    Lleva el aprendizaje al siguiente nivel con nuestra plataforma de debates y
+                                    competiciones en
+                                    tiempo real. Fomenta la participación activa y el pensamiento crítico.
+                                </p>
+
+                                <div class="space-y-6 mb-8">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <div
+                                                class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4 flex-1">
+                                            <h4 class="text-lg font-bold text-gray-900 dark:text-white">Panel de
+                                                Moderador</h4>
+                                            <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Gestiona rondas,
+                                                preguntas y
+                                                tiempos con control total sobre la dinámica de la clase.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <div
+                                                class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4 flex-1">
+                                            <h4 class="text-lg font-bold text-gray-900 dark:text-white">Pizarra en Vivo
+                                            </h4>
+                                            <p class="mt-1 text-gray-500 dark:text-gray-400 mb-2">Visualización de
+                                                puntajes y
+                                                rankings en tiempo real para mantener la emoción y el compromiso.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- New CTA Element: Join Session Input -->
+                                <div x-data="{ token: 'edusys', role: 'moderator' }"
+                                    class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
+                                    <select x-model="role"
+                                        class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
+                                        <option value="moderator"
+                                            class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
+                                            Moderador</option>
+                                        {{-- <option value="board" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Participante</option> --}}
+                                        <option value="scoreboard"
+                                            class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">Pizarra
+                                        </option>
+                                    </select>
+                                    <input x-model="token" type="text" placeholder="Ingresa código..."
+                                        value="edusys"
+                                        class="bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white flex-1 p-3 px-4 placeholder-gray-500">
+                                    <button
+                                        @click="if(token) window.open(`/general/educational/competition/${role}/${token}`, '_blank')"
+                                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg px-6 py-2.5 transition-colors sm:mt-0 mt-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :disabled="!token">
+                                        Ingresar Ahora
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    </section>
     <!-- Legal & License Section -->
     <section class="bg-white dark:bg-gray-800 py-20 border-t border-gray-200 dark:border-gray-700" id="legal">
         <div class="max-w-screen-xl px-4 mx-auto lg:px-6">
@@ -1711,16 +1772,12 @@
                         <strong>EDUSYS</strong>™. Todos los
                         derechos reservados.</span>
                     <div class="flex space-x-6 sm:justify-center">
-                        {{-- <a href="#"
+                        <a href="#"
                             class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="currentColor" viewBox="0 0 8 19">
-                                <path fill-rule="evenodd"
-                                    d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <span class="sr-only">Facebook page</span>
+                            FSD. NoeMDB
+                            <span class="sr-only">noemdb</span>
                         </a>
+                        {{-- 
                         <a href="#"
                             class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
