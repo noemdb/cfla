@@ -838,7 +838,7 @@
                     </div>
 
                     <!-- New CTA Element: Join Session Input -->
-                    <div x-data="{ token: '<strong>EDUSYS</strong>', role: 'moderator' }"
+                    <div x-data="{ token: 'edusys', role: 'moderator' }"
                         class="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row shadow-sm">
                         <select x-model="role"
                             class="bg-transparent border-0 border-r border-gray-200 dark:border-gray-700 focus:ring-0 text-gray-900 dark:text-white font-medium py-3 px-4 min-w-[140px]">
@@ -866,7 +866,7 @@
 
 
 
-    <!-- <strong>EDUSYS</strong> Intelligence: High Impact UI Section -->
+    <!-- EDUSYS Intelligence: High Impact UI Section -->
     <section class="bg-white dark:bg-gray-800 py-32 relative overflow-hidden">
         <!-- Parallax/Floating elements -->
         <div class="absolute top-10 left-10 w-20 h-20 bg-emerald-500/20 rounded-full animate-blob filter blur-xl">
@@ -1110,7 +1110,7 @@
                                 ],
                                 [
                                     'title' => 'Informe de Notas',
-                                    'desc' => 'Generación de reportes de rendimiento y boletas dinámicas.',
+                                    'desc' => 'Generación de reportes de rendimiento en informes de notas.',
                                 ],
                                 [
                                     'title' => 'Histórico & Certificación',
@@ -1148,7 +1148,7 @@
                                 [
                                     'title' => 'Procesamiento de Pagos',
                                     'desc' =>
-                                        'Registro tripartito: <strong>EDUSYS</strong>, soportes físicos y conciliación bancaria.',
+                                        'Registro tripartito: EDUSYS, soportes físicos y conciliación bancaria.',
                                 ],
                                 [
                                     'title' => 'Conciliación Diaria',
@@ -1562,7 +1562,7 @@
                             <div>
                                 <h4 class="font-bold text-gray-900 dark:text-white">Email</h4>
                                 <p class="text-gray-500 dark:text-gray-400">
-                                    soporte.<strong>EDUSYS</strong>.ve@gmail.com</p>
+                                    soporte.edusys.ve@gmail.com</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
