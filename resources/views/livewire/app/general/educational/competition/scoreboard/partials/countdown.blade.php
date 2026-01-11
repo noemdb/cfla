@@ -1,38 +1,38 @@
-<div class="bg-green-100 border-t-4 border-cyan-600 p-2 mt-2">
-    
-    <div class="flex justify-center m-2 w-full">
-        
-        <div class="text-center w-full" >
-            @if ($question) 
-                <div class="">
+<div class="diagnostic-card border border-emerald-500/20 rounded-2xl p-4 mt-2 bg-gray-900/40 backdrop-blur-sm">
 
-                    <div class="text-gray-800">
-                
-                        <div class=" font-bold text-xl mb-2 ">
+    <div class="flex justify-center m-2 w-full">
+
+        <div class="text-center w-full">
+            @if ($question)
+                <div>
+
+                    <div class="text-gray-100">
+
+                        <div class="font-bold text-xl mb-2 text-emerald-400 uppercase tracking-widest">
                             Cronómetro
                         </div>
-                        {{-- <small class="text-gray-400">[Cuenta regresiva]</small> --}}
-                    
-                        <div class="">
+
+                        <div>
                             @if ($timeRemaining >= 0)
-                                <h1 class="text-8xl font-extrabold">{{$timeRemaining}}</h1>
+                                <h1 class="text-8xl font-black text-white tabular-nums">{{ $timeRemaining }}</h1>
                             @else
                                 <div x-show="showMessage" class="message">
-                                    <div class="text-sm font-light">Tiempo finalizado... actualizando la información</div>
+                                    <div class="text-sm font-light text-orange-400">Tiempo finalizado... actualizando la
+                                        información</div>
                                 </div>
                             @endif
                         </div>
-                
+
                     </div>
-                    
-                    <div class="text-sm font-bold text-gray-400">[Seg]</div>                    
-                
+
+                    <div class="text-sm font-bold text-emerald-500/60 uppercase tracking-widest mt-2">[Segundos]</div>
+
                 </div>
             @else
-                <div class="text-gray-400">Espere a que se establezca la pregunta activa</div>
+                <div class="text-gray-500 italic">Espere a que se establezca la pregunta activa</div>
             @endif
         </div>
-        
+
     </div>
-    
+
 </div>

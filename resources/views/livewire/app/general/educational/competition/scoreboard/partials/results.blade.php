@@ -1,38 +1,31 @@
-<div class="mt-1 w-full border-t-4 border-emerald-800">
-    
-    <div class="py-2 bg-slate-200 text-gray-900 border border-gray-300">
+<div class="mt-1 w-full border-t-2 border-emerald-500/30">
 
-        <h4 class="text-2xl font-bold dark:text-white ">Puntuación</h4>
+    <div class="py-4 diagnostic-card bg-gray-900/40 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
+
+        <h4 class="text-2xl font-bold text-emerald-400 uppercase tracking-widest mb-4">Puntuación</h4>
 
         @if (!empty($grado->name))
-            {{-- <div class="font-bold text-xl">{{ (!empty($grado->name)) ? $grado->name : null ;}}</div>
-            <p class="font-normal text-gray-700 dark:text-gray-400">
-                <span class="text-6xl font-extrabold">{{$competition->getTotalScoreForGrado($grado->id)}}</span>                             
-                <small class="text-lg">Pts</small>
-            </p> --}}
-
-            <div class="font-bold text-xl">{{ (!empty($grado->name)) ? $grado->name : null ;}}</div>
+            <div class="font-bold text-xl text-gray-300 mb-4">{{ $grado->name }}</div>
             @php $seccions = $grado->activeSeccions() @endphp
-            @forelse ($seccions as $item)
-                <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700">
-                    
-                    <div class="">
-                        
-                        <h4 class="mb-2 text-xl font-normal tracking-tight text-gray-900 dark:text-white">
-                            Sección {{$item->name}}                    
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @forelse ($seccions as $item)
+                    <div
+                        class="diagnostic-card flex flex-col items-center justify-center p-6 text-center bg-gray-800/40 border border-emerald-500/10 rounded-xl hover:border-emerald-500/30 transition-all duration-300">
+                        <h4 class="mb-2 text-lg font-bold tracking-tight text-emerald-300 uppercase">
+                            Sección {{ $item->name }}
                         </h4>
-                        <p class="font-bold text-4xl text-gray-700 dark:text-gray-400">
-                            {{$competition->getTotalScoreForSection($item->id)}} PTS
+                        <p class="font-black text-5xl text-white">
+                            {{ $competition->getTotalScoreForSection($item->id) }}
                         </p>
+                        <span class="text-xs text-emerald-500 font-bold uppercase tracking-widest mt-1">PTS</span>
                     </div>
-    
-                </figure>
-            @empty
-                <div>No hay secciones</div>
-            @endforelse  
+                @empty
+                    <div class="col-span-2 text-gray-500 italic py-4">No hay secciones activas</div>
+                @endforelse
+            </div>
         @else
-            <div>No hay Grado/Año</div>
-        @endif 
+            <div class="text-gray-500 italic">No hay Grado/Año</div>
+        @endif
 
     </div>
 

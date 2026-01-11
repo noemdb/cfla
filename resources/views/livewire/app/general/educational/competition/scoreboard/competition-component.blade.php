@@ -1,48 +1,46 @@
 <div>
 
-    <div class="m-1 w-full" wire:poll.1s="updateCompetition({{$competition->id}})">
+    <div class="m-1 w-full" wire:poll.1s="updateCompetition({{ $competition->id }})">
 
         @if ($competition)
-            <div class="flex justify-between border-b-2 border bg-lime-100 border-gray-200 rounded h-full">
+            <div class="flex justify-between items-center bg-transparent border-b border-emerald-500/10 h-full p-2">
                 <div class="flex-1">
-
-                    <h5 class="mb-2 px-2 text-4xl font-bold tracking-tight text-gray-900 dark:text-white">                
-                        <div class="text-green-950">
-                            <small class="block text-sm font-bold text-green-900">Competición activa: </small>
-                            <small class="text-gray-200">{{$competition->id}}.</small>
-                            {{$competition->name}} 
-                        </div> 
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span
+                            class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">ID:
+                            {{ $competition->id }}</span>
+                        @if ($competition->status_active)
+                            <span class="flex h-2 w-2 relative">
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                        @endif
+                    </div>
+                    <h5 class="text-3xl font-black tracking-tight text-white uppercase group">
+                        {{ $competition->name }}
                     </h5>
 
-                    <div class="text-sm font-light">
-                        <div class="text-right">        
-                            <div x-data="{ open: false }">
-                                <button  class="text-sm font-light" @click="open = ! open">Leer más</button>         
-                                <div x-show="open" @click.outside="open = false">
-                                    <p class="text-start mb-1 font-normal text-gray-700 dark:text-gray-400 ">
-                                        {{$competition->description}}
-                                        
-                                    </p>
-                                    <p class="text-start mb-1 font-normal text-gray-700 dark:text-gray-400">
-                                        {{$competition->motive}}
-                                    </p>
-                                    <span class="font-semibold text-gray-700 dark:text-gray-400 text-sm">[Fecha: {{$competition->date}}]</span>
-                                </div>
-                            </div> 
+                    <div x-data="{ open: false }" class="mt-2">
+                        <button
+                            class="text-xs font-bold text-emerald-400/60 hover:text-emerald-400 transition-colors uppercase tracking-widest"
+                            @click="open = ! open">Ver descripción <span x-text="open ? '-' : '+'"></span></button>
+                        <div x-show="open" x-collapse @click.outside="open = false"
+                            class="mt-2 text-sm text-gray-400 italic">
+                            {{ $competition->description }}
                         </div>
                     </div>
-
                 </div>
 
                 <div class="flex-none">
-                    <x-dropdown>
-                        <x-dropdown.item label="Planilla de Resultados" />
+                    <x-dropdown icon="dots-vertical" class="text-emerald-400">
+                        <x-dropdown.item label="Planilla de Resultados" icon="presentation-chart-bar" />
                     </x-dropdown>
                 </div>
             </div>
         @else
             <div>Espere a que se establezca una competición activa</div>
-        @endif       
+        @endif
 
     </div>
 

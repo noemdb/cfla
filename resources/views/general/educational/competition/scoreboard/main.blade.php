@@ -1,41 +1,29 @@
-<div>    
-    
-    {{-- <section class="bg-center bg-no-repeat bg-[url('https://flowbite.s3.amazonaws.com/docs/jumbotron/conference.jpg')] bg-gray-700 bg-blend-multiply"> --}}
-        
-    <section class="">
-
+<div class="py-8">
+    <section class="max-w-7xl mx-auto px-4">
         <div class="px-4 mx-auto text-center h-full">
-    
-            @if ($competition)   
-
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-                    <div class="col-span-2"> 
-                        {{-- @include('general.educational.competition.scoreboard.partials.competition') --}}
-                        <livewire:app.general.educational.competition.scoreboard.competition-component :id="$competition->id"/>
+            @if ($competition)
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div
+                        class="diagnostic-card border border-emerald-500/10 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                        <div
+                            class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
+                            Información de la Competición</div>
+                        <livewire:app.general.educational.competition.scoreboard.competition-component
+                            :id="$competition->id" />
                     </div>
-                    <div class="col-span-2"> 
-                        <div> <livewire:app.general.educational.competition.scoreboard.debate-component :id="$competition->id"/> </div>
+                    <div
+                        class="diagnostic-card border border-emerald-500/10 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                        <div
+                            class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
+                            Estado del Debate</div>
+                        <livewire:app.general.educational.competition.scoreboard.debate-component :id="$competition->id" />
                     </div>
                 </div>
-
-                {{-- <div> <livewire:app.general.educational.competition.scoreboard.question-component :id="$competition->id"/> </div> --}}
-
-                {{-- <div> <livewire:app.general.educational.competition.scoreboard.option-component :id="$competition->id"/> </div> --}}
-                
             @else
-    
                 <div class="flex items-center justify-center mt-10">
-
-                    @include('general.educational.competition.scoreboard.default.notfound')            
-
+                    @include('general.educational.competition.scoreboard.default.notfound')
                 </div>
-    
-            @endif        
-    
+            @endif
         </div>
-    
     </section>
-
 </div>
-
-

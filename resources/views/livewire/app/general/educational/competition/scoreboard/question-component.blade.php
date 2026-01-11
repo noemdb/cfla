@@ -1,40 +1,35 @@
 <div>
-    
-    <div class="mt-4 p-2 w-full border border-gray-300 bg-green-200 rounded-lg" wire:poll.1s="updateQuestion({{$competition->id}})">
-    {{-- <div class="mt-4 pt-4 w-full border-t-2 border-gray-200"> --}}
+
+    <div class="mt-4 p-4 w-full border border-emerald-500/20 bg-gray-900/40 rounded-2xl backdrop-blur-sm"
+        wire:poll.1s="updateQuestion({{ $competition->id }})">
 
         @if ($question)
-            <x-card>
-        
-                <x-slot name="title">
-                    <h5 class="mb-2 px-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <div class="diagnostic-card border border-emerald-500/10 rounded-xl p-6">
 
-                        <div class="text-sm font-bold text-green-900">Pregunta:</div>
-                        <div class="text-green-950 flex justify-between items-center">
-                            <div><small class="text-gray-200">{{$question->id}}.</small> <span class="text-4xl text-green-950 font-bold">{!!$question->text!!}</span> </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-1">
+                        <div class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2">Pregunta Activa
                         </div>
-                        
-                    </h5>
-                    {{-- <div class="text-6xl bg-green-400 p-4 rounded">{{$question->weighting}}Pts</div>   --}}
-                    
-                    <div class="rounded-full w-24 h-24 bg-green-400 shadow-md flex justify-center items-center">
-                        <div class="font-bold">
-                            <div class="text-white text-center text-4xl">{{$question->weighting}}</div>
-                            <div>Pts</div>
+                        <div class="flex items-start gap-4">
+                            <span
+                                class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-full font-bold">#{{ $question->id }}</span>
+                            <h5 class="text-2xl font-bold text-white leading-tight flex-1">{!! $question->text !!}</h5>
                         </div>
                     </div>
-                </x-slot>
-        
-                <x-slot name="action">
-                    <x-dropdown>
-                        <x-dropdown.item label="Acerca de ..." />
-                    </x-dropdown>
-                </x-slot>                 
-        
-            </x-card>
+
+                    <div class="shrink-0 ml-6">
+                        <div
+                            class="rounded-full w-24 h-24 bg-gradient-to-br from-emerald-600 to-emerald-400 shadow-lg flex flex-col justify-center items-center">
+                            <div class="text-white text-center text-4xl font-black">{{ $question->weighting }}</div>
+                            <div class="text-emerald-100 text-xs font-bold uppercase tracking-widest">Pts</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         @else
-            <div>Espere a que se establezca la pregunta activa</div>
-        @endif                
+            <div class="text-center py-8 text-gray-500 italic">Espere a que se establezca la pregunta activa</div>
+        @endif
 
     </div>
 

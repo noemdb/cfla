@@ -6,20 +6,27 @@
                     <div class="col-span-10">
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-1">
                             <div class="col-span-2">
-                                <livewire:app.general.educational.competition.scoreboard.competition-component :id="$competition->id"/>
+                                <livewire:app.general.educational.competition.scoreboard.competition-component
+                                    :id="$competition->id" />
                             </div>
                             <div class="col-span-2">
-                                <livewire:app.general.educational.competition.scoreboard.debate-component :id="$competition->id"/>
+                                <livewire:app.general.educational.competition.scoreboard.debate-component
+                                    :id="$competition->id" />
                             </div>
                         </div>
-                        <div class="border-t-4 border-cyan-600 mt-1 bg-slate-100">
-                            <livewire:app.general.educational.competition.scoreboard.question-component :id="$competition->id"/>
-                            <livewire:app.general.educational.competition.scoreboard.option-component :id="$competition->id"/>
+                        <div
+                            class="border-t-2 border-emerald-500/30 mt-2 diagnostic-card rounded-2xl p-4 bg-gray-900/40">
+                            <livewire:app.general.educational.competition.scoreboard.question-component
+                                :id="$competition->id" />
+                            <livewire:app.general.educational.competition.scoreboard.option-component
+                                :id="$competition->id" />
                         </div>
                     </div>
-                    <div class="col-span-2 border-l-2">
-                        <div class="bg-lime-200 border-t-4  border-white p-1" wire:poll.5s="updateScoreBoard({{$competition->id}})">
-                            <span class="text-lg font-bold">Resultados Preliminares:</span>
+                    <div class="col-span-2 border-l-2 border-emerald-500/20">
+                        <div class="bg-emerald-600/20 border-t-2 border-emerald-500/30 p-3 backdrop-blur-sm"
+                            wire:poll.5s="updateScoreBoard({{ $competition->id }})">
+                            <span class="text-lg font-bold text-emerald-300 uppercase tracking-widest">Resultados
+                                Preliminares</span>
                         </div>
                         @include('livewire.app.general.educational.competition.scoreboard.partials.scores')
                     </div>

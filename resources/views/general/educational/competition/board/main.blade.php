@@ -1,23 +1,17 @@
-<section class="bg-center bg-no-repeat bg-[url('https://flowbite.s3.amazonaws.com/docs/jumbotron/conference.jpg')] bg-gray-700 bg-blend-multiply">
-
+<section class="py-8">
     <div class="px-4 mx-auto text-center h-full">
-
         @if ($competition)
-
-            <div class="flex items-center justify-center">
-                @include('general.educational.competition.board.partials.competition') 
+            <div class="flex items-center justify-center mb-10">
+                @include('general.educational.competition.board.partials.competition')
             </div>
 
-            @include('general.educational.competition.board.partials.debates2')
-            
+            <div class="diagnostic-card border border-emerald-500/10 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                @include('general.educational.competition.board.partials.debates2')
+            </div>
         @else
-
             <div class="flex items-center justify-center mt-10">
-                @include('general.educational.competition.board.default.notfound')            
+                @include('general.educational.competition.board.default.notfound')
             </div>
-
-        @endif        
-
+        @endif
     </div>
-
 </section>
