@@ -1,6 +1,6 @@
 @extends('general.educational.competition.moderator.layouts.home')
 
-@section('title', 'CENTRO EDUCATIVO - Competiciones - Moderador')
+@section('title', 'UE CFLA - Competiciones - Moderador')
 
 @section('header') @include('general.educational.competition.moderator.header') @endsection
 

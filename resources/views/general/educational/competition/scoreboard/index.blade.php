@@ -1,6 +1,6 @@
 @extends('general.educational.competition.scoreboard.layouts.home')
 
-@section('title', 'CENTRO EDUCATIVO - Competiciones - Pizarra de Resultados')
+@section('title', 'UE CFLA - Competiciones - Pizarra de Resultados')
 
 @section('header') @include('general.educational.competition.scoreboard.header') @endsection
 

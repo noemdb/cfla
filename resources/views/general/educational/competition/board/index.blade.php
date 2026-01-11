@@ -1,6 +1,6 @@
 @extends('general.educational.competition.board.layouts.home')
 
-@section('title', 'CENTRO EDUCATIVO - Competiciones')
+@section('title', 'UE CFLA - Competiciones')
 
 @section('header') @include('general.educational.competition.board.header') @endsection
 

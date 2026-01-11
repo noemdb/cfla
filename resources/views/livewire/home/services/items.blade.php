@@ -2,7 +2,7 @@
     <div class="mx-auto text-center">
         <h3 class="mb-6 text-3xl font-bold">Planes</h3>
         <p class="mb-6 pb-2 md:mb-12 md:pb-0">
-            Nuestra Institución es un centro educativo privado de San Felipe, Yaracuy, Venezuela, está comprometida con
+            Nuestra Institución es un UE CFLA privado de San Felipe, Yaracuy, Venezuela, está comprometida con
             la educación integral de sus estudiantes.
             Ofrece tres planes de formación: Educación primaria y Media General Ciencia y Tecnología.
 
@@ -10,7 +10,7 @@
         </p>
     </div>
 
-    
+
     <div class="grid gap-4 text-center md:grid-cols-3">
 
         <!--First Testimonial-->
@@ -44,7 +44,7 @@
                     <div class="flex justify-center items-center gap-2">
                         <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$120 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
-                    </div>                   
+                    </div>
 
                 </div>
 
@@ -97,7 +97,7 @@
                     <div class="flex justify-center items-center gap-2">
                         <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$120 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
-                    </div>                   
+                    </div>
 
                 </div>
 
