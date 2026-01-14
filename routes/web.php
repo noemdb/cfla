@@ -137,6 +137,8 @@ Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdm
 
         return view('admin.voting.polls.list', compact('polls'));
     })->name('list');
+
+    Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 });
 
 // API para fingerprinting
