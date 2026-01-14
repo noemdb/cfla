@@ -1,6 +1,6 @@
 @extends('layouts.home')
 
-@section('title', 'C.E. Colegio Fray Luis Amigó')
+@section('title', 'U.E. Colegio Fray Luis Amigó')
 
 @section('header') <livewire:home.header-component  /> @endsection
 
