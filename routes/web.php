@@ -137,7 +137,9 @@ Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdm
 
         return view('admin.voting.polls.list', compact('polls'));
     })->name('list');
+});
 
+Route::prefix('admin')->name('admin.logs')->middleware(['auth', 'isAdmin'])->group(function () {
     Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 });
 
