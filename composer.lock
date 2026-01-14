@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "55a93cd4d4ecc0aa31b800e5e2c95bbf",
+    "content-hash": "f9d45bc43ded182496558812a3d862b0",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4622,25 +4622,25 @@
         },
         {
             "name": "rap2hpoutre/laravel-log-viewer",
-            "version": "v2.4.0",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rap2hpoutre/laravel-log-viewer.git",
-                "reference": "49c52ae197b3d4f7f9e43d328628edc4bc529afa"
+                "reference": "ab85d5d88de728b99a9391a0c70e9b2f5743a589"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rap2hpoutre/laravel-log-viewer/zipball/49c52ae197b3d4f7f9e43d328628edc4bc529afa",
-                "reference": "49c52ae197b3d4f7f9e43d328628edc4bc529afa",
+                "url": "https://api.github.com/repos/rap2hpoutre/laravel-log-viewer/zipball/ab85d5d88de728b99a9391a0c70e9b2f5743a589",
+                "reference": "ab85d5d88de728b99a9391a0c70e9b2f5743a589",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
                 "php": "^7.2|^8.0"
             },
             "require-dev": {
-                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0|^9.0",
-                "phpunit/phpunit": "^7||^8.4|^9.3.3|^10.1"
+                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^7||^8.4|^9.3.3|^10.1|^11.0"
             },
             "type": "laravel-package",
             "extra": {
@@ -4679,9 +4679,9 @@
             ],
             "support": {
                 "issues": "https://github.com/rap2hpoutre/laravel-log-viewer/issues",
-                "source": "https://github.com/rap2hpoutre/laravel-log-viewer/tree/v2.4.0"
+                "source": "https://github.com/rap2hpoutre/laravel-log-viewer/tree/v2.5.0"
             },
-            "time": "2024-03-20T08:49:53+00:00"
+            "time": "2025-03-10T15:35:06+00:00"
         },
         {
             "name": "ratchet/rfc6455",
