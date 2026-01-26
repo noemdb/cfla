@@ -2,7 +2,7 @@
     <li class="mb-4 md:mb-0 md:pr-2 border-b-2 border-green-200" data-te-nav-item-ref>
         <!-- Logo de tu aplicación -->
         @include('livewire.home.header.icon')
-        C.E. Colegio Fray Luis Amigó
+        U.E. Colegio Fray Luis Amigó
     </li>
     {{-- 
     <li class="mb-2 md:mb-0 md:pr-2" data-te-nav-item-ref>

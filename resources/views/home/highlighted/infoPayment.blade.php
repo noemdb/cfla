@@ -1,88 +1,92 @@
-<x-card class="h-full">
-
-    @slot('header')
-    <h3 class="text-green-950 bg-primary-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
-        <div class="h-full flex items-center">
-            <x-icon name="document-text" class="flex-none w-10 h-10" />
-            <div class="flex-initial">Canales de Pago.</div>
+<div class="h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
+            <x-icon name="document-text" class="w-8 h-8 text-emerald-400" />
         </div>
-    </h3>
-    @endslot
-
-    <div class="h-full block bg-white dark:bg-neutral-700">
-
-        {{-- <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
-            <div class="flex items-center justify-center">
-                <div class="w-24 h-24 bg-blue-200 rounded-full">
-                    <div class="text-center">
-                        <x-icon name="document-text" class="flex-none h-14 w-14" />
-                    </div>
-                </div>
-            </div>
-        </div> --}}
-
-        <div class="grid place-items-center h-24 ">
-            <p class="text-center bg-gray-200 rounded-full p-4">
-                <x-icon name="document-text" class="flex-none h-14 w-14" />
-            </p>
-        </div>
-
-        <div class="font-bold text-lg md:text-xl border-b-2 border-gray-400">TITULAR: Asociación de terciarios capuchinos de Venezuela C.A </div> 
-
-        <div class="text-xs text-gray-200flex justify-between items-center bg-info-100 p-2 my-2 rounded-lg origin-bottom">
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Baco del Tesoro - Bs</strong>
-                    <br>
-                    Cuenta Corriente<br>
-                    RIF: J000570167<br>
-                    0163-0246-51-2463000279<br>
-                </div>
-            </div>
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Bancaribe - Bs</strong>
-                    <br>
-                    Cuenta Corriente<br>
-                    RIF: J000570167<br>
-                    0114-0270-40-2700047221<br>
-                </div>
-            </div>            
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Bancaribe - Divisas</strong>
-                    <br>
-                    Cuenta Corriente<br>
-                    RIF: J000570167<br>
-                    0114-0270-40-2704003083<br>
-                </div>
-            </div>            
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Pago Móvil</strong>
-                    <br>
-                    Banco del Tesoro (0163)<br>
-                    RIF: J000570167<br>
-                    04245891682<br>
-                </div>
-            </div>            
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Efectivo</strong>
-                    <br>
-                    En las oficinas administrativas de la institución. 
-                </div>
-            </div>  
-            <div class="text-xs mb-4 text-neutral-600 dark:text-neutral-200 border-t">
-                <div class="text-sm md:text-sm lg:text-md xl:text-xl capitalize">
-                    <strong>Punto de Venta</strong>
-                    <br>
-                    En la taquilla de Administración. 
-                </div>
-            </div>           
-        </div>
+        <h3 class="text-lg md:text-xl font-bold text-emerald-100 uppercase tracking-wide">
+            Canales de Pago
+        </h3>
     </div>
 
-</x-card>
+    <!-- Content -->
+    <div class="flex-1 flex flex-col">
+
+        <div class="flex justify-center mb-4">
+            <div class="grid place-items-center h-20 w-20 bg-emerald-900/30 rounded-full border border-emerald-500/30">
+                <x-icon name="document-text" class="w-10 h-10 text-emerald-400" />
+            </div>
+        </div>
+
+        <div class="text-center mb-4 pb-4 border-b border-emerald-500/30">
+            <div class="text-xs text-emerald-400 font-bold tracking-wider uppercase mb-1">Titular</div>
+            <div class="text-sm font-semibold text-gray-200">Asociación de terciarios capuchinos de Venezuela C.A</div>
+        </div>
+
+        <div class="space-y-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+            <!-- Banco del Tesoro -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Baco del Tesoro - Bs</div>
+                <div class="text-xs text-gray-400">
+                    <div>Cuenta Corriente</div>
+                    <div>RIF: J000570167</div>
+                    <div class="font-mono text-gray-300 mt-1">0163-0246-51-2463000279</div>
+                </div>
+            </div>
+
+            <!-- Bancaribe - Bs -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Bancaribe - Bs</div>
+                <div class="text-xs text-gray-400">
+                    <div>Cuenta Corriente</div>
+                    <div>RIF: J000570167</div>
+                    <div class="font-mono text-gray-300 mt-1">0114-0270-40-2700047221</div>
+                </div>
+            </div>
+
+            <!-- Bancaribe - Divisas -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Bancaribe - Divisas</div>
+                <div class="text-xs text-gray-400">
+                    <div>Cuenta Corriente</div>
+                    <div>RIF: J000570167</div>
+                    <div class="font-mono text-gray-300 mt-1">0114-0270-40-2704003083</div>
+                </div>
+            </div>
+
+            <!-- Pago Móvil -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Pago Móvil</div>
+                <div class="text-xs text-gray-400">
+                    <div>Banco del Tesoro (0163)</div>
+                    <div>RIF: J000570167</div>
+                    <div class="font-mono text-gray-300 mt-1">04245891682</div>
+                </div>
+            </div>
+
+            <!-- Efectivo -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Efectivo</div>
+                <div class="text-xs text-gray-400">
+                    En las oficinas administrativas de la institución.
+                </div>
+            </div>
+
+            <!-- Punto de Venta -->
+            <div
+                class="bg-gray-800/50 p-3 rounded-lg border border-emerald-500/10 hover:border-emerald-500/30 transition-colors">
+                <div class="text-emerald-400 font-bold text-sm mb-1">Punto de Venta</div>
+                <div class="text-xs text-gray-400">
+                    En la taquilla de Administración.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{--  --}}

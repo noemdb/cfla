@@ -1,73 +1,65 @@
-<div id="carouselHeroCrossfade" class="relative" data-te-carousel-init data-te-ride="carousel">
+<div id="carouselHeroCrossfade" class="relative diagnostic-card rounded-xl overflow-hidden shadow-2xl h-[500px] group"
+    data-te-carousel-init data-te-ride="carousel">
 
+    <!-- Carousel Indicators -->
     <div class="absolute inset-x-0 bottom-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0"
         data-te-carousel-indicators>
         @foreach ($posts->take(4) as $item)
-            <button 
-                type="button" 
-                data-te-target="#carouselHeroCrossfade" 
-                data-te-slide-to="{{$loop->index}}" 
-                {{ ($loop->first) ? 'data-te-carousel-active' : null}}                
-                class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0 -indent-[999px] opacity-50 transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none"
-                aria-current="true"
-                aria-label="Slide {{$loop->iteration}}">
+            <button type="button" data-te-target="#carouselHeroCrossfade" data-te-slide-to="{{ $loop->index }}"
+                {{ $loop->first ? 'data-te-carousel-active' : null }}
+                class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-emerald-500 bg-clip-padding p-0 -indent-[999px] opacity-50 transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none aria-current:opacity-100"
+                aria-current="true" aria-label="Slide {{ $loop->iteration }}">
             </button>
         @endforeach
     </div>
 
-    <!--Carousel items-->
-    <div class="relative rounded-lg w-full overflow-hidden after:clear-both after:block after:content-['']">
-        <!-- items -->
+    <!-- Carousel Items -->
+    <div class="relative w-full h-full overflow-hidden after:clear-both after:block after:content-['']">
         @foreach ($posts->take(4) as $item)
             @php $category = $item->category @endphp
             <div data-te-carousel-fade data-te-carousel-item
-                class="relative float-left -mr-[100%] w-full !transform-none opacity-0 transition-opacity duration-[600ms] ease-in-out motion-reduce:transition-none"
-                {{ ($loop->first) ? 'data-te-carousel-active' : null}}> 
-                
-                <div id="title" class="sm:hidden text-white border-b-2 border-green-800 p-4" style="background-color: #004400">
-                    @include('livewire.home.hero.title')
+                class="relative float-left -mr-[100%] w-full h-full !transform-none opacity-0 transition-opacity duration-[1000ms] ease-in-out motion-reduce:transition-none"
+                {{ $loop->first ? 'data-te-carousel-active' : null }}>
+
+                <!-- Background Image -->
+                <div class="absolute inset-0">
+                    <img src="{{ asset($item->category_image_url) }}"
+                        class="block w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-[2000ms] ease-out opacity-100"
+                        alt="{{ $item->title }}" />
                 </div>
 
-                <div class="relative min-h-64" style="background-color: #004400">  
-                    
-                    @php $url = $item->category_image_url @endphp
+                <!-- Content Container -->
+                <div class="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-4xl">
 
-                    <img src="{{asset($url)}}" class="block w-full" alt="Wild Landscape" />
-
-                    <div class="absolute ml-2 w-1/2 top-2 py-2 text-start text-white">
-
-                        <div id="title" class="hidden sm:block border-b-2 border-green-800">
+                    <!-- Title Area -->
+                    <div class="mb-4">
+                        <div
+                            class="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider text-emerald-400 uppercase bg-emerald-900/30 border border-emerald-500/30 rounded-full backdrop-blur-sm">
+                            Destacado
+                        </div>
+                        <div class="text-white">
                             @include('livewire.home.hero.title')
                         </div>
-                        
-                        {{-- <div class="md:py-2 lg:py-4 min-h-9  sm:h-24 md:h-44 lg:h-full xl:h-full text-xs xl:text-lg mt-2 max-w-full overflow-hidden text-wrap word-break"> --}}
-                        <div class="md:py-2 lg:py-4 min-h-9 max-h-64 md:max-h-72 lg:max-h-86 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs xl:text-lg mt-2 max-w-full overflow-hidden text-wrap word-break">
-                            {!!$item->body ?? null!!} 
+                    </div>
+
+                    <!-- Body Preview -->
+                    <div class="hidden sm:block mb-6">
+                        <div
+                            class="text-gray-200 text-sm md:text-lg leading-relaxed line-clamp-3 text-shadow-sm max-w-2xl bg-gray-900/30 p-4 rounded-lg backdrop-blur-sm border-l-4 border-emerald-500">
+                            {!! strip_tags($item->body) !!}
                         </div>
+                    </div>
 
-                        {{-- @if ($item->saefl_image_url)                            
-                            <div id="footer-out" class="hidden xl:block border-b-2 border-green-800 rounded-b max-w-48 rounded-lg" style="background-color: #004400">
-                                <img src="{{asset($item->saefl_image_url)}}" class="block w-full" alt="Wild Landscape" />
-                            </div> 
-                        @endif  --}}
+                    <!-- Footer / Actions -->
+                    <div>
+                        @include('livewire.home.hero.footer')
+                    </div>
 
-                        <div id="footer-into" class="hidden sm:block">
-                            @include('livewire.home.hero.footer')
-                        </div>                                           
-                        
-                    </div>                    
-                    
                 </div>
-
-                <div id="footer-out" class="sm:hidden border-b-2 border-green-800 rounded-b" style="background-color: #004400">
-                    @include('livewire.home.hero.footer')
-                </div>
-
             </div>
-        @endforeach        
-        
+        @endforeach
     </div>
 
 </div>
 
-@includeWhen($modalShow,'livewire.home.modal.post')
+@includeWhen($modalShow, 'livewire.home.modal.post')

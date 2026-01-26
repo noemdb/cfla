@@ -21,7 +21,7 @@
             <!-- Header con Logo -->
             <div class="text-center mb-2">
                 <div class="flex flex-col items-center mb-2">
-                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">C.E. Colegio Fray Luis Amigó</h3>
+                    <h3 class="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-2xl uppercase">U.E. Colegio Fray Luis Amigó</h3>
 
 
                     <!-- Títulos -->

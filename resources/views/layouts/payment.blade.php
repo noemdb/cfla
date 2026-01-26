@@ -17,13 +17,14 @@
 
 </head>
 
-<body class="dark:bg-black w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 aspect-[9/16] bg-gray-200 mx-auto">          
+<body class="dark:bg-black w-full sm:w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 aspect-[9/16] bg-gray-200 mx-auto">
 
     <x-notifications />
 
     <div id="header"> @yield('header') </div>
 
-    <div class="text-xl text-green-950 font-bold text-center py-2 my-2 bg-white rounded">C.E. Colegio Fray Luis Amigó</div>
+    <div class="text-xl text-green-950 font-bold text-center py-2 my-2 bg-white rounded">U.E. Colegio Fray Luis Amigó
+    </div>
 
     <div id="main" class="py-1"> @yield('main') </div>
 

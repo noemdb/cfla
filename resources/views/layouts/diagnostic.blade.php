@@ -44,7 +44,7 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <h1 class="text-lg md:text-2xl font-bold text-white">C.E. COLEGIO FRAY LUIS AMIGÓ</h1>
+                        <h1 class="text-lg md:text-2xl font-bold text-white">U.E. COLEGIO FRAY LUIS AMIGÓ</h1>
                         <p class="sm:block text-sm text-emerald-300"><strong>Diagnóstico Educativo.</strong> Evaluación
                             académica personalizada</p>
                     </div>

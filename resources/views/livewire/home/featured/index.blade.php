@@ -1,20 +1,24 @@
-<h5 class="text-lg md:text-xl lg:text-2xl xl:text-3xl flex items-center text-{{$category->color_class ?? null}}-600">
-    <span class="text-sm text-gray-600 pr-4">{{$item->id ?? null}}. </span>
-    <x-icon name="{{$category->iconClass ?? null}}" class="w-6 h-6 mr-1" /> {{$item->title ?? null}}
+<h5
+    class="text-lg md:text-xl lg:text-2xl flex items-center text-emerald-100 font-bold mb-3 group-hover:text-emerald-300 transition-colors duration-300">
+    <span class="text-xs text-gray-500 font-mono pr-2 opacity-50">{{ $item->id ?? null }}. </span>
+    {{-- <x-icon name="{{ $category->iconClass ?? null }}" class="w-6 h-6 mr-1" /> --}} {{ $item->title ?? null }}
 </h5>
 
-<div class=" font-normal text-gray-400 text-sm md:text-md lg:text-lg xl:text-xl">{{$item->description ?? null}}</div>
+<div class="font-normal text-gray-300 text-sm md:text-base leading-relaxed">{{ $item->description ?? null }}</div>
 
-<div class="font-normal sm:block md:py-2 lg:py-4 text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
-    <div class="text-sm md:text-md lg:text-lg xl:text-xl">
-        {{ Str::limit($item->body,500,'...') ?? null }}
+<div class="font-light text-sm border-t border-emerald-500/20 mt-4 pt-4 max-w-full overflow-hidden text-wrap word-break">
+    <div class="text-gray-400 line-clamp-3 group-hover:text-gray-300 transition-colors duration-300">
+        {{ Str::limit($item->body, 500, '...') ?? null }}
     </div>
 </div>
 
-<div class="border-t-2 mt-1 text-xs md:text-sm lg:text-md xl:text-lg text-gray-400 ">
-    <div class="text-xs">Creado: {{$item->created_at ?? null}} || Actualizado: {{$item->updated_at ?? null}}</div>
+<div class="border-t border-emerald-500/20 mt-4 pt-2 flex items-center justify-between text-xs text-gray-500 font-mono">
+    <span>{{ $item->created_at->format('d M Y') ?? null }}</span>
 </div>
 
 <div class="flex justify-end py-2">
-    <x-button sm info label="Más..." wire:click="showItem({{$item->id ?? null}})" class="w-full sm:w-auto"/>
+    <button wire:click="showItem({{ $item->id ?? null }})"
+        class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg hover:shadow-emerald-500/30">
+        Más...
+    </button>
 </div>

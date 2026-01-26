@@ -2,62 +2,46 @@
 
 @section('title', 'U.E. Colegio Fray Luis Amigó')
 
-@section('header') <livewire:home.header-component  /> @endsection
+@section('content')
+    <div class="space-y-12">
+        {{-- Hero Section --}}
+        <section id="hero" class="relative">
+            <livewire:home.hero-component />
+        </section>
 
-@section('hero') <livewire:home.hero-component /> @endsection
+        {{-- Highlighted Section --}}
+        <section id="highlighted" class="container mx-auto px-4">
+            <livewire:home.highlighted-component />
+        </section>
 
-@section('highlighted') <livewire:home.highlighted-component /> @endsection
+        {{-- Pensums Section --}}
+        <section id="pensums" class="container mx-auto px-4">
+            @include('home.pensums.main')
+        </section>
 
-@section('pensums') @include('home.pensums.main') @endsection
+        {{-- Featured Section --}}
+        <section id="featured" class="container mx-auto px-4">
+            <livewire:home.featured-component />
+        </section>
 
-@section('featured') <livewire:home.featured-component /> @endsection
+        {{-- Services Section --}}
+        <section id="services" class="container mx-auto px-4">
+            <livewire:home.services-component />
+        </section>
 
-@section('services') <livewire:home.services-component /> @endsection
+        {{-- Gallery Section --}}
+        <section id="gallery" class="container mx-auto px-4">
+            @include('home.gallery.main')
+        </section>
 
-{{-- @section('testimonials') <livewire:home.testimonials-component /> @endsection --}}
+        {{-- Contacts Section --}}
+        <section id="contacts" class="container mx-auto px-4 mb-12">
+            <livewire:home.contacts-component />
+        </section>
 
-@section('gallery') @include('home.gallery.main') @endsection
-
-{{-- @section('autority') @include('home.autority.main') @endsection --}}
-
-{{-- @section('workers') <livewire:home.workers-component /> @endsection --}}
-
-@section('contacts') <livewire:home.contacts-component /> @endsection
-
-{{-- @section('socials') @include('home.socials.main') @endsection --}}
-
-@section('footer')  @include('home.footer.main') @endsection
-
-{{-- -------------------------------------------------------- --}}
-
-
-{{-- @section('aside')  @include('home.aside.main') @endsection --}}
-
-{{-- @section('hero')  @include('home.hero.main') @endsection --}}
-
-{{-- @section('highlighted')  @include('home.highlighted.main') @endsection --}}
-
-{{-- @section('featured')  @include('home.featured.main') @endsection --}}
-
-{{-- @section('category')  @include('home.category.main') @endsection --}}
-
-{{-- @section('gallery')  @include('home.gallery.main') @endsection --}}
-
-{{-- @section('services')  @include('home.services.main') @endsection --}}
-
-{{-- @section('alliances')  @include('home.alliances.main') @endsection --}}
-
-{{-- @section('contacts')  @include('home.contacts.main') @endsection --}}
-
-{{-- @section('socials')  @include('home.socials.main') @endsection --}}
-
-{{-- @section('testimonials')  @include('home.testimonials.main') @endsection --}}
-
-{{-- @section('timeline')  @include('home.timeline.main') @endsection --}}
-
-{{-- @section('graphs')  @include('home.graphs.main') @endsection --}}
-
-
-
-{{-- @section('content') <livewire:home /> @endsection --}}
-
+        {{-- Footer Section (Included in Main Body) --}}
+        <section id="footer-content" class="container mx-auto px-4">
+            @include('home.footer.main')
+        </section>
+    </div>
+@endsection

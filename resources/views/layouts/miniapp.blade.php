@@ -23,7 +23,7 @@
 
     <div id="header"> @yield('header') </div>
 
-    <div class="text-xl text-green-950 font-bold text-center py-2 my-2 bg-white rounded">C.E. Colegio Fray Luis Amigó</div>
+    <div class="text-xl text-green-950 font-bold text-center py-2 my-2 bg-white rounded">U.E. Colegio Fray Luis Amigó</div>
 
     <div id="main" class="py-1"> @yield('main') </div>
 

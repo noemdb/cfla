@@ -1,58 +1,41 @@
-
-<x-card class="bg-white rounded m-2 h-full">
-
-    {{-- @slot('header')
-    <h3 class="text-green-950 bg-blue-100 p-2 text-xl font-bold dark:text-neutral-200">
-        <div class="h-full flex items-center">
-            <x-icon name="menu" class="flex-none w-10 h-10 mb-4" />
-            <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>
+<div class="h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center space-x-3 mb-4">
+        <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
+            <x-icon name="menu" class="w-8 h-8 text-emerald-400" />
         </div>
-    </h3>
-    @endslot --}}
-
-    @slot('header')
-    <h3 class="text-green-950 bg-indigo-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
-        <div class="h-full flex items-center">
-            <x-icon name="menu" class="flex-none w-10 h-10" />
-            <div class="flex-initial">Censo Escolar 25-26 - Asistente</div>
-        </div>
-    </h3>
-    @endslot
-
-    <div
-        class="h-full block rounded-lg bg-white dark:bg-neutral-700 pt-4 mt-4">
-        <div class="relative overflow-hidden bg-cover bg-no-repeat" data-te-ripple-init data-te-ripple-color="light">
-            <div class="flex justify-center">
-                {{-- <img class="rounded-t-lg w-24 h-24" src="{{asset('image/logo/report-payment.png')}}" alt="" /> --}}
-
-                <div class="grid place-items-center h-24 ">
-                    <p class="text-center bg-gray-200 rounded-full p-4">
-                        <x-icon name="document-report" class="w-24 h-24" />
-                    </p>
-                </div>
-
-
-                <a href="#!">
-                    <div
-                        class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-[hsla(0,0%,98%,0.15)] bg-fixed opacity-0 transition duration-300 ease-in-out hover:opacity-100">
-                    </div>
-                </a>
-            </div>
-            <div class="text-center  dark:text-neutral-200 mt-6 pt-6">
-                <div class="text-3xl text-gray-900">El primer paso hacia una educación de excelencia.</div>
-                {{-- <div class="mb-8 font-semibold">9na Jornada, desde el 31 de julio hasta el 15 de agosto de 8am a 2pm.</div> --}}
-                <div class="mb-8 font-semibold">11va Jornada, desde el 01 hasta el 22 de septiembre de 8am a 2pm.</div>
-                {{-- <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div> --}}
-            </div>
-        </div>
-        <div class="p-6">
-            <p class="text-md mb-4 text-neutral-600 dark:text-neutral-200">
-                Nos complace poder ofrecerles a sus hijos la oportunidad de formar parte de nuestra comunidad educativa, que está comprometida con la excelencia académica y el desarrollo integral de los estudiantes.🙌🏻
-            </p>
-            <div class="flex justify-end">
-                <x-button positive label="Comenzar" class="w-full" :href="route('census')"/>
-            </div>
-        </div>
+        <h3 class="text-lg md:text-xl font-bold text-emerald-100 uppercase tracking-wide">
+            Censo Escolar 25-26 - Asistente
+        </h3>
     </div>
 
-</x-card>
+    <!-- Content -->
+    <div class="flex-1 flex flex-col">
+        <div class="relative overflow-hidden rounded-xl mb-4 group">
+            <div class="flex justify-center bg-gray-800/50 p-6 rounded-xl border border-emerald-500/20">
+                <div
+                    class="grid place-items-center h-24 w-24 bg-emerald-900/30 rounded-full border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                    <x-icon name="document-report" class="w-12 h-12 text-emerald-400" />
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <div class="text-xl font-semibold text-gray-200 mb-2">El primer paso hacia una educación de excelencia.
+                </div>
+                <div class="text-sm text-emerald-300 font-medium mb-2">11va Jornada, desde el 01 hasta el 22 de
+                    septiembre de 8am a 2pm.</div>
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-400 text-center mb-6 leading-relaxed flex-1">
+            Nos complace poder ofrecerles a sus hijos la oportunidad de formar parte de nuestra comunidad educativa, que
+            está comprometida con la excelencia académica y el desarrollo integral de los estudiantes.
+        </p>
+
+        <div class="mt-auto">
+            <x-button positive label="Comenzar"
+                class="w-full bg-emerald-600 hover:bg-emerald-500 border-none shadow-lg shadow-emerald-500/20"
+                :href="route('census')" />
+        </div>
+    </div>
+</div>
