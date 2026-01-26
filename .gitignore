@@ -1,34 +1,57 @@
-/.phpunit.cache
+# ===== Laravel core =====
+/vendor
 /node_modules
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
-/vendor
+
+# ===== Environment =====
 .env
-.env.backup
-.env.production
 .env.*
-!env.example
+!.env.example
+
+# ===== Laravel runtime (CRÍTICO) =====
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/storage/logs/*
+
+# ===== Public runtime / uploads =====
+/public/uploads/
+/public/image/
+/public/images/
+/public/videos/
+/public/pwa/
+/public/tmp/
+/public/cache/
+/public/php.ini
+
+# ===== Year / period folders (genérico) =====
+/public/s*/
+
+# ===== Tests =====
+/.phpunit.cache
 .phpunit.result.cache
+
+# ===== Frontend logs =====
+npm-debug.log*
+yarn-error.log*
+
+# ===== Docker / Homestead =====
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml
+
+# ===== IDE / OS =====
+.DS_Store
+.idea/
+.vscode/
+.fleet/
+
+# ===== Auth / secrets =====
 auth.json
-npm-debug.log
-yarn-error.log
-/.fleet
-/.idea
-/.vscode
 /storage/app/google/credentials.json
 /storage/app/google/token.json
-/public/s2021
-/public/s2122
-/public/s2223
-/public/s2323
-/public/s2425
-/public/s2526
-/public/saefl
-/public/saefl2
-/public/saefl3
-/public/saefl4
+
