@@ -31,7 +31,7 @@
     # -------------------------------------------------
     # 3. Proteger carpetas de assets
     # -------------------------------------------------
-    RewriteRule ^(images|image|videos|pwa|uploads|storage)/ - [F,L]
+    # RewriteRule ^(images|image|videos|pwa|uploads|storage)/ - [F,L]
 
     # -------------------------------------------------
     # 4. Manejo Authorization Header (Laravel / APIs)
