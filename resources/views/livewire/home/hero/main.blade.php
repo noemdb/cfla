@@ -1,4 +1,4 @@
-<div class="relative diagnostic-card rounded-xl overflow-hidden shadow-2xl h-[500px] group" wire:ignore>
+<div class="relative diagnostic-card rounded-xl overflow-hidden shadow-2xl h-[700px] group" wire:ignore>
 
     <!-- Swiper -->
     <div class="swiper heroSwiper w-full h-full">
@@ -15,7 +15,7 @@
 
                         <!-- Gradient Overlay -->
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-gray-100 via-gray-100/10 to-transparent dark:from-gray-900 dark:via-gray-900/10">
+                            class="absolute inset-0 bg-gradient-to-t from-gray-100/30 via-gray-100/5 to-transparent dark:from-gray-900/30 dark:via-gray-900/5">
                         </div>
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-gray-100/60 to-transparent dark:from-gray-900/60">

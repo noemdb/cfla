@@ -24,8 +24,8 @@
     <link rel="manifest" href="{{ asset('pwa/manifest.json') }}">
 
     <!-- Updated favicon to use Font Awesome stethoscope SVG -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'><path fill='%2310b981' d='M64 112C64 85.5 85.5 64 112 64L160 64C177.7 64 192 78.3 192 96C192 113.7 177.7 128 160 128L128 128L128 256C128 309 171 352 224 352C277 352 320 309 320 256L320 128L288 128C270.3 128 256 113.7 256 96C256 78.3 270.3 64 288 64L336 64C362.5 64 384 85.5 384 112L384 256C384 333.4 329 398 256 412.8L256 432C256 493.9 306.1 544 368 544C429.9 544 480 493.9 480 432L480 346.5C442.7 333.3 416 297.8 416 256C416 203 459 160 512 160C565 160 608 203 608 256C608 297.8 581.3 333.4 544 346.5L544 432C544 529.2 465.2 608 368 608C270.8 608 192 529.2 192 432L192 412.8C119 398 64 333.4 64 256L64 112zM512 288C529.7 288 544 273.7 544 256C544 238.3 529.7 224 512 224C494.3 224 480 238.3 480 256C480 273.7 494.3 288 512 288z'/></svg>">
+    {{-- <link rel="icon" type="image/svg+xml" --}}
+    {{-- href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'><path fill='%2310b981' d='M64 112C64 85.5 85.5 64 112 64L160 64C177.7 64 192 78.3 192 96C192 113.7 177.7 128 160 128L128 128L128 256C128 309 171 352 224 352C277 352 320 309 320 256L320 128L288 128C270.3 128 256 113.7 256 96C256 78.3 270.3 64 288 64L336 64C362.5 64 384 85.5 384 112L384 256C384 333.4 329 398 256 412.8L256 432C256 493.9 306.1 544 368 544C429.9 544 480 493.9 480 432L480 346.5C442.7 333.3 416 297.8 416 256C416 203 459 160 512 160C565 160 608 203 608 256C608 297.8 581.3 333.4 544 346.5L544 432C544 529.2 465.2 608 368 608C270.8 608 192 529.2 192 432L192 412.8C119 398 64 333.4 64 256L64 112zM512 288C529.7 288 544 273.7 544 256C544 238.3 529.7 224 512 224C494.3 224 480 238.3 480 256C480 273.7 494.3 288 512 288z'/></svg>"> --}}
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -192,6 +192,10 @@
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">SAEFL</a>
                 <a href="{{ route('home') }}#contacts"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Contáctanos</a>
+                <button id="installPWAMobile" style="display: none;"
+                    class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-900/50">
+                    Instalar la App
+                </button>
                 <a href="{{ route('home') }}#featured"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Acerca
                     de...</a>
@@ -226,7 +230,68 @@
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (event) => {
+            // event.preventDefault(); // Evita que el navegador muestre el banner de instalación automático
             deferredPrompt = event;
+
+            // Muestra el botón de instalación en desktop y mobile
+            const installButton = document.getElementById('installPWA');
+            const installButtonMobile = document.getElementById('installPWAMobile');
+
+            if (installButton) {
+                installButton.style.display = 'block';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'block';
+            }
+
+            // Event listener para el botón desktop
+            if (installButton) {
+                installButton.addEventListener('click', () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt(); // Muestra el diálogo de instalación
+
+                        deferredPrompt.userChoice.then((choiceResult) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('El usuario aceptó la instalación');
+                            } else {
+                                console.log('El usuario canceló la instalación');
+                            }
+                            deferredPrompt = null;
+                        });
+                    }
+                });
+            }
+
+            // Event listener para el botón mobile
+            if (installButtonMobile) {
+                installButtonMobile.addEventListener('click', () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt(); // Muestra el diálogo de instalación
+
+                        deferredPrompt.userChoice.then((choiceResult) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('El usuario aceptó la instalación');
+                            } else {
+                                console.log('El usuario canceló la instalación');
+                            }
+                            deferredPrompt = null;
+                        });
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada');
+            const installButton = document.getElementById('installPWA');
+            const installButtonMobile = document.getElementById('installPWAMobile');
+
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+            if (installButtonMobile) {
+                installButtonMobile.style.display = 'none';
+            }
         });
 
         // Auto-scroll suave para navegación
