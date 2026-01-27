@@ -1,4 +1,4 @@
-<section class="text-gray-300">
+<section class="text-gray-600 dark:text-gray-300">
     <div class="mx-auto text-center max-w-3xl">
         <p class="mb-6 pb-2 md:mb-12 md:pb-0 text-lg">
             Nuestra Institución es un UE CFLA privado de San Felipe, Yaracuy, Venezuela, está comprometida con
@@ -12,16 +12,19 @@
         <!--First Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
-                <div class="h-28 bg-gradient-to-br from-emerald-800 to-green-900"></div>
+                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
                 <div
-                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-gray-900 bg-emerald-900 flex justify-center items-center">
-                    <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-300" />
+                    class="h-28 bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-800 dark:to-green-900">
+                </div>
+                <div
+                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-white dark:border-gray-900 bg-emerald-100 dark:bg-emerald-900 flex justify-center items-center">
+                    <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-100 text-center">Educación Inicial</h4>
+                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                        Inicial</h4>
                     <hr class="border-emerald-500/30" />
-                    <p class="mt-4 flex-1 text-sm text-gray-400">
+                    <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                             class="inline-block h-5 w-5 pr-2 text-emerald-500" viewBox="0 0 24 24">
                             <path
@@ -38,10 +41,10 @@
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
                             $120
                         </div>
-                        <div class="text-xs text-emerald-400 font-bold">/ Mensuales</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">/ Mensuales</div>
                     </div>
 
-                    <ul class="w-full text-center text-gray-400 text-sm space-y-2 mt-auto">
+                    <ul class="w-full text-center text-gray-600 dark:text-gray-400 text-sm space-y-2 mt-auto">
                         <li class="w-full border-b border-emerald-500/10 py-1">De 1ro hasta 3er grupo</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Bajo la normativa vigente</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Inscritos en el M.P.P.E</li>
@@ -54,21 +57,23 @@
         <!--Second Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col transform md:-translate-y-4">
+                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col transform md:-translate-y-4">
                 <!-- Highlighted header -->
-                <div class="h-28 bg-gradient-to-br from-emerald-600 to-green-700 overflow-hidden">
+                <div
+                    class="h-28 bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-600 dark:to-green-700 overflow-hidden">
                     <div
                         class="absolute top-0 right-0 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-bl-lg">
-                        &nbsp;</div>
+                        POPULAR</div>
                 </div>
                 <div
-                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-gray-900 bg-emerald-800 flex justify-center items-center">
-                    <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-200" />
+                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-white dark:border-gray-900 bg-emerald-100 dark:bg-emerald-800 flex justify-center items-center">
+                    <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-200" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-100 text-center">Educación Primaria</h4>
+                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                        Primaria</h4>
                     <hr class="border-emerald-500/30" />
-                    <p class="mt-4 flex-1 text-sm text-gray-400">
+                    <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                             class="inline-block h-5 w-5 pr-2 text-emerald-500" viewBox="0 0 24 24">
                             <path
@@ -83,10 +88,10 @@
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
                             $120
                         </div>
-                        <div class="text-xs text-emerald-400 font-bold">/ Mensuales</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">/ Mensuales</div>
                     </div>
 
-                    <ul class="w-full text-center text-gray-400 text-sm space-y-2 mt-auto">
+                    <ul class="w-full text-center text-gray-600 dark:text-gray-400 text-sm space-y-2 mt-auto">
                         <li class="w-full border-b border-emerald-500/10 py-1">De 1ro hasta 6to grado</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Bajo la normativa vigente</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Inscritos en el M.P.P.E</li>
@@ -99,16 +104,18 @@
         <!--Third Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
-                <div class="h-28 bg-gradient-to-br from-gray-800 to-emerald-900"></div>
+                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
+                <div class="h-28 bg-gradient-to-br from-gray-200 to-emerald-200 dark:from-gray-800 dark:to-emerald-900">
+                </div>
                 <div
-                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-gray-900 bg-emerald-900 flex justify-center items-center">
-                    <x-icon name="cog" class="p-2 h-16 w-16 text-emerald-300" />
+                    class="mx-auto -mt-12 w-24 h-24 overflow-hidden rounded-full border-4 border-white dark:border-gray-900 bg-emerald-100 dark:bg-emerald-900 flex justify-center items-center">
+                    <x-icon name="cog" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-100 text-center">Media General</h4>
+                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Media General
+                    </h4>
                     <hr class="border-emerald-500/30" />
-                    <p class="mt-4 flex-1 text-sm text-gray-400">
+                    <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
                             class="inline-block h-5 w-5 pr-2 text-emerald-500" viewBox="0 0 24 24">
                             <path
@@ -123,10 +130,10 @@
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-500/20">
                             $120
                         </div>
-                        <div class="text-xs text-emerald-400 font-bold">/ Mensuales</div>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">/ Mensuales</div>
                     </div>
 
-                    <ul class="w-full text-center text-gray-400 text-sm space-y-2 mt-auto">
+                    <ul class="w-full text-center text-gray-600 dark:text-gray-400 text-sm space-y-2 mt-auto">
                         <li class="w-full border-b border-emerald-500/10 py-1">De 1ro a 5to año</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Bajo la normativa vigente</li>
                         <li class="w-full border-b border-emerald-500/10 py-1">Inscritos en el M.P.P.E</li>

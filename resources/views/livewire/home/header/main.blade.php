@@ -1,36 +1,17 @@
-<header>
-    <!-- Navigation bar -->
-    <nav class="relative flex w-full items-center justify-between bg-green-900 text-green-200 py-2 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 dark:text-neutral-200 md:flex-wrap md:justify-start"
-        data-te-navbar-ref>
-        <div class="flex w-full flex-wrap items-center px-3 justify-between">            
-
-            <!-- Navigation links -->
-            <div class="flex-shrink-0 mb-2 mr-2">
-                <!-- Logo de tu aplicación -->
-                @include('livewire.home.header.icon')
-            </div>
-            <div class="!visible hidden grow basis-[100%] items-center md:!flex md:basis-auto" id="navbarSupportedContentY" data-te-collapse-item>
-                @include('livewire.home.header.menu.items')                
-            </div>
-
-            <div class="flex items-center">
-                <!-- Hamburger menu button -->
-                <button
-                    class="text-green-200 border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-white dark:hover:text-white dark:focus:text-white md:hidden"
-                    type="button" data-te-collapse-init data-te-target="#navbarSupportedContentY"
-                    aria-controls="navbarSupportedContentY" aria-expanded="false" aria-label="Toggle navigation">
-                    <!-- Hamburger menu icon -->
-                    <span class="[&>svg]:w-5">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="h-7 w-7">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                    </span>
-                </button>
-            </div>
-
+<div class="flex justify-between items-center px-4 py-3 bg-gray-900 border-b border-emerald-500/20">
+    <div class="flex items-center space-x-3">
+        <div class="bg-gray-800 p-1.5 rounded-lg border border-emerald-500/30 shadow-sm">
+            <img src="{{ asset('image/brand/512.png') }}" class="w-8 h-8 object-contain" alt="Logo">
         </div>
-    </nav>
-    
-</header>
+        <div>
+            <h1 class="text-base font-bold text-gray-100 leading-tight tracking-tight">SAEFL</h1>
+            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Sistema de Pagos</p>
+        </div>
+    </div>
+
+    <div>
+        <a href="{{ route('home') }}" class="p-2 text-gray-400 hover:text-emerald-400 transition-colors">
+            <x-icon name="home" class="w-5 h-5" />
+        </a>
+    </div>
+</div>

@@ -1,30 +1,23 @@
-<footer class="text-center bg-green-900 text-green-100 dark:bg-gray-900 dark:text-green-200 lg:text-left">
-    <div
-        class="flex items-center justify-center border-b-2 border-green-200 p-6 dark:border-green-500 lg:justify-between">
-        <div class="mr-12 hidden lg:block">
-            <span>Conéctate con nosotros en nuestras redes sociales:</span>
+<footer class="text-center bg-gray-900 text-gray-300 lg:text-left border-t border-emerald-500/10 mt-8 pb-20 sm:pb-8">
+    <div class="flex flex-col items-center justify-center border-b border-emerald-500/10 p-6 space-y-4">
+        <div class="text-emerald-200 font-semibold text-sm">
+            <span>Conéctate con nosotros:</span>
         </div>
         @include('payment.footer.icons')
     </div>
 
-    <div class="hidden md:block">
-
-        <div class="mx-6 py-10 text-center md:text-left text-xs">
-            <div class="grid-1 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                @include('payment.footer.elements')
-            </div>
+    <div class="mx-6 py-8 text-left text-xs">
+        <div class="space-y-8">
+            @include('payment.footer.elements')
         </div>
-    
-        @include('payment.footer.buttonTop')
-
     </div>
 
-    <div class="bg-green-200 p-6 text-center dark:bg-green-700">
-        <div class="text-xl text-green-950 font-bold">SAEFL</div>
-        <span class="text-green-900">© 2024 Copyright:</span>
-        <a class="font-semibold text-green-900 dark:text-green-400" href="https://github.com/noemdb">@noemdb</a>
-    </div>
-    
+    @include('payment.footer.buttonTop')
 
+    <div class="bg-gray-900 p-6 text-center border-t border-emerald-500/10">
+        <div class="text-xl font-bold text-emerald-400 mb-2">SAEFL</div>
+        <span class="text-gray-400">© 2024 Copyright:</span>
+        <a class="font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+            href="https://github.com/noemdb">@noemdb</a>
+    </div>
 </footer>
-

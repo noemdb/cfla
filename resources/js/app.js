@@ -33,6 +33,21 @@ initTE({
     Stepper,
 });
 
+// Import Swiper and modules
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
+
+// Expose Swiper to window for usage in templates
+window.Swiper = Swiper;
+window.SwiperNavigation = Navigation;
+window.SwiperPagination = Pagination;
+window.SwiperAutoplay = Autoplay;
+window.SwiperEffectFade = EffectFade;
+
 // Funciones globales para el sistema de votación
 window.VotingSystem = {
     // Generar fingerprint del navegador

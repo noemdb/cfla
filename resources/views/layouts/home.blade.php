@@ -103,26 +103,28 @@
 </head>
 
 <body
-    class="font-sans antialiased bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 min-h-screen text-gray-100">
+    class="font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gradient-to-br dark:from-gray-900 dark:via-emerald-900 dark:to-gray-900 min-h-screen dark:text-gray-100 transition-colors duration-300">
 
     <x-notifications position="top-center" />
 
     <!-- Header -->
-    <header class="bg-gray-900/80 backdrop-blur-sm border-b border-emerald-800/30 sticky top-0 z-10 shadow-lg">
+    <header
+        class="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-emerald-800/30 sticky top-0 z-10 shadow-lg transition-colors duration-300">
         <div class="container-fluid mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <!-- Logo y título principal -->
                 <div class="flex items-center space-x-6">
                     <div class="flex-shrink-0">
-                        <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ config('app.name') }} Logo"
                             class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                     </div>
 
                     <div class="flex flex-col">
                         <h1 class="text-lg md:text-2xl font-bold text-white">U.E. COLEGIO FRAY LUIS AMIGÓ</h1>
-                        <p class="sm:block text-sm text-emerald-300"><strong>Innovación Educativa.</strong> Formando el
+                        <p class="sm:block text-sm text-emerald-300"><strong>Excelencia Educativa.</strong> Formando el
                             futuro</p>
                     </div>
+
                 </div>
 
                 <!-- Navigation Area -->
@@ -162,6 +164,8 @@
                     <a href="{{ route('home') }}#featured"
                         class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50 transition-colors">Acerca
                         de...</a>
+
+
                 </nav>
 
                 <!-- Mobile Menu Button -->
@@ -202,7 +206,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900/60 backdrop-blur-sm border-t border-emerald-800/30 mt-auto">
+    <footer
+        class="bg-white/90 dark:bg-gray-900/60 backdrop-blur-sm border-t border-gray-200 dark:border-emerald-800/30 mt-auto transition-colors duration-300">
         <div class="container mx-auto px-4 py-6">
             <div class="text-center space-y-3">
                 <!-- Copyright -->

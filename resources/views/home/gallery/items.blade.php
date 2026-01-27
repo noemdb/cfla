@@ -1,5 +1,5 @@
 <div
-    class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 md:p-6 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500">
+    class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4 md:p-6 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500">
     <div id="carouselExampleGallery" class="relative group" data-te-carousel-init data-te-ride="carousel">
 
         <!-- Indicators -->
@@ -40,7 +40,7 @@
                     <div class="relative overflow-hidden bg-cover bg-no-repeat rounded-xl group/item"
                         style="background-position: 50%">
                         <img data-te-lazy-src="{{ asset('image/gallery/' . $i . '.jpg') }}" data-te-lazy-load-init
-                            class="block w-full rounded-xl border-2 border-emerald-500/20 shadow-lg transform group-hover/item:scale-105 transition-transform duration-700 ease-out" />
+                            class="block w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-500/20 shadow-lg transform group-hover/item:scale-105 transition-transform duration-700 ease-out" />
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60">
                         </div>
@@ -60,12 +60,12 @@
 
         <!-- Controls -->
         <button
-            class="absolute bottom-0 left-0 top-0 z-[1] flex w-[10%] items-center justify-center border-0 bg-gradient-to-r from-gray-900/60 to-transparent p-0 text-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white hover:no-underline hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none rounded-l-xl"
+            class="absolute bottom-0 left-0 top-0 z-[1] flex w-[10%] items-center justify-center border-0 bg-gradient-to-r from-gray-100/60 dark:from-gray-900/60 to-transparent p-0 text-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white hover:no-underline hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none rounded-l-xl"
             type="button" data-te-target="#carouselExampleGallery" data-te-slide="prev">
             <span
-                class="inline-block h-10 w-10 p-2 rounded-full bg-emerald-900/50 backdrop-blur-sm border border-emerald-500/30 hover:bg-emerald-600 transition-colors">
+                class="inline-block h-10 w-10 p-2 rounded-full bg-emerald-100/50 dark:bg-emerald-900/50 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-200 dark:hover:bg-emerald-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="h-full w-full">
+                    stroke="currentColor" class="h-full w-full text-emerald-700 dark:text-white">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
             </span>
@@ -73,12 +73,12 @@
                 class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Previous</span>
         </button>
         <button
-            class="absolute bottom-0 right-0 top-0 z-[1] flex w-[10%] items-center justify-center border-0 bg-gradient-to-l from-gray-900/60 to-transparent p-0 text-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white hover:no-underline hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none rounded-r-xl"
+            class="absolute bottom-0 right-0 top-0 z-[1] flex w-[10%] items-center justify-center border-0 bg-gradient-to-l from-gray-100/60 dark:from-gray-900/60 to-transparent p-0 text-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:text-white hover:no-underline hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none rounded-r-xl"
             type="button" data-te-target="#carouselExampleGallery" data-te-slide="next">
             <span
-                class="inline-block h-10 w-10 p-2 rounded-full bg-emerald-900/50 backdrop-blur-sm border border-emerald-500/30 hover:bg-emerald-600 transition-colors">
+                class="inline-block h-10 w-10 p-2 rounded-full bg-emerald-100/50 dark:bg-emerald-900/50 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-200 dark:hover:bg-emerald-600 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                    stroke="currentColor" class="h-full w-full">
+                    stroke="currentColor" class="h-full w-full text-emerald-700 dark:text-white">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
             </span>

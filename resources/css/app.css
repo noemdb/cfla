@@ -9,6 +9,21 @@
         @apply text-neutral-50;
         @apply bg-neutral-800;
     }
+
+    /* WireUI / Global Dark Mode Form Overrides */
+    html.dark label {
+        @apply !text-gray-200;
+    }
+    
+    html.dark input, 
+    html.dark select, 
+    html.dark textarea {
+        @apply !bg-gray-800 !border-gray-600 !text-gray-100 !placeholder-gray-400;
+    }
+
+    html.dark .text-secondary-700 {
+        @apply !text-gray-200; /* Force WireUI secondary text to be light in dark mode */
+    }
 }
 
 @tailwind components;

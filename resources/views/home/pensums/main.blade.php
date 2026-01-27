@@ -1,9 +1,11 @@
 <div class="space-y-6">
 
     <div class="text-center mb-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Descubre Nuestro Pensum Académico</h2>
-        <h3 class="text-lg md:text-xl text-emerald-300 font-semibold mb-2">Formación Integral para el Futuro</h3>
-        <p class="text-gray-400 max-w-4xl mx-auto text-sm md:text-base">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Descubre Nuestro Pensum Académico
+        </h2>
+        <h3 class="text-lg md:text-xl text-emerald-700 dark:text-emerald-300 font-semibold mb-2">Formación Integral para
+            el Futuro</h3>
+        <p class="text-gray-600 dark:text-gray-400 max-w-4xl mx-auto text-sm md:text-base">
             En la U.E. Colegio Fray Luis Amigó, ofrecemos una educación de excelencia en Educación Inicial, Educación
             Primaria y Media General en Ciencia y Tecnología, diseñada para desarrollar habilidades académicas,
             personales y sociales en cada estudiante.
