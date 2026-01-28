@@ -1,4 +1,5 @@
-<div class="relative diagnostic-card rounded-xl overflow-hidden shadow-2xl h-[700px] group" wire:ignore>
+<div class="relative diagnostic-card rounded-xl overflow-hidden shadow-2xl h-[500px] sm:h-[600px] md:h-[700px] group"
+    wire:ignore>
 
     <!-- Swiper -->
     <div class="swiper heroSwiper w-full h-full">
@@ -24,10 +25,10 @@
 
                     <!-- Content Container -->
                     <div
-                        class="absolute inset-0 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-5xl z-10 pointer-events-none">
+                        class="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-24 max-w-5xl z-10 pointer-events-none">
                         <div class="pointer-events-auto">
                             <!-- Title Area -->
-                            <div class="mb-6 opacity-0 translate-y-8 transition-all duration-700 delay-300"
+                            <div class="mb-3 sm:mb-6 opacity-0 translate-y-8 transition-all duration-700 delay-300"
                                 data-hero-animate>
                                 <div
                                     class="inline-flex items-center gap-2 px-3 py-1 mb-4 text-xs font-bold tracking-wider uppercase rounded-full backdrop-blur-md shadow-lg bg-emerald-100/90 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-500/30">
@@ -41,10 +42,10 @@
                             </div>
 
                             <!-- Body Preview -->
-                            <div class="hidden sm:block mb-8 max-w-2xl opacity-0 translate-y-8 transition-all duration-700 delay-500"
+                            <div class="mb-4 sm:mb-8 max-w-2xl opacity-0 translate-y-8 transition-all duration-700 delay-500"
                                 data-hero-animate>
                                 <div
-                                    class="p-6 rounded-2xl shadow-2xl text-lg leading-relaxed line-clamp-3 backdrop-blur-lg bg-white/60 text-gray-800 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-100 dark:border-white/10">
+                                    class="p-3 sm:p-6 rounded-xl sm:rounded-2xl shadow-2xl text-sm sm:text-lg leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-3 backdrop-blur-lg bg-white/60 text-gray-800 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-100 dark:border-white/10">
                                     {!! strip_tags($item->body) !!}
                                 </div>
                             </div>
@@ -62,7 +63,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="swiper-pagination !bottom-8 !left-auto !right-8 !w-auto flex gap-2"></div>
+        <div class="swiper-pagination !bottom-4 sm:!bottom-8 !left-auto !right-4 sm:!right-8 !w-auto flex gap-2"></div>
 
         <!-- Navigation -->
         <div

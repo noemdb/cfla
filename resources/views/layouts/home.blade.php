@@ -120,8 +120,10 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <h1 class="text-lg md:text-2xl font-bold text-white">U.E. COLEGIO FRAY LUIS AMIGÓ</h1>
-                        <p class="sm:block text-sm text-emerald-300"><strong>Excelencia Educativa.</strong> Formando el
+                        <h1 class="text-sm sm:text-lg md:text-2xl font-bold text-white">U.E. COLEGIO FRAY LUIS AMIGÓ
+                        </h1>
+                        <p class="hidden sm:block text-sm text-emerald-300"><strong>Excelencia Educativa.</strong>
+                            Formando el
                             futuro</p>
                     </div>
 
