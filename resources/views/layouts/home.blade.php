@@ -29,7 +29,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <wireui:scripts />
+    {{-- <wireui:scripts /> --}}
     @livewireStyles
 
     <!-- Meta tags para SEO -->
@@ -105,7 +105,7 @@
 <body
     class="font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gradient-to-br dark:from-gray-900 dark:via-emerald-900 dark:to-gray-900 min-h-screen dark:text-gray-100 transition-colors duration-300">
 
-    <x-notifications position="top-center" />
+    {{-- <x-notifications position="top-center" /> --}}
 
     <!-- Header -->
     <header
