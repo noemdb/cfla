@@ -6,7 +6,7 @@ namespace App\Livewire;
 use App\Models\Visit;
 use Livewire\Component;
 use Livewire\WithPagination;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 
 class VisitsDashboard extends Component
 {

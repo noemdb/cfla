@@ -1,4 +1,4 @@
-<x-modal.card title="Docente" blur wire:model="modalShow" max-width="lg">
+<x-modal-card title="Docente" blur wire:model="modalShow" max-width="lg">
 
     <x-card>
         <p class="text-center text-gray-600">
@@ -15,4 +15,4 @@
     </x-card>
 
 
-</x-modal.card>
+</x-modal-card>

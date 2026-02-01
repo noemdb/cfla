@@ -1,4 +1,4 @@
-<x-modal.card blur wire:model="modalSearch" align="center">
+<x-modal-card blur wire:model="modalSearch" align="center">
 
     <div class="h-full flex flex-col justify-center max-w-2xl mx-auto shadow-xl">
         <x-card class="border border-emerald-500/30 bg-gray-900/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -31,7 +31,7 @@
                         <div class="mb-[2px]">
                             <x-button
                                 class="h-[42px] px-6 bg-emerald-600 hover:bg-emerald-500 text-white border-0 shadow-lg shadow-emerald-500/20 transition-all rounded-lg"
-                                icon="search" wire:click="search" />
+                                icon="magnifying-glass" wire:click="search" />
                         </div>
                     </div>
                 </div>
@@ -57,4 +57,4 @@
         </x-card>
     </div>
 
-</x-modal.card>
+</x-modal-card>

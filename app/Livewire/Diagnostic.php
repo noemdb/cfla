@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 
 class Diagnostic extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     public $currentView = 'student-identification'; // student-identification, dashboard, wizard, summary, guide
     public $studentCi = '';
@@ -150,11 +150,12 @@ class Diagnostic extends Component
             return;
         }
 
-        $studentPensums = $this->currentStudent->pensums;
+        $studentPensums = $this->currentStudent->pensums->where('status_active_diagnostic', true);
+        //filtramos por pensum.status_active_diagnostic = true para garantizar que solo se muestren los pensums activos
 
         $this->pensums = $studentPensums
             ->filter(function ($pensum) {
-                // Only include pensums that have active diagnostic questions
+                // Only include questions active and that have active diagnostic questions
                 return $pensum->diagQuestions()->where('activo', true)->exists();
             })
             ->map(function ($pensum) {

@@ -3,7 +3,10 @@
     <!-- Updated header to use rounded card styling consistent with other sections -->
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
-            <div class="bg-gray-800 rounded-xl p-8 mb-8">
+            <div
+                class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+                <!-- Shine effect -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
                 <!-- Added status indicator to top right of container -->
                 <div class="flex justify-end mb-4">
                     @if ($isReviewMode)
@@ -71,7 +74,11 @@
         @if ($currentQuestion)
             <div class="max-w-4xl mx-auto">
                 <!-- Pregunta -->
-                <div class="bg-gray-800 rounded-xl p-8 mb-8">
+                <div
+                    class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+                    <!-- Shine effect -->
+                    <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none">
+                    </div>
                     <div class="flex items-start space-x-4 mb-6">
                         <div
                             class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">
@@ -99,8 +106,8 @@
                         @if ($currentQuestion->tipo_pregunta === 'multiple')
                             @foreach ($currentQuestion->options as $option)
                                 <label
-                                    class="flex items-center p-4 bg-gray-700 rounded-lg transition-colors
-                                    {{ $isReviewMode || $showAnsweredQuestions ? 'cursor-default' : 'hover:bg-gray-600 cursor-pointer' }}">
+                                    class="flex items-center p-4 bg-gray-800/50 border border-white/5 rounded-lg transition-all duration-200
+                                    {{ $isReviewMode || $showAnsweredQuestions ? 'cursor-default' : 'hover:bg-gray-700/50 hover:border-emerald-500/30 cursor-pointer' }}">
                                     <input type="radio" wire:model.live="selectedAnswer" wire:change="$refresh"
                                         value="{{ $option->opcion }}"
                                         {{ $isReviewMode || $showAnsweredQuestions ? 'disabled' : '' }}
@@ -235,7 +242,7 @@
         @else
             <!-- Updated empty state message to be more accurate -->
             <div class="max-w-4xl mx-auto text-center">
-                <div class="bg-gray-800 rounded-xl p-8">
+                <div class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-2xl">
                     <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

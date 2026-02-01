@@ -8,7 +8,7 @@ use App\Models\app\Entity\Institucion;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\View;
 
 class CatchmentWizard extends Component
 {
-    use Actions;
+    use WireUiActions;
     use CatchmentValidate;
     use CatchmentUpdates;
 

@@ -8,7 +8,7 @@ use App\Models\app\Entity\Institucion;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 
 use Barryvdh\DomPDF\Facade\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 
 class EnrollmentWizard extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     public $emrollment_id; // ID de la censo
     public $currentStep = 1; // Paso actual del asistente

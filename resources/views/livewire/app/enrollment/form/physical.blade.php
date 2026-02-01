@@ -21,27 +21,27 @@
 
 <div class="pb-2">
     @php $name = 'age' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+    <x-maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
 </div>
 
 <div class="pb-2">
     @php $name = 'weight' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+    <x-maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
 </div>
 
 <div class="pb-2">
     @php $name = 'height' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable label="{{$label}}" mask="###" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+    <x-maskable label="{{$label}}" mask="###" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
 </div>
 
 <div class="pb-2">
     @php $name = 'order_born' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+    <x-maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
 </div>
 
 <div class="pb-2">
     @php $name = 'group_family' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+    <x-maskable label="{{$label}}" mask="##" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
 </div>
 
 <div class="pb-2">

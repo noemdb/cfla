@@ -3,7 +3,7 @@
     <div>
         @forelse ($seccions as $item)
 
-        <x-badge.circle lg label="{{$item->name}}" positive/>
+        <x-mini-badge lg label="{{$item->name}}" positive/>
         
         @empty
             <div>No hay secciones</div>

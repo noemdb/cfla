@@ -1,4 +1,4 @@
-<x-modal.card title="No se encontró ningún registro" blur wire:model="modalEmpty" max-width="lg" align="center">
+<x-modal-card title="No se encontró ningún registro" blur wire:model="modalEmpty" max-width="lg" align="center">
     <div class="bg-gray-900/90 text-center p-6 rounded-lg border border-emerald-500/30">
         <div class="mb-4">
             <div
@@ -20,4 +20,4 @@
                 class="inline-flex w-full justify-center rounded-md bg-gray-800 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-600 hover:bg-gray-700 sm:mt-0 sm:w-auto">Cerrar</button>
         </div>
     </div>
-</x-modal.card>
+</x-modal-card>

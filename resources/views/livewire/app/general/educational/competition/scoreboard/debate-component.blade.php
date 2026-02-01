@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="flex-none">
-                    <x-dropdown icon="adjustments" class="text-emerald-400">
+                    <x-dropdown icon="adjustments-vertical" class="text-emerald-400">
                         <x-dropdown.item label="Estadísticas de Debate" icon="chart-bar" />
                     </x-dropdown>
                 </div>

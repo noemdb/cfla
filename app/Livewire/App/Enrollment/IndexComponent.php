@@ -12,12 +12,12 @@ use App\Models\app\Learner\Estudiant;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Livewire\Attributes\Validate;
 
 class IndexComponent extends Component
 {
-    use Actions;
+    use WireUiActions;
     use WithFileUploads;
     #[Validate('image|max:1024')] // 1MB Max
     public $image;

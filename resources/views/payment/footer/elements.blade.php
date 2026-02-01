@@ -19,11 +19,11 @@
     </h6>
     <div class="text-xs text-gray-400 space-y-3">
         <div class="flex items-start">
-            <x-icon name="location-marker" class="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" />
+            <x-icon name="map-pin" class="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" />
             <p>Av. La Paz con Av. Cedeño, San Felipe, Yaracuy.</p>
         </div>
         <div class="flex items-start">
-            <x-icon name="mail" class="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" />
+            <x-icon name="envelope" class="w-4 h-4 mr-2 text-emerald-500 flex-shrink-0" />
             <div class="flex flex-col space-y-1">
                 <span>colegiofrayluisa@gmail.com</span>
                 <span>controldeestudios.c.e.cfla@gmail.com</span>

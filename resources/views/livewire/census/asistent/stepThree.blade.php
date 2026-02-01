@@ -32,7 +32,7 @@
             
             
             <div class="space-y-2 mb-2">
-                <x-inputs.maskable
+                <x-maskable
                     wire:model="representant_phone"
                     label="Número de teléfono"
                     mask="## ### ###-####"
@@ -41,25 +41,25 @@
                     right-icon="phone"
                     class="mb-2"
                 /> 
-                <x-inputs.maskable
+                <x-maskable
                     wire:model="representant_cellphone"
                     label="Número WhatsApp"
                     mask="## ### ###-####"
                     placeholder="58 414 145-9834"
                     corner-hint="Ej: 58 414 145-9834"
-                    right-icon="chat-alt-2"
+                    right-icon="chat-bubble-left-right"
                     class="mb-2"
                 />               
             </div>
 
             <div class="space-y-2 mb-2">
-                {{-- <x-inputs.maskable
+                {{-- <x-maskable
                     wire:model="representant_cellphone"
                     label="Número WhatsApp: Ej: 58 414 145-9834"
                     mask="## ### ###-####"
                     placeholder="Número WhatsApp"
                     id="representant_cellphone"
-                    right-icon="chat-alt-2"
+                    right-icon="chat-bubble-left-right"
                 /> --}}                
             </div>            
 

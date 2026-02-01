@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Validate;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 
 use App\Mail\WelcomeEmail;
 use App\Models\app\Entity\Autoridad;
@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\View;
 
 class IndexComponent extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     use WithFileUploads;
     #[Validate('image|max:1024|nullable')] // 1MB Max

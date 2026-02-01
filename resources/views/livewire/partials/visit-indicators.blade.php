@@ -54,7 +54,7 @@
     <x-card class="bg-white hover:shadow-md transition-shadow">
         <div class="flex items-center">
             <div class="p-2 mr-3 rounded-full bg-amber-100 text-amber-600">
-                <x-icon name="refresh" class="w-5 h-5" />
+                <x-icon name="arrow-path" class="w-5 h-5" />
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Recurrentes</p>

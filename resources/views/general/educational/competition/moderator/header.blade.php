@@ -4,7 +4,7 @@
             <!-- Logo y título principal -->
             <div class="flex items-center space-x-6">
                 <div class="flex-shrink-0">
-                    <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                    <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ config('app.name') }} Logo"
                         class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
 
@@ -15,10 +15,17 @@
                 </div>
             </div>
 
-            <div class="hidden w-full md:block md:w-auto">
-                <div
-                    class="font-bold border border-emerald-500/30 rounded-lg px-4 py-2 bg-emerald-900/20 text-emerald-400 backdrop-blur-md">
-                    Panel de Moderación
+            <div class="flex items-center space-x-4">
+                <div class="hidden w-full md:block md:w-auto">
+                    <div
+                        class="font-bold border border-emerald-500/30 rounded-lg px-4 py-2 bg-emerald-900/20 text-emerald-400 backdrop-blur-md">
+                        Panel de Moderación
+                    </div>
+                </div>
+
+                <div class="flex-shrink-0">
+                    <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
             </div>
         </div>

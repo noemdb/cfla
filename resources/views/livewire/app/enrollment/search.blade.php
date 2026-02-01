@@ -1,4 +1,4 @@
-<x-modal.card blur wire:model="modalSearch" max-width="2xl">
+<x-modal-card blur wire:model="modalSearch" max-width="2xl">
     <x-slot name="header">
         <h3 class=" rounded-t-lg text-green-950 bg-primary-200 text-xl font-bold dark:text-neutral-200">
             <div class="h-full flex items-center">
@@ -22,7 +22,7 @@
             <div class="grow 0 pr-2">
                 <x-input class="h-8" label="Cédula del representante" placeholder="Sólo números" corner-hint="Ej: 12345678" right-icon="calculator" wire:model="ci" />
             </div>
-            <div class="grow-0 pl-2 items-end"><x-button class="h-8 p-0.5 border rounded-md shadow" icon="search" primary flat squared wire:click="search" /></div>
+            <div class="grow-0 pl-2 items-end"><x-button class="h-8 p-0.5 border rounded-md shadow" icon="magnifying-glass" primary flat squared wire:click="search" /></div>
         </div>
 
         <hr class="my-2">
@@ -33,5 +33,5 @@
         </div>        
 
     </x-card>
-</x-modal.card>
+</x-modal-card>
 

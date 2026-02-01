@@ -6,7 +6,7 @@
         <div
             class="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-900 dark:to-gray-900 p-6 border-b border-emerald-200 dark:border-emerald-500/30">
             <h3 class="text-3xl font-bold text-white dark:text-emerald-100 flex items-center">
-                <x-icon name="chat-alt-2" class="w-8 h-8 mr-3 text-white dark:text-emerald-400" />
+                <x-icon name="chat-bubble-left-right" class="w-8 h-8 mr-3 text-white dark:text-emerald-400" />
                 CONTÁCTANOS
             </h3>
         </div>

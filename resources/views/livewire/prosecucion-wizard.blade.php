@@ -36,7 +36,7 @@
                     wire:loading.attr="disabled"
                     wire:target="searchRepresentant"
                 >
-                    <x-icon name="search" class="w-5 h-5 mr-2" />
+                    <x-icon name="magnifying-glass" class="w-5 h-5 mr-2" />
                     <span wire:loading.remove wire:target="searchRepresentant">Buscar Representante</span>
                     <span wire:loading wire:target="searchRepresentant">Buscando...</span>
                 </button>
@@ -249,7 +249,7 @@
                     wire:click="resetWizard"
                     class="inline-flex items-center px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-xl shadow-lg transition-colors duration-200 border border-gray-600"
                 >
-                    <x-icon name="refresh" class="w-5 h-5 mr-2" />
+                    <x-icon name="arrow-path" class="w-5 h-5 mr-2" />
                     Nueva Consulta
                 </button>
             </div>

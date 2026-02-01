@@ -7,16 +7,36 @@
         <p class="text-gray-300 text-lg mb-6">
             Comprueba tus conocimientos en las diferentes áreas de formación
         </p>
-        
-        <!-- Added guide button in header section -->
-        <div class="flex justify-center">
-            <button 
-                wire:click="showGuide" 
+
+        <!-- Added guide and refresh buttons in header section -->
+        <div class="flex justify-center space-x-4">
+            <button wire:click="showGuide"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-semibold flex items-center space-x-2 shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                    </path>
                 </svg>
                 <span>Guía de Participación</span>
+            </button>
+
+            <button wire:click="loadAvailablePensums" wire:loading.attr="disabled"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold flex items-center space-x-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                <div wire:loading.remove wire:target="loadAvailablePensums">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                </div>
+                <div wire:loading wire:target="loadAvailablePensums">
+                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                </div>
+                <span>Actualizar Áreas</span>
             </button>
         </div>
     </div>
@@ -49,7 +69,7 @@
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($pensums as $pensum)
-            <div class="diagnostic-card rounded-xl p-6 border @if($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
+            <div class="diagnostic-card rounded-xl p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
                 wire:click="startDiagnostic({{ $pensum['id'] }})">
 
                 <!-- Progress Ring -->
@@ -60,9 +80,11 @@
                             <h3 class="text-xl font-semibold text-white">
                                 {{ $pensum['name'] }}
                             </h3>
-                            @if($pensum['is_completed'])
+                            @if ($pensum['is_completed'])
                                 <svg class="w-5 h-5 text-green-400 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
                                 </svg>
                             @endif
                         </div>
@@ -76,13 +98,15 @@
                             <path class="text-gray-700" stroke="currentColor" stroke-width="3" fill="none"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <!-- Enhanced progress ring color for completed areas -->
-                            <path class="@if($pensum['is_completed']) text-green-400 @else text-green-500 @endif progress-ring" stroke="currentColor" stroke-width="3"
-                                fill="none" stroke-linecap="round"
+                            <path
+                                class="@if ($pensum['is_completed']) text-green-400 @else text-green-500 @endif progress-ring"
+                                stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"
                                 stroke-dasharray="{{ $pensum['progress_percentage'] }}, 100"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <span class="text-xs font-semibold @if($pensum['is_completed']) text-green-300 @else text-white @endif">
+                            <span
+                                class="text-xs font-semibold @if ($pensum['is_completed']) text-green-300 @else text-white @endif">
                                 {{ $pensum['progress_percentage'] }}%
                             </span>
                         </div>
@@ -92,7 +116,8 @@
                 <!-- Stats -->
                 <div class="flex justify-between items-center mb-4">
                     <div class="text-sm text-gray-400">
-                        <span class="@if($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
+                        <span
+                            class="@if ($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
                         / {{ $pensum['total_questions'] }} preguntas
                     </div>
 
@@ -111,8 +136,11 @@
                 <!-- Difficulty Distribution -->
                 <div class="mb-2">
                     <div class="flex items-center mb-1">
-                        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
                         </svg>
                         <span class="text-xs text-gray-400 font-medium">Distribución por dificultad</span>
                     </div>
@@ -123,7 +151,7 @@
                             @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
                                 @if (isset($pensum['difficulty_distribution'][$level]))
                                     <div class="flex-1 bg-gray-700 rounded-full h-1.5">
-                                        <div class="@if($level === 'easy') bg-gradient-to-r from-green-500 to-green-400 @elseif($level === 'medium') bg-gradient-to-r from-yellow-500 to-yellow-400 @else bg-gradient-to-r from-red-500 to-red-400 @endif h-1.5 rounded-full"
+                                        <div class="@if ($level === 'easy') bg-gradient-to-r from-green-500 to-green-400 @elseif($level === 'medium') bg-gradient-to-r from-yellow-500 to-yellow-400 @else bg-gradient-to-r from-red-500 to-red-400 @endif h-1.5 rounded-full"
                                             style="width: {{ ($pensum['difficulty_distribution'][$level] / $pensum['total_questions']) * 100 }}%">
                                         </div>
                                     </div>
@@ -135,7 +163,8 @@
                             @foreach (['easy' => 'Fácil', 'medium' => 'Medio', 'hard' => 'Difícil'] as $level => $label)
                                 @if (isset($pensum['difficulty_distribution'][$level]))
                                     <div class="flex-1 text-center">
-                                        <span class="text-xs @if($level === 'easy') text-green-400 @elseif($level === 'medium') text-yellow-400 @else text-red-400 @endif font-medium">
+                                        <span
+                                            class="text-xs @if ($level === 'easy') text-green-400 @elseif($level === 'medium') text-yellow-400 @else text-red-400 @endif font-medium">
                                             {{ $label }}
                                         </span>
                                         <div class="text-xs text-gray-500">
@@ -152,7 +181,7 @@
                     <!-- Modified button to prevent event bubbling and call specific methods -->
                     <button
                         wire:click.stop="@if ($pensum['is_completed']) reviewAnswers({{ $pensum['id'] }}) @else startDiagnostic({{ $pensum['id'] }}) @endif"
-                        class="@if($pensum['is_completed']) bg-green-500 hover:bg-green-600 @else bg-green-600 hover:bg-green-700 @endif text-white px-6 py-2 rounded-lg transition-colors font-semibold">
+                        class="@if ($pensum['is_completed']) bg-green-500 hover:bg-green-600 @else bg-green-600 hover:bg-green-700 @endif text-white px-6 py-2 rounded-lg transition-colors font-semibold">
                         @if ($pensum['is_completed'])
                             Ver Respuestas
                         @else

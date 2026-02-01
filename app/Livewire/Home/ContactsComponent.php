@@ -4,12 +4,12 @@ namespace App\Livewire\Home;
 
 use App\Models\app\Blog\Contact;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Livewire\Attributes\Validate;
 
 class ContactsComponent extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     // #[Validate('name|required','email|required','message|required')] // 1MB Max
 

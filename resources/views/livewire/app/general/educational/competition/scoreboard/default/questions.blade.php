@@ -16,8 +16,8 @@
                                         {{$loop->iteration}}. {{$item->text}}
                                     </div>
                                     <div class="flex-none px-1 text-sm">
-                                        @if ($item->status_over_time) <x-badge.circle outline icon="check" /> @endif
-                                        @if ($item->status_answer) <x-badge.circle flat icon="check" /> @endif
+                                        @if ($item->status_over_time) <x-mini-badge outline icon="check" /> @endif
+                                        @if ($item->status_answer) <x-mini-badge flat icon="check" /> @endif
                                     </div>
                                 </div>       
                                 

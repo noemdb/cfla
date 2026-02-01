@@ -11,7 +11,7 @@
 
 <div class="pb-2">
     @php $name = 'mother_ci' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
+    <x-maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
 </div>
 
 <div class="pb-2">
@@ -36,14 +36,14 @@
 
 <div class="pb-2">
     @php $name = 'mother_phones' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
+    <x-phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
 </div>
 
 <hr class="mt-4">
 
 <div class="pb-2">
     @php $name = 'father_ci' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
+    <x-maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
 </div>
 
 <div class="pb-2">
@@ -68,5 +68,5 @@
 
 <div class="pb-2">
     @php $name = 'father_phones' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
+    <x-phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
 </div>

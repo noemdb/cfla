@@ -85,7 +85,7 @@
                     @if (!$question->status_answer && $question->status_over_time && $question->status_active)
                         @php $seccions = $question->seccions @endphp
                         <div class="absolute top-3 right-3 z-10">
-                            <x-dropdown icon="dots-vertical" class="text-emerald-400">
+                            <x-dropdown icon="ellipsis-vertical" class="text-emerald-400">
                                 <x-dropdown.header label="Asignar Puntaje">
                                     @foreach ($seccions as $seccion)
                                         <x-dropdown.item :label="$seccion->name"

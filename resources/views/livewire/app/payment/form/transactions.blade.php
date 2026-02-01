@@ -2,7 +2,7 @@
     <div class="w-full px-2 sm:w-1/2">
         <div class="pb-2">
             @php $name = 'ammount_1' ; $model = 'payment.'.$name; $label=$list_comment[$name] @endphp
-            <x-inputs.currency label="{{$label}}" prefix="Bs." thousands="." decimal="," wire:model.live="{{$model}}" />
+            <x-currency label="{{$label}}" prefix="Bs." thousands="." decimal="," wire:model.live="{{$model}}" />
         </div>
     </div>
     <div class="w-full px-2 sm:w-1/2">
@@ -41,7 +41,7 @@
     <div class="w-full px-2 sm:w-1/2">
         <div class="pb-2">
             @php $name = 'number_i_pay_1' ; $model = 'payment.'.$name; $label=$list_comment[$name] @endphp
-            <x-inputs.maskable label="{{$label}}" mask="################" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
+            <x-maskable label="{{$label}}" mask="################" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números" />
         </div>
     </div>
     
@@ -50,7 +50,7 @@
 @if ($payment->method_pay_id_1 == 5 || $payment->method_pay_id_1 == 7) 
     <div class="pb-2">
         @php $name = 'phone_1' ; $model = 'payment.'.$name; $label=$list_comment[$name] @endphp
-        <x-inputs.phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
+        <x-phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
     </div>
 @endif
 
