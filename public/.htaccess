@@ -4,74 +4,67 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
-    # =================================================================
-    # BLOQUEO DE BACKDOORS - REGLAS MEJORADAS
-    # =================================================================
-    
-    # REGLA 1: Bloquear parámetros específicos sin importar valor
-    RewriteCond %{QUERY_STRING} (^|&)img=[^&]* [NC,OR]
-    RewriteCond %{QUERY_STRING} (^|&)download=[^&]* [NC,OR]
-    RewriteCond %{QUERY_STRING} (^|&)zip=[^&]* [NC,OR]
-    RewriteCond %{QUERY_STRING} (^|&)wanna_play_with_me=[^&]* [NC]
-    RewriteRule .* - [F,L]
-    
-    # REGLA 2: Bloquear funciones peligrosas
-    RewriteCond %{QUERY_STRING} base64_decode [NC,OR]
-    RewriteCond %{QUERY_STRING} (shell_exec|passthru|exec|system) [NC,OR]
-    RewriteCond %{QUERY_STRING} phpinfo [NC,OR]
-    RewriteCond %{QUERY_STRING} (cmd=|eval\(|union.*select) [NC]
-    RewriteRule .* - [F,L]
-    
-    # REGLA 3: Bloquear archivos maliciosos conocidos
-    RewriteCond %{REQUEST_URI} (filemanagerNew|Enterprise-FM|bootstrap\.cache)\.php [NC]
-    RewriteRule .* - [F,L]
-    
-    # REGLA 4: Bloquear parámetros en cualquier posición
-    RewriteCond %{QUERY_STRING} .*img.* [NC]
-    RewriteCond %{QUERY_STRING} !(jpeg|jpg|png|gif|webp) [NC]
-    RewriteRule .* - [F,L]
 
-    # =================================================================
-    # CONFIGURACIÓN ORIGINAL LARAVEL (modificada)
-    # =================================================================
-    
+    # -------------------------------------------------
+    # 1. Seguridad básica
+    # -------------------------------------------------
+
     # Desactivar listado de directorios
     Options -Indexes
-    
+
     # Bloquear ejecución de PHP fuera de index.php
     <FilesMatch "\.(php|phtml|php5|php7|phar)$">
-        <IfModule mod_authz_core.c>
-            Require all denied
-        </IfModule>
-        <IfModule !mod_authz_core.c>
-            Order deny,allow
-            Deny from all
-        </IfModule>
+        Require all denied
     </FilesMatch>
 
     <Files "index.php">
-        <IfModule mod_authz_core.c>
-            Require all granted
-        </IfModule>
+        Require all granted
     </Files>
 
-    # Bloquear extensiones usadas para malware
+    # -------------------------------------------------
+    # 2. Bloquear extensiones usadas para malware
+    # -------------------------------------------------
     <FilesMatch "\.(wbmp|fla|dat|log|sh)$">
         Require all denied
     </FilesMatch>
 
-    # Manejo Authorization Header
+    # -------------------------------------------------
+    # 3. Proteger carpetas de assets
+    # -------------------------------------------------
+    # RewriteRule ^(images|image|videos|pwa|uploads|storage)/ - [F,L]
+
+    # -------------------------------------------------
+    # 4. Manejo Authorization Header (Laravel / APIs)
+    # -------------------------------------------------
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Redirección de trailing slash
+    # -------------------------------------------------
+    # 5. Redirección de trailing slash
+    # -------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Front Controller Laravel
+    # -------------------------------------------------
+    # 6. Front Controller Laravel
+    # -------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# ===================================================
+# REGLAS DE SEGURIDAD ESPECÍFICAS (AGREGAR AL FINAL)
+# ===================================================
+
+# Bloquear archivos maliciosos específicos
+<FilesMatch "(filemanagerNew\.php|Enterprise\-FM\.php|bootstrap\.cache\.php)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Bloquear carpetas vulnerables
+<IfModule mod_rewrite.c>
+    RewriteRule ^pwa/ - [F,L,NC]
 </IfModule>
