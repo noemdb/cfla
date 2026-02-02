@@ -6,31 +6,30 @@
     RewriteEngine On
     
     # =================================================================
-    # BLOQUEO DE BACKDOORS Y PARÁMETROS MALICIOSOS - ALTA PRIORIDAD
+    # BLOQUEO DE BACKDOORS - REGLAS MEJORADAS
     # =================================================================
     
-    # BLOQUE 1: Parámetro específico del backdoor
-    RewriteCond %{QUERY_STRING} (wanna_play_with_me) [NC]
+    # REGLA 1: Bloquear parámetros específicos sin importar valor
+    RewriteCond %{QUERY_STRING} (^|&)img=[^&]* [NC,OR]
+    RewriteCond %{QUERY_STRING} (^|&)download=[^&]* [NC,OR]
+    RewriteCond %{QUERY_STRING} (^|&)zip=[^&]* [NC,OR]
+    RewriteCond %{QUERY_STRING} (^|&)wanna_play_with_me=[^&]* [NC]
     RewriteRule .* - [F,L]
     
-    # BLOQUE 2: Patrones de decodificación base64 maliciosos
-    RewriteCond %{QUERY_STRING} (base64_decode.*img|base64_decode.*download|base64_decode.*zip) [NC]
+    # REGLA 2: Bloquear funciones peligrosas
+    RewriteCond %{QUERY_STRING} base64_decode [NC,OR]
+    RewriteCond %{QUERY_STRING} (shell_exec|passthru|exec|system) [NC,OR]
+    RewriteCond %{QUERY_STRING} phpinfo [NC,OR]
+    RewriteCond %{QUERY_STRING} (cmd=|eval\(|union.*select) [NC]
     RewriteRule .* - [F,L]
     
-    # BLOQUE 3: Funciones peligrosas de PHP
-    RewriteCond %{QUERY_STRING} (shell_exec|passthru|phpinfo) [NC]
+    # REGLA 3: Bloquear archivos maliciosos conocidos
+    RewriteCond %{REQUEST_URI} (filemanagerNew|Enterprise-FM|bootstrap\.cache)\.php [NC]
     RewriteRule .* - [F,L]
     
-    # BLOQUE 4: Ejecución de comandos
-    RewriteCond %{QUERY_STRING} (cmd=|exec=|system\(|eval\() [NC]
-    RewriteRule .* - [F,L]
-    
-    # BLOQUE 5: Inyecciones SQL
-    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|drop.*table) [NC]
-    RewriteRule .* - [F,L]
-    
-    # BLOQUE 6: Acceso a archivos maliciosos
-    RewriteCond %{REQUEST_URI} (filemanagerNew\.php|Enterprise\-FM\.php|bootstrap\.cache\.php) [NC]
+    # REGLA 4: Bloquear parámetros en cualquier posición
+    RewriteCond %{QUERY_STRING} .*img.* [NC]
+    RewriteCond %{QUERY_STRING} !(jpeg|jpg|png|gif|webp) [NC]
     RewriteRule .* - [F,L]
 
     # =================================================================
