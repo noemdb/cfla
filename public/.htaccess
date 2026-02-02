@@ -4,51 +4,74 @@
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    
+    # =================================================================
+    # BLOQUEO DE BACKDOORS Y PARÁMETROS MALICIOSOS - ALTA PRIORIDAD
+    # =================================================================
+    
+    # BLOQUE 1: Parámetro específico del backdoor
+    RewriteCond %{QUERY_STRING} (wanna_play_with_me) [NC]
+    RewriteRule .* - [F,L]
+    
+    # BLOQUE 2: Patrones de decodificación base64 maliciosos
+    RewriteCond %{QUERY_STRING} (base64_decode.*img|base64_decode.*download|base64_decode.*zip) [NC]
+    RewriteRule .* - [F,L]
+    
+    # BLOQUE 3: Funciones peligrosas de PHP
+    RewriteCond %{QUERY_STRING} (shell_exec|passthru|phpinfo) [NC]
+    RewriteRule .* - [F,L]
+    
+    # BLOQUE 4: Ejecución de comandos
+    RewriteCond %{QUERY_STRING} (cmd=|exec=|system\(|eval\() [NC]
+    RewriteRule .* - [F,L]
+    
+    # BLOQUE 5: Inyecciones SQL
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|drop.*table) [NC]
+    RewriteRule .* - [F,L]
+    
+    # BLOQUE 6: Acceso a archivos maliciosos
+    RewriteCond %{REQUEST_URI} (filemanagerNew\.php|Enterprise\-FM\.php|bootstrap\.cache\.php) [NC]
+    RewriteRule .* - [F,L]
 
-    # -------------------------------------------------
-    # 1. Seguridad básica
-    # -------------------------------------------------
-
+    # =================================================================
+    # CONFIGURACIÓN ORIGINAL LARAVEL (modificada)
+    # =================================================================
+    
     # Desactivar listado de directorios
     Options -Indexes
-
+    
     # Bloquear ejecución de PHP fuera de index.php
     <FilesMatch "\.(php|phtml|php5|php7|phar)$">
-        Require all denied
+        <IfModule mod_authz_core.c>
+            Require all denied
+        </IfModule>
+        <IfModule !mod_authz_core.c>
+            Order deny,allow
+            Deny from all
+        </IfModule>
     </FilesMatch>
 
     <Files "index.php">
-        Require all granted
+        <IfModule mod_authz_core.c>
+            Require all granted
+        </IfModule>
     </Files>
 
-    # -------------------------------------------------
-    # 2. Bloquear extensiones usadas para malware
-    # -------------------------------------------------
+    # Bloquear extensiones usadas para malware
     <FilesMatch "\.(wbmp|fla|dat|log|sh)$">
         Require all denied
     </FilesMatch>
 
-    # -------------------------------------------------
-    # 3. Proteger carpetas de assets
-    # -------------------------------------------------
-    # RewriteRule ^(images|image|videos|pwa|uploads|storage)/ - [F,L]
-
-    # -------------------------------------------------
-    # 4. Manejo Authorization Header (Laravel / APIs)
-    # -------------------------------------------------
+    # Manejo Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # -------------------------------------------------
-    # 5. Redirección de trailing slash
-    # -------------------------------------------------
+    # Redirección de trailing slash
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # -------------------------------------------------
-    # 6. Front Controller Laravel
-    # -------------------------------------------------
+    # Front Controller Laravel
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
