@@ -33,6 +33,52 @@ use App\Models\VotingPoll;
 // });
 // Route::get('/', function () { return view('home'); });
 
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+// ===================================================
+// BLOQUEO DE PARÁMETROS MALICIOSOS - ALTA PRIORIDAD
+// ===================================================
+Route::any('{any}', function () {
+    $request = request();
+    
+    // Parámetros a bloquear
+    $blockedParams = ['wanna_play_with_me', 'img', 'download', 'zip', 'cmd'];
+    
+    foreach ($blockedParams as $param) {
+        if ($request->has($param)) {
+            \Log::warning('Intento de acceso con parámetro bloqueado: ' . $param, [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'user_agent' => $request->userAgent()
+            ]);
+            abort(403, 'Acceso denegado');
+        }
+    }
+    
+    // Bloquear contenido malicioso en cualquier parámetro
+    $allInput = $request->all();
+    foreach ($allInput as $value) {
+        if (is_string($value) && (
+            stripos($value, 'base64_decode') !== false ||
+            stripos($value, 'shell_exec') !== false ||
+            stripos($value, 'passthru') !== false
+        )) {
+            \Log::critical('Contenido malicioso detectado: ' . substr($value, 0, 100), [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl()
+            ]);
+            abort(403, 'Acceso denegado');
+        }
+    }
+})->where('any', '.*');
+
+// ===================================================
+// RUTAS NORMALES DE LA APLICACIÓN
+// ===================================================
+
+
 Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
 Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
 
