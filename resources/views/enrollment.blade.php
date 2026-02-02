@@ -1,10 +1,33 @@
-@extends('layouts.miniapp')
+<!DOCTYPE html>
+<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-@section('title', 'U.E. Colegio Fray Luis Amigó')
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Solicitud de Matrícula || {{ config('app.name') }}</title>
 
-@section('header') <livewire:home.header-component  /> @endsection
+    <!-- Livewire -->
+    @livewireStyles
 
-@section('main') <livewire:app.enrollment.main-component /> @endsection
+    @wireUiScripts
 
-@section('footer')  @include('payment.footer.main') @endsection
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @yield('styles')
+
+</head>
+
+<body>
+
+    <x-notifications />
+
+    <livewire:app.enrollment.main-component />
+
+    @livewireScripts
+
+    @yield('scripts')
+
+</body>
+
+</html>

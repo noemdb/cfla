@@ -48,11 +48,29 @@ class User extends Authenticatable
     public function getFullNameAttribute()
     {
         $user = DB::table('users')
-        ->selectRaw("CONCAT(profiles.firstname, ' ', profiles.lastname) as fullname")
-        ->join('profiles', 'users.id', '=', 'profiles.user_id')
-        ->where('users.id',$this->id)
-        ->first();
+            ->selectRaw("CONCAT(profiles.firstname, ' ', profiles.lastname) as fullname")
+            ->join('profiles', 'users.id', '=', 'profiles.user_id')
+            ->where('users.id', $this->id)
+            ->first();
 
-        return ($user) ? $user->fullname : null ;
+        return ($user) ? $user->fullname : null;
+    }
+
+    public function isAdminOrDiagnostic()
+    {
+        return $this->is_admin || $this->is_diagnostic;
+    }
+
+    public function getRoleLabelAttribute()
+    {
+        if ($this->is_admin) {
+            return 'Administrador';
+        }
+
+        if ($this->is_diagnostic) {
+            return 'Personal de Diagnóstico';
+        }
+
+        return 'Usuario Estándar';
     }
 }

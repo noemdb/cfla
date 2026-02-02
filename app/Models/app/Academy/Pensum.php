@@ -51,4 +51,9 @@ class Pensum extends Model
     {
         return $this->belongsTo(Grado::class, 'grado_id');
     }
+
+    public function pevaluacions()
+    {
+        return $this->hasMany(Pevaluacion::class, 'pensum_id');
+    }
 }

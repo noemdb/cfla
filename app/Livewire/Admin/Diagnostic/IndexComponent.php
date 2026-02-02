@@ -51,15 +51,18 @@ class IndexComponent extends Component
     public function render()
     {
         $pestudios = Pestudio::with(['grados.seccions', 'grados' => function($query) {
-            $query->where('status_active', 'true');
+            $query->where('status_active', 'true')->has('pensums');
         }])
         ->where('status_active', 'true')
+        ->orderBy('order', 'asc')
         ->get();
 
         // Get all pensums grouped by pestudio and grado
-        $pensums = Pensum::with(['asignatura', 'grado', 'pestudio'])
+        $pensums = Pensum::whereHas('pevaluacions')
+            ->with(['asignatura', 'grado', 'pestudio'])
+            ->withCount('diagQuestions')
             ->get()
-            ->groupBy(['pestudio_id', 'grado_id']); //dd($pensums);
+            ->groupBy(['pestudio_id', 'grado_id']);
 
         return view('livewire.admin.diagnostic.index-component', [
             'pestudios' => $pestudios,

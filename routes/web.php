@@ -100,51 +100,35 @@ Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showPart
 
 // Rutas del panel administrativo
 
-Route::get('/admin', function () {
-    return view('admin.index');
-})->middleware(['auth'])->name('admin.index');
+// Rutas del panel administrativo
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::get('/', function () {
+        return view('admin.index');
+    })->name('index');
 
-// Rutas del panel administrativo para los voting
-Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('/dashboard', [VotingDashboardController::class, 'index'])
-        ->name('dashboard');
+    // Rutas protegidas para Administradores y Personal de Diagnóstico
+    Route::middleware(['isAdminOrDiagnostic'])->group(function () {
+        // Módulo de Votación
+        Route::prefix('voting')->name('voting.')->group(function () {
+            Route::get('/dashboard', [VotingDashboardController::class, 'index'])->name('dashboard');
+            Route::resource('polls', VotingPollController::class);
+            Route::post('/polls/{poll}/start', [VotingPollController::class, 'start'])->name('polls.start');
+            Route::post('/polls/{poll}/stop', [VotingPollController::class, 'stop'])->name('polls.stop');
+            Route::post('/polls/{poll}/reset', [VotingPollController::class, 'reset'])->name('polls.reset');
+            Route::get('/results', [VotingPollController::class, 'results'])->name('results');
+            Route::get('/list', [VotingPollController::class, 'publicList'])->name('list');
+        });
 
-    Route::resource('polls', VotingPollController::class);
+        // Módulo de Diagnóstico
+        Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
+            Route::get('/', \App\Livewire\Admin\Diagnostic\IndexComponent::class)->name('index');
+        });
+    });
 
-    Route::post('/polls/{poll}/start', [VotingPollController::class, 'start'])
-        ->name('polls.start');
-    Route::post('/polls/{poll}/stop', [VotingPollController::class, 'stop'])
-        ->name('polls.stop');
-
-    Route::post('/polls/{poll}/reset', [VotingPollController::class, 'reset'])
-        ->name('polls.reset');
-
-    // Ruta para resultados
-    Route::get('/results', function () {
-        $polls = VotingPoll::with(['options.votes'])
-            ->withVotesCount()
-            ->get();
-        return view('admin.voting.polls.results', compact('polls'));
-    })->name('results');
-
-    // Ruta para mostrar encuestas públicas
-    Route::get('/list', function () {
-        // $polls = VotingPoll::query()
-        $polls = VotingPoll::where('enable', true)
-            ->with('options')
-            ->withVotesCount()
-            ->get();
-
-        return view('admin.voting.polls.list', compact('polls'));
-    })->name('list');
-});
-
-Route::prefix('admin')->name('admin.logs')->middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
-});
-
-Route::prefix('admin/diagnostico')->name('admin.diagnostico.')->middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('/', \App\Livewire\Admin\Diagnostic\IndexComponent::class)->name('index');
+    // Rutas exclusivas para Administradores
+    Route::middleware(['isAdmin'])->group(function () {
+        Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index')->name('logs');
+    });
 });
 
 // API para fingerprinting
