@@ -1,0 +1,16 @@
+# BLOQUEO COMPLETO DEL DIRECTORIO STORAGE
+Order Deny,Allow
+Deny from all
+
+# Solo permitir acceso desde localhost si es necesario para Laravel
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REMOTE_ADDR} !^127\.0\.0\.1$
+    RewriteCond %{REMOTE_ADDR} !^::1$
+    RewriteRule ^ - [F,L]
+</IfModule>
+
+# Bloquear todos los tipos de archivos
+<FilesMatch ".*">
+    Require all denied
+</FilesMatch>

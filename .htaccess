@@ -1,0 +1,15 @@
+# BLOQUEO DE ARCHIVOS SENSIBLES
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
+
+<FilesMatch "^\.env(\..*)?$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Bloquear directorios de sistema
+RedirectMatch 404 /vendor/
+RedirectMatch 404 /storage/logs/
+RedirectMatch 404 /bootstrap/cache/
