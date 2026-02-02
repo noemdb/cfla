@@ -7,7 +7,7 @@ use App\Models\VotingSession;
 use App\Models\VotingVote;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +15,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class VotingPoll extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     // Propiedades públicas simples (solo tipos básicos)
     public $poll;

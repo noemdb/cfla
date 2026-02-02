@@ -1,0 +1,144 @@
+# WireUI Component Usage Report
+
+This report lists all Blade views within `resources/views` that utilize components from the WireUI package.
+
+## Summary of Usage
+
+- **Total Views Analyzed:** 91
+- **Most Common Components:** `x-notifications`, `x-icon`, `x-card`, `x-button`, `x-input`.
+
+---
+
+## Detailed View List
+
+### Layouts & Global Components
+- **resources/views/layouts/home.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/enrollment.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/payment.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/diagnostic.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/vote.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/proposal.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/miniapp.blade.php**
+  - `x-notifications`
+- **resources/views/layouts/voting.blade.php**
+  - `x-notifications`
+- **resources/views/components/statistic.blade.php**
+  - `x-icon`
+- **resources/views/general/layouts/home.blade.php**
+  - `x-notifications`
+
+### Application Modules
+
+#### Enrollment (Livewire)
+- **resources/views/livewire/app/enrollment/steper/parents.blade.php**: `x-errors`
+- **resources/views/livewire/app/enrollment/steper/main.blade.php**: `x-errors`
+- **resources/views/livewire/app/enrollment/steper/button.blade.php**: `x-button`
+- **resources/views/livewire/app/enrollment/empty.blade.php**: `x-modal.card`
+- **resources/views/livewire/app/enrollment/search.blade.php**: `x-button`, `x-card`, `x-icon`, `x-input`, `x-modal.card`
+- **resources/views/livewire/app/enrollment/representant.blade.php**: `x-modal.card`
+- **resources/views/livewire/app/enrollment/start.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/app/enrollment/modal/empty.blade.php**: `x-modal.card`
+- **resources/views/livewire/app/enrollment/modal/ready.blade.php**: `x-modal.card`
+- **resources/views/livewire/app/enrollment/modal/estudiant.blade.php**: `x-badge.circle`, `x-button`, `x-modal.card`
+- **resources/views/livewire/app/enrollment/form/parents.blade.php**: `x-input`, `x-inputs.maskable`, `x-inputs.phone`, `x-select`, `x-textarea`
+- **resources/views/livewire/app/enrollment/form/specialist.blade.php**: `x-input`, `x-toggle`
+- **resources/views/livewire/app/enrollment/form/representant.blade.php**: `x-input`, `x-inputs.maskable`, `x-inputs.phone`, `x-select`
+- **resources/views/livewire/app/enrollment/form/physical.blade.php**: `x-inputs.maskable`, `x-select`, `x-toggle`
+- **resources/views/livewire/app/enrollment/form/conditions.blade.php**: `x-input`, `x-toggle`
+- **resources/views/livewire/app/enrollment/form/estudiant.blade.php**: `x-datetime-picker`, `x-input`, `x-inputs.maskable`, `x-select`, `x-textarea`
+- **resources/views/livewire/app/enrollment/form/potential.blade.php**: `x-input`, `x-select`, `x-toggle`
+- **resources/views/livewire/app/enrollment/form/coexistence.blade.php**: `x-input`, `x-select`, `x-toggle`
+- **resources/views/livewire/app/enrollment/form/illness.blade.php**: `x-input`, `x-toggle`
+
+#### Payment (Livewire)
+- **resources/views/livewire/app/payment/empty.blade.php**: `x-modal.card`
+- **resources/views/livewire/app/payment/operOk.blade.php**: `x-card`, `x-modal.card`
+- **resources/views/livewire/app/payment/search.blade.php**: `x-button`, `x-card`, `x-icon`, `x-input`, `x-modal.card`
+- **resources/views/livewire/app/payment/start.blade.php**: `x-button`, `x-icon`
+- **resources/views/livewire/app/payment/assistant.blade.php**: `x-badge.circle`, `x-button`, `x-modal.card`
+- **resources/views/livewire/app/payment/form/transactions.blade.php**: `x-datetime-picker`, `x-inputs.currency`, `x-inputs.maskable`, `x-inputs.phone`, `x-select`, `x-textarea`
+- **resources/views/livewire/app/payment/form/motive.blade.php**: `x-select`
+
+#### Educational Competition (Livewire)
+- **resources/views/livewire/app/general/educational/competition/moderator/question-component.blade.php**: `x-select`
+- **resources/views/livewire/app/general/educational/competition/moderator/index-component.blade.php**: `x-button`, `x-select`
+- **resources/views/livewire/app/general/educational/competition/moderator/answer-component.blade.php**: `x-button`, `x-card`
+- **resources/views/livewire/app/general/educational/competition/moderator/option-component.blade.php**: `x-dropdown`, `x-dropdown.header`, `x-dropdown.item`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/competition-component.blade.php**: `x-dropdown`, `x-dropdown.item`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/debate-component.blade.php**: `x-dropdown`, `x-dropdown.item`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/default/debate.blade.php**: `x-card`, `x-dropdown`, `x-dropdown.item`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/default/questions.blade.php**: `x-badge.circle`, `x-card`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/default/competition.blade.php**: `x-card`, `x-dropdown`, `x-dropdown.item`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/default/options.blade.php**: `x-badge.circle`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/default/notfound.blade.php**: `x-icon`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/partials/questions.blade.php**: `x-badge.circle`
+- **resources/views/livewire/app/general/educational/competition/scoreboard/partials/answer.blade.php**: `x-badge`, `x-button`, `x-card`
+- **resources/views/livewire/app/general/educational/competition/dashboard/index-component.blade.php**: `x-select`
+- **resources/views/livewire/app/general/educational/competition/dashboard/answer-component.blade.php**: `x-badge.circle`
+- **resources/views/livewire/app/general/educational/competition/dashboard/option-component.blade.php**: `x-badge.circle`
+- **resources/views/livewire/app/general/educational/competition/partials/competition.blade.php**: `x-card`, `x-dropdown`, `x-dropdown.item`
+
+#### Census & Catchment
+- **resources/views/livewire/app/catchment/start.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/app/catchment/index-component.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/app/catchment/form.blade.php**: `x-inputs.phone`
+- **resources/views/livewire/census/section/left.blade.php**: `x-icon`
+- **resources/views/livewire/census/asistent/stepOne.blade.php**: `x-button`, `x-card`, `x-input`
+- **resources/views/livewire/census/asistent/stepTwo.blade.php**: `x-button`, `x-datetime-picker`, `x-input`, `x-select`, `x-select.option`
+- **resources/views/livewire/census/asistent/stepThree.blade.php**: `x-button`, `x-input`, `x-inputs.maskable`
+- **resources/views/livewire/census/asistent/stepFour.blade.php**: `x-button`
+- **resources/views/livewire/catchment-wizard.blade.php**: `x-errors`
+
+### Home & Landing Pages
+- **resources/views/home/workers/main.blade.php**: `x-card`
+- **resources/views/home/highlighted/suspended/point.blade.php**: `x-icon`
+- **resources/views/home/highlighted/infoPayment.blade.php**: `x-icon`
+- **resources/views/home/highlighted/report.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/home/highlighted/point.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/home/highlighted/enrollments.blade.php**: `x-button`, `x-card`, `x-icon`, `x-input`
+- **resources/views/home/contacts/main.blade.php**: `x-card`
+- **resources/views/home/testimonials/main.blade.php**: `x-card`
+- **resources/views/home/alliances/main.blade.php**: `x-card`
+- **resources/views/home/featured/main.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/home/autority/main.blade.php**: `x-card`
+- **resources/views/home/services/main.blade.php**: `x-card`
+- **resources/views/home/services/items.blade.php**: `x-avatar`, `x-icon`
+- **resources/views/home/socials/main.blade.php**: `x-card`
+- **resources/views/home/graphs/main.blade.php**: `x-card`
+- **resources/views/home/category/main.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/home/timeline/main.blade.php**: `x-card`
+- **resources/views/home/header/icon.blade.php**: `x-avatar`
+- **resources/views/livewire/home.blade.php**: `x-button`, `x-input`, `x-select`
+- **resources/views/livewire/home/workers/modal/profesor.blade.php**: `x-card`, `x-modal.card`
+- **resources/views/livewire/home/highlighted/report.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/home/highlighted/point.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/home/highlighted/census.blade.php**: `x-button`, `x-icon`
+- **resources/views/livewire/home/highlighted/enrollments.blade.php**: `x-button`, `x-card`, `x-icon`, `x-input`
+- **resources/views/livewire/home/workers-component.blade.php**: `x-card`
+- **resources/views/livewire/home/testimonials-component.blade.php**: `x-card`
+- **resources/views/livewire/home/featured/index.blade.php**: `x-icon`
+- **resources/views/livewire/home/featured/item.blade.php**: `x-button`
+- **resources/views/livewire/home/featured/items.blade.php**: `x-button`, `x-card`, `x-icon`
+- **resources/views/livewire/home/featured/modal/post.blade.php**: `x-card`, `x-modal.card`
+- **resources/views/livewire/home/services/items.blade.php**: `x-icon`
+- **resources/views/livewire/home/featured-component.blade.php**: `x-icon`
+- **resources/views/livewire/home/contacts-component.blade.php**: `x-icon`
+- **resources/views/livewire/home/modal/post.blade.php**: `x-card`, `x-modal.card`
+- **resources/views/livewire/home/header/main.blade.php**: `x-icon`
+- **resources/views/livewire/home/header/menu/items.blade.php**: `x-button`, `x-dropdown`, `x-dropdown.item`
+- **resources/views/livewire/home/header/icon.blade.php**: `x-avatar`
+
+### Profile & Other
+- **resources/views/profile/partials/delete-user-form.blade.php**: `x-modal`
+- **resources/views/livewire/profile/delete-user-form.blade.php**: `x-modal`
+- **resources/views/livewire/layout/navigation.blade.php**: `x-dropdown`
+- **resources/views/livewire/visits-dashboard.blade.php**: `x-avatar`, `x-badge`, `x-button`, `x-card`, `x-icon`, `x-input`, `x-native-select`
+- **resources/views/livewire/partials/visit-indicators.blade.php**: `x-card`, `x-icon`
+- **resources/views/prosecucion.blade.php**: `x-notifications`
+- **resources/views/test.blade.php**: `x-button`, `x-card`, `x-color-picker`, `x-dialog`, `x-dropdown`, `x-dropdown.item`, `x-input`, `x-modal`, `x-notifications`, `x-select`

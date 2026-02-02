@@ -1,4 +1,4 @@
-<x-modal.card title="Reportes de pago" blur wire:model="modalAssistent" align="center">
+<x-modal-card title="Reportes de pago" blur wire:model="modalAssistent" align="center">
 
     <div class="my-2 p-4 bg-emerald-900/30 border border-emerald-500/30 rounded-lg flex justify-between items-center">
         <div class="text-emerald-400 font-bold">
@@ -6,7 +6,7 @@
                 class="text-sm text-gray-200 text-left">Nombre: {{ $representant->name ?? null }}, CI:
                 {{ $representant->ci_representant ?? null }}</span>
         </div>
-        <div><x-badge.circle icon="check" positive class="w-10 h-10 bg-emerald-600 border-none text-white" /></div>
+        <div><x-mini-badge icon="check" positive class="w-10 h-10 bg-emerald-600 border-none text-white" /></div>
     </div>
 
     @php $width = ($limit>0) ? round((100 * $step / $limit)) : 0; @endphp
@@ -40,4 +40,4 @@
         </div>
     @endif
 
-</x-modal.card>
+</x-modal-card>

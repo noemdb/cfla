@@ -32,6 +32,11 @@ class Grado extends Model
         return $this->hasMany(Seccion::class);
     }
 
+    public function pensums()
+    {
+        return $this->hasMany(Pensum::class, 'grado_id');
+    }
+
     /**
      * Get the active sections for the grade.
      *

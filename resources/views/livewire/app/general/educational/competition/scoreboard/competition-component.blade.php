@@ -33,8 +33,8 @@
                 </div>
 
                 <div class="flex-none">
-                    <x-dropdown icon="dots-vertical" class="text-emerald-400">
-                        <x-dropdown.item label="Planilla de Resultados" icon="presentation-chart-bar" />
+                    <x-dropdown icon="ellipsis-vertical" class="text-emerald-400">
+                        <x-dropdown.item label="Planilla de Resultados" icon="chart-bar" />
                     </x-dropdown>
                 </div>
             </div>

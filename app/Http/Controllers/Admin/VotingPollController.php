@@ -370,4 +370,22 @@ class VotingPollController extends Controller
                 ]);
         }
     }
+
+    public function results()
+    {
+        $polls = VotingPoll::with(['options.votes'])
+            ->withVotesCount()
+            ->get();
+        return view('admin.voting.polls.results', compact('polls'));
+    }
+
+    public function publicList()
+    {
+        $polls = VotingPoll::where('enable', true)
+            ->with('options')
+            ->withVotesCount()
+            ->get();
+
+        return view('admin.voting.polls.list', compact('polls'));
+    }
 }

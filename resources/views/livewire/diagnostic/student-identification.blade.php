@@ -1,4 +1,4 @@
-<div class=" flex items-center justify-center bg-gray-900 px-4  py-4">
+<div class=" flex items-center justify-center  px-4  py-4">
     <div class="max-w-md w-full space-y-2">
         <!-- Header -->
         <div class="text-center">
@@ -17,7 +17,7 @@
         </div>
 
         <!-- Formulario -->
-        <div class="bg-gray-800 rounded-xl p-8 shadow-2xl border border-gray-700">
+        <div class="rounded-xl p-8 shadow-2xl border border-gray-700">
             <form wire:submit.prevent="verifyStudent" class="space-y-6">
                 <!-- Campo de cédula -->
                 <div>

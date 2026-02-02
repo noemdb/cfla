@@ -1,4 +1,4 @@
-<x-modal.card title="Datos del Representante" blur wire:model.live="modalAssistent">
+<x-modal-card title="Datos del Representante" blur wire:model.live="modalAssistent">
 
     <div>Nombre: {{$representant->name ?? null}}</div>
 
@@ -11,4 +11,4 @@
     @endforelse
 
 
-</x-modal.card>
+</x-modal-card>

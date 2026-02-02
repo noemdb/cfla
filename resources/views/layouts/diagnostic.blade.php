@@ -8,10 +8,10 @@
 
     <title>@yield('title', 'Diagnóstico Académico - ' . config('app.name', 'Sistema de Diagnóstico'))</title>
 
-<!-- Updated favicon to use Font Awesome stethoscope SVG -->
+    <!-- Updated favicon to use Font Awesome stethoscope SVG -->
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'><path fill='%2310b981' d='M64 112C64 85.5 85.5 64 112 64L160 64C177.7 64 192 78.3 192 96C192 113.7 177.7 128 160 128L128 128L128 256C128 309 171 352 224 352C277 352 320 309 320 256L320 128L288 128C270.3 128 256 113.7 256 96C256 78.3 270.3 64 288 64L336 64C362.5 64 384 85.5 384 112L384 256C384 333.4 329 398 256 412.8L256 432C256 493.9 306.1 544 368 544C429.9 544 480 493.9 480 432L480 346.5C442.7 333.3 416 297.8 416 256C416 203 459 160 512 160C565 160 608 203 608 256C608 297.8 581.3 333.4 544 346.5L544 432C544 529.2 465.2 608 368 608C270.8 608 192 529.2 192 432L192 412.8C119 398 64 333.4 64 256L64 112zM512 288C529.7 288 544 273.7 544 256C544 238.3 529.7 224 512 224C494.3 224 480 238.3 480 256C480 273.7 494.3 288 512 288z'/></svg>">
-    
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @wireUiScripts
@@ -28,18 +28,22 @@
 </head>
 
 <body
-    class="font-sans antialiased bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 min-h-screen text-gray-100">
+    class="bg-[#020617] text-gray-100 font-sans antialiased min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-950/50 via-gray-950 to-black selection:bg-emerald-500 selection:text-white bg-fixed">
 
-    <x-notifications />
+    <div class="relative z-[100]">
+        <x-notifications />
+    </div>
+
 
     <!-- Header -->
-    <header class="bg-gray-900/80 backdrop-blur-sm border-b border-emerald-800/30 sticky top-0 z-10 shadow-lg">
+    <header class="bg-gray-900/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
         <div class="container-fluid mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <!-- Logo y título principal -->
                 <div class="flex items-center space-x-6">
+                    {{-- /home/nuser/code/cfla/public/image/logo/logo1x1.png --}}
                     <div class="flex-shrink-0">
-                        <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ config('app.name') }} Logo"
                             class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                     </div>
 
@@ -48,6 +52,13 @@
                         <p class="sm:block text-sm text-emerald-300"><strong>Diagnóstico Educativo.</strong> Evaluación
                             académica personalizada</p>
                     </div>
+                </div>
+
+                {{-- este logo debe estar alineado a la derecha --}}
+
+                <div class="">
+                    <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
             </div>
         </div>
@@ -59,7 +70,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900/60 backdrop-blur-sm border-t border-emerald-800/30 mt-auto">
+    <footer class="bg-gray-900/50 backdrop-blur-md border-t border-white/5 mt-auto">
         <div class="container mx-auto px-4 py-6">
             <div class="text-center space-y-3">
                 <!-- Características del sistema -->
@@ -108,7 +119,7 @@
     </footer>
 
     @livewireScripts
-    <x-notifications />
+
 
     <!-- Scripts específicos para diagnóstico -->
     <script>

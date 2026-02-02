@@ -1,4 +1,4 @@
-<x-modal.card title="{{ $post->title ?? null }}" blur wire:model="modalShow" align="center">
+<x-modal-card title="{{ $post->title ?? null }}" blur wire:model="modalShow" align="center">
 
     <div class="h-full flex flex-col justify-center max-w-5xl mx-auto">
         <div
@@ -48,4 +48,4 @@
         </div>
     </div>
 
-</x-modal.card>
+</x-modal-card>

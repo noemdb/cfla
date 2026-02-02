@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex items-center space-x-3 mb-4">
         <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
-            <x-icon name="menu" class="w-8 h-8 text-emerald-400" />
+            <x-icon name="bars-3" class="w-8 h-8 text-emerald-400" />
         </div>
         <h3 class="text-lg md:text-xl font-bold text-emerald-100 uppercase tracking-wide">
             Censo Escolar 25-26 - Asistente
@@ -15,7 +15,7 @@
             <div class="flex justify-center bg-gray-800/50 p-6 rounded-xl border border-emerald-500/20">
                 <div
                     class="grid place-items-center h-24 w-24 bg-emerald-900/30 rounded-full border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                    <x-icon name="document-report" class="w-12 h-12 text-emerald-400" />
+                    <x-icon name="document-chart-bar" class="w-12 h-12 text-emerald-400" />
                 </div>
             </div>
 
@@ -33,9 +33,11 @@
         </p>
 
         <div class="mt-auto">
-            <x-button positive label="Comenzar"
+            <x-button positive
                 class="w-full bg-emerald-600 hover:bg-emerald-500 border-none shadow-lg shadow-emerald-500/20"
-                :href="route('census')" />
+                :href="route('census')">
+                Comenzar
+            </x-button>
         </div>
     </div>
 </div>

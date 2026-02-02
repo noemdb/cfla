@@ -3,7 +3,7 @@
     @slot('header')
     <h3 class="text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
-            <x-icon name="menu" class="flex-none w-10 h-10" />
+            <x-icon name="bars-3" class="flex-none w-10 h-10" />
             <div class="flex-initial">Reporte de pago...</div>                    
         </div>
     </h3>

@@ -22,7 +22,7 @@
 
             <!-- Búsqueda -->
             <x-input wire:model.live.debounce.300ms="search" label="Buscar" placeholder="URL, IP o usuario..."
-                icon="search" class="w-full sm:w-48" />
+                icon="magnifying-glass" class="w-full sm:w-48" />
         </div>
     </x-card>
 

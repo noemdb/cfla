@@ -1,4 +1,4 @@
-<x-modal.card title="Resultado de la operación" blur wire:model="modalOperOk" max-width="xl" align="center">
+<x-modal-card title="Resultado de la operación" blur wire:model="modalOperOk" max-width="xl" align="center">
     <div class="relative">
         <!-- Background Effects -->
         <div
@@ -66,4 +66,4 @@
 
         </x-card>
     </div>
-</x-modal.card>
+</x-modal-card>

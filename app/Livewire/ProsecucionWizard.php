@@ -6,13 +6,13 @@ use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
 use Carbon\Carbon;
 use Livewire\Component;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProsecucionWizard extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     public $step = 1;
     public $ci_representant = '';

@@ -36,7 +36,7 @@
             </div>
 
             <div class="text-sm sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
-                {{ $post->body, 100 ?? null }}
+                {{ Str::limit($post->body, 100, '...') ?? null }}
             </div>
 
             <div class="text-sm sm:text-sm md:text-lg border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">

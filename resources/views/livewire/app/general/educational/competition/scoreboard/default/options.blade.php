@@ -34,7 +34,7 @@
             <blockquote class="max-w-2xl mx-auto mb-2 text-gray-500 lg:mb-2 dark:text-gray-400">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     @php $color=$colors[$loop->index]; @endphp
-                    <x-badge.circle :$color lg label="{{$literal[$loop->index]}}"/>
+                    <x-mini-badge :$color lg label="{{$literal[$loop->index]}}"/>
                 </h3>
             </blockquote>
             <figcaption class="flex items-center justify-center ">

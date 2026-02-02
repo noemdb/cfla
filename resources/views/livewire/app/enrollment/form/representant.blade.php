@@ -10,7 +10,7 @@
 
 <div class="pb-2">
     @php $name = 'ci_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
+    <x-maskable mask="##.###.###" label="{{$label}}" placeholder="{{$label}}" wire:model.live="{{$model}}" right-icon="calculator" corner-hint="Sólo números"/>
 </div>
 
 <div class="pb-2">
@@ -20,12 +20,12 @@
 
 <div class="pb-2">
     @php $name = 'phone_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}"/>
+    <x-phone mask="(####) ###-##-##" right-icon="phone" label="{{$label}}" wire:model.live="{{$model}}"/>
 </div>
 
 <div class="pb-2">
     @php $name = 'cellphone_representant' ; $model = 'enrollment.'.$name; $label=$list_comment[$name] @endphp
-    <x-inputs.phone mask="(####) ###-##-##" right-icon="table" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
+    <x-phone mask="(####) ###-##-##" right-icon="table" label="{{$label}}" wire:model.live="{{$model}}" corner-hint="Sólo números"/>
 </div>
 
 <div class="pb-2">

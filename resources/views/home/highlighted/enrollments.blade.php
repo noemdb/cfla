@@ -15,7 +15,7 @@
         <x-input label="Cédula del Representante" placeholder="Sólo números" corner-hint="Ej: 12345678">
             <x-slot name="append">
                 <div class="absolute inset-y-0 right-0 flex items-center p-0.5">
-                    <x-button class="h-full rounded-r-md" icon="search" primary flat squared />
+                    <x-button class="h-full rounded-r-md" icon="magnifying-glass" primary flat squared />
                 </div>
             </x-slot>
         </x-input>

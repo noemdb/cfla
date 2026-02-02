@@ -1,5 +1,5 @@
-<div class="min-h-screen bg-gray-900 text-white">
-    @if($currentView === 'student-identification')
+<div class="min-h-screen text-white">
+    @if ($currentView === 'student-identification')
         @include('livewire.diagnostic.student-identification')
     @elseif($currentView === 'dashboard')
         @include('livewire.diagnostic.dashboard')

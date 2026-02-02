@@ -10,12 +10,12 @@ use App\Models\app\Educational\DebateOption;
 use App\Models\app\Educational\DebateQuestion;
 use Livewire\Component;
 use Livewire\Attributes\On;
-use WireUi\Traits\Actions;
+use WireUi\Traits\WireUiActions;
 
 
 class OptionComponent extends Component
 {
-    use Actions;
+    use WireUiActions;
 
     public $question,$options,$answer,$active_id,$literal,$colors;
     public $grado,$seccions,$seccion_score,$timeRemaining,$timerActive,$pollingInterval,$timeElapsed;
