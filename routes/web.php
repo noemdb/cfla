@@ -33,10 +33,6 @@ use App\Models\VotingPoll;
 // });
 // Route::get('/', function () { return view('home'); });
 
-<?php
-
-use Illuminate\Support\Facades\Route;
-
 // ===================================================
 // BLOQUEO DE PARÁMETROS MALICIOSOS - ALTA PRIORIDAD
 // ===================================================
