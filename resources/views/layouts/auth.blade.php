@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>@yield('title', 'Acceso al Sistema - ' . config('app.name', 'SIA'))</title>
+
+    <!-- Updated favicon to use Font Awesome stethoscope SVG -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'><path fill='%2310b981' d='M64 112C64 85.5 85.5 64 112 64L160 64C177.7 64 192 78.3 192 96C192 113.7 177.7 128 160 128L128 128L128 256C128 309 171 352 224 352C277 352 320 309 320 256L320 128L288 128C270.3 128 256 113.7 256 96C256 78.3 270.3 64 288 64L336 64C362.5 64 384 85.5 384 112L384 256C384 333.4 329 398 256 412.8L256 432C256 493.9 306.1 544 368 544C429.9 544 480 493.9 480 432L480 346.5C442.7 333.3 416 297.8 416 256C416 203 459 160 512 160C565 160 608 203 608 256C608 297.8 581.3 333.4 544 346.5L544 432C544 529.2 465.2 608 368 608C270.8 608 192 529.2 192 432L192 412.8C119 398 64 333.4 64 256L64 112zM512 288C529.7 288 544 273.7 544 256C544 238.3 529.7 224 512 224C494.3 224 480 238.3 480 256C480 273.7 494.3 288 512 288z'/></svg>">
+
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @wireUiScripts
+    @livewireStyles
+
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Portal de acceso seguro al sistema U.E. COLEGIO FRAY LUIS AMIGÓ">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Prevenir zoom en móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    @yield('styles')
+</head>
+
+<body
+    class="bg-[#020617] text-gray-100 font-sans antialiased min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-950/50 via-gray-950 to-black selection:bg-emerald-500 selection:text-white bg-fixed">
+
+    <div class="relative z-[100]">
+        <x-notifications />
+    </div>
+
+
+    <!-- Header -->
+    <header class="bg-gray-900/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+        <div class="container-fluid mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo y título principal -->
+                <div class="flex items-center space-x-6">
+                    <div class="flex-shrink-0">
+                        <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ config('app.name') }} Logo"
+                            class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
+                    </div>
+
+                    <div class="flex flex-col">
+                        <h1 class="text-lg md:text-2xl font-bold text-white">U.E. COLEGIO FRAY LUIS AMIGÓ</h1>
+                        <p class="sm:block text-sm text-emerald-300"><strong>Portal de Acceso.</strong> Identidad y seguridad</p>
+                    </div>
+                </div>
+
+                <div class="">
+                    <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 py-6">
+        @yield('content')
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 backdrop-blur-md border-t border-white/5 mt-auto">
+        <div class="container mx-auto px-4 py-6">
+            <div class="text-center space-y-3">
+                <!-- Características del sistema -->
+                <div class="flex items-center justify-center space-x-6 text-sm text-emerald-300 flex-wrap gap-2">
+                    <div class="flex items-center space-x-1">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        <span>Conexión cifrada</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span>Seguridad institucional</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        <span>Protección de datos</span>
+                    </div>
+                </div>
+
+                <!-- Copyright -->
+                <p class="text-xs text-gray-400">
+                    © {{ date('Y') }} <strong>SAEFL</strong> @noemdb | Módulo de Autenticación Segura. Todos los
+                    derechos reservados.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    @livewireScripts
+
+    @yield('script')
+
+    <!-- Scripts de micro-interacción para login -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Marcar como enviando cuando se envía el formulario
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = `
+                            <svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Procesando...</span>
+                        `;
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Estilos adicionales para auth -->
+    <style>
+        /* Animaciones suaves para cards */
+        .diagnostic-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .diagnostic-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.15);
+        }
+
+        .diagnostic-card:active {
+            transform: translateY(-2px);
+        }
+
+        /* Focus mejorado para accesibilidad */
+        input:focus,
+        button:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #10b981;
+            outline-offset: 2px;
+        }
+
+        /* Animación de entrada para elementos */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Efectos para botones */
+        .btn-diagnostic {
+            background: linear-gradient(135deg, #059669, #10b981);
+            transition: all 0.3s ease;
+        }
+
+        .btn-diagnostic:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-diagnostic:active {
+            transform: translateY(0);
+        }
+    </style>
+</body>
+
+</html>

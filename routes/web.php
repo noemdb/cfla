@@ -102,7 +102,7 @@ Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showPart
 
 Route::get('/admin', function () {
     return view('admin.index');
-})->middleware(['auth', 'isAdmin'])->name('admin.index');
+})->middleware(['auth'])->name('admin.index');
 
 // Rutas del panel administrativo para los voting
 Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdmin'])->group(function () {
@@ -141,6 +141,10 @@ Route::prefix('admin/voting')->name('admin.voting.')->middleware(['auth', 'isAdm
 
 Route::prefix('admin')->name('admin.logs')->middleware(['auth', 'isAdmin'])->group(function () {
     Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+});
+
+Route::prefix('admin/diagnostico')->name('admin.diagnostico.')->middleware(['auth', 'isAdmin'])->group(function () {
+    Route::get('/', \App\Livewire\Admin\Diagnostic\IndexComponent::class)->name('index');
 });
 
 // API para fingerprinting

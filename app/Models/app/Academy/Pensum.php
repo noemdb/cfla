@@ -15,7 +15,12 @@ class Pensum extends Model
         'grado_id',
         'asignatura_id',
         'status_component',
+        'status_active_diagnostic',
         'observations',
+    ];
+
+    protected $casts = [
+        'status_active_diagnostic' => 'boolean',
     ];
 
     const COLUMN_COMMENTS = [
@@ -24,6 +29,7 @@ class Pensum extends Model
         'asignatura_id' => 'Asignatura',
         'status_component' => 'Contiene componentes de Formación?',
         'observations' => 'Observación',
+        'status_active_diagnostic' => 'Activo para diagnostico',
     ];
 
     public function diagQuestions()
@@ -34,5 +40,15 @@ class Pensum extends Model
     public function asignatura()
     {
         return $this->belongsTo(Asignatura::class, 'asignatura_id');
+    }
+
+    public function pestudio()
+    {
+        return $this->belongsTo(Pestudio::class, 'pestudio_id');
+    }
+
+    public function grado()
+    {
+        return $this->belongsTo(Grado::class, 'grado_id');
     }
 }
