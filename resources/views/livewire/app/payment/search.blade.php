@@ -16,7 +16,7 @@
                     <div class="text-emerald-400 font-medium tracking-wide">Asistente</div>
                     <div
                         class="text-xs font-semibold text-emerald-200/70 uppercase tracking-widest mt-2 bg-emerald-900/30 py-1 px-3 rounded-full inline-block border border-emerald-500/10">
-                        Período Escolar 2024 - 2025</div>
+                        Período Escolar 2025 - 2026</div>
                 </div>
 
                 <!-- Input Section -->
