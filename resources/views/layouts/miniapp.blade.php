@@ -24,7 +24,7 @@
 
     <!-- Mobile App Container -->
     <div
-        class="w-full h-full max-w-md bg-gray-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-gray-950/40 min-h-screen sm:min-h-[calc(100vh-3rem)] sm:h-auto sm:rounded-3xl shadow-[0_20px_50px_-12px_rgba(16,185,129,0.15)] border-x border-gray-800/50 sm:border border-white/5 relative flex flex-col overflow-hidden ring-1 ring-white/10">
+        class="w-full h-full max-w-md bg-gray-950/70 backdrop-blur-xl supports-[backdrop-filter]:bg-gray-950/40 min-h-screen sm:min-h-[calc(100vh-3rem)] sm:h-auto sm:rounded-3xl shadow-[0_20px_50px_-12px_rgba(16,185,129,0.15)] border-x border-gray-800/50 sm:border border-white/5 relative flex flex-col overflow-visible ring-1 ring-white/10">
 
         <!-- Header Section -->
         <div id="header" class="bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 border-b border-white/5">
