@@ -27,7 +27,7 @@
 
         <!-- Componente Livewire para resultados en tiempo real -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            @livewire('voting-poll-result', ['access_token' => $access_token])
+            @livewire('app.voting.voting-poll-result', ['access_token' => $access_token])
         </div>
 
         <!-- Footer con información adicional -->
@@ -67,8 +67,8 @@
 @endsection
 
 @section('content')
-@parent
-<style>
+    @parent
+    <style>
         @media print {
             .no-print {
                 display: none !important;

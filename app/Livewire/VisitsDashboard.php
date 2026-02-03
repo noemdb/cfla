@@ -10,7 +10,7 @@ use WireUi\Traits\WireUiActions;
 
 class VisitsDashboard extends Component
 {
-    use WithPagination, Actions;
+    use WithPagination, WireUiActions;
 
     public $perPage = 5;
     public $search = '';

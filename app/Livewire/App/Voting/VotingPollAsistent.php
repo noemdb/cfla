@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\App\Voting;
 
-use App\Models\VotingPoll;
-use App\Models\VotingSession;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingPoll;
+use App\Models\app\Voting\VotingSession;
+use App\Models\app\Voting\VotingVote;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Illuminate\Support\Str;
@@ -411,6 +411,6 @@ class VotingPollAsistent extends Component
 
     public function render()
     {
-        return view('livewire.voting-poll-asistent');
+        return view('livewire.app.voting.voting-poll-asistent');
     }
 }

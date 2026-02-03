@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\VotingPoll;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingPoll;
+use App\Models\app\Voting\VotingVote;
 
 class VotingDashboardController extends Controller
 {

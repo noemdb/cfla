@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\App\Voting;
 
-use App\Models\VotingPoll;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingPoll;
+use App\Models\app\Voting\VotingVote;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
@@ -78,6 +78,6 @@ class VotingPollResult extends Component
 
     public function render()
     {
-        return view('livewire.voting-poll-result');
+        return view('livewire.app.voting.voting-poll-result');
     }
 }

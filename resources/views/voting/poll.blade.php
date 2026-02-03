@@ -29,7 +29,7 @@
 
         <!-- Contenido principal -->
         <div class="relative z-10">
-            <livewire:voting-poll :access-token="$accessToken" />
+            <livewire:app.voting.voting-poll :access-token="$accessToken" />
         </div>
     </div>
 

@@ -50,7 +50,7 @@
         <!-- Contenido Principal -->
         <div class="max-w-4xl mx-auto py-8">
             @if ($polls->count() > 0)
-                <livewire:voting-poll-asistent :polls="$polls" />
+                <livewire:app.voting.voting-poll-asistent :polls="$polls" />
             @else
                 <!-- Estado vacío -->
                 <div class="text-center py-16">
@@ -138,8 +138,8 @@
 
 
 @section('script')
-@parent
-<script>
+    @parent
+    <script>
         // Auto-refresh cada 30 segundos
         setInterval(function() {
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();

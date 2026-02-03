@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVotingPollRequest;
 use App\Http\Requests\UpdateVotingPollRequest;
-use App\Models\VotingPoll;
+use App\Models\app\Voting\VotingPoll;
 use Illuminate\Http\Request;
-use App\Models\VotingSession;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingSession;
+use App\Models\app\Voting\VotingVote;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -33,7 +33,6 @@ class VotingPollController extends Controller
             ]);
 
             return view('admin.voting.polls.index', compact('polls'));
-
         } catch (Exception $e) {
             Log::error('Error loading admin polls index: ' . $e->getMessage(), [
                 'error_trace' => $e->getTraceAsString()
@@ -56,7 +55,6 @@ class VotingPollController extends Controller
             ]);
 
             return view('admin.voting.polls.create');
-
         } catch (Exception $e) {
             Log::error('Error loading poll create page: ' . $e->getMessage());
 
@@ -94,7 +92,6 @@ class VotingPollController extends Controller
                     'description' => 'Encuesta creada exitosamente.',
                     'icon' => 'success'
                 ]);
-
         } catch (\Exception $e) {
             Log::error('Error creating poll: ' . $e->getMessage(), [
                 'request_data' => $request->validated(),
@@ -123,7 +120,6 @@ class VotingPollController extends Controller
             ]);
 
             return view('admin.voting.polls.show', compact('poll'));
-
         } catch (Exception $e) {
             Log::error('Error loading poll details: ' . $e->getMessage(), [
                 'poll_id' => $poll->id ?? 'unknown'
@@ -150,7 +146,6 @@ class VotingPollController extends Controller
             ]);
 
             return view('admin.voting.polls.edit', compact('poll'));
-
         } catch (Exception $e) {
             Log::error('Error loading poll edit page: ' . $e->getMessage(), [
                 'poll_id' => $poll->id ?? 'unknown'
@@ -193,7 +188,6 @@ class VotingPollController extends Controller
                     'description' => 'Encuesta actualizada exitosamente.',
                     'icon' => 'success'
                 ]);
-
         } catch (\Exception $e) {
             Log::error('Error updating poll: ' . $e->getMessage(), [
                 'poll_id' => $poll->id,
@@ -231,7 +225,6 @@ class VotingPollController extends Controller
                     'description' => "Encuesta \"{$pollTitle}\" eliminada exitosamente.",
                     'icon' => 'success'
                 ]);
-
         } catch (\Exception $e) {
             Log::error('Error deleting poll: ' . $e->getMessage(), [
                 'poll_id' => $poll->id ?? 'unknown',
@@ -268,7 +261,6 @@ class VotingPollController extends Controller
                     'description' => "La encuesta \"{$poll->title}\" está ahora activa y recibiendo votos.",
                     'icon' => 'success'
                 ]);
-
         } catch (\Exception $e) {
             Log::error('Error starting poll: ' . $e->getMessage(), [
                 'poll_id' => $poll->id,
@@ -302,7 +294,6 @@ class VotingPollController extends Controller
                     'description' => "La encuesta \"{$poll->title}\" ha sido detenida y ya no acepta votos.",
                     'icon' => 'info'
                 ]);
-
         } catch (\Exception $e) {
             Log::error('Error stopping poll: ' . $e->getMessage(), [
                 'poll_id' => $poll->id,
@@ -355,7 +346,6 @@ class VotingPollController extends Controller
                     'description' => "La encuesta \"{$pollTitle}\" ha sido reiniciada. Se eliminaron {$voteCount} votos y todas las sesiones.",
                     'icon' => 'warning'
                 ]);
-
         } catch (Exception $e) {
             Log::error('Error resetting poll: ' . $e->getMessage(), [
                 'poll_id' => $poll->id,

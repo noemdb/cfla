@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visit;
-use App\Models\VotingPoll;
-use App\Models\VotingSession;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingPoll;
+use App\Models\app\Voting\VotingSession;
+use App\Models\app\Voting\VotingVote;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -118,8 +118,8 @@ class PollVotingController extends Controller
         // Obtener encuestas activas con sus opciones y conteo de votos
         $polls = VotingPoll::where('enable', true)
             ->with(['options'])
-            ->withCount(['votes' => function($query) {
-                $query->whereHas('option', function($subQuery) {
+            ->withCount(['votes' => function ($query) {
+                $query->whereHas('option', function ($subQuery) {
                     $subQuery->whereColumn('poll_id', 'voting_polls.id');
                 });
             }])
@@ -129,8 +129,8 @@ class PollVotingController extends Controller
         // Calcular estadísticas generales
         $activePolls = VotingPoll::where('enable', true)->count();
 
-        $totalVotes = VotingVote::whereHas('option', function($query) {
-            $query->whereHas('poll', function($subQuery) {
+        $totalVotes = VotingVote::whereHas('option', function ($query) {
+            $query->whereHas('poll', function ($subQuery) {
                 $subQuery->where('enable', true);
             });
         })->count();

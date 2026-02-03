@@ -59,7 +59,7 @@
                                 <p class="text-blue-400 font-medium">Total Votos</p>
                                 <p class="text-2xl font-bold text-white">
                                     {{ $polls->sum(function ($poll) {
-                                        return \App\Models\VotingVote::whereHas('option', function ($query) use ($poll) {
+                                        return \App\Models\app\Voting\VotingVote::whereHas('option', function ($query) use ($poll) {
                                             $query->where('poll_id', $poll->id);
                                         })->count();
                                     }) }}
@@ -161,7 +161,7 @@
 
                         <!-- Contenido de resultados -->
                         <div class="p-4">
-                            @livewire('voting-poll-result', ['access_token' => $poll->access_token, 'showTitle' => false], key($poll->id))
+                            @livewire('app.voting.voting-poll-result', ['access_token' => $poll->access_token, 'showTitle' => false], key($poll->id))
                         </div>
                     </div>
 

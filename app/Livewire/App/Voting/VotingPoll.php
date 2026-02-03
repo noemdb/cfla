@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\App\Voting;
 
-use App\Models\VotingPoll as Poll;
-use App\Models\VotingSession;
-use App\Models\VotingVote;
+use App\Models\app\Voting\VotingPoll as Poll;
+use App\Models\app\Voting\VotingSession;
+use App\Models\app\Voting\VotingVote;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
@@ -728,6 +728,6 @@ class VotingPoll extends Component
             $this->updateTimeRemaining();
         }
 
-        return view('livewire.voting-poll');
+        return view('livewire.app.voting.voting-poll');
     }
 }

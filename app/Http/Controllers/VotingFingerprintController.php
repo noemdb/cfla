@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VotingPoll;
-use App\Models\VotingSession;
+use App\Models\app\Voting\VotingPoll;
+use App\Models\app\Voting\VotingSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;

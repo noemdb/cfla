@@ -15,7 +15,7 @@ use App\Http\Controllers\Admin\VotingPollController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
-use App\Models\VotingPoll;
+use App\Models\app\Voting\VotingPoll;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,6 +144,3 @@ Route::post('/login', [LoginController::class, 'login']);
 
 // Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-
-
