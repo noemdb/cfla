@@ -1,60 +1,38 @@
-<x-modal-card blur wire:model="modalSearch" align="center">
+<x-modal-card blur="md" wire:model="modalSearch" align="center" max-width="md">
+    <x-card class="!bg-gray-900 !border-white/10 shadow-2xl shadow-emerald-500/10 overflow-hidden relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
 
-    <div class="h-full flex flex-col justify-center max-w-2xl mx-auto shadow-xl">
-        <x-card class="border border-emerald-500/30 bg-gray-900/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
-
-            <div class="p-6">
-                <!-- Header -->
-                <div class="text-center mb-8">
-                    <div
-                        class="inline-flex justify-center items-center p-3 bg-emerald-900/30 rounded-full border border-emerald-500/20 mb-4 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                        <x-icon name="document-text" class="w-10 h-10 text-emerald-400" />
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-1">Reporte de Pago</h2>
-                    <div class="text-emerald-400 font-medium tracking-wide">Asistente</div>
-                    <div
-                        class="text-xs font-semibold text-emerald-200/70 uppercase tracking-widest mt-2 bg-emerald-900/30 py-1 px-3 rounded-full inline-block border border-emerald-500/10">
-                        Período Escolar 2025 - 2026</div>
+        <div class="space-y-6 pt-4">
+            <!-- Header Info -->
+            <div class="text-center mb-2">
+                <div
+                    class="inline-flex justify-center items-center p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-4 shadow-lg shadow-emerald-500/5">
+                    <x-icon name="clipboard-document-check" class="w-12 h-12 text-emerald-500" />
                 </div>
-
-                <!-- Input Section -->
-                <div class="bg-gray-800/50 p-6 rounded-xl border border-emerald-500/10 mb-6">
-                    <div class="flex items-end gap-3">
-                        <div class="flex-grow">
-                            <x-input
-                                class="bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500/20 transition-colors"
-                                label="CI. Representante" placeholder="Ej: 12345678" corner-hint="Sólo números"
-                                wire:model="ci" />
-                        </div>
-                        <div class="mb-[2px]">
-                            <x-button
-                                class="h-[42px] px-6 bg-emerald-600 hover:bg-emerald-500 text-white border-0 shadow-lg shadow-emerald-500/20 transition-all rounded-lg"
-                                icon="magnifying-glass" wire:click="search" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Info Box -->
-                <div class="bg-gray-800/80 rounded-lg p-4 border-l-4 border-emerald-500">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0 mt-0.5">
-                            <x-icon name="information-circle" class="w-5 h-5 text-emerald-400" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-gray-100 leading-relaxed font-light tracking-wide">
-                                El número de cédula de identidad se solicita para verificar la identidad del
-                                representante y asociar su reporte de pago.
-                                El <span class="text-emerald-400 font-bold">SAEFL</span> buscará en su base de datos
-                                para iniciar el asistente.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
+                <h3 class="text-xl font-bold text-white tracking-tight">Asistente de Registro</h3>
+                <p class="text-xs text-emerald-500/80 font-semibold uppercase tracking-widest mt-1">Período 2025 - 2026
+                </p>
             </div>
-        </x-card>
-    </div>
 
+            <!-- Input Form -->
+            <div class="bg-black/40 p-6 rounded-lg border border-white/5 space-y-6 shadow-2xl">
+                <x-input label="Cédula del Representante" placeholder="Ej: 12345678" wire:model="ci"
+                    icon="identification" hint="Sin puntos ni guiones"
+                    class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 !text-gray-100 placeholder:!text-gray-600 transition-all shadow-inner" />
+
+                <x-button primary xl full label="Continuar" icon="check" wire:click="search"
+                    class="!bg-emerald-600 hover:!bg-emerald-500 !border-none shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all font-black uppercase tracking-widest py-4" />
+            </div>
+
+            <!-- Helpful Note -->
+            <div class="flex items-start gap-3 p-4 bg-emerald-950 rounded-xl border border-emerald-500/10">
+                <x-icon name="information-circle" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                <p class="text-[11px] leading-relaxed text-gray-400">
+                    La cédula se utiliza para verificar sus datos y asociar correctamente el reporte de pago en nuestra
+                    base
+                    de datos institucional <span class="text-emerald-500 font-bold">SAEFL</span>.
+                </p>
+            </div>
+        </div>
+    </x-card>
 </x-modal-card>

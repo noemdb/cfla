@@ -1,6 +1,6 @@
-<x-modal-card title="Reportes de pago" blur wire:model="modalAssistent" align="center">
+<x-modal-card blur="md" title="Reportes de pago" blur wire:model="modalAssistent" align="center">
 
-    <div class="my-2 p-4 bg-emerald-900/30 border border-emerald-500/30 rounded-lg flex justify-between items-center">
+    <div class="my-2 p-4 bg-emerald-900 border border-emerald-500/30 rounded-lg flex justify-between items-center">
         <div class="text-emerald-400 font-bold">
             <span class="text-xl font-bold">Representante encontrado.</span> <br> <span
                 class="text-sm text-gray-200 text-left">Nombre: {{ $representant->name ?? null }}, CI:
@@ -20,9 +20,6 @@
             @include('livewire.app.payment.stepper.motive')
             @include('livewire.app.payment.stepper.transactions')
         </div>
-        {{-- <div class="{{($step==2) ? 'block' : 'hidden'}}" id="transactions">
-            @include('livewire.app.payment.stepper.transactions')
-        </div> --}}
         <div class="{{ $step == 2 ? 'block' : 'hidden' }}" id="confirm">
             @include('livewire.app.payment.stepper.confirm')
         </div>

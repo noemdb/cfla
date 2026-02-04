@@ -30,7 +30,7 @@
 
 <x-dialog />
 
-<x-modal wire:model.live="simpleModal">
+<x-modal wire:model.live="simpleModal" blur>
     <x-card title="Consent Terms">
         <p class="text-gray-600">
             Lorem Ipsum...
