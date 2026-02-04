@@ -14,9 +14,12 @@
             $model = 'payment.' . $name;
             $label = $list_comment[$name];
         @endphp
-        <x-datetime-picker parse-format="YYYY-MM-DD" display-format="DD-MM-YYYY" label="{{ $label }}"
+        {{-- <x-datetime-picker position="top" parse-format="YYYY-MM-DD" display-format="DD-MM-YYYY" label="{{ $label }}"
             placeholder="{{ $label }}" wire:model.live="{{ $model }}" :min="now()->subYears(1)" :max="now()"
-            without-time="false" class="" />
+            without-time="false" class="" /> --}}
+
+        <x-date label="{{ $label }}" placeholder="{{ $label }}" wire:model.live="{{ $model }}"
+            :min="now()->subYears(1)" :max="now()" />
     </div>
 </div>
 
@@ -27,8 +30,8 @@
             $model = 'payment.' . $name;
             $label = $list_comment[$name];
         @endphp
-        <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$list_bank"
-            wire:model.live="{{ $model }}" option-key-value class="" />
+        <x-native-select label="{{ $label }}" placeholder="Seleccionar" :options="$list_bank"
+            wire:model.live="{{ $model }}" option-key-value />
     </div>
     <div>
         @php
@@ -36,7 +39,7 @@
             $model = 'payment.' . $name;
             $label = $list_comment[$name];
         @endphp
-        <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$banco_emisor_list"
+        <x-native-select label="{{ $label }}" placeholder="Seleccionar" :options="$banco_emisor_list"
             wire:model.live="{{ $model }}" option-key-value class="" />
     </div>
 </div>
@@ -48,7 +51,7 @@
             $model = 'payment.' . $name;
             $label = $list_comment[$name];
         @endphp
-        <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$method_pay_list"
+        <x-native-select label="{{ $label }}" placeholder="Seleccionar" :options="$method_pay_list"
             wire:model.live="{{ $model }}" option-key-value class="" />
     </div>
     <div>
