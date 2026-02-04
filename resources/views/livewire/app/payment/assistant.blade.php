@@ -1,12 +1,18 @@
-<x-modal-card blur="md" title="Reportes de pago" blur wire:model="modalAssistent" align="center">
+<x-modal-card blur="md" title="Reportes de pago" wire:model="modalAssistent" align="center">
 
-    <div class="my-2 p-4 bg-emerald-900 border border-emerald-500/30 rounded-lg flex justify-between items-center">
-        <div class="text-emerald-400 font-bold">
-            <span class="text-xl font-bold">Representante encontrado.</span> <br> <span
-                class="text-sm text-gray-200 text-left">Nombre: {{ $representant->name ?? null }}, CI:
-                {{ $representant->ci_representant ?? null }}</span>
+    <div
+        class="my-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center shadow-sm">
+        <div class="space-y-1">
+            <span class="text-lg font-bold text-emerald-500">Representante encontrado</span>
+            <div class="text-sm text-gray-400">
+                <span class="font-medium text-gray-300">{{ $representant->name ?? null }}</span>
+                <span class="mx-1 text-gray-600">|</span>
+                <span class="text-gray-400">CI: {{ $representant->ci_representant ?? null }}</span>
+            </div>
         </div>
-        <div><x-mini-badge icon="check" positive class="w-10 h-10 bg-emerald-600 border-none text-white" /></div>
+        <div class="bg-emerald-500/20 p-2 rounded-lg">
+            <x-icon name="check-circle" class="w-8 h-8 text-emerald-500" />
+        </div>
     </div>
 
     @php $width = ($limit>0) ? round((100 * $step / $limit)) : 0; @endphp
@@ -16,7 +22,7 @@
     </div>
 
     <div class="mb-6">
-        <div class="{{ $step == 1 ? 'block' : 'hidden' }}" id="tabs-motive">
+        <div class="{{ $step == 1 ? 'block' : 'hidden' }} p-2" id="tabs-motive">
             @include('livewire.app.payment.stepper.motive')
             @include('livewire.app.payment.stepper.transactions')
         </div>

@@ -6,8 +6,7 @@
             $label = $list_comment[$name];
         @endphp
         <x-currency label="{{ $label }}" prefix="Bs." thousands="." decimal=","
-            wire:model.live="{{ $model }}"
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            wire:model.live="{{ $model }}" class="" />
     </div>
     <div>
         @php
@@ -17,8 +16,7 @@
         @endphp
         <x-datetime-picker parse-format="YYYY-MM-DD" display-format="DD-MM-YYYY" label="{{ $label }}"
             placeholder="{{ $label }}" wire:model.live="{{ $model }}" :min="now()->subYears(1)" :max="now()"
-            without-time="false"
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            without-time="false" class="" />
     </div>
 </div>
 
@@ -30,8 +28,7 @@
             $label = $list_comment[$name];
         @endphp
         <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$list_bank"
-            wire:model.live="{{ $model }}" option-key-value
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            wire:model.live="{{ $model }}" option-key-value class="" />
     </div>
     <div>
         @php
@@ -40,8 +37,7 @@
             $label = $list_comment[$name];
         @endphp
         <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$banco_emisor_list"
-            wire:model.live="{{ $model }}" option-key-value
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            wire:model.live="{{ $model }}" option-key-value class="" />
     </div>
 </div>
 
@@ -53,8 +49,7 @@
             $label = $list_comment[$name];
         @endphp
         <x-select label="{{ $label }}" placeholder="Seleccionar" :options="$method_pay_list"
-            wire:model.live="{{ $model }}" option-key-value
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            wire:model.live="{{ $model }}" option-key-value class="" />
     </div>
     <div>
         @php
@@ -63,8 +58,7 @@
             $label = $list_comment[$name];
         @endphp
         <x-maskable label="{{ $label }}" mask="################" placeholder="{{ $label }}"
-            wire:model.live="{{ $model }}" right-icon="calculator" corner-hint="Sólo números"
-            class="!bg-gray-950 !border-gray-800 focus:!border-emerald-500/50 focus:!ring-4 focus:!ring-emerald-500/10 transition-all !text-gray-100 placeholder:!text-gray-600" />
+            wire:model.live="{{ $model }}" right-icon="calculator" corner-hint="Sólo números" class="" />
     </div>
 </div>
 
@@ -88,15 +82,15 @@
     @endphp
     <label for="formFile"
         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ $label }}</label>
-    <div class="relative group">
+    <div class="relative group mt-1">
         <input wire:model.live="{{ $model }}"
-            class="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
+            class="block w-full text-sm text-slate-400
+            file:mr-4 file:py-2.5 file:px-5
             file:rounded-xl file:border-0
             file:text-xs file:font-bold file:uppercase
             file:bg-emerald-600 file:text-white
             hover:file:bg-emerald-500
-            dark:bg-gray-950 dark:border-gray-800 rounded-xl border border-dashed border-gray-700 p-2 transition-all cursor-pointer shadow-inner"
+            dark:bg-slate-900/50 dark:border-slate-800 rounded-xl border border-dashed border-slate-700 p-3 transition-all cursor-pointer shadow-inner"
             type="file" id="formFile" />
     </div>
 </div>
@@ -113,5 +107,6 @@
         $model = 'payment.' . $name;
         $label = $list_comment[$name];
     @endphp
-    <x-textarea right-icon="table" label="{{ $label }}" wire:model.live="{{ $model }}" />
+    <x-textarea right-icon="table" label="{{ $label }}" wire:model.live="{{ $model }}"
+        class="border border-slate-700 p-2" />
 </div>
