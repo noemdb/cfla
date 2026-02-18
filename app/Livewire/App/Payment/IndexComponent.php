@@ -28,7 +28,7 @@ class IndexComponent extends Component
     public $ci;
     public $step = 0, $limit = 2;
     public $modalStart, $modalOperOk, $modalSearch, $modalAssistent, $modalEmpty;
-    public Representant $representant;
+    public ?Representant $representant = null;
     public PaymentForm $payment;
     public $list_comment, $list_bank, $method_pay_list, $type_pay_list, $banco_emisor_list;
     public $toDate, $banco;
