@@ -86,7 +86,7 @@
     <label for="formFile"
         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ $label }}</label>
     <div class="relative group mt-1">
-        <input wire:model.live="{{ $model }}"
+        <input wire:model.live="{{ $model }}" accept=".jpg,.jpeg,.png,.gif,.webp,.svg"
             class="block w-full text-sm text-slate-400
             file:mr-4 file:py-2.5 file:px-5
             file:rounded-xl file:border-0
@@ -96,11 +96,14 @@
             dark:bg-slate-900/50 dark:border-slate-800 rounded-xl border border-dashed border-slate-700 p-3 transition-all cursor-pointer shadow-inner"
             type="file" id="formFile" />
     </div>
+    @error('image')
+        <p class="mt-1 text-xs text-red-600 font-semibold">{{ $message }}</p>
+    @enderror
 </div>
-@if ($image)
-    <div class="text-center text-xs text-gray-600 font-bold">Vista previa</div>
-    <div class="flex justify-center">
-        <img class="border rounded min-w-64 shadow" src="{{ $image->temporaryUrl() }}">
+@if ($image && in_array(strtolower($image->extension()), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']))
+    <div class="text-center text-xs text-gray-600 font-bold mt-2">Vista previa</div>
+    <div class="flex justify-center mt-1">
+        <img class="border rounded min-w-64 shadow transition-all duration-300" src="{{ $image->temporaryUrl() }}">
     </div>
 @endif
 
