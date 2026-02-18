@@ -125,7 +125,7 @@
         <hr style="border: 1px #ccc solid">
 
         <div>
-            Te invitamos cordialmente a visitar nuestro colegio en el día de tu conveniencia, desde el 15 hasta el 22 de agosto de 8am a 2pm. Durante este período, se estarán llevando a cabo las actividades propias del Censo Escolar 2025 - 2026 . ¡Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso!
+            Te invitamos cordialmente a visitar nuestro colegio en el día seleccionado de 8am a 2pm. ¡Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso!
         </div>
 
         <div>
