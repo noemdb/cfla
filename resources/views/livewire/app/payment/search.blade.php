@@ -4,14 +4,26 @@
 
         <div class="space-y-6 pt-4">
             <!-- Header Info -->
-            <div class="text-center mb-2">
-                <div
-                    class="inline-flex justify-center items-center p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-4 shadow-lg shadow-emerald-500/5">
-                    <x-icon name="clipboard-document-check" class="w-12 h-12 text-emerald-500" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2 items-center">
+                <div class="text-center">
+                    <div
+                        class="inline-flex justify-center items-center p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-3 shadow-lg shadow-emerald-500/5">
+                        <x-icon name="clipboard-document-check" class="w-10 h-10 text-emerald-500" />
+                    </div>
+                    <h3 class="text-lg font-bold text-white tracking-tight">Asistente de Registro</h3>
+                    <p class="text-[10px] text-emerald-500/80 font-semibold uppercase tracking-widest mt-1">Período 2025
+                        - 2026
+                    </p>
                 </div>
-                <h3 class="text-xl font-bold text-white tracking-tight">Asistente de Registro</h3>
-                <p class="text-xs text-emerald-500/80 font-semibold uppercase tracking-widest mt-1">Período 2025 - 2026
-                </p>
+                <div class="text-[13px] text-gray-300 leading-relaxed text-left">
+                    <span class="text-emerald-600 dark:text-emerald-400 font-bold block mb-1">Un proceso sencillo y
+                        rápido:</span>
+                    Usando esta opción es necesaria la verificación, conciliación y registro de los datos ingresados.
+                    Estas
+                    actividades cumplen con un lapso de tiempo <span
+                        class="text-emerald-600 dark:text-emerald-200 font-semibold">(1 o 2 días)</span> para ser
+                    procesados en el <span class="text-emerald-600 dark:text-emerald-400 font-bold">SAEFL</span>.
+                </div>
             </div>
 
             <!-- Input Form -->
