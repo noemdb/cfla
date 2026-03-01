@@ -7,6 +7,7 @@ use Livewire\Component;
 class ImportantInformationComponent extends Component
 {
     public $images = [];
+    public $imagePost;
 
     public function mount()
     {
