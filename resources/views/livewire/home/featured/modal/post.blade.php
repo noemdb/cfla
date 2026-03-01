@@ -25,7 +25,7 @@
                     <!-- Body Content -->
                     <div
                         class="prose prose-invert max-w-none text-gray-300 text-base md:text-lg border-t border-emerald-500/20 pt-6">
-                        {{ $post->body ?? null }}
+                        {!! $post->body ?? null !!}
                     </div>
 
                     @if ($post->insert)
