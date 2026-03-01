@@ -1,4 +1,4 @@
-<div class="container-fluid mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="container-fluid mx-auto px-2 sm:px-2 lg:px-2 py-2">
     <div
         class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center bg-white dark:bg-gray-900/40 rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-emerald-100/50 dark:border-emerald-900/20">
 
@@ -47,7 +47,7 @@
             @endif
 
             <!-- Floating Badge -->
-            <div class="absolute top-4 left-4 z-20 pointer-events-none">
+            {{-- <div class="absolute top-4 left-4 z-20 pointer-events-none">
                 <div
                     class="flex items-center gap-2 px-4 py-2 text-xs font-bold tracking-widest uppercase rounded-full backdrop-blur-xl bg-emerald-500 text-white shadow-xl border border-white/20">
                     <span class="relative flex h-2 w-2">
@@ -57,7 +57,7 @@
                     </span>
                     Información Al Día
                 </div>
-            </div>
+            </div> --}}
         </div>
 
         <!-- Right Column: Complementary Text -->
@@ -160,9 +160,13 @@
 
     function initImportantSwiper() {
         const swiperEl = document.querySelector('.importantSwiper');
-        if (swiperEl && !swiperEl.swiper) {
-            const slideCount = swiperEl.querySelectorAll('.swiper-slide').length;
+        if (swiperEl && !swiperEl.swiper && window.Swiper) {
+            const slides = swiperEl.querySelectorAll('.swiper-slide');
+            const slideCount = slides.length;
+            console.log('ImportantSwiper: Found ' + slideCount + ' slides');
+
             if (slideCount > 0) {
+                const canLoop = slideCount > 1;
                 new window.Swiper(".importantSwiper", {
                     modules: [
                         window.SwiperNavigation,
@@ -175,21 +179,23 @@
                         crossFade: true
                     },
                     speed: 800,
-                    loop: slideCount > 1,
-                    autoplay: slideCount > 1 ? {
+                    loop: canLoop,
+                    autoplay: canLoop ? {
                         delay: 5000,
                         disableOnInteraction: false,
                     } : false,
-                    pagination: slideCount > 1 ? {
+                    pagination: canLoop ? {
                         el: ".important-pagination",
                         clickable: true,
                     } : false,
-                    navigation: slideCount > 1 ? {
+                    navigation: canLoop ? {
                         nextEl: ".important-next",
                         prevEl: ".important-prev",
                     } : false,
                 });
             }
+        } else if (!window.Swiper) {
+            console.error('ImportantSwiper: Library not found');
         }
     }
 </script>
