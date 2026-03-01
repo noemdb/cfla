@@ -6,28 +6,45 @@
         <div class="relative rounded-3xl overflow-hidden shadow-2xl h-[350px] sm:h-[450px] md:h-[550px] group border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-800/50"
             wire:ignore>
 
-            <div class="swiper importantSwiper w-full h-full">
-                <div class="swiper-wrapper">
-                    @foreach ($images as $image)
-                        <div class="swiper-slide relative w-full h-full flex items-center justify-center p-4">
-                            <img src="{{ $image }}"
-                                class="max-w-full max-h-full object-contain drop-shadow-2xl transition-transform duration-700 group-hover:scale-[1.03]"
-                                alt="Comunicado Important" />
+            @if (count($images) > 0)
+                <div class="swiper importantSwiper w-full h-full">
+                    <div class="swiper-wrapper">
+                        @foreach ($images as $image)
+                            <div class="swiper-slide relative w-full h-full flex items-center justify-center p-4">
+                                <img src="{{ $image }}"
+                                    class="max-w-full max-h-full object-contain drop-shadow-2xl transition-transform duration-700 group-hover:scale-[1.03]"
+                                    alt="Comunicado Important" />
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (count($images) > 1)
+                        <div class="swiper-pagination important-pagination !bottom-4"></div>
+                        <!-- Navigation Controls -->
+                        <div
+                            class="swiper-button-prev important-prev !left-4 !w-10 !h-10 !bg-white/90 dark:bg-gray-800/90 backdrop-blur-md !rounded-full !text-emerald-600 after:!text-lg shadow-lg hover:!bg-emerald-500 hover:!text-white transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center">
                         </div>
-                    @endforeach
+                        <div
+                            class="swiper-button-next important-next !right-4 !w-10 !h-10 !bg-white/90 dark:bg-gray-800/90 backdrop-blur-md !rounded-full !text-emerald-600 after:!text-lg shadow-lg hover:!bg-emerald-500 hover:!text-white transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center">
+                        </div>
+                    @endif
                 </div>
-
-                <!-- Pagination -->
-                <div class="swiper-pagination important-pagination !bottom-4"></div>
-
-                <!-- Navigation Controls -->
+            @else
+                <!-- Placeholder / Empty State -->
                 <div
-                    class="swiper-button-prev important-prev !left-4 !w-10 !h-10 !bg-white/90 dark:bg-gray-800/90 backdrop-blur-md !rounded-full !text-emerald-600 after:!text-lg shadow-lg hover:!bg-emerald-500 hover:!text-white transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center">
+                    class="w-full h-full flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 p-8 text-center">
+                    <div
+                        class="w-24 h-24 mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-500">
+                        <i class="bx bx-image-alt text-5xl"></i>
+                    </div>
+                    <h3
+                        class="text-xl font-bold text-gray-900 dark:text-white mb-2 underline decoration-emerald-500 underline-offset-4">
+                        Comunicados Próximamente</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs">En este espacio compartiremos la
+                        información más relevante para nuestra comunidad.</p>
                 </div>
-                <div
-                    class="swiper-button-next important-next !right-4 !w-10 !h-10 !bg-white/90 dark:bg-gray-800/90 backdrop-blur-md !rounded-full !text-emerald-600 after:!text-lg shadow-lg hover:!bg-emerald-500 hover:!text-white transition-all duration-300 opacity-0 group-hover:opacity-100 flex items-center justify-center">
-                </div>
-            </div>
+            @endif
 
             <!-- Floating Badge -->
             <div class="absolute top-4 left-4 z-20 pointer-events-none">
@@ -144,32 +161,35 @@
     function initImportantSwiper() {
         const swiperEl = document.querySelector('.importantSwiper');
         if (swiperEl && !swiperEl.swiper) {
-            new window.Swiper(".importantSwiper", {
-                modules: [
-                    window.SwiperNavigation,
-                    window.SwiperPagination,
-                    window.SwiperAutoplay,
-                    window.SwiperEffectFade
-                ],
-                effect: "fade",
-                fadeEffect: {
-                    crossFade: true
-                },
-                speed: 800,
-                loop: true,
-                autoplay: {
-                    delay: 5000,
-                    disableOnInteraction: false,
-                },
-                pagination: {
-                    el: ".important-pagination",
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: ".important-next",
-                    prevEl: ".important-prev",
-                },
-            });
+            const slideCount = swiperEl.querySelectorAll('.swiper-slide').length;
+            if (slideCount > 0) {
+                new window.Swiper(".importantSwiper", {
+                    modules: [
+                        window.SwiperNavigation,
+                        window.SwiperPagination,
+                        window.SwiperAutoplay,
+                        window.SwiperEffectFade
+                    ],
+                    effect: "fade",
+                    fadeEffect: {
+                        crossFade: true
+                    },
+                    speed: 800,
+                    loop: slideCount > 1,
+                    autoplay: slideCount > 1 ? {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    } : false,
+                    pagination: slideCount > 1 ? {
+                        el: ".important-pagination",
+                        clickable: true,
+                    } : false,
+                    navigation: slideCount > 1 ? {
+                        nextEl: ".important-next",
+                        prevEl: ".important-prev",
+                    } : false,
+                });
+            }
         }
     }
 </script>

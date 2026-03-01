@@ -10,12 +10,17 @@ class ImportantInformationComponent extends Component
 
     public function mount()
     {
-        $directory = public_path('image/important/001');
-        if (File::exists($directory)) {
-            $files = File::files($directory);
+        $directoryPath = 'image/important/001';
+        $fullPath      = public_path($directoryPath);
+
+        if (File::isDirectory($fullPath)) {
+            $files = File::files($fullPath);
             foreach ($files as $file) {
-                if ($file->isFile() && in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
-                    $this->images[] = asset('image/important/001/' . $file->getFilename());
+                if ($file->isFile()) {
+                    $extension = strtolower($file->getExtension());
+                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
+                        $this->images[] = asset($directoryPath . '/' . $file->getFilename());
+                    }
                 }
             }
         }
