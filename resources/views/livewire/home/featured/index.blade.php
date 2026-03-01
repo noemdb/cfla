@@ -22,6 +22,6 @@
 <div class="flex justify-end py-2">
     <button wire:click="showItem({{ $item->id ?? null }})"
         class="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium shadow-lg hover:shadow-emerald-500/30">
-        Más...
+        Más... ...
     </button>
 </div>
