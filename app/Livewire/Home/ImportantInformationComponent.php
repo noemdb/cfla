@@ -10,7 +10,7 @@ class ImportantInformationComponent extends Component
 
     public function mount()
     {
-        $directoryPath = 'image/important/001';
+        $directoryPath = 'image/resaltado/001';
         $fullPath      = public_path($directoryPath);
         $foundImages   = [];
 

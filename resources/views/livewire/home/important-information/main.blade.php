@@ -13,7 +13,7 @@
                             <div class="swiper-slide relative w-full h-full flex items-center justify-center p-4">
                                 <img src="{{ $image }}"
                                     class="max-w-full max-h-full object-contain drop-shadow-2xl transition-transform duration-700 group-hover:scale-[1.03]"
-                                    alt="Comunicado Important" />
+                                    alt="Comunicado Resaltado" />
                             </div>
                         @endforeach
                     </div>
