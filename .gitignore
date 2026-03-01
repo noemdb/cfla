@@ -21,7 +21,6 @@
 # ===== Public runtime / uploads =====
 /public/uploads/
 /public/image/
-!/public/image/resaltado/
 /public/images/
 /public/videos/
 /public/pwa/

@@ -19,6 +19,11 @@
             <livewire:home.highlighted-component />
         </section>
 
+        {{-- Resaltado Section --}}
+        <section id="resaltado" class="relative">
+            @include('home.resaltado.main')
+        </section>
+
         {{-- Pensums Section --}}
         <section id="pensums" class="container mx-auto px-1">
             @include('home.pensums.main')
