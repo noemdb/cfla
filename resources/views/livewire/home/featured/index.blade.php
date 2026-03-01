@@ -5,12 +5,12 @@
 </h5>
 
 <div class="font-normal text-gray-700 dark:text-gray-300 text-sm md:text-base leading-relaxed">
-    {{ $item->description ?? null }}</div>
+    {!! $item->description ?? null !!}</div>
 
 <div class="font-light text-sm border-t border-emerald-500/20 mt-4 pt-4 max-w-full overflow-hidden text-wrap word-break">
     <div
         class="text-gray-500 dark:text-gray-400 line-clamp-3 group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors duration-300">
-        {{ Str::limit($item->body, 500, '...') ?? null }}
+        {!! Str::limit($item->body, 500, '...') !!}
     </div>
 </div>
 
