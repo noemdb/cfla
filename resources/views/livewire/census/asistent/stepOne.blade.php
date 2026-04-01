@@ -45,7 +45,7 @@
                     xl
                     positive
                     label="Valida tu dirección de correo electrónico"
-                    class="w-full"
+                    class="w-full !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg"
                 />
             </div>
 
