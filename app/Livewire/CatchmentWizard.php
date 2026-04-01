@@ -108,7 +108,7 @@ class CatchmentWizard extends Component
         if (count($this->catchmentsList) === 0) {
             $this->wizardFlow = 'A';
             $this->currentStep = 2; // Avance a stepEmail
-            $this->notification()->warning(
+            //$this->notification()->warning(
                 $title = 'Cédula no registrada',
                 $description = 'No posees historiales. Por favor, procede a validar tu correo electrónico para un nuevo registro.'
             );
