@@ -63,17 +63,17 @@
 
             <div class="w-full z-10 max-w-md rounded-[40px] p-6 lg:p-12">
 
-                @php $show = ($currentStep === 1) ? true : false @endphp
-                @includeWhen($show, 'livewire.census.asistent.stepOne')
+                @includeWhen($currentStep === 1, 'livewire.census.asistent.stepCi')
 
-                @php $show = ($currentStep === 2) ? true : false @endphp
-                @includeWhen($show, 'livewire.census.asistent.stepTwo')
+                @includeWhen($currentStep === 2 && $wizardFlow === 'A', 'livewire.census.asistent.stepEmail')
+                
+                @includeWhen($currentStep === 2 && $wizardFlow === 'B', 'livewire.census.asistent.stepList')
 
-                @php $show = ($currentStep === 3) ? true : false @endphp
-                @includeWhen($show, 'livewire.census.asistent.stepThree')
+                @includeWhen($currentStep === 3, 'livewire.census.asistent.stepStudent')
 
-                @php $show = ($currentStep === 4) ? true : false @endphp
-                @includeWhen($show, 'livewire.census.asistent.stepFour')
+                @includeWhen($currentStep === 4, 'livewire.census.asistent.stepRepresentant')
+
+                @includeWhen($currentStep === 5, 'livewire.census.asistent.stepDownload')
 
             </div>
 

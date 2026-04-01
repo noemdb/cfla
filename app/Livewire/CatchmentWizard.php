@@ -26,9 +26,12 @@ class CatchmentWizard extends Component
 
     public $catchment_id; // ID de la censo
     public $currentStep = 1; // Paso actual del asistente
-    public $email; // Paso 1: Correo electrónico
+    public $wizardFlow = null; // 'A' (No existe CI) o 'B' (Existe CI)
+    
+    public $email; // Paso 1 (Flow A): Correo electrónico
     public $verificationCode = null; // Código de verificación
     public $input_code; // Código generado para validar
+    public $catchmentsList = []; // Lista de censos encontrados para este representante
     public $firstname; // Paso 2: Nombre completo del niño/a
     public $lastname; // Paso 2: Nombre completo del niño/a
     public $date_birth; // Paso 2: Fecha de nacimiento
@@ -57,16 +60,19 @@ class CatchmentWizard extends Component
 
     public function setStep($step)
     {
-        $this->currentStep = ($this->status_validate_code_email) ? $step : $this->currentStep;
+        $this->currentStep = (count($this->catchmentsList) > 0 || $step == 1) ? $step : $this->currentStep;
     }
 
     public function restart()
     {
         $this->currentStep = 1;
+        $this->currentStep = 1;
         $this->catchment_id = null;
+        $this->wizardFlow = null;
         $this->email = null;
         $this->verificationCode = null;
         $this->input_code = null;
+        $this->catchmentsList = [];
         $this->firstname = null;
         $this->lastname = null;
         $this->date_birth = null;
@@ -87,22 +93,47 @@ class CatchmentWizard extends Component
         $this->day_appointment_start = ($today > $this->day_appointment_start) ? $today : $this->day_appointment_start;
     }
 
-    // Paso 1: Enviar código al email
+    public function searchByCi()
+    {
+        $this->validate([
+            'representant_ci' => 'required|string|min:6|max:15'
+        ], [
+            'representant_ci.required' => 'La cédula de identidad es requerida.',
+        ]);
+
+        $this->catchmentsList = Catchment::with(['catchmentInterviews', 'grado'])
+            ->where('representant_ci', $this->representant_ci)
+            ->get();
+
+        if (count($this->catchmentsList) === 0) {
+            $this->wizardFlow = 'A';
+            $this->currentStep = 2; // Avance a stepEmail
+            $this->notification()->warning(
+                $title = 'Cédula no registrada',
+                $description = 'No posees historiales. Por favor, procede a validar tu correo electrónico para un nuevo registro.'
+            );
+        } else {
+            $this->wizardFlow = 'B';
+            $this->email = $this->catchmentsList[0]->email ?? null;
+            $this->currentStep = 2; // Avance a stepList
+            $this->notification()->success(
+                $title = 'Estatus recuperado',
+                $description = 'Hemos encontrado información asociada a tu representada/o.'
+            );
+        }
+    }
+
+    // Paso 2 (Flow A): Enviar código al email
     public function sendEmailCode(SendPulseService $sendPulseService)
     {
         $this->validate(['email' => 'required|email']);
 
-        // Generar un código aleatorio
         $this->verificationCode = rand(100000, 999999);
 
         try {
-            // Renderizar la vista del email
             $html = View::make('emails.verification-code', [
                 'code' => $this->verificationCode
             ])->render();
-
-            // Enviar email usando el servicio SendPulse
-            // Enviar email usando el servicio inyectado
             
             $result = $sendPulseService->sendEmail(
                 to: $this->email,
@@ -133,7 +164,7 @@ class CatchmentWizard extends Component
     public function validateEmailCode()
     {
         if ($this->input_code == Session::get('email_code')) {
-            $this->currentStep = 2;
+            $this->currentStep = 3; // Avanza a paso 3: Estudiante
             $this->status_validate_code_email = true;
             $this->notification()->success(
                 $title = 'Excelente!',
@@ -145,6 +176,12 @@ class CatchmentWizard extends Component
                 $description = 'Código incorrecto.'
             );
         }
+    }
+
+    // Método para Flow B (saltar de listado al formulario de nuevo estudiante)
+    public function startNewCatchment()
+    {
+        $this->currentStep = 3; // Salta de ListView al Form de Estudiante
     }
 
     public function validateStudent()
@@ -166,7 +203,7 @@ class CatchmentWizard extends Component
                 $description = 'Este estudiante ya está registrado.'
             );
         } else {
-            $this->currentStep = 3;
+            $this->currentStep = 4; // Avanza a representant
         }
     }
 
@@ -201,7 +238,7 @@ class CatchmentWizard extends Component
         );
         // return redirect()->route('home'); // Redirigir al usuario
 
-        $this->currentStep = 4;
+        $this->currentStep = 5; // Avanza a PDF download
     }
 
     public function updatedDayAppointment($value)

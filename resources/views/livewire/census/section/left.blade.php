@@ -7,48 +7,67 @@
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
         <div class="mb-8 font-semibold">1ra Jornada, desde el 18 de febrero hasta el 31 de julio de 8am a 2pm.</div>
 
-        {{-- <div class="w-full max-w-sm space-y-4"> --}}
         <div class="w-full max-full space-y-4">
+            {{-- Paso 1 --}}
             <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
                 <div class="flex items-center gap-4">
-                    <span
-                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 1 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">1</span>
-                    <span class="text-lg">Validacion del email</span>
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 1 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">1</span>
+                    <span class="text-lg">Consulta de Cédula</span>
                 </div>
             </div>
+
+            {{-- Paso 2 --}}
             <div class="rounded-lg {{ $currentStep == 2 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
                 <div class="flex items-center gap-4">
-                    <span
-                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 2 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 2 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         2
                     </span>
-                    <span class="text-lg">Datos del estudiante</span>
+                    <span class="text-lg">
+                        @if($wizardFlow === 'A')
+                            Validar Email
+                        @elseif($wizardFlow === 'B')
+                            Historial de Censo
+                        @else
+                            Verificación
+                        @endif
+                    </span>
                 </div>
             </div>
+
+            {{-- Paso 3 --}}
             <div class="rounded-lg {{ $currentStep == 3 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
                 <div class="flex items-center gap-4">
-                    <span
-                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 3 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 3 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         3
                     </span>
-                    <span class="text-lg">Datos del representante</span>
+                    <span class="text-lg">Datos del Estudiante</span>
                 </div>
             </div>
 
+            {{-- Paso 4 --}}
             <div class="rounded-lg {{ $currentStep == 4 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
                 <div class="flex items-center gap-4">
-                    <span
-                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         4
                     </span>
-                    <span class="text-lg">Guarda tu planilla de registro</span>
+                    <span class="text-lg">Datos del Representante</span>
                 </div>
             </div>
 
-            <div class="rounded-lg {{ $currentStep == 4 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+            {{-- Paso 5 --}}
+            <div class="rounded-lg {{ $currentStep == 5 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
+                <div class="flex items-center gap-4">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 5 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                        5
+                    </span>
+                    <span class="text-lg">Planilla de Registro</span>
+                </div>
+            </div>
+
+            {{-- Botón Reset --}}
+            <div class="rounded-lg {{ $currentStep == 5 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm hover:bg-white/10 transition">
                 <div class="flex items-center gap-4 cursor-pointer" wire:click="restart">
-                    <span
-                        class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 5 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         <x-icon name="arrow-path" class="w-5 h-5" />
                     </span>
                     <span class="text-lg font-semibold">Empezar de nuevo</span>
