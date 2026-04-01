@@ -46,7 +46,9 @@
     </div>
 
     <div class="mt-8 space-y-3 text-center">
-        <x-button wire:click="startNewCatchment" xl flat positive label="Registrar un nuevo representado" class="w-full !border-green-800 hover:!bg-gray-800" />
-        <x-button wire:click="restart" xl flat white label="Consultar otra cédula" class="w-full !border-gray-700 hover:!bg-gray-800" />
+        <x-button wire:click="startNewCatchment" xl positive label="Registrar un nuevo representado"
+            class="w-full !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg" />
+        <x-button wire:click="restart" xl flat white label="Consultar otra cédula"
+            class="w-full !border-gray-700 hover:!bg-gray-800" />
     </div>
 </div>

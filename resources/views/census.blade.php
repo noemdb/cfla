@@ -20,12 +20,7 @@
 
 <body>
 
-    <div class="sm:hidden">
-        <x-notifications position="top-center" />
-    </div>
-    <div class="hidden sm:block">
-        <x-notifications />
-    </div>
+    <x-notifications />
 
     <livewire:catchment-wizard />
 

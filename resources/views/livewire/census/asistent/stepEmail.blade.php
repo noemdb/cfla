@@ -14,8 +14,8 @@
             </div>
 
             <div class="mb-2 space-y-2">
-                <x-button wire:click="sendEmailCode" xl black label="Conecta tu email con nosotros" class="w-full"
-                    type="email" />
+                <x-button wire:click="sendEmailCode" xl positive label="Conecta tu email con nosotros"
+                    class="w-full !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg" type="button" />
             </div>
 
         @else

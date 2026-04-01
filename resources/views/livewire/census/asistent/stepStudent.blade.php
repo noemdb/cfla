@@ -58,7 +58,8 @@
             </div>
 
             <div class="space-y-2">
-                <x-button wire:click="validateStudent" xl black label="Verifica los datos" class="w-full my-2" />
+                <x-button wire:click="validateStudent" xl positive label="Verifica los datos"
+                    class="w-full my-2 !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg" />
             </div>
 
         </div>

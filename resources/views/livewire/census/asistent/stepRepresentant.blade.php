@@ -84,10 +84,10 @@
             <div class="space-y-2 mb-2">
                 <x-button
                     xl
-                    wire:click="saveCatchment" 
-                    positive 
-                    label="Guarda tus datos" 
-                    class="w-full my-2" 
+                    wire:click="saveCatchment"
+                    positive
+                    label="Guarda tus datos"
+                    class="w-full my-2 !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg"
                 />
             </div>
         </div>
