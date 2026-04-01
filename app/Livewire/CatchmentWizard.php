@@ -7,6 +7,7 @@ use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
+use App\Services\SendPulseService;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -87,7 +88,7 @@ class CatchmentWizard extends Component
     }
 
     // Paso 1: Enviar código al email
-    public function sendEmailCode()
+    public function sendEmailCode(SendPulseService $sendPulseService)
     {
         $this->validate(['email' => 'required|email']);
 
@@ -100,28 +101,24 @@ class CatchmentWizard extends Component
                 'code' => $this->verificationCode
             ])->render();
 
-            // Enviar email usando Resend API
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('RESEND_API_KEY'),
-                'Content-Type' => 'application/json',
-            ])->post(env('RESEND_URL'), [
-                'from' => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
-                'to' => $this->email,
-                'cc' => env('MAIL_CC_ADDRESS_CONTROL'),
-                'bcc' => env('MAIL_CC_ADDRESS'),
-                'subject' => 'Código de verificación',
-                'html' => $html,
-            ]);
+            // Enviar email usando el servicio SendPulse
+            // Enviar email usando el servicio inyectado
+            
+            $result = $sendPulseService->sendEmail(
+                to: $this->email,
+                subject: 'Código de verificación',
+                htmlBody: $html,
+                cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
+                bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+            );
 
-            if ($response->successful()) {
+            if ($result) {
                 Session::put('email_code', $this->verificationCode);
 
                 $this->notification()->success(
                     $title = 'Excelente!',
                     $description = 'Se ha enviado un código de validación a tu correo.'
                 );
-            } else {
-                throw new \Exception('Error en la respuesta de Resend: ' . $response->body());
             }
         } catch (\Exception $e) {
             $this->verificationCode = null;

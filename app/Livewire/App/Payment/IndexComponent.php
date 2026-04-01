@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\View;
 use Livewire\Attributes\Validate;
+use App\Services\SendPulseService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use WireUi\Traits\WireUiActions;
@@ -55,7 +56,7 @@ class IndexComponent extends Component
         return ($url) ? 'storage/payment/' . $url : null;
     }
 
-    public function save()
+    public function save(SendPulseService $sendPulseService)
     {
         $this->payment->image_1 = $this->upLoadImage($this->image);
 
@@ -101,26 +102,22 @@ class IndexComponent extends Component
                 // Renderizar la vista del email
                 $html = View::make($data->view, ['data' => $data])->render();
 
-                // Enviar email usando Resend API
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . env('RESEND_API_KEY'),
-                    'Content-Type'  => 'application/json',
-                ])->post(env('RESEND_URL'), [
-                    'from'    => env('RESEND_FROM_NAME') . ' <' . env('RESEND_FROM') . '>',
-                    'to'      => $data->email,
-                    'cc'      => [env('MAIL_CC_ADDRESS_ADMON', null)],
-                    'bcc'     => [env('MAIL_CC_ADDRESS', null)],
-                    'subject' => $data->subject,
-                    'html'    => $html,
-                ]);
+                // Enviar email usando el servicio SendPulse
+                // Enviar email usando el servicio inyectado
+                
+                $result = $sendPulseService->sendEmail(
+                    to: $data->email,
+                    subject: $data->subject,
+                    htmlBody: $html,
+                    cc: env('MAIL_CC_ADDRESS_ADMON') ? [env('MAIL_CC_ADDRESS_ADMON')] : [],
+                    bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+                );
 
-                if ($response->successful()) {
+                if ($result) {
                     $this->notification()->success(
                         $title = 'Excelente!',
                         $description = 'Se ha enviado la notificación a tu correo electrónico.'
                     );
-                } else {
-                    throw new \Exception('Error en la respuesta de Resend: ' . $response->body());
                 }
             } catch (\Exception $e) {
                 $this->notification()->error(
