@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,15 +13,21 @@
     @wireUiScripts
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     @yield('styles')
-    
+
 </head>
+
 <body>
 
-    <x-notifications />
+    <div class="sm:hidden">
+        <x-notifications position="top-center" />
+    </div>
+    <div class="hidden sm:block">
+        <x-notifications />
+    </div>
 
-    <livewire:catchment-wizard  />    
+    <livewire:catchment-wizard />
 
     @livewireScripts
 
@@ -29,4 +36,3 @@
 </body>
 
 </html>
-

@@ -3,6 +3,8 @@
 
     <div class="grid md:grid-cols-1">
 
+        @include('livewire.census.asistent._flashAlert')
+
         @if (!$verificationCode)
 
             <p class="mb-4 text-gray-400">Ingresa tu dirección de correo electrónico</p>

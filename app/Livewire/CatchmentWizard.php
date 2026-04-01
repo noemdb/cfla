@@ -28,6 +28,7 @@ class CatchmentWizard extends Component
     public $verificationCode = null;              // Código de verificación
     public $input_code;                           // Código generado para validar
     public $catchmentsList = [];                  // Lista de censos encontrados para este representante
+    public $flashAlert     = null;                // ['type' => 'warning|success|info', 'message' => '...']
     public $firstname;                            // Paso 2: Nombre completo del niño/a
     public $lastname;                             // Paso 2: Nombre completo del niño/a
     public $date_birth;                           // Paso 2: Fecha de nacimiento
@@ -62,13 +63,13 @@ class CatchmentWizard extends Component
     public function restart()
     {
         $this->currentStep                = 1;
-        $this->currentStep                = 1;
         $this->catchment_id               = null;
         $this->wizardFlow                 = null;
         $this->email                      = null;
         $this->verificationCode           = null;
         $this->input_code                 = null;
         $this->catchmentsList             = [];
+        $this->flashAlert                 = null;
         $this->firstname                  = null;
         $this->lastname                   = null;
         $this->date_birth                 = null;
@@ -103,18 +104,18 @@ class CatchmentWizard extends Component
         if (count($this->catchmentsList) === 0) {
             $this->wizardFlow  = 'A';
             $this->currentStep = 2; // Avance a stepEmail
-                                    // $this->notification()->warning(
-                                    //     $title = 'Cédula no registrada',
-                                    //     $description = 'No posees historiales. Por favor, procede a validar tu correo electrónico para un nuevo registro.'
-                                    // );
+            $this->flashAlert  = [
+                'type'    => 'warning',
+                'message' => 'Cédula no encontrada. Ingresa tu correo electrónico para conectar con nosotros',
+            ];
         } else {
             $this->wizardFlow  = 'B';
             $this->email       = $this->catchmentsList[0]->email ?? null;
             $this->currentStep = 2; // Avance a stepList
-            $this->notification()->success(
-                $title = 'Estatus recuperado',
-                $description = 'Hemos encontrado información asociada a tu representada/o.'
-            );
+            $this->flashAlert  = [
+                'type'    => 'success',
+                'message' => 'Estatus recuperado. Hemos encontrado información asociada a tu representada/o.',
+            ];
         }
     }
 

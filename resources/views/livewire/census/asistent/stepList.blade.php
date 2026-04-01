@@ -1,6 +1,8 @@
 <div class="mx-auto w-full max-w-lg">
     <h2 class="mb-4 text-3xl font-bold text-white">Resultados de Consulta</h2>
-    <p class="mb-6 text-gray-300 font-medium">Estos son los registros asociados a tu cédula.</p>
+    <p class="mb-4 text-gray-300 font-medium">Estos son los registros asociados a tu cédula.</p>
+
+    @include('livewire.census.asistent._flashAlert')
 
     <div class="space-y-4">
         @foreach($catchmentsList as $catchment)
