@@ -38,8 +38,8 @@ class CatchmentWizard extends Component
     public $representant_cellphone;               // Paso 3: Nombre del representante
     public $grade;                                // Paso 3: Grado/Nivel solicitado
     public $day_appointment;                      // Dia de la cita
-    public $day_appointment_start = '2026-02-18'; // Dia de la cita inical
-    public $day_appointment_end   = '2026-07-31'; // Dia de la cita final
+    public $day_appointment_start = '2026-04-13'; // Dia de la cita inical
+    public $day_appointment_end   = '2026-04-17'; // Dia de la cita final
     public $status_validate_code_email;           // Dia de la cita final
 
     protected $listeners   = ['hideVideo'];
