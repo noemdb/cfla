@@ -5,7 +5,7 @@
             <x-icon name="bars-3" class="w-8 h-8 text-emerald-400" />
         </div>
         <h3 class="text-lg md:text-xl font-bold text-emerald-100 uppercase tracking-wide">
-            Censo Escolar 25-26 - Asistente
+            Censo Escolar 26-27 - Asistente
         </h3>
     </div>
 
@@ -22,8 +22,7 @@
             <div class="text-center mt-4">
                 <div class="text-xl font-semibold text-gray-200 mb-2">El primer paso hacia una educación de excelencia.
                 </div>
-                <div class="text-sm text-emerald-300 font-medium mb-2">11va Jornada, desde el 01 hasta el 22 de
-                    septiembre de 8am a 2pm.</div>
+                <div class="text-sm text-emerald-300 font-medium mb-2">Primera convocatoria: 13 al 17 de abril, 8am a 12m.</div>
             </div>
         </div>
 
