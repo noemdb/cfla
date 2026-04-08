@@ -2,7 +2,7 @@
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">U.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-1">
-            <h1 class="text-2xl font-semibold">Censo Escolar 25-26 - Asistente</h1>
+            <h1 class="text-2xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
         <div class="mb-8 font-semibold">1ra Jornada, desde el 18 de febrero hasta el 31 de julio de 8am a 2pm.</div>
