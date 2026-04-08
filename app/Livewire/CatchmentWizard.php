@@ -188,6 +188,9 @@ class CatchmentWizard extends Component
             'date_birth' => 'required|date|before:today',
         ]);
 
+        $this->representant_phone     = null;
+        $this->representant_cellphone = null;
+
         // Verificar si ya está registrado
         if (Catchment::where('firstname', $this->firstname)
             ->where('lastname', $this->lastname)
