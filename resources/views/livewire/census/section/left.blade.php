@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">1ra Jornada, desde el 18 de febrero hasta el 31 de julio de 8am a 2pm.</div>
+        <div class="mb-8 font-semibold">Primera convocatoria: 13 al 17 de abril, de 8am a 2pm.</div>
 
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}
