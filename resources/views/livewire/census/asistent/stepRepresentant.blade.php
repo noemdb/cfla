@@ -21,11 +21,12 @@
 
 
             <div class="space-y-2 mb-2">
-                <x-maskable wire:model="representant_phone" label="Número de teléfono" mask="## ### ###-####"
-                    placeholder="58 414 145-9834" {{-- corner-hint="Ej: 58 414 145-9834" --}} right-icon="phone" class="mb-2" />
+                {{-- <x-maskable wire:model="representant_phone" label="Número de teléfono" mask="## ### ###-####"
+                    placeholder="58 414 145-9834" right-icon="phone" class="mb-2" /> --}}
+                <x-input wire:model="representant_phone" label="Número de teléfono" placeholder="58 414 145-9834"
+                    {{-- right-icon="user" --}} class="mb-2" suffix="#" />
                 <x-maskable wire:model="representant_cellphone" label="Número WhatsApp" mask="## ### ###-####"
-                    placeholder="58 414 145-9834" {{-- corner-hint="Ej: 58 414 145-9834" --}} right-icon="chat-bubble-left-right"
-                    class="mb-2" />
+                    placeholder="58 414 145-9834" right-icon="chat-bubble-left-right" class="mb-2" />
             </div>
 
             <div class="space-y-2 mb-2">
