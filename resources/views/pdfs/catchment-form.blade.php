@@ -96,7 +96,7 @@
             <td width="76%">
                 <div class="header">{{ $institution->name }}</div>
                 <div class="sub-header">DIRECCIÓN ACADÉMICA</div>
-                <div class="sub-header">Censo Escolar 2025 2026</div>
+                <div class="sub-header">Censo Escolar 2026 2027</div>
             </td>
             <td width="12%">
                 <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}">
