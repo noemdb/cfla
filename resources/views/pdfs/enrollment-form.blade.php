@@ -96,7 +96,7 @@
             <td width="76%">
                 <div class="header">{{ $institution->name }}</div>
                 <div class="sub-header">DIRECCIÓN ACADÉMICA</div>
-                <div class="sub-header">Censo Escolar 2025 2026</div>
+                <div class="sub-header">Censo Escolar 2026 2027</div>
             </td>
             <td width="12%">
                 <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}">
@@ -119,27 +119,69 @@
         <div class="text-div">
             <strong>Grado/Año Seleccionado:</strong>
             @switch($grado_id)
-                @case(22) 1er Grupo Inicial @break
-                @case(23) 2do Grupo Inicial @break
-                @case(24) 3er Grupo Inicial @break
-                @case(1)  1er Grado @break
-                @case(2)  2do Grado @break
-                @case(3)  3er Grado @break
-                @case(4)  4to Grado @break
-                @case(5)  5to Grado @break
-                @case(6)  6to Grado @break
-                @case(12) 1er Año @break
-                @case(13) 2do Año @break
-                @case(14) 3er Año @break
-                @case(10) 4to Año @break
-                @case(11) 5to Año @break
+                @case(22)
+                    1er Grupo Inicial
+                @break
+
+                @case(23)
+                    2do Grupo Inicial
+                @break
+
+                @case(24)
+                    3er Grupo Inicial
+                @break
+
+                @case(1)
+                    1er Grado
+                @break
+
+                @case(2)
+                    2do Grado
+                @break
+
+                @case(3)
+                    3er Grado
+                @break
+
+                @case(4)
+                    4to Grado
+                @break
+
+                @case(5)
+                    5to Grado
+                @break
+
+                @case(6)
+                    6to Grado
+                @break
+
+                @case(12)
+                    1er Año
+                @break
+
+                @case(13)
+                    2do Año
+                @break
+
+                @case(14)
+                    3er Año
+                @break
+
+                @case(10)
+                    4to Año
+                @break
+
+                @case(11)
+                    5to Año
+                @break
             @endswitch
         </div>
 
         <hr style="border: 1px #ccc solid">
 
         <div>
-            Te invitamos cordialmente a visitar nuestro colegio en el día seleccionado. ¡Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso!
+            Te invitamos cordialmente a visitar nuestro colegio en el día seleccionado. ¡Esperamos contar con tu
+            presencia para conocernos mejor y acompañarte en este importante proceso!
         </div>
     </div>
 
@@ -172,7 +214,8 @@
     <!-- Pie de página -->
     <footer class="footer">
         AV. LA PAZ CON AV. CEDEÑO FRENTE A LA PLAZA JUAN JOSE DE MAYA. SAN FELIPE, YARACUY, VENEZUELA<br>
-        Teléfonos: + 58 424-5891682 || + 58 414-5442298 || + 58 424-5027880 | Correo: colegiofrayluisa@gmail.com || direccionacademica.c.e.cfla@gmail.com || controldeestudios.c.e.cfla@gmail.com
+        Teléfonos: + 58 424-5891682 || + 58 414-5442298 || + 58 424-5027880 | Correo: colegiofrayluisa@gmail.com ||
+        direccionacademica.c.e.cfla@gmail.com || controldeestudios.c.e.cfla@gmail.com
     </footer>
 
 </body>
