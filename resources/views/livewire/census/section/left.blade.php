@@ -2,10 +2,10 @@
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">U.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-1">
-            <h1 class="text-2xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
+            <h1 class="text-3xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
         </div>
         <div class="text-xl">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold text-lg">Primera convocatoria: Desde el 28 hasta 30 de abril, a las 2pm.</div>
+        <div class="mb-8 font-semibold text-2xl">Primera convocatoria: Desde el 28 hasta 30 de abril, a las 2pm.</div>
 
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}
