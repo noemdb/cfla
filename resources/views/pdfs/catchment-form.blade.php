@@ -194,7 +194,7 @@
         <table class="header-table">
             <tr>
                 <td width="15%" style="text-align: left;">
-                    <img class="logo" src="{{ public_path('image/avatar/uecfla.jpg') }}">
+                    <img class="logo" src="{{ asset('image/avatar/uecfla.jpg') }}">
                 </td>
                 <td width="70%" style="text-align: center;">
                     <div class="institution-name">{{ $institution->name }}</div>
@@ -202,7 +202,7 @@
                     <div class="censo-info">Censo Escolar 2026 - 2027</div>
                 </td>
                 <td width="15%" style="text-align: right;">
-                    <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}">
+                    <img class="logo-large" src="{{ asset('image/avatar/amigoniano.png') }}">
                 </td>
             </tr>
         </table>
