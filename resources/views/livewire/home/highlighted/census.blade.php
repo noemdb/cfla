@@ -22,7 +22,9 @@
             <div class="text-center mt-4">
                 <div class="text-xl font-semibold text-gray-200 mb-2">El primer paso hacia una educación de excelencia.
                 </div>
-                <div class="text-sm text-emerald-300 font-medium mb-2">Primera convocatoria: 13 al 17 de abril, 8am a 12m.</div>
+                <div class="text-sm text-emerald-300 font-medium mb-2">Primera convocatoria: 27 de abril al 30 de mayo,
+                    de 8am a 2pm, 8am a
+                    2pm.</div>
             </div>
         </div>
 

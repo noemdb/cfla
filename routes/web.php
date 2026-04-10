@@ -45,6 +45,7 @@ Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
 
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
 Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');
+Route::get('/catchment/preview', [CatchmentPDFController::class, 'preview'])->name('catchment.preview');
 
 // Ruta para la prosecución
 Route::get('/prosecucion', [HomeController::class, 'prosecucion'])->name('prosecucion');
