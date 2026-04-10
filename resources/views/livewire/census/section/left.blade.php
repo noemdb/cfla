@@ -98,47 +98,47 @@
     {{-- Modal Código de Vestimenta --}}
     <x-modal name="dress-code-modal" max-width="2xl" align="center">
         <x-card title="Resumen del Código de Vestimenta">
-            <div class="space-y-6 text-gray-700">
+            <div class="space-y-6 text-gray-700 dark:text-gray-200">
                 <section>
-                    <h3 class="flex items-center gap-2 font-bold text-teal-700 uppercase border-b border-teal-100 pb-1 mb-2">
+                    <h3 class="flex items-center gap-2 font-bold text-teal-700 dark:text-teal-400 uppercase border-b border-teal-100 dark:border-teal-900 pb-1 mb-2">
                         <x-icon name="academic-cap" class="w-5 h-5" />
                         Educación Primaria (1° a 6° Grado)
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100">
-                            <span class="font-bold block text-teal-800 mb-1">Uniforme Diario:</span>
+                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
+                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">Uniforme Diario:</span>
                             Pantalón azul marino, chemise blanca con insignia, zapatos negros/marrón, medias blancas, abrigo azul marino.
                         </div>
-                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100">
-                            <span class="font-bold block text-teal-800 mb-1">Educación Física:</span>
+                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
+                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">Educación Física:</span>
                             Mono azul marino, franela blanca con insignia, zapatos deportivos negros o marrón.
                         </div>
                     </div>
                 </section>
 
                 <section>
-                    <h3 class="flex items-center gap-2 font-bold text-teal-700 uppercase border-b border-teal-100 pb-1 mb-2">
+                    <h3 class="flex items-center gap-2 font-bold text-teal-700 dark:text-teal-400 uppercase border-b border-teal-100 dark:border-teal-900 pb-1 mb-2">
                         <x-icon name="book-open" class="w-5 h-5" />
                         Educación Media General
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100">
-                            <span class="font-bold block text-teal-800 mb-1">1° a 3° Año:</span>
-                            Chemise <strong class="text-teal-900">azul celeste</strong> con insignia. Resto igual a primaria.
+                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
+                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">1° a 3° Año:</span>
+                            Chemise <strong class="text-teal-900 dark:text-teal-200">azul celeste</strong> con insignia. Resto igual a primaria.
                         </div>
-                        <div class="bg-teal-50 p-3 rounded-lg border border-teal-100">
-                            <span class="font-bold block text-teal-800 mb-1">4° y 5° Año:</span>
-                            Chemise <strong class="text-teal-900">beige</strong> con insignia, zapatos exclusivamente negros.
+                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
+                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">4° y 5° Año:</span>
+                            Chemise <strong class="text-teal-900 dark:text-teal-200">beige</strong> con insignia, zapatos exclusivamente negros.
                         </div>
                     </div>
                 </section>
 
-                <section class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        <x-icon name="check-circle" class="w-5 h-5 text-green-600" />
+                <section class="bg-gray-50 dark:bg-secondary-800/50 p-4 rounded-xl border border-gray-200 dark:border-secondary-700">
+                    <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
+                        <x-icon name="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400" />
                         Normas Generales de Presentación:
                     </h4>
-                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
                         <li>Uniforme completo, limpio y en buen estado.</li>
                         <li>Cabello en tono natural (sin tintes o accesorios extravagantes).</li>
                         <li><strong>Varones:</strong> Cabello corto convencional, sin barba o bigote.</li>
@@ -146,7 +146,7 @@
                     </ul>
                 </section>
 
-                <p class="text-[10px] italic text-gray-500 text-center">
+                <p class="text-[10px] italic text-gray-500 dark:text-gray-400 text-center">
                     * El incumplimiento genera correctivos pedagógicos según los Acuerdos de Convivencia.
                 </p>
             </div>
