@@ -263,53 +263,21 @@
     </div>
 
     <!-- Código de Vestimenta -->
-    <div class="section-header">Resumen del Código de Vestimenta</div>
+<div class="section-header">Código de Vestimenta</div>
 
-    <table class="table-content">
-        <thead>
-            <tr>
-                <th colspan="2">Educación Primaria (1° a 6° Grado)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td width="30%"><strong>Uniforme Diario</strong></td>
-                <td>Pantalón azul marino, chemise blanca con insignia, zapatos negros/marrón, medias blancas, abrigo
-                    azul marino.</td>
-            </tr>
-            <tr>
-                <td><strong>Educación Física</strong></td>
-                <td>Mono azul marino, franela blanca con insignia, zapatos deportivos negros o marrón.</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <table class="table-content" style="margin-top: 15px;">
-        <thead>
-            <tr>
-                <th colspan="2">Educación Media General</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td width="30%"><strong>1° a 3° Año</strong></td>
-                <td>Chemise <strong>azul celeste</strong> con insignia. Resto igual a primaria.</td>
-            </tr>
-            <tr>
-                <td><strong>4° y 5° Año</strong></td>
-                <td>Chemise <strong>beige</strong> con insignia, zapatos exclusivamente negros.</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div style="margin-top: 10px; font-size: 10px; color: #444;">
-        <strong>Normas Generales:</strong>
-        <ul>
-            <li>Uniforme completo y limpio.</li>
-            <li>Cabello en tono natural, sin accesorios extravagantes.</li>
-            <li>Varones: Cabello corto convencional.</li>
-        </ul>
+<div class="invitation-box" style="background-color: #fff8f8; border-left-color: #d32f2f;">
+    <div style="font-weight: bold; color: #d32f2f; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+        Debe presentarse de manera sobria
     </div>
+    <div style="font-weight: bold; color: #333; margin-bottom: 6px;">No está permitido:</div>
+    <ul style="color: #333; margin: 0; padding-left: 20px;">
+        <li>Licras, mono deportivo, leggings, strapless.</li>
+        <li>Bermudas, shorts, pantalones rotos.</li>
+        <li>Blusas y franelas sin mangas.</li>
+        <li>Exponer el ombligo.</li>
+        <li>Vestidos o faldas cortas (debe estar por debajo de la rodilla).</li>
+    </ul>
+</div>
 
     <!-- Firmas -->
     <div class="signature-section">
