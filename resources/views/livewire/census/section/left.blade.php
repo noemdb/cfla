@@ -96,67 +96,60 @@
     </div>
 
     {{-- Modal Código de Vestimenta --}}
-    <x-modal name="dress-code-modal" max-width="2xl" align="center">
-        <x-card title="Resumen del Código de Vestimenta">
-            <div class="space-y-6 text-gray-700 dark:text-gray-200">
-                <section>
-                    <h3 class="flex items-center gap-2 font-bold text-teal-700 dark:text-teal-400 uppercase border-b border-teal-100 dark:border-teal-900 pb-1 mb-2">
-                        <x-icon name="academic-cap" class="w-5 h-5" />
-                        Educación Primaria (1° a 6° Grado)
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
-                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">Uniforme Diario:</span>
-                            Pantalón azul marino, chemise blanca con insignia, zapatos negros/marrón, medias blancas, abrigo azul marino.
-                        </div>
-                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
-                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">Educación Física:</span>
-                            Mono azul marino, franela blanca con insignia, zapatos deportivos negros o marrón.
-                        </div>
-                    </div>
-                </section>
+<x-modal name="dress-code-modal" max-width="lg" align="center">
+    <x-card title="Código de Vestimenta">
+        <div class="space-y-4 text-gray-700 dark:text-gray-200">
 
-                <section>
-                    <h3 class="flex items-center gap-2 font-bold text-teal-700 dark:text-teal-400 uppercase border-b border-teal-100 dark:border-teal-900 pb-1 mb-2">
-                        <x-icon name="book-open" class="w-5 h-5" />
-                        Educación Media General
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
-                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">1° a 3° Año:</span>
-                            Chemise <strong class="text-teal-900 dark:text-teal-200">azul celeste</strong> con insignia. Resto igual a primaria.
-                        </div>
-                        <div class="bg-teal-50 dark:bg-teal-950/30 p-3 rounded-lg border border-teal-100 dark:border-teal-900">
-                            <span class="font-bold block text-teal-800 dark:text-teal-300 mb-1">4° y 5° Año:</span>
-                            Chemise <strong class="text-teal-900 dark:text-teal-200">beige</strong> con insignia, zapatos exclusivamente negros.
-                        </div>
-                    </div>
-                </section>
-
-                <section class="bg-gray-50 dark:bg-secondary-800/50 p-4 rounded-xl border border-gray-200 dark:border-secondary-700">
-                    <h4 class="font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
-                        <x-icon name="check-circle" class="w-5 h-5 text-green-600 dark:text-green-400" />
-                        Normas Generales de Presentación:
-                    </h4>
-                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                        <li>Uniforme completo, limpio y en buen estado.</li>
-                        <li>Cabello en tono natural (sin tintes o accesorios extravagantes).</li>
-                        <li><strong>Varones:</strong> Cabello corto convencional, sin barba o bigote.</li>
-                        <li><strong>Hembras:</strong> Uñas cortas, solo brillo o color discreto; sin maquillaje.</li>
-                    </ul>
-                </section>
-
-                <p class="text-[10px] italic text-gray-500 dark:text-gray-400 text-center">
-                    * El incumplimiento genera correctivos pedagógicos según los Acuerdos de Convivencia.
+            {{-- Aviso principal --}}
+            <div class="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3">
+                <x-icon name="exclamation-triangle" class="w-6 h-6 shrink-0 text-red-600 dark:text-red-400" />
+                <p class="font-bold uppercase tracking-wide text-red-700 dark:text-red-400 text-sm">
+                    Debe presentarse de manera sobria
                 </p>
             </div>
 
-            <x-slot name="footer">
-                <div class="flex justify-end gap-x-4">
-                    <x-button flat label="Cerrar" x-on:click="close" />
-                    <x-button primary label="Entendido" x-on:click="close" />
-                </div>
-            </x-slot>
-        </x-card>
-    </x-modal>
+            {{-- Lista de prohibiciones --}}
+            <div class="rounded-xl border border-red-100 dark:border-red-900 bg-white dark:bg-secondary-800/50 p-4">
+                <h4 class="mb-3 flex items-center gap-2 font-bold text-red-700 dark:text-red-400 uppercase text-sm tracking-wide">
+                    <x-icon name="x-circle" class="w-5 h-5 shrink-0" />
+                    No está permitido:
+                </h4>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li class="flex items-start gap-2">
+                        <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
+                        Licras, mono deportivo, leggings, strapless.
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
+                        Bermudas, shorts, pantalones rotos.
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
+                        Blusas y franelas sin mangas.
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
+                        Exponer el ombligo.
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
+                        Vestidos o faldas cortas
+                        <span class="text-gray-500 dark:text-gray-400">(debe estar por debajo de la rodilla).</span>
+                    </li>
+                </ul>
+            </div>
+
+            {{-- Nota al pie --}}
+            <p class="text-[10px] italic text-gray-500 dark:text-gray-400 text-center">
+                * Esta indicación aplica para el día de la cita presencial en el colegio.
+            </p>
+        </div>
+
+        <x-slot name="footer">
+            <div class="flex justify-end">
+                <x-button primary label="Entendido" x-on:click="close" />
+            </div>
+        </x-slot>
+    </x-card>
+</x-modal>
 </div>
