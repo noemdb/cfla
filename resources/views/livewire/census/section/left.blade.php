@@ -2,7 +2,7 @@
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">U.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-1">
-            <h1 class="text-3xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
+            <h1 class="text-3xl font-semibold">Censo Escolar 26-27 <br> Asistente</h1>
         </div>
         <div class="text-xl">El primer paso hacia una educación de excelencia.</div>
         <div class="mb-8 font-semibold text-2xl rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">Primera convocatoria:
