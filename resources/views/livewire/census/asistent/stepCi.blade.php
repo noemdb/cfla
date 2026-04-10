@@ -11,8 +11,11 @@
         </div>
 
         <div class="mb-2 space-y-2">
-            <x-button wire:click="searchByCi" xl positive label="Consultar"
-                class="w-full !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg" type="button" />
+{{--  
+
+<x-button wire:click="searchByCi" xl positive label="Consultar" class="w-full !bg-green-800 hover:!bg-green-900 border-2 !border-green-900 shadow-lg" type="button" />
+
+--}}
         </div>
     </div>
 </div>
