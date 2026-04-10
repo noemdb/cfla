@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">Primera convocatoria: 27 de abril al 30 de mayo, de 8am a 2pm.</div>
+        <div class="mb-8 font-semibold">Primera convocatoria: 27 de abril al 30 de mayo, a las 2pm.</div>
 
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}
