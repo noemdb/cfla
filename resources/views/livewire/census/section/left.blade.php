@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-semibold">Censo Escolar 26-27 - Asistente</h1>
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold">Primera convocatoria: 27 de abril al 30 de mayo, a las 2pm.</div>
+        <div class="mb-8 font-semibold">Primera convocatoria: Desde el 28 hasta 30 de abril, a las 2pm.</div>
 
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}
@@ -96,7 +96,7 @@
     </div>
 
     {{-- Modal Código de Vestimenta --}}
-<x-modal name="dress-code-modal" max-width="lg" align="center">
+<x-modal name="dress-code-modal" max-width="lg" align="center"  x-on:click="$openModal('blur-base')">
     <x-card title="Código de Vestimenta">
         <div class="space-y-4 text-gray-700 dark:text-gray-200">
 
