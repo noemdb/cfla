@@ -82,6 +82,15 @@
         </div>
     @endif
 
+    {{-- Modal Código de Vestimenta (teleportado al body) --}}
+    <template x-teleport="body">
+        <div>
+            @if ($modalDressCode)
+                @include('livewire.census.section.dress-code')
+            @endif
+        </div>
+    </template>
+
 </div>
 
 @section('scripts')

@@ -42,6 +42,8 @@ class CatchmentWizard extends Component
     public $day_appointment_end   = '2026-04-30'; // Dia de la cita final
     public $status_validate_code_email;           // Dia de la cita final
 
+    public bool $modalDressCode = false;          // Modal Código de Vestimenta
+
     protected $listeners   = ['hideVideo'];
     public bool $showVideo = true; // Estado inicial: mostrar video
     public function hideVideo()
@@ -58,6 +60,16 @@ class CatchmentWizard extends Component
     public function setStep($step)
     {
         $this->currentStep = (count($this->catchmentsList) > 0 || $step == 1) ? $step : $this->currentStep;
+    }
+
+    public function openDressCode(): void
+    {
+        $this->modalDressCode = true;
+    }
+
+    public function closeDressCode(): void
+    {
+        $this->modalDressCode = false;
     }
 
     public function restart()

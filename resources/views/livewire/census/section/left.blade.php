@@ -75,7 +75,7 @@
 
             {{-- Código de Vestimenta --}}
             <div class="rounded-lg bg-white/5 p-4 backdrop-blur-sm hover:bg-white/10 transition">
-                <div class="flex items-center gap-4 cursor-pointer" onclick="$openModal('dress-code-modal')">
+                <div class="flex items-center gap-4 cursor-pointer" wire:click="openDressCode">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
                         <x-icon name="information-circle" class="w-5 h-5" />
                     </span>
@@ -97,63 +97,4 @@
         </div>
     </div>
 
-    {{-- Modal Código de Vestimenta --}}
-    <x-modal name="dress-code-modal" max-width="lg" align="center" x-on:click="$openModal('blur-base')">
-        <x-card title="Código de Vestimenta">
-            <div class="space-y-4 text-gray-700 dark:text-gray-200">
-
-                {{-- Aviso principal --}}
-                <div
-                    class="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3">
-                    <x-icon name="exclamation-triangle" class="w-6 h-6 shrink-0 text-red-600 dark:text-red-400" />
-                    <p class="font-bold uppercase tracking-wide text-red-700 dark:text-red-400 text-sm">
-                        Debe presentarse de manera sobria
-                    </p>
-                </div>
-
-                {{-- Lista de prohibiciones --}}
-                <div class="rounded-xl border border-red-100 dark:border-red-900 bg-white dark:bg-secondary-800/50 p-4">
-                    <h4
-                        class="mb-3 flex items-center gap-2 font-bold text-red-700 dark:text-red-400 uppercase text-sm tracking-wide">
-                        <x-icon name="x-circle" class="w-5 h-5 shrink-0" />
-                        No está permitido:
-                    </h4>
-                    <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                        <li class="flex items-start gap-2">
-                            <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
-                            Licras, mono deportivo, leggings, strapless.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
-                            Bermudas, shorts, pantalones rotos.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
-                            Blusas y franelas sin mangas.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
-                            Exponer el ombligo.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <x-icon name="x-mark" class="mt-0.5 w-4 h-4 shrink-0 text-red-500" />
-                            Vestidos o faldas cortas
-                            <span class="text-gray-500 dark:text-gray-400">(debe estar por debajo de la rodilla).</span>
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Nota al pie --}}
-                <p class="text-[10px] italic text-gray-500 dark:text-gray-400 text-center">
-                    * Esta indicación aplica para el día de la cita presencial en el colegio.
-                </p>
-            </div>
-
-            <x-slot name="footer">
-                <div class="flex justify-end">
-                    <x-button primary label="Entendido" x-on:click="close" />
-                </div>
-            </x-slot>
-        </x-card>
-    </x-modal>
 </div>
