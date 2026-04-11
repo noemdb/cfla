@@ -332,13 +332,25 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <x-notification title="Éxito" description="{{ session('success') }}" icon="success" />
-    @endif
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (session('success'))
+                $wireui.notify({
+                    title: 'Éxito',
+                    description: "{{ session('success') }}",
+                    icon: 'success'
+                });
+            @endif
 
-    @if (session('error'))
-        <x-notification title="Error" description="{{ session('error') }}" icon="error" />
-    @endif
+            @if (session('error'))
+                $wireui.notify({
+                    title: 'Error',
+                    description: "{{ session('error') }}",
+                    icon: 'error'
+                });
+            @endif
+        });
+    </script>
 @endsection
 
 @section('script')
