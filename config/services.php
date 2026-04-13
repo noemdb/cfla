@@ -32,10 +32,11 @@ return [
     ],
 
     'sendpulse' => [
-        'client_id'     => env('SENDPULSE_CLIENT_ID'),
-        'client_secret' => env('SENDPULSE_API_KEY'),
-        'from_email'    => env('SENDPULSE_FROM'),
-        'from_name'     => env('SENDPULSE_FROM_NAME'),
+        'client_id'              => env('SENDPULSE_CLIENT_ID'),
+        'client_secret'          => env('SENDPULSE_API_KEY'),
+        'from_email'             => env('SENDPULSE_FROM'),
+        'from_name'              => env('SENDPULSE_FROM_NAME'),
+        'oauth_url'              => env('SENDPULSE_OAUTH_URL', 'https://api.sendpulse.com/oauth/access_token'),
     ],
 
 ];

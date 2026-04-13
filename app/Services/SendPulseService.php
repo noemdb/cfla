@@ -13,13 +13,15 @@ class SendPulseService
     protected ?string $clientSecret;
     protected ?string $fromEmail;
     protected ?string $fromName;
+    protected ?string $oauthUrl;
 
     public function __construct()
     {
-        $this->clientId     = config('services.sendpulse.client_id');
-        $this->clientSecret = config('services.sendpulse.client_secret');
-        $this->fromEmail    = config('services.sendpulse.from_email');
-        $this->fromName     = config('services.sendpulse.from_name');
+        $this->clientId     = trim(config('services.sendpulse.client_id'));
+        $this->clientSecret = trim(config('services.sendpulse.client_secret'));
+        $this->fromEmail    = trim(config('services.sendpulse.from_email'));
+        $this->fromName     = trim(config('services.sendpulse.from_name'));
+        $this->oauthUrl     = config('services.sendpulse.oauth_url', 'https://api.sendpulse.com/oauth/access_token');
     }
 
     /**
@@ -37,7 +39,7 @@ class SendPulseService
                 throw new Exception('Configuración de SendPulse incompleta: clientId o clientSecret no definidos.');
             }
 
-            $response = Http::post('https://api.sendpulse.com/oauth/access_token', [
+            $response = Http::asJson()->acceptJson()->post($this->oauthUrl, [
                 'grant_type' => 'client_credentials',
                 'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
