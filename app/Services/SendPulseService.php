@@ -33,6 +33,10 @@ class SendPulseService
     {
         // Caché del token por 55 minutos (su vigencia máxima es generalmente de 1 hora o 3600 segundos)
         return Cache::remember('sendpulse_access_token', 3300, function () {
+            if (empty($this->clientId) || empty($this->clientSecret)) {
+                throw new Exception('Configuración de SendPulse incompleta: clientId o clientSecret no definidos.');
+            }
+
             $response = Http::post('https://api.sendpulse.com/oauth/access_token', [
                 'grant_type' => 'client_credentials',
                 'client_id' => $this->clientId,
