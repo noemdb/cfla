@@ -9,7 +9,7 @@ class HighlightedComponent extends Component
 {
 
     protected $listeners = ['hideVideo'];
-    public bool $showVideo = true; // Estado inicial: mostrar video
+    public $showVideo = true; // Estado inicial: mostrar video
     public function hideVideo()
     {
         $this->showVideo = false; // Ocultar video al finalizar

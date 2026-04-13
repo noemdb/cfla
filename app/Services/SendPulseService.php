@@ -9,17 +9,17 @@ use Exception;
 
 class SendPulseService
 {
-    protected string $clientId;
-    protected string $clientSecret;
-    protected string $fromEmail;
-    protected string $fromName;
+    protected ?string $clientId;
+    protected ?string $clientSecret;
+    protected ?string $fromEmail;
+    protected ?string $fromName;
 
     public function __construct()
     {
-        $this->clientId = env('SENDPULSE_CLIENT_ID');
-        $this->clientSecret = env('SENDPULSE_API_KEY');
-        $this->fromEmail = env('SENDPULSE_FROM');
-        $this->fromName = env('SENDPULSE_FROM_NAME');
+        $this->clientId     = config('services.sendpulse.client_id');
+        $this->clientSecret = config('services.sendpulse.client_secret');
+        $this->fromEmail    = config('services.sendpulse.from_email');
+        $this->fromName     = config('services.sendpulse.from_name');
     }
 
     /**

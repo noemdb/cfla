@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'sendpulse' => [
+        'client_id'     => env('SENDPULSE_CLIENT_ID'),
+        'client_secret' => env('SENDPULSE_API_KEY'),
+        'from_email'    => env('SENDPULSE_FROM'),
+        'from_name'     => env('SENDPULSE_FROM_NAME'),
+    ],
+
 ];
