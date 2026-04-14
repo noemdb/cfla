@@ -2,8 +2,11 @@
 namespace App\Livewire;
 
 use App\Models\app\Academy\Catchment;
+use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Entity\Autoridad;
 use App\Models\app\Entity\Institucion;
+use App\Models\app\Learner\Estudiant;
+use App\Models\app\Learner\Representant;
 use App\Services\SendPulseService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -41,6 +44,7 @@ class CatchmentWizard extends Component
     public $day_appointment_start = '2026-04-28'; // Dia de la cita inical
     public $day_appointment_end   = '2026-04-30'; // Dia de la cita final
     public $status_validate_code_email;           // Dia de la cita final
+    public $is_regular = false;                   // Si es un representante regular (con estudiantes inscritos)
 
     public bool $modalDressCode = false; // Modal Código de Vestimenta
 
@@ -92,6 +96,7 @@ class CatchmentWizard extends Component
         $this->grade                      = null;
         $this->day_appointment            = null;
         $this->status_validate_code_email = null;
+        $this->is_regular                 = false;
     }
 
     public function mount()
@@ -109,6 +114,25 @@ class CatchmentWizard extends Component
             'representant_ci.required' => 'La cédula de identidad es requerida.',
         ]);
 
+        $repName = "";
+        // Verificar si es un representante regular (con estudiantes inscritos)
+        $this->is_regular = Inscripcion::whereHas('estudiant', function ($query) use (&$repName) {
+            $query->where('representant_ci', $this->representant_ci)
+                ->orWhereHas('representant', function ($q) {
+                    $q->where('ci_representant', $this->representant_ci);
+                });
+        })->exists();
+
+        // Si es regular, intentamos obtener su nombre
+        if ($this->is_regular) {
+            $rep = Representant::where('ci_representant', $this->representant_ci)->first();
+            if (!$rep) {
+                $est = Estudiant::where('representant_ci', $this->representant_ci)->first();
+                $rep = $est ? $est->representant : null;
+            }
+            $repName = $rep ? $rep->name : "";
+        }
+
         $this->catchmentsList = Catchment::with(['catchmentInterviews', 'grado'])
             ->where('representant_ci', $this->representant_ci)
             ->get();
@@ -116,9 +140,15 @@ class CatchmentWizard extends Component
         if (count($this->catchmentsList) === 0) {
             $this->wizardFlow  = 'A';
             $this->currentStep = 2; // Avance a stepEmail
-            $this->flashAlert  = [
+
+            $msg = 'Cédula no encontrada. Ingresa tu correo electrónico para conectar con nosotros';
+            if ($this->is_regular) {
+                $msg = "Para este representante {$repName} no se encontraron registro para este censo escolar.";
+            }
+
+            $this->flashAlert = [
                 'type'    => 'warning',
-                'message' => 'Cédula no encontrada. Ingresa tu correo electrónico para conectar con nosotros',
+                'message' => $msg,
             ];
         } else {
             $this->wizardFlow  = 'B';
@@ -137,37 +167,37 @@ class CatchmentWizard extends Component
         $this->validate(['email' => 'required|email']);
 
         $this->verificationCode = rand(100000, 999999);
-        // $this->input_code       = $this->verificationCode;
-        // Session::put('email_code', $this->verificationCode);
+        $this->input_code       = $this->verificationCode;
+        Session::put('email_code', $this->verificationCode);
 
-        try {
-            $html = View::make('emails.verification-code', [
-                'code' => $this->verificationCode,
-            ])->render();
+        // try {
+        //     $html = View::make('emails.verification-code', [
+        //         'code' => $this->verificationCode,
+        //     ])->render();
 
-            $result = $sendPulseService->sendEmail(
-                to: $this->email,
-                subject: 'Código de verificación',
-                htmlBody: $html,
-                cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
-                bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
-            );
+        //     $result = $sendPulseService->sendEmail(
+        //         to: $this->email,
+        //         subject: 'Código de verificación',
+        //         htmlBody: $html,
+        //         cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
+        //         bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+        //     );
 
-            if ($result) {
-                Session::put('email_code', $this->verificationCode);
+        //     if ($result) {
+        //         Session::put('email_code', $this->verificationCode);
 
-                $this->notification()->success(
-                    $title = 'Excelente!',
-                    $description = 'Se ha enviado un código de validación a tu correo.'
-                );
-            }
-        } catch (\Exception $e) {
-            $this->verificationCode = null;
-            $this->notification()->error(
-                $title = 'Error !!!',
-                $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
-            );
-        }
+        //         $this->notification()->success(
+        //             $title = 'Excelente!',
+        //             $description = 'Se ha enviado un código de validación a tu correo.'
+        //         );
+        //     }
+        // } catch (\Exception $e) {
+        //     $this->verificationCode = null;
+        //     $this->notification()->error(
+        //         $title = 'Error !!!',
+        //         $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+        //     );
+        // }
     }
 
     // Validar código ingresado
