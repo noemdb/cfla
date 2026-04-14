@@ -137,37 +137,37 @@ class CatchmentWizard extends Component
         $this->validate(['email' => 'required|email']);
 
         $this->verificationCode = rand(100000, 999999);
-        $this->input_code       = $this->verificationCode;
-        Session::put('email_code', $this->verificationCode);
+        // $this->input_code       = $this->verificationCode;
+        // Session::put('email_code', $this->verificationCode);
 
-        // try {
-        //     $html = View::make('emails.verification-code', [
-        //         'code' => $this->verificationCode,
-        //     ])->render();
+        try {
+            $html = View::make('emails.verification-code', [
+                'code' => $this->verificationCode,
+            ])->render();
 
-        //     $result = $sendPulseService->sendEmail(
-        //         to: $this->email,
-        //         subject: 'Código de verificación',
-        //         htmlBody: $html,
-        //         cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
-        //         bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
-        //     );
+            $result = $sendPulseService->sendEmail(
+                to: $this->email,
+                subject: 'Código de verificación',
+                htmlBody: $html,
+                cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
+                bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+            );
 
-        //     if ($result) {
-        //         Session::put('email_code', $this->verificationCode);
+            if ($result) {
+                Session::put('email_code', $this->verificationCode);
 
-        //         $this->notification()->success(
-        //             $title = 'Excelente!',
-        //             $description = 'Se ha enviado un código de validación a tu correo.'
-        //         );
-        //     }
-        // } catch (\Exception $e) {
-        //     $this->verificationCode = null;
-        //     $this->notification()->error(
-        //         $title = 'Error !!!',
-        //         $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
-        //     );
-        // }
+                $this->notification()->success(
+                    $title = 'Excelente!',
+                    $description = 'Se ha enviado un código de validación a tu correo.'
+                );
+            }
+        } catch (\Exception $e) {
+            $this->verificationCode = null;
+            $this->notification()->error(
+                $title = 'Error !!!',
+                $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+            );
+        }
     }
 
     // Validar código ingresado

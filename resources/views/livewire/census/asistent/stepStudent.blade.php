@@ -42,9 +42,10 @@
 
             <hr class="my-2">
 
-            <div class="space-y-2 mb-2">
+            <div class="space-y-2 mb-2 text-center">
                 <span>
-                    Datos del representante: {{ $representant_ci }}
+                    Datos del representante: {{ $representant_ci }} <span
+                        class="text-gray-400">{{ $email }}</span>
                 </span>
             </div>
 
