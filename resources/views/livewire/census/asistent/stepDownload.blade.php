@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-sm">
-    <h2 class="mb-2 text-3xl font-bold text-white">Paso 5</h2>
+    <h2 class="mb-2 text-3xl font-bold text-white">Paso 4</h2>
     <p class="mb-4 text-gray-400">Descarga tu planilla de registro y guarda el QR</p>
 
     @if ($catchment_id)

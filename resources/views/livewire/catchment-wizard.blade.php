@@ -71,9 +71,7 @@
 
                 @includeWhen($currentStep === 3, 'livewire.census.asistent.stepStudent')
 
-                @includeWhen($currentStep === 4, 'livewire.census.asistent.stepRepresentant')
-
-                @includeWhen($currentStep === 5, 'livewire.census.asistent.stepDownload')
+                @includeWhen($currentStep === 4, 'livewire.census.asistent.stepDownload')
 
             </div>
 

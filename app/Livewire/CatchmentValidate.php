@@ -12,8 +12,8 @@ trait CatchmentValidate
             'date_birth' => 'required|date|before:today',
             'representant_ci' => 'required', // ajustado a genérico numérico o string
             'representant_name' => 'required|string|max:100',
-            'representant_phone' => 'required|numeric|digits:12',
-            'representant_cellphone' => 'required|numeric|digits:12',
+            'representant_phone' => 'required',
+            'representant_cellphone' => 'nullable|numeric|digits:12',
             'grade' => 'required|integer',
             'day_appointment' => 'required|after_or_equal:'.$this->day_appointment_start.'|before_or_equal:'.$this->day_appointment_end.'',
         ];

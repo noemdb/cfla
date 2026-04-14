@@ -14,9 +14,9 @@
     html.dark label {
         @apply !text-gray-200;
     }
-    
-    html.dark input, 
-    html.dark select, 
+
+    html.dark input,
+    html.dark select,
     html.dark textarea {
         @apply !bg-gray-800 !border-gray-600 !text-gray-100 !placeholder-gray-400;
     }
@@ -129,4 +129,18 @@
     .voting-option {
         @apply p-3;
     }
+}
+
+/* Custom Validation Error Styling - Forced Bold and Red */
+.text-negative-600, 
+.text-red-600,
+p.text-negative-600,
+label.text-negative-600,
+html.dark label.text-negative-600,
+div.text-negative-600,
+span.text-negative-600,
+[error] p {
+    font-weight: 900 !important;
+    color: #ff0000 !important; /* Rojo Puro */
+    display: block !important;
 }

@@ -42,7 +42,7 @@ class CatchmentWizard extends Component
     public $day_appointment_end   = '2026-04-30'; // Dia de la cita final
     public $status_validate_code_email;           // Dia de la cita final
 
-    public bool $modalDressCode = false;          // Modal Código de Vestimenta
+    public bool $modalDressCode = false; // Modal Código de Vestimenta
 
     protected $listeners   = ['hideVideo'];
     public bool $showVideo = true; // Estado inicial: mostrar video
@@ -137,35 +137,37 @@ class CatchmentWizard extends Component
         $this->validate(['email' => 'required|email']);
 
         $this->verificationCode = rand(100000, 999999);
+        $this->input_code       = $this->verificationCode;
+        Session::put('email_code', $this->verificationCode);
 
-        try {
-            $html = View::make('emails.verification-code', [
-                'code' => $this->verificationCode,
-            ])->render();
+        // try {
+        //     $html = View::make('emails.verification-code', [
+        //         'code' => $this->verificationCode,
+        //     ])->render();
 
-            $result = $sendPulseService->sendEmail(
-                to: $this->email,
-                subject: 'Código de verificación',
-                htmlBody: $html,
-                cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
-                bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
-            );
+        //     $result = $sendPulseService->sendEmail(
+        //         to: $this->email,
+        //         subject: 'Código de verificación',
+        //         htmlBody: $html,
+        //         cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
+        //         bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+        //     );
 
-            if ($result) {
-                Session::put('email_code', $this->verificationCode);
+        //     if ($result) {
+        //         Session::put('email_code', $this->verificationCode);
 
-                $this->notification()->success(
-                    $title = 'Excelente!',
-                    $description = 'Se ha enviado un código de validación a tu correo.'
-                );
-            }
-        } catch (\Exception $e) {
-            $this->verificationCode = null;
-            $this->notification()->error(
-                $title = 'Error !!!',
-                $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
-            );
-        }
+        //         $this->notification()->success(
+        //             $title = 'Excelente!',
+        //             $description = 'Se ha enviado un código de validación a tu correo.'
+        //         );
+        //     }
+        // } catch (\Exception $e) {
+        //     $this->verificationCode = null;
+        //     $this->notification()->error(
+        //         $title = 'Error !!!',
+        //         $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+        //     );
+        // }
     }
 
     // Validar código ingresado
@@ -192,18 +194,12 @@ class CatchmentWizard extends Component
         $this->currentStep = 3; // Salta de ListView al Form de Estudiante
     }
 
-    public function validateStudent()
+    // Paso 3: Guardar inscripción (Ahora consolidado con datos de representante)
+    public function saveCatchment()
     {
-        $this->validate([
-            'firstname'  => 'required|string|max:100',
-            'lastname'   => 'required|string|max:100',
-            'date_birth' => 'required|date|before:today',
-        ]);
+        $this->validate();
 
-        $this->representant_phone     = null;
-        $this->representant_cellphone = null;
-
-        // Verificar si ya está registrado
+        // Verificar si el estudiante ya está registrado
         if (Catchment::where('firstname', $this->firstname)
             ->where('lastname', $this->lastname)
             ->where('date_birth', $this->date_birth)
@@ -213,15 +209,8 @@ class CatchmentWizard extends Component
                 $title = 'Error !!!',
                 $description = 'Este estudiante ya está registrado.'
             );
-        } else {
-            $this->currentStep = 4; // Avanza a representant
+            return;
         }
-    }
-
-    // Paso 4: Guardar inscripción
-    public function saveCatchment()
-    {
-        $date = $this->validate();
 
         $time   = Carbon::now()->timestamp;
         $random = mt_rand(10000, 99999);
@@ -247,9 +236,8 @@ class CatchmentWizard extends Component
             $title = 'Excelente!',
             $description = 'Registro realizado con éxito.'
         );
-        // return redirect()->route('home'); // Redirigir al usuario
 
-        $this->currentStep = 5; // Avanza a PDF download
+        $this->currentStep = 4; // Avanza a PDF download (antes paso 5)
     }
 
     public function updatedDayAppointment($value)
