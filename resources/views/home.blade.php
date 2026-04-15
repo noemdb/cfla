@@ -9,14 +9,19 @@
             <livewire:home.hero-component />
         </section>
 
-        {{-- Important Information Section --}}
-        <section id="important-information" class="relative">
-            <livewire:home.important-information-component />
+        {{-- Information Highlighted Section --}}
+        <section id="information-highlighted" class="relative mt-12">
+            <livewire:home.information-highlighted-component />
         </section>
 
         {{-- Highlighted Section --}}
         <section id="highlighted" class="container mx-auto px-1">
             <livewire:home.highlighted-component />
+        </section>
+
+        {{-- Important Information Section --}}
+        <section id="important-information" class="relative">
+            <livewire:home.important-information-component />
         </section>
 
         {{-- Resaltado Section --}}
