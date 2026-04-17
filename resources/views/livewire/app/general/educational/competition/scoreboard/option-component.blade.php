@@ -81,7 +81,8 @@
                                                         : 'text-gray-800 font-semibold')
                                                 )
                                             }}">
-                                            {!! $item->text !!}
+                                            <span>{!! $item->text !!}</span>
+                                            
                                         </div>
                                         <small class="block text-xs text-emerald-700/60 mt-2">#{{ $item->id }}</small>
                                     </div>
