@@ -1,28 +1,27 @@
-<div>
-
-    <div wire:poll.1s="updateOptions({{ $competition->id }})">
-
+{{-- Altura restringida al espacio visible hasta el footer --}}
+<div class="h-[calc(100vh-12rem)] flex flex-col overflow-hidden">
+    <div wire:poll.1s="updateOptions({{ $competition->id }})" class="h-full flex flex-col">
         @if ($question)
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-
-                <div class="col-span-1">
-
-                    <div class="flex items-center h-full mt-4">
-                        <div class="rotate-[-90deg] text-2xl">Opciones</div>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 h-full flex-1">
+                
+                {{-- Columna Izquierda: Etiqueta "Opciones" --}}
+                <div class="col-span-1 flex items-center justify-center">
+                    <div class="rotate-[-90deg] whitespace-nowrap text-xl font-bold text-emerald-700 uppercase tracking-wider">
+                        Opciones
                     </div>
-
                 </div>
 
-                <div class="col-span-8">
-
+                {{-- Columna Central: Opciones de respuesta --}}
+                <div class="col-span-8 flex flex-col h-full">
+                    {{-- Línea separadora --}}
                     @if ($question->status_answer)
-                        <div class="my-2 border-t-2 border-emerald-500">
-                        @else
-                            <div class="my-2 border-t-2 border-orange-400">
+                        <div class="my-2 border-t-2 border-emerald-400 flex-shrink-0"></div>
+                    @else
+                        <div class="my-2 border-t-2 border-emerald-300 flex-shrink-0"></div>
                     @endif
 
-                    <div
-                        class="grid border border-emerald-500/20 rounded-2xl shadow-lg p-4 md:grid-cols-2 bg-gray-900/40 backdrop-blur-sm h-full gap-4">
+                    {{-- Grid de opciones: se expande al espacio restante --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-2xl bg-white shadow-sm flex-1 content-stretch overflow-hidden">
                         @forelse ($options as $item)
                             @php
                                 $wrong = $item->status_wrong_answer && $question->status_over_time;
@@ -30,82 +29,92 @@
                                 $status_noanswer = $question->status_over_time && !$item->status_option_correct;
                             @endphp
 
-                            <div
-                                class="diagnostic-card h-full flex flex-col items-center justify-start py-6 text-center rounded-2xl border transition-all duration-500 relative overflow-hidden
-                                    {{ $status_answer
-                                        ? 'bg-gradient-to-br from-emerald-600/50 to-emerald-500/30 border-emerald-300 shadow-2xl shadow-emerald-500/60 scale-105 animate-pulse'
-                                        : ($wrong
-                                            ? 'bg-red-500/20 border-red-500/30 opacity-60'
-                                            : 'bg-gray-800/40 border-emerald-500/10') }}">
+                            {{-- Tarjeta de Opción: ocupa espacio uniforme --}}
+                            <div class="h-full flex flex-col items-center justify-center px-4 py-6 text-center rounded-xl border transition-all duration-300 ease-in-out relative
+                                {{ $status_answer
+                                    ? 'bg-emerald-100 border-emerald-400 shadow-md ring-1 ring-emerald-200'
+                                    : ($wrong
+                                        ? 'bg-red-50 border-red-200 shadow-sm opacity-80'
+                                        : ($status_noanswer
+                                            ? 'bg-gray-100 border-gray-200 shadow-sm opacity-60'
+                                            : 'bg-emerald-50 border-emerald-200 shadow-sm hover:shadow-md hover:border-emerald-400 hover:-translate-y-0.5')
+                                        )
+                                }}">
 
+                                {{-- Icono Check --}}
                                 @if ($status_answer)
-                                    <!-- Icono de check para respuesta correcta -->
-                                    <div class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-lg">
-                                        <svg class="w-6 h-6 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd" />
+                                    <div class="absolute top-3 right-3 bg-emerald-600 rounded-full p-1.5 shadow-sm">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                         </svg>
                                     </div>
                                 @endif
-                                <div class="max-w-2xl mx-auto mb-4 h-full flex flex-col justify-center z-10">
-                                    <div class="mb-4">
-                                        @if ($status_noanswer)
-                                            <div
-                                                class="rounded-full h-20 w-20 bg-gray-600/50 shadow-md flex justify-center items-center mx-auto">
-                                            @else
-                                                <div
-                                                    class="rounded-full {{ $status_answer ? 'h-28 w-28 bg-gradient-to-br from-white to-emerald-100 shadow-2xl shadow-emerald-400/50 ring-4 ring-emerald-300/50' : 'h-20 w-20 bg-emerald-600 shadow-lg' }} flex justify-center items-center mx-auto transition-all duration-500">
-                                        @endif
-                                        <span
-                                            class="{{ $status_answer ? 'text-emerald-700 text-6xl' : 'text-white text-4xl' }} text-center font-black">{{ $literal[$loop->index] }}</span>
+
+                                {{-- Contenido centrado --}}
+                                <div class="flex flex-col items-center justify-center flex-1 w-full gap-4">
+                                    
+                                    {{-- Círculo con literal --}}
+                                    <div class="rounded-full flex justify-center items-center transition-all duration-300
+                                        {{ $status_answer
+                                            ? 'h-24 w-24 bg-emerald-200 border-2 border-emerald-500 text-emerald-900 shadow-sm'
+                                            : ($wrong
+                                                ? 'h-20 w-20 bg-red-100 border-2 border-red-300 text-red-800'
+                                                : ($status_noanswer
+                                                    ? 'h-20 w-20 bg-gray-200 border-2 border-gray-300 text-gray-500'
+                                                    : 'h-20 w-20 bg-white border-2 border-emerald-300 text-gray-800 shadow-sm')
+                                            )
+                                        }}">
+                                        <span class="font-black text-center {{ $status_answer ? 'text-5xl' : 'text-4xl' }}">
+                                            {{ $literal[$loop->index] }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Texto de la opción --}}
+                                    <div class="w-full px-2 z-10">
+                                        <div class="text-center transition-all duration-300 text-3xl leading-tight
+                                            {{ $status_noanswer
+                                                ? 'text-gray-400 font-light line-through decoration-gray-400'
+                                                : ($status_answer
+                                                    ? 'text-emerald-900 font-bold'
+                                                    : ($wrong
+                                                        ? 'text-red-800 font-medium'
+                                                        : 'text-gray-800 font-semibold')
+                                                )
+                                            }}">
+                                            {!! $item->text !!}
+                                        </div>
+                                        <small class="block text-xs text-emerald-700/60 mt-2">#{{ $item->id }}</small>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-center h-full px-4 z-10">
-                                <div class="space-y-1">
-                                    @if ($status_noanswer)
-                                        <div
-                                            class="text-gray-500 font-light text-xl text-center line-through opacity-50">
-                                        @else
-                                            <div
-                                                class="{{ $status_answer ? 'text-white font-black text-3xl drop-shadow-lg' : 'text-white font-bold text-2xl' }} text-center transition-all duration-500">
-                                    @endif
-                                    {!! $item->text !!}
-                                </div>
-                                <small class="text-gray-600 block text-xs">#{{ $item->id }}</small>
+                        @empty
+                            <div class="col-span-2 flex items-center justify-center py-8 text-gray-600 italic bg-emerald-50/30 rounded-xl border border-emerald-100 h-full">
+                                Espere a que se establezca la pregunta activa
                             </div>
+                        @endforelse
                     </div>
                 </div>
-            @empty
-                <div class="col-span-2 text-gray-500 italic py-8">Espere a que se establezca la pregunta activa</div>
-        @endforelse
-    </div>
 
-</div>
-
-</div>
-
-<div class="col-span-3" wire:poll.1s="updateTimetimeRemaining" style="">
-
-    <div class="">
-
-        @if ($competition)
-            @include('livewire.app.general.educational.competition.scoreboard.partials.countdown')
-            @include('livewire.app.general.educational.competition.scoreboard.partials.results')
+                {{-- Columna Derecha: Cronómetro y Resultados --}}
+                <div class="col-span-3 flex flex-col gap-3 h-full" wire:poll.1s="updateTimetimeRemaining">
+                    @if ($competition)
+                        <div class="flex-shrink-0">
+                            @include('livewire.app.general.educational.competition.scoreboard.partials.countdown')
+                        </div>
+                        <div class="flex-1 min-h-0 overflow-hidden">
+                            @include('livewire.app.general.educational.competition.scoreboard.partials.results')
+                        </div>
+                    @else
+                        <div class="flex items-center justify-center h-full text-gray-600 italic text-sm">
+                            Espere a que se establezca una competición
+                        </div>
+                    @endif
+                </div>
+            </div>
         @else
-            <div class="me-2 text-gray-400">Espere a que se establezca una competición</div>
+            <div class="flex items-center justify-center py-6 text-gray-600 italic bg-emerald-50 rounded-xl border border-emerald-200 h-full">
+                Espere... No hay una pregunta activa
+            </div>
         @endif
-
     </div>
-
-</div>
-
-</div>
-@else
-<div>Espere... No hay una pregunta activa</div>
-@endif
-
-</div>
-
 </div>

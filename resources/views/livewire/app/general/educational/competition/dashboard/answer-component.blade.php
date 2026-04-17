@@ -10,5 +10,3 @@
         @endforelse
     </div>
 </div>
-
-{{-- primary,secondary,positive,negative,warning,info,dark,secondary,positive,negative,primary --}}
