@@ -71,7 +71,7 @@
 
                                     {{-- Texto de la opción --}}
                                     <div class="w-full px-2 z-10">
-                                        <div class="text-center transition-all duration-300 text-3xl leading-tight
+                                        <div class="text-center transition-all duration-300 text-2xl leading-tight
                                             {{ $status_noanswer
                                                 ? 'text-gray-400 font-light line-through decoration-gray-400'
                                                 : ($status_answer
