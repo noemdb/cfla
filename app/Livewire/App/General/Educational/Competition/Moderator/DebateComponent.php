@@ -39,15 +39,20 @@ class DebateComponent extends Component
     
     public function mount($competition_id)
     {
-        $this->debates = Debate::where('competition_id',$competition_id)->where('grado_id',$this->grado_id)->get();
         $this->competition_id = $competition_id;
+        $this->debates = collect(); // Initialize as empty collection
+        if ($this->grado_id) {
+            $this->loadDebate($this->competition_id);
+        }
         $this->loadActive();
     }
 
     public function render()
     {
         // $this->debates = $this->debates->sortByDesc('status_active');
-        $this->debates = $this->debates->sort();
+        if ($this->debates) {
+            $this->debates = $this->debates->sort();
+        }
         return view('livewire.app.general.educational.competition.moderator.debate-component');
     }
 
@@ -81,9 +86,11 @@ class DebateComponent extends Component
 
     public function loadDebate($competition_id)
     {
-        $this->debates = Debate::query(); 
-        $this->debates = ($competition_id) ? Debate::where('competition_id',$competition_id)->where('grado_id',$this->grado->id) : $this->debates;
-        $this->debates = $this->debates->get(); 
+        if (!$this->grado) {
+            $this->debates = collect();
+            return;
+        }
+        $this->debates = Debate::where('competition_id',$competition_id)->where('grado_id',$this->grado->id)->get();
     }
     
 }

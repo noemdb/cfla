@@ -1,21 +1,19 @@
 <?php
 
-use App\Http\Controllers\Census\CatchmentPDFController;
-use App\Http\Controllers\CensusController;
-use App\Http\Controllers\Educational\CompetitionController;
-use App\Http\Controllers\GmailController;
-use App\Http\Controllers\HomeController;
-use App\Livewire\EnrollmentWizard;
-use Illuminate\Support\Facades\Route;
-use Livewire\Livewire;
-use App\Http\Controllers\OrderController;
-
 use App\Http\Controllers\Admin\VotingDashboardController;
 use App\Http\Controllers\Admin\VotingPollController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CensusController;
+use App\Http\Controllers\Census\CatchmentPDFController;
+use App\Http\Controllers\Educational\CompetitionController;
+use App\Http\Controllers\GmailController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
-use App\Models\app\Voting\VotingPoll;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\Admin\Diagnostic\IndexComponent as DiagnosticIndex;
+use App\Livewire\Admin\Educational\Competition\IndexComponent as CompetitionIndex;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,10 +30,8 @@ use App\Models\app\Voting\VotingPoll;
 // RUTAS NORMALES DE LA APLICACIÓN
 // ===================================================
 
-
 Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
 Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
-
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
@@ -61,12 +57,10 @@ Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
 Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
 
-
 //Api Gmail
 Route::get('/auth/google', [GmailController::class, 'redirectToGoogle'])->name('google.auth');
 Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/send-email', [GmailController::class, 'sendEmail']);
-
 
 /////////////////////////////////////////////////////////////
 //////////////// Encuestas Anonimas /////////////////////////
@@ -122,7 +116,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         // Módulo de Diagnóstico
         Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
-            Route::get('/', \App\Livewire\Admin\Diagnostic\IndexComponent::class)->name('index');
+            Route::get('/', DiagnosticIndex::class)->name('index');
+        });
+
+        // Módulo de Competiciones Académicas
+        Route::prefix('educational')->name('educational.')->group(function () {
+            Route::get('/competition', CompetitionIndex::class)->name('competition.index');
         });
     });
 
@@ -135,7 +134,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 // API para fingerprinting
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
     ->name('voting.store-fingerprint');
-
 
 // Mostrar formulario de login
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
