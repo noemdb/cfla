@@ -140,7 +140,26 @@ class QuestionComponent extends Component
 
     public function reshuffle()
     {
-        $this->questions = collect($this->questions)->shuffle();
+        $grouped = collect($this->questions)->shuffle()->groupBy('category');
+        
+        $interleaved = collect();
+        
+        while ($grouped->isNotEmpty()) {
+            $keys = $grouped->keys()->shuffle();
+            
+            foreach ($keys as $key) {
+                if ($grouped->has($key)) {
+                    $items = $grouped->get($key);
+                    $interleaved->push($items->shift());
+                    
+                    if ($items->isEmpty()) {
+                        $grouped->forget($key);
+                    }
+                }
+            }
+        }
+        
+        $this->questions = $interleaved;
     }
 
 }
