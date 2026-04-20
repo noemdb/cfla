@@ -16,7 +16,7 @@
     <x-notifications />
     <div id="header" data-header="header" class="relative z-50"> @yield('header') </div>
     <div id="main" class="flex-1 relative z-10">
-        <main class="container-fluid mx-auto px-4 py-8">
+        <main class="container-fluid w-full px-4 py-8">
             @yield('main')
         </main>
     </div>
