@@ -10,11 +10,15 @@
     @include('general.educational.competition.partials.styles')
 </head>
 <body
-    class="font-sans antialiased bg-gradient-to-br from-gray-50 via-emerald-50 to-gray-100 min-h-screen text-gray-900 flex flex-col">
+    class="bg-[#020617] text-gray-100 font-sans antialiased min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-950/30 via-gray-950 to-black selection:bg-emerald-500 selection:text-white bg-fixed flex flex-col">
     <x-notifications />
-    <div id="header" data-header="header"> @yield('header') </div>
-    <div id="main" class="flex-1"> @yield('main') </div>
-    <div id="footer"> @yield('footer') </div>
+    <div id="header" data-header="header" class="relative z-50"> @yield('header') </div>
+    <div id="main" class="flex-1 relative z-10">
+        <main class="container mx-auto px-4 py-8">
+            @yield('main')
+        </main>
+    </div>
+    <div id="footer" class="relative z-50 mt-auto"> @yield('footer') </div>
     @yield('javascripts')
     @livewireScripts
 </body>

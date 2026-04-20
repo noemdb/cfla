@@ -55,7 +55,11 @@ class QuestionComponent extends Component
     
     public function render()
     {
-        $this->questions = $this->questions->sortByDesc('status_active');
+        $active = collect($this->questions)->filter(fn($q) => $q->status_active);
+        $inactive = collect($this->questions)->reject(fn($q) => $q->status_active);
+        
+        $this->questions = $active->merge($inactive)->values();
+        
         return view('livewire.app.general.educational.competition.moderator.question-component');
     }
 
@@ -136,7 +140,7 @@ class QuestionComponent extends Component
 
     public function reshuffle()
     {
-        $this->updatedCategory($this->category);
+        $this->questions = collect($this->questions)->shuffle();
     }
 
 }

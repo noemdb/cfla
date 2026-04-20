@@ -18,7 +18,7 @@
             </div>
 
             <ul class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                @forelse ($questions->sortBy('category') as $item)
+                @forelse ($questions as $item)
                     @php $active = ($item->id == $active_id) ? true : false; @endphp
                     <li class="group">
                         <button wire:click="active({{ $item->id }})"
