@@ -134,4 +134,9 @@ class QuestionComponent extends Component
         $this->questions =  DebateQuestion::where('debate_id',$this->question->debate_id)->get();
     }
 
+    public function reshuffle()
+    {
+        $this->updatedCategory($this->category);
+    }
+
 }

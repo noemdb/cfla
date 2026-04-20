@@ -4,7 +4,17 @@
             <div class="flex items-center justify-between mb-4 border-b border-emerald-500/10 pb-2">
                 <span class="text-xs font-black uppercase tracking-widest text-emerald-500/60">Banco de
                     Interrogantes</span>
-                <span class="text-[10px] text-gray-500 font-bold">{{ $questions->count() }} Disponibles</span>
+                <div class="flex items-center gap-3">
+                    <button wire:click="reshuffle" title="Aleatorizar lista"
+                        class="p-1 hover:bg-emerald-500/20 rounded-md text-emerald-500/60 hover:text-emerald-400 transition-all duration-300">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                    </button>
+                    <span class="text-[10px] text-gray-500 font-bold">{{ $questions->count() }} Disponibles</span>
+                </div>
             </div>
 
             <ul class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
