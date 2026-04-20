@@ -8,6 +8,44 @@
                         <span class="text-xs font-black uppercase tracking-widest text-emerald-500">Cronómetro en
                             Vivo</span>
                     </div>
+
+                    <div x-data="{ 
+                        audio: new Audio('/audios/competition.mp3'),
+                        playing: false,
+                        toggle() {
+                            if (this.playing) {
+                                this.audio.pause();
+                                this.playing = false;
+                            } else {
+                                this.audio.play();
+                                this.playing = true;
+                                this.audio.onended = () => { this.playing = false; };
+                            }
+                        }
+                    }">
+                        <button @click="toggle()" 
+                            class="p-2 transition-all rounded-xl flex items-center gap-2 border transition-all duration-300"
+                            :class="playing ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'"
+                            title="Reproducir música de competición">
+                            <template x-if="!playing">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                </svg>
+                            </template>
+                            <template x-if="playing">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex gap-0.5 items-center">
+                                        <div class="w-0.5 h-3 bg-amber-400 animate-bounce"></div>
+                                        <div class="w-0.5 h-4 bg-amber-400 animate-bounce" style="animation-delay: 0.1s"></div>
+                                        <div class="w-0.5 h-2 bg-amber-400 animate-bounce" style="animation-delay: 0.2s"></div>
+                                    </div>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6" />
+                                    </svg>
+                                </div>
+                            </template>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row items-center gap-6">
