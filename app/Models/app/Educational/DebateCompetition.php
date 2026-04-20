@@ -131,5 +131,26 @@ class DebateCompetition extends Model
             $competition->save();
         }
     }
-    
+
+    public function reset()
+    {
+        DB::transaction(function () {
+            $debateIds = $this->debates()->pluck('id');
+
+            // Delete associated answers
+            DebateAnswer::whereIn('question_id', function ($query) use ($debateIds) {
+                $query->select('id')->from('debate_questions')->whereIn('debate_id', $debateIds);
+            })->delete();
+
+            // Reset questions metrics
+            DebateQuestion::whereIn('debate_id', $debateIds)->update([
+                'time_elapsed' => 0,
+                'status_answer' => 0,
+                'status_active' => false
+            ]);
+            
+            // Also deactivate debates
+            $this->debates()->update(['status_active' => false]);
+        });
+    }
 }

@@ -75,11 +75,11 @@
                 <div class="flex flex-col md:flex-row items-center gap-6">
                     <div
                         class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-3 px-6 rounded-xl font-black uppercase tracking-[0.2em] text-lg shadow-inner">
-                        {{ $grado->name }}
+                        {{ $grado->name ?? 'Sin Grado' }}
                     </div>
 
                     <div class="flex-1 text-center md:text-start">
-                        @if ($question->status_answer)
+                        @if ($question->status_answer && $answer)
                             <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Resultado
                                 Registrado</p>
                             @php $seccion_name = ($answer->seccion) ? $answer->seccion->name : 'N/A';@endphp
@@ -92,7 +92,7 @@
                     </div>
 
                     <div class="shrink-0">
-                        @if ($question->status_answer)
+                        @if ($question->status_answer && $answer)
                             <div class="flex items-center gap-3">
                                 @php $score = ($answer->score) ? $answer->score : 0 ; @endphp
                                 <div class="text-right">
@@ -117,10 +117,12 @@
                                     @endif
                                 </button>
                             </div>
+                        @elseif($question->status_answer && !$answer)
+                            <div class="text-orange-400 text-xs font-bold italic">Pregunta marcada como respondida pero sin datos de respuesta.</div>
                         @else
                             @if ($question->exist_option_correct)
                                 <div class="flex flex-wrap justify-center md:justify-end gap-2">
-                                    @php $seccions = $grado->activeSeccions() @endphp
+                                    @php $seccions = $grado ? $grado->activeSeccions() : [] @endphp
                                     @foreach ($seccions as $item)
                                         <button wire:click="saveAnswerSeccion({{ $item->id }},true)"
                                             class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20">

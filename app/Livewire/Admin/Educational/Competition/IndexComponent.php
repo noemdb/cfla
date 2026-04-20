@@ -56,6 +56,36 @@ class IndexComponent extends Component
         );
     }
 
+    public function confirmReset($id)
+    {
+        $this->dialog()->confirm([
+            'title'       => '¿Reiniciar Competición?',
+            'description' => 'Esta acción eliminará todas las respuestas y reiniciará los tiempos de todos los debates asociados. Esta acción no se puede deshacer.',
+            'icon'        => 'warning',
+            'accept'      => [
+                'label'  => 'Sí, reiniciar todo',
+                'method' => 'resetCompetition',
+                'params' => $id,
+                'color'  => 'negative',
+            ],
+            'reject' => [
+                'label'  => 'Cancelar',
+                'color'  => 'secondary',
+            ],
+        ]);
+    }
+
+    public function resetCompetition($id)
+    {
+        $competition = DebateCompetition::findOrFail($id);
+        $competition->reset();
+
+        $this->notification()->success(
+            $title = 'Competición Reiniciada',
+            $description = "El progreso de '{$competition->name}' ha sido reseteado correctamente."
+        );
+    }
+
     #[Layout('layouts.dashboard')]
     public function render()
     {

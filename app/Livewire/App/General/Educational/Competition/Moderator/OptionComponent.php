@@ -194,13 +194,22 @@ class OptionComponent extends Component
     {
         $this->question = DebateQuestion::setActive($id);
         $this->active_id = $this->question->id ;
+        $this->updateOptionList($id);
         $this->dispatch('question-online',id: $id);
+
+        if ($this->question->status_answer) {
+            $this->notification()->warning(
+                $title = 'Interrogante ya respondida',
+                $description = 'Esta pregunta ya cuenta con una respuesta registrada en la base de datos.'
+            );
+        }
     }
 
     public function setOffline($id)
     {
         $this->question = DebateQuestion::setDesActive($id);
         $this->active_id = null;
+        $this->updateOptionList($id);
         $this->dispatch('question-online',id: $id);
     }
 
