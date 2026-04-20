@@ -16,7 +16,7 @@ class QuestionComponent extends Component
     public function updateQuestionsList($id)
     {
         $this->debate = Debate::find($id) ?? new Debate();
-        $this->questions = DebateQuestion::where('debate_id',$id);
+        $this->questions = DebateQuestion::where('debate_id',$id)->whereNotNull('pensum_id');
         $this->questions = ($this->category) ? $this->questions->where('category',$this->category) : $this->questions ;    
         $this->questions = $this->questions->inRandomOrder()->get();
         $this->loadActive();       
@@ -27,7 +27,7 @@ class QuestionComponent extends Component
     #[On('update-score')] 
     public function updateScore()
     {
-        $this->questions = DebateQuestion::where('debate_id',$this->debate->id)->where('category',$this->category)->inRandomOrder()->get();
+        $this->questions = DebateQuestion::where('debate_id',$this->debate->id)->where('category',$this->category)->whereNotNull('pensum_id')->inRandomOrder()->get();
     }
 
     #[On('question-online')] 
@@ -76,7 +76,7 @@ class QuestionComponent extends Component
 
     public function updatedCategory($category)
     {
-        $this->questions =  DebateQuestion::where('debate_id',$this->debate->id)->where('category','like','%'.$category.'%');
+        $this->questions =  DebateQuestion::where('debate_id',$this->debate->id)->where('category','like','%'.$category.'%')->whereNotNull('pensum_id');
         $this->questions = ($this->weighting) ? $this->questions->where('weighting',$this->weighting) : $this->questions;
         $this->questions = $this->questions->inRandomOrder()->get();
     }
@@ -135,7 +135,7 @@ class QuestionComponent extends Component
     {
         // $this->question = DebateQuestion::find($id);
         $this->question = DebateQuestion::setActive($id);
-        $this->questions =  DebateQuestion::where('debate_id',$this->question->debate_id)->get();
+        $this->questions =  DebateQuestion::where('debate_id',$this->question->debate_id)->whereNotNull('pensum_id')->get();
     }
 
     public function reshuffle()
