@@ -128,6 +128,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Rutas exclusivas para Administradores
     Route::middleware(['isAdmin'])->group(function () {
         Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index')->name('logs');
+        Route::get('database/backup', [\App\Http\Controllers\Admin\DatabaseController::class, 'downloadBackup'])->name('database.backup');
     });
 });
 
