@@ -51,6 +51,7 @@
                 <div class="flex flex-col md:flex-row items-center gap-6" x-data="{
                     s: @js($timeRemaining ?? 0),
                     active: @js($timerActive ?? false),
+                    started: @js($timerActive ?? false),
                     iv: null,
                     competition_id: @js($question->debate->competition_id),
                     init() {
@@ -67,6 +68,7 @@
                     sync() {
                         if (this.iv) clearInterval(this.iv);
                         if (this.active && this.s > 0) {
+                            this.started = true;
                             this.iv = setInterval(() => { 
                                 if (this.s > 0) { 
                                     this.s--; 
@@ -110,7 +112,7 @@
                             </svg>
                             Pausar
                         </button>
-                        {{-- Iniciar: visible cuando Alpine tiene active=false --}}
+                        {{-- Iniciar / Continuar: visible cuando Alpine tiene active=false --}}
                         <button x-show="!active" wire:click="start"
                             class="flex-1 md:flex-none px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -118,7 +120,7 @@
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
                                     clip-rule="evenodd" />
                             </svg>
-                            Iniciar
+                            <span x-text="started ? 'Continuar' : 'Iniciar'"></span>
                         </button>
                         <button wire:click="finished"
                             class="flex-1 md:flex-none px-8 py-4 bg-red-500/20 border border-red-500/30 text-red-400 rounded-xl font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
