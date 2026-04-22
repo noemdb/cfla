@@ -10,6 +10,8 @@ use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 use App\Models\app\Academy\Grado;
 
+use App\Events\Competition\ScoreboardUpdated;
+
 class AnswersComponent extends Component
 {
     use WireUiActions, WithPagination;
@@ -78,6 +80,9 @@ class AnswersComponent extends Component
                 $description = 'Los puntos han sido anulados (score = 0) y colocados bajo revisión.'
             );
         }
+
+        // Broadcast al scoreboard para actualización en tiempo real
+        broadcast(new ScoreboardUpdated($this->competition->id))->toOthers();
     }
 
     public function paginationView()

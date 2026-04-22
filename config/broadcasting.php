@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('BROADCAST_DRIVER', 'null'),
+    'default' => env('BROADCAST_CONNECTION', env('BROADCAST_DRIVER', 'null')),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,10 +36,12 @@ return [
             'secret' => env('REVERB_APP_SECRET'),
             'app_id' => env('REVERB_APP_ID'),
             'options' => [
-                'host' => env('REVERB_HOST'),
-                'port' => env('REVERB_PORT', 443),
-                'scheme' => env('REVERB_SCHEME', 'https'),
-                'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                // El host/puerto/scheme aquí es para que PHP (backend) alcance Reverb internamente.
+                // SIEMPRE debe apuntar al servidor interno (localhost:8090 con http).
+                'host' => env('REVERB_HOST', '127.0.0.1'),
+                'port' => env('REVERB_SERVER_PORT', 8090),
+                'scheme' => 'http',
+                'useTLS' => false,
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

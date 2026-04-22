@@ -55,3 +55,6 @@ auth.json
 /storage/app/google/credentials.json
 /storage/app/google/token.json
 
+# ===== Custom Ignore =====
+/context/
+

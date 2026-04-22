@@ -12,7 +12,7 @@ use Livewire\Component;
 class OptionComponent extends Component
 {
     public $literal, $debate, $grado, $seccions, $colors, $competition, $options, $question, $timeRemaining;
-    public int $competition_id;
+    public int $competition_id = 0;
 
     public function mount($id)
     {
