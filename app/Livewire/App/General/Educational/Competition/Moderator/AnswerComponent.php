@@ -11,8 +11,7 @@ use Livewire\Attributes\On;
 class AnswerComponent extends Component
 {
     public $question,$answer,$grado,$seccions,$seccion,$question_id;
-    public $timeRemaining,$timerActive,$pollingInterval,$timeElapsed;
-    public $interval;
+    public $timeRemaining,$timerActive,$timeElapsed;
 
     #[On('answer-update')] 
     public function updateQuestion($id)
@@ -33,7 +32,6 @@ class AnswerComponent extends Component
         $this->seccions = ($this->question) ? $this->question->seccions->where('status_inscription_affects','true') : null ;
 
         $this->timerActive = false;
-        $this->pollingInterval = 100;
 
         $this->answer = DebateAnswer::where('question_id',$question_id)->first();
         $this->seccion = ($this->answer) ? $this->answer->seccion : null ;
@@ -48,25 +46,36 @@ class AnswerComponent extends Component
     public function start()
     {
         $this->timerActive = true;
-        $this->timeElapsed = $this->question->time_elapsed;
-        $this->dispatch('startTimer', active: $this->timerActive); 
+        // Broadcast vía WebSockets para sincronizar UI de Alpine y Scoreboard
+        event(new \App\Events\Competition\TimerSync($this->question->debate->competition_id, $this->timeRemaining, true));
     }
 
-    public function decrementCount()
-    {
-        if ($this->timeRemaining > 0) {
-            $this->timeRemaining--;
-            $this->timeElapsed++;
-            $this->question->time_elapsed = $this->timeElapsed;
-            $this->question->save();
-        } else {
-            $this->stopPolling();
-        }
-    }
-
-    public function stopPolling()
+    public function pause($remaining)
     {
         $this->timerActive = false;
+        $this->timeRemaining = $remaining;
+        
+        $this->timeElapsed = $this->question->time - $this->timeRemaining;
+        $this->question->time_elapsed = $this->timeElapsed;
+        $this->question->save();
+        
+        event(new \App\Events\Competition\TimerSync($this->question->debate->competition_id, $this->timeRemaining, false));
+    }
+
+    public function finished()
+    {
+        $this->timerActive = false;
+        $this->timeRemaining = 0;
+        $this->question->time_elapsed = $this->question->time;
+        $this->question->save();
+        
+        event(new \App\Events\Competition\TimerSync($this->question->debate->competition_id, 0, false));
+        event(new \App\Events\Competition\ScoreboardUpdated($this->question->debate->competition_id));
+        event(new \App\Events\Competition\QuestionActivated(
+            $this->question->debate->competition_id, 
+            $this->question->id, 
+            0
+        ));
     }
 
 }
