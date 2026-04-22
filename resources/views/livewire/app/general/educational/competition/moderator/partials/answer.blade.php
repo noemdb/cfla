@@ -48,50 +48,49 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="flex flex-col md:flex-row items-center gap-6" x-data="{
+                    s: @js($timeRemaining ?? 0),
+                    active: @js($timerActive ?? false),
+                    iv: null,
+                    competition_id: @js($question->debate->competition_id),
+                    init() {
+                        this.sync();
+                        if (window.Echo) {
+                            window.Echo.channel('competition.' + this.competition_id)
+                                .listen('.timer.sync', (e) => {
+                                    this.s = e.time_remaining;
+                                    this.active = e.timer_active;
+                                    this.sync();
+                                });
+                        }
+                    },
+                    sync() {
+                        if (this.iv) clearInterval(this.iv);
+                        if (this.active && this.s > 0) {
+                            this.iv = setInterval(() => { 
+                                if (this.s > 0) { 
+                                    this.s--; 
+                                } 
+                                if (this.s <= 0) { 
+                                    clearInterval(this.iv); 
+                                    this.active = false;
+                                    $wire.finished();
+                                }
+                            }, 1000);
+                        }
+                    },
+                    pauseTimer() {
+                        $wire.pause(this.s);
+                    },
+                    fmt(v) { 
+                        let mins = Math.floor(v / 60);
+                        let secs = v % 60;
+                        return String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+                    }
+                }" x-init="init()">
                     <div
                         class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-2xl py-6 px-10 min-w-[200px]">
-                        <div wire:key="mod-timer-{{ $question->id ?? 'none' }}" class="text-5xl font-black text-white tabular-nums tracking-tighter" x-data="{
-                            s: @js($timeRemaining ?? 0),
-                            active: @js($timerActive ?? false),
-                            iv: null,
-                            competition_id: @js($question->debate->competition_id),
-                            init() {
-                                this.sync();
-                                if (window.Echo) {
-                                    window.Echo.channel('competition.' + this.competition_id)
-                                        .listen('.timer.sync', (e) => {
-                                            this.s = e.time_remaining;
-                                            this.active = e.timer_active;
-                                            this.sync();
-                                        });
-                                }
-                            },
-                            sync() {
-                                if (this.iv) clearInterval(this.iv);
-                                if (this.active && this.s > 0) {
-                                    this.iv = setInterval(() => { 
-                                        if (this.s > 0) { 
-                                            this.s--; 
-                                        } 
-                                        if (this.s <= 0) { 
-                                            clearInterval(this.iv); 
-                                            this.active = false;
-                                            $wire.finished();
-                                        }
-                                    }, 1000);
-                                }
-                            },
-                            pauseTimer() {
-                                // Llamar al backend informando los segundos restantes
-                                $wire.pause(this.s);
-                            },
-                            fmt(v) { 
-                                let mins = Math.floor(v / 60);
-                                let secs = v % 60;
-                                return String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
-                            }
-                        }" x-init="init()">
+                        <div wire:key="mod-timer-{{ $question->id ?? 'none' }}" class="text-5xl font-black text-white tabular-nums tracking-tighter">
                             <span x-text="fmt(s)"></span>
                         </div>
                         <div class="ml-3 flex flex-col items-start border-l border-emerald-500/20 pl-3">
