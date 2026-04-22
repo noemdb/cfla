@@ -315,4 +315,24 @@ class OptionComponent extends Component
 
     }
 
+    public function nullifyQuestion()
+    {
+        $question = DebateQuestion::findOrFail($this->question->id);
+        
+        // Setear el puntaje a 0 en las respuestas
+        $question->answers()->update(['score' => 0]);
+        
+        // Indicar que la pregunta entra en revisión
+        $question->update(['status_under_review' => true]);
+        
+        $this->notification()->success(
+            $title = 'Respuesta anulada',
+            $description = 'Se han reseteado los puntajes y se marcó en revisión.'
+        );
+        
+        // Recargar vista
+        $this->updateOptionList($question->id);
+        $this->dispatch('update-score');
+    }
+
 }

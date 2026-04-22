@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class DebateQuestion extends Model
 {
     use HasFactory;
-    protected $fillable = ['debate_id', 'category', 'text', 'time', 'weighting', 'observation', 'status_active', 'attachment', 'time_elapsed', 'status_answer'];
+    protected $fillable = ['debate_id', 'category', 'text', 'time', 'weighting', 'observation', 'status_active', 'attachment', 'time_elapsed', 'status_answer', 'status_under_review'];
 
     const COLUMN_COMMENTS = [
         'debate_id'     => 'Debates',
@@ -21,6 +21,7 @@ class DebateQuestion extends Model
         'attachment'    => 'Archivo adjunto',
         'time_elapsed'  => 'Tiempo transcurrido',
         'status_answer' => 'Estado de respuesta',
+        'status_under_review' => 'En revisión',
     ];
 
     const CATEGORY = [

@@ -54,17 +54,28 @@
                                         <span>{{ $item->weighting }}pts</span>
                                     </div>
                                 </div>
-                                <div class="shrink-0 flex gap-1">
+                                <div class="shrink-0 flex items-center gap-1.5">
                                     @if ($item->status_active)
                                         <span class="h-2 w-2 rounded-full bg-red-400 animate-pulse"
                                             title="En curso"></span>
                                     @endif
+                                    
+                                    @if ($item->status_under_review)
+                                        <span class="text-orange-400" title="En Revisión">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                        </span>
+                                    @endif
+
                                     @if ($item->status_answer)
-                                        <svg class="w-3 h-3 {{ $active ? 'text-white' : 'text-emerald-400' }}"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-3 h-3 {{ $active ? 'text-white' : 'text-emerald-400' }}"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Respondida">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
                                     @endif
                                 </div>
                             </div>

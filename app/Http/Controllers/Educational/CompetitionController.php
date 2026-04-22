@@ -28,4 +28,11 @@ class CompetitionController extends Controller
         if (empty($competition)) abort(404,'Competición no encontrada');
         return view('general.educational.competition.scoreboard.index',compact('token'));
     }
+
+    public function answers($token)
+    {
+        $competition = DebateCompetition::where('token',$token)->first();
+        if (empty($competition)) abort(404,'Competición no encontrada');
+        return view('general.educational.competition.answers.index',compact('token'));
+    }
 }

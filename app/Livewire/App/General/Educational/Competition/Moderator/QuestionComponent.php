@@ -11,14 +11,15 @@ use Livewire\Attributes\On;
 class QuestionComponent extends Component
 {
     public $debate,$debate_id,$questions,$question,$active_id,$category,$list_category,$list_weighting,$weighting;
+    public array $selectedWeightings = [];
+    public bool $filterAnswered = false;
+    public bool $filterUnanswered = true;
 
     #[On('detabe-active')] 
     public function updateQuestionsList($id)
     {
         $this->debate = Debate::find($id) ?? new Debate();
-        $this->questions = DebateQuestion::where('debate_id',$id)->whereNotNull('pensum_id');
-        $this->questions = ($this->category) ? $this->questions->where('category',$this->category) : $this->questions ;    
-        $this->questions = $this->questions->inRandomOrder()->get();
+        $this->updatedCategory($this->category);
         $this->loadActive();       
         $this->updatedListCategory($id);
         $this->dispatch('question-active',id: $this->active_id);
@@ -27,7 +28,7 @@ class QuestionComponent extends Component
     #[On('update-score')] 
     public function updateScore()
     {
-        $this->questions = DebateQuestion::where('debate_id',$this->debate->id)->where('category',$this->category)->whereNotNull('pensum_id')->inRandomOrder()->get();
+        $this->updatedCategory($this->category);
     }
 
     #[On('question-online')] 
@@ -76,9 +77,26 @@ class QuestionComponent extends Component
 
     public function updatedCategory($category)
     {
-        $this->questions =  DebateQuestion::where('debate_id',$this->debate->id)->where('category','like','%'.$category.'%')->whereNotNull('pensum_id');
-        $this->questions = ($this->weighting) ? $this->questions->where('weighting',$this->weighting) : $this->questions;
-        $this->questions = $this->questions->inRandomOrder()->get();
+        $query = DebateQuestion::where('debate_id', $this->debate->id)
+            ->where('category', 'like', '%'.$category.'%')
+            ->whereNotNull('pensum_id');
+
+        // Combinar select rápido + checkboxes en un único filtro whereIn (semántica OR)
+        $weightingFilter = array_unique(array_filter(
+            array_merge($this->selectedWeightings, $this->weighting ? [$this->weighting] : [])
+        ));
+        if (!empty($weightingFilter)) {
+            $query->whereIn('weighting', $weightingFilter);
+        }
+
+        if ($this->filterAnswered) {
+            $query->where('status_answer', true);
+        }
+        if ($this->filterUnanswered) {
+            $query->where('status_answer', false);
+        }
+
+        $this->questions = $query->inRandomOrder()->get();
     }
 
     public function updatedListCategory($debate_id)
@@ -94,7 +112,22 @@ class QuestionComponent extends Component
         $this->list_category = $filteredArray;
     }
 
+    public function updatedSelectedWeightings()
+    {
+        $this->updatedCategory($this->category);
+    }
+
     public function updatedWeighting()
+    {
+        $this->updatedCategory($this->category);
+    }
+
+    public function updatedFilterAnswered()
+    {
+        $this->updatedCategory($this->category);
+    }
+
+    public function updatedFilterUnanswered()
     {
         $this->updatedCategory($this->category);
     }

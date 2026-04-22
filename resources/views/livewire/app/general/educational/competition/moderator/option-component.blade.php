@@ -14,7 +14,14 @@
                     </div>
                     <div class="flex-1">
                         <h5 class="text-sm font-bold text-gray-300 italic">"{{ $question->text }}"</h5>
-                        @if ($question->status_answer)
+                        @if ($question->status_under_review)
+                            <span class="text-[9px] font-black uppercase tracking-widest text-red-500 flex items-center gap-1 mt-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                Atención: Respuesta Anulada (En revisión)
+                            </span>
+                        @elseif ($question->status_answer)
                             <span class="text-[9px] font-black uppercase tracking-widest text-orange-400 flex items-center gap-1 mt-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -72,6 +79,26 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Botón de anulación --}}
+            @if ($question->status_answer)
+                <div class="mt-5 flex justify-end">
+                    <button type="button" 
+                        {{ $question->status_under_review ? 'disabled' : '' }}
+                        wire:click.prevent="nullifyQuestion"
+                        wire:confirm="¿Anular Puntuación? Esta acción no se puede revertir. Se resetearán los puntos otorgados y la interrogante pasará a estado de revisión de los moderadores."
+                        title="{{ $question->status_under_review ? 'Esta respuesta ya fue anulada' : 'Anular Respuesta' }}"
+                        class="flex items-center gap-2.5 px-5 py-2.5 bg-red-500/10 text-red-500 rounded-xl transition-all duration-300 border border-red-500/30 group 
+                               {{ $question->status_under_review 
+                                  ? 'opacity-40 cursor-not-allowed grayscale' 
+                                  : 'hover:bg-red-500 hover:text-white shadow-lg shadow-red-500/20' }}">
+                        <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                        <span class="text-[11px] font-black uppercase tracking-widest">Anular Respuesta Puntuada</span>
+                    </button>
+                </div>
+            @endif
         </div>
 
         @include('livewire.app.general.educational.competition.moderator.partials.answer')

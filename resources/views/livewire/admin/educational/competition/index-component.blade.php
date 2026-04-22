@@ -68,10 +68,10 @@
                 </div>
 
                 <!-- Action Links -->
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-4 gap-2">
                     <a href="{{ route('general.educational.competition.moderator', $competition->token) }}"
                         target="_blank"
-                        class="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-emerald-500/10 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-emerald-500/10 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-emerald-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -83,7 +83,7 @@
 
                     <a href="{{ route('general.educational.competition.scoreboard', $competition->token) }}"
                         target="_blank"
-                        class="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-purple-500/10 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-purple-500/10 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-purple-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -93,8 +93,18 @@
                         <span class="text-[9px] font-bold uppercase tracking-wider text-gray-400 font-black">Puntaje</span>
                     </a>
 
+                    <a href="{{ route('admin.educational.competition.answers', $competition->token) }}"
+                        target="_blank"
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-blue-500/10 rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all duration-300 group/link">
+                        <svg class="w-5 h-5 text-blue-400 group-hover/link:scale-110 transition-transform"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-gray-400 font-black">Audit</span>
+                    </a>
+
                     <button type="button" wire:click="confirmReset({{ $competition->id }})"
-                        class="flex flex-col items-center gap-2 p-3 bg-white/5 hover:bg-amber-500/10 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-amber-500/10 rounded-2xl border border-white/5 hover:border-amber-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-amber-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

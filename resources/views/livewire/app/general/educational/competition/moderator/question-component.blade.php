@@ -48,16 +48,91 @@
         </div>
     </div>
 
+    {{-- Filtros: Categoría + Ponderación --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="relative group">
+        <div class="space-y-4 relative group">
             <x-select placeholder="Seleccione Categoría" wire:model.live="category" :options="$list_category"
                 class="bg-gray-900 border-emerald-500/20 text-white focus:border-emerald-500 focus:ring-emerald-500" />
+
+            {{-- Controles de filtro por estado --}}
+            <div class="flex flex-wrap items-center gap-4 pt-1">
+
+                {{-- Toggle: Sin Responder --}}
+                <label for="filter-unanswered" class="group flex items-center gap-2.5 cursor-pointer select-none">
+                    <div class="relative">
+                        <input id="filter-unanswered" type="checkbox" wire:model.live="filterUnanswered"
+                            class="sr-only peer" />
+                        <div
+                            class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer
+                            peer-checked:bg-orange-600 transition-colors duration-300">
+                        </div>
+                        <div
+                            class="absolute top-[2px] left-[2px] w-4 h-4 bg-white rounded-full shadow
+                            transition-transform duration-300 peer-checked:translate-x-4">
+                        </div>
+                    </div>
+                    <span
+                        class="text-[11px] font-bold uppercase tracking-widest
+                        text-gray-400 group-hover:text-orange-400 transition-colors duration-200">
+                        Sin responder
+                    </span>
+                </label>
+
+                {{-- Toggle: Solo Respondidas --}}
+                <label for="filter-answered" class="group flex items-center gap-2.5 cursor-pointer select-none">
+                    <div class="relative">
+                        <input id="filter-answered" type="checkbox" wire:model.live="filterAnswered"
+                            class="sr-only peer" />
+                        <div
+                            class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer
+                            peer-checked:bg-emerald-600 transition-colors duration-300">
+                        </div>
+                        <div
+                            class="absolute top-[2px] left-[2px] w-4 h-4 bg-white rounded-full shadow
+                            transition-transform duration-300 peer-checked:translate-x-4">
+                        </div>
+                    </div>
+                    <span
+                        class="text-[11px] font-bold uppercase tracking-widest
+                        text-gray-400 group-hover:text-emerald-400 transition-colors duration-200">
+                        Solo Respondidas
+                    </span>
+                </label>
+
+                </label>
+
+            </div>
         </div>
-        <div class="relative group">
+        <div class="space-y-2">
             <x-select placeholder="Seleccione Ponderación" wire:model.live="weighting" :options="$list_weighting"
                 class="bg-gray-900 border-emerald-500/20 text-white focus:border-emerald-500 focus:ring-emerald-500" />
+            {{-- Checkboxes de selección múltiple --}}
+            @if ($list_weighting->isNotEmpty())
+                <div class="flex flex-wrap gap-2 pt-0.5">
+                    @foreach ($list_weighting as $val)
+                        @php $checked = in_array($val, $selectedWeightings); @endphp
+                        <label for="w-{{ $val }}"
+                            class="flex items-center gap-1.5 cursor-pointer select-none px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all duration-200
+                                {{ $checked
+                                    ? 'bg-emerald-600 border-emerald-400 text-white shadow-md shadow-emerald-500/20'
+                                    : 'bg-gray-900/50 border-emerald-500/15 text-gray-400 hover:border-emerald-500/40 hover:text-emerald-300' }}">
+                            <input id="w-{{ $val }}" type="checkbox" wire:model.live="selectedWeightings"
+                                value="{{ $val }}" class="sr-only" />
+                            @if ($checked)
+                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            @endif
+                            {{ $val }} pts
+                        </label>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
+
+
 
     <div class="mt-8">
         @if ($questions->isNotEmpty())

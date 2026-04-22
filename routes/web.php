@@ -122,6 +122,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         // Módulo de Competiciones Académicas
         Route::prefix('educational')->name('educational.')->group(function () {
             Route::get('/competition', CompetitionIndex::class)->name('competition.index');
+            Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
         });
     });
 
