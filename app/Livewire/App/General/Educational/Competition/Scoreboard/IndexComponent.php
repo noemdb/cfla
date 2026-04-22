@@ -18,7 +18,7 @@ class IndexComponent extends Component
     {
         $this->token = $token;
         $this->competition = DebateCompetition::where('token',$token)->where('status_active',true)->first();
-        $this->competition_id = ($this->competition) ? $this->competition->id : null;
+        $this->competition_id = ($this->competition) ? $this->competition->id : 0;
         $this->setDebateActive();
         $this->getQuestions();
         $this->setQuestionActive();

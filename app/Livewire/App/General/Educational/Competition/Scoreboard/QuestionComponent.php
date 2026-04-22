@@ -9,7 +9,7 @@ use Livewire\Component;
 
 class QuestionComponent extends Component
 {
-    public $competition, $question, $competition_id;
+    public $competition, $question, $competition_id = 0;
 
     public function mount($id)
     {

@@ -8,7 +8,7 @@ use Livewire\Component;
 
 class CompetitionComponent extends Component
 {
-    public $token, $competition, $competition_id;
+    public $token, $competition, $competition_id = 0;
 
     public function mount($id)
     {
