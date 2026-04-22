@@ -55,8 +55,7 @@
                     {{-- Sidebar: Resultados Preliminares --}}
                     <div class="col-span-2 border-l-2 border-emerald-500/30 bg-gray-50">
 
-                        <div class="bg-emerald-600 p-3"
-                            wire:poll.5s="updateScoreBoard({{ $competition->id }})">
+                        <div class="bg-emerald-600 p-3">
                             <span class="text-lg font-bold text-white uppercase tracking-widest">
                                 Resultados Preliminares
                             </span>

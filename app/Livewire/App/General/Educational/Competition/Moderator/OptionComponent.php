@@ -3,6 +3,9 @@
 namespace App\Livewire\App\General\Educational\Competition\Moderator;
 //livewire.app.general.educational.competition.moderator.option-component
 
+use App\Events\Competition\QuestionActivated;
+use App\Events\Competition\ScoreboardUpdated;
+use App\Events\Competition\TimerSync;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Educational\DebateAnswer;
@@ -66,22 +69,31 @@ class OptionComponent extends Component
     public function start()
     {
         $this->timerActive = true;
-        $this->timeElapsed = $this->question->time_elapsed;
-        // $this->dispatch('startTimer', active: $this->timerActive); 
+        // Solo lanzamos síncronia a la UI (Alpine). Backend ya no cuenta segundo a segundo.
+        event(new TimerSync($this->question->debate->competition_id, $this->timeRemaining, true));
     }
-    public function pause()
+    public function pause($remaining)
     {
         $this->timerActive = false;
+        $this->timeRemaining = $remaining;
+        
+        $this->timeElapsed = $this->question->time - $this->timeRemaining;
         $this->question->time_elapsed = $this->timeElapsed;
         $this->question->save();
-        // $this->dispatch('startTimer', active: $this->timerActive); 
+        
+        event(new TimerSync($this->question->debate->competition_id, $this->timeRemaining, false));
     }
 
     public function finished()
     {
         $this->timerActive = false;
+        $this->timeRemaining = 0;
         $this->question->time_elapsed = $this->question->time;
         $this->question->save();
+        
+        event(new TimerSync($this->question->debate->competition_id, 0, false));
+        event(new ScoreboardUpdated($this->question->debate->competition_id));
+        event(new QuestionActivated($this->question->debate->competition_id, $this->question->id, 0));
     }
     public function decrementCount()
     {
@@ -145,7 +157,8 @@ class OptionComponent extends Component
         $this->updateOptionList($question->id);
 
         $this->dispatch('update-score');
-
+        // Broadcast al scoreboard
+        event(new ScoreboardUpdated($question->debate->competition_id));
     }
 
     public function saveAnswer($grado_id,$correct)
@@ -203,6 +216,12 @@ class OptionComponent extends Component
                 $description = 'Esta pregunta ya cuenta con una respuesta registrada en la base de datos.'
             );
         }
+
+        event(new QuestionActivated(
+            $this->question->debate->competition_id,
+            $id,
+            $this->question->timeRemaining
+        ));
     }
 
     public function setOffline($id)
@@ -211,6 +230,12 @@ class OptionComponent extends Component
         $this->active_id = null;
         $this->updateOptionList($id);
         $this->dispatch('question-online',id: $id);
+
+        event(new QuestionActivated(
+            $this->question->debate->competition_id,
+            null,
+            null
+        ));
     }
 
     public function setPoin($id,$score)
@@ -333,6 +358,8 @@ class OptionComponent extends Component
         // Recargar vista
         $this->updateOptionList($question->id);
         $this->dispatch('update-score');
+        // Broadcast al scoreboard
+        event(new ScoreboardUpdated($question->debate->competition_id));
     }
 
 }

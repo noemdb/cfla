@@ -3,7 +3,7 @@
     <div class="py-2">Tiempo/Puntaje</div>
     @if (! $question->status_over_time)
 
-        <div wire:poll.{{ $timeRemaining}}s="updateTimetimeRemaining">
+        <div>
             <div class=" font-bold text-xl mb-2 border-t-2 border-gray-200">Cronómetro <span class="text-sm font-bold text-gray-400">[Seg.]</span></div>
 
             <div x-data="{ 

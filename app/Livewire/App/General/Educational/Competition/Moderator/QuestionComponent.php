@@ -3,6 +3,8 @@
 namespace App\Livewire\App\General\Educational\Competition\Moderator;
 //livewire.app.general.educational.competition.moderator.question-component
 
+use App\Events\Competition\DebateActivated;
+use App\Events\Competition\QuestionActivated;
 use App\Models\app\Educational\Debate;
 use App\Models\app\Educational\DebateQuestion;
 use Livewire\Component;
@@ -137,9 +139,17 @@ class QuestionComponent extends Component
         $this->debate = Debate::setActive($id);
         $this->question = DebateQuestion::find($this->active_id);
         $this->updatedCategory($this->category);
-        $this->dispatch('debate-online',id: $id);
-        $id = ($this->question) ? $this->question->id : null ;
-        $this->dispatch('question-active',id: $id);
+        $this->dispatch('debate-online', id: $id);
+        $qId = ($this->question) ? $this->question->id : null;
+        $this->dispatch('question-active', id: $qId);
+
+        // Broadcast vía WebSocket
+        event(new DebateActivated($this->debate->competition_id, $id));
+        event(new QuestionActivated(
+            $this->debate->competition_id,
+            $qId,
+            $this->question?->timeRemaining,
+        ));
     }
 
     public function setOffline($id)
@@ -147,21 +157,36 @@ class QuestionComponent extends Component
         $this->debate = Debate::setDesActive($id);
         $this->question = DebateQuestion::find($this->active_id);
         $this->updatedCategory($this->category);
-        $this->dispatch('debate-online',id: $id);
-        $id = ($this->question) ? $this->question->id : null ;
-        $this->dispatch('question-active',id: $id);
+        $this->dispatch('debate-online', id: $id);
+        $qId = ($this->question) ? $this->question->id : null;
+        $this->dispatch('question-active', id: $qId);
+
+        // Broadcast vía WebSocket
+        event(new DebateActivated($this->debate->competition_id, null));
     }
 
     public function setOnlineQuestion($id)
     {
         $this->question = DebateQuestion::setActive($id);
         $this->active_id = $id;
+
+        // Broadcast vía WebSocket
+        event(new QuestionActivated(
+            $this->question->debate->competition_id,
+            $id,
+            $this->question->timeRemaining,
+        ));
     }
 
     public function setOfflineQuestion($id)
     {
         $this->question = DebateQuestion::setDesActive($id);
         $this->active_id = null;
+
+        // Broadcast: pregunta desactivada
+        if ($this->debate) {
+            event(new QuestionActivated($this->debate->competition_id, null, null));
+        }
     }
 
     public function activeOnline($id)

@@ -12,13 +12,29 @@
                 </div>
                 <div class="col-span-2">
                     <div class="text-sm font-normal border rounded border-gray-600 p-2">
-                        <div class="text-2xl font-extrabold">
-                            @if ($timerActive)
-                                <span wire:poll.{{ $pollingInterval }}ms="decrementCount">{{ gmdate('i:s', $timeRemaining) }} <span class="text-sm font-light">[min:seg]</span></span>
-                            @else
-                                <span>{{ gmdate('i:s', $timeRemaining) }} <span class="text-sm font-light">[min:seg]</span></span>
-                            @endif
-                        </div> 
+                        <div class="text-2xl font-extrabold" x-data="{
+                            s: @js($timeRemaining ?? 0),
+                            running: @js($timerActive ?? false),
+                            iv: null,
+                            init() {
+                                if (this.running && this.s > 0) {
+                                    this.startTimer();
+                                }
+                            },
+                            startTimer() {
+                                this.iv = setInterval(() => {
+                                    if(this.s > 0) this.s--;
+                                    else clearInterval(this.iv);
+                                }, 1000);
+                            },
+                            fmt(v) {
+                                let m = Math.floor(v / 60);
+                                let secs = v % 60;
+                                return String(m).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+                            }
+                        }" x-init="init()">
+                            <span x-text="fmt(s)"></span> <span class="text-sm font-light">[min:seg]</span>
+                        </div>
                     </div>
                 </div>
                 <div class="col-span-2">

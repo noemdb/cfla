@@ -6,6 +6,7 @@ use App\Models\app\Academy\Grado;
 use App\Models\app\Educational\Debate;
 use App\Models\app\Educational\DebateCompetition;
 use App\Models\app\Educational\DebateQuestion;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class IndexComponent extends Component
@@ -16,18 +17,24 @@ class IndexComponent extends Component
     public function mount($token)
     {
         $this->token = $token;
-        $this->competition = DebateCompetition::where('token',$token)->where('status_active',true)->first(); //dd($this->competition);
-        $this->competition_id = ($this->competition) ? $this->competition->id : null ;
+        $this->competition = DebateCompetition::where('token',$token)->where('status_active',true)->first();
+        $this->competition_id = ($this->competition) ? $this->competition->id : null;
         $this->setDebateActive();
         $this->getQuestions();
         $this->setQuestionActive();
         $this->setOptionsActive();
-        $this->grado = ($this->debate) ? $this->debate->grado : collect(); //dd($this->seccions);
-        $this->seccions = ($this->debate) ? $this->debate->seccions : collect(); //dd($this->seccions);
+        $this->grado = ($this->debate) ? $this->debate->grado : collect();
+        $this->seccions = ($this->debate) ? $this->debate->seccions : collect();
 
         $this->literal = ['A','B','C','D','E','F']; 
         $this->colors = ['primary','secondary','positive','negative','warning','info'];
         $this->pollingInterval = 100; 
+    }
+
+    #[On('echo:competition.{competition_id},.scoreboard.updated')]
+    public function refreshScoreboard(): void
+    {
+        $this->competition = DebateCompetition::find($this->competition_id);
     }
 
     public function render()
@@ -61,11 +68,6 @@ class IndexComponent extends Component
     public function updateTimetimeRemaining()
     {
         $this->question = ($this->question) ? DebateQuestion::find($this->question_id) : null;
-    }
-
-    public function updateScoreBoard($id)
-    {
-        $this->competition = DebateCompetition::findOrFail($id);
     }
 }
 

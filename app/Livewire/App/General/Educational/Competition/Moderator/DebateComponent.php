@@ -3,6 +3,7 @@
 namespace App\Livewire\App\General\Educational\Competition\Moderator;
 //livewire.app.general.educational.competition.moderator.debate-component
 
+use App\Events\Competition\DebateActivated;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Educational\Debate;
 use App\Models\app\Educational\DebateCompetition;
@@ -76,12 +77,14 @@ class DebateComponent extends Component
     {
         $this->debate = Debate::setActive($id);
         $this->active_id = $this->debate->id ;
+        event(new DebateActivated($this->competition_id, $this->active_id));
     }
 
     public function setOffline($id)
     {
         $this->debate = Debate::setDesActive($id);
         $this->active_id = null;
+        event(new DebateActivated($this->competition_id, null));
     }
 
     public function loadDebate($competition_id)

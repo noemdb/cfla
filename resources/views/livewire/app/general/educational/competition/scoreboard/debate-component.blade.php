@@ -1,5 +1,5 @@
 <div>
-    <div class="m-1 w-full" wire:poll.1s="updateDebate({{ $competition->id }})">
+    <div class="m-1 w-full">
 
         @if ($debate)
 

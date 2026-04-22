@@ -1,6 +1,6 @@
 {{-- Altura restringida al espacio visible hasta el footer --}}
 <div class="h-[calc(100vh-12rem)] flex flex-col overflow-hidden">
-    <div wire:poll.1s="updateOptions({{ $competition->id }})" class="h-full flex flex-col">
+    <div class="h-full flex flex-col">
         @if ($question)
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 h-full flex-1">
                 
@@ -97,7 +97,7 @@
                 </div>
 
                 {{-- Columna Derecha: Cronómetro y Resultados --}}
-                <div class="col-span-3 flex flex-col gap-3 h-full" wire:poll.1s="updateTimetimeRemaining">
+                <div class="col-span-3 flex flex-col gap-3 h-full">
                     @if ($competition)
                         <div class="flex-shrink-0">
                             @include('livewire.app.general.educational.competition.scoreboard.partials.countdown')
