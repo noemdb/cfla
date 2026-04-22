@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class IndexComponent extends Component
 {
-    public $token,$competition,$competition_id,$debate,$debate_id,$questions,$question,$question_id,$options,$answer,$grado,$seccions;
+    public $token,$competition,$competition_id = 0,$debate,$debate_id,$questions,$question,$question_id,$options,$answer,$grado,$seccions;
     public $literal,$colors,$pollingInterval,$timeRemaining;
 
     public function mount($token)
