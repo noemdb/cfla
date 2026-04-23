@@ -28,5 +28,9 @@ class AuthServiceProvider extends ServiceProvider
         // Gate::define('manage-polls', function ($user) {
         //     return true; // Por ahora permitir a todos
         // });
+
+        Gate::define('viewPulse', function ($user) {
+            return $user->is_admin || $user->is_diagnostic;
+        });
     }
 }
