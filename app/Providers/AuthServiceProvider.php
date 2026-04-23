@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -30,8 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         // });
 
         Gate::define('viewPulse', function ($user) {
-            // Temporalmente permitimos a cualquier usuario logueado
-            return true;
+            return $user->isAdminOrDiagnostic();
         });
     }
 }
