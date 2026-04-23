@@ -30,7 +30,8 @@ class AuthServiceProvider extends ServiceProvider
         // });
 
         Gate::define('viewPulse', function ($user) {
-            return $user->is_admin || $user->is_diagnostic;
+            // Temporalmente permitimos a cualquier usuario logueado
+            return true;
         });
     }
 }
