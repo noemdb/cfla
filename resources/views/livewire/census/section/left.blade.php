@@ -7,9 +7,10 @@
             </h1>
         </div>
         <div class="text-xl">El primer paso hacia una educación de excelencia.</div>
-        <div class="mb-8 font-semibold text-2xl rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">Primera convocatoria:
-            Desde
-            el 28 hasta 30 de abril, a las 2pm.</div>
+        @php $jornadaProxima = App\Models\app\Academy\Catchment::getJornadaProxima(); @endphp
+        <div class="mb-4 font-semibold text-2xl rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">
+            {{ $jornadaProxima['label'] }}, a las 2pm.
+        </div>
 
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}

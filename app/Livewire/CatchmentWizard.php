@@ -27,24 +27,24 @@ class CatchmentWizard extends Component
     public $currentStep = 1;    // Paso actual del asistente
     public $wizardFlow  = null; // 'A' (No existe CI) o 'B' (Existe CI)
 
-    public $email;                                // Paso 1 (Flow A): Correo electrónico
-    public $verificationCode = null;              // Código de verificación
-    public $input_code;                           // Código generado para validar
-    public $catchmentsList = [];                  // Lista de censos encontrados para este representante
-    public $flashAlert     = null;                // ['type' => 'warning|success|info', 'message' => '...']
-    public $firstname;                            // Paso 2: Nombre completo del niño/a
-    public $lastname;                             // Paso 2: Nombre completo del niño/a
-    public $date_birth;                           // Paso 2: Fecha de nacimiento
-    public $representant_name;                    // Paso 3: Nombre del representante
-    public $representant_ci;                      // Paso 3: CI del representante
-    public $representant_phone;                   // Paso 3: WhatsApp del representante
-    public $representant_cellphone;               // Paso 3: Nombre del representante
-    public $grade;                                // Paso 3: Grado/Nivel solicitado
-    public $day_appointment;                      // Dia de la cita
-    public $day_appointment_start = '2026-04-28'; // Dia de la cita inical
-    public $day_appointment_end   = '2026-04-30'; // Dia de la cita final
-    public $status_validate_code_email;           // Dia de la cita final
-    public $is_regular = false;                   // Si es un representante regular (con estudiantes inscritos)
+    public $email;                      // Paso 1 (Flow A): Correo electrónico
+    public $verificationCode = null;    // Código de verificación
+    public $input_code;                 // Código generado para validar
+    public $catchmentsList = [];        // Lista de censos encontrados para este representante
+    public $flashAlert     = null;      // ['type' => 'warning|success|info', 'message' => '...']
+    public $firstname;                  // Paso 2: Nombre completo del niño/a
+    public $lastname;                   // Paso 2: Nombre completo del niño/a
+    public $date_birth;                 // Paso 2: Fecha de nacimiento
+    public $representant_name;          // Paso 3: Nombre del representante
+    public $representant_ci;            // Paso 3: CI del representante
+    public $representant_phone;         // Paso 3: WhatsApp del representante
+    public $representant_cellphone;     // Paso 3: Nombre del representante
+    public $grade;                      // Paso 3: Grado/Nivel solicitado
+    public $day_appointment;            // Dia de la cita
+    public $day_appointment_start;      // Dia de la cita inicial (se carga desde Catchment::JORNADAS)
+    public $day_appointment_end;        // Dia de la cita final   (se carga desde Catchment::JORNADAS)
+    public $status_validate_code_email; // Dia de la cita final
+    public $is_regular = false;         // Si es un representante regular (con estudiantes inscritos)
 
     public bool $modalDressCode = false; // Modal Código de Vestimenta
 
@@ -101,9 +101,16 @@ class CatchmentWizard extends Component
 
     public function mount()
     {
-        $today                       = now()->toDateString();
-        $this->day_appointment       = $today;
-        $this->day_appointment_start = ($today > $this->day_appointment_start) ? $today : $this->day_appointment_start;
+        $jornadaActiva = Catchment::getJornadaProxima();
+
+        $this->day_appointment_start = $jornadaActiva['start'];
+        $this->day_appointment_end   = $jornadaActiva['end'];
+
+        // La cita inicial es el mayor entre hoy y el inicio de la jornada
+        $today                 = now()->toDateString();
+        $this->day_appointment = ($today > $this->day_appointment_start)
+            ? $today
+            : $this->day_appointment_start;
     }
 
     public function searchByCi()
@@ -126,7 +133,7 @@ class CatchmentWizard extends Component
         // Si es regular, intentamos obtener su nombre
         if ($this->is_regular) {
             $rep = Representant::where('ci_representant', $this->representant_ci)->first();
-            if (!$rep) {
+            if (! $rep) {
                 $est = Estudiant::where('representant_ci', $this->representant_ci)->first();
                 $rep = $est ? $est->representant : null;
             }
@@ -167,37 +174,35 @@ class CatchmentWizard extends Component
         $this->validate(['email' => 'required|email']);
 
         $this->verificationCode = rand(100000, 999999);
-        $this->input_code       = $this->verificationCode;
-        Session::put('email_code', $this->verificationCode);
 
-        // try {
-        //     $html = View::make('emails.verification-code', [
-        //         'code' => $this->verificationCode,
-        //     ])->render();
+        try {
+            $html = View::make('emails.verification-code', [
+                'code' => $this->verificationCode,
+            ])->render();
 
-        //     $result = $sendPulseService->sendEmail(
-        //         to: $this->email,
-        //         subject: 'Código de verificación',
-        //         htmlBody: $html,
-        //         cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
-        //         bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
-        //     );
+            $result = $sendPulseService->sendEmail(
+                to: $this->email,
+                subject: 'Código de verificación',
+                htmlBody: $html,
+                cc: env('MAIL_CC_ADDRESS_CONTROL') ? [env('MAIL_CC_ADDRESS_CONTROL')] : [],
+                bcc: env('MAIL_CC_ADDRESS') ? [env('MAIL_CC_ADDRESS')] : []
+            );
 
-        //     if ($result) {
-        //         Session::put('email_code', $this->verificationCode);
+            if ($result) {
+                Session::put('email_code', $this->verificationCode);
 
-        //         $this->notification()->success(
-        //             $title = 'Excelente!',
-        //             $description = 'Se ha enviado un código de validación a tu correo.'
-        //         );
-        //     }
-        // } catch (\Exception $e) {
-        //     $this->verificationCode = null;
-        //     $this->notification()->error(
-        //         $title = 'Error !!!',
-        //         $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
-        //     );
-        // }
+                $this->notification()->success(
+                    $title = 'Excelente!',
+                    $description = 'Se ha enviado un código de validación a tu correo.'
+                );
+            }
+        } catch (\Exception $e) {
+            $this->verificationCode = null;
+            $this->notification()->error(
+                $title = 'Error !!!',
+                $description = 'No se pudo enviar el correo. Por favor, intenta nuevamente.'
+            );
+        }
     }
 
     // Validar código ingresado

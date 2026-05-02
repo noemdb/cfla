@@ -22,8 +22,8 @@
             <div class="text-center mt-4">
                 <div class="text-xl font-semibold text-gray-200 mb-2">El primer paso hacia una educación de excelencia.
                 </div>
-                <div class="text-sm text-emerald-300 font-medium mb-2">Primera convocatoria: 28 de abril al 30 de mayo,
-                    a las 2pm.</div>
+                @php $jornadaProxima = App\Models\app\Academy\Catchment::getJornadaProxima(); @endphp
+                <div class="text-sm text-emerald-300 font-medium mb-2">{{ $jornadaProxima['label'] }}, a las 2pm.</div>
             </div>
         </div>
 
