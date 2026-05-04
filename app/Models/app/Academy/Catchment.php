@@ -24,6 +24,11 @@ class Catchment extends Model
      */
     const JORNADAS = [
         [
+            'label' => 'Segunda convocatoria: del 04 al 07 de mayo',
+            'start' => '2026-05-04',
+            'end'   => '2026-05-07',
+        ],
+        [
             'label' => 'Tercera convocatoria: del 26 al 28 de mayo',
             'start' => '2026-05-26',
             'end'   => '2026-05-28',
