@@ -24,7 +24,19 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/admin');
+            $user = Auth::user();
+
+            // Redirigir según el rol, ignorando "intended" para evitar
+            // que usuarios sin privilegios accedan a rutas protegidas.
+            if ($user->is_admin || $user->is_diagnostic) {
+                return redirect()->to('/admin');
+            }
+
+            if ($user->is_planner) {
+                return redirect()->to('/planning');
+            }
+
+            return redirect()->to('/');
         }
 
         return back()->withErrors([

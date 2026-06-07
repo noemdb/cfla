@@ -9,6 +9,8 @@ use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\GmailController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Planning\PlanningController;
+use App\Http\Controllers\Planning\ActivityPdfController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
 use Illuminate\Support\Facades\Route;
@@ -94,15 +96,15 @@ Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('po
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Rutas del panel administrativo
-
-// Rutas del panel administrativo
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    Route::get('/', function () {
-        return view('admin.index');
-    })->name('index');
 
     // Rutas protegidas para Administradores y Personal de Diagnóstico
     Route::middleware(['isAdminOrDiagnostic'])->group(function () {
+
+        Route::get('/', function () {
+            return view('admin.index');
+        })->name('index');
+
         // Módulo de Votación
         Route::prefix('voting')->name('voting.')->group(function () {
             Route::get('/dashboard', [VotingDashboardController::class, 'index'])->name('dashboard');
@@ -130,6 +132,82 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::middleware(['isAdmin'])->group(function () {
         Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index')->name('logs');
         Route::get('database/backup', [\App\Http\Controllers\Admin\DatabaseController::class, 'downloadBackup'])->name('database.backup');
+    });
+});
+
+// ===================================================
+// MÓDULO DE PLANIFICACIÓN
+// ===================================================
+Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])->group(function () {
+    Route::get('/', [PlanningController::class, 'index'])->name('index');
+
+    // Módulo de Indicadores de Planificación
+    Route::prefix('indicators')->name('indicators.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Indicator\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Diagnóstico
+    Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
+        Route::get('/', DiagnosticIndex::class)->name('index');
+    });
+
+    // Módulo de Competiciones Académicas
+    Route::prefix('educational')->name('educational.')->group(function () {
+        Route::get('/competition', CompetitionIndex::class)->name('competition.index');
+        Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
+    });
+
+    // Módulo de Carga Académica (Pevaluacions)
+    Route::prefix('pevaluacions')->name('pevaluacions.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Pevaluacion\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Actividades de Planificación
+    Route::prefix('activities')->name('activities.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Activities\IndexComponent::class)->name('index');
+        // Rutas PDF
+        Route::get('/format/{pevaluacion}', [ActivityPdfController::class, 'format'])->name('format');
+        Route::get('/resume/{pevaluacion}', [ActivityPdfController::class, 'resume'])->name('resume');
+    });
+
+    // Módulo de Planes de Estudio
+    Route::prefix('pestudios')->name('pestudios.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Pestudio\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Programas Educativos
+    Route::prefix('peducativos')->name('peducativos.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Peducativo\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Asignaturas
+    Route::prefix('asignaturas')->name('asignaturas.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Asignatura\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Grados
+    Route::prefix('grados')->name('grados.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Grado\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Secciones
+    Route::prefix('secciones')->name('secciones.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Seccion\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Lapsos
+    Route::prefix('lapsos')->name('lapsos.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Lapso\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Pensums (Pivote central: Pestudio × Grado × Asignatura)
+    Route::prefix('pensums')->name('pensums.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Pensum\IndexComponent::class)->name('index');
+    });
+
+    // Módulo de Profesores
+    Route::prefix('profesors')->name('profesors.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');
     });
 });
 

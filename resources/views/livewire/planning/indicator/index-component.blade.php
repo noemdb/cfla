@@ -1,0 +1,567 @@
+<div class="fade-in">
+    {{-- Loading overlay --}}
+    <div wire:loading
+         class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
+        <div class="bg-gray-900/90 border border-white/10 rounded-2xl px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
+            {{-- Animated spinner --}}
+            <div class="relative w-14 h-14">
+                <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-cyan-400 animate-spin"></div>
+                <div class="absolute inset-2 rounded-full border-4 border-transparent border-t-emerald-400 animate-spin" style="animation-duration: 0.8s; animation-direction: reverse;"></div>
+            </div>
+            <span class="text-sm font-bold text-gray-300 tracking-widest uppercase">Cargando</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white mb-2">Indicadores de Planificación</h1>
+            <p class="text-cyan-400 font-medium">Dashboard institucional con KPIs por programa educativo y período académico.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('planning.index') }}"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Planificación
+            </a>
+            <button wire:click="$refresh"
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Refrescar
+            </button>
+        </div>
+    </div>
+
+    <!-- Global KPI Boxes -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <x-indicator-box
+            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
+            label="Inscritos" value="{{ number_format($totalInscritos) }}" color="blue" />
+        <x-indicator-box
+            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
+            label="Planes de Evaluación" value="{{ number_format($totalPevaluacions) }}" color="emerald" />
+        <x-indicator-box
+            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+            label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
+        <x-indicator-box
+            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
+            label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="amber" />
+    </div>
+
+    <!-- Filters: Lapso + Peducativo + Pestudio + Profesor -->
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 rounded-2xl mb-6">
+        {{-- Lapso selector --}}
+        <div class="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-white/5">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mr-2">Período:</span>
+            @foreach($lapsos as $lapso)
+                <button wire:click="$set('selectedLapsoId', {{ $lapso->id }})"
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 {{ $selectedLapsoId == $lapso->id ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10' }}">
+                    {{ $lapso->name }}
+                    <span class="block text-[9px] text-gray-500">{{ $lapso->finicial?->format('d/m') }} - {{ $lapso->ffinal?->format('d/m') }}</span>
+                </button>
+            @endforeach
+        </div>
+
+        {{-- 3 filter dropdowns --}}
+        <div class="flex flex-wrap items-center gap-3">
+            {{-- Peducativo filter --}}
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Educativo:</span>
+                <select wire:model.live="selectedPeducativoId"
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($peducativos as $ped)
+                        <option value="{{ $ped->id }}">{{ $ped->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Pestudio filter --}}
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Estudio:</span>
+                <select wire:model.live="selectedPestudioId"
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($pestudios as $pest)
+                        <option value="{{ $pest->id }}">{{ $pest->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Grado filter --}}
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Grado:</span>
+                <select wire:model.live="selectedGradoId"
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($gradosOptions as $grd)
+                        <option value="{{ $grd->id }}">{{ $grd->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Profesor filter --}}
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Profesor:</span>
+                <select wire:model.live="selectedProfesorId"
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($profesoresOptions as $prof)
+                        <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Tabs -->
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
+        <div class="border-b border-white/5">
+            <nav class="flex overflow-x-auto">
+                <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Indicadores Principales
+                </button>
+                <button @click="activeTab = 2" :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path></svg>
+                    Profesores
+                </button>
+                <button @click="activeTab = 3" :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    Actividades
+                </button>
+                <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Planes de Evaluación
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-6">
+
+            {{-- ═══════════════════════════════════════════════════════════════════
+                 TAB 1: Indicadores Principales — grouped by Peducativo
+                 ═══════════════════════════════════════════════════════════════════ --}}
+            <div x-show="activeTab === 1" x-cloak>
+                <div class="space-y-8">
+                    @forelse($peducativoMainIndicators as $item)
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+                                    <span class="text-cyan-400 text-xs font-bold">{{ $item->peducativo?->code ?? '' }}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
+                                <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
+                                <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <x-indicator-box
+                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
+                                    label="Inscritos"
+                                    value="{{ number_format($item->inscritos) }}"
+                                    color="blue"
+                                />
+                                <x-indicator-box
+                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
+                                    label="Evaluaciones Registradas"
+                                    value="{{ number_format($item->pevaluacions_count) }}"
+                                    color="emerald"
+                                />
+                                <x-indicator-box
+                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+                                    label="Actividades Registradas"
+                                    value="{{ number_format($item->activities_count) }}"
+                                    color="purple"
+                                />
+                                <x-indicator-box
+                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
+                                    label="Profesores con Carga"
+                                    value="{{ $item->profesores_count }}"
+                                    color="amber"
+                                />
+                            </div>
+                        </div>
+                        @if(!$loop->last)<hr class="border-white/5 my-6">@endif
+                    @empty
+                        <div class="text-center py-16">
+                            <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <p class="text-gray-500 font-medium">No hay programas educativos activos</p>
+                            <p class="text-gray-600 text-sm mt-1">Activa un programa educativo con planificación para ver indicadores.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            {{-- ═══════════════════════════════════════════════════════════════════
+                 TAB 2: Profesores  — Peducativo tabs → DataTable (uses top lapso selector)
+                 ═══════════════════════════════════════════════════════════════════ --}}
+            <div x-show="activeTab === 2" x-cloak
+                 x-data="{ activePeducativo: {{ $peducativos->first()?->id ?? 0 }} }">
+
+                @php $lapsoId = $selectedLapsoId; @endphp
+
+                @if(isset($tab2Data[$lapsoId]) && count($tab2Data[$lapsoId]) > 0)
+                    <!-- Peducativo nav-tabs (uses selected lapso only) -->
+                    <div class="border-b border-white/5 mb-4">
+                        <nav class="flex overflow-x-auto -mb-px">
+                            @foreach($peducativos as $peducativo)
+                                @php $ieePROM = $tab2Data[$lapsoId][$peducativo->id]['ieePROM'] ?? 0; @endphp
+                                <button @click="activePeducativo = {{ $peducativo->id }}"
+                                    :class="activePeducativo === {{ $peducativo->id }} ? 'text-violet-400 border-violet-500 bg-violet-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
+                                    class="flex-1 px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    {{ $peducativo->name }}
+                                    <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
+                                        Prom.Notas[{{ round($ieePROM, 2) }}]
+                                    </span>
+                                </button>
+                            @endforeach
+                        </nav>
+                    </div>
+
+                    <!-- Peducativo content panels -->
+                    @foreach($peducativos as $peducativo)
+                        @php
+                            $data = $tab2Data[$lapsoId][$peducativo->id] ?? null;
+                            $profesors = $data['profesors'] ?? collect();
+                        @endphp
+                        <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
+                            @if($profesors->isNotEmpty())
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="border-b border-white/5">
+                                                <th class="text-left px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Planes Evaluación</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Notas Cargadas</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas">IEE</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas para el corte de notas">IEE-CN</th>
+                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Índice Relativo de Rendimiento en Evaluación">IRE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-white/5">
+                                            @foreach($profesors as $teacher)
+                                                <tr class="hover:bg-white/[0.02] transition-colors">
+                                                    <td class="px-3 py-3">
+                                                        <span class="text-sm text-white font-medium">{{ $teacher->full_name }}</span>
+                                                        <span class="block text-[10px] text-gray-500">{{ $teacher->ci_profesor }}</span>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
+                                                            {{ $teacher->activities_count }}
+                                                            @if($teacher->activities_count > 0)
+                                                                <small class="text-gray-500">[{{ $teacher->approval_rate }}%]</small>
+                                                            @endif
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
+                                                            {{ $teacher->pevaluacions_count }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
+                                                            {{ $teacher->boletins_count }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <div class="w-16 bg-white/5 rounded-full h-1.5">
+                                                                <div class="h-1.5 rounded-full {{ ($teacher->iee ?? 0) >= 70 ? 'bg-emerald-500' : (($teacher->iee ?? 0) >= 40 ? 'bg-amber-500' : 'bg-red-500') }}"
+                                                                     style="width: {{ min(100, $teacher->iee ?? 0) }}%"></div>
+                                                            </div>
+                                                            <span class="text-xs font-mono {{ ($teacher->iee ?? 0) >= 70 ? 'text-emerald-400' : (($teacher->iee ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
+                                                                {{ $teacher->iee }}%
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <span class="text-xs font-mono {{ ($teacher->iee_cn ?? 0) >= 70 ? 'text-emerald-400' : (($teacher->iee_cn ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
+                                                            {{ $teacher->iee_cn }}%
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-center">
+                                                        <span class="text-xs font-mono {{ ($teacher->ire ?? 0) >= 100 ? 'text-emerald-400' : (($teacher->ire ?? 0) >= 70 ? 'text-amber-400' : 'text-red-400') }}">
+                                                            {{ $teacher->ire }}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="bg-white/5 rounded-xl p-6 text-center">
+                                    <p class="text-gray-500 text-sm">No hay profesores con carga académica en este programa educativo.</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    <div class="bg-white/5 rounded-xl p-6 text-center">
+                        <p class="text-gray-500 text-sm">No hay datos de profesores para el período seleccionado.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- ═══════════════════════════════════════════════════════════════════
+                 TAB 3: Actividades  — Peducativo tabs → 6 boxes (uses top lapso selector)
+                 ═══════════════════════════════════════════════════════════════════ --}}
+            <div x-show="activeTab === 3" x-cloak
+                 x-data="{ activePeducativo: {{ $peducativos->first()?->id ?? 0 }} }">
+
+                @php $lapsoId = $selectedLapsoId; @endphp
+
+                @if(isset($tab3Data[$lapsoId]) && count($tab3Data[$lapsoId]) > 0)
+                    <!-- Peducativo nav-tabs (uses selected lapso only) -->
+                    <div class="border-b border-white/5 mb-4">
+                        <nav class="flex overflow-x-auto -mb-px">
+                            @foreach($peducativos as $peducativo)
+                                @php
+                                    $tab3Item = $tab3Data[$lapsoId][$peducativo->id] ?? null;
+                                    $ieePROM = $tab3Item ? ($tab2Data[$lapsoId][$peducativo->id]['ieePROM'] ?? 0) : 0;
+                                @endphp
+                                <button @click="activePeducativo = {{ $peducativo->id }}"
+                                    :class="activePeducativo === {{ $peducativo->id }} ? 'text-amber-400 border-amber-500 bg-amber-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
+                                    class="flex-1 px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    {{ $peducativo->name }}
+                                    <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
+                                        Prom.Notas[{{ round($ieePROM, 2) }}]
+                                    </span>
+                                </button>
+                            @endforeach
+                        </nav>
+                    </div>
+
+                    <!-- Peducativo content panels -->
+                    @foreach($peducativos as $peducativo)
+                        @php
+                            $tab3Item = $tab3Data[$lapsoId][$peducativo->id] ?? null;
+                            $indicators = $tab3Item->indicators ?? null;
+                        @endphp
+                        <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
+                            @if($indicators && $indicators->total_activities > 0)
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+                                        label="Total de actividades planificadas"
+                                        value="{{ number_format($indicators->total_activities) }}"
+                                        color="cyan"
+                                    />
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>'
+                                        label="Indicador de Cobertura Curricular"
+                                        subtext="Promedio de actividades por Área de Formación"
+                                        value="{{ $indicators->cobertura_curricular }}"
+                                        color="emerald"
+                                    />
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"></path></svg>'
+                                        label="Indicador de Participación"
+                                        subtext="% Docentes con Planificaciones Activas"
+                                        value="{{ $indicators->participacion }}%"
+                                        color="blue"
+                                    />
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>'
+                                        label="Indicador de Seguimiento"
+                                        subtext="Tasa de Comentarios en Actividades"
+                                        value="{{ $indicators->seguimiento }}%"
+                                        color="purple"
+                                    />
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                                        label="Indicador de Aprobación"
+                                        subtext="% de Actividades Aprobadas"
+                                        value="{{ $indicators->aprobacion }}%"
+                                        color="emerald"
+                                    />
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
+                                        label="Indicador de Supervisión"
+                                        subtext="Tasa de Observaciones en Áreas de Formación"
+                                        value="{{ $indicators->supervision }}%"
+                                        color="rose"
+                                    />
+                                </div>
+                            @else
+                                <div class="bg-white/5 rounded-xl p-6 text-center">
+                                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                    <p class="text-gray-500 text-sm mb-1">Sin actividades registradas</p>
+                                    <p class="text-gray-600 text-xs">No hay actividades planificadas para este período en {{ $peducativo->name }}.</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    <div class="bg-white/5 rounded-xl p-6 text-center">
+                        <p class="text-gray-500 text-sm">No hay datos de actividades para el período seleccionado.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- ═══════════════════════════════════════════════════════════════════
+                 TAB 4: Planes de Evaluación  — summary per Peducativo (Chart.js)
+                 Charts created in x-init (before x-show hides them) so canvases
+                 have valid dimensions. Bar chart uses $watch + resize() on tab
+                 activation to handle responsive sizing after being hidden.
+                 ═══════════════════════════════════════════════════════════════════ --}}
+            <div x-show="activeTab === 4" x-cloak>
+                <div class="space-y-8">
+                    {{-- Summary comparison bar chart --}}
+                    @if($tab4Data->isNotEmpty())
+                        <div class="bg-gray-800/30 border border-white/5 rounded-2xl p-6 mb-4">
+                            <h4 class="text-sm font-bold text-cyan-400 mb-4">Comparativa entre Programas Educativos</h4>
+                            <div class="h-56 md:h-64">
+                                <canvas
+                                    x-init="
+                                        const createBarChart = () => {
+                                            if ($el.__chart) $el.__chart.destroy();
+                                            const labels = [@foreach($tab4Data as $i)'{{ addslashes($i->peducativo?->code ?? $i->peducativo?->name) }}',@endforeach];
+                                            const pevData = [{{ $tab4Data->pluck('pev_count')->implode(',') }}];
+                                            const actData = [{{ $tab4Data->pluck('act_count')->implode(',') }}];
+                                            const bolData = [{{ $tab4Data->pluck('boletins_count')->implode(',') }}];
+                                            $el.__chart = new Chart($el.getContext('2d'), {
+                                                type: 'bar',
+                                                data: {
+                                                    labels: labels,
+                                                    datasets: [
+                                                        { label: 'Planes de Evaluación', data: pevData, backgroundColor: '#06b6d4', borderRadius: 4 },
+                                                        { label: 'Actividades', data: actData, backgroundColor: '#10b981', borderRadius: 4 },
+                                                        { label: 'Notas Cargadas', data: bolData, backgroundColor: '#8b5cf6', borderRadius: 4 },
+                                                    ]
+                                                },
+                                                options: {
+                                                    responsive: true, maintainAspectRatio: false,
+                                                    plugins: {
+                                                        legend: { labels: { color: '#9ca3af', font: { size: 11 }, boxWidth: 12, padding: 16 } }
+                                                    },
+                                                    scales: {
+                                                        x: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                                                        y: { beginAtZero: true, ticks: { color: '#6b7280', precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                                                    }
+                                                }
+                                            });
+                                        };
+                                        createBarChart();
+                                        if (activeTab !== 4) {
+                                            $watch('activeTab', (val) => {
+                                                if (val === 4) $nextTick(() => { if ($el.__chart) $el.__chart.resize(); });
+                                            });
+                                        }
+                                    "
+                                ></canvas>
+                            </div>
+                        </div>
+                    @endif
+
+                    @forelse($tab4Data as $item)
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                                    <span class="text-indigo-400 text-xs font-bold">{{ $item->peducativo?->code ?? '' }}</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
+                            </div>
+                            <div class="bg-gray-800/30 border border-white/5 rounded-2xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-sm font-bold text-cyan-400">Resumen de Planes de Evaluación</h4>
+                                    @php
+                                        $lapsoName = $lapsos->firstWhere('id', $selectedLapsoId)?->name ?? 'Período actual';
+                                    @endphp
+                                    <span class="text-xs text-gray-500">{{ $lapsoName }}</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {{-- Chart.js Doughnut (responsive:false — fixed dimensions work even when hidden) --}}
+                                    <div class="flex items-center justify-center h-48 bg-white/[0.02] rounded-xl border border-white/5">
+                                        <div class="text-center">
+                                            <canvas
+                                                x-init="
+                                                    if ($el.__chart) $el.__chart.destroy();
+                                                    const donutTotal = {{ $item->pev_count + $item->act_count + $item->boletins_count }};
+                                                    $el.__chart = new Chart($el.getContext('2d'), {
+                                                        type: 'doughnut',
+                                                        data: {
+                                                            labels: ['Planes de Evaluación', 'Actividades', 'Notas Cargadas'],
+                                                            datasets: [{
+                                                                data: [{{ $item->pev_count }}, {{ $item->act_count }}, {{ $item->boletins_count }}],
+                                                                backgroundColor: ['#06b6d4', '#10b981', '#8b5cf6'],
+                                                                borderWidth: 2,
+                                                                borderColor: '#111827',
+                                                            }]
+                                                        },
+                                                        options: {
+                                                            responsive: false,
+                                                            maintainAspectRatio: true,
+                                                            cutout: '72%',
+                                                            plugins: {
+                                                                legend: { display: false },
+                                                                tooltip: {
+                                                                    callbacks: {
+                                                                        label: function(ctx) {
+                                                                            const t = ctx.dataset.data.reduce((a,b) => a+b, 0);
+                                                                            const pct = t > 0 ? ((ctx.raw / t) * 100).toFixed(1) : 0;
+                                                                            return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    });
+                                                "
+                                                class="w-32 h-32 mx-auto mb-3" width="128" height="128">
+                                            </canvas>
+                                            <div class="flex items-center justify-center gap-3 text-xs">
+                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>Planes: {{ $item->pev_count }}</span>
+                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Actividades: {{ $item->act_count }}</span>
+                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>Notas: {{ $item->boletins_count }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{-- Stats list --}}
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                                            <span class="text-sm text-gray-400">Planes de Evaluación</span>
+                                            <span class="text-sm font-bold text-white font-mono">{{ $item->pev_count }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                                            <span class="text-sm text-gray-400">Actividades Registradas</span>
+                                            <span class="text-sm font-bold text-white font-mono">{{ $item->act_count }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                                            <span class="text-sm text-gray-400">Notas Cargadas</span>
+                                            <span class="text-sm font-bold text-white font-mono">{{ $item->boletins_count }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                                            <span class="text-sm text-gray-400">Actividades por Plan</span>
+                                            <span class="text-sm font-bold text-white font-mono">{{ $item->avg_per_plan }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-cyan-500/5 rounded-xl border border-cyan-500/10">
+                                            <span class="text-sm text-cyan-400 font-medium">Total Combinado</span>
+                                            <span class="text-sm font-bold text-cyan-400 font-mono">{{ $item->pev_count + $item->act_count }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-16">
+                            <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            <p class="text-gray-500 font-medium">No hay datos de planes de evaluación</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

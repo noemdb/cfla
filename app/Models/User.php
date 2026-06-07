@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_planner',
+        'is_diagnostic',
     ];
 
 
@@ -43,6 +45,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_planner' => 'boolean',
+        'is_diagnostic' => 'boolean',
     ];
 
     public function getFullNameAttribute()
@@ -71,6 +75,15 @@ class User extends Authenticatable
             return 'Personal de Diagnóstico';
         }
 
+        if ($this->is_planner) {
+            return 'Personal de Planificación';
+        }
+
         return 'Usuario Estándar';
+    }
+
+    public function getIsPlannerAttribute()
+    {
+        return $this->is_admin || ($this->attributes['is_planner'] ?? false);
     }
 }

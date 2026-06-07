@@ -1,15 +1,20 @@
 import "./bootstrap";
 
+// Import Flowbite
 import "flowbite";
 
-// Initialization for ES Users
+// Make Chart.js available globally for Livewire/Alpine components
+import Chart from 'chart.js/auto';
+window.Chart = Chart;
+
+// Initialization for ES Users (Chart from tw-elements is same library, aliased to avoid name collision)
 import {
     Tooltip,
     Tab,
     Carousel,
     Ripple,
     Animate,
-    Chart,
+    Chart as TwChart,
     Offcanvas,
     Dropdown,
     Collapse,
@@ -24,7 +29,7 @@ initTE({
     Carousel,
     Ripple,
     Animate,
-    Chart,
+    Chart: TwChart,
     Offcanvas,
     Dropdown,
     Collapse,

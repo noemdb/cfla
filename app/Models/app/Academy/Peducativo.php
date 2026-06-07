@@ -4,10 +4,42 @@ namespace App\Models\app\Academy;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Peducativo extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'pescolar_id', 'manager_id', 'deputy_id', 'assistant_id',
+        'name', 'description', 'order',
+        'status_active', 'show_quantitative_indicators',
+    ];
+
+    public function pescolar()
+    {
+        return $this->belongsTo(Pescolar::class, 'pescolar_id');
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'manager_id');
+    }
+
+    public function deputy()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'deputy_id');
+    }
+
+    public function assistant()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'assistant_id');
+    }
+
+    public function pestudios()
+    {
+        return $this->hasMany(Pestudio::class, 'peducativo_id');
+    }
 
     public function getGradosAttribute()
     {
@@ -26,13 +58,18 @@ class Peducativo extends Model
             ->get();
     }
 
-    public function scopeActive($query, $flag='true') {
-        return $query->where('peducativos.status_active',  $flag='true');
+    public function scopeActive($query, $flag = 'true')
+    {
+        return $query->where('peducativos.status_active', $flag);
     }
 
     public static function getPeducativosAttribute()
     {
         return Peducativo::where('peducativos.status_active', "true")->get();
     }
-    
+
+    public function getFullNameAttribute()
+    {
+        return "{$this->name}";
+    }
 }

@@ -21,6 +21,10 @@
     <meta name="description" content="Dashboard administrativo U.E. COLEGIO FRAY LUIS AMIGÓ">
     <meta name="robots" content="noindex, nofollow">
 
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
     @yield('styles')
 </head>
 
@@ -47,7 +51,12 @@
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center space-x-6">
-                    <a href="{{ route('admin.index') }}" class="text-sm font-medium {{ request()->routeIs('admin.index') ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }} transition-colors">Dashboard</a>
+                    @if(Auth::user()->is_admin || Auth::user()->is_diagnostic)
+                        <a href="{{ route('admin.index') }}" class="text-sm font-medium {{ request()->routeIs('admin.index') ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }} transition-colors">Dashboard</a>
+                        <a href="{{ route('planning.index') }}" class="text-sm font-medium {{ request()->routeIs('planning.*') ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }} transition-colors">Planificación</a>
+                    @elseif(Auth::user()->is_planner)
+                        <a href="{{ route('planning.index') }}" class="text-sm font-medium {{ request()->routeIs('planning.*') ? 'text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }} transition-colors">Planificación</a>
+                    @endif
                     @if(Auth::user()->is_admin)
                         <a href="{{ route('admin.voting.dashboard') }}" class="text-sm font-medium text-gray-400 hover:text-emerald-300 transition-colors">Votaciones</a>
                         <a href="{{ url('admin/logs') }}" class="text-sm font-medium text-gray-400 hover:text-emerald-300 transition-colors">Logs</a>
@@ -58,7 +67,7 @@
                 <div class="flex items-center space-x-4">
                     <div class="text-right hidden sm:block">
                         <p class="text-sm font-semibold text-white">{{ Auth::user()->username }}</p>
-                        <p class="text-xs text-emerald-500">{{ Auth::user()->is_admin ? 'Administrador' : 'Usuario' }}</p>
+                        <p class="text-xs text-emerald-500">{{ Auth::user()->role_label }}</p>
                     </div>
                     
                     <form method="POST" action="{{ route('logout') }}">

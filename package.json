@@ -22,6 +22,7 @@
         "@alpinejs/intersect": "^3.13.3",
         "@ryangjchandler/alpine-clipboard": "^2.3.0",
         "alpinejs": "^3.13.3",
+        "chart.js": "^3.9.1",
         "gsap": "^3.12.5",
         "swiper": "^12.0.3",
         "tw-elements": "^1.1.0"

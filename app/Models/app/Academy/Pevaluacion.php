@@ -4,12 +4,24 @@ namespace App\Models\app\Academy;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pevaluacion extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['profesor_id', 'lapso_id', 'seccion_id', 'pensum_id', 'grupo_estable_id', 'status_baremo', 'status_official', 'status_note_report', 'nota_type', 'escala_id', 'objetivo', 'description', 'observations', 'category', 'deleted_at'];
+    protected $fillable = [
+        'profesor_id', 'lapso_id', 'seccion_id', 'pensum_id', 'grupo_estable_id',
+        'status_baremo', 'status_official', 'status_note_report', 'nota_type',
+        'escala_id', 'objetivo', 'description', 'observations', 'category',
+    ];
+
+    protected $casts = [
+        'status_official' => 'boolean',
+        'status_note_report' => 'boolean',
+    ];
+
+    protected $table = 'pevaluacions';
 
     const COLUMN_COMMENTS = [
         'profesor_id' => 'Profesor',
@@ -19,17 +31,16 @@ class Pevaluacion extends Model
         'grupo_estable_id' => 'Grupo Estable',
         'status_baremo' => 'Baremo',
         'status_official' => 'En documentos oficiales',
-        'nota_type' => 'Tipo de noata',
+        'nota_type' => 'Tipo de nota',
         'escala_id' => 'Escala',
         'objetivo' => 'Objetivo',
         'description' => 'Descripción',
         'observations' => 'Observaciones',
         'category' => 'Category',
-        'deleted_at' => 'Fecha de Eliminación',
-        'grado_id' => 'Grado/Año',
-        'pestudio_id' => 'Plan Estudio',
         'status_note_report' => 'En Informe de Notas',
     ];
+
+    // ─── RELACIONES ──────────────────────────────────────────────
 
     public function profesor()
     {
@@ -56,10 +67,10 @@ class Pevaluacion extends Model
         return $this->hasOneThrough(
             Grado::class,
             Seccion::class,
-            'id',           // Foreign key on Seccion (intermediate) table
-            'id',           // Foreign key on Grado (related) table
-            'seccion_id',   // Local key on Pevaluacion (starting) table
-            'grado_id'      // Local key on Seccion (intermediate) table
+            'id',
+            'id',
+            'seccion_id',
+            'grado_id'
         );
     }
 
@@ -68,10 +79,61 @@ class Pevaluacion extends Model
         return $this->hasOneThrough(
             Pestudio::class,
             Pensum::class,
-            'id',           // Foreign key on Pensum (intermediate) table
-            'id',           // Foreign key on Pestudio (related) table
-            'pensum_id',    // Local key on Pevaluacion (starting) table
-            'pestudio_id'   // Local key on Pensum (intermediate) table
+            'id',
+            'id',
+            'pensum_id',
+            'pestudio_id'
         );
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'pevaluacion_id');
+    }
+
+    public function grupoEstable()
+    {
+        return $this->belongsTo(GrupoEstable::class, 'grupo_estable_id');
+    }
+
+    public function evaluacions()
+    {
+        return $this->hasMany(Evaluacion::class, 'pevaluacion_id');
+    }
+
+    public function escala()
+    {
+        return $this->belongsTo(Escala::class, 'escala_id');
+    }
+
+    // ─── SCOPES ──────────────────────────────────────────────────
+
+    public function scopeActive($query, $flag = true)
+    {
+        return $query->where('pevaluacions.status_official', $flag);
+    }
+
+    public function scopeWithPlanningModule($query)
+    {
+        return $query->whereHas('pensum.pestudio', function ($q) {
+            $q->where('planning_module', true);
+        });
+    }
+
+    // ─── ACCESSORS ───────────────────────────────────────────────
+
+    public function getFullNameAttribute()
+    {
+        $asignatura = $this->pensum?->asignatura?->name ?? '?';
+        $seccion = $this->seccion?->name ?? '?';
+        $lapso = $this->lapso?->name ?? '?';
+        return "{$asignatura} - {$seccion} ({$lapso})";
+    }
+
+    public function getIsLapsoClosedAttribute()
+    {
+        return $this->lapso && $this->lapso->ffinal
+            ? now()->gt($this->lapso->ffinal)
+            : false;
     }
 }
