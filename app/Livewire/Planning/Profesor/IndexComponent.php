@@ -274,7 +274,7 @@ class IndexComponent extends Component
         $this->name = $profesor->name;
         $this->lastname = $profesor->lastname;
         $this->gender = $profesor->gender;
-        $this->date_birth = $profesor->date_birth?->format('Y-m-d');
+        $this->date_birth = $profesor->date_birth ? \Carbon\Carbon::parse($profesor->date_birth)->format('Y-m-d') : null;
         $this->email = $profesor->email;
         $this->phone = $profesor->phone;
         $this->cellphone = $profesor->cellphone;
@@ -501,6 +501,13 @@ class IndexComponent extends Component
 
     // ─── HELPERS ──────────────────────────────────────────────────
 
+    public function autoGenerateUsername()
+    {
+        if (!$this->isEditing && !empty($this->name) && !empty($this->lastname) && !empty($this->ci_profesor)) {
+            $this->user_username = $this->generateUsername();
+        }
+    }
+
     private function generateUsername(): string
     {
         $nameParts = explode(' ', trim($this->name));
@@ -549,6 +556,6 @@ class IndexComponent extends Component
         $this->wizardStep = 1;
     }
 
-    #[Layout('layouts.dashboard')]
+    #[Layout('planning.layouts.app')]
     public function layout() {}
 }

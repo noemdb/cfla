@@ -361,6 +361,6 @@ class IndexComponent extends Component
         return view('livewire.planning.indicator.index-component');
     }
 
-    #[Layout('layouts.dashboard')]
+    #[Layout('planning.layouts.app')]
     public function layout() {}
 }

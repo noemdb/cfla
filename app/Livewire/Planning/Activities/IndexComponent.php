@@ -288,6 +288,6 @@ class IndexComponent extends Component
         $this->modePreview = false;
     }
 
-    #[Layout('layouts.dashboard')]
+    #[Layout('planning.layouts.app')]
     public function layout() {}
 }

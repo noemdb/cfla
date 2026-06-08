@@ -231,6 +231,6 @@ class IndexComponent extends Component
         $this->previewMode = false;
     }
 
-    #[Layout('layouts.dashboard')]
+    #[Layout('planning.layouts.app')]
     public function layout() {}
 }

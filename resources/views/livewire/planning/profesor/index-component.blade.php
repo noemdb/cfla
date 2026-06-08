@@ -449,7 +449,7 @@
                         <div class="flex gap-2">
                             <input type="text" wire:model="user_username" placeholder="jperez78"
                                 class="flex-1 bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                            <button type="button" wire:click="$set('user_username', '{{ $isEditing ? '' : 'generateUsername()' }}')"
+                            <button type="button" wire:click="autoGenerateUsername"
                                 class="px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all text-xs font-bold"
                                 title="Generar automáticamente">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
