@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "192",
+        "name": "[QUIM-1A] QUÍMICA [pensumId=192]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-QUIM-1A-01",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Comprende la estructura de la materia desde la escala atómica-molecular hasta los sistemas materiales.",
+            "descripcion": "Relaciona la estructura interna de átomos y moléculas con propiedades macroscópicas, diferenciando entre sustancias puras, mezclas y estados de agregación."
+        },
+        {
+            "id": "COMP-QUIM-1A-02",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Aplica la estequiometría para cuantificar relaciones en reacciones químicas.",
+            "descripcion": "Utiliza leyes ponderales, cálculos de masa molar, rendimiento teórico y reactivo limitante para predecir cantidades de sustancias en transformaciones químicas."
+        },
+        {
+            "id": "COMP-QUIM-1A-03",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Explica los estados de agregación de la materia mediante teoría cinético-molecular.",
+            "descripcion": "Interpreta el comportamiento de sólidos, líquidos y gases mediante modelos cinéticos, fuerzas intermoleculares y diagramas de fases."
+        },
+        {
+            "id": "COMP-QUIM-1A-04",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Comprende la reactividad química mediante análisis de energía y velocidad de reacción.",
+            "descripcion": "Relaciona cinética química, activación energética, factores que afectan velocidad y leyes de termoquímica en procesos exotérmicos y endotérmicos."
+        },
+        {
+            "id": "COMP-QUIM-1A-05",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Aplica el concepto de equilibrio químico en sistemas reversibles.",
+            "descripcion": "Interpreta constantes de equilibrio, principio de Le Chatelier y desplazamientos en equilibrios iónicos y moleculares."
+        },
+        {
+            "id": "COMP-QUIM-1A-06",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Explica el comportamiento de soluciones y propiedades coligativas.",
+            "descripcion": "Aplica concentraciones molares, normalidad, molaridad y propiedades coligativas para interpretar fenómenos de ebulloscopia, crioscopía y presión osmótica."
+        },
+        {
+            "id": "COMP-QUIM-1A-07",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Comprende los principios de electroquímica y sus aplicaciones.",
+            "descripcion": "Relaciona procesos de oxidación-reducción, pilas voltaicas, electrolisis y aplicaciones industriales como la electrólisis del agua y corrosión."
+        },
+        {
+            "id": "COMP-QUIM-1A-08",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Clasifica y caracteriza compuestos químicos inorgánicos según nomenclatura IUPAC.",
+            "descripcion": "Nomenclatura, formulación y propiedades de óxidos, ácidos, bases y sales, aplicando reglas de nomenclatura sistemática."
+        },
+        {
+            "id": "COMP-QUIM-1A-09",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Comprende la estructura y reactividad básica de compuestos orgánicos.",
+            "descripcion": "Identifica funciones orgánicas principales, isomería, reacciones básicas y aplicaciones de compuestos carbonados en la industria y vida cotidiana."
+        },
+        {
+            "id": "COMP-QUIM-1A-10",
+            "referent_id": "2",
+            "pensum_id": 192,
+            "nombre": "Aplica conocimientos químicos para interpretar impactos ambientales y tecnológicos.",
+            "descripcion": "Relaciona procesos químicos con contaminación, cambio climático, energías limpias y sustentabilidad, proponiendo soluciones tecnológicas apropiadas."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-QUIM-1A-01-01",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-01",
+            "descripcion": "Diferencia entre átomos, moléculas, íones y radicales según estructura electrónica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-02",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-02",
+            "descripcion": "Clasifica sustancias en elementos, compuestos y mezclas homogéneas/heterogéneas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-03",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-03",
+            "descripcion": "Relaciona configuración electrónica con propiedades periódicas de elementos representativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-04",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-04",
+            "descripcion": "Predice tipo de enlace químico (iónico, covalente, metálico) según electronegatividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-05",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-05",
+            "descripcion": "Construye modelos moleculares para visualizar geometría y polaridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-06",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-06",
+            "descripcion": "Aplica leyes de Dalton, Proust y Richter para verificar composición de compuestos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-01",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-07",
+            "descripcion": "Calcula masa molar de elementos y compuestos a partir de masas atómicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-02",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-08",
+            "descripcion": "Realiza conversiones entre masa, moles y número de partículas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-03",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-09",
+            "descripcion": "Aplica estequiometria para calcular reactivo limitante y rendimiento teórico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-04",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-10",
+            "descripcion": "Balancea ecuaciones químicas por método algebraico y redox.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-05",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-11",
+            "descripcion": "Calcula composición porcentual de compuestos a partir de fórmulas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-06",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-12",
+            "descripcion": "Determina fórmulas empiricas y moleculares a partir de datos analíticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-01",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-13",
+            "descripcion": "Explica el modelo cinético-molecular de estados sólido, líquido y gaseoso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-02",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-14",
+            "descripcion": "Interpreta diagramas de fases de agua y otras sustancias puras.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-03",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-15",
+            "descripcion": "Aplica ley de los gases ideales para calcular presión, volumen o temperatura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-04",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-16",
+            "descripcion": "Diferencia fuerzas intermoleculares (Van der Waals, puentes de H) y su efecto en propiedades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-05",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-17",
+            "descripcion": "Calcula energía requerida para cambios de estado usando calores latentes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-06",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-18",
+            "descripcion": "Explica tensión superficial, viscosidad y capilaridad en sistemas biológicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-01",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-19",
+            "descripcion": "Determina energía de activación usando diagrama de energía de reacción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-02",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-20",
+            "descripcion": "Formula ley de velocidad para reacciones elementales y complejas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-03",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-21",
+            "descripcion": "Predice efecto de concentración, temperatura y catalizadores en velocidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-04",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-22",
+            "descripcion": "Calcula calor de reacción aplicando ley de Hess y entalpías de formación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-05",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-23",
+            "descripcion": "Diferencia reacciones endotérmicas y exotérmicas con ejemplos cotidianos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-06",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-24",
+            "descripcion": "Relaciona energía de enlace con estabilidad de moléculas y entalpía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-01",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-25",
+            "descripcion": "Escribe expresión de constante de equilibrio Kc y Kp para reacciones reversibles.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-02",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-26",
+            "descripcion": "Aplica principio de Le Chatelier para predecir desplazamiento de equilibrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-03",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-27",
+            "descripcion": "Calcula pH de soluciones ácidas y básicas usando concentración de iones H+.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-04",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-28",
+            "descripcion": "Clasifica sales en neutras, ácidas o básicas según hidrólisis.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-05",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-29",
+            "descripcion": "Explica solubilidad mediante producto de solubilidad Ksp.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-06",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-30",
+            "descripcion": "Calcula grado de disociación de electrolitos débiles.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-01",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-31",
+            "descripcion": "Convierte entre unidades de concentración (molaridad, normalidad, % en masa).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-02",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-32",
+            "descripcion": "Diluye soluciones calculando volúmenes y concentraciones finales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-03",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-33",
+            "descripcion": "Calcula aumento ebulloscópico y descenso crioscópico en soluciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-04",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-34",
+            "descripcion": "Aplica presión osmótica en fenómenos biológicos (células, riñón).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-05",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-35",
+            "descripcion": "Prepara soluciones de concentración específica utilizando material de laboratorio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-06",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-36",
+            "descripcion": "Coligadad en el comportamiento de soluciones y propiedades coligativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-01",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-37",
+            "descripcion": "Asigna números de oxidación a elementos en compuestos y iones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-02",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-38",
+            "descripcion": "Balancea reacciones redox usando método del ion-electrón.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-03",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-39",
+            "descripcion": "Calcula potencial de celda volcánica usando series de potenciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-04",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-40",
+            "descripcion": "Predice productos de electrólisis de soluciones acuosas y fundidas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-05",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-41",
+            "descripcion": "Explica corrosión metálica y métodos de protección catódica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-06",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-42",
+            "descripcion": "Calcula masa depositada en electrólisis usando leyes de Faraday.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-01",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-43",
+            "descripcion": "Nombra óxidos básicos, ácidos y anfóteros según nomenclatura IUPAC.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-02",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-44",
+            "descripcion": "Formula ácidos oxácidos e hidrácidos según regla de -ico/-oso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-03",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-45",
+            "descripcion": "Nombra hidróxidos (bases) y predice solubilidad en agua.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-04",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-46",
+            "descripcion": "Formula sales neutras, ácidas y básicas a partir del ácido-base.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-05",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-47",
+            "descripcion": "Clasifica reacciones de síntesis, descomposición, desplazamiento y doble desplazamiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-06",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-48",
+            "descripcion": "Predice productos de reacciones entre óxidos, ácidos, bases y sales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-01",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-49",
+            "descripcion": "Identifica hidrocarburos saturados, insaturados y aromáticos según estructura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-02",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-50",
+            "descripcion": "Nombra compuestos orgánicos según sufijo de función (anos, enos, olos, aldehídos, cetonas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-03",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-51",
+            "descripcion": "Reconoce isomería estructural en compuestos carbonados simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-04",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-52",
+            "descripcion": "Identifica polímeros naturales (proteínas, almidón) y sintéticos (plásticos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-05",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-53",
+            "descripcion": "Explica combustion incompleta y formación de contaminantes orgánicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-06",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-54",
+            "descripcion": "Relaciona bioenergética con metabolismo celular de carbohidratos y lípidos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-01",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-55",
+            "descripcion": "Relaciona efecto invernadero con emisiones de CO2 y metano por actividades humanas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-02",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-56",
+            "descripcion": "Analiza capa de ozono y efectos de CFCs mediante reacciones fotoquímicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-03",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-57",
+            "descripcion": "Evalúa calidad de agua mediante parámetros físico-químicos (pH, DBO, DQO).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-04",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-58",
+            "descripcion": "Propone tecnologías limpias para tratamiento de aguas residuales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-05",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-59",
+            "descripcion": "Calcula rendimiento de celdas de combustible y baterías recargables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-06",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-60",
+            "descripcion": "Diseña experimentos para degradar contaminantes orgánicos usando fotocatálisis.",
+            "nivel_esperado": 3
+        }
+    ]
+}

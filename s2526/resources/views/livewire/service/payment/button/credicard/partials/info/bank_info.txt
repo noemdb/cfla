@@ -1,0 +1,25 @@
+{#2498 ▼
+  +"bank_info": {#2575 ▼
+    +"country": "VE"
+    +"code": "0172"
+    +"name": "BANCAMIGA, BANCO UNIVERSAL"
+    +"acronym": "BANCAMIGA"
+    +"thumbnail": "images/thumbnails/issuingBank/bancamiga.png"
+    +"no_bin_found_card_payment_allowed": true
+    +"tdd_pin_required": true
+    +"card_validation_config": {#2638 ▼
+      +"TDD": "NONE"
+      +"TDC": "OTP_BANK"
+    }
+    +"bank_card_validation": {#2613 ▼
+      +"TDD": false
+      +"TDC": true
+    }
+  }
+  +"financial_card_emitter": {#2515 ▼
+    +"name": "MAESTRO"
+    +"thumbnail": "images/issuingcard/maestro.png"
+  }
+}
+
+

@@ -1,0 +1,3 @@
+php artisan make:controller 'Profesor\SocialActions\HomeController'
+php artisan make:controller 'Profesor\SocialActions\Tab\CommunityActionController'
+php artisan make:controller 'Profesor\SocialActions\Tab\CommunityHourController'

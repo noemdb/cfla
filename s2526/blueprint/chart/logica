@@ -1,0 +1,83 @@
+Administracion
+
+php artisan make:controller 'Administracion\Chart\InscripcionController'
+php artisan make:controller 'Administracion\Chart\PreinscripcionController'
+php artisan make:controller 'Administracion\Chart\AdministrativasController'
+php artisan make:controller 'Administracion\Chart\AlmacensController'
+php artisan make:controller 'Administracion\Chart\CarrerasController'
+php artisan make:controller 'Administracion\Chart\DocumentosController'
+php artisan make:controller 'Administracion\Chart\EstadosController'
+php artisan make:controller 'Administracion\Chart\ExpedientesController'
+php artisan make:controller 'Administracion\Chart\MovimientosController'
+php artisan make:controller 'Administracion\Chart\AreasController'
+php artisan make:controller 'Administracion\Chart\BancosController'
+php artisan make:controller 'Administracion\Chart\IngresosController'
+php artisan make:controller 'Administracion\Chart\EvaluacionController'
+php artisan make:controller 'Administracion\Chart\AreaConocimientoController'
+php artisan make:controller 'Administracion\Chart\EstudiantController'
+php artisan make:controller 'Administracion\Chart\ExchangeRateController'
+php artisan make:controller 'Administracion\Chart\PaymentController'
+php artisan make:controller 'Administracion\Chart\RegistroPagosController'
+php artisan make:controller 'Administracion\Chart\LapsoController'
+
+php artisan make:controller 'Administracion\Chart\BmessengeController'
+
+Profesor
+php artisan make:controller 'Profesor\Chart\EvaluacionController'
+
+Director
+php artisan make:controller 'Director\Chart\EvaluacionController' &&
+php artisan make:controller 'Director\Chart\PevaluacionController' &&
+php artisan make:controller 'Director\Chart\AreaConocimientoController' &&
+php artisan make:controller 'Director\Chart\EstudiantController' &&
+php artisan make:controller 'Director\Chart\BancosController' &&
+php artisan make:controller 'Director\Chart\InscripcionController'
+php artisan make:controller 'Director\Chart\PaymentController' &&
+php artisan make:controller 'Director\Chart\LoginoutsController' &&
+php artisan make:controller 'Director\Chart\LogdbsController'
+php artisan make:controller 'Director\Chart\ExchangeRateController'
+php artisan make:controller 'Director\Chart\RegistroPagosController'
+php artisan make:controller 'Administracion\Chart\PollController'
+
+Representant
+php artisan make:controller 'Representant\Chart\BancosController' &&
+php artisan make:controller 'Representant\Chart\EvaluacionController' &&
+php artisan make:controller 'Representant\Chart\IncidentController' &&
+
+Controls
+php artisan make:controller 'Controls\Chart\EvaluacionController' &&
+php artisan make:controller 'Controls\Chart\PevaluacionController' &&
+php artisan make:controller 'Controls\Chart\AreaConocimientoController' &&
+php artisan make:controller 'Controls\Chart\EstudiantController' &&
+php artisan make:controller 'Controls\Chart\BancosController' &&
+php artisan make:controller 'Controls\Chart\InscripcionController'
+php artisan make:controller 'Controls\Chart\PaymentController' &&
+php artisan make:controller 'Controls\Chart\LoginoutsController' &&
+php artisan make:controller 'Controls\Chart\LogdbsController'
+php artisan make:controller 'Controls\Chart\ExchangeRateController'
+php artisan make:controller 'Controls\Chart\RegistroPagosController'
+
+Academico
+php artisan make:controller 'Academico\Chart\EvaluacionController'
+php artisan make:controller 'Academico\Chart\PevaluacionController'
+php artisan make:controller 'Academico\Chart\AreaConocimientoController'
+php artisan make:controller 'Academico\Chart\EstudiantController'
+php artisan make:controller 'Academico\Chart\BancosController'
+php artisan make:controller 'Academico\Chart\InscripcionController'
+php artisan make:controller 'Academico\Chart\PaymentController'
+php artisan make:controller 'Academico\Chart\LoginoutsController'
+php artisan make:controller 'Academico\Chart\LogdbsController'
+php artisan make:controller 'Academico\Chart\ExchangeRateController'
+php artisan make:controller 'Academico\Chart\RegistroPagosController'
+php artisan make:controller 'Academico\Chart\PollController'
+
+
+Bienestar
+php artisan make:controller 'Bienestar\Chart\EvaluacionController' &&
+php artisan make:controller 'Bienestar\Chart\EstudiantController' &&
+php artisan make:controller 'Bienestar\Chart\InscripcionController'
+php artisan make:controller 'Bienestar\Chart\AreaConocimientoController'
+
+Evaluacion
+php artisan make:controller 'Evaluacion\Chart\EvaluacionController'
+php artisan make:controller 'Leader\Chart\EvaluacionController'

@@ -1,0 +1,40 @@
+Implementacion de Middleware
+php artisan make:middleware 'Admin\IsAdmin'
+php artisan make:middleware 'Expediente\IsExpediente'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsAdmon' &&
+php artisan make:middleware 'App\Http\Middleware\Admin\IsControl'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsCommon'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsProfesor'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsDirector'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsControls'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsAcademico'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsAdmons'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsRepresentant' &&
+php artisan make:middleware 'App\Http\Middleware\Admin\IsEstudiant'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsBienestar'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsEvaluacion'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsProyecto'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsLeader'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsInicial'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsTime'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsPlanning'
+php artisan make:middleware 'App\Http\Middleware\Admin\IsAudit'
+
+registrar Middleware en kernel.php (variable: protected $routeMiddleware)
+'is_admin'=> 'App\Http\Middleware\Admin\IsAdmin',
+'is_admon'=> 'App\Http\Middleware\App\IsAdmon',
+'is_control'=> 'App\Http\Middleware\App\IsControl',
+'is_common'=> 'App\Http\Middleware\App\IsCommon',
+'is_profesor'=> 'App\Http\Middleware\App\IsProfesor',
+'is_director'=> 'App\Http\Middleware\App\IsDirector',
+'is_academico'=> 'App\Http\Middleware\App\IsAcademico',
+'is_representant'=> 'App\Http\Middleware\App\IsRepresentant',
+'is_estudiant'=> 'App\Http\Middleware\App\IsEstudiant',
+'is_bienestar'=> 'App\Http\Middleware\App\IsBienestar',
+'is_evaluacion'=> 'App\Http\Middleware\App\IsEvaluacion',
+'is_proyecto'=> 'App\Http\Middleware\App\IsProyecto',
+'is_proyecto'=> 'App\Http\Middleware\App\IsLeader',
+'is_proyecto'=> 'App\Http\Middleware\App\IsInicial',
+'is_time'=> 'App\Http\Middleware\Admin\IsTime',
+'is_planning'=> 'App\Http\Middleware\Admin\IsPlanning',
+'is_audit'=> 'App\Http\Middleware\Admin\IsAudit',

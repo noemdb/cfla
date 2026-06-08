@@ -5,6 +5,7 @@ namespace App\Models\app\Academy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Pevaluacion extends Model
 {
@@ -104,6 +105,24 @@ class Pevaluacion extends Model
     public function escala()
     {
         return $this->belongsTo(Escala::class, 'escala_id');
+    }
+
+    // ─── STATIC METHODS ──────────────────────────────────────────
+
+    /**
+     * Cuenta las evaluaciones registradas por un profesor en un lapso.
+     */
+    public static function count_evaluacion_prof_lapso($profesor_id, $lapso_id)
+    {
+        $count = self::select(DB::raw('count(evaluacions.id) as value'))
+            ->join('evaluacions', 'pevaluacions.id', '=', 'evaluacions.pevaluacion_id')
+            ->where('pevaluacions.profesor_id', $profesor_id)
+            ->where('pevaluacions.lapso_id', $lapso_id)
+            ->whereNull('evaluacions.deleted_at')
+            ->groupBy('pevaluacions.lapso_id')
+            ->first();
+
+        return ($count) ? (int) $count->value : 0;
     }
 
     // ─── SCOPES ──────────────────────────────────────────────────

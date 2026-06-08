@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'is_planner',
         'is_diagnostic',
+        'is_profesor',
     ];
 
 
@@ -47,6 +48,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_planner' => 'boolean',
         'is_diagnostic' => 'boolean',
+        'is_profesor' => 'boolean',
     ];
 
     public function getFullNameAttribute()
@@ -65,6 +67,11 @@ class User extends Authenticatable
         return $this->is_admin || $this->is_diagnostic;
     }
 
+    public function isProfesor()
+    {
+        return $this->is_profesor ?? false;
+    }
+
     public function getRoleLabelAttribute()
     {
         if ($this->is_admin) {
@@ -76,7 +83,11 @@ class User extends Authenticatable
         }
 
         if ($this->is_planner) {
-            return 'Personal de Planificación';
+            return 'Planificación';
+        }
+
+        if ($this->isProfesor()) {
+            return 'Profesor';
         }
 
         return 'Usuario Estándar';

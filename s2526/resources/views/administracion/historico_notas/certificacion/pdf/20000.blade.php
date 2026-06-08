@@ -1,0 +1,1 @@
+<h1>No hay certificaciones de notas para este plan de formación</h1>

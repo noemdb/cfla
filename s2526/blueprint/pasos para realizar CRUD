@@ -1,0 +1,14 @@
+Crear Controladores
+Crear Las rutas
+Crear Request
+Crear el icon_menu
+Configurar Modelos 
+	Establecer relaciones
+		-. hasMany, belongsTo
+		-. Definir las funciones: getTruncProductoAttribute()
+Configurar Controladores
+	Definir index, create, edit, etc.
+Creacion de la View's 
+	Duplicacion de las carpetas
+	Remplazo de los nombres de las variables
+Creacion de los js para el metodo delete

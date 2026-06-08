@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "193",
+        "name": "[MATEMAT-3A] MATEMÁTICAS [pensumId=193]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-MATEMAT-3A-01",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Resuelve ecuaciones polinómicas, sistemas de ecuaciones y desigualdades de primer y segundo grado.",
+            "descripcion": "Aplica algoritmos algebraicos para encontrar soluciones reales y complejas, interpretando resultados en contextos modelados."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-02",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Analiza funciones reales mediante representaciones gráficas, algebraicas y tabulares.",
+            "descripcion": "Identifica dominio, rango, monotonía, extremos y transformaciones en funciones polinómicas, racionales y radicales."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-03",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Aplica funciones trigonométricas para modelar fenómenos periódicos y resolver triángulos.",
+            "descripcion": "Utiliza razones trigonométricas, identidades y funciones circulares para interpretar fenómenos oscilatorios y calcular elementos de triángulos."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-04",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Resuelve problemas de geometría analítica en el plano y el espacio tridimensional.",
+            "descripcion": "Aplica vectores, rectas, planos y secciones cónicas para representar y resolver situaciones geométricas."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-05",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Organiza, representa e interpreta datos estadísticos mediante medidas de tendencia y dispersión.",
+            "descripcion": "Construye tablas, gráficos y calcula medidas estadísticas para analizar distribuciones de datos univariados y bivariados."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-06",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Calcula probabilidades de eventos simples y compuestos usando reglas de combinatoria.",
+            "descripcion": "Aplica principios de conteo, permutaciones, combinaciones y probabilidad condicional para evaluar situaciones de incertidumbre."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-07",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Opera con números complejos en forma binómica y polar para resolver ecuaciones y problemas físicos.",
+            "descripcion": "Interpreta números complejos geométricamente, aplica operaciones y los utiliza en ecuaciones y fenómenos oscilatorios."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-08",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Analiza sucesiones y series aritméticas y geométricas en contextos financieros y naturales.",
+            "descripcion": "Calcula términos y sumas de progresiones, aplicándolas en modelos de crecimiento, interés compuesto y aproximaciones."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-09",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Introduce conceptos de límite y derivada para analizar tasas de cambio instantáneas.",
+            "descripcion": "Calcula límites por sustitución y factorización, interpreta derivada como pendiente de tangente y tasa de variación."
+        },
+        {
+            "id": "COMP-MATEMAT-3A-10",
+            "referent_id": "2",
+            "pensum_id": 193,
+            "nombre": "Desarrolla estrategias de razonamiento lógico-matemático para resolver problemas complejos.",
+            "descripcion": "Aplica métodos de demostración, inducción matemática y modelización para abordar situaciones novedosas."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-MATEMAT-3A-01-01",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-01",
+            "descripcion": "Resuelve ecuaciones cuadráticas completas e incompletas por factorización y fórmula general.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-01-02",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-02",
+            "descripcion": "Resuelve sistemas 2×2 lineales por reducción, igualación, sustitución y determinantes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-01-03",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-03",
+            "descripcion": "Resuelve desigualdades lineales y cuadráticas expresando solución en intervalos y representación gráfica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-01-04",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-04",
+            "descripcion": "Interpreta discriminante de ecuación cuadrática para predecir naturaleza de raíces.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-01-05",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-05",
+            "descripcion": "Resuelve sistemas 3×3 por método de Gauss-Jordan.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-01-06",
+            "competency_id": "COMP-MATEMAT-3A-01",
+            "codigo": "MATEMAT-3A-IL-06",
+            "descripcion": "Aplica ecuaciones e inecuaciones en modelación de problemas de optimización.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-01",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-07",
+            "descripcion": "Determina dominio y rango de funciones polinómicas, racionales y radicales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-02",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-08",
+            "descripcion": "Identifica intervalos de crecimiento, decrecimiento y extremos relativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-03",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-09",
+            "descripcion": "Aplica transformaciones (traslación, reflexión, dilatación) a funciones básicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-04",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-10",
+            "descripcion": "Determina asíntotas verticales, horizontales y oblicuas de funciones racionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-05",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-11",
+            "descripcion": "Compara funciones lineales, cuadráticas y exponenciales según tasas de cambio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-02-06",
+            "competency_id": "COMP-MATEMAT-3A-02",
+            "codigo": "MATEMAT-3A-IL-12",
+            "descripcion": "Aplica funciones para modelar crecimiento poblacional y decaimiento exponencial.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-01",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-13",
+            "descripcion": "Calcula razones trigonométricas en triángulos rectángulos usando catetos e hipotenusa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-02",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-14",
+            "descripcion": "Aplica teorema del seno y del coseno para resolver triángulos oblicuos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-03",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-15",
+            "descripcion": "Evalúa funciones seno, coseno y tangente en ángulos de cualquier magnitud.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-04",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-16",
+            "descripcion": "Aplica identidades pitagóricas y de ángulo doble en simplificación de expresiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-05",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-17",
+            "descripcion": "Resuelve ecuaciones trigonométricas básicas en intervalos específicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-03-06",
+            "competency_id": "COMP-MATEMAT-3A-03",
+            "codigo": "MATEMAT-3A-IL-18",
+            "descripcion": "Modela fenómenos periódicos (ondas, movimiento circular) con funciones trigonométricas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-01",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-19",
+            "descripcion": "Calcula distancia entre puntos y pendiente de recta en sistema cartesiano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-02",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-20",
+            "descripcion": "Determina ecuación de recta en forma general, punto-pendiente y pendiente-intercepto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-03",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-21",
+            "descripcion": "Identifica paralelismo y perpendicularidad mediante comparación de pendientes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-04",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-22",
+            "descripcion": "Reconoce ecuaciones de circunferencia, parábola, elipse e hipérbola.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-05",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-23",
+            "descripcion": "Calcula distancia de punto a recta y ángulo entre rectas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-04-06",
+            "competency_id": "COMP-MATEMAT-3A-04",
+            "codigo": "MATEMAT-3A-IL-24",
+            "descripcion": "Representa vectores en R2 y R3, calculando módulo, dirección y operaciones básicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-01",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-25",
+            "descripcion": "Calcula media, mediana, moda, desviación media y estándar de datos agrupados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-02",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-26",
+            "descripcion": "Construye e interpreta histogramas, polígonos de frecuencia y ojivas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-03",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-27",
+            "descripcion": "Calcula coeficiente de variación para comparar dispersión entre conjuntos de datos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-04",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-28",
+            "descripcion": "Determina coeficiente de correlación lineal e interpreta relación entre variables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-05",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-29",
+            "descripcion": "Ajusta recta de regresión por mínimos cuadrados y realiza predicciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-05-06",
+            "competency_id": "COMP-MATEMAT-3A-05",
+            "codigo": "MATEMAT-3A-IL-30",
+            "descripcion": "Interpreta percentiles y su aplicación en pruebas estandarizadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-01",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-31",
+            "descripcion": "Aplica principio de multiplicación y adición en problemas de conteo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-02",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-32",
+            "descripcion": "Calcula permutaciones con y sin repetición en situaciones ordenadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-03",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-33",
+            "descripcion": "Aplica combinaciones para selecciones donde el orden no importa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-04",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-34",
+            "descripcion": "Calcula probabilidad clásica, frecuencial y geométrica en experimentos simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-05",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-35",
+            "descripcion": "Aplica probabilidad condicional y regla de Bayes en eventos dependientes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-06-06",
+            "competency_id": "COMP-MATEMAT-3A-06",
+            "codigo": "MATEMAT-3A-IL-36",
+            "descripcion": "Distingue distribuciones binomial y normal estándar en fenómenos aleatorios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-01",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-37",
+            "descripcion": "Representa números complejos en forma binómica y coordenadas (a+bi).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-02",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-38",
+            "descripcion": "Suma, resta, multiplica y divide números complejos en forma binómica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-03",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-39",
+            "descripcion": "Calcula módulo y argumento de número complejo y lo representa en plano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-04",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-40",
+            "descripcion": "Aplica teorema de De Moivre para potencias y raíces de números complejos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-05",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-41",
+            "descripcion": "Factoriza polinomios usando raíces complejas y teorema fundamental del álgebra.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-07-06",
+            "competency_id": "COMP-MATEMAT-3A-07",
+            "codigo": "MATEMAT-3A-IL-42",
+            "descripcion": "Resuelve ecuaciones con coeficientes complejos y representa soluciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-01",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-43",
+            "descripcion": "Calcula término enésimo de progresiones aritméticas y geométricas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-02",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-44",
+            "descripcion": "Calcula suma de n términos y suma infinita de progresiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-03",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-45",
+            "descripcion": "Aplica progresión geométrica en cálculo de interés compuesto y anualidades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-04",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-46",
+            "descripcion": "Inducción matemática para demostrar propiedades de sumatorias y desigualdades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-05",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-47",
+            "descripcion": "Aplica sumatoria de series en aproximaciones numéricas y cálculo de áreas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-08-06",
+            "competency_id": "COMP-MATEMAT-3A-08",
+            "codigo": "MATEMAT-3A-IL-48",
+            "descripcion": "Modela crecimiento poblacional y decaimiento radioactivo con progresiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-01",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-49",
+            "descripcion": "Calcula límites por sustitución directa y factorización en funciones racionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-02",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-50",
+            "descripcion": "Aplica propiedades de límites para resolver formas indeterminadas 0/0.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-03",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-51",
+            "descripcion": "Interpreta derivada como pendiente de recta tangente a curva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-04",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-52",
+            "descripcion": "Aplica reglas de derivación (potencia, producto, cociente) en funciones polinómicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-05",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-53",
+            "descripcion": "Calcula tasa de variación instantánea en problemas de velocidad y aceleración.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-09-06",
+            "competency_id": "COMP-MATEMAT-3A-09",
+            "codigo": "MATEMAT-3A-IL-54",
+            "descripcion": "Aplica derivadas para determinar máximos y mínimos en problemas de optimización.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-01",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-55",
+            "descripcion": "Formula conjeturas y demuestra propiedades usando razonamiento deductivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-02",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-56",
+            "descripcion": "Identifica falacias lógicas en argumentos matemáticos y extrapolaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-03",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-57",
+            "descripcion": "Construye contraejemplos para refutar proposiciones generales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-04",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-58",
+            "descripcion": "Selecciona estrategias heurísticas para resolver problemas no algorítmicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-05",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-59",
+            "descripcion": "Valida modelos matemáticos comparando predicciones con datos empíricos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-MATEMAT-3A-10-06",
+            "competency_id": "COMP-MATEMAT-3A-10",
+            "codigo": "MATEMAT-3A-IL-60",
+            "descripcion": "Comunica soluciones matemáticas con lenguaje formal y argumentación coherente.",
+            "nivel_esperado": 3
+        }
+    ]
+}

@@ -1,0 +1,5 @@
+{
+    "commission_amount":0.03,
+    "commission_config_type":"PERCENTAGE",
+    "commission_config_amount":0
+}

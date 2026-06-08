@@ -1,0 +1,119 @@
+Form Request Validation
+php artisan make:request 'Administracion\Configuracion\CreateInstitucionRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateInstitucionRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateAutoridadRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateAutoridadRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateBancoRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateBancoRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateConceptoPagoRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateConceptoPagoRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateRegistroPagoRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateRegistroPagoRequest'
+
+php artisan make:request 'Administracion\Planpago\CreatePlanpagoRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdatePlanpagoRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateCuentaxpagarRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateCuentaxpagarRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateConceptoPagoRequest' &&
+php artisan make:request 'Administracion\Planpago\CreateConceptoPagoRequest'
+
+php artisan make:request 'Administracion\Estudiant\CreateEstudiantRequest' &&
+php artisan make:request 'Administracion\Estudiant\UpdateEstudiantRequest' &&
+
+php artisan make:request 'Administracion\Estudiant\CreateRepresentantRequest' &&
+php artisan make:request 'Administracion\Estudiant\UpdateRepresentantRequest'
+
+php artisan make:request 'Administracion\Estudiant\CreateAbonoRequest' &&
+php artisan make:request 'Administracion\Estudiant\UpdateAbonoRequest'
+
+php artisan make:request 'Administracion\Estudiant\CreateBoletinRequest' &&
+php artisan make:request 'Administracion\Estudiant\UpdateBoletinRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateRegistroPagoRepresentantRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateRegistroPagoRepresentantRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateRegistroParcialRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateRegistroParcialRequest'
+
+php artisan make:request 'Administracion\Planpago\CreateRegistroPagoAsistentRequest' &&
+php artisan make:request 'Administracion\Planpago\UpdateRegistroPagoAsistentRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateAsignaturaRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateAsignaturaRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateBoletinRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateBoletinRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateProfesorRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateProfesorRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreatePlanBeneficorRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdatePlanBeneficoRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateExchangeRateRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateExchangeRateRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreatePensumRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdatePensumRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateBoletinRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateBoletinRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateDescuentoRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateDescuentoRequest'
+
+
+php artisan make:request 'Administracion\Profesor\CreateEcualitativaRequest' &&
+php artisan make:request 'Administracion\Profesor\UpdateEcualitativaRequest'
+
+php artisan make:request 'Administracion\Profesor\CreateEDescriptivaRequest' &&
+php artisan make:request 'Administracion\Profesor\UpdateEDescriptivaRequest'
+
+
+php artisan make:request 'Administracion\Profesor\CreatePevaluacionRequest' &&
+php artisan make:request 'Administracion\Profesor\UpdatePevaluacionRequest'
+
+
+php artisan make:request 'Administracion\Profesor\CreateEvaluacionRequest' &&
+php artisan make:request 'Administracion\Profesor\UpdateEvaluacionRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateProfesorGuiaRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateProfesorGuiaRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateGrupoEstableRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateGrupoEstableRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateBoletinRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateBoletinRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateBoletinAjusteRequest'
+
+
+php artisan make:request 'Administracion\Configuracion\CreateHistoricoNotaRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateHistoricoNotaRequest' &&
+
+php artisan make:request 'Administracion\Configuracion\CreateHnotaRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateHnotaRequest'
+
+php artisan make:request 'Administracion\Configuracion\CreateAreaConocimientoRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateAreaConocimientoRequest' &&
+php artisan make:request 'Administracion\Configuracion\CreateCampoConocimientoRequest' &&
+php artisan make:request 'Administracion\Configuracion\UpdateCampoConocimientoRequest'
+
+php artisan make:request 'Administracion\CreateRegistroTituloRequest' &&
+php artisan make:request 'Administracion\UpdateRegistroTituloRequest' &&
+php artisan make:request 'Administracion\CreateTituloRequest' &&
+php artisan make:request 'Administracion\UpdateTituloRequest'
+
+php artisan make:request 'Administracion\CreatePrepagoRequest' &&
+php artisan make:request 'Administracion\UpdatePrepagoRequest' &&
+
+
+php artisan make:request 'Administracion\Collection\CreateAsistentRequest' &&
+php artisan make:request 'Administracion\Collection\CreateCollPoliticallRequest' &&
+php artisan make:request 'Administracion\Collection\CreateCollMessegeRequest' &&

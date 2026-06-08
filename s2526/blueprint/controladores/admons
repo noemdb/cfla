@@ -1,0 +1,6 @@
+php artisan make:controller 'Admons\HomeController' 
+php artisan make:controller 'Admons\Tab\AdministracionController' 
+php artisan make:controller 'Admons\Tab\ControlController' 
+php artisan make:controller 'Admons\Tab\AuditController' 
+php artisan make:controller 'Admons\Tab\UserController' 
+php artisan make:controller 'Admons\Tab\CollPoliticalController' 

@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "195",
+        "name": "[LE-LI-1A] LENGUA Y LITERATURA [pensumId=195]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-LELI-1A-01",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Comprende e interpreta textos de diversos géneros, épocas y tradiciones literarias.",
+            "descripcion": "Aplica estrategias de lectura crítica para identificar estructuras, recursos estilísticos, intencionalidad y contexto sociocultural en obras literarias y no literarias."
+        },
+        {
+            "id": "COMP-LELI-1A-02",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Analiza elementos constitutivos de géneros literarios y movimientos estéticos.",
+            "descripcion": "Reconoce características, autores representativos y evolución histórica de géneros y movimientos, relacionándolos con el contexto sociopolítico venezolano y latinoamericano."
+        },
+        {
+            "id": "COMP-LELI-1A-03",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Desarrolla la argumentación crítica mediante la producción de textos académicos.",
+            "descripcion": "Construye argumentos lógicos con evidencia textual, reconociendo falacias, sesgos y manipulación discursiva en diversos tipos de textos."
+        },
+        {
+            "id": "COMP-LELI-1A-04",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Produce textos escritos coherentes y apropiados a diferentes situaciones comunicativas.",
+            "descripcion": "Escribe narraciones, ensayos, argumentaciones y textos expositivos con estructura clara, cohesión léxico-gramatical y estilo adaptado al género y audiencia."
+        },
+        {
+            "id": "COMP-LELI-1A-05",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Desarrolla la expresión oral con fluidez, claridad y estrategias discursivas.",
+            "descripcion": "Participa en debates, mesas redondas y exposiciones organizando ideas, usando lenguaje no verbal efectivo y respondiendo con argumentación."
+        },
+        {
+            "id": "COMP-LELI-1A-06",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Reflexiona sobre el sistema lingüístico español aplicando conceptos gramaticales.",
+            "descripcion": "Analiza estructuras morfosintácticas, normativa académica y variación lingüística para comprender el funcionamiento y evolución del idioma."
+        },
+        {
+            "id": "COMP-LELI-1A-07",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Valora la literatura venezolana y latinoamericana como expresión identitaria y social.",
+            "descripcion": "Interpreta obras representativas de autores venezolanos y latinoamericanos, reconociendo su contribución a la formación de identidad cultural y crítica social."
+        },
+        {
+            "id": "COMP-LELI-1A-08",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Relaciona la literatura con el contexto histórico, político y cultural.",
+            "descripcion": "Contextualiza obras literarias en momentos históricos clave (Independencia, dictaduras, procesos sociales), analizando su función testimonial y crítica."
+        },
+        {
+            "id": "COMP-LELI-1A-09",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Investiga y documenta información para la producción de textos académicos.",
+            "descripcion": "Busca, selecciona, organiza y cita fuentes académicas (libros, artículos, bases de datos) siguiendo normas de citación y evitando el plagio."
+        },
+        {
+            "id": "COMP-LELI-1A-10",
+            "referent_id": "2",
+            "pensum_id": 195,
+            "nombre": "Desarrolla la creatividad literaria mediante la producción de textos originales.",
+            "descripcion": "Crea poemas, cuentos críticos y guiones dramáticos, experimentando con recursos estilísticos y revisando el proceso creativo."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-LELI-1A-01-01",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-01",
+            "descripcion": "Identifica estructura narrativa (nudo, desenlace) en obras del romanticismo y modernismo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-01-02",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-02",
+            "descripcion": "Reconoce recursos estilísticos (metáfora, hipérbaton, símil) y su función poética.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-01-03",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-03",
+            "descripcion": "Interpreta intencionalidad del autor mediante análisis de voz narrativa y perspectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-01-04",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-04",
+            "descripcion": "Relaciona contexto sociohistórico con temáticas de obras literarias latinoamericanas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-01-05",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-05",
+            "descripcion": "Compara versiones fílmicas y textuales evaluando fidelidad interpretativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-01-06",
+            "competency_id": "COMP-LELI-1A-01",
+            "codigo": "LELI-1A-IL-06",
+            "descripcion": "Analiza ironía, parodia y crítica social en textos vanguardistas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-01",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-07",
+            "descripcion": "Caracteriza novela, cuento, poesía, ensayo y teatro según elementos constitutivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-02",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-08",
+            "descripcion": "Reconoce movimientos literarios (realismo, vanguardia, boom latinoamericano) y autores representativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-03",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-09",
+            "descripcion": "Interpreta poesía épica, lírica y dramática según tradiciones clásicas y modernas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-04",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-10",
+            "descripcion": "Analiza estructura actancial y función del narrador en novelas del siglo XX.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-05",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-11",
+            "descripcion": "Relaciona vanguardia literaria europea con manifestaciones latinoamericanas (ultraísmo, creacionismo).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-02-06",
+            "competency_id": "COMP-LELI-1A-02",
+            "codigo": "LELI-1A-IL-12",
+            "descripcion": "Compara teoria del realismo mágico con realismo social en narrativa latinoamericana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-01",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-13",
+            "descripcion": "Formula tesis argumentativa con posicionamiento crítico sobre tema literario-social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-02",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-14",
+            "descripcion": "Identifica falacias lógicas (ad hominem, falsa dicotomía) en argumentos mediáticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-03",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-15",
+            "descripcion": "Construye contraargumentos con evidencia textual y citas apropiadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-04",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-16",
+            "descripcion": "Reconoce manipulación discursiva, propaganda y sesgos ideológicos en textos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-05",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-17",
+            "descripcion": "Evalúa credibilidad y autoría de fuentes literarias y académicas digitales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-03-06",
+            "competency_id": "COMP-LELI-1A-03",
+            "codigo": "LELI-1A-IL-18",
+            "descripcion": "Aplica teoría literaria (feminista, marxista, poscolonial) en análisis crítico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-01",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-19",
+            "descripcion": "Escribe párrafos con unidad temática, cohesión léxica y conectores apropiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-02",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-20",
+            "descripcion": "Elabora ensayos argumentativos con introducción, antítesis, síntesis y conclusión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-03",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-21",
+            "descripcion": "Adapta registro lingüístico según género (narrativo, expositivo, persuasivo) y audiencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-04",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-22",
+            "descripcion": "Revisa ortografía, puntuación, concordancia y estilo mediante autorrevisión y pares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-05",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-23",
+            "descripcion": "Produce reseñas críticas de obras literarias con análisis y evaluación personal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-04-06",
+            "competency_id": "COMP-LELI-1A-04",
+            "codigo": "LELI-1A-IL-24",
+            "descripcion": "Crea textos digitales (blogs) integrando multimodalidad (imágenes, hipervínculos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-01",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-25",
+            "descripcion": "Organiza exposiciones orales con estructura lógica y lenguaje no verbal efectivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-02",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-26",
+            "descripcion": "Participa en debates defendiendo posiciones con argumentos y refutando contrapartes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-03",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-27",
+            "descripcion": "Modula voz, ritmo y entonación para enfatizar ideas y mantener atención audiencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-04",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-28",
+            "descripcion": "Responde preguntas complejas improvisando con coherencia y profundidad conceptual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-05",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-29",
+            "descripcion": "Gestiona turnos de palabra y dinámicas grupales en mesas redondas literarias.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-05-06",
+            "competency_id": "COMP-LELI-1A-05",
+            "codigo": "LELI-1A-IL-30",
+            "descripcion": "Graba y autoevalúa producciones orales identificando áreas de mejora fonética-pragmática.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-01",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-31",
+            "descripcion": "Analiza funciones sintácticas (sujeto, predicado, complementos) en oraciones complejas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-02",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-32",
+            "descripcion": "Aplica normativa de la RAE en uso de letras, tildes y signos de puntuación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-03",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-33",
+            "descripcion": "Explica usos de indicativo vs subjuntivo en proposiciones subordinadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-04",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-34",
+            "descripcion": "Identifica variación diatópica, diastrática y diafásica en textos venezolanos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-05",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-35",
+            "descripcion": "Analiza formación de palabras (derivación, composición, parasíntesis) en léxico culto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-06-06",
+            "competency_id": "COMP-LELI-1A-06",
+            "codigo": "LELI-1A-IL-36",
+            "descripcion": "Reconoce préstamos, neologismos y calcos en español contemporáneo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-01",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-37",
+            "descripcion": "Interpreta obra de Rómulo Gallegos como crítica social y construcción nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-02",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-38",
+            "descripcion": "Analiza poesía de Antonio Machado y García Lorca en contexto generacional del 98 y 27.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-03",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-39",
+            "descripcion": "Relaciona narrativa del Boom Latinoamericano con contexto político de dictaduras.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-04",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-40",
+            "descripcion": "Compara poesía de mujeres (Storni, Mistral, Castellanos) y construcción de voz femenina.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-05",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-41",
+            "descripcion": "Interpreta teatro político (W. Gamero, J. Martínez) en contexto venezolano contemporáneo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-07-06",
+            "competency_id": "COMP-LELI-1A-07",
+            "codigo": "LELI-1A-IL-42",
+            "descripcion": "Evalúa literatura afrodescendiente e indígena como resistencia y memoria colectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-01",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-43",
+            "descripcion": "Contextualiza novela de dictadura latinoamericana con procesos históricos regionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-02",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-44",
+            "descripcion": "Analiza literatura testimonial como registro de violaciones a derechos humanos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-03",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-45",
+            "descripcion": "Relaciona modernismo con contexto de identidad latinoamericana fin de siglo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-04",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-46",
+            "descripcion": "Interpreta literatura venezolana de posguerra como proceso de reconstrucción identitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-05",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-47",
+            "descripcion": "Compara literatura de la independencia en Venezuela, México y Argentina.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-08-06",
+            "competency_id": "COMP-LELI-1A-08",
+            "codigo": "LELI-1A-IL-48",
+            "descripcion": "Evalúa función de literatura como herramienta de transformación social y política.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-01",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-49",
+            "descripcion": "Búsqueda avanzada en bases de datos (JSTOR, Dialnet) y catálogos de bibliotecas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-02",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-50",
+            "descripcion": "Selecciona fuentes académicas evaluando autoría, fecha, editorial y revisión por pares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-03",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-51",
+            "descripcion": "Organiza información con mapas conceptuales y fichas bibliográficas sistemáticas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-04",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-52",
+            "descripcion": "Cita fuentes usando normas APA 7ª edición en texto y lista de referencias.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-05",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-53",
+            "descripcion": "Evita plagio parafraseando, citando y referenciando apropiadamente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-09-06",
+            "competency_id": "COMP-LELI-1A-09",
+            "codigo": "LELI-1A-IL-54",
+            "descripcion": "Elabora monografías con hipótesis, desarrollo argumentativo y conclusiones fundamentadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-01",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-55",
+            "descripcion": "Experimenta con métrica, rima y figuras retóricas en composición poética original.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-02",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-56",
+            "descripcion": "Escribe cuento corto con estructura narrativa, personajes y conflicto desarrollados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-03",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-57",
+            "descripcion": "Participa en talleres de escritura creativa revisando borradores con pares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-04",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-58",
+            "descripcion": "Incorpora crítica social contemporánea en guiones dramáticos y obras de teatro.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-05",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-59",
+            "descripcion": "Publica textos creativos en medios escolares (revista, blog) con corrección lingüística.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LELI-1A-10-06",
+            "competency_id": "COMP-LELI-1A-10",
+            "codigo": "LELI-1A-IL-60",
+            "descripcion": "Autoevalúa proceso creativo reflexionando sobre inspiración, bloqueo y revisiones.",
+            "nivel_esperado": 3
+        }
+    ]
+}

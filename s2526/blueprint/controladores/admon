@@ -1,0 +1,22 @@
+Controller para vistas
+php artisan make:controller 'Admon\HomeController'
+
+php artisan make:controller 'Administracion\Tab\RecursoController' &&
+php artisan make:controller 'Administracion\Tab\IsrlController' &&
+php artisan make:controller 'Administracion\Tab\AsistentController' &&
+
+
+php artisan make:controller 'Administracion\Tab\Receibt\ReciboController' &&
+php artisan make:controller 'Administracion\Tab\Receibt\ReciboCashController' &&
+php artisan make:controller 'Administracion\Tab\Receibt\ReciboChangeController' &&
+php artisan make:controller 'Administracion\Tab\Receibt\ReciboPagoController' &&
+
+php artisan make:controller 'Administracion\Tab\RefundController' &&
+
+php artisan make:controller 'Administracion\Tab\CalendarEventController' &&
+
+php artisan make:controller 'Administracion\Tab\TransactionController' &&
+
+php artisan make:controller 'Administracion\Integration\WhatsAppApiController' &&
+php artisan make:controller 'Integration\WhatsAppApiController' &&
+

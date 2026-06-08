@@ -1,0 +1,8 @@
+php artisan make:controller 'Administracion\Tab\Polls\PollGroupController' &&
+php artisan make:controller 'Administracion\Tab\Polls\PollMainController' &&
+php artisan make:controller 'Administracion\Tab\Polls\PollTokenController' &&
+php artisan make:controller 'Administracion\Tab\Polls\PollQuestionController' &&
+php artisan make:controller 'Administracion\Tab\Polls\PollOptionController' &&
+php artisan make:controller 'Administracion\Tab\Polls\PollAnswerController'
+
+ &&

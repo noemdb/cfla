@@ -1,0 +1,11 @@
+php artisan make:controller 'Representant\HomeController' &&
+php artisan make:controller 'Representant\Tab\AdministracionController' &&
+php artisan make:controller 'Representant\Tab\ControlController' &&
+php artisan make:controller 'Representant\Tab\PreinscripcionController' &&
+php artisan make:controller 'Representant\Tab\InscripcionController' &&
+php artisan make:controller 'Representant\Tab\BoletinController' &&
+php artisan make:controller 'Representant\Tab\EDescriptivaController' &&
+php artisan make:controller 'Representant\Tab\PrepagoController' &&
+php artisan make:controller 'Representant\Tab\RegistroPagoController'
+php artisan make:controller 'Representant\Tab\AyudaController'
+php artisan make:controller 'Representant\Tab\UserController'

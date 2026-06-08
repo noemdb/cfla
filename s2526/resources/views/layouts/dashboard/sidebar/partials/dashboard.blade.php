@@ -1,0 +1,86 @@
+{{-- <a class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+    <i class="{{ $icon_menus['inicio'] }} text-primary"></i>
+    Inicio
+</a> --}}
+
+@includeWhen(Auth::user()->isAdmin(), 'layouts.dashboard.sidebar.partials.dashboard.admin')
+@includeWhen(Auth::user()->IsAdmon(), 'layouts.dashboard.sidebar.partials.dashboard.admon')
+@includeWhen(Auth::user()->IsControl(), 'layouts.dashboard.sidebar.partials.dashboard.control')
+
+{{-- @includeWhen(Auth::user()->IsAdmon(), 'layouts.dashboard.navbar.admon')
+
+@includeWhen(Auth::user()->IsControl(), 'layouts.dashboard.navbar.control') --}}
+
+{{-- <a title="Notificaciones" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+    <i class="{{ $icon_menus['notificaciones'] }} text-secondary"></i>
+    Notificaciones
+</a> --}}
+
+{{-- <a class="accordion {{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' accordion_active' : '') }}"  href="#">
+    <i class="{{ $icon_menus['libro'] }} text-default"></i>
+    Libros
+</a>
+
+<div class="{{ $display ?? 'accordion_panel' }}" style="display: {{ (Request::is('*models*') ? ' block !important' : 'none') }}; display: {{ $display ?? 'none' }};" >
+
+    <ul class="nav flex-column">
+
+        <a title="Libro de inscripciones administrativas" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-danger"></i>
+            Inscripc. Admin.
+        </a>
+
+        <a title="Libro de retiros administrativos" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-warning"></i>
+            Retiros Admin.
+        </a>
+
+        <a title="Libro de representantes" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-info"></i>
+            Representantes
+        </a>
+
+        <a title="Libro de posibles deserciones'" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-dark"></i>
+            Deserciones
+        </a>
+
+        <a title="Libro de pagos adelantados" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-primary"></i>
+            Adelantados
+        </a>
+
+        <a title="Libro de notas de crédito" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-secondary"></i>
+            Nota Crédito
+        </a>
+
+        <a title="Libro de facturación" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-success"></i>
+            Facturación
+        </a>
+
+        <a title="Libro de facturación" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-warning"></i>
+            Créditos
+        </a>
+
+        <a title="Libro de facturación" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-danger"></i>
+            Bancos
+        </a>
+
+        <a title="Libro analítico de cobro" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+            <i class="{{ $icon_menus['libro'] }} text-info"></i>
+            Analítico Cobro
+        </a>
+
+    </ul>
+
+</div>
+
+<a title="Ingresos por concepto" class="{{ $class ?? 'nav-link' }} p-1 pl-2 {{ (Request::is('*models*') ? ' active' : '') }}" href="{{ route('administracion.home') }}">
+    <i class="{{ $icon_menus['ingresos'] }} text-dark"></i>
+    Ingresos
+</a> --}}
+

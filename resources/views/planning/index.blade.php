@@ -2,30 +2,46 @@
 
 @section('title', 'Planificación - Panel de Gestión')
 
+@section('navbar-info')
+<div class="hidden lg:flex items-center gap-3 ml-4">
+    {{-- Fecha --}}
+    <div class="flex items-center gap-1.5 text-xs text-gray-400">
+        <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span>{{ now()->isoFormat('DD [de] MMMM, YYYY') }}</span>
+    </div>
+
+    <span class="w-px h-4 bg-white/5"></span>
+
+    {{-- Período --}}
+    <div class="flex items-center gap-1.5 text-xs text-gray-400">
+        <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <span>2025-2026</span>
+    </div>
+
+    <span class="w-px h-4 bg-white/5"></span>
+
+    {{-- Usuario --}}
+    <div class="flex items-center gap-1.5 text-xs">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            {{ Auth::user()->username }}
+        </span>
+    </div>
+</div>
+@endsection
+
 @section('content')
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
             <h1 class="text-3xl font-extrabold text-white mb-2">Planificación Académica</h1>
             <p class="text-emerald-400 font-medium">Gestión y organización de actividades académicas institucionales.</p>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
-                <p class="text-emerald-300 text-sm font-medium mb-1">Fecha Actual</p>
-                <p class="text-white text-2xl font-bold">{{ now()->isoFormat('DD [de] MMMM, YYYY') }}</p>
-            </div>
-            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
-                <p class="text-blue-300 text-sm font-medium mb-1">Periodo Escolar</p>
-                <p class="text-white text-2xl font-bold">2025-2026</p>
-            </div>
-            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
-                <p class="text-purple-300 text-sm font-medium mb-1">Usuario</p>
-                <p class="text-white text-2xl font-bold">
-                    {{ Auth::user()->username }}
-                </p>
-            </div>
         </div>
 
         <h2 class="text-xl font-bold text-white mb-6 flex items-center">

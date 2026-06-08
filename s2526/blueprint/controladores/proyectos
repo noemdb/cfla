@@ -1,0 +1,4 @@
+php artisan make:controller 'Proyecto\HomeController'
+php artisan make:controller 'Proyecto\Tab\ControlController'
+php artisan make:controller 'Proyecto\Tab\UserController'
+php artisan make:controller 'Proyecto\Tab\MailerController'

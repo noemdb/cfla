@@ -66,11 +66,31 @@ class Profesor extends Model
         return $this->hasMany(Pevaluacion::class, 'profesor_id');
     }
 
+    public function profesor_guias()
+    {
+        return $this->hasMany(ProfesorGuia::class, 'profesor_id');
+    }
+
     // ─── ACCESSORS ───────────────────────────────────────────────
 
     public function getFullNameAttribute()
     {
         return trim("{$this->lastname} {$this->name}");
+    }
+
+    /**
+     * Secciones donde el profesor es guía/tutor.
+     */
+    public function getSeccionGuiasAttribute()
+    {
+        $seccions = Seccion::select('seccions.*', 'lapsos.name as lapso_name')
+            ->join('profesor_guias', 'seccions.id', '=', 'profesor_guias.seccion_id')
+            ->join('lapsos', 'lapsos.id', '=', 'profesor_guias.lapso_id')
+            ->where('profesor_guias.profesor_id', $this->id)
+            ->groupBy('seccions.id')
+            ->get();
+
+        return $seccions;
     }
 
     // ═══════════════════════════════════════════════════════════════

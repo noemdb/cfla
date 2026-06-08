@@ -1,0 +1,64 @@
+@extends('administracion.layouts.dashboard.app')
+
+@section('main')
+    <main role="main" class="col-md-10 col-lg-10">
+
+        <div class="card card-primary mt-2">
+            <div class="card-header pb-0 mb-0 alert-secondary">
+                <h3>
+                    <i class="{{ $icon_menus['pagos_adelantados'] }} fa-1x text-success"></i>
+                    Registro de abonos
+                    {{-- INI Menu rapido --}}
+                    <div class="btn-group float-right">
+
+                        {{-- @include('administracion.abonos.menus.index') --}}
+
+                    </div>
+                    {{-- FIN Menu rapido --}}
+
+                </h3>
+            </div>
+
+            <div class="card-body">
+
+                {{-- Mensaje session-flash sobre operaciones con base de datos --}}
+                @include('administracion.elements.messeges.oper_ok')
+
+                {!! Form::open([
+                    'route' => 'administracion.creditoafavors.index',
+                    'method' => 'GET',
+                    'class' => '',
+                    'role' => 'search',
+                ]) !!}
+                {{-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="name"> --}}
+                <div class="input-group">
+                    {!! Form::text('search', $search, ['class' => 'form-control', 'placeholder' => 'Buscar Nombre o Cédula']) !!}
+                    <div class="input-group-append" style="z-index: 0;">
+                        <button class="btn btn-primary my-2 my-sm-0" type="submit">Buscar</button>
+                        <a href="{{ route('administracion.creditoafavors.list.abono.dw.excel') }}"
+                            class="btn btn-success float-right" target="_blank">
+                            <i class="fas fa-file-excel text-light" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="btn btn-danger float-right" target="_blank">
+                            <i class="fa fa-file-pdf  text-light" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+                {!! Form::close() !!}
+
+                {{-- {{$creditoafavors}} --}}
+
+                @if (!empty($estudiants))
+                    @include('administracion.creditoafavors.deck.abonos')
+                @endif
+
+            </div>
+
+        </div>
+
+    </main>
+@endsection
+
+@section('scripts')
+    @parent
+@endsection

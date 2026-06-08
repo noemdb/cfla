@@ -211,6 +211,24 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
     });
 });
 
+// ===================================================
+// MÓDULO DE PROFESOR (Dashboard)
+// ===================================================
+Route::prefix('app')->name('app.')->middleware(['auth', 'isProfesor'])->group(function () {
+    Route::prefix('profesors')->name('profesors.')->group(function () {
+        Route::get('/home', [\App\Http\Controllers\Profesor\HomeController::class, 'home'])->name('home');
+        Route::get('/users', [\App\Http\Controllers\Profesor\HomeController::class, 'users'])->name('users.index');
+
+        // Módulo de Actividades
+        Route::prefix('activities')->name('activities.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\ActivityController::class, 'index'])->name('index');
+            Route::get('/create/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'create'])->name('create');
+            Route::get('/format/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'format'])->name('format');
+            Route::get('/resume/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'resume'])->name('resume');
+        });
+    });
+});
+
 // API para fingerprinting
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
     ->name('voting.store-fingerprint');

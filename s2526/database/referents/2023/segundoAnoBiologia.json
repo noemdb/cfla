@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "153",
+        "name": "[BIO-TEC-2A] BIOLOGÍA, AMBIENTE Y TECNOLOGÍA [pensumId=153]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-BIO-TEC-2A-01",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Analiza la estructura y función de la célula como unidad básica de la vida.",
+            "descripcion": "Identifica organelos, procesos metabólicos y diferencias entre células procariotas y eucariotas en contextos biológicos y tecnológicos."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-02",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Comprende los procesos de nutrición, respiración y excreción en seres vivos y su relación con la salud humana.",
+            "descripcion": "Relaciona sistemas digestivo, respiratorio y excretor con hábitos alimenticios, higiene y prevención de enfermedades."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-03",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Evalúa el impacto del consumo de sustancias psicoactivas en la salud individual y colectiva.",
+            "descripcion": "Analiza efectos del alcohol, tabaco y drogas en el sistema nervioso y propone estrategias de prevención desde una perspectiva científica y ética."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-04",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Estudia la dinámica de los ecosistemas y los ciclos biogeoquímicos en contextos locales y globales.",
+            "descripcion": "Describe flujos de energía, ciclos del agua, carbono y nitrógeno, y evalúa alteraciones antrópicas como la contaminación y la deforestación."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-05",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Diseña y ejecuta investigaciones sobre biodiversidad y conservación en entornos venezolanos.",
+            "descripcion": "Aplica métodos de muestreo, identificación taxonómica y análisis de amenazas para proponer estrategias de protección de especies y hábitats."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-06",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Promueve prácticas de higiene y saneamiento ambiental como base de la salud comunitaria.",
+            "descripcion": "Relaciona el manejo adecuado del agua, residuos sólidos y vectores con la prevención de enfermedades infecciosas y parasitarias."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-07",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Aplica principios de microbiología en la comprensión de enfermedades, fermentaciones y bioprocesos.",
+            "descripcion": "Identifica microorganismos beneficiosos y patógenos, y comprende su rol en la salud, la industria alimentaria y el tratamiento de residuos."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-08",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Analiza críticamente el uso de la tecnología en la manipulación genética y sus implicaciones éticas.",
+            "descripcion": "Evalúa aplicaciones de la biotecnología (transgénicos, clonación, edición genética) considerando riesgos, beneficios y justicia social."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-09",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Desarrolla proyectos interdisciplinarios que integran biología, ambiente y tecnología para resolver problemas locales.",
+            "descripcion": "Formula preguntas, diseña metodologías y propone soluciones innovadoras a desafíos sanitarios, alimentarios o ecológicos del entorno escolar o comunitario."
+        },
+        {
+            "id": "COMP-BIO-TEC-2A-10",
+            "referent_id": "2",
+            "pensum_id": 153,
+            "nombre": "Valora la soberanía alimentaria y la agroecología como alternativas sostenibles al modelo agroindustrial.",
+            "descripcion": "Contrasta sistemas productivos convencionales con prácticas agroecológicas, promoviendo el consumo local, la diversidad agrícola y la seguridad alimentaria."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-BIO-TEC-2A-01-01",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-01",
+            "descripcion": "Identifica las partes de la célula animal y vegetal en modelos o microscopía óptica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-01-02",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-02",
+            "descripcion": "Distingue entre células procariotas y eucariotas por estructura y complejidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-01-03",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-03",
+            "descripcion": "Explica la función de organelos clave: núcleo, mitocondrias, cloroplastos, lisosomas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-01-04",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-04",
+            "descripcion": "Relaciona la estructura celular con la especialización de tejidos en organismos multicelulares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-01-05",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-05",
+            "descripcion": "Describe procesos básicos como difusión, ósmosis y transporte activo en membranas celulares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-01-06",
+            "competency_id": "COMP-BIO-TEC-2A-01",
+            "codigo": "BIO-TEC-2A-IL-06",
+            "descripcion": "Argumenta por qué la célula es la unidad estructural y funcional de todos los seres vivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-01",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-07",
+            "descripcion": "Describe la ruta del alimento en el sistema digestivo humano y su transformación en nutrientes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-02",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-08",
+            "descripcion": "Explica el intercambio gaseoso en los alvéolos pulmonares y su relación con la circulación sanguínea.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-03",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-09",
+            "descripcion": "Identifica órganos del sistema excretor y su función en la eliminación de desechos metabólicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-04",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-10",
+            "descripcion": "Relaciona una dieta balanceada con el buen funcionamiento de los sistemas corporales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-05",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-11",
+            "descripcion": "Propone hábitos de higiene personal y alimentaria para prevenir enfermedades gastrointestinales y respiratorias.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-02-06",
+            "competency_id": "COMP-BIO-TEC-2A-02",
+            "codigo": "BIO-TEC-2A-IL-12",
+            "descripcion": "Argumenta que la salud es un derecho humano vinculado a condiciones sociales y ambientales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-01",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-13",
+            "descripcion": "Describe los efectos del alcohol y el tabaco en el sistema nervioso central y cardiovascular.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-02",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-14",
+            "descripcion": "Identifica señales de alerta en el consumo problemático de sustancias psicoactivas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-03",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-15",
+            "descripcion": "Analiza cómo la publicidad y la presión social influyen en el inicio del consumo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-04",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-16",
+            "descripcion": "Reconoce recursos de ayuda (líneas telefónicas, centros comunitarios) para situaciones de adicción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-05",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-17",
+            "descripcion": "Promueve campañas escolares de prevención del consumo basadas en evidencia científica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-03-06",
+            "competency_id": "COMP-BIO-TEC-2A-03",
+            "codigo": "BIO-TEC-2A-IL-18",
+            "descripcion": "Argumenta que la prevención debe abordar factores sociales, no solo individuales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-01",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-19",
+            "descripcion": "Describe el flujo de energía en cadenas y redes tróficas (productores, consumidores, descomponedores).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-02",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-20",
+            "descripcion": "Explica los ciclos biogeoquímicos del agua, carbono y nitrógeno con esquemas o maquetas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-03",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-21",
+            "descripcion": "Analiza cómo la deforestación y la quema afectan el ciclo del carbono y el clima local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-04",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-22",
+            "descripcion": "Relaciona la contaminación del agua con la pérdida de biodiversidad acuática y riesgos sanitarios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-05",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-23",
+            "descripcion": "Propone acciones para mitigar el impacto humano en los ciclos naturales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-04-06",
+            "competency_id": "COMP-BIO-TEC-2A-04",
+            "codigo": "BIO-TEC-2A-IL-24",
+            "descripcion": "Vincula sus análisis con los ODS 13 (Acción climática), 14 (Vida submarina) y 15 (Vida de ecosistemas terrestres).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-01",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-25",
+            "descripcion": "Aplica técnicas de muestreo (transectos, cuadrantes) en estudios de biodiversidad local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-02",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-26",
+            "descripcion": "Identifica especies nativas, endémicas y exóticas en su entorno escolar o comunitario.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-03",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-27",
+            "descripcion": "Utiliza claves dicotómicas o apps digitales para clasificar organismos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-04",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-28",
+            "descripcion": "Evalúa amenazas a la biodiversidad (fragmentación, caza ilegal, contaminación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-05",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-29",
+            "descripcion": "Propone estrategias de conservación in situ y ex situ para especies vulnerables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-05-06",
+            "competency_id": "COMP-BIO-TEC-2A-05",
+            "codigo": "BIO-TEC-2A-IL-30",
+            "descripcion": "Participa en campañas de sensibilización sobre la riqueza biológica venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-01",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-31",
+            "descripcion": "Identifica fuentes de contaminación del agua (doméstica, agrícola, industrial) en su comunidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-02",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-32",
+            "descripcion": "Diseña un plan básico de manejo de residuos sólidos en el aula o escuela (reducción, reutilización, reciclaje).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-03",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-33",
+            "descripcion": "Relaciona la acumulación de basura con la proliferación de vectores (mosquitos, roedores).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-04",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-34",
+            "descripcion": "Promueve prácticas de higiene personal y colectiva para prevenir enfermedades diarreicas y vectoriales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-05",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-35",
+            "descripcion": "Construye un filtro casero de agua como solución tecnológica comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-06-06",
+            "competency_id": "COMP-BIO-TEC-2A-06",
+            "codigo": "BIO-TEC-2A-IL-36",
+            "descripcion": "Vincula el saneamiento ambiental con los ODS 6 (Agua limpia) y 11 (Ciudades sostenibles).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-01",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-37",
+            "descripcion": "Clasifica microorganismos (bacterias, virus, hongos, protozoos) por características estructurales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-02",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-38",
+            "descripcion": "Explica el papel de bacterias en la fermentación láctica y alcohólica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-03",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-39",
+            "descripcion": "Describe mecanismos de acción de antibióticos y el problema de la resistencia antimicrobiana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-04",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-40",
+            "descripcion": "Identifica microorganismos patógenos asociados a enfermedades comunes (dengue, malaria, cólera).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-05",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-41",
+            "descripcion": "Aplica medidas de higiene y bioseguridad para prevenir infecciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-07-06",
+            "competency_id": "COMP-BIO-TEC-2A-07",
+            "codigo": "BIO-TEC-2A-IL-42",
+            "descripcion": "Reconoce el uso de microorganismos en el tratamiento de aguas residuales y compostaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-01",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-43",
+            "descripcion": "Describe el proceso de creación de un organismo transgénico (ej.: maíz Bt).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-02",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-44",
+            "descripcion": "Explica el principio de la edición genética mediante CRISPR-Cas9.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-03",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-45",
+            "descripcion": "Analiza ventajas y riesgos de los cultivos transgénicos en el contexto venezolano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-04",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-46",
+            "descripcion": "Debate sobre los límites éticos de la clonación y la manipulación genética humana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-05",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-47",
+            "descripcion": "Critica la patentabilidad de genes y semillas como forma de neocolonialismo tecnológico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-08-06",
+            "competency_id": "COMP-BIO-TEC-2A-08",
+            "codigo": "BIO-TEC-2A-IL-48",
+            "descripcion": "Defiende el acceso equitativo a los avances biotecnológicos como derecho de los pueblos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-01",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-49",
+            "descripcion": "Formula una pregunta investigable sobre un problema biológico local (calidad del agua, biodiversidad urbana, salud).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-02",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-50",
+            "descripcion": "Diseña una metodología ética, segura y replicable para abordar su pregunta.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-03",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-51",
+            "descripcion": "Recopila datos cualitativos y cuantitativos mediante observación, encuestas o experimentación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-04",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-52",
+            "descripcion": "Analiza resultados con base en conceptos biológicos y los contrasta con hipótesis iniciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-05",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-53",
+            "descripcion": "Propone soluciones educativas, técnicas o comunitarias derivadas de su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-09-06",
+            "competency_id": "COMP-BIO-TEC-2A-09",
+            "codigo": "BIO-TEC-2A-IL-54",
+            "descripcion": "Comunica sus hallazgos en un informe o presentación oral con rigor científico y compromiso social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-01",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-55",
+            "descripcion": "Define soberanía alimentaria y la distingue de la seguridad alimentaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-02",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-56",
+            "descripcion": "Identifica prácticas agroecológicas (rotación de cultivos, abonos orgánicos, policultivos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-03",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-57",
+            "descripcion": "Contrasta el modelo agroindustrial (monocultivo, agroquímicos) con la agricultura campesina sostenible.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-04",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-58",
+            "descripcion": "Promueve el consumo de alimentos locales, de temporada y producidos sin agrotóxicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-05",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-59",
+            "descripcion": "Participa en huertos escolares o comunitarios como práctica de producción endógena.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-BIO-TEC-2A-10-06",
+            "competency_id": "COMP-BIO-TEC-2A-10",
+            "codigo": "BIO-TEC-2A-IL-60",
+            "descripcion": "Vincula la agroecología con los ODS 2 (Hambre cero) y 12 (Producción responsable).",
+            "nivel_esperado": 3
+        }
+    ]
+}

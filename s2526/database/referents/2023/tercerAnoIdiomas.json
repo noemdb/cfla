@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "194",
+        "name": "[IDIO-1A] IDIOMAS [pensumId=194]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-IDIO-1A-01",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Comprende textos orales de diversidad de registros y acentos en contextos académicos y sociales.",
+            "descripcion": "Interpreta mensajes explícitos e implícitos en conversaciones, discursos y audios, identificando propósito, tono y organización textual."
+        },
+        {
+            "id": "COMP-IDIO-1A-02",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Produce textos orales coherentes y apropiados para comunicarse en situaciones formales e informales.",
+            "descripcion": "Planifica, organiza y expresa ideas con fluidez, pronunciación inteligible y estrategias de compensación en interacciones diversas."
+        },
+        {
+            "id": "COMP-IDIO-1A-03",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Comprende textos escritos de complejidad académica y literaria mediante estrategias de lectura crítica.",
+            "descripcion": "Aplica técnicas de skimming, scanning e inferencia para interpretar artículos, narraciones y ensayos, reconociendo estructuras argumentativas."
+        },
+        {
+            "id": "COMP-IDIO-1A-04",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Produce textos escritos con cohesión, coherencia y adecuación a géneros discursivos variados.",
+            "descripcion": "Elabora párrafos, ensayos y correos electrónicos organizando ideas, usando conectores apropiados y revisando la ortografía y sintaxis."
+        },
+        {
+            "id": "COMP-IDIO-1A-05",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Aplica estructuras gramaticales y léxicas para negociar significado en comunicación auténtica.",
+            "descripcion": "Usa tiempos verbales complejos, modalidades, collocations y estrategias de parafraseo para expresar matices de tiempo, certeza y obligación."
+        },
+        {
+            "id": "COMP-IDIO-1A-06",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Desarrolla competencia intercultural para interactuar respetuosamente con hablantes de otras lenguas.",
+            "descripcion": "Compara costumbres, valores y perspectivas culturales, evitando estereotipos y adaptando comunicación a contextos interculturales."
+        },
+        {
+            "id": "COMP-IDIO-1A-07",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Utiliza estrategias metacognitivas para regular el aprendizaje autónomo del idioma.",
+            "descripcion": "Planifica metas, monitorea progreso, evalúa dificultades y selecciona recursos (digitales, autodidácticos) para mejorar competencia lingüística."
+        },
+        {
+            "id": "COMP-IDIO-1A-08",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Comunica de forma efectiva en entornos digitales multilingües con ética y responsabilidad.",
+            "descripcion": "Interactúa en plataformas virtuales, evalúa credibilidad de fuentes, protege datos personales y respeta derechos de autor."
+        },
+        {
+            "id": "COMP-IDIO-1A-09",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Aplica pensamiento crítico para analizar, argumentar y evaluar información en lengua extranjera.",
+            "descripcion": "Identifica sesgos, falacias y propaganda en discursos, construyendo argumentos lógicos con evidencia y contraejemplos."
+        },
+        {
+            "id": "COMP-IDIO-1A-10",
+            "referent_id": "2",
+            "pensum_id": 194,
+            "nombre": "Participa colaborativamente en proyectos interdisciplinarios usando el idioma como herramienta de mediación.",
+            "descripcion": "Coopera en equipos multiculturales, negociando significados, resolviendo conflictos comunicativos y compartiendo responsabilidades."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-IDIO-1A-01-01",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-01",
+            "descripcion": "Identifica idea central y detalles específicos en conversaciones grabadas de contexto académico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-01-02",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-02",
+            "descripcion": "Inferencia de actitud, propósito y relación entre hablantes mediante matices tonales y léxicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-01-03",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-03",
+            "descripcion": "Reconoce organización de discursos (tesis, argumentos, conclusión) en presentaciones orales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-01-04",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-04",
+            "descripcion": "Comprende instrucciones complejas de múltiples pasos en contextos procedurales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-01-05",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-05",
+            "descripcion": "Distingue acentos y variedades dialectales del inglés (británico, norteamericano) en audios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-01-06",
+            "competency_id": "COMP-IDIO-1A-01",
+            "codigo": "IDIO-1A-IL-06",
+            "descripcion": "Identifica expresiones idiomáticas y coloquialismos en contextos informales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-01",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-07",
+            "descripcion": "Organiza ideas usando conectores de secuencia, causa-efecto y contraste en monólogos planificados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-02",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-08",
+            "descripcion": "Mantiene conversaciones con turnos de palabra apropiados y claridad en la pronunciación de fonemas difíciles.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-03",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-09",
+            "descripcion": "Usa estrategias de compensación (circunloquios, gestos) cuando desconoce términos específicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-04",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-10",
+            "descripcion": "Narra experiencias personales y eventos hipotéticos usando tiempos verbales complejos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-05",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-11",
+            "descripcion": "Argumenta opiniones con evidencia y ejemplos en debates estructurados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-02-06",
+            "competency_id": "COMP-IDIO-1A-02",
+            "codigo": "IDIO-1A-IL-12",
+            "descripcion": "Adopta registros formales e informales según interlocutor y contexto comunicativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-01",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-13",
+            "descripcion": "Aplica técnicas de skimming para identificar idea principal en artículos extensos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-02",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-14",
+            "descripcion": "Usa scanning para localizar información específica en textos académicos y literarios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-03",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-15",
+            "descripcion": "Infiere significado de palabras desconocidas por contexto y análisis morfológico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-04",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-16",
+            "descripcion": "Reconoce organización textual (introducción, desarrollo, conclusión) en ensayos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-05",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-17",
+            "descripcion": "Identifica recursos literarios (metáfora, ironía, símil) en narrativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-03-06",
+            "competency_id": "COMP-IDIO-1A-03",
+            "codigo": "IDIO-1A-IL-18",
+            "descripcion": "Evalúa argumentos identificando premisas, evidencia y conclusiones en textos persuasivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-01",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-19",
+            "descripcion": "Escribe párrafos con cohesión usando conectores de secuencia, adición y contraste.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-02",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-20",
+            "descripcion": "Elabora ensayos argumentativos con tesis clara, argumentos y evidencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-03",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-21",
+            "descripcion": "Demuestra dominio de ortografía, puntuación y mayúsculas en textos extensos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-04",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-22",
+            "descripcion": "Usa tiempos verbales complejos (perfectos, progresivos, modales) con precisión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-05",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-23",
+            "descripcion": "Revisa y edita textos propios y de pares usando rúbricas de calidad lingüística.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-04-06",
+            "competency_id": "COMP-IDIO-1A-04",
+            "codigo": "IDIO-1A-IL-24",
+            "descripcion": "Adapta estilo y registro según audiencia y propósito comunicativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-01",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-25",
+            "descripcion": "Usa tiempos verbales perfectos (present, past, future) con precisión contextual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-02",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-26",
+            "descripcion": "Aplica modal verbs (must, should, may) para expresar obligación, consejo y probabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-03",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-27",
+            "descripcion": "Usa collocations y chunks léxicos de frecuencia en producción oral y escrita.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-04",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-28",
+            "descripcion": "Aplica voz pasiva en diferentes tiempos para enfocar información.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-05",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-29",
+            "descripcion": "Usa cláusulas de relativo (defining/non-defining) con precisión en descripciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-05-06",
+            "competency_id": "COMP-IDIO-1A-05",
+            "codigo": "IDIO-1A-IL-30",
+            "descripcion": "Parafrasea ideas complejas usando sinónimos y reformulaciones para claridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-01",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-31",
+            "descripcion": "Compara tradiciones, valores y costumbres entre culturas de habla inglesa y venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-02",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-32",
+            "descripcion": "Reconoce y evita estereotipos culturales en comunicación intercultural.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-03",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-33",
+            "descripcion": "Adapta registro lingüístico según contextos culturales (formalidad, proxemics).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-04",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-34",
+            "descripcion": "Interpreta referentes culturales (eventos históricos, figuras) en textos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-05",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-35",
+            "descripcion": "Participa en intercambios virtuales con estudiantes de habla inglesa respetando turnos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-06-06",
+            "competency_id": "COMP-IDIO-1A-06",
+            "codigo": "IDIO-1A-IL-36",
+            "descripcion": "Analiza representación mediática de culturas angloparlantes y sesgos implícitos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-01",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-37",
+            "descripcion": "Establece metas SMART para el desarrollo de competencia lingüística trimestral.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-02",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-38",
+            "descripcion": "Selecciona recursos digitales (apps, podcasts) apropiados a su nivel y estilo de aprendizaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-03",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-39",
+            "descripcion": "Mantiene diario de aprendizaje reflexionando sobre errores y estrategias de mejora.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-04",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-40",
+            "descripcion": "Autoevalúa producciones usando rúbricas y checklists de desempeño lingüístico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-05",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-41",
+            "descripcion": "Participa en tutorías de pares para retroalimentación constructiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-07-06",
+            "competency_id": "COMP-IDIO-1A-07",
+            "codigo": "IDIO-1A-IL-42",
+            "descripcion": "Identifica patrones de error recurrentes y planifica acciones correctivas específicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-01",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-43",
+            "descripcion": "Evalúa credibilidad de fuentes digitales en inglés mediante criterios de autoridad y precisión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-02",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-44",
+            "descripcion": "Protege datos personales y privacidad en redes sociales y plataformas educativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-03",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-45",
+            "descripcion": "Crea contenido digital (blogs, videos) cumpliendo derechos de autor y licencias Creative Commons.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-04",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-46",
+            "descripcion": "Interactúa asertivamente en foros y videoconferencias con netiquette apropiada.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-05",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-47",
+            "descripcion": "Detecta phishing, fake news y engaños digitales en contenido angloparlante.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-08-06",
+            "competency_id": "COMP-IDIO-1A-08",
+            "codigo": "IDIO-1A-IL-48",
+            "descripcion": "Gestiona identidad digital positiva y footprint académico profesional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-01",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-49",
+            "descripcion": "Identifica sesgos, falacias y técnicas persuasivas en discursos publicitarios y políticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-02",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-50",
+            "descripcion": "Construye argumentos con premisas, evidencia y contraejemplos en debates.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-03",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-51",
+            "descripcion": "Compara perspectivas en textos multimodales identificando autoría y agenda.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-04",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-52",
+            "descripcion": "Evalúa validez de generalizaciones y evidencia empírica en artículos de opinión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-05",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-53",
+            "descripcion": "Propone soluciones alternativas a problemas identificados en textos críticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-09-06",
+            "competency_id": "COMP-IDIO-1A-09",
+            "codigo": "IDIO-1A-IL-54",
+            "descripcion": "Reflexiona sobre construcción de identidad y representación en medios angloparlantes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-01",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-55",
+            "descripcion": "Distribuye roles y responsabilidades equitativamente en proyectos de equipo multilingüe.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-02",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-56",
+            "descripcion": "Mediene comunicación entre hablantes de distintos niveles lingüísticos respetando diversidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-03",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-57",
+            "descripcion": "Resuelve conflictos comunicativos mediante negociación y clarificación semántica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-04",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-58",
+            "descripcion": "Presenta resultados de proyecto grupal con división clara de contribuciones individuales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-05",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-59",
+            "descripcion": "Evalúa desempeño grupal y propone mejoras en procesos colaborativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IDIO-1A-10-06",
+            "competency_id": "COMP-IDIO-1A-10",
+            "codigo": "IDIO-1A-IL-60",
+            "descripcion": "Documenta procesos y decisiones del equipo usando herramientas colaborativas digitales.",
+            "nivel_esperado": 3
+        }
+    ]
+}
