@@ -212,6 +212,12 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
     Route::prefix('profesors')->name('profesors.')->group(function () {
         Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');
     });
+
+    // ─── LMS: Monitor y Auditoría para Coordinadores ──────────────
+    Route::prefix('lms')->name('lms.')->group(function () {
+        Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
+        Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
+    });
 });
 
 // ===================================================
@@ -245,7 +251,22 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'isProfesor'])->group(fu
         Route::prefix('diagnostics')->name('diagnostics.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Profesor\DiagnosticController::class, 'index'])->name('index');
         });
+
+        // ─── LMS: Editor de Contenido del Profesor ─────────────────
+        Route::prefix('lms')->name('lms.')->group(function () {
+            Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
+                 ->name('editor');
+        });
     });
+});
+
+// ─── LMS: Rutas de Estudiante ───────────────────────────────────────────────
+Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isStudent'])->group(function () {
+    Route::get('/home', \App\Livewire\Student\Lms\StudentHome::class)->name('home');
+    Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
+    Route::get('/resource/{resource}/download', [
+        \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download'
+    ])->name('resource.download');
 });
 
 // API para fingerprinting

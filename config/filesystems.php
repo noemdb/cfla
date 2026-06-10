@@ -56,6 +56,14 @@ return [
             'visibility' => 'public',
         ],
 
+        'lms_media' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/lms_media'),
+            'url'        => env('APP_URL') . '/storage/lms_media',
+            'visibility' => 'private',
+            'throw'      => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

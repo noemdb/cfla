@@ -436,7 +436,7 @@
             <!-- Pagination -->
             @if($pevaluacions->hasPages())
                 <div class="mt-6">
-                    {{ $pevaluacions->links() }}
+                    {{ $pevaluacions->links('vendor.pagination.custom-tailwind') }}
                 </div>
             @endif
         </div>

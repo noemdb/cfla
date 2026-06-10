@@ -12,8 +12,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // Comentar o remover cualquier política de VotingPoll por ahora
-        // 'App\Models\VotingPoll' => 'App\Policies\VotingPollPolicy',
+        \App\Models\app\Academy\Activity::class => \App\Policies\LmsActivityPolicy::class,
+        \App\Models\app\Academy\Lms\LmsMediaLibrary::class => \App\Policies\LmsMediaPolicy::class,
     ];
 
     /**

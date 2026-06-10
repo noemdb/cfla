@@ -2,6 +2,11 @@
 
 namespace App\Models\app\Academy;
 
+use App\Models\app\Academy\Lms\LmsActivityLink;
+use App\Models\app\Academy\Lms\LmsActivityLog;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lms\LmsActivitySection;
 use App\Models\app\Academy\Pevaluacion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +47,41 @@ class Activity extends Model
     public function pevaluacion()
     {
         return $this->belongsTo(Pevaluacion::class, 'pevaluacion_id');
+    }
+
+    // ─── RELACIONES LMS ────────────────────────────────────────
+
+    public function lmsPublication()
+    {
+        return $this->hasOne(LmsActivityPublication::class, 'activity_id');
+    }
+
+    public function lmsSections()
+    {
+        return $this->hasMany(LmsActivitySection::class, 'activity_id')
+                    ->orderBy('sort_order');
+    }
+
+    public function lmsResources()
+    {
+        return $this->hasMany(LmsActivityResource::class, 'activity_id')
+                    ->orderBy('sort_order');
+    }
+
+    public function lmsLinks()
+    {
+        return $this->hasMany(LmsActivityLink::class, 'activity_id')
+                    ->orderBy('sort_order');
+    }
+
+    public function lmsLogs()
+    {
+        return $this->hasMany(LmsActivityLog::class, 'activity_id');
+    }
+
+    public function isLmsPublished(): bool
+    {
+        return $this->lmsPublication?->isVisibleToStudents() ?? false;
     }
 
     /**

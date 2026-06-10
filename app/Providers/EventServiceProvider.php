@@ -21,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         OrderShipped::class => [
             SendShipmentNotification::class,
         ],
+        \App\Events\Lms\ScheduledPublicationsReady::class => [
+            \App\Listeners\Lms\ActivateScheduledPublications::class,
+        ],
     ];
 
     /**
