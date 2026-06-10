@@ -226,7 +226,7 @@
 
         @if($pevaluacions->hasPages())
             <div class="px-5 py-4 border-t border-white/5">
-                {{ $pevaluacions->links() }}
+                {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif
     </div>
@@ -333,7 +333,7 @@
     </x-modal>
 
     <!-- ===== MODAL: Formulario Crear/Editar ===== -->
-    <x-modal-card title="{{ $isEditing ? 'Editar Carga Académica' : 'Nueva Carga Académica' }}" blur="lg" wire:model="modeForm" max-width="4xl" persistent>
+    <x-modal-card title="{{ $form->isEditing ? 'Editar Carga Académica' : 'Nueva Carga Académica' }}" blur="lg" wire:model="modeForm" max-width="6xl" persistent>
         <div class="space-y-6">
             @if($errors->any())
                 <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
@@ -364,58 +364,58 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio *</label>
-                        <select wire:model.live="pestudio_id"
+                        <select wire:model.live="form.pestudio_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($pestudios as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('pestudio_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.pestudio_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Grado/Año *</label>
-                        <select wire:model.live="grado_id"
+                        <select wire:model.live="form.grado_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($grados as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @if(empty($grados) && $pestudio_id)
+                        @if(empty($grados) && $form->pestudio_id)
                             <p class="text-amber-400 text-[10px] mt-1">No hay grados activos para este plan.</p>
                         @endif
-                        @error('grado_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.grado_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Sección *</label>
-                        <select wire:model="seccion_id"
+                        <select wire:model="form.seccion_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($secciones as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @if(empty($secciones) && $grado_id)
+                        @if(empty($secciones) && $form->grado_id)
                             <p class="text-amber-400 text-[10px] mt-1">No hay secciones activas para este grado.</p>
                         @endif
-                        @error('seccion_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.seccion_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Área de Formación (Pensum) *</label>
-                        <select wire:model="pensum_id"
+                        <select wire:model="form.pensum_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($pensums as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @if(empty($pensums) && $grado_id)
+                        @if(empty($pensums) && $form->grado_id)
                             <p class="text-amber-400 text-[10px] mt-1">No hay pensums activos para este grado.</p>
                         @endif
-                        @error('pensum_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.pensum_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -431,58 +431,58 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Profesor *</label>
-                        <select wire:model="profesor_id"
+                        <select wire:model="form.profesor_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($profesors as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('profesor_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.profesor_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Momento (Lapso) *</label>
-                        <select wire:model="lapso_id"
+                        <select wire:model="form.lapso_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($lapsos as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('lapso_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.lapso_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Tipo de Nota</label>
-                        <select wire:model="nota_type"
+                        <select wire:model="form.nota_type"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="ACUMULATIVA">Acumulativa</option>
                             <option value="PROMEDIADA">Promediada</option>
                         </select>
-                        @error('nota_type') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.nota_type') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Escala de Notas</label>
-                        <select wire:model="escala_id"
+                        <select wire:model="form.escala_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($escalas as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('escala_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.escala_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Grupo Estable</label>
-                        <select wire:model="grupo_estable_id"
+                        <select wire:model="form.grupo_estable_id"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($grupos_estables as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
-                        @error('grupo_estable_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.grupo_estable_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -498,27 +498,27 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" wire:model="status_official" value="1"
-                                {{ $status_official ? 'checked' : '' }}
+                            <input type="checkbox" wire:model="form.status_official" value="1"
+                                {{ $form->status_official ? 'checked' : '' }}
                                 class="w-4 h-4 text-emerald-500 bg-white/5 border-white/10 rounded focus:ring-emerald-500/50 focus:ring-2">
                             <span class="text-xs text-gray-300 group-hover:text-white transition-colors">Documento oficial</span>
                         </label>
-                        @error('status_official') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.status_official') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="flex items-center gap-2 cursor-pointer group">
-                            <input type="checkbox" wire:model="status_note_report" value="1"
-                                {{ $status_note_report ? 'checked' : '' }}
+                            <input type="checkbox" wire:model="form.status_note_report" value="1"
+                                {{ $form->status_note_report ? 'checked' : '' }}
                                 class="w-4 h-4 text-emerald-500 bg-white/5 border-white/10 rounded focus:ring-emerald-500/50 focus:ring-2">
                             <span class="text-xs text-gray-300 group-hover:text-white transition-colors">En Informe de Notas</span>
                         </label>
-                        @error('status_note_report') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.status_note_report') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Baremo</label>
-                        <input type="text" wire:model="status_baremo" placeholder="Estado baremo"
+                        <input type="text" wire:model="form.status_baremo" placeholder="Estado baremo"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                        @error('status_baremo') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.status_baremo') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -534,27 +534,27 @@
                 <div class="grid grid-cols-1 gap-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Objetivo</label>
-                        <input type="text" wire:model="objetivo" placeholder="Objetivo general de la asignación"
+                        <input type="text" wire:model="form.objetivo" placeholder="Objetivo general de la asignación"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                        @error('objetivo') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.objetivo') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Descripción</label>
-                        <input type="text" wire:model="description" placeholder="Descripción de la asignación"
+                        <input type="text" wire:model="form.description" placeholder="Descripción de la asignación"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                        @error('description') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.description') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Observaciones</label>
-                        <input type="text" wire:model="observations" placeholder="Observaciones adicionales"
+                        <input type="text" wire:model="form.observations" placeholder="Observaciones adicionales"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                        @error('observations') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.observations') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Categoría</label>
-                        <input type="text" wire:model="category" placeholder="Categoría (opcional)"
+                        <input type="text" wire:model="form.category" placeholder="Categoría (opcional)"
                             class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-                        @error('category') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+                        @error('form.category') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>
@@ -562,8 +562,8 @@
 
         <x-slot name="footer">
             <div class="flex justify-end gap-x-4">
-                <x-button flat label="Cancelar" x-on:click="modeForm = false" />
-                <x-button primary label="{{ $isEditing ? 'Actualizar Asignación' : 'Guardar Asignación' }}" wire:click="save" spinner="save" />
+                <x-button flat label="Cancelar" x-on:click="$wire.modeForm = false" />
+                <x-button primary label="{{ $form->isEditing ? 'Actualizar Asignación' : 'Guardar Asignación' }}" wire:click="save" spinner="save" />
             </div>
         </x-slot>
     </x-modal-card>

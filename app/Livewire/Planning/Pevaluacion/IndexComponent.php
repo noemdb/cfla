@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Planning\Pevaluacion;
 
+use App\Livewire\Forms\Planning\PevaluacionForm;
 use App\Models\app\Academy\Escala;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\GrupoEstable;
@@ -24,19 +25,8 @@ class IndexComponent extends Component
     public $modeIndex = true;
     public $modeForm = false;
 
-    // Editing flag
-    public $isEditing = false;
-    public $pevaluacion_id;
-
-    // Form fields
-    public $pestudio_id, $grado_id, $seccion_id;
-    public $lapso_id, $pensum_id, $profesor_id;
-    public $grupo_estable_id, $escala_id;
-    public $nota_type = 'ACUMULATIVA';
-    public $status_note_report = true;
-    public $status_official = true;
-    public $status_baremo;
-    public $objetivo, $description, $observations, $category;
+    // Form Object
+    public PevaluacionForm $form;
 
     // Select lists (cascading)
     public $pestudios;
@@ -70,25 +60,6 @@ class IndexComponent extends Component
 
     // Pagination
     public $paginate = 15;
-
-    protected $rules = [
-        'pestudio_id' => 'required|integer|exists:pestudios,id',
-        'grado_id' => 'required|integer|exists:grados,id',
-        'seccion_id' => 'required|integer|exists:seccions,id',
-        'lapso_id' => 'required|integer|exists:lapsos,id',
-        'pensum_id' => 'required|integer|exists:pensums,id',
-        'profesor_id' => 'required|integer|exists:profesors,id',
-        'grupo_estable_id' => 'nullable|integer|exists:grupo_estables,id',
-        'escala_id' => 'nullable|integer|exists:escalas,id',
-        'nota_type' => 'required|in:ACUMULATIVA,PROMEDIADA',
-        'status_note_report' => 'required|boolean',
-        'status_official' => 'required|boolean',
-        'status_baremo' => 'nullable|string|max:255',
-        'objetivo' => 'nullable|string|max:500',
-        'description' => 'nullable|string|max:500',
-        'observations' => 'nullable|string|max:500',
-        'category' => 'nullable|string|max:255',
-    ];
 
     public function mount()
     {
@@ -167,12 +138,12 @@ class IndexComponent extends Component
 
     // ─── CASCADING SELECTS ──────────────────────────────────────
 
-    public function updatedPestudioId($value)
+    public function updatedFormPestudioId($value)
     {
-        $this->grado_id = null;
-        $this->seccion_id = null;
-        $this->pensum_id = null;
-        $this->profesor_id = null;
+        $this->form->grado_id = null;
+        $this->form->seccion_id = null;
+        $this->form->pensum_id = null;
+        $this->form->profesor_id = null;
 
         if ($value) {
             $this->grados = Grado::where('pestudio_id', $value)
@@ -194,12 +165,12 @@ class IndexComponent extends Component
         }
     }
 
-    public function updatedGradoId($value)
+    public function updatedFormGradoId($value)
     {
-        $this->seccion_id = null;
-        $this->pensum_id = null;
+        $this->form->seccion_id = null;
+        $this->form->pensum_id = null;
 
-        if ($value && $this->pestudio_id) {
+        if ($value && $this->form->pestudio_id) {
             $this->secciones = Seccion::where('grado_id', $value)
                 ->where('status_active', true)
                 ->orderBy('name')
@@ -208,7 +179,7 @@ class IndexComponent extends Component
                 ->toArray();
 
             $this->pensums = Pensum::whereHas('grado', fn($q) => $q->where('id', $value))
-                ->whereHas('pestudio', fn($q) => $q->where('id', $this->pestudio_id))
+                ->whereHas('pestudio', fn($q) => $q->where('id', $this->form->pestudio_id))
                 ->where('status_active', true)
                 ->with('asignatura')
                 ->get()
@@ -246,9 +217,7 @@ class IndexComponent extends Component
 
     public function create()
     {
-        $this->resetForm();
-        $this->isEditing = false;
-        $this->pevaluacion_id = null;
+        $this->form->resetForm();
         $this->grados = [];
         $this->secciones = [];
         $this->pensums = [];
@@ -258,7 +227,9 @@ class IndexComponent extends Component
 
     public function edit($id)
     {
-        $pevaluacion = Pevaluacion::findOrFail($id);
+        $pevaluacion = Pevaluacion::with([
+            'seccion', 'pensum',
+        ])->findOrFail($id);
 
         // Check if lapso is closed
         if ($pevaluacion->is_lapso_closed) {
@@ -269,66 +240,47 @@ class IndexComponent extends Component
             return;
         }
 
-        $this->pevaluacion_id = $pevaluacion->id;
-        $this->pestudio_id = $pevaluacion->pensum->pestudio_id;
-        $this->grado_id = $pevaluacion->seccion->grado_id;
-        $this->seccion_id = $pevaluacion->seccion_id;
-        $this->lapso_id = $pevaluacion->lapso_id;
-        $this->pensum_id = $pevaluacion->pensum_id;
-        $this->profesor_id = $pevaluacion->profesor_id;
-        $this->grupo_estable_id = $pevaluacion->grupo_estable_id;
-        $this->escala_id = $pevaluacion->escala_id;
-        $this->nota_type = $pevaluacion->nota_type ?? 'ACUMULATIVA';
-        $this->status_note_report = $pevaluacion->status_note_report ?? true;
-        $this->status_official = $pevaluacion->status_official ?? true;
-        $this->status_baremo = $pevaluacion->status_baremo;
-        $this->objetivo = $pevaluacion->objetivo;
-        $this->description = $pevaluacion->description;
-        $this->observations = $pevaluacion->observations;
-        $this->category = $pevaluacion->category;
+        // Load form data from the pevaluacion
+        $this->form->loadFromPevaluacion($pevaluacion);
 
-        // Load cascading lists
-        $this->grados = Grado::where('pestudio_id', $this->pestudio_id)
+        // Load cascading lists based on the loaded values
+        $this->grados = Grado::where('pestudio_id', $this->form->pestudio_id)
             ->where('status_active', 'true')
             ->orderBy('name')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->secciones = Seccion::where('grado_id', $this->grado_id)
+        $this->secciones = Seccion::where('grado_id', $this->form->grado_id)
             ->where('status_active', true)
             ->orderBy('name')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->pensums = Pensum::whereHas('grado', fn($q) => $q->where('id', $this->grado_id))
-            ->whereHas('pestudio', fn($q) => $q->where('id', $this->pestudio_id))
+        $this->pensums = Pensum::whereHas('grado', fn($q) => $q->where('id', $this->form->grado_id))
+            ->whereHas('pestudio', fn($q) => $q->where('id', $this->form->pestudio_id))
             ->where('status_active', true)
             ->with('asignatura')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->isEditing = true;
         $this->close();
         $this->modeForm = true;
     }
 
     public function save()
     {
-        $this->status_note_report = filter_var($this->status_note_report, FILTER_VALIDATE_BOOLEAN);
-        $this->status_official = filter_var($this->status_official, FILTER_VALIDATE_BOOLEAN);
-
         $this->validate();
 
         // Validar unicidad compuesta (lapso_id + seccion_id + pensum_id)
-        $exists = Pevaluacion::where('lapso_id', $this->lapso_id)
-            ->where('seccion_id', $this->seccion_id)
-            ->where('pensum_id', $this->pensum_id);
+        $exists = Pevaluacion::where('lapso_id', $this->form->lapso_id)
+            ->where('seccion_id', $this->form->seccion_id)
+            ->where('pensum_id', $this->form->pensum_id);
 
-        if ($this->isEditing) {
-            $exists->where('id', '!=', $this->pevaluacion_id);
+        if ($this->form->isEditing) {
+            $exists->where('id', '!=', $this->form->pevaluacion_id);
         }
 
         if ($exists->exists()) {
@@ -339,25 +291,10 @@ class IndexComponent extends Component
             return;
         }
 
-        $data = [
-            'profesor_id' => $this->profesor_id,
-            'pensum_id' => $this->pensum_id,
-            'seccion_id' => $this->seccion_id,
-            'lapso_id' => $this->lapso_id,
-            'grupo_estable_id' => $this->grupo_estable_id ?: null,
-            'escala_id' => $this->escala_id ?: null,
-            'nota_type' => $this->nota_type,
-            'status_note_report' => $this->status_note_report,
-            'status_official' => $this->status_official,
-            'status_baremo' => $this->status_baremo ?: null,
-            'objetivo' => $this->objetivo ?: null,
-            'description' => $this->description ?: null,
-            'observations' => $this->observations ?: null,
-            'category' => $this->category ?: null,
-        ];
+        $data = $this->form->getData();
 
-        if ($this->isEditing) {
-            $pevaluacion = Pevaluacion::findOrFail($this->pevaluacion_id);
+        if ($this->form->isEditing) {
+            $pevaluacion = Pevaluacion::findOrFail($this->form->pevaluacion_id);
             $pevaluacion->update($data);
             $this->notification()->success(
                 title: 'Carga Académica Actualizada',
@@ -437,19 +374,6 @@ class IndexComponent extends Component
             'search', 'filter_pestudio', 'filter_profesor',
             'filter_grado', 'filter_seccion', 'filter_lapso',
         ]);
-    }
-
-    public function resetForm()
-    {
-        $this->reset([
-            'pestudio_id', 'grado_id', 'seccion_id', 'lapso_id',
-            'pensum_id', 'profesor_id', 'grupo_estable_id', 'escala_id',
-            'nota_type', 'status_baremo', 'objetivo', 'description',
-            'observations', 'category',
-        ]);
-        $this->status_note_report = true;
-        $this->status_official = true;
-        $this->nota_type = 'ACUMULATIVA';
     }
 
     public function close()

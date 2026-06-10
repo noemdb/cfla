@@ -164,7 +164,7 @@
 
         @if($pensums->hasPages())
             <div class="px-5 py-4 border-t border-white/5">
-                {{ $pensums->links() }}
+                {{ $pensums->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif
     </div>

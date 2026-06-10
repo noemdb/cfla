@@ -41,6 +41,9 @@ class IndexComponent extends Component
     public $list_pestudio, $list_grado, $list_seccion, $list_lapso;
     public $list_profesors, $list_pensum, $list_comment;
 
+    // Tab data (lapsos collection for the Alpine.js tab navigation)
+    public $tabsLapsos;
+
     // Leader context
     public $leader_id;
 
@@ -65,6 +68,7 @@ class IndexComponent extends Component
         $this->setProfesorLists();
 
         $this->list_lapso = Lapso::select('name', 'id')->orderBy('name')->pluck('name', 'id');
+        $this->tabsLapsos = Lapso::orderBy('name')->orderBy('id')->get();
         $this->list_comment = Pevaluacion::COLUMN_COMMENTS;
 
         // Lapso actual por defecto
@@ -87,8 +91,18 @@ class IndexComponent extends Component
 
         $pevaluacions = $this->getPevaluaciones($filters);
 
+        // Compute the active tab index from the current lapso_id
+        $activeTabIndex = 1;
+        if ($this->tabsLapsos && $this->lapso_id) {
+            $found = $this->tabsLapsos->search(fn($lapso) => $lapso->id == $this->lapso_id);
+            if ($found !== false) {
+                $activeTabIndex = $found + 1;
+            }
+        }
+
         return view('livewire.planning.activities.index-component', [
             'pevaluacions' => $pevaluacions,
+            'activeTabIndex' => $activeTabIndex,
         ]);
     }
 

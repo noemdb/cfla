@@ -30,7 +30,7 @@
 
     <!-- Filter Bar -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan Estudio</label>
                 <select wire:model.live="pestudio_id"
@@ -70,17 +70,6 @@
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     @foreach($list_seccion as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Momento</label>
-                <select wire:model.live="lapso_id"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($list_lapso as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
@@ -162,270 +151,295 @@
         </div>
     @endif
 
-    <!-- Table -->
-    <div class="space-y-6">
-        @forelse($pevaluacions as $item)
-            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
-                wire:key="peva-{{ $item->id }}"
-                x-data="{ open: false, activeTab: 0 }">
+    <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden"
+         x-data="{ activeTab: {{ $activeTabIndex }} }">
 
-                <!-- Header Row -->
-                <div @click="open = !open"
-                    class="flex items-center justify-between p-5 cursor-pointer hover:bg-white/[0.02] transition-colors group">
-                    <div class="flex items-center gap-4 min-w-0">
-                        <div class="w-11 h-11 bg-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                        </div>
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-sm font-bold text-white">{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}</span>
-                                <span class="px-2 py-0.5 bg-white/5 text-[10px] font-bold text-gray-400 rounded-md border border-white/5">{{ $item->pensum?->asignatura?->code ?? '' }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                                <span>{{ $item->seccion?->grado?->name ?? '' }} - Sección {{ $item->seccion?->name ?? '' }}</span>
-                                <span class="w-1 h-1 rounded-full bg-gray-600"></span>
-                                <span>{{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}</span>
-                                <span class="w-1 h-1 rounded-full bg-gray-600"></span>
-                                <span class="text-emerald-500/70 font-medium">{{ $item->lapso?->name ?? '' }}</span>
-                            </div>
-                        </div>
-                    </div>
+        {{-- Tab Navigation --}}
+        <div class="border-b border-white/5">
+            <nav class="flex overflow-x-auto">
+                @foreach($tabsLapsos as $index => $lapsoItem)
+                    @php $tabNum = $loop->iteration; @endphp
+                    <button
+                        @click="activeTab = {{ $tabNum }}; $wire.set('lapso_id', {{ $lapsoItem->id }})"
+                        :class="activeTab === {{ $tabNum }}
+                            ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
+                            : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                        class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    >
+                        <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ $lapsoItem->name }}
+                        <span class="block text-[9px] font-normal text-gray-500 normal-case">{{ $lapsoItem->code }}</span>
+                    </button>
+                @endforeach
+            </nav>
+        </div>
 
-                    <div class="flex items-center gap-4 flex-shrink-0">
-                        <!-- Activity count -->
-                        <div class="flex items-center gap-2">
+        {{-- Tab Content --}}
+        <div class="space-y-6 p-6">
+            @forelse($pevaluacions as $item)
+                <div class="bg-gray-900/60 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
+                    wire:key="peva-{{ $item->id }}"
+                    x-data="{ open: false, activeTab: 0 }">
+
+                    <!-- Header Row -->
+                    <div @click="open = !open"
+                        class="flex items-center justify-between p-5 cursor-pointer hover:bg-white/[0.02] transition-colors group">
+                        <div class="flex items-center gap-4 min-w-0">
+                            <div class="w-11 h-11 bg-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="text-sm font-bold text-white">{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}</span>
+                                    <span class="px-2 py-0.5 bg-white/5 text-[10px] font-bold text-gray-400 rounded-md border border-white/5">{{ $item->pensum?->asignatura?->code ?? '' }}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                    <span>{{ $item->seccion?->grado?->name ?? '' }} - Sección {{ $item->seccion?->name ?? '' }}</span>
+                                    <span class="w-1 h-1 rounded-full bg-gray-600"></span>
+                                    <span>{{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 flex-shrink-0">
+                            <!-- Activity count -->
+                            <div class="flex items-center gap-2">
+                                @if($item->activities_count > 0)
+                                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
+                                        {{ $item->activities_count }} Act.
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 bg-red-500/10 text-red-400 text-xs font-bold rounded-lg border border-red-500/20">
+                                        Sin actividades
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Observation button -->
+                            <button type="button" wire:click="createObservation({{ $item->id }})" stop
+                                class="p-2 bg-white/5 hover:bg-blue-500/10 rounded-xl border border-white/5 hover:border-blue-500/20 text-gray-400 hover:text-blue-400 transition-all duration-300"
+                                title="Observaciones del coordinador">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+
+                            <!-- PDF links -->
                             @if($item->activities_count > 0)
-                                <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">
-                                    {{ $item->activities_count }} Act.
-                                </span>
-                            @else
-                                <span class="px-3 py-1 bg-red-500/10 text-red-400 text-xs font-bold rounded-lg border border-red-500/20">
-                                    Sin actividades
-                                </span>
+                                <a href="{{ route('planning.activities.format', $item->id) }}" target="_blank"
+                                    class="p-2 bg-white/5 hover:bg-purple-500/10 rounded-xl border border-white/5 hover:border-purple-500/20 text-gray-400 hover:text-purple-400 transition-all duration-300"
+                                    title="Formato completo (9 columnas)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                </a>
+                                <a href="{{ route('planning.activities.resume', $item->id) }}" target="_blank"
+                                    class="p-2 bg-white/5 hover:bg-emerald-500/10 rounded-xl border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-300"
+                                    title="Resumen ejecutivo (6 columnas)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </a>
                             @endif
-                        </div>
 
-                        <!-- Observation button -->
-                        <button type="button" wire:click="createObservation({{ $item->id }})" stop
-                            class="p-2 bg-white/5 hover:bg-blue-500/10 rounded-xl border border-white/5 hover:border-blue-500/20 text-gray-400 hover:text-blue-400 transition-all duration-300"
-                            title="Observaciones del coordinador">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </button>
-
-                        <!-- PDF links -->
-                        @if($item->activities_count > 0)
-                            <a href="{{ route('planning.activities.format', $item->id) }}" target="_blank"
-                                class="p-2 bg-white/5 hover:bg-purple-500/10 rounded-xl border border-white/5 hover:border-purple-500/20 text-gray-400 hover:text-purple-400 transition-all duration-300"
-                                title="Formato completo (9 columnas)">
+                            <!-- Toggle -->
+                            <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 transition-transform duration-300"
+                                :class="open ? 'rotate-180 bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-gray-500'">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
                                 </svg>
-                            </a>
-                            <a href="{{ route('planning.activities.resume', $item->id) }}" target="_blank"
-                                class="p-2 bg-white/5 hover:bg-emerald-500/10 rounded-xl border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-300"
-                                title="Resumen ejecutivo (6 columnas)">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </a>
-                        @endif
-
-                        <!-- Toggle -->
-                        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 transition-transform duration-300"
-                            :class="open ? 'rotate-180 bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-gray-500'">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Expanded Activities with Tabs -->
-                <div x-show="open" x-collapse x-cloak>
-                    <div class="px-5 pb-5 pt-0 border-t border-white/5">
-                        @if($item->activities_count > 0)
-                            {{-- Tab Bar --}}
-                            <div class="flex w-full mt-4 pb-1">
-                                @foreach($item->activities as $i => $act)
-                                    @php
-                                        $wordCount = $act->teachingWordsMayorCount();
-                                        $avr = $act->activities_avr;
-                                        $qualityIcon = null;
-                                        $qualityTitle = null;
-                                        if ($avr !== null) {
-                                            if ($wordCount > $avr) {
-                                                $qualityIcon = '↑';
-                                                $qualityTitle = "Palabras ({$wordCount}) por encima del promedio ({$avr})";
-                                            } elseif ($wordCount == $avr) {
-                                                $qualityIcon = '−';
-                                                $qualityTitle = "Palabras ({$wordCount}) igual al promedio ({$avr})";
-                                            } else {
-                                                $qualityIcon = '↓';
-                                                $qualityTitle = "Palabras ({$wordCount}) por debajo del promedio ({$avr})";
+                    <!-- Expanded Activities with Tabs -->
+                    <div x-show="open" x-collapse x-cloak>
+                        <div class="px-5 pb-5 pt-0 border-t border-white/5">
+                            @if($item->activities_count > 0)
+                                {{-- Activity Tab Bar --}}
+                                <div class="flex w-full mt-4 pb-1">
+                                    @foreach($item->activities as $i => $act)
+                                        @php
+                                            $wordCount = $act->teachingWordsMayorCount();
+                                            $avr = $act->activities_avr;
+                                            $qualityIcon = null;
+                                            $qualityTitle = null;
+                                            if ($avr !== null) {
+                                                if ($wordCount > $avr) {
+                                                    $qualityIcon = '↑';
+                                                    $qualityTitle = "Palabras ({$wordCount}) por encima del promedio ({$avr})";
+                                                } elseif ($wordCount == $avr) {
+                                                    $qualityIcon = '−';
+                                                    $qualityTitle = "Palabras ({$wordCount}) igual al promedio ({$avr})";
+                                                } else {
+                                                    $qualityIcon = '↓';
+                                                    $qualityTitle = "Palabras ({$wordCount}) por debajo del promedio ({$avr})";
+                                                }
                                             }
-                                        }
-                                    @endphp
-                                    <button type="button" @click="activeTab = {{ $i }}"
-                                        class="relative flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-bold rounded-lg border transition-all duration-200"
-                                        :class="activeTab === {{ $i }}
-                                            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/10'
-                                            : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-gray-200'"
-                                        title="{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}{{ $qualityTitle ? ' · ' . $qualityTitle : '' }}">
-                                        <span class="flex items-center justify-center w-6 h-6 rounded-md text-xs font-black"
-                                            :class="activeTab === {{ $i }} ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-gray-500'">
-                                            {{ $i + 1 }}
-                                        </span>
-                                        @if($qualityIcon)
-                                            <span class="text-[10px] font-bold leading-none {{ $wordCount > $avr ? 'text-emerald-400' : ($wordCount == $avr ? 'text-blue-400' : 'text-amber-400') }}"
-                                                title="{{ $qualityTitle }}">{{ $qualityIcon }}</span>
-                                        @endif
-                                        @if($act->status !== null)
-                                            <span class="w-1.5 h-1.5 rounded-full {{ $act->status ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                                        @endif
-                                    </button>
-                                @endforeach
-                            </div>
+                                        @endphp
+                                        <button type="button" @click="activeTab = {{ $i }}"
+                                            class="relative flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-bold rounded-lg border transition-all duration-200"
+                                            :class="activeTab === {{ $i }}
+                                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/10'
+                                                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-gray-200'"
+                                            title="{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}{{ $qualityTitle ? ' · ' . $qualityTitle : '' }}">
+                                            <span class="flex items-center justify-center w-6 h-6 rounded-md text-xs font-black"
+                                                :class="activeTab === {{ $i }} ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-gray-500'">
+                                                {{ $i + 1 }}
+                                            </span>
+                                            @if($qualityIcon)
+                                                <span class="text-[10px] font-bold leading-none {{ $wordCount > $avr ? 'text-emerald-400' : ($wordCount == $avr ? 'text-blue-400' : 'text-amber-400') }}"
+                                                    title="{{ $qualityTitle }}">{{ $qualityIcon }}</span>
+                                            @endif
+                                            @if($act->status !== null)
+                                                <span class="w-1.5 h-1.5 rounded-full {{ $act->status ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
 
-                            {{-- Tab Content --}}
-                            @foreach($item->activities as $i => $act)
-                                <div x-show="activeTab === {{ $i }}" x-cloak x-transition:enter.duration.200ms class="mt-4">
-                                    <div class="bg-white/[0.03] p-4 rounded-xl border border-white/5">
-                                        <div class="flex items-start justify-between gap-4">
-                                            <div class="flex-1 min-w-0">
-                                                <!-- Fechas -->
-                                                <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                    </svg>
-                                                    <span class="font-medium">{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }}</span>
-                                                    <span class="text-gray-600">—</span>
-                                                    <span class="font-medium">{{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}</span>
-                                                </div>
-
-                                                <!-- Topic -->
-                                                <p class="text-sm text-gray-100 font-medium mb-1">{{ $act->topic }}</p>
-                                                <p class="text-xs text-gray-300 line-clamp-2">{{ $act->teaching }}</p>
-
-                                                <!-- Word quality indicator -->
-                                                @php
-                                                    $wordCount = $act->teachingWordsMayorCount();
-                                                    $avr = $act->activities_avr;
-                                                    $quality = null;
-                                                    if ($avr !== null) {
-                                                        $quality = $wordCount > $avr ? 'above' : ($wordCount === $avr ? 'at' : 'below');
-                                                    }
-                                                @endphp
-                                                @if($quality)
-                                                    <div class="flex items-center gap-1.5 mt-2">
-                                                        <span class="text-[10px] text-gray-500 font-medium">Calidad:</span>
-                                                        @if($quality === 'above')
-                                                            <span class="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                                                                {{ $wordCount }} > {{ $avr }}
-                                                            </span>
-                                                        @elseif($quality === 'at')
-                                                            <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-md border border-blue-500/20">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                                                                {{ $wordCount }} = {{ $avr }}
-                                                            </span>
-                                                        @else
-                                                            <span class="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded-md border border-amber-500/20">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-                                                                {{ $wordCount }} < {{ $avr }}
-                                                            </span>
-                                                        @endif
+                                {{-- Activity Tab Content --}}
+                                @foreach($item->activities as $i => $act)
+                                    <div x-show="activeTab === {{ $i }}" x-cloak x-transition:enter.duration.200ms class="mt-4">
+                                        <div class="bg-white/[0.03] p-4 rounded-xl border border-white/5">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="flex-1 min-w-0">
+                                                    <!-- Fechas -->
+                                                    <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                        <span class="font-medium">{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }}</span>
+                                                        <span class="text-gray-600">—</span>
+                                                        <span class="font-medium">{{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}</span>
                                                     </div>
-                                                @endif
 
-                                                <!-- Comments section -->
-                                                <div class="mt-3 pt-3 border-t border-white/5">
-                                                    <div class="flex items-center justify-between">
-                                                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Comentario [Jefe Área]</span>
-                                                        <div class="flex items-center gap-2">
-                                                            <button type="button" wire:click="showPreview({{ $act->id }})"
-                                                                class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-sky-500/10 rounded-lg border border-white/5 hover:border-sky-500/20 text-gray-400 hover:text-sky-400 text-[10px] font-bold uppercase tracking-wider transition-all duration-300">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                                                </svg>
-                                                                Vista Previa
-                                                            </button>
-                                                            <button type="button" wire:click="setModeComment({{ $act->id }})"
-                                                                class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 text-[10px] font-bold uppercase tracking-wider transition-all duration-300">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                                                </svg>
-                                                                {{ $act->comments ? 'Editar' : 'Agregar' }}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    @if($act->comments)
-                                                        <p class="text-xs text-gray-200 mt-1 italic">"{{ $act->comments }}"</p>
-                                                    @else
-                                                        <p class="text-xs text-gray-500 mt-1 italic">Sin comentarios</p>
-                                                    @endif
-                                                    @if($act->status !== null)
-                                                        <div class="mt-1">
-                                                            @if($act->status)
-                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
-                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                                    Aprobado
+                                                    <!-- Topic -->
+                                                    <p class="text-sm text-gray-100 font-medium mb-1">{{ $act->topic }}</p>
+                                                    <p class="text-xs text-gray-300 line-clamp-2">{{ $act->teaching }}</p>
+
+                                                    <!-- Word quality indicator -->
+                                                    @php
+                                                        $wordCount = $act->teachingWordsMayorCount();
+                                                        $avr = $act->activities_avr;
+                                                        $quality = null;
+                                                        if ($avr !== null) {
+                                                            $quality = $wordCount > $avr ? 'above' : ($wordCount === $avr ? 'at' : 'below');
+                                                        }
+                                                    @endphp
+                                                    @if($quality)
+                                                        <div class="flex items-center gap-1.5 mt-2">
+                                                            <span class="text-[10px] text-gray-500 font-medium">Calidad:</span>
+                                                            @if($quality === 'above')
+                                                                <span class="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                                                                    {{ $wordCount }} > {{ $avr }}
+                                                                </span>
+                                                            @elseif($quality === 'at')
+                                                                <span class="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded-md border border-blue-500/20">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                                                                    {{ $wordCount }} = {{ $avr }}
                                                                 </span>
                                                             @else
-                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded-md border border-amber-500/20">
-                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                                    En revisión
+                                                                <span class="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded-md border border-amber-500/20">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                                                    {{ $wordCount }} < {{ $avr }}
                                                                 </span>
                                                             @endif
                                                         </div>
                                                     @endif
+
+                                                    <!-- Comments section -->
+                                                    <div class="mt-3 pt-3 border-t border-white/5">
+                                                        <div class="flex items-center justify-between">
+                                                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Comentario [Jefe Área]</span>
+                                                            <div class="flex items-center gap-2">
+                                                                <button type="button" wire:click="showPreview({{ $act->id }})"
+                                                                    class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-sky-500/10 rounded-lg border border-white/5 hover:border-sky-500/20 text-gray-400 hover:text-sky-400 text-[10px] font-bold uppercase tracking-wider transition-all duration-300">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                    </svg>
+                                                                    Vista Previa
+                                                                </button>
+                                                                <button type="button" wire:click="setModeComment({{ $act->id }})"
+                                                                    class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 text-[10px] font-bold uppercase tracking-wider transition-all duration-300">
+                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                                    </svg>
+                                                                    {{ $act->comments ? 'Editar' : 'Agregar' }}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        @if($act->comments)
+                                                            <p class="text-xs text-gray-200 mt-1 italic">"{{ $act->comments }}"</p>
+                                                        @else
+                                                            <p class="text-xs text-gray-500 mt-1 italic">Sin comentarios</p>
+                                                        @endif
+                                                        @if($act->status !== null)
+                                                            <div class="mt-1">
+                                                                @if($act->status)
+                                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                                        Aprobado
+                                                                    </span>
+                                                                @else
+                                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[10px] font-bold rounded-md border border-amber-500/20">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                                        En revisión
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                @endforeach
+                            @else
+                                <div class="flex items-center justify-center py-8 text-center">
+                                    <div>
+                                        <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p class="text-gray-500 text-sm">No hay actividades registradas en este plan de evaluación.</p>
+                                    </div>
                                 </div>
-                            @endforeach
-                        @else
-                            <div class="flex items-center justify-center py-8 text-center">
-                                <div>
-                                    <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <p class="text-gray-500 text-sm">No hay actividades registradas en este plan de evaluación.</p>
-                                </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        <!-- Observations -->
-                        @if($item->observations)
-                            <div class="mt-3 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
-                                <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Observaciones del Coordinador</p>
-                                <p class="text-xs text-gray-200">{{ $item->observations }}</p>
-                            </div>
-                        @endif
+                            <!-- Observations -->
+                            @if($item->observations)
+                                <div class="mt-3 p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-1">Observaciones del Coordinador</p>
+                                    <p class="text-xs text-gray-200">{{ $item->observations }}</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-            </div>
-        @empty
-            <div class="bg-gray-900/20 border border-white/5 rounded-3xl py-16 text-center">
-                <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <p class="text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
-                <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
-            </div>
-        @endforelse
+            @empty
+                <div class="bg-gray-900/20 border border-white/5 rounded-3xl py-16 text-center">
+                    <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
+                    <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
+                </div>
+            @endforelse
 
-        <!-- Pagination -->
-        @if($pevaluacions->hasPages())
-            <div class="mt-6">
-                {{ $pevaluacions->links() }}
-            </div>
-        @endif
+            <!-- Pagination -->
+            @if($pevaluacions->hasPages())
+                <div class="mt-6">
+                    {{ $pevaluacions->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 
     <!-- ===== MODAL: Observaciones del Coordinador ===== -->
