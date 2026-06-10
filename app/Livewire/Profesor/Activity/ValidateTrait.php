@@ -23,9 +23,6 @@ trait ValidateTrait
         'activity.learning' => 'nullable|string',
         'activity.observations' => 'required|string',
         'activity.description' => 'nullable|string',
-        'achievement.name' => 'null|string',
-        'achievement.weighting' => 'nullable|numeric|min:0|max:100',
-        'achievement.status_quantitative_weighting' => 'nullable|boolean',
     ];
 
     protected function validationAttributes()
@@ -41,9 +38,6 @@ trait ValidateTrait
             'activity.learning' => $this->list_comment['learning'] ?? 'Aprendizaje',
             'activity.description' => $this->list_comment['description'] ?? 'Descripción',
             'activity.observations' => $this->list_comment['observations'] ?? 'Observaciones',
-            'achievement.name' => $this->list_comment['name'] ?? 'Indicador',
-            'achievement.weighting' => $this->list_comment['weighting'] ?? 'Ponderación',
-            'achievement.status_quantitative_weighting' => $this->list_comment['status_quantitative_weighting'] ?? 'Indicador Cuantitativo',
         ];
     }
 }

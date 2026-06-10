@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DiagAnswer extends Model
 {
+    use HasFactory;
+
     protected $table = 'diag_answers';
 
     protected $fillable = [
@@ -34,6 +36,11 @@ class DiagAnswer extends Model
     public function selectedOption()
     {
         return $this->belongsTo(DiagOption::class, 'option_id');
+    }
+
+    public function session()
+    {
+        return $this->belongsTo(DiagSession::class, 'session_id');
     }
 
     public function isCorrect()
@@ -73,7 +80,7 @@ class DiagAnswer extends Model
             ->whereNotNull('option_id')
             ->whereHas('question', function ($q) {
                 $q->where('activo', 1)
-                    ->where('tipo_pregunta', 'multiple'); // Only multiple choice questions
+                    ->where('tipo_pregunta', 'multiple');
             });
 
         // Filter by student if provided

@@ -2,6 +2,7 @@
 
 namespace App\Models\app\Instrument;
 
+use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DiagSession extends Model
 {
+    use HasFactory;
+
     protected $table = 'diag_sessions';
 
     protected $fillable = [
@@ -19,6 +22,14 @@ class DiagSession extends Model
         'progreso',
         'total_preguntas',
         'activo',
+        'diag_main_id',
+        'lapso_id',
+        'status',
+    ];
+
+    protected $dates = [
+        'iniciado_at',
+        'completado_at',
     ];
 
     public function estudiant()
@@ -31,15 +42,18 @@ class DiagSession extends Model
         return $this->belongsTo(Pensum::class, 'pensum_id');
     }
 
+    public function diagMain()
+    {
+        return $this->belongsTo(DiagMain::class, 'diag_main_id');
+    }
+
+    public function lapso()
+    {
+        return $this->belongsTo(Lapso::class, 'lapso_id');
+    }
+
     public function answers()
     {
-        return $this->hasManyThrough(
-            DiagAnswer::class,
-            Estudiant::class,
-            'id', // clave foránea en estudiant
-            'estudiant_id', // clave foránea en diag_answers
-            'estudiant_id', // clave local en diag_sessions
-            'id' // clave local en estudiant
-        );
+        return $this->hasMany(DiagAnswer::class, 'session_id');
     }
 }

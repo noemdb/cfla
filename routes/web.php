@@ -148,7 +148,10 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
 
     // Módulo de Diagnóstico
     Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
-        Route::get('/', DiagnosticIndex::class)->name('index');
+        Route::get('/', function () {
+            return view('planning.diagnostic.index');
+        })->name('index');
+        Route::get('/referents', \App\Livewire\Planning\Diagnostic\ReferentsMain::class)->name('referents.index');
     });
 
     // Módulo de Competiciones Académicas
@@ -225,6 +228,22 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'isProfesor'])->group(fu
             Route::get('/create/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'create'])->name('create');
             Route::get('/format/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'format'])->name('format');
             Route::get('/resume/{pevaluacion}', [\App\Http\Controllers\Profesor\ActivityController::class, 'resume'])->name('resume');
+            Route::get('/grados-by-pestudio/{pestudio_id}', [\App\Http\Controllers\Profesor\ActivityController::class, 'gradosByPestudio'])
+                ->name('grados.by.pestudio')
+                ->where('pestudio_id', '[0-9]+');
+            Route::get('/secciones-by-grado/{grado_id}', [\App\Http\Controllers\Profesor\ActivityController::class, 'seccionesByGrado'])
+                ->name('secciones.by.grado')
+                ->where('grado_id', '[0-9]+');
+        });
+
+        // Módulo de Competencias (Debates Educativos)
+        Route::prefix('competitions')->name('competitions.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\DebateController::class, 'competitions'])->name('index');
+        });
+
+        // Módulo de Diagnósticos
+        Route::prefix('diagnostics')->name('diagnostics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Profesor\DiagnosticController::class, 'index'])->name('index');
         });
     });
 });

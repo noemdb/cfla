@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class DebateQuestion extends Model
 {
     use HasFactory;
-    protected $fillable = ['debate_id', 'category', 'text', 'time', 'weighting', 'observation', 'status_active', 'attachment', 'time_elapsed', 'status_answer', 'status_under_review'];
+    protected $fillable = ['debate_id', 'pensum_id', 'user_id', 'category', 'text', 'time', 'weighting', 'observation', 'status_active', 'attachment', 'time_elapsed', 'status_answer', 'status_under_review'];
 
     const COLUMN_COMMENTS = [
         'debate_id'     => 'Debates',
@@ -71,6 +71,10 @@ class DebateQuestion extends Model
     {return $this->hasMany(DebateAnswer::class, 'question_id');}
     public function debate()
     {return $this->belongsTo(Debate::class, 'debate_id');}
+    public function user()
+    {return $this->belongsTo(\App\Models\User::class, 'user_id');}
+    public function pensum()
+    {return $this->belongsTo(\App\Models\app\Academy\Pensum::class, 'pensum_id');}
 
     public function getGradoAttribute()
     {

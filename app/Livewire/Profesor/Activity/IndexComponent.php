@@ -13,22 +13,37 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithPagination;
+use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use ValidateTrait;
+    use WireUiActions, WithPagination;
 
-    public Activity $activity;
-    public Achievement $achievement;
+    /** @var Activity */
+    public $activity;
+    public $achievement;
 
-    public $seccion_id, $activity_id, $pevaluacion, $pevaluacion_id, $activities, $achievement_id;
+    public $seccion_id, $activity_id, $pevaluacion, $pevaluacion_id, $achievement_id;
     public $modeCreator, $modeEdit, $modeCreatorAchievement, $modeEditAchievement;
     public $list_comment, $list_seccions;
     public $grado_id, $lapso_id;
     public $enable_edit;
     public $showDetailModal = false;
     public $detailActivity;
+    public $showAchievementModal = false;
 
+    // Filters & Pagination
+    public $search = '';
+    public $paginate = 10;
+
+    /** @var ActivityForm Form Object para los campos del formulario de actividad */
+    public ActivityForm $activityForm;
+
+    /** @var AchievementForm Form Object para el modal de indicadores */
+    public AchievementForm $achievementForm;
+
+    /** @var \Illuminate\Support\Collection */
     public $list_grado, $list_seccion, $list_lapso;
 
     public function updatedGradoId($value)
@@ -38,15 +53,13 @@ class IndexComponent extends Component
             : collect();
     }
 
-    public function updatedAchievementStatusQuantitativeWeighting($value)
-    {
-        $this->achievement->weighting = $value ?: null;
-    }
-
     public function mount($id)
     {
         $user_id = Auth::id();
         $user = User::findOrFail($user_id);
+
+        $this->activity = new Activity();
+        $this->achievement = new Achievement();
 
         $this->pevaluacion = Pevaluacion::with([
             'pensum.asignatura',
@@ -59,7 +72,7 @@ class IndexComponent extends Component
         ])->findOrFail($id);
 
         $this->pevaluacion_id = $id;
-        $this->list_comment = Activity::COLUMN_COMMENTS;
+        $this->list_comment = array_merge(Activity::COLUMN_COMMENTS, Achievement::COLUMN_COMMENTS);
         $grado = $this->pevaluacion->grado;
 
         // Descartar la sección actual de la lista de clonación
@@ -86,13 +99,35 @@ class IndexComponent extends Component
         }
     }
 
+    // ─── FILTER RESET PAGE ───────────────────────────────────────
+
+    public function updatingSearch() { $this->resetPage(); }
+
+    public function updatingPaginate() { $this->resetPage(); }
+
     public function render()
     {
-        $this->activities = Activity::where('pevaluacion_id', $this->pevaluacion_id)
-            ->orderBy('finicial')
-            ->get();
+        $query = Activity::where('pevaluacion_id', $this->pevaluacion_id);
 
-        return view('livewire.profesor.activity.index-component');
+        // Filtro: búsqueda por texto
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('topic', 'like', '%' . $this->search . '%')
+                  ->orWhere('thematic', 'like', '%' . $this->search . '%')
+                  ->orWhere('references', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%')
+                  ->orWhere('teaching', 'like', '%' . $this->search . '%')
+                  ->orWhere('learning', 'like', '%' . $this->search . '%')
+                  ->orWhere('observations', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $activities = $query->orderBy('finicial')
+            ->paginate($this->paginate);
+
+        return view('livewire.profesor.activity.index-component', [
+            'activities' => $activities,
+        ]);
     }
 
     // ─── MODOS ─────────────────────────────────────────────
@@ -111,6 +146,7 @@ class IndexComponent extends Component
         $this->modeEdit = true;
         $this->activity = Activity::findOrFail($id);
         $this->activity_id = $id;
+        $this->activityForm->fillFromModel($this->activity);
     }
 
     public function addAchievement($id)
@@ -120,16 +156,21 @@ class IndexComponent extends Component
         $this->activity_id = null;
         $this->modeCreatorAchievement = true;
         $this->activity = Activity::findOrFail($id);
+        $this->achievementForm->activity_id = $this->activity->id;
+        $this->showAchievementModal = true;
     }
 
     public function setEditAchievement($id)
     {
         $this->close();
         $this->modeCreatorAchievement = true;
-        $this->achievement = Achievement::findOrFail($id);
-        $this->activity = $this->achievement->activity;
-        $this->activity_id = $this->activity->id;
+        $achievement = Achievement::findOrFail($id);
         $this->achievement_id = $id;
+        $this->activity = $achievement->activity;
+        $this->activity_id = $this->activity->id;
+        // Poblar el Form Object con los datos del modelo
+        $this->achievementForm->fillFromModel($achievement);
+        $this->showAchievementModal = true;
     }
 
     // ─── DETALLE (MODAL) ──────────────────────────────────
@@ -152,16 +193,10 @@ class IndexComponent extends Component
 
     public function save()
     {
-        $this->validate();
+        $this->activityForm->validate();
 
-        $this->activity->pevaluacion_id = $this->pevaluacion->id;
-        $this->activity->description   = ($this->activity->description === '')   ? null : $this->activity->description;
-        $this->activity->observations  = ($this->activity->observations === '')  ? null : $this->activity->observations;
-        $this->activity->references    = ($this->activity->references === '')    ? null : $this->activity->references;
-        $this->activity->teaching      = ($this->activity->teaching === '')      ? null : $this->activity->teaching;
-        $this->activity->learning      = ($this->activity->learning === '')      ? null : $this->activity->learning;
-        $this->activity->topic         = ($this->activity->topic === '')         ? null : $this->activity->topic;
-        $this->activity->thematic      = ($this->activity->thematic === '')      ? null : $this->activity->thematic;
+        $this->activityForm->pevaluacion_id = $this->pevaluacion->id;
+        $this->activityForm->applyToModel($this->activity);
 
         $this->activity->save();
 
@@ -177,15 +212,16 @@ class IndexComponent extends Component
 
     public function saveAchievement()
     {
-        $this->achievement->activity_id = $this->activity->id;
+        $this->achievementForm->validate();
 
-        $this->validate([
-            'achievement.name' => 'required|min:6',
-            'achievement.weighting' => 'nullable|numeric|min:0|max:100',
-            'achievement.status_quantitative_weighting' => 'nullable|boolean',
-        ]);
+        if ($this->achievement_id) {
+            $achievement = Achievement::findOrFail($this->achievement_id);
+        } else {
+            $achievement = new Achievement();
+        }
 
-        $this->achievement->save();
+        $this->achievementForm->applyToModel($achievement);
+        $achievement->save();
 
         $this->notification()->success(
             '¡Excelente, buen trabajo!',
@@ -312,30 +348,28 @@ class IndexComponent extends Component
 
     // ─── HELPERS ───────────────────────────────────────────
 
+    public function toggleWeighting()
+    {
+        $this->achievementForm->toggleWeighting();
+    }
+
     public function close()
     {
         $this->modeCreator = false;
         $this->modeEdit = false;
         $this->modeCreatorAchievement = false;
         $this->modeEditAchievement = false;
+        $this->showAchievementModal = false;
+        $this->activityForm->reset();
+        $this->achievementForm->resetForm();
     }
 
     public function resetModel()
     {
         $this->activity = new Activity();
-        $this->activity->finicial = null;
-        $this->activity->ffinal = null;
-        $this->activity->topic = null;
-        $this->activity->thematic = null;
-        $this->activity->references = null;
-        $this->activity->teaching = null;
-        $this->activity->learning = null;
-        $this->activity->observations = null;
-        $this->activity->description = null;
 
-        $this->achievement = new Achievement();
-        $this->achievement->name = null;
-        $this->achievement->weighting = null;
         $this->achievement_id = null;
+        $this->activityForm->reset();
+        $this->achievementForm->resetForm();
     }
 }

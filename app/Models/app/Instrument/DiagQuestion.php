@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DiagQuestion extends Model
 {
+    use HasFactory;
+
     protected $table = 'diag_questions';
 
     protected $fillable = [
@@ -18,6 +20,9 @@ class DiagQuestion extends Model
         'difficulty',
         'weighing',
         'activo',
+        'diag_main_id',
+        'competency_id',
+        'indicator_id',
     ];
 
     // 🔹 Relaciones
@@ -34,6 +39,21 @@ class DiagQuestion extends Model
     public function answers()
     {
         return $this->hasMany(DiagAnswer::class, 'question_id');
+    }
+
+    public function diagMain()
+    {
+        return $this->belongsTo(DiagMain::class, 'diag_main_id');
+    }
+
+    public function competency()
+    {
+        return $this->belongsTo(DiagCompetency::class, 'competency_id');
+    }
+
+    public function indicator()
+    {
+        return $this->belongsTo(DiagIndicator::class, 'indicator_id');
     }
 
     public function getAsignaturaNameAttribute()

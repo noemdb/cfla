@@ -42,7 +42,7 @@
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                     </svg>
-                    Módulo Plan de Actividades
+                    Módulo Planificación Académica
                 </h3>
                 <span class="text-[10px] text-gray-500 font-medium tracking-wider">Diseñado por: Prof. Carmin Cortez</span>
             </div>
@@ -62,6 +62,13 @@
 
             {{-- Table --}}
             @include('profesors.activities.table.index')
+
+            {{-- Pagination --}}
+            @if(method_exists($pevaluacions, 'links'))
+                <div class="mt-4">
+                    {{ $pevaluacions->appends(request()->query())->links('vendor.pagination.custom-tailwind') }}
+                </div>
+            @endif
 
         </div>
     </div>

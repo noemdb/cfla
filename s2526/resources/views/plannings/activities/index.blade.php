@@ -10,7 +10,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h4 class="mb-0 font-weight-bold">
                     <i class="{{$icon_menus['activities'] ?? 'fas fa-tasks'}} text-success pr-1" aria-hidden="true"></i>
-                    Módulo Plan de Actividades
+                    Módulo Planificación Académica
                     <span class="badge badge-light text-success ml-2 align-middle" style="font-size:0.7rem;">
                         <i class="fa fa-graduation-cap mr-1"></i>{{ count($pestudios) }} Plan(es) Educativo(s)
                     </span>

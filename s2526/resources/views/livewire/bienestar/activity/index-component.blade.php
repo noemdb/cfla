@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between">
             <div>
                 <i class="{{ $icon_menus['activities'] ?? '' }} text-info pr-1" aria-hidden="true"></i>
-                <span class="font-weight-bold">Módulo Plan de Actividades</span>
+                <span class="font-weight-bold">Módulo Planificación Académica</span>
                 <small class="text-muted">Complementaria Integral</small>
             </div>
             <div><span class="text-muted font-weight-bold" style="font-size: 1rem;opacity: 0.5;">Diseñado por: Prof.

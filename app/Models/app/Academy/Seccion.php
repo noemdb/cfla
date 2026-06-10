@@ -43,6 +43,11 @@ class Seccion extends Model
         return $this->hasMany(ProfesorGuia::class, 'seccion_id');
     }
 
+    public function pevaluacions()
+    {
+        return $this->hasMany(Pevaluacion::class, 'seccion_id');
+    }
+
     public function pestudio()
     {
         return $this->grado->pestudio();

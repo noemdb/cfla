@@ -71,6 +71,17 @@ class Profesor extends Model
         return $this->hasMany(ProfesorGuia::class, 'profesor_id');
     }
 
+    public function pensums()
+    {
+        return $this->belongsToMany(Pensum::class, 'pevaluacions', 'profesor_id', 'pensum_id')
+            ->select('pensums.*')
+            ->selectRaw("CONCAT(grados.code_sm, ' - ', asignaturas.name) as asignatura_name")
+            ->join('grados', 'grados.id', '=', 'pensums.grado_id')
+            ->join('asignaturas', 'asignaturas.id', '=', 'pensums.asignatura_id')
+            ->whereNull('pevaluacions.deleted_at')
+            ->groupBy('pensums.id');
+    }
+
     // ─── ACCESSORS ───────────────────────────────────────────────
 
     public function getFullNameAttribute()
@@ -91,6 +102,42 @@ class Profesor extends Model
             ->get();
 
         return $seccions;
+    }
+
+    // ─── PENSUMS (para el módulo de Competencias) ──────────────
+
+    /**
+     * Obtiene los pensums (áreas de formación) asignados al profesor
+     * a través de su carga académica (pevaluacions), incluyendo
+     * el conteo de preguntas de competencias asociadas.
+     */
+    public function getPensumsName()
+    {
+        return Pensum::select('pensums.*')
+            ->join('pevaluacions', 'pensums.id', '=', 'pevaluacions.pensum_id')
+            ->where('pevaluacions.profesor_id', $this->id)
+            ->where('pensums.status_active', true)
+            ->whereNull('pevaluacions.deleted_at')
+            ->whereNull('pensums.deleted_at')
+            ->with(['asignatura', 'grado.pestudio'])
+            ->distinct()
+            ->get();
+    }
+
+    /**
+     * Lista los grados donde el profesor dicta clases.
+     */
+    public static function list_grado($profesorId)
+    {
+        return Grado::select('grados.*')
+            ->join('pensums', 'pensums.grado_id', '=', 'grados.id')
+            ->join('pevaluacions', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.profesor_id', $profesorId)
+            ->where('grados.status_active', true)
+            ->whereNull('pensums.deleted_at')
+            ->whereNull('pevaluacions.deleted_at')
+            ->distinct()
+            ->get();
     }
 
     // ═══════════════════════════════════════════════════════════════

@@ -74,9 +74,40 @@
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">
                     Actividades registradas
-                    <span class="text-gray-500 font-normal normal-case">({{ $activities->count() }})</span>
+                    <span class="text-gray-500 font-normal normal-case">({{ $activities->total() }})</span>
                 </h3>
                 <div class="flex items-center gap-2">
+                    {{-- Search --}}
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar..."
+                            class="w-44 bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                        @if($search)
+                            <button wire:click="$set('search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        @endif
+                    </div>
+
+                    {{-- Per page --}}
+                    <div class="relative w-16">
+                        <select wire:model.live="paginate"
+                            class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-2 pr-7 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
                     {{-- Clone selector (only if activities empty) --}}
                     @if($activities->isEmpty())
                         <select wire:model="seccion_id"
@@ -120,7 +151,7 @@
                                 {{-- Status badge --}}
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-400">
-                                        {{ $loop->iteration }}
+                                        {{ $activities->firstItem() + $loop->index }}
                                     </span>
                                     @if($item->status_resume)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -190,64 +221,6 @@
 
                         {{-- Achievements Section --}}
                         <div class="mt-3 ml-8 pl-4 border-l border-white/5">
-                            {{-- Achievement Create Overlay --}}
-                            @if($modeCreatorAchievement && $item->id == $activity->id)
-                                <div class="mb-3 p-4 bg-gray-800/50 border border-white/10 rounded-xl">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Agregar o Editar Indicadores</span>
-                                        <button wire:click="close" class="text-gray-500 hover:text-gray-300 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="grid grid-cols-1 gap-3">
-                                        {{-- Name --}}
-                                        <div>
-                                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['name'] ?? 'Indicador' }}</label>
-                                            <input type="text" wire:model="achievement.name"
-                                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
-                                                placeholder="{{ $list_comment['name'] ?? '' }}">
-                                            @error('achievement.name') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-                                        </div>
-
-                                        {{-- Quantitative toggle --}}
-                                        <div class="flex items-center gap-3">
-                                            <label class="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" wire:model="achievement.status_quantitative_weighting"
-                                                    class="rounded border-white/10 bg-gray-800/50 text-emerald-500 focus:ring-emerald-500/20">
-                                                <span class="text-[11px] text-gray-400">{{ $list_comment['status_quantitative_weighting'] ?? 'Indicador Cuantitativo' }}</span>
-                                            </label>
-                                        </div>
-
-                                        {{-- Weighting --}}
-                                        @if($achievement->status_quantitative_weighting)
-                                        <div>
-                                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['weighting'] ?? 'Ponderación' }}</label>
-                                            <select wire:model="achievement.weighting"
-                                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50">
-                                                <option value="">Seleccione</option>
-                                                @for($i = 1; $i <= 20; $i++)
-                                                    <option value="{{ $i }}">{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                            @error('achievement.weighting') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <button wire:click="saveAchievement"
-                                            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 rounded-xl border border-emerald-500/20 transition-all duration-200 text-xs font-bold">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                            Guardar
-                                        </button>
-                                    </div>
-                                </div>
-                            @endif
-
                             {{-- Achievement list header --}}
                             <div class="flex items-center justify-between py-1.5">
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600">Indicadores / Aprendizajes Esperados</span>
@@ -308,11 +281,32 @@
                         <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
-                        <p class="text-sm font-medium text-gray-400">No hay actividades registradas</p>
-                        <p class="text-xs text-gray-600 mt-1">Presione <span class="text-emerald-400 font-medium">"+ Nuevo"</span> para comenzar.</p>
+                        <p class="text-sm font-medium text-gray-400">
+                            @if($search)
+                                No se encontraron actividades
+                            @else
+                                No hay actividades registradas
+                            @endif
+                        </p>
+                        @if($search)
+                            <p class="text-xs text-gray-600 mt-1">No hay resultados para "<span class="text-emerald-400 font-medium">{{ $search }}</span>".</p>
+                            <button wire:click="$set('search', '')"
+                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                Limpiar búsqueda
+                            </button>
+                        @else
+                            <p class="text-xs text-gray-600 mt-1">Presione <span class="text-emerald-400 font-medium">"+ Nuevo"</span> para comenzar.</p>
+                        @endif
                     </div>
                 @endforelse
             </div>
+
+            {{-- Pagination --}}
+            @if($activities->hasPages())
+                <div class="mt-4 pt-4 border-t border-white/5">
+                    {{ $activities->links('vendor.livewire.custom-tailwind') }}
+                </div>
+            @endif
         </div>
     </div>
 
@@ -582,6 +576,115 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
                             Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ACHIEVEMENT MODAL --}}
+    @if($showAchievementModal)
+        <div class="fixed inset-0 z-[9997] overflow-y-auto" wire:key="achievement-modal-{{ $activity->id }}-{{ $achievement_id ?? 'new' }}">
+            {{-- Backdrop --}}
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="close"></div>
+
+            {{-- Modal panel --}}
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">
+                                    {{ $achievement_id ? 'Editar Indicador' : 'Agregar Indicador' }}
+                                </h3>
+                                <p class="text-xs text-gray-500">
+                                    {{ $pevaluacion->pensum?->asignatura?->name }} —
+                                    {{ $activity->topic ? Str::limit($activity->topic, 40) : 'Nueva actividad' }}
+                                </p>
+                            </div>
+                        </div>
+                        <button wire:click="close"
+                            class="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                        <div class="space-y-4">
+
+                            {{-- Achievement Name --}}
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                                    {{ $list_comment['name'] ?? 'Nombre del indicador' }}
+                                </label>
+                                <input type="text" wire:model="achievementForm.name"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
+                                    placeholder="{{ $list_comment['name'] ?? 'Ej: Identifica los elementos...' }}">
+                                @error('achievementForm.name')
+                                    <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Quantitative Weighting Toggle --}}
+                            <div class="flex items-center gap-3 pt-2">
+                                <button type="button" wire:click="toggleWeighting"
+                                    class="relative inline-flex items-center cursor-pointer focus:outline-none">
+                                    <div class="w-9 h-5 rounded-full transition-colors duration-200 ease-in-out {{ $achievementForm->quantitative ? 'bg-emerald-500' : 'bg-gray-700 border border-white/10' }}">
+                                        <div class="inline-block w-4 h-4 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out {{ $achievementForm->quantitative ? 'translate-x-[18px]' : 'translate-x-[2px]' }} mt-[2px]"></div>
+                                    </div>
+                                </button>
+                                <span class="text-[11px] text-gray-400 font-medium">
+                                    {{ $list_comment['status_quantitative_weighting'] ?? 'Indicador ponderado (cuantitativo)' }}
+                                </span>
+                            </div>
+
+                            {{-- Weighting selector --}}
+                            @if($achievementForm->quantitative)
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                                        {{ $list_comment['weighting'] ?? 'Ponderación' }}
+                                    </label>
+                                    <select wire:model="achievementForm.weighting"
+                                        class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                                        <option value="">Seleccione ponderación</option>
+                                        @for($i = 1; $i <= 20; $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                    @error('achievementForm.weighting')
+                                        <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                        <button wire:click="close"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cancelar
+                        </button>
+                        <button wire:click="saveAchievement"
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            {{ $achievement_id ? 'Guardar Cambios' : 'Guardar Indicador' }}
                         </button>
                     </div>
                 </div>
