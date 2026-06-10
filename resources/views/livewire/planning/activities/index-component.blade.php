@@ -152,20 +152,16 @@
     @endif
 
     <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden"
-         x-data="{ activeTab: {{ $activeTabIndex }} }">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-white/5">
             <nav class="flex overflow-x-auto">
                 @foreach($tabsLapsos as $index => $lapsoItem)
-                    @php $tabNum = $loop->iteration; @endphp
-                    <button
-                        @click="activeTab = {{ $tabNum }}; $wire.set('lapso_id', {{ $lapsoItem->id }})"
-                        :class="activeTab === {{ $tabNum }}
-                            ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
-                            : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                        class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    @php $isActive = $lapsoItem->id == $lapso_id; @endphp
+                    <button wire:click="selectLapso({{ $lapsoItem->id }})"
+                        class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
+                               {{ $isActive ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}"
                     >
                         <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -261,46 +257,50 @@
                     <div x-show="open" x-collapse x-cloak>
                         <div class="px-5 pb-5 pt-0 border-t border-white/5">
                             @if($item->activities_count > 0)
-                                {{-- Activity Tab Bar --}}
-                                <div class="flex w-full mt-4 pb-1">
-                                    @foreach($item->activities as $i => $act)
-                                        @php
-                                            $wordCount = $act->teachingWordsMayorCount();
-                                            $avr = $act->activities_avr;
-                                            $qualityIcon = null;
-                                            $qualityTitle = null;
-                                            if ($avr !== null) {
-                                                if ($wordCount > $avr) {
-                                                    $qualityIcon = '↑';
-                                                    $qualityTitle = "Palabras ({$wordCount}) por encima del promedio ({$avr})";
-                                                } elseif ($wordCount == $avr) {
-                                                    $qualityIcon = '−';
-                                                    $qualityTitle = "Palabras ({$wordCount}) igual al promedio ({$avr})";
-                                                } else {
-                                                    $qualityIcon = '↓';
-                                                    $qualityTitle = "Palabras ({$wordCount}) por debajo del promedio ({$avr})";
+                                {{-- Activity Tab Bar (border-b-2 style like profesor home) --}}
+                                <div class="border-b border-white/5 mt-4">
+                                    <nav class="flex overflow-x-auto">
+                                        @foreach($item->activities as $i => $act)
+                                            @php
+                                                $wordCount = $act->teachingWordsMayorCount();
+                                                $avr = $act->activities_avr;
+                                                $qualityIcon = null;
+                                                $qualityColor = null;
+                                                $qualityTitle = null;
+                                                if ($avr !== null) {
+                                                    if ($wordCount > $avr) {
+                                                        $qualityIcon = '↑';
+                                                        $qualityColor = 'text-emerald-400';
+                                                        $qualityTitle = "Palabras ({$wordCount}) por encima del promedio ({$avr})";
+                                                    } elseif ($wordCount == $avr) {
+                                                        $qualityIcon = '−';
+                                                        $qualityColor = 'text-blue-400';
+                                                        $qualityTitle = "Palabras ({$wordCount}) igual al promedio ({$avr})";
+                                                    } else {
+                                                        $qualityIcon = '↓';
+                                                        $qualityColor = 'text-amber-400';
+                                                        $qualityTitle = "Palabras ({$wordCount}) por debajo del promedio ({$avr})";
+                                                    }
                                                 }
-                                            }
-                                        @endphp
-                                        <button type="button" @click="activeTab = {{ $i }}"
-                                            class="relative flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-bold rounded-lg border transition-all duration-200"
-                                            :class="activeTab === {{ $i }}
-                                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-sm shadow-emerald-500/10'
-                                                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-gray-200'"
-                                            title="{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}{{ $qualityTitle ? ' · ' . $qualityTitle : '' }}">
-                                            <span class="flex items-center justify-center w-6 h-6 rounded-md text-xs font-black"
-                                                :class="activeTab === {{ $i }} ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-gray-500'">
-                                                {{ $i + 1 }}
-                                            </span>
-                                            @if($qualityIcon)
-                                                <span class="text-[10px] font-bold leading-none {{ $wordCount > $avr ? 'text-emerald-400' : ($wordCount == $avr ? 'text-blue-400' : 'text-amber-400') }}"
-                                                    title="{{ $qualityTitle }}">{{ $qualityIcon }}</span>
-                                            @endif
-                                            @if($act->status !== null)
-                                                <span class="w-1.5 h-1.5 rounded-full {{ $act->status ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
-                                            @endif
-                                        </button>
-                                    @endforeach
+                                            @endphp
+                                            <button type="button" @click="activeTab = {{ $i }}"
+                                                :class="activeTab === {{ $i }}
+                                                    ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
+                                                    : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                                                class="flex-1 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                                                title="{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}{{ $qualityTitle ? ' · ' . $qualityTitle : '' }}">
+                                                <span class="flex items-center justify-center gap-1.5">
+                                                    <span>Act. {{ $i + 1 }}</span>
+                                                    @if($qualityIcon)
+                                                        <span class="text-[10px] font-bold leading-none {{ $qualityColor }}">{{ $qualityIcon }}</span>
+                                                    @endif
+                                                    @if($act->status !== null)
+                                                        <span class="w-1.5 h-1.5 rounded-full {{ $act->status ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                                    @endif
+                                                </span>
+                                            </button>
+                                        @endforeach
+                                    </nav>
                                 </div>
 
                                 {{-- Activity Tab Content --}}

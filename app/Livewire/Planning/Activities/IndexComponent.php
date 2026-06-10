@@ -145,6 +145,12 @@ class IndexComponent extends Component
 
     public function updatedLapsoId($value) { $this->resetPage(); }
 
+    public function selectLapso($id)
+    {
+        $this->lapso_id = $id;
+        $this->resetPage();
+    }
+
     public function updatedProfesorId($value) { $this->resetPage(); }
 
     public function updatedStatusActivities($value) { $this->resetPage(); }
