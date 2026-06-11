@@ -17,7 +17,13 @@ class PensumFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'pestudio_id' => \App\Models\app\Academy\Pestudio::factory(),
+            'grado_id' => \App\Models\app\Academy\Grado::factory(),
+            'asignatura_id' => \App\Models\app\Academy\Asignatura::factory(),
+            'status_component' => $this->faker->boolean(),
+            'status_active' => true,
+            'status_active_diagnostic' => $this->faker->boolean(),
+            'observations' => $this->faker->sentence(),
         ];
     }
 }

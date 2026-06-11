@@ -227,14 +227,14 @@
 
                             <!-- PDF links -->
                             @if($item->activities_count > 0)
-                                <a href="{{ route('planning.activities.format', $item->id) }}" target="_blank"
+                                <a href="{{ route('app.profesors.activities.format', $item->id) }}" target="_blank"
                                     class="p-2 bg-white/5 hover:bg-purple-500/10 rounded-xl border border-white/5 hover:border-purple-500/20 text-gray-400 hover:text-purple-400 transition-all duration-300"
                                     title="Formato completo (9 columnas)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
                                 </a>
-                                <a href="{{ route('planning.activities.resume', $item->id) }}" target="_blank"
+                                <a href="{{ route('app.profesors.activities.resume', $item->id) }}" target="_blank"
                                     class="p-2 bg-white/5 hover:bg-emerald-500/10 rounded-xl border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-300"
                                     title="Resumen ejecutivo (6 columnas)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

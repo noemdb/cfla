@@ -17,7 +17,15 @@ class GradoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'pestudio_id' => \App\Models\app\Academy\Pestudio::factory(),
+            'name' => $this->faker->word(),
+            'code' => $this->faker->unique()->bothify('GR-####'),
+            'code_sm' => $this->faker->unique()->bothify('GR##'),
+            'description' => $this->faker->sentence(),
+            'status_active' => 'true',
+            'hour_social' => $this->faker->numberBetween(40, 200),
+            'total_hour_social' => $this->faker->numberBetween(40, 200),
+            'order' => $this->faker->numberBetween(1, 10),
         ];
     }
 }

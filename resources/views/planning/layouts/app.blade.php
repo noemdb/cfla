@@ -328,7 +328,7 @@
         <div class="container mx-auto px-4 py-6">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
                 <p class="text-xs text-gray-500">
-                    &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión Educativa.
+                    &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión y Planificación Académica.
                 </p>
                 <div class="flex space-x-6 text-xs text-emerald-500/60 font-medium">
                     <span>Planificación Académica</span>

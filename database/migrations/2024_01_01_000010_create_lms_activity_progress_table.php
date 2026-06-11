@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_activity_progress', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('student_id');
+            $table->foreign('student_id')->references('id')->on('users')->restrictOnDelete();
             $table->enum('status', ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'])->default('NOT_STARTED');
             $table->decimal('completion_pct', 5, 2)->default(0);
             $table->unsignedInteger('time_spent_secs')->default(0);

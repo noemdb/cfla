@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto py-8 px-4 space-y-6">
+<div class="w-full mx-auto py-8 px-4 space-y-6">
 
     <div class="flex items-center justify-between">
         <div>

@@ -83,6 +83,15 @@
                                 </svg>
                                 Competencias
                             </a>
+
+                            {{-- LMS: Contenido de Lecciones --}}
+                            <a href="{{ route('app.profesors.lms.lesson.wizard') }}"
+                                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-emerald-300 hover:bg-white/5 transition-colors {{ request()->routeIs('app.profesors.lms.*') ? 'text-emerald-400 bg-emerald-500/5' : '' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                Contenido LMS
+                            </a>
                         </div>
                     </div>
 
@@ -229,6 +238,11 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                         Competiciones
                                     </a>
+                                    <a href="{{ route('planning.lms.monitor') }}"
+                                        class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-emerald-300 transition-colors {{ request()->routeIs('planning.lms.*') ? 'text-emerald-400' : '' }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        Monitor LMS
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -269,7 +283,7 @@
         <div class="container mx-auto px-4 py-6">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
                 <p class="text-xs text-gray-500">
-                    &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión Educativa.
+                    &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión y Planificación Académica.
                 </p>
                 <div class="flex space-x-6 text-xs text-emerald-500/60 font-medium">
                     <span>Panel del Profesor</span>

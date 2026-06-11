@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Planning\Pensum;
 
+use App\Livewire\Forms\Planning\PensumForm;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pensum;
@@ -19,16 +20,8 @@ class IndexComponent extends Component
     public $modeIndex = true;
     public $modeForm = false;
 
-    // Editing flag
-    public $isEditing = false;
-    public $pensum_id;
-
-    // Form fields
-    public $pestudio_id, $grado_id, $asignatura_id;
-    public $status_component = 'false';
-    public $status_active = true;
-    public $status_active_diagnostic = false;
-    public $observations;
+    // Form Object
+    public PensumForm $form;
 
     // Select lists (cascading)
     public $pestudios;
@@ -38,6 +31,12 @@ class IndexComponent extends Component
     // Search & filters
     public $search = '';
     public $filter_pestudio = '';
+    public $filter_grado = '';
+    public $listGrados = [];
+
+    // Sort
+    public string $sortField = 'pestudio_id';
+    public string $sortDirection = 'asc';
 
     // Confirm delete
     public $confirmDeleteId = null;
@@ -45,16 +44,6 @@ class IndexComponent extends Component
     // Preview
     public $previewMode = false;
     public $previewPensum = null;
-
-    protected $rules = [
-        'pestudio_id' => 'required|integer|exists:pestudios,id',
-        'grado_id' => 'required|integer|exists:grados,id',
-        'asignatura_id' => 'required|integer|exists:asignaturas,id',
-        'status_component' => 'required|in:true,false',
-        'status_active' => 'required|boolean',
-        'status_active_diagnostic' => 'required|boolean',
-        'observations' => 'nullable|string|max:255',
-    ];
 
     public function mount()
     {
@@ -66,10 +55,43 @@ class IndexComponent extends Component
         $this->close();
     }
 
+    // ─── SORT ─────────────────────────────────────────────────────
+
+    public function sortBy(string $field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+    // ─── FILTERS ──────────────────────────────────────────────────
+
+    public function updatedFilterPestudio($value): void
+    {
+        $this->filter_grado = '';
+        $this->listGrados = $value
+            ? Grado::where('pestudio_id', $value)
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray()
+            : [];
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingFilterPestudio() { $this->resetPage(); }
+    public function updatingFilterGrado() { $this->resetPage(); }
+
+    // ─── RENDER ───────────────────────────────────────────────────
+
     public function render()
     {
-        $query = Pensum::with(['pestudio', 'grado', 'asignatura'])
-            ->withCount('pevaluacions');
+        $query = Pensum::with(['pestudio', 'grado', 'asignatura', 'diagCompetencies.referent'])
+            ->withCount(['pevaluacions', 'diagCompetencies']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -84,10 +106,20 @@ class IndexComponent extends Component
             $query->where('pestudio_id', $this->filter_pestudio);
         }
 
-        $pensums = $query->orderBy('pestudio_id')
-            ->orderBy('grado_id')
-            ->orderBy('asignatura_id')
-            ->paginate(15);
+        if ($this->filter_grado) {
+            $query->where('grado_id', $this->filter_grado);
+        }
+
+        // Aplicar ordenamiento
+        if (in_array($this->sortField, ['pestudio_id', 'grado_id', 'asignatura_id', 'status_component', 'status_active', 'id'])) {
+            $query->orderBy($this->sortField, $this->sortDirection);
+        } elseif (in_array($this->sortField, ['pevaluacions_count', 'diag_competencies_count'])) {
+            $query->orderBy($this->sortField, $this->sortDirection);
+        } else {
+            $query->orderBy('pestudio_id')->orderBy('grado_id')->orderBy('asignatura_id');
+        }
+
+        $pensums = $query->paginate(15);
 
         return view('livewire.planning.pensum.index-component', [
             'pensums' => $pensums,
@@ -96,10 +128,15 @@ class IndexComponent extends Component
 
     // ─── CASCADING SELECTS ──────────────────────────────────────
 
-    public function updatedPestudioId($value)
+    public function updatedFormPestudioId($value)
     {
-        $this->grado_id = null;
-        $this->asignatura_id = null;
+        // During edit, the form values are already set — don't cascade-null them
+        if ($this->form->isEditing) {
+            return;
+        }
+
+        $this->form->grado_id = null;
+        $this->form->asignatura_id = null;
 
         if ($value) {
             $this->grados = Grado::where('pestudio_id', $value)
@@ -124,9 +161,7 @@ class IndexComponent extends Component
 
     public function create()
     {
-        $this->resetForm();
-        $this->isEditing = false;
-        $this->pensum_id = null;
+        $this->form->resetForm();
         $this->grados = [];
         $this->asignaturas = [];
         $this->close();
@@ -136,83 +171,44 @@ class IndexComponent extends Component
     public function edit($id)
     {
         $pensum = Pensum::findOrFail($id);
-        $this->pensum_id = $pensum->id;
-        $this->pestudio_id = $pensum->pestudio_id;
-        $this->grado_id = $pensum->grado_id;
-        $this->asignatura_id = $pensum->asignatura_id;
-        $this->status_component = $pensum->status_component;
-        $this->status_active = $pensum->status_active;
-        $this->status_active_diagnostic = $pensum->status_active_diagnostic;
-        $this->observations = $pensum->observations;
+        $this->form->loadFromPensum($pensum);
 
         // Cargar listas para el pestudio seleccionado
-        $this->grados = Grado::where('pestudio_id', $this->pestudio_id)
+        $this->grados = Grado::where('pestudio_id', $this->form->pestudio_id)
             ->orderBy('name')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->asignaturas = Asignatura::where('pestudio_id', $this->pestudio_id)
+        $this->asignaturas = Asignatura::where('pestudio_id', $this->form->pestudio_id)
             ->orderBy('name')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->isEditing = true;
         $this->close();
         $this->modeForm = true;
     }
 
     public function save()
     {
-        // Normalizar campos
-        $val = $this->status_component;
-        $this->status_component = ($val === true || $val === 'true' || $val === 1 || $val === '1') ? 'true' : 'false';
-        $this->status_active = filter_var($this->status_active, FILTER_VALIDATE_BOOLEAN);
-        $this->status_active_diagnostic = filter_var($this->status_active_diagnostic, FILTER_VALIDATE_BOOLEAN);
-
         $this->validate();
 
-        // Validar unicidad compuesta (pestudio_id + grado_id + asignatura_id)
-        $exists = Pensum::where('pestudio_id', $this->pestudio_id)
-            ->where('grado_id', $this->grado_id)
-            ->where('asignatura_id', $this->asignatura_id);
+        try {
+            $this->form->save();
 
-        if ($this->isEditing) {
-            $exists->where('id', '!=', $this->pensum_id);
-        }
-
-        if ($exists->exists()) {
+            $this->notification()->success(
+                title: $this->form->isEditing ? 'Pensum Actualizado' : 'Pensum Creado',
+                description: $this->form->isEditing
+                    ? 'El pensum se actualizó correctamente.'
+                    : 'El pensum se creó correctamente.'
+            );
+        } catch (\RuntimeException $e) {
             $this->notification()->error(
                 title: 'Pensum Duplicado',
-                description: 'Ya existe un pensum con ese plan de estudio, grado y asignatura.'
+                description: $e->getMessage()
             );
             return;
-        }
-
-        $data = [
-            'pestudio_id' => $this->pestudio_id,
-            'grado_id' => $this->grado_id,
-            'asignatura_id' => $this->asignatura_id,
-            'status_component' => $this->status_component,
-            'status_active' => $this->status_active,
-            'status_active_diagnostic' => $this->status_active_diagnostic,
-            'observations' => $this->observations ?: null,
-        ];
-
-        if ($this->isEditing) {
-            $pensum = Pensum::findOrFail($this->pensum_id);
-            $pensum->update($data);
-            $this->notification()->success(
-                title: 'Pensum Actualizado',
-                description: 'El pensum se actualizó correctamente.'
-            );
-        } else {
-            Pensum::create($data);
-            $this->notification()->success(
-                title: 'Pensum Creado',
-                description: 'El pensum se creó correctamente.'
-            );
         }
 
         $this->close();
@@ -258,8 +254,8 @@ class IndexComponent extends Component
 
     public function showPreview($id)
     {
-        $this->previewPensum = Pensum::with(['pestudio', 'grado', 'asignatura'])
-            ->withCount('pevaluacions')
+        $this->previewPensum = Pensum::with(['pestudio', 'grado', 'asignatura', 'diagCompetencies.referent'])
+            ->withCount(['pevaluacions', 'diagCompetencies'])
             ->findOrFail($id);
         $this->previewMode = true;
     }
@@ -271,16 +267,6 @@ class IndexComponent extends Component
     }
 
     // ─── HELPERS ──────────────────────────────────────────────────
-
-    public function resetForm()
-    {
-        $this->reset([
-            'pestudio_id', 'grado_id', 'asignatura_id', 'observations',
-        ]);
-        $this->status_component = 'false';
-        $this->status_active = true;
-        $this->status_active_diagnostic = false;
-    }
 
     public function close()
     {

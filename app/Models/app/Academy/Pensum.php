@@ -2,6 +2,7 @@
 
 namespace App\Models\app\Academy;
 
+use App\Models\app\Instrument\DiagCompetency;
 use App\Models\app\Instrument\DiagQuestion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,6 +58,11 @@ class Pensum extends Model
     public function pevaluacions()
     {
         return $this->hasMany(Pevaluacion::class, 'pensum_id');
+    }
+
+    public function diagCompetencies()
+    {
+        return $this->hasMany(DiagCompetency::class, 'pensum_id');
     }
 
     public function diagQuestions()

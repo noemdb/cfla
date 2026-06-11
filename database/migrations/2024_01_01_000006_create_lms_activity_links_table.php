@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_activity_links', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignId('added_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('added_by');
+            $table->foreign('added_by')->references('id')->on('users')->restrictOnDelete();
             $table->string('title');
             $table->string('url', 1000);
             $table->enum('link_type', ['REFERENCE', 'VIDEO', 'TOOL', 'DOCUMENT', 'OTHER'])->default('REFERENCE');

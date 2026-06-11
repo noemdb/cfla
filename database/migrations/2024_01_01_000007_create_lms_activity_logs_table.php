@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_activity_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->restrictOnDelete();
-            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->restrictOnDelete();
             $table->enum('event', [
                 'VIEW', 'CONTENT_VIEW', 'RESOURCE_DOWNLOAD',
                 'PUBLISH', 'UNPUBLISH', 'EDIT', 'SECTION_ADD',

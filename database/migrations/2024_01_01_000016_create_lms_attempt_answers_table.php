@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('points_awarded', 6, 2)->nullable();
             $table->boolean('is_correct')->nullable();
 
-            $table->unique(['attempt_id', 'question_id']);
+            $table->unique(['attempt_id', 'question_id'], 'lms_ans_attempt_q_uniq');
             $table->index('attempt_id');
         });
     }

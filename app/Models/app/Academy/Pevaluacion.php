@@ -155,4 +155,19 @@ class Pevaluacion extends Model
             ? now()->gt($this->lapso->ffinal)
             : false;
     }
+
+    // ─── COMPETENCIAS ────────────────────────────────────────────
+
+    /**
+     * Obtiene las competencias del pensum asociado con sus indicadores
+     * y referentes normativos, como una colección.
+     *
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function getCompetenciasWithIndicators(): ?\Illuminate\Support\Collection
+    {
+        return $this->pensum?->diagCompetencies()
+            ->with(['indicators', 'referent'])
+            ->get();
+    }
 }

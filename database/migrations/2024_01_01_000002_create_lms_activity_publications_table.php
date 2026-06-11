@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_activity_publications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->unique()->constrained('activities')->cascadeOnDelete();
-            $table->foreignId('published_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('published_by');
+            $table->foreign('published_by')->references('id')->on('users')->restrictOnDelete();
             $table->enum('status', ['DRAFT', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED'])->default('DRAFT');
             $table->dateTime('publish_at')->nullable();
             $table->dateTime('unpublish_at')->nullable();

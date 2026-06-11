@@ -12,7 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
             $table->foreignId('media_id')->constrained('lms_media_library')->restrictOnDelete();
-            $table->foreignId('uploaded_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('uploaded_by');
+            $table->foreign('uploaded_by')->references('id')->on('users')->restrictOnDelete();
             $table->string('display_name');
             $table->text('description')->nullable();
             $table->unsignedTinyInteger('sort_order')->default(1);

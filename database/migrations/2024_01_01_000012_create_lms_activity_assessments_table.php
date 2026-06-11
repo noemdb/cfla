@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_activity_assessments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('created_by');
+            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
             $table->string('title');
             $table->text('description')->nullable();
             $table->enum('assessment_type', ['QUIZ', 'EXAM', 'PRACTICE', 'SURVEY'])->default('QUIZ');

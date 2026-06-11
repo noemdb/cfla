@@ -11,6 +11,7 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Entity\Institucion;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -149,57 +150,64 @@ class ActivityController extends Controller
     }
 
     /**
-     * Vista PDF: Plan de Actividades completo.
+     * PDF: Plan de Actividades completo (9 columnas).
      */
     public function format($id)
     {
         $pevaluacion = Pevaluacion::with([
             'pensum.asignatura',
             'pensum.grado',
-            'pensum.pestudio',
-            'seccion',
+            'seccion.grado',
             'lapso',
             'profesor',
+            'activities' => fn($q) => $q->orderBy('finicial'),
+            'activities.achievements',
         ])->findOrFail($id);
 
-        $activities = Activity::with('achievements')
-            ->where('pevaluacion_id', $id)
-            ->orderBy('finicial', 'asc')
-            ->get();
-
         $institucion = Institucion::orderBy('created_at', 'DESC')->first();
-        $fecha       = Carbon::now()->format('d-m-Y h:i A');
 
-        return view('profesors.activities.format', compact(
-            'pevaluacion', 'activities', 'institucion', 'fecha'
-        ));
+        $pdf = Pdf::loadView('pdfs.planning.activities.format', [
+            'pevaluacion'  => $pevaluacion,
+            'institucion'   => $institucion,
+            'fecha'         => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+        ]);
+
+        $pdf->setPaper('letter', 'landscape');
+        $pdf->setOption('enable_font_subsetting', true);
+        $pdf->setOption('dpi', 72);
+        $pdf->setOption('default_font', 'Helvetica');
+
+        return $pdf->stream("plan-actividades-{$id}.pdf");
     }
 
     /**
-     * Vista PDF: Resumen del Plan de Actividades.
+     * PDF: Resumen del Plan de Actividades (6 columnas).
      */
     public function resume($id)
     {
         $pevaluacion = Pevaluacion::with([
             'pensum.asignatura',
             'pensum.grado',
-            'pensum.pestudio',
-            'seccion',
+            'seccion.grado',
             'lapso',
             'profesor',
+            'activities' => fn($q) => $q->whereNotNull('description')->orderBy('finicial'),
+            'activities.achievements',
         ])->findOrFail($id);
 
-        $activities = Activity::with('achievements')
-            ->where('pevaluacion_id', $id)
-            ->whereNotNull('description')
-            ->orderBy('finicial', 'asc')
-            ->get();
-
         $institucion = Institucion::orderBy('created_at', 'DESC')->first();
-        $fecha       = Carbon::now()->format('d-m-Y h:i A');
 
-        return view('profesors.activities.resume', compact(
-            'pevaluacion', 'activities', 'institucion', 'fecha'
-        ));
+        $pdf = Pdf::loadView('pdfs.planning.activities.resume', [
+            'pevaluacion'  => $pevaluacion,
+            'institucion'   => $institucion,
+            'fecha'         => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+        ]);
+
+        $pdf->setPaper('letter', 'landscape');
+        $pdf->setOption('enable_font_subsetting', true);
+        $pdf->setOption('dpi', 72);
+        $pdf->setOption('default_font', 'Helvetica');
+
+        return $pdf->stream("resumen-actividades-{$id}.pdf");
     }
 }

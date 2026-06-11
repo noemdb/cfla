@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_assessment_attempts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('assessment_id')->constrained('lms_activity_assessments')->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('student_id');
+            $table->foreign('student_id')->references('id')->on('users')->restrictOnDelete();
             $table->unsignedTinyInteger('attempt_number')->default(1);
             $table->decimal('score', 8, 2)->nullable();
             $table->enum('status', ['IN_PROGRESS', 'SUBMITTED', 'GRADED'])->default('IN_PROGRESS');
@@ -20,7 +21,7 @@ return new class extends Migration
             $table->dateTime('graded_at')->nullable();
             $table->unsignedInteger('time_spent_secs')->nullable();
 
-            $table->unique(['assessment_id', 'student_id', 'attempt_number']);
+            $table->unique(['assessment_id', 'student_id', 'attempt_number'], 'lms_att_attempts_uniq');
             $table->index(['student_id', 'status']);
             $table->index(['assessment_id', 'status']);
         });

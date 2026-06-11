@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('lms_content_progress', function (Blueprint $table) {
             $table->id();
             $table->foreignId('content_id')->constrained('lms_activity_contents')->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('student_id');
+            $table->foreign('student_id')->references('id')->on('users')->restrictOnDelete();
             $table->boolean('viewed')->default(false);
             $table->dateTime('viewed_at')->nullable();
             $table->unsignedInteger('time_spent_secs')->default(0);

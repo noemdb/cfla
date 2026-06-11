@@ -11,8 +11,10 @@ return new class extends Migration
         Schema::create('lms_activity_attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('activity_id')->constrained('activities')->restrictOnDelete();
-            $table->foreignId('student_id')->constrained('users')->restrictOnDelete();
-            $table->foreignId('recorded_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('student_id');
+            $table->foreign('student_id')->references('id')->on('users')->restrictOnDelete();
+            $table->unsignedInteger('recorded_by');
+            $table->foreign('recorded_by')->references('id')->on('users')->restrictOnDelete();
             $table->enum('status', ['PRESENT', 'LATE', 'ABSENT', 'EXCUSED', 'REMOTE'])->default('ABSENT');
             $table->text('observation')->nullable();
             $table->dateTime('checked_in_at')->nullable();

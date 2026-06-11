@@ -1,15 +1,24 @@
-<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
+<div class="w-full mx-auto py-8 px-4 space-y-6">
 
     {{-- Header con estado de publicación --}}
     <div class="flex items-start justify-between">
-        <div>
-            <h1 class="text-xl font-semibold text-white">
-                {{ $activity->topic ?? 'Actividad sin título' }}
-            </h1>
-            <p class="text-sm text-slate-400 mt-1">
-                {{ $activity->pevaluacion->pensum->asignatura->name ?? '' }}
-                · {{ $activity->finicial->format('d/m/Y') ?? '' }} – {{ $activity->ffinal->format('d/m/Y') ?? '' }}
-            </p>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('app.profesors.lms.lesson.wizard') }}"
+               class="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all"
+               title="Volver al asistente">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-xl font-semibold text-white">
+                    {{ $activity->topic ?? 'Actividad sin título' }}
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">
+                    {{ $activity->pevaluacion->pensum->asignatura->name ?? '' }}
+                    · {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m/Y') }} – {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m/Y') }}
+                </p>
+            </div>
         </div>
 
         @php $pub = $activity->lmsPublication; @endphp

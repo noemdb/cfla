@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('lms_media_library', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('uploaded_by')->constrained('users')->restrictOnDelete();
+            $table->unsignedInteger('uploaded_by');
+            $table->foreign('uploaded_by')->references('id')->on('users')->restrictOnDelete();
             $table->string('disk', 50)->default('public');
             $table->string('path', 1000);
             $table->string('original_name');

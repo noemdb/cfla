@@ -10,7 +10,6 @@ use App\Http\Controllers\GmailController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Planning\PlanningController;
-use App\Http\Controllers\Planning\ActivityPdfController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
 use Illuminate\Support\Facades\Route;
@@ -168,9 +167,9 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
     // Módulo de Actividades de Planificación
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/', \App\Livewire\Planning\Activities\IndexComponent::class)->name('index');
-        // Rutas PDF
-        Route::get('/format/{pevaluacion}', [ActivityPdfController::class, 'format'])->name('format');
-        Route::get('/resume/{pevaluacion}', [ActivityPdfController::class, 'resume'])->name('resume');
+        // Rutas PDF (redirigen al módulo profesor)
+        Route::get('/format/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.format', $pevaluacion))->name('format');
+        Route::get('/resume/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.resume', $pevaluacion))->name('resume');
     });
 
     // Módulo de Planes de Estudio
@@ -254,6 +253,8 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'isProfesor'])->group(fu
 
         // ─── LMS: Editor de Contenido del Profesor ─────────────────
         Route::prefix('lms')->name('lms.')->group(function () {
+            Route::get('/activity/lesson/new', \App\Livewire\Profesor\Lms\LessonWizard::class)
+                 ->name('lesson.wizard');
             Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
                  ->name('editor');
         });
