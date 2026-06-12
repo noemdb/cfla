@@ -17,7 +17,7 @@ class IsProfesor
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->isProfesor()) {
+        if (Auth::check() && (Auth::user()->isProfesor() || Auth::user()->is_admin)) {
             return $next($request);
         }
 

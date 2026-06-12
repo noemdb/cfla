@@ -39,6 +39,7 @@ class IndexComponent extends Component
     use \App\Http\Livewire\Evaluacion\Diagnostic\DeepSeekReportTrait;
     use \App\Http\Livewire\Evaluacion\Diagnostic\GeminiReportTrait;
     use \App\Http\Livewire\Evaluacion\Diagnostic\OpenRouterReportTrait;
+    use \App\Http\Livewire\Evaluacion\Diagnostic\NvidiaReportTrait;
 
     public $cacheKey;
     public $lastUpdated;

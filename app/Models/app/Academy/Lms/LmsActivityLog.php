@@ -16,7 +16,7 @@ class LmsActivityLog extends Model
         'context_id', 'context_type', 'ip_address',
     ];
 
-    protected $dates = ['created_at'];
+    protected $casts = ['created_at' => 'datetime'];
 
     public function activity()
     {

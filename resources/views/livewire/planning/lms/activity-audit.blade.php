@@ -1,4 +1,4 @@
-<div class="max-w-5xl mx-auto py-8 px-4 space-y-6">
+<div class="w-full mx-auto py-8 px-4 space-y-6">
 
     {{-- Header --}}
     <div>
@@ -66,7 +66,7 @@
                 @forelse($logs as $log)
                     <tr class="hover:bg-slate-700/20">
                         <td class="px-4 py-2.5 text-slate-300 whitespace-nowrap">
-                            {{ $log->created_at->format('d/m/Y H:i') }}
+                            {{ $log->created_at?->format('d/m/Y H:i') }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-300">{{ $log->user?->name ?? '—' }}</td>
                         <td class="px-4 py-2.5">

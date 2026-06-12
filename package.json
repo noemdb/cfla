@@ -25,6 +25,7 @@
         "chart.js": "^3.9.1",
         "gsap": "^3.12.5",
         "swiper": "^12.0.3",
-        "tw-elements": "^1.1.0"
+        "tw-elements": "^1.1.0",
+        "typed.js": "^3.0.0"
     }
 }

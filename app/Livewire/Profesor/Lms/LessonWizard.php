@@ -17,6 +17,7 @@ use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Instrument\DiagReferent;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
+use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -68,6 +69,10 @@ class LessonWizard extends Component
     public bool $generatingStep2 = false;
     public ?string $generationError = null;
 
+    // ─── Wizard: Resultado de generación (typewriter overlay) ──
+    public bool $showGenerationResult = false;
+    public ?string $generationType = null; // 'step1' | 'step2' | 'section'
+
     // ─── Export/Import ─────────────────────────────────────────
     public bool $showExportModal = false;
     public bool $showImportModal = false;
@@ -82,8 +87,20 @@ class LessonWizard extends Component
     public array $importAvailableSections = [];
     public array $importAvailableActivities = [];
 
+    // ─── Import wizard ─────────────────────────────────────────
+    public int $importWizardStep = 1;
+    public ?array $importPreviewData = null;
+
+    // ─── Export wizard ─────────────────────────────────────────
+    public int $exportWizardStep = 1;
+    public ?array $exportPreviewData = null;
+
     // ─── Wizard: Vista previa estudiante ──────────────────────
     public bool $showStudentPreview = false;
+
+    // ─── List mode: Vista previa estudiante desde DB ─────────
+    public bool $showListStudentPreview = false;
+    public ?array $listPreviewData = null;
 
     // ─── Wizard: Recursos temporales ───────────────────────────
     public $resourceFile;
@@ -100,6 +117,7 @@ class LessonWizard extends Component
     public string $pubStatus = 'DRAFT';
     public ?string $publishAt = null;
     public bool $saved = false;
+    public bool $showPublishConfirm = false;
 
     protected $paginationTheme = 'tailwind';
 
@@ -120,6 +138,12 @@ class LessonWizard extends Component
     public function mount(): void
     {
         $this->lapsoId = Lapso::current()?->id;
+
+        // Si se pasa activity_id en la URL, iniciar wizard directamente
+        $activityId = request()->query('activity_id');
+        if ($activityId) {
+            $this->startWizard((int) $activityId);
+        }
     }
 
     // ─── Listado: filtros ──────────────────────────────────────
@@ -160,6 +184,7 @@ class LessonWizard extends Component
             'pevaluacion.pensum.grado',
             'pevaluacion.seccion',
             'pevaluacion.lapso',
+            'achievements',
             'lmsPublication',
             'lmsSections.contents',
         ])->findOrFail($activityId);
@@ -213,6 +238,15 @@ class LessonWizard extends Component
         $this->currentStep = max(1, min(4, $step));
     }
 
+    /**
+     * Descarta el overlay de resultado de generación.
+     */
+    public function dismissGenerationResult(): void
+    {
+        $this->showGenerationResult = false;
+        $this->generationType = null;
+    }
+
     public function backToList(): void
     {
         $this->mode = 'list';
@@ -224,6 +258,152 @@ class LessonWizard extends Component
         $this->wizardLinks = [];
         $this->wizardReferents = null;
         $this->saved = false;
+        $this->showPublishConfirm = false;
+        $this->showGenerationResult = false;
+        $this->generationType = null;
+        $this->generationError = null;
+        $this->lessonTitle = '';
+        $this->lessonDescription = '';
+        $this->publishAt = null;
+        $this->allowDownloads = true;
+        // Resetear filtros del listado para mostrar actividades limpias
+        $this->lapsoId = null;
+        $this->pestudioId = null;
+        $this->gradoId = null;
+        $this->seccionId = null;
+        $this->search = '';
+        // Limpiar activity_id de la URL para evitar conflictos al re-ingresar al wizard
+        $this->js("window.history.replaceState({}, '', window.location.pathname)");
+    }
+
+    // ─── List mode: Vista estudiante desde la BD ──────────────
+
+    /**
+     * Carga los datos LMS guardados de una actividad para mostrar
+     * la vista previa del estudiante desde el listado.
+     */
+    public function openListStudentPreview(int $activityId): void
+    {
+        // Cerrar primero cualquier otro modal que pueda interferir
+        $this->closeExportModal();
+        $this->closeImportModal();
+
+        try {
+            $activity = Activity::with([
+                'pevaluacion.pensum.asignatura',
+                'lmsPublication',
+                'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+                'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
+                'lmsResources' => fn($q) => $q->where('is_visible', true),
+                'lmsResources.media',
+                'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            ])->findOrFail($activityId);
+
+            // Reiniciar propiedades primero para forzar detección de cambio
+            $this->showListStudentPreview = false;
+            $this->listPreviewData = null;
+
+            $this->listPreviewData = [
+                'activity_id'   => $activity->id,
+                'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+                'title'         => $activity->topic ?? 'Lección',
+                'description'   => $activity->description ?? '',
+                'start_date'    => $activity->finicial,
+                'end_date'      => $activity->ffinal,
+                'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
+                'sections'      => $activity->lmsSections->toArray(),
+                'resources'     => $activity->lmsResources->toArray(),
+                'links'         => $activity->lmsLinks->toArray(),
+            ];
+
+            $this->showListStudentPreview = true;
+        } catch (\Throwable $e) {
+            $this->notification()->error(
+                'Error al cargar vista',
+                'No se pudo cargar la vista previa: ' . $e->getMessage()
+            );
+        }
+    }
+
+    public function closeListStudentPreview(): void
+    {
+        $this->showListStudentPreview = false;
+        $this->listPreviewData = null;
+    }
+
+    // ─── List mode: Eliminar lección (todo el contenido LMS) ──
+
+    /**
+     * Muestra diálogo de confirmación para eliminar todo el contenido
+     * LMS de una actividad (secciones, contenidos, recursos, enlaces,
+     * publicación y logs).
+     */
+    public function confirmDeleteLesson(int $activityId): void
+    {
+        $activity = Activity::findOrFail($activityId);
+
+        $this->dialog()->confirm([
+            'title'       => 'Eliminar Lección',
+            'description' => "¿Eliminar todo el contenido LMS de la actividad \"{$activity->topic}\"? Se eliminarán secciones, contenidos, recursos, enlaces y la publicación. Esta acción no se puede deshacer.",
+            'icon'        => 'error',
+            'accept'      => [
+                'label'  => 'Eliminar',
+                'method' => 'deleteLesson',
+                'params' => $activityId,
+                'color'  => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+            ],
+        ]);
+    }
+
+    /**
+     * Elimina completamente el contenido LMS de una actividad.
+     */
+    public function deleteLesson(int $activityId): void
+    {
+        $activity = Activity::findOrFail($activityId);
+
+        // Verificar permisos
+        abort_unless(
+            auth()->user()->is_admin
+            || $activity->pevaluacion->profesor_id === auth()->id(),
+            403
+        );
+
+        try {
+            \DB::transaction(function () use ($activity) {
+                // Eliminar contenidos de cada sección
+                $sectionIds = $activity->lmsSections()->pluck('id');
+                \App\Models\app\Academy\Lms\LmsActivityContent::whereIn('section_id', $sectionIds)->delete();
+
+                // Eliminar secciones
+                $activity->lmsSections()->delete();
+
+                // Eliminar recursos
+                $activity->lmsResources()->delete();
+
+                // Eliminar enlaces
+                $activity->lmsLinks()->delete();
+
+                // Eliminar publicación
+                $activity->lmsPublication()?->delete();
+
+                // Eliminar logs
+                $activity->lmsLogs()?->delete();
+            });
+
+            $this->notification()->success(
+                'Lección eliminada',
+                'Todo el contenido LMS de la actividad se eliminó correctamente.'
+            );
+        } catch (\Throwable $e) {
+            $this->notification()->error(
+                'Error',
+                'No se pudo eliminar el contenido: ' . $e->getMessage()
+            );
+        }
     }
 
     // ─── Wizard: Paso 1 — Generar con IA ───────────────────────
@@ -292,13 +472,13 @@ PROMPT;
 Genera titulo y descripcion.
 PROMPT;
 
-        // ─── Llamar al servicio ─────────────────────────────────
+        // ─── Llamar al servicio con compactación ───────────────
         try {
-            /** @var OpenRouterService $llm */
-            $llm = app(OpenRouterService::class);
-            $result = $llm->ask($systemPrompt, $userPrompt, [
-                'max_tokens' => 256,
-            ]);
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 256],
+            );
 
             if (!$result['success']) {
                 $this->generationError = $result['error'];
@@ -315,17 +495,18 @@ PROMPT;
                 return;
             }
 
-            // ─── Parsear resultado: título || descripción ──────
-            $parts = explode('||', $content);
-            $title = trim($parts[0] ?? '');
-            $description = trim($parts[1] ?? '');
+            // ─── Parsear resultado: título y descripción ─────────
+            [$this->lessonTitle, $this->lessonDescription] = $this->parseTitleDescription($content);
 
-            if (!empty($title)) {
-                $this->lessonTitle = $title;
+            if (empty($this->lessonTitle) && empty($this->lessonDescription)) {
+                $this->generationError = 'La respuesta de la IA no contiene título ni descripción válidos.';
+                $this->notification()->error('Error al generar', $this->generationError);
+                return;
             }
-            if (!empty($description)) {
-                $this->lessonDescription = $description;
-            }
+
+            // Mostrar overlay con resultado
+            $this->generationType = 'step1';
+            $this->showGenerationResult = true;
 
             $this->notification()->success(
                 'Contenido generado',
@@ -463,13 +644,13 @@ PROMPT;
 Genera contenido para esta seccion.
 PROMPT;
 
-        // ─── Llamar al servicio ─────────────────────────────────
+        // ─── Llamar al servicio con compactación ───────────────
         try {
-            /** @var OpenRouterService $llm */
-            $llm = app(OpenRouterService::class);
-            $result = $llm->ask($systemPrompt, $userPrompt, [
-                'max_tokens' => 512,
-            ]);
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 512],
+            );
 
             if (!$result['success']) {
                 $this->generationError = $result['error'];
@@ -496,7 +677,12 @@ PROMPT;
                 'media'    => null,
             ];
 
-            $this->notification()->success('Contenido generado', 'El contenido se agregó a la sección correctamente.');
+            // Mostrar overlay con resultado
+            $sectionName = $this->wizardSections[$sectionIndex]['title'] ?? 'Sección';
+            $this->generationType = 'section';
+            $this->showGenerationResult = true;
+
+            $this->notification()->success('Contenido generado', "El contenido de \"{$sectionName}\" se generó correctamente.");
         } catch (\Throwable $e) {
             $this->generationError = $e->getMessage();
             $this->notification()->error('Error', $e->getMessage());
@@ -614,31 +800,26 @@ PROMPT;
 
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
-Eres docente venezolano. Genera estructura leccion LMS.
-Debes reemplazar CADA "TITULO:" y "CONTENIDO:" por texto real.
-NO incluyas las palabras TITULO ni CONTENIDO en la respuesta.
+Eres docente venezolano. Genera contenido pedagógico para una lección LMS.
 
-Formato:
+Estructura obligatoria (incluye //INICIO, //DESARROLLO, //CIERRE tal cual):
 
 //INICIO
-TITULO: (max 10 palabras, atractivo para estudiantes)
-CONTENIDO: (1-2 parrafos, 80-150 palabras)
+Título de inicio (máx 10 palabras, atractivo para estudiantes)
+Contenido de inicio (1-2 párrafos, 80-150 palabras)
 
-//DESARROLLO (3 a 6 bloques)
-TITULO: (max 10 palabras)
-CONTENIDO: (1-2 parrafos, 100-250 palabras)
+//DESARROLLO (3 a 6 bloques, cada bloque separado por línea en blanco)
+Título del bloque (máx 10 palabras)
+Contenido del bloque (1-2 párrafos, 100-250 palabras)
 
-TITULO: (siguiente bloque)
-CONTENIDO:
-
-TITULO: (etc...)
-CONTENIDO: (...)
+Título del siguiente bloque
+Contenido
 
 //CIERRE
-TITULO: (max 10 palabras)
-CONTENIDO: (1 parrafo, 80-150 palabras)
+Título de cierre (máx 10 palabras)
+Contenido de cierre (1 párrafo, 80-150 palabras)
 
-Reglas: lenguaje acorde al grado, ejemplos concretos, alineado con referentes.
+Reglas: lenguaje acorde al grado, ejemplos concretos, alineado con referentes normativos. NO uses la palabra TITULO ni CONTENIDO como etiquetas.
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -658,13 +839,13 @@ PROMPT;
 Genera estructura completa leccion.
 PROMPT;
 
-        // ─── Llamar al servicio ─────────────────────────────────
+        // ─── Llamar al servicio con compactación ───────────────
         try {
-            /** @var OpenRouterService $llm */
-            $llm = app(OpenRouterService::class);
-            $result = $llm->ask($systemPrompt, $userPrompt, [
-                'max_tokens' => 768,
-            ]);
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 768],
+            );
 
             if (!$result['success']) {
                 $this->generationError = $result['error'];
@@ -710,11 +891,17 @@ PROMPT;
 
             if (empty($this->wizardSections)) {
                 $this->generationError = 'No se pudieron extraer secciones del contenido generado.';
+                $this->notification()->error('Error de formato', $this->generationError . ' La respuesta de la IA no incluyó los marcadores //INICIO, //DESARROLLO, //CIERRE.');
                 $this->generatingStep2 = false;
                 return;
             }
 
             $count = count($this->wizardSections);
+
+            // Mostrar overlay con resultado
+            $this->generationType = 'step2';
+            $this->showGenerationResult = true;
+
             $this->notification()->success(
                 'Secciones generadas',
                 "Se crearon {$count} secciones con contenido pedagógico."
@@ -875,6 +1062,15 @@ PROMPT;
 
     // ─── Wizard: Paso 4 — Guardar y Publicar ───────────────────
 
+    public function confirmPublish(): void
+    {
+        if (blank($this->publishAt)) {
+            $this->showPublishConfirm = true;
+        } else {
+            $this->saveAndPublish();
+        }
+    }
+
     public function saveAndPublish(): void
     {
         $activityId = $this->selectedActivityId;
@@ -985,6 +1181,8 @@ PROMPT;
         $this->exportTargetActivityId = null;
         $this->exportAvailableSections = $sections;
         $this->exportAvailableActivities = [];
+        $this->exportWizardStep = 1;
+        $this->exportPreviewData = null;
         $this->showExportModal = true;
     }
 
@@ -1005,14 +1203,38 @@ PROMPT;
             return;
         }
 
-        $this->exportAvailableActivities = Activity::whereHas('pevaluacion', function ($q) use ($value, $activity) {
+        $this->exportAvailableActivities = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.pensum.grado',
+            'pevaluacion.seccion',
+            'pevaluacion.lapso',
+            'lmsPublication',
+            'lmsSections' => fn($q) => $q->withCount('contents'),
+            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+        ])->whereHas('pevaluacion', function ($q) use ($value, $activity) {
             $q->where('seccion_id', $value)
               ->where('lapso_id', $activity->pevaluacion->lapso_id)
               ->where('profesor_id', $activity->pevaluacion->profesor_id);
-        })->orderBy('topic')->get()->map(fn($a) => [
-            'id'    => $a->id,
-            'label' => $a->topic ?? 'Actividad #' . $a->id,
-        ])->pluck('label', 'id')->toArray();
+        })->where('id', '!=', $this->exportActivityId)
+            ->orderBy('topic')
+            ->get()
+            ->map(fn($a) => [
+                'id'          => $a->id,
+                'topic'       => $a->topic ?? 'Actividad sin título',
+                'description' => $a->description ?? '',
+                'start_date'  => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
+                'end_date'    => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
+                'asignatura'  => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
+                'grado'       => $a->pevaluacion?->pensum?->grado?->name ?? '—',
+                'seccion'     => $a->pevaluacion?->seccion?->name ?? '—',
+                'lapso'       => $a->pevaluacion?->lapso?->name ?? '—',
+                'has_lms'     => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
+                'sections_count' => $a->lmsSections->count(),
+                'contents_count' => $a->lmsSections->sum(fn($s) => $s->contents_count ?? 0),
+                'resources_count' => $a->lmsResources->count(),
+                'links_count'     => $a->lmsLinks->count(),
+            ])->values()->toArray();
     }
 
     /**
@@ -1042,6 +1264,46 @@ PROMPT;
         }
     }
 
+    /**
+     * Carga la vista previa del contenido a exportar y avanza al paso 2.
+     */
+    public function loadExportPreview(): void
+    {
+        if (!$this->exportTargetActivityId) {
+            return;
+        }
+
+        $activity = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'lmsPublication',
+            'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+            'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
+            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsResources.media',
+            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+        ])->findOrFail($this->exportActivityId);
+
+        $this->exportPreviewData = [
+            'activity_id'   => $activity->id,
+            'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title'         => $activity->topic ?? 'Lección',
+            'description'   => $activity->description ?? '',
+            'start_date'    => $activity->finicial,
+            'end_date'      => $activity->ffinal,
+            'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
+            'sections'      => $activity->lmsSections->toArray(),
+            'resources'     => $activity->lmsResources->toArray(),
+            'links'         => $activity->lmsLinks->toArray(),
+        ];
+
+        $this->exportWizardStep = 2;
+    }
+
+    public function goToExportStep(int $step): void
+    {
+        $this->exportWizardStep = max(1, min(3, $step));
+    }
+
     public function closeExportModal(): void
     {
         $this->showExportModal = false;
@@ -1050,6 +1312,8 @@ PROMPT;
         $this->exportTargetActivityId = null;
         $this->exportAvailableSections = [];
         $this->exportAvailableActivities = [];
+        $this->exportWizardStep = 1;
+        $this->exportPreviewData = null;
     }
 
     // ─── Import ───────────────────────────────────────────────
@@ -1062,6 +1326,18 @@ PROMPT;
     {
         $activity = Activity::with('pevaluacion.seccion.grado', 'pevaluacion.lapso')
             ->findOrFail($activityId);
+
+        // Si la actividad ya tiene contenido LMS, no se puede importar
+        $hasLmsContent = $activity->lmsSections()
+            ->where('is_visible', true)
+            ->exists();
+        if ($hasLmsContent) {
+            $this->notification()->warning(
+                'Lección existente',
+                'Esta actividad ya tiene contenido LMS. No se puede importar contenido adicional.'
+            );
+            return;
+        }
 
         $currentSectionId = $activity->pevaluacion->seccion_id;
         $gradeId = $activity->pevaluacion->seccion->grado_id;
@@ -1085,6 +1361,8 @@ PROMPT;
         $this->importSourceActivityId = null;
         $this->importAvailableSections = $sections;
         $this->importAvailableActivities = [];
+        $this->importWizardStep = 1;
+        $this->importPreviewData = null;
         $this->showImportModal = true;
     }
 
@@ -1105,15 +1383,38 @@ PROMPT;
             return;
         }
 
-        $this->importAvailableActivities = Activity::whereHas('pevaluacion', function ($q) use ($value, $activity) {
+        $this->importAvailableActivities = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.pensum.grado',
+            'pevaluacion.seccion',
+            'pevaluacion.lapso',
+            'lmsPublication',
+            'lmsSections' => fn($q) => $q->withCount('contents'),
+            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+        ])->whereHas('pevaluacion', function ($q) use ($value, $activity) {
             $q->where('seccion_id', $value)
               ->where('lapso_id', $activity->pevaluacion->lapso_id)
               ->where('profesor_id', $activity->pevaluacion->profesor_id);
         })->where('id', '!=', $this->importActivityId)
-            ->orderBy('topic')->get()->map(fn($a) => [
-                'id'    => $a->id,
-                'label' => $a->topic ?? 'Actividad #' . $a->id,
-            ])->pluck('label', 'id')->toArray();
+            ->orderBy('topic')
+            ->get()
+            ->map(fn($a) => [
+                'id'          => $a->id,
+                'topic'       => $a->topic ?? 'Actividad sin título',
+                'description' => $a->description ?? '',
+                'start_date'  => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
+                'end_date'    => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
+                'asignatura'  => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
+                'grado'       => $a->pevaluacion?->pensum?->grado?->name ?? '—',
+                'seccion'     => $a->pevaluacion?->seccion?->name ?? '—',
+                'lapso'       => $a->pevaluacion?->lapso?->name ?? '—',
+                'has_lms'     => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
+                'sections_count' => $a->lmsSections->count(),
+                'contents_count' => $a->lmsSections->sum(fn($s) => $s->contents_count ?? 0),
+                'resources_count' => $a->lmsResources->count(),
+                'links_count'     => $a->lmsLinks->count(),
+            ])->values()->toArray();
     }
 
     /**
@@ -1143,6 +1444,46 @@ PROMPT;
         }
     }
 
+    /**
+     * Carga la vista previa del contenido a importar y avanza al paso 2.
+     */
+    public function loadImportPreview(): void
+    {
+        if (!$this->importSourceActivityId) {
+            return;
+        }
+
+        $activity = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'lmsPublication',
+            'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+            'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
+            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsResources.media',
+            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+        ])->findOrFail($this->importSourceActivityId);
+
+        $this->importPreviewData = [
+            'activity_id'   => $activity->id,
+            'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title'         => $activity->topic ?? 'Lección',
+            'description'   => $activity->description ?? '',
+            'start_date'    => $activity->finicial,
+            'end_date'      => $activity->ffinal,
+            'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
+            'sections'      => $activity->lmsSections->toArray(),
+            'resources'     => $activity->lmsResources->toArray(),
+            'links'         => $activity->lmsLinks->toArray(),
+        ];
+
+        $this->importWizardStep = 2;
+    }
+
+    public function goToImportStep(int $step): void
+    {
+        $this->importWizardStep = max(1, min(3, $step));
+    }
+
     public function closeImportModal(): void
     {
         $this->showImportModal = false;
@@ -1151,6 +1492,8 @@ PROMPT;
         $this->importSourceActivityId = null;
         $this->importAvailableSections = [];
         $this->importAvailableActivities = [];
+        $this->importWizardStep = 1;
+        $this->importPreviewData = null;
     }
 
     // ─── Copia de contenido LMS ─────────────────────────────────
@@ -1200,6 +1543,17 @@ PROMPT;
             $newLink->activity_id = $targetActivityId;
             $newLink->save();
         }
+
+        // 4. Crear o actualizar la publicación en estado borrador si no existe
+        LmsActivityPublication::firstOrCreate(
+            ['activity_id' => $targetActivityId],
+            [
+                'published_by'    => auth()->id(),
+                'status'          => 'DRAFT',
+                'allow_comments'  => true,
+                'allow_downloads' => true,
+            ]
+        );
     }
 
     // ─── Helpers para la vista previa ──────────────────────────
@@ -1209,6 +1563,313 @@ PROMPT;
         return array_filter($this->wizardSections, fn($s) => $s['is_visible']);
     }
 
+    // ─── Estrategia de compactación de prompts ─────────────────
+    //
+    // Para evitar que prompts con muchos referentes normativos
+    // excedan el budget de tokens en OpenRouter, se sigue esta
+    // estrategia en 2 fases:
+    //
+    //   1. NVIDIA (gratuito, qwen3.5-122b) → compacta el user
+    //      prompt cuando supera el budget, preservando datos
+    //      curriculares esenciales.
+    //   2. OpenRouter (modelo superior) → recibe el prompt
+    //      compactado y genera la respuesta final.
+    //
+    // Si la compactación falla, se envía el original a OpenRouter
+    // como fallback.
+
+    /**
+     * Estima tokens de forma conservadora (~3.5 chars/token para español).
+     */
+    private function estimateTokens(string $text): int
+    {
+        return max(1, (int) ceil(mb_strlen($text) / 3.5));
+    }
+
+    /**
+     * Compacta texto vía NvidiaService preservando la información
+     * pedagógica esencial. Si falla, retorna el texto original.
+     */
+    private function compactWithNvidia(string $text): string
+    {
+        /** @var NvidiaService $nvidia */
+        $nvidia = app(NvidiaService::class);
+
+        $result = $nvidia->ask(
+            'Eres un asistente que compacta texto pedagógico. Preserva TODA la información esencial: datos curriculares, nombres de competencias, indicadores de logro, áreas de aprendizaje y contenidos. Elimina solo redundancias, relleno y repeticiones. No pierdas contenido sustantivo ni datos clave. Responde SOLO con el texto compactado, sin explicaciones ni metadatos.',
+            $text,
+            [
+                'max_tokens'  => min(1536, (int) ceil($this->estimateTokens($text) * 0.55)),
+                'temperature' => 0.3,
+            ]
+        );
+
+        if (!$result['success'] || empty(trim($result['content'] ?? ''))) {
+            return $text;
+        }
+
+        $compacted = trim($result['content']);
+
+        // Limpiar anotaciones de seguridad que Nvidia a veces prefija
+        $compacted = $this->stripSafetyAnnotations($compacted);
+
+        if (empty($compacted)) {
+            return $text;
+        }
+
+        // Solo usar si realmente se redujo (evita respuestas espurias)
+        if (mb_strlen($compacted) >= mb_strlen($text) * 0.95) {
+            return $text;
+        }
+
+        return $compacted;
+    }
+
+    /**
+     * Elimina líneas de anotaciones de seguridad que ciertos modelos
+     * (Nvidia, etc.) prefijan en las respuestas.
+     *
+     * Ejemplos: "User Safety: safe", "**Content Safety:** medium_low",
+     * "Output Safety: high", "Safety: safe".
+     */
+    private function stripSafetyAnnotations(string $text): string
+    {
+        $lines = explode("\n", $text);
+        $filtered = array_filter($lines, function (string $line): bool {
+            $trimmed = trim($line);
+            if (empty($trimmed)) {
+                return true;
+            }
+            // "User Safety: safe", "**User Safety:** safe"
+            if (preg_match('/^(?:\*{1,2}\s*)?(?:User|Content|Output|Model)\s+Safety\s*:\s*(?:\*{1,2}\s*)?\w+/i', $trimmed)) {
+                return false;
+            }
+            // "Safety: high", "**Safety:** safe"
+            if (preg_match('/^(?:\*{1,2}\s*)?Safety\s*:\s*(?:\*{1,2}\s*)?\w+\s*$/i', $trimmed)) {
+                return false;
+            }
+            return true;
+        });
+        return trim(implode("\n", $filtered));
+    }
+
+    /**
+     * Envía un prompt a OpenRouter, compactándolo automáticamente
+     * con Nvidia si el user prompt supera el token budget.
+     *
+     * Si OpenRouter falla (ej: créditos insuficientes), cae en
+     * NvidiaService como fallback automático.
+     *
+     * @param  string       $systemPrompt  Instrucción del sistema.
+     * @param  string       $userPrompt    Mensaje del usuario.
+     * @param  array        $overrides     Overrides para el LLM.
+     * @param  int          $tokenBudget   Máx. tokens del user prompt antes de compactar.
+     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
+     */
+    private function askWithCompaction(
+        string $systemPrompt,
+        string $userPrompt,
+        array  $overrides = [],
+        int    $tokenBudget = 2000
+    ): array {
+        $estimatedTokens = $this->estimateTokens($userPrompt);
+        $compacted = false;
+        $originalSize = mb_strlen($userPrompt);
+
+        if ($estimatedTokens > $tokenBudget) {
+            $compactResult = $this->compactWithNvidia($userPrompt);
+
+            if ($compactResult !== $userPrompt && mb_strlen($compactResult) < $originalSize * 0.9) {
+                $userPrompt = $compactResult;
+                $compacted = true;
+
+                $this->notification()->info(
+                    'Prompt compactado',
+                    'El contexto se compactó vía NVIDIA para optimizar tokens ('
+                    . number_format($originalSize) . ' → ' . number_format(mb_strlen($compactResult)) . ' chars).'
+                );
+            }
+        }
+
+        // ─── Fase 1: intentar con OpenRouter ─────────────────────
+        /** @var OpenRouterService $llm */
+        $llm = app(OpenRouterService::class);
+        $result = $llm->ask($systemPrompt, $userPrompt, $overrides);
+
+        // ─── Fase 2: si OpenRouter falla, caer en Nvidia ─────────
+        if (!$result['success']) {
+            $errorMsg = $result['error'] ?? '';
+
+            // HTTP 429 (rate limit) → fallback automático a Nvidia
+            if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit exceeded') || str_contains($errorMsg, 'free-models-per-day')) {
+                $this->notification()->info(
+                    'Usando NVIDIA (fallback)',
+                    'OpenRouter alcanzó el límite de requests. Usando modelo NVIDIA como alternativa.'
+                );
+
+                /** @var NvidiaService $nvidia */
+                $nvidia = app(NvidiaService::class);
+                return $nvidia->ask($systemPrompt, $userPrompt, $overrides);
+            }
+
+            // Errores que no son rate limit: informar al usuario
+            if (str_contains($errorMsg, '402') || str_contains($errorMsg, 'Insufficient credits')) {
+                $this->notification()->error(
+                    'OpenRouter sin créditos',
+                    'La generación requiere créditos en OpenRouter. Agrega créditos en openrouter.ai/settings/credits y vuelve a intentar.'
+                );
+            }
+
+            return $result;
+        }
+
+        return $result;
+    }
+
+    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
+
+    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
+
+    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
+
+    /**
+     * Parsea la respuesta del LLM extrayendo título y descripción.
+     * Soporta múltiples formatos de respuesta:
+     *
+     *   "Título || Descripción"        (separador ||)
+     *   "Título\nDescripción"           (primera línea = título)
+     *   "**Título:** ...\n**Descripción:** ..."  (markdown)
+     *   "Título: ...\nDescripción: ..." (etiquetas literales)
+     */
+    private function parseTitleDescription(string $content): array
+    {
+        $content = trim($content);
+        if (empty($content)) {
+            return ['', ''];
+        }
+
+        // ── Pre-procesamiento: eliminar líneas de seguridad/anotaciones ──
+        $content = $this->stripSafetyAnnotations($content);
+
+        // Si después de filtrar solo quedaban anotaciones de seguridad
+        if (empty($content)) {
+            return ['', ''];
+        }
+
+        // ── Estrategia 1: separador "||" (formato original) ──────
+        if (str_contains($content, '||')) {
+            $parts = explode('||', $content, 2);
+            $title = trim($parts[0]);
+            $desc  = trim($parts[1] ?? '');
+            // Limpiar posibles prefijos tipo "Título:" o "Linea 1 →"
+            $title = $this->stripLabelPrefix($title, ['titulo', 'título', 'title', 'linea 1', 'línea 1']);
+            $desc  = $this->stripLabelPrefix($desc, ['descripcion', 'descripción', 'description', 'linea 2', 'línea 2']);
+            if (!empty($title)) {
+                return [$title, $desc];
+            }
+        }
+
+        // ── Estrategia 2: etiquetas markdown "**Título:** /**Descripción:**" ─
+        $mdPattern = '/\*\*(?:T[íi]tulo|Título|Title|Descripci[oó]n|Description)\s*:\s*\*\*(.*?)(?=\s*\*\*(?:T[íi]tulo|Descripci[oó]n|))\s*/ius';
+        if (preg_match_all($mdPattern, $content, $mdMatches)) {
+            $title = '';
+            $desc  = '';
+            foreach ($mdMatches[0] as $i => $fullMatch) {
+                $value = trim($mdMatches[1][$i] ?? '');
+                if (stripos($fullMatch, 'título') !== false || stripos($fullMatch, 'titulo') !== false || stripos($fullMatch, 'title') !== false) {
+                    $title = $value;
+                } elseif (stripos($fullMatch, 'descripción') !== false || stripos($fullMatch, 'descripcion') !== false || stripos($fullMatch, 'description') !== false) {
+                    $desc = $value;
+                }
+            }
+            if (!empty($title) && !empty($desc)) {
+                return [$title, $desc];
+            }
+        }
+
+        // ── Estrategia 3: etiquetas literales "Título:" / "Descripción:" ──
+        $labelPattern = '/(?:T[íi]tulo|Título|Title|Descripci[oó]n|Description)\s*:\s*(.*?)(?=(?:\n(?:T[íi]tulo|Descripci[oó]n|Description)\s*:))/ius';
+        // Buscar párrafos etiquetados
+        $lines = explode("\n", $content);
+        $title = '';
+        $desc  = '';
+        $currentLabel = null;
+        $buffer = '';
+        foreach ($lines as $rawLine) {
+            $line = trim($rawLine);
+            if (empty($line)) {
+                continue;
+            }
+            // Detectar etiqueta
+            $matched = false;
+            foreach (['Título:', 'Titulo:', 'Title:', 'Descripción:', 'Descripcion:', 'Description:'] as $label) {
+                if (str_starts_with(mb_strtolower($line), mb_strtolower($label))) {
+                    // Guardar buffer anterior
+                    if ($currentLabel === 'title' && !empty($buffer)) {
+                        $title = trim($buffer);
+                    } elseif ($currentLabel === 'desc' && !empty($buffer)) {
+                        $desc = trim($buffer);
+                    }
+                    $currentLabel = (stripos($label, 'título') !== false || stripos($label, 'titulo') !== false || stripos($label, 'title') !== false) ? 'title' : 'desc';
+                    $buffer = trim(mb_substr($line, mb_strlen($label)));
+                    $matched = true;
+                    break;
+                }
+            }
+            if (!$matched) {
+                $buffer .= "\n" . $line;
+            }
+        }
+        // Último buffer
+        if ($currentLabel === 'title' && !empty($buffer)) {
+            $title = trim($buffer);
+        } elseif ($currentLabel === 'desc' && !empty($buffer)) {
+            $desc = trim($buffer);
+        }
+        if (!empty($title) && !empty($desc)) {
+            return [$title, $desc];
+        }
+
+        // ── Estrategia 4: primera línea = título, resto = descripción ──
+        $nonEmpty = array_values(array_filter(explode("\n", $content), fn($l) => !empty(trim($l))));
+        if (count($nonEmpty) >= 2) {
+            $first = trim($nonEmpty[0]);
+            $rest  = trim(implode("\n", array_slice($nonEmpty, 1)));
+            // La primera línea no debería ser muy larga para ser título
+            if (mb_strlen($first) <= 200 && !empty($rest)) {
+                return [$first, $rest];
+            }
+        }
+
+        // ── Estrategia 5 (fallback absoluto): todo es el título ──
+        $maxTitle = 120;
+        $fallbackTitle = mb_strlen($content) > $maxTitle ? mb_substr($content, 0, $maxTitle) . '…' : $content;
+        return [$fallbackTitle, ''];
+    }
+
+    /**
+     * Elimina prefijos de etiqueta como "Título:" o "Línea 1 →" del texto.
+     */
+    private function stripLabelPrefix(string $text, array $labels): string
+    {
+        $text = trim($text);
+        foreach ($labels as $label) {
+            // Con dos puntos
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . ':')) {
+                $text = trim(mb_substr($text, mb_strlen($label) + 1));
+            }
+            // Con flecha "→"
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . '→')) {
+                $text = trim(mb_substr($text, mb_strlen($label) + 1));
+            }
+            // Con guión " - " o " -> "
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . ' -')) {
+                $text = trim(mb_substr($text, mb_strlen($label) + 2));
+            }
+        }
+        return trim($text);
+    }
+
     // ─── Render ────────────────────────────────────────────────
 
     public function render()
@@ -1216,7 +1877,7 @@ PROMPT;
         if ($this->mode === 'wizard') {
             return view('livewire.profesor.lms.lesson-wizard', [
                 'totalSteps' => 4,
-            ])->layout('planning.layouts.app');
+            ])->layout('profesors.layouts.app');
         }
 
         // Modo listado
@@ -1272,6 +1933,6 @@ PROMPT;
 
         return view('livewire.profesor.lms.lesson-wizard', compact(
             'activities', 'listLapso', 'listPestudio', 'listGrado', 'listSeccion'
-        ))->layout('planning.layouts.app');
+        ))->layout('profesors.layouts.app');
     }
 }

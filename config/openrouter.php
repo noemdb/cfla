@@ -16,7 +16,7 @@ return [
 
     'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
 
-    'model' => env('OPENROUTER_MODEL', 'qwen/qwen3-vl-30b-a3b-thinking'),
+    'model' => env('OPENROUTER_MODEL', 'google/gemma-4-31b-it:free'),
 
     /*
     |--------------------------------------------------------------------------

@@ -39,4 +39,9 @@ return [
         'oauth_url'              => env('SENDPULSE_OAUTH_URL', 'https://api.sendpulse.com/oauth/access_token'),
     ],
 
+    'gemini' => [
+        'api_key'         => env('GEMINI_API_KEY'),
+        'api_url'         => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+    ],
+
 ];

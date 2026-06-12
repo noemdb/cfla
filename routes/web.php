@@ -216,6 +216,7 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
     Route::prefix('lms')->name('lms.')->group(function () {
         Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
         Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
+        Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
     });
 });
 

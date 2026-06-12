@@ -1,5 +1,5 @@
 {{-- Session Detail Modal --}}
-@if($showSessionModal && $selectedSession)
+@if($SessionModalReport && $selectedSession)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showSessionModal', false)"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
