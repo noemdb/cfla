@@ -20,6 +20,7 @@ class Catchment extends Model
      *   'end'   => Fecha de fin   (Y-m-d)
      */
     const JORNADAS = [
+        // --- Mayo (Existente) ---
         [
             'label' => 'Segunda convocatoria: del 05 al 07 de mayo',
             'start' => '2026-05-05',
@@ -30,10 +31,47 @@ class Catchment extends Model
             'start' => '2026-05-26',
             'end'   => '2026-05-28',
         ],
+        
+        // --- Junio y Julio (Extendido) ---
         [
             'label' => 'Cuarta convocatoria: del 08 al 12 de junio',
             'start' => '2026-06-08',
             'end'   => '2026-06-12',
+        ],
+        [
+            'label' => 'Quinta convocatoria: del 15 al 19 de junio',
+            'start' => '2026-06-15',
+            'end'   => '2026-06-19',
+        ],
+        [
+            'label' => 'Sexta convocatoria: del 22 al 26 de junio',
+            'start' => '2026-06-22',
+            'end'   => '2026-06-26',
+        ],
+        [
+            'label' => 'Séptima convocatoria: del 29 de junio al 03 de julio',
+            'start' => '2026-06-29',
+            'end'   => '2026-07-03',
+        ],
+        [
+            'label' => 'Octava convocatoria: del 06 al 10 de julio',
+            'start' => '2026-07-06',
+            'end'   => '2026-07-10',
+        ],
+        [
+            'label' => 'Novena convocatoria: del 13 al 17 de julio',
+            'start' => '2026-07-13',
+            'end'   => '2026-07-17',
+        ],
+        [
+            'label' => 'Décima convocatoria: del 20 al 24 de julio',
+            'start' => '2026-07-20',
+            'end'   => '2026-07-24',
+        ],
+        [
+            'label' => 'Undécima convocatoria: del 27 al 31 de julio',
+            'start' => '2026-07-27',
+            'end'   => '2026-07-31',
         ],
     ];
 
