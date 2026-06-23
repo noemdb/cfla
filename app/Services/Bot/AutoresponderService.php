@@ -8,9 +8,14 @@ class AutoresponderService
 {
     /**
      * Base URL de la API de saefl (s2526).
-     * La API es la misma que consume la app AutoResponder original.
+     * Se define desde APP_URL_SAEFL en el .env, con fallback a localhost.
      */
-    protected string $baseUrl = 'http://localhost:2526/api/bot/autoresponder';
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = rtrim(env('APP_URL_SAEFL', 'http://localhost:2526'), '/') . '/api/bot/autoresponder';
+    }
 
     /**
      * Procesa el mensaje del chatbot redirigiendo al endpoint
