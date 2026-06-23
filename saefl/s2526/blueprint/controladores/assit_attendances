@@ -1,0 +1,7 @@
+php artisan make:controller 'Administracion\AssistControl\AssitAttendanceController'
+php artisan make:controller 'Administracion\AssistControl\AssitScheduleController'
+php artisan make:controller 'Administracion\AssistControl\AssitDayController'
+php artisan make:controller 'Administracion\AssistControl\AssitHourController'
+php artisan make:controller 'Administracion\AssistControl\AssitObservationController'
+php artisan make:controller 'Administracion\AssistControl\AssitPermissionController'
+php artisan make:controller 'Administracion\AssistControl\AssitTurnController'

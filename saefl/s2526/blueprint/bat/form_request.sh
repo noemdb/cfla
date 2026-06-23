@@ -1,0 +1,6 @@
+php artisan make:request 'Admin\CreateUserRequest'
+php artisan make:request 'Admin\UpdateUserRequest'
+php artisan make:request 'Admin\CreateProfileRequest'
+php artisan make:request 'Admin\UpdateProfileRequest'
+php artisan make:request 'Admin\CreateRolRequest'
+php artisan make:request 'Admin\UpdateRolRequest'

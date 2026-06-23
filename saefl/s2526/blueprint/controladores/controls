@@ -1,0 +1,7 @@
+php artisan make:controller 'Controls\HomeController'
+php artisan make:controller 'Controls\Tab\AdministracionController'
+php artisan make:controller 'Controls\Tab\ControlController'
+php artisan make:controller 'Controls\Tab\AuditController'
+php artisan make:controller 'Controls\Tab\UserController'
+
+php artisan make:controller 'Controls\Tab\CollPoliticalController' &&

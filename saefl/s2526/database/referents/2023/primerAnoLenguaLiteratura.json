@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "140",
+        "name": "[LE-LI-1A] LENGUA Y LITERATURA [pensumId=140]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-LE-LI-1A-01",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Comprende y produce textos escritos con intención comunicativa y propósito específico.",
+            "descripcion": "El estudiante interpreta, analiza y crea textos narrativos, expositivos y argumentativos, adaptando su lenguaje al contexto y audiencia."
+        },
+        {
+            "id": "COMP-LE-LI-1A-02",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Utiliza estrategias de lectura crítica para inferir, sintetizar y evaluar textos literarios y no literarios.",
+            "descripcion": "Aplica técnicas como paráfrasis, inferencia, identificación de ideas principales y análisis de estructura textual."
+        },
+        {
+            "id": "COMP-LE-LI-1A-03",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Reconoce y valora la literatura como expresión cultural y artística del pueblo venezolano y universal.",
+            "descripcion": "Identifica características del discurso lírico, comprende su función expresiva y lo contextualiza histórica y socialmente."
+        },
+        {
+            "id": "COMP-LE-LI-1A-04",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Aplica normas ortográficas, gramaticales y de puntuación en la producción escrita formal.",
+            "descripcion": "Corrige errores de acentuación, concordancia, uso de signos de puntuación y registro léxico según el contexto."
+        },
+        {
+            "id": "COMP-LE-LI-1A-05",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Participa en intercambios orales formales e informales con claridad, respeto y argumentación fundamentada.",
+            "descripcion": "Interviene en debates, mesas redondas y exposiciones orales, escuchando activamente y respondiendo con pertinencia."
+        },
+        {
+            "id": "COMP-LE-LI-1A-06",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Reconoce y utiliza diversos géneros discursivos según su finalidad comunicativa.",
+            "descripcion": "Selecciona el género adecuado para producir textos funcionales (informes, reseñas, manifiestos, guías) en contextos escolares y comunitarios."
+        },
+        {
+            "id": "COMP-LE-LI-1A-07",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Desarrolla proyectos investigativos que integran fuentes confiables y citación ética.",
+            "descripcion": "Formula preguntas de indagación, recopila información de fuentes primarias y secundarias, y presenta hallazgos con rigor académico."
+        },
+        {
+            "id": "COMP-LE-LI-1A-08",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Analiza el discurso publicitario y mediático desde una perspectiva crítica y ciudadana.",
+            "descripcion": "Identifica intenciones persuasivas, sesgos ideológicos y estrategias retóricas en medios impresos, digitales y audiovisuales."
+        },
+        {
+            "id": "COMP-LE-LI-1A-09",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Valora la diversidad lingüística y cultural en textos nacionales e internacionales.",
+            "descripcion": "Reconoce variedades del español, lenguas originarias y registros sociales del lenguaje como expresión de identidad y patrimonio."
+        },
+        {
+            "id": "COMP-LE-LI-1A-10",
+            "referent_id": "2",
+            "pensum_id": 140,
+            "nombre": "Utiliza la paráfrasis, resumen y síntesis como herramientas para la comprensión y producción textual.",
+            "descripcion": "Reformula ideas ajenas sin alterar su sentido, distinguiendo entre cita, parafraseo y plagio."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-LE-LI-1A-01-01",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-01",
+            "descripcion": "Identifica la estructura y propósito de textos expositivos y argumentativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-01-02",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-02",
+            "descripcion": "Redacta textos coherentes con introducción, desarrollo y conclusión, utilizando conectores adecuados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-01-03",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-03",
+            "descripcion": "Adapta el registro lingüístico (formal/informal) al destinatario y propósito del texto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-01-04",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-04",
+            "descripcion": "Incluye evidencia relevante (datos, citas, ejemplos) para respaldar sus argumentos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-01-05",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-05",
+            "descripcion": "Concluye su texto reafirmando la tesis sin introducir ideas nuevas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-01-06",
+            "competency_id": "COMP-LE-LI-1A-01",
+            "codigo": "LE-LI-1A-IL-06",
+            "descripcion": "Evita repeticiones innecesarias mediante el uso de sinónimos y recursos cohesivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-01",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-07",
+            "descripcion": "Parafrasea y resume textos narrativos manteniendo la idea central.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-02",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-08",
+            "descripcion": "Realiza inferencias a partir de indicios textuales explícitos e implícitos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-03",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-09",
+            "descripcion": "Identifica recursos retóricos (ironía, hipérbole, pregunta retórica) en textos argumentativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-04",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-10",
+            "descripcion": "Distingue entre hechos, opiniones y juicios de valor en textos periodísticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-05",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-11",
+            "descripcion": "Evalúa la credibilidad de fuentes informativas según su autoría, fecha y propósito.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-02-06",
+            "competency_id": "COMP-LE-LI-1A-02",
+            "codigo": "LE-LI-1A-IL-12",
+            "descripcion": "Contrasta distintas versiones de un mismo hecho presentadas en medios diversos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-01",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-13",
+            "descripcion": "Identifica elementos del discurso lírico (yo poético, tema, figuras retóricas) en poemas contemporáneos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-02",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-14",
+            "descripcion": "Relaciona el contenido de una obra literaria con su contexto histórico y social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-03",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-15",
+            "descripcion": "Compara obras literarias de autores venezolanos con otras de tradición universal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-04",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-16",
+            "descripcion": "Argumenta cómo la literatura puede inspirar acciones solidarias o transformadoras.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-05",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-17",
+            "descripcion": "Crea un poema breve aplicando recursos del discurso lírico estudiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-03-06",
+            "competency_id": "COMP-LE-LI-1A-03",
+            "codigo": "LE-LI-1A-IL-18",
+            "descripcion": "Participa en clubes de lectura o tertulias literarias con aportes críticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-01",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-19",
+            "descripcion": "Aplica correctamente las reglas de acentuación gráfica (agudas, graves, esdrújulas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-02",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-20",
+            "descripcion": "Utiliza signos de puntuación (coma, punto y coma, dos puntos) con propiedad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-03",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-21",
+            "descripcion": "Corrige errores de concordancia verbal y nominal en sus propios textos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-04",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-22",
+            "descripcion": "Evita muletillas, repeticiones innecesarias y vicios del lenguaje en textos formales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-05",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-23",
+            "descripcion": "Selecciona el léxico preciso según el campo semántico del tema tratado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-04-06",
+            "competency_id": "COMP-LE-LI-1A-04",
+            "codigo": "LE-LI-1A-IL-24",
+            "descripcion": "Revisa y edita sus textos en al menos dos versiones antes de entregarlos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-01",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-25",
+            "descripcion": "Expone oralmente un tema con claridad, orden y apoyo visual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-02",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-26",
+            "descripcion": "Escucha activamente y formula preguntas pertinentes a otros expositores.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-03",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-27",
+            "descripcion": "Defiende una postura en un debate con argumentos válidos y respeto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-04",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-28",
+            "descripcion": "Modula su voz, gestos y lenguaje corporal para reforzar su mensaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-05",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-29",
+            "descripcion": "Adapta su discurso oral al tipo de audiencia (compañeros, docentes, comunidad).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-05-06",
+            "competency_id": "COMP-LE-LI-1A-05",
+            "codigo": "LE-LI-1A-IL-30",
+            "descripcion": "Recibe retroalimentación oral con apertura y la incorpora a futuras intervenciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-01",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-31",
+            "descripcion": "Elige el género discursivo adecuado para una situación comunicativa dada (carta, informe, reseña, manifiesto).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-02",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-32",
+            "descripcion": "Identifica las convenciones estructurales de un género (ej.: carta formal: fecha, destinatario, despedida).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-03",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-33",
+            "descripcion": "Adapta el contenido de un mismo mensaje a distintos géneros (ej.: noticia → resumen → infografía).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-04",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-34",
+            "descripcion": "Reconoce las diferencias entre géneros digitales (blog, tweet, hilo) y tradicionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-05",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-35",
+            "descripcion": "Produce un manifiesto escolar con lenguaje persuasivo y llamado a la acción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-06-06",
+            "competency_id": "COMP-LE-LI-1A-06",
+            "codigo": "LE-LI-1A-IL-36",
+            "descripcion": "Analiza cómo el género influye en la recepción del mensaje por parte del lector.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-01",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-37",
+            "descripcion": "Formula una pregunta de investigación clara, viable y relevante.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-02",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-38",
+            "descripcion": "Selecciona fuentes confiables (libros, revistas académicas, sitios institucionales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-03",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-39",
+            "descripcion": "Organiza la información recolectada en categorías temáticas coherentes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-04",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-40",
+            "descripcion": "Cita fuentes en el cuerpo del texto y en la bibliografía según formato institucional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-05",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-41",
+            "descripcion": "Presenta hallazgos en un informe escrito con introducción, desarrollo y conclusiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-07-06",
+            "competency_id": "COMP-LE-LI-1A-07",
+            "codigo": "LE-LI-1A-IL-42",
+            "descripcion": "Defiende oralmente su investigación ante un jurado o audiencia escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-01",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-43",
+            "descripcion": "Identifica la intención persuasiva en anuncios publicitarios impresos o digitales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-02",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-44",
+            "descripcion": "Detecta manipulación emocional en titulares o publicaciones virales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-03",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-45",
+            "descripcion": "Analiza cómo los medios construyen agendas y priorizan ciertos temas sobre otros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-04",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-46",
+            "descripcion": "Critica representaciones estereotipadas en campañas publicitarias o programas mediáticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-05",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-47",
+            "descripcion": "Propone criterios para distinguir información verificable de opinión o desinformación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-08-06",
+            "competency_id": "COMP-LE-LI-1A-08",
+            "codigo": "LE-LI-1A-IL-48",
+            "descripcion": "Reflexiona sobre su propia posición ideológica al interpretar un mensaje mediático.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-01",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-49",
+            "descripcion": "Reconoce variedades del español (venezolano, rioplatense, peninsular) en textos auténticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-02",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-50",
+            "descripcion": "Identifica palabras o expresiones de lenguas originarias en el habla cotidiana venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-03",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-51",
+            "descripcion": "Valora la riqueza del lenguaje popular, refranes y dichos como patrimonio cultural.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-04",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-52",
+            "descripcion": "Evita el uso discriminatorio del lenguaje en sus producciones orales y escritas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-05",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-53",
+            "descripcion": "Compara formas de expresión en distintos registros sociales (coloquial, técnico, académico).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-09-06",
+            "competency_id": "COMP-LE-LI-1A-09",
+            "codigo": "LE-LI-1A-IL-54",
+            "descripcion": "Argumenta por qué la diversidad lingüística enriquece la comunicación humana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-01",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-55",
+            "descripcion": "Parafrasea un párrafo manteniendo el significado original y usando vocabulario propio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-02",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-56",
+            "descripcion": "Resume un texto extenso en no más de 1/3 de su extensión original.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-03",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-57",
+            "descripcion": "Sintetiza ideas de múltiples fuentes en un solo enunciado coherente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-04",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-58",
+            "descripcion": "Evita el plagio mediante la cita textual o parafraseo con atribución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-05",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-59",
+            "descripcion": "Distingue entre idea principal y detalles secundarios en un texto académico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-LE-LI-1A-10-06",
+            "competency_id": "COMP-LE-LI-1A-10",
+            "codigo": "LE-LI-1A-IL-60",
+            "descripcion": "Utiliza la paráfrasis como estrategia para comprender textos complejos.",
+            "nivel_esperado": 3
+        }
+    ]
+}

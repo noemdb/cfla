@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "143",
+        "name": "[OR-VOC-1A] ORIENTACIÓN VOCACIONAL [pensumId=143]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-OR-VOC-1A-01",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Desarrolla una identidad personal y vocacional coherente, crítica y comprometida con los valores de la Pedagogía Amigoniana.",
+            "descripcion": "Reflexiona sobre sus emociones, intereses, talentos y creencias, integrando principios de solidaridad, responsabilidad, alegría y servicio comunitario en su proyecto de vida."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-02",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Explora opciones formativas y profesionales alineadas con sus intereses, capacidades y el contexto socioeconómico nacional.",
+            "descripcion": "Investiga carreras técnicas, universitarias y emprendimientos posibles en Venezuela, considerando demandas del mercado laboral, vocación de servicio y soberanía productiva."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-03",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Elabora un proyecto de vida personal y profesional con sentido de propósito, realismo y proyección social.",
+            "descripcion": "Define metas académicas, laborales y personales a corto, mediano y largo plazo, integrando formación, trabajo y compromiso con la comunidad."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-04",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Fortalece habilidades para la toma de decisiones autónoma, informada y ética en su desarrollo vocacional.",
+            "descripcion": "Aplica estrategias de autoevaluación, análisis de alternativas y evaluación de consecuencias para orientar sus elecciones formativas y laborales."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-05",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Reconoce la diversidad de trayectorias vitales y profesionales como expresión de la riqueza humana y social.",
+            "descripcion": "Valora caminos no tradicionales (emprendimiento, oficios, formación técnica, cooperativismo) como opciones válidas y dignas de realización personal."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-06",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Prepara herramientas básicas para su inserción en el mundo educativo y laboral post-secundario.",
+            "descripcion": "Elabora currículum vitae, practica entrevistas simuladas, identifica instituciones formativas y comprende procesos de admisión o selección."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-07",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Promueve una visión del trabajo como fuente de dignidad, desarrollo humano y transformación social.",
+            "descripcion": "Rechaza visiones mercantilistas del empleo y defiende el trabajo decente, la economía solidaria y la producción endógena como pilares del bien común."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-08",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Establece redes de apoyo y orientación para su desarrollo personal y profesional.",
+            "descripcion": "Identifica figuras de referencia (docentes, familiares, profesionales), busca mentorías y participa en espacios de acompañamiento vocacional."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-09",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Integra saberes académicos, técnicos y espirituales en la construcción de su proyecto de vida.",
+            "descripcion": "Articula aprendizajes de distintas áreas del conocimiento con su dimensión ética, espiritual y social, orientando su futuro hacia el servicio al Reino de Dios y al bien común."
+        },
+        {
+            "id": "COMP-OR-VOC-1A-10",
+            "referent_id": "2",
+            "pensum_id": 143,
+            "nombre": "Participa en ferias, talleres y encuentros vocacionales que amplíen su horizonte de posibilidades formativas y profesionales.",
+            "descripcion": "Asiste a eventos institucionales, interactúa con representantes de instituciones educativas y técnicas, y comparte su proceso de discernimiento con pares."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-OR-VOC-1A-01-01",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-01",
+            "descripcion": "Reflexiona por escrito sobre sus fortalezas, debilidades, intereses y aspiraciones personales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-01-02",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-02",
+            "descripcion": "Identifica influencias familiares, culturales y mediáticas en la formación de su identidad y expectativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-01-03",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-03",
+            "descripcion": "Relaciona los principios amigonianos (alegría, trabajo, servicio) con sus decisiones vocacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-01-04",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-04",
+            "descripcion": "Expresa su identidad a través de producciones creativas (collage, mapa de sueños, relato autobiográfico).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-01-05",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-05",
+            "descripcion": "Reconoce la importancia del sentido de pertenencia a su escuela, comunidad y país en su proyecto de vida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-01-06",
+            "competency_id": "COMP-OR-VOC-1A-01",
+            "codigo": "OR-VOC-1A-IL-06",
+            "descripcion": "Argumenta por qué la coherencia entre valores, talentos y opciones profesionales es clave para la realización personal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-01",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-07",
+            "descripcion": "Investiga al menos tres opciones formativas post-secundarias (universidad, instituto técnico, emprendimiento).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-02",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-08",
+            "descripcion": "Describe perfiles profesionales de carreras vinculadas a la ciencia, tecnología, producción o servicios sociales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-03",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-09",
+            "descripcion": "Analiza la relación entre las necesidades del país y las oportunidades de formación en áreas estratégicas (salud, energía, agro, educación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-04",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-10",
+            "descripcion": "Identifica instituciones venezolanas públicas o comunitarias que ofrecen formación en sus áreas de interés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-05",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-11",
+            "descripcion": "Evalúa ventajas y desafíos de cada opción formativa considerando recursos, ubicación y duración.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-02-06",
+            "competency_id": "COMP-OR-VOC-1A-02",
+            "codigo": "OR-VOC-1A-IL-12",
+            "descripcion": "Reconoce que la vocación puede evolucionar y que el aprendizaje es permanente a lo largo de la vida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-01",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-13",
+            "descripcion": "Establece metas personales, académicas y profesionales a corto (1 año), mediano (3 años) y largo plazo (5+ años).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-02",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-14",
+            "descripcion": "Define pasos concretos para alcanzar cada meta (estudios, prácticas, certificaciones, experiencia).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-03",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-15",
+            "descripcion": "Incluye en su proyecto de vida dimensiones no laborales: salud, relaciones, espiritualidad, ocio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-04",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-16",
+            "descripcion": "Vincula su proyecto personal con el desarrollo local, nacional y los Objetivos de Desarrollo Sostenible (ODS).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-05",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-17",
+            "descripcion": "Presenta su proyecto de vida en un formato creativo (carpeta, presentación digital, video).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-03-06",
+            "competency_id": "COMP-OR-VOC-1A-03",
+            "codigo": "OR-VOC-1A-IL-18",
+            "descripcion": "Reflexiona sobre cómo su proyecto contribuye al bien común y a la transformación social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-01",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-19",
+            "descripcion": "Aplica técnicas de autoevaluación (test de intereses, rueda de la vida, inventario de habilidades).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-02",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-20",
+            "descripcion": "Analiza ventajas y desventajas de distintas opciones formativas o profesionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-03",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-21",
+            "descripcion": "Evalúa las posibles consecuencias de sus decisiones en su vida personal, familiar y comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-04",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-22",
+            "descripcion": "Toma decisiones con autonomía, sin ceder a presiones externas contrarias a sus valores.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-05",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-23",
+            "descripcion": "Busca información confiable antes de tomar decisiones importantes sobre su futuro.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-04-06",
+            "competency_id": "COMP-OR-VOC-1A-04",
+            "codigo": "OR-VOC-1A-IL-24",
+            "descripcion": "Acepta que equivocarse forma parte del proceso de aprendizaje y ajusta su rumbo cuando es necesario.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-01",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-25",
+            "descripcion": "Reconoce el valor social y económico de los oficios manuales, artesanales y técnicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-02",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-26",
+            "descripcion": "Valora el emprendimiento comunitario, cooperativo y solidario como alternativa al modelo empresarial tradicional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-03",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-27",
+            "descripcion": "Evita estereotipos de género, clase o etnia al considerar opciones profesionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-04",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-28",
+            "descripcion": "Entrevista a personas que han seguido trayectorias no convencionales y aprende de sus experiencias.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-05",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-29",
+            "descripcion": "Argumenta que toda actividad humana digna puede ser camino de realización personal y servicio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-05-06",
+            "competency_id": "COMP-OR-VOC-1A-05",
+            "codigo": "OR-VOC-1A-IL-30",
+            "descripcion": "Rechaza visiones elitistas que privilegian ciertas profesiones sobre otras.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-01",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-31",
+            "descripcion": "Elabora un currículum vitae básico con datos personales, formación, habilidades y experiencias relevantes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-02",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-32",
+            "descripcion": "Practica entrevistas simuladas respondiendo preguntas comunes con claridad y seguridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-03",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-33",
+            "descripcion": "Identifica requisitos de admisión en instituciones de educación superior o técnica en Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-04",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-34",
+            "descripcion": "Prepara una carta de motivación sencilla para aplicar a programas de formación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-05",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-35",
+            "descripcion": "Conoce plataformas nacionales (OPSU, Misión Sucre, INCES) para la orientación y acceso a la formación post-secundaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-06-06",
+            "competency_id": "COMP-OR-VOC-1A-06",
+            "codigo": "OR-VOC-1A-IL-36",
+            "descripcion": "Participa en simulacros de procesos de selección (pruebas, dinámicas grupales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-01",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-37",
+            "descripcion": "Define el trabajo decente como aquel que respeta la dignidad, derechos y condiciones justas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-02",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-38",
+            "descripcion": "Critica la explotación laboral, la precarización y la informalidad como violaciones a los derechos humanos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-03",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-39",
+            "descripcion": "Promueve modelos de economía solidaria, cooperativa y comunal como alternativas al capitalismo excluyente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-04",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-40",
+            "descripcion": "Valora el trabajo productivo en el campo, la industria y los servicios como base de la soberanía nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-05",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-41",
+            "descripcion": "Reconoce que el trabajo manual y técnico es tan valioso como el intelectual o académico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-07-06",
+            "competency_id": "COMP-OR-VOC-1A-07",
+            "codigo": "OR-VOC-1A-IL-42",
+            "descripcion": "Argumenta que el verdadero desarrollo se mide por el bienestar colectivo, no solo por el crecimiento económico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-01",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-43",
+            "descripcion": "Identifica al menos tres personas de confianza (familiares, docentes, líderes comunitarios) para orientación vocacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-02",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-44",
+            "descripcion": "Solicita mentorías o acompañamiento a profesionales de su área de interés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-03",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-45",
+            "descripcion": "Participa en grupos de pares para compartir dudas, avances y recursos sobre orientación vocacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-04",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-46",
+            "descripcion": "Comunica abiertamente con su familia o tutores sobre sus intereses y necesidades formativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-05",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-47",
+            "descripcion": "Busca información en centros de orientación escolares, universitarios o comunitarios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-08-06",
+            "competency_id": "COMP-OR-VOC-1A-08",
+            "codigo": "OR-VOC-1A-IL-48",
+            "descripcion": "Reconoce que pedir ayuda es un acto de fortaleza, no de debilidad, en el proceso vocacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-01",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-49",
+            "descripcion": "Integra aprendizajes de Matemática, Ciencias, Lenguaje y Tecnología en su proyecto profesional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-02",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-50",
+            "descripcion": "Reflexiona sobre cómo su fe y espiritualidad orientan sus decisiones vocacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-03",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-51",
+            "descripcion": "Articula su proyecto de vida con los valores del Evangelio y la doctrina social de la Iglesia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-04",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-52",
+            "descripcion": "Reconoce que su vocación incluye dimensiones éticas, estéticas, políticas y trascendentes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-05",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-53",
+            "descripcion": "Formula su proyecto como respuesta personal al llamado de Dios en el hoy de la historia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-09-06",
+            "competency_id": "COMP-OR-VOC-1A-09",
+            "codigo": "OR-VOC-1A-IL-54",
+            "descripcion": "Promueve una visión integral del ser humano que rechaza la fragmentación entre mente, cuerpo y espíritu.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-01",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-55",
+            "descripcion": "Participa activamente en ferias vocacionales organizadas por la escuela o instituciones externas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-02",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-56",
+            "descripcion": "Interactúa con representantes de universidades, institutos técnicos y programas de formación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-03",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-57",
+            "descripcion": "Asiste a charlas, talleres o paneles sobre opciones formativas y profesionales en Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-04",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-58",
+            "descripcion": "Comparte su proceso de discernimiento vocacional con compañeros en espacios guiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-05",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-59",
+            "descripcion": "Recoge materiales informativos (folletos, enlaces, contactos) para profundizar en sus opciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-OR-VOC-1A-10-06",
+            "competency_id": "COMP-OR-VOC-1A-10",
+            "codigo": "OR-VOC-1A-IL-60",
+            "descripcion": "Propone actividades vocacionales para futuras generaciones de estudiantes en su institución.",
+            "nivel_esperado": 3
+        }
+    ]
+}

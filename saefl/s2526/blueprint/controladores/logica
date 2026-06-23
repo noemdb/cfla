@@ -1,0 +1,107 @@
+php artisan make:controller 'Administracion\HomeController' &&
+php artisan make:controller 'Administracion\Crud\ConfiguracionController' --resource &&
+php artisan make:controller 'Administracion\Crud\EstudiantesController' --resource &&
+php artisan make:controller 'Administracion\Crud\PadresController' --resource &&
+php artisan make:controller 'Administracion\Crud\PagosAdelantadosController' --resource &&
+php artisan make:controller 'Administracion\Crud\RegistroPagosController' --resource &&
+php artisan make:controller 'Administracion\Crud\CuentasCobrarController' --resource &&
+php artisan make:controller 'Administracion\Crud\OperacionesBancosController' --resource &&
+php artisan make:controller 'Administracion\Crud\AreaController' --resource
+
+php artisan make:controller 'Administracion\Tab\InicioController' &&
+php artisan make:controller 'Administracion\Tab\ConfiguracionController' &&
+php artisan make:controller 'Administracion\Tab\EstudiantesController' &&
+php artisan make:controller 'Administracion\Tab\RetiroController' &&
+php artisan make:controller 'Administracion\Tab\PadresController' &&
+php artisan make:controller 'Administracion\Tab\RepresentantesController' &&
+php artisan make:controller 'Administracion\Tab\PagosAdelantadosController' &&
+php artisan make:controller 'Administracion\Tab\RegistroPagosController' &&
+php artisan make:controller 'Administracion\Tab\RecursoController' &&
+php artisan make:controller 'Administracion\Tab\AbonoController' &&
+php artisan make:controller 'Administracion\Tab\CreditoAFavorController' &&
+php artisan make:controller 'Administracion\Tab\CuentasCobrarController' &&
+php artisan make:controller 'Administracion\Tab\OperacionesBancosController' &&
+php artisan make:controller 'Administracion\Tab\BoletinController'
+php artisan make:controller 'Administracion\Tab\BoletinRevisionController'
+php artisan make:controller 'Administracion\Tab\PevaluacionController' &&
+php artisan make:controller 'Administracion\Tab\EvaluacionController' &&
+php artisan make:controller 'Administracion\Tab\EcualitativaController'
+php artisan make:controller 'Administracion\Tab\EDescriptivaController'
+php artisan make:controller 'Administracion\Tab\ProfesorGestableController' &&
+php artisan make:controller 'Administracion\Tab\EvaluacionGestableController' &&
+
+
+php artisan make:controller 'Administracion\Tab\Inicio\HomeController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\HomeController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PescolarController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\InstitucionController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\AutoridadController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\BancoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PeducativoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PestudioController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\GradoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\SeccionController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\AsignaturaController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\GrupoEstableController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\ProfesorController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\ProfesorGuiaController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PensumController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PlanPagoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PlanBeneficoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\DescuentoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\DescuentoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CuentaXPagarController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\ConceptoPagoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PdescuentoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CcobroController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CbancarioController'
+
+php artisan make:controller 'Administracion\Tab\InscripcionController' &&
+php artisan make:controller 'Administracion\Tab\AdministrativaController' &&
+php artisan make:controller 'Administracion\Tab\MateriaPendienteController' &&
+
+php artisan make:controller 'Administracion\Tab\Estudiante\HomeController' &&
+
+php artisan make:controller 'Administracion\Tab\PadresController' &&
+php artisan make:controller 'Administracion\Tab\PagosAdelantadosController' &&
+php artisan make:controller 'Administracion\Tab\DeudaAnteriorController' &&
+php artisan make:controller 'Administracion\Tab\IngresoController' &&
+php artisan make:controller 'Administracion\Tab\CuentasCobrarController' &&
+php artisan make:controller 'Administracion\Tab\OperacionesBancosController' &&
+php artisan make:controller 'Administracion\Tab\PrepagoController' &&
+php artisan make:controller 'Administracion\Tab\PaymentController' &&
+php artisan make:controller 'Administracion\Tab\MbancarioController' &&
+php artisan make:controller 'Administracion\Tab\PreinscripcionController' &&
+
+
+
+php artisan make:controller 'Administracion\Tab\StatusController' &&
+php artisan make:controller 'Administracion\Tab\Estudiant\DebtpayController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollPoliticalController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollNivelController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollActivityController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollPromiseController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollMessegeController' &&
+php artisan make:controller 'Administracion\Tab\Collection\CollDebtorController' &&
+
+php artisan make:controller 'Administracion\Bot\BmainController' &&
+php artisan make:controller 'Administracion\Bot\BoptionController' &&
+php artisan make:controller 'Administracion\Bot\BmessegeController' &&
+
+
+php artisan make:controller 'Administracion\Assistcontrol\AssitAttendanceController' &&
+php artisan make:controller 'Administracion\Assistcontrol\AssitScheduleController' &&
+php artisan make:controller 'Administracion\Assistcontrol\AssitDayController' &&
+php artisan make:controller 'Administracion\Assistcontrol\AssitObservationController'
+php artisan make:controller 'Administracion\Assistcontrol\AssitPermissionController' &&
+
+php artisan make:controller 'Administracion\Agentia\PromptContextController' &&
+
+
+
+php artisan make:controller 'Helper\ManulasController'
+
+
+
+
+

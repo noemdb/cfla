@@ -1,0 +1,9 @@
+Controller para los api
+php artisan make:controller 'Admon\HomeController'
+
+php artisan make:controller 'Api\Bot\RepresentantController'
+php artisan make:controller 'Api\Bot\ExchangeRateController'
+php artisan make:controller 'Api\Bot\AutoresponderController'
+
+
+php artisan make:controller 'Api\Bot\AutoresponderControlController'

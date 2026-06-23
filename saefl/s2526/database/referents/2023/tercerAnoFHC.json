@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "224",
+        "name": "[FHC-EMCT-3] FORMACIÓN HUMANA CRISTIANA [pensumId=224]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-FHC-3-01",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Desarrolla autoconocimiento desde la dignidad inherente como persona humana.",
+            "descripcion": "Reflexiona críticamente sobre su identidad, fortalezas, limitaciones y potencialidades, reconociendo la dignidad intrínseca que fundamenta los derechos y deberes éticos hacia sí mismo y los demás."
+        },
+        {
+            "id": "COMP-FHC-3-02",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Aplica principios ético-cristianos de justicia, solidaridad y misericordia en la construcción de relaciones dignas.",
+            "descripcion": "Integra valores de equidad, empatía, perdón y servicio en la convivencia diaria, promoviendo el bien común y el desarrollo integral de la comunidad educativa y social."
+        },
+        {
+            "id": "COMP-FHC-3-03",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Analiza el compromiso social desde la opción preferencial por los pobres y excluidos.",
+            "descripcion": "Identifica situaciones de vulnerabilidad, pobreza y exclusión en su entorno, desarrollando proyectos de acompañamiento y transformación social con enfoque de justicia restaurativa."
+        },
+        {
+            "id": "COMP-FHC-3-04",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Explora la espiritualidad como dimensión humana que busca sentido y trascendencia en la vida.",
+            "descripcion": "Reflexiona sobre preguntas existenciales, la búsqueda de sentido y la relación armoniosa con lo sagrado, cultivando la interioridad y el discernimiento vocacional sin imposiciones dogmáticas."
+        },
+        {
+            "id": "COMP-FHC-3-05",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Practica el diálogo interreligioso y respeto a la diversidad de creencias como expresión de fraternidad universal.",
+            "descripcion": "Promueve la convivencia pacífica, el respeto a las diferencias religiosas y la construcción de consensos básicos sobre valores compartidos en contextos pluralistas."
+        },
+        {
+            "id": "COMP-FHC-3-06",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Aplica el principio de cuidado integral de la creación en la promoción de la sostenibilidad ambiental.",
+            "descripcion": "Reconoce la interdependencia entre humanos y naturaleza, desarrollando acciones concretas de ecología integral, economía circular y defensa de los bienes comunes."
+        },
+        {
+            "id": "COMP-FHC-3-07",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Ejercita el liderazgo servicial y la corresponsabilidad en la comunidad educativa y social.",
+            "descripcion": "Asume roles de servicio a los demás, liderando iniciativas de ayuda mutua, mentoría y acompañamiento, priorizando el bienestar colectivo sobre el individualismo."
+        },
+        {
+            "id": "COMP-FHC-3-08",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Discierne moralmente en situaciones complejas aplicando el principio de doble efecto y la búsqueda del bien mayor.",
+            "descripcion": "Analiza dilemas éticos desde múltiples perspectivas, evaluando consecuencias, intenciones y principios morales para tomar decisiones responsables y fundamentadas."
+        },
+        {
+            "id": "COMP-FHC-3-09",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Construye comunidad desde la pertenencia, el acogimiento y la experiencia fraterna compartida.",
+            "descripcion": "Participa activamente en dinámicas de grupo que fortalecen el sentido de pertenencia, la confianza mutua y la construcción de vínculos significativos basados en el respeto."
+        },
+        {
+            "id": "COMP-FHC-3-10",
+            "referent_id": "2",
+            "pensum_id": 224,
+            "nombre": "Desarrolla un proyecto de vida con sentido trascendente que articula fe, razón y servicio.",
+            "descripcion": "Integra sus creencias, capacidades y aspiraciones en un proyecto vital coherente que busca el desarrollo personal y el aporte al bien común con sentido de trascendencia."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-FHC-3-01-01",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.01",
+            "descripcion": "Elaboró un ensayo reflexivo de 500 palabras que describe su identidad personal, valores fundamentales y momentos clave de autodescubrimiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-01-02",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.02",
+            "descripcion": "Identificó tres fortalezas personales y dos áreas de crecimiento, argumentando evidencia de comportamientos observables en contextos escolares y familiares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-01-03",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.03",
+            "descripcion": "Relacionó concepto de dignidad humana con derechos fundamentales, redactando análisis crítico sobre discriminación o exclusión observada.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-01-04",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.04",
+            "descripcion": "Construyó mapa conceptual de su identidad (raíces, talentos, pasiones, misión) conectando elementos con vocación y propósito de vida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-01-05",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.05",
+            "descripcion": "Participó en dinámica de grupo donde compartió testimonio personal, recibiendo y ofreciendo feedback empático que fortaleció autoconciencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-01-06",
+            "competency_id": "COMP-FHC-3-01",
+            "codigo": "FHC-EMCT-3-IL-01.06",
+            "descripcion": "Elaboró cronología de momentos significativos que marcaron su desarrollo personal, identificando patrones de crecimiento y aprendizaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-01",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.01",
+            "descripcion": "Identificó situaciones de injusticia en su entorno y propuso solución fundamentada en principio de solidaridad y misericordia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-02",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.02",
+            "descripcion": "Practicó perdón y reconciliación en conflicto interpersonal, documentando proceso y aprendizajes sobre empatía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-03",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.03",
+            "descripcion": "Participó en proyectos de servicio comunitario voluntario, evidenciando compromiso con bien común y acompañamiento a grupos vulnerables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-04",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.04",
+            "descripcion": "Analizó casos éticos reales aplicando principios de justicia restaurativa y propuestas de reparación del daño colectivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-05",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.05",
+            "descripcion": "Diseñó campaña de sensibilización sobre tema social (bullying, pobreza, exclusión) con enfoque en responsabilidad compartida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-02-06",
+            "competency_id": "COMP-FHC-3-02",
+            "codigo": "FHC-EMCT-3-IL-02.06",
+            "descripcion": "Reflexionó sobre enseñanzas de figuras cristianas (Francisco, Teresa de Calcuta) aplicando principios a realidad contemporánea.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-01",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.01",
+            "descripcion": "Mapeó situaciones de pobreza, exclusión o vulnerabilidad en su comunidad mediante diagnóstico participativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-02",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.02",
+            "descripcion": "Diseñó proyecto de acompañamiento a población vulnerable (ancianos, niños, discapacitados) con enfoque de misericordia activa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-03",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.03",
+            "descripcion": "Participó en obra social concreta (comedor, tutoría, recolección) evidenciando compromiso de 20+ horas de servicio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-04",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.04",
+            "descripcion": "Analizó causas estructurales de pobreza y exclusión, proponiendo soluciones sistémicas más allá de asistencialismo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-05",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.05",
+            "descripcion": "Reflexionó sobre enseñanzas bíblicas de justicia social (profetas, bienaventuranzas) aplicándolas a realidad venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-03-06",
+            "competency_id": "COMP-FHC-3-03",
+            "codigo": "FHC-EMCT-3-IL-03.06",
+            "descripcion": "Evaluó impacto de su acción social en beneficiarios mediante encuesta de percepción y autoevaluación de aprendizajes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-01",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.01",
+            "descripcion": "Exploró preguntas existenciales fundamentales (sentido, propósito, felicidad) mediante ensayo filosófico-teológico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-02",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.02",
+            "descripcion": "Practicó técnicas de interioridad (oración, meditación, silencio) documentando experiencia y aprendizajes sobre sí mismo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-03",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.03",
+            "descripcion": "Relacionó concepto de vocación con proyecto de vida, identificando llamado personal a servir y contribuir al bien común.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-04",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.04",
+            "descripcion": "Analizó relación fe-razón, compatibilizando creencias con pensamiento crítico y conocimiento científico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-05",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.05",
+            "descripcion": "Reflexionó sobre figuras de trascendencia (santos, mártires, líderes espirituales) extrayendo lecciones aplicables a su vida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-04-06",
+            "competency_id": "COMP-FHC-3-04",
+            "codigo": "FHC-EMCT-3-IL-04.06",
+            "descripcion": "Construyó mapa de sentido vital conectando pasado historias, presente acciones y futuro aspiraciones transcendente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-01",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.01",
+            "descripcion": "Investigó creencias y prácticas religiosas de compañeros, elaborando comparativo de valores compartidos y diferencias respetuosas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-02",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.02",
+            "descripcion": "Participó en diálogo interreligioso con activa escucha, formulando preguntas curiosas sin intento de proselitismo o conversión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-03",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.03",
+            "descripcion": "Construyó consenso sobre valores universales (paz, justicia, dignidad) con compañeros de diversas creencias.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-04",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.04",
+            "descripcion": "Analizó conflictos religiosos históricos y contemporáneos, proponiendo vías de reconciliación basadas en respeto y diálogo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-05",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.05",
+            "descripcion": "Diseñó campaña escolar de tolerancia religiosa usando testimonios, leyendas y narrativas que resaltan humanidad común.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-05-06",
+            "competency_id": "COMP-FHC-3-05",
+            "codigo": "FHC-EMCT-3-IL-05.06",
+            "descripcion": "Reflexionó sobre propia posición ante pluralismo religioso, defendiendo tolerancia sin relativismo ético.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-01",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.01",
+            "descripcion": "Identificó interdependencia entre humanos y ecosistema mediante análisis de huella ecológica y capacidad de carga local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-02",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.02",
+            "descripcion": "Diseñó proyecto eclesial de cuidado de creación (huerto, reciclaje, eficiencia energética) con impacto medible en comunidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-03",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.03",
+            "descripcion": "Aplicó principios de economía circular en reducción de residuos escolares, midiendo disminución cuantitativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-04",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.04",
+            "descripcion": "Analizó enseñanzas bíblicas sobre cuidado de creación conectando con deberes ciudadanos actuales y ODS.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-05",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.05",
+            "descripcion": "Promovó defensa de bienes comunes (agua, aire) mediante incidencia en políticas escolares ambientales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-06-06",
+            "competency_id": "COMP-FHC-3-06",
+            "codigo": "FHC-EMCT-3-IL-06.06",
+            "descripcion": "Evaluó impacto ambiental de propio consumo proponiendo tres reducciones concretas con seguimiento mensurable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-01",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.01",
+            "descripcion": "Asumió rol de liderazgo servicial en actividad comunitaria coordinando equipos y priorizando necesidades ajenas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-02",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.02",
+            "descripcion": "Mentorizó a compañeros en temas académicos o personales, evidenciando paciencia, empatía y dedicación al crecimiento del otro.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-03",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.03",
+            "descripcion": "Organizó colecta o campaña solidaria con logística, promoción y entrega transparente beneficiando a población vulnerable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-04",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.04",
+            "descripcion": "Reflexionó sobre enseñanzas de Jesús sobre servicio (lavar pies, samaritano) aplicándolas a contexto actual con ejemplos concretos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-05",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.05",
+            "descripcion": "Evaluó propia capacidad de liderazgo servicial mediante feedback de equipo y autoevaluación de humildad, generosidad y disponibilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-07-06",
+            "competency_id": "COMP-FHC-3-07",
+            "codigo": "FHC-EMCT-3-IL-07.06",
+            "descripcion": "Promovió corresponsabilidad organizando equipos rotativos donde todos asumen liderazgo y servicio alternadamente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-01",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.01",
+            "descripcion": "Analizó dilema moral complejo (aborto, eutanasia) evaluando intención, medios y consecuencias aplicando principio doble efecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-02",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.02",
+            "descripcion": "Discernió entre moralidad de ley y bien común en caso de injusticia estructural, argumentando postura con fundamentación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-03",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.03",
+            "descripcion": "Aplicó principio de bien mayor para resolver conflicto de valores (verdad vs lealtad, justicia vs misericordia) con justificación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-04",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.04",
+            "descripcion": "Reflexionó sobre pecado social y responsabilidad estructural, reconociendo propia complicidad y proponiendo conversión personal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-05",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.05",
+            "descripcion": "Construyó argumentación moral sobre tema controversial (corrupción, violencia) basada en dignidad humana y bien común.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-08-06",
+            "competency_id": "COMP-FHC-3-08",
+            "codigo": "FHC-EMCT-3-IL-08.06",
+            "descripcion": "Consultó orientación moral de figuras de autoridad (padres, docentes) sin delegación de responsabilidad personal final.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-01",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.01",
+            "descripcion": "Participó activamente en dinámicas grupales que fortalecieron confianza, cohesión y sentido de pertenencia comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-02",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.02",
+            "descripcion": "Acogió a compañero en situación de vulnerabilidad (acoso, duelo, problemas familiares) con empatía y disponibilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-03",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.03",
+            "descripcion": "Mediate conflicto grupal aplicando principios de escucha activa, reparación y construcción de acuerdos comunitarios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-04",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.04",
+            "descripcion": "Contribuyó a clima escolar positivo evitando chismes, promoviendo inclusión y celebrando diversidad cultural y religiosa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-05",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.05",
+            "descripcion": "Reflexionó sobre enseñanzas de comunidad primitiva cristiana (Hechos) aplicando a construcción de comunidad escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-09-06",
+            "competency_id": "COMP-FHC-3-09",
+            "codigo": "FHC-EMCT-3-IL-09.06",
+            "descripcion": "Evaluó clima de comunidad mediante encuesta de percepción y propuso tres acciones de mejora implementadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-01",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.01",
+            "descripcion": "Integró dimensiones académica, personal, social y espiritual en proyecto de vida coherente con valores cristianos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-02",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.02",
+            "descripcion": "Definió propósito de vida que trasciende éxito personal, enfocado en servicio, bien común y desarrollo de otros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-03",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.03",
+            "descripcion": "Estableció metas de crecimiento espiritual (oración, reflexión, servicio) integradas a rutina académica y personal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-04",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.04",
+            "descripcion": "Relacionó creencia en providencia con acción responsable, evitando fatalismo y promoviendo corresponsabilidad activa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-05",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.05",
+            "descripcion": "Documentó proceso de discernimiento vocacional evidenciando síntesis entre fe, dones personales y necesidades del mundo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-3-10-06",
+            "competency_id": "COMP-FHC-3-10",
+            "codigo": "FHC-EMCT-3-IL-10.06",
+            "descripcion": "Comprometió acciones concretas de servicio vocacional post-egreso, con plan de seguimiento y evaluación de impacto.",
+            "nivel_esperado": 3
+        }
+    ]
+}

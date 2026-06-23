@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "109",
+        "name": "[CT-5] CIENCIAS DE LA TIERRA [pensumId=109]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-CT-5-01",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Analiza la estructura y dinámica interna de la Tierra y su relación con fenómenos geológicos.",
+            "descripcion": "Interpreta la composición de las capas terrestres, los procesos tectónicos, la actividad sísmica y volcánica, y su impacto en el relieve y los riesgos geológicos."
+        },
+        {
+            "id": "COMP-CT-5-02",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Evalúa los procesos exógenos que modelan la superficie terrestre y su influencia en paisajes y suelos.",
+            "descripcion": "Describe la acción del agua, viento, hielo y gravedad en la erosión, transporte y sedimentación, y su rol en la formación de cuencas, valles y costas."
+        },
+        {
+            "id": "COMP-CT-5-03",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Comprende el ciclo hidrológico y su importancia para la distribución, calidad y gestión del agua dulce.",
+            "descripcion": "Explica los procesos de evaporación, condensación, precipitación, infiltración y escorrentía, y su vinculación con el abastecimiento hídrico y la sostenibilidad ambiental."
+        },
+        {
+            "id": "COMP-CT-5-04",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Estudia los recursos naturales geológicos y su aprovechamiento responsable en el contexto venezolano.",
+            "descripcion": "Identifica minerales, rocas, fuentes de energía fósil y renovables, y evalúa prácticas extractivas desde la perspectiva de la soberanía y la justicia socioambiental."
+        },
+        {
+            "id": "COMP-CT-5-05",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Interpreta evidencias geológicas y paleontológicas para comprender la historia de la Tierra y la evolución de la vida.",
+            "descripcion": "Analiza estratos, fósiles, dataciones radiométricas y eventos geológicos clave (orogenias, extinciones masivas) en la reconstrucción del pasado planetario."
+        },
+        {
+            "id": "COMP-CT-5-06",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Evalúa los riesgos geológicos y climáticos en su entorno local y propone medidas de prevención y adaptación.",
+            "descripcion": "Identifica amenazas como deslizamientos, inundaciones, sequías y actividad sísmica, y diseña planes comunitarios de reducción de riesgos."
+        },
+        {
+            "id": "COMP-CT-5-07",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Aplica técnicas de cartografía y sistemas de información geográfica (SIG) en el análisis espacial del territorio.",
+            "descripcion": "Lee e interpreta mapas topográficos, geológicos y temáticos, y utiliza herramientas digitales para representar y analizar fenómenos geoespaciales."
+        },
+        {
+            "id": "COMP-CT-5-08",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Relaciona los cambios climáticos globales con procesos geológicos y antrópicos a distintas escalas temporales.",
+            "descripcion": "Contrasta variaciones climáticas naturales (glaciaciones) con el calentamiento global actual, evaluando causas, consecuencias y respuestas locales."
+        },
+        {
+            "id": "COMP-CT-5-09",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Promueve la conservación de cuencas hidrográficas, acuíferos y ecosistemas geológicos sensibles.",
+            "descripcion": "Reconoce la interdependencia entre geodiversidad, biodiversidad y servicios ecosistémicos, y defiende políticas de protección territorial."
+        },
+        {
+            "id": "COMP-CT-5-10",
+            "referent_id": "1",
+            "pensum_id": 109,
+            "nombre": "Desarrolla proyectos investigativos sobre problemáticas geocientíficas del entorno escolar o comunitario.",
+            "descripcion": "Formula preguntas, diseña metodologías de campo y gabinete, recopila datos y propone soluciones basadas en evidencia geológica y ciudadana."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-CT-5-01-01",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-01",
+            "descripcion": "Describe la estructura de la Tierra: corteza, manto, núcleo externo e interno.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-01-02",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-02",
+            "descripcion": "Explica la teoría de la tectónica de placas y sus evidencias (sismos, volcanes, dorsales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-01-03",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-03",
+            "descripcion": "Relaciona los límites de placas con la formación de montañas, fosas y rifts.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-01-04",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-04",
+            "descripcion": "Interpreta sismogramas básicos y localiza epicentros mediante triangulación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-01-05",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-05",
+            "descripcion": "Clasifica tipos de volcanes y erupciones según su composición y estilo eruptivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-01-06",
+            "competency_id": "COMP-CT-5-01",
+            "codigo": "CT-5TO-IL-06",
+            "descripcion": "Argumenta sobre la importancia del monitoreo geológico para la prevención de desastres.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-01",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-07",
+            "descripcion": "Identifica formas del relieve generadas por procesos fluviales, eólicos, glaciares y gravitacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-02",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-08",
+            "descripcion": "Describe el ciclo de formación de suelos a partir de la meteorización de rocas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-03",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-09",
+            "descripcion": "Explica cómo la erosión afecta la productividad agrícola y la estabilidad de laderas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-04",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-10",
+            "descripcion": "Relaciona la deforestación con el aumento de la escorrentía y la pérdida de suelo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-05",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-11",
+            "descripcion": "Propone prácticas de conservación de suelos (terrazas, barreras vivas, cobertura vegetal).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-02-06",
+            "competency_id": "COMP-CT-5-02",
+            "codigo": "CT-5TO-IL-12",
+            "descripcion": "Analiza fotografías aéreas o satelitales para identificar procesos geomorfológicos activos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-01",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-13",
+            "descripcion": "Describe las etapas del ciclo hidrológico y su interconexión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-02",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-14",
+            "descripcion": "Distingue entre aguas superficiales y subterráneas, y explica la recarga de acuíferos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-03",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-15",
+            "descripcion": "Evalúa factores que afectan la calidad del agua (contaminación, salinización, sedimentación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-04",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-16",
+            "descripcion": "Calcula el balance hídrico en una cuenca simple (precipitación vs. escorrentía + evaporación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-05",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-17",
+            "descripcion": "Relaciona el uso insostenible del agua con conflictos sociales y ambientales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-03-06",
+            "competency_id": "COMP-CT-5-03",
+            "codigo": "CT-5TO-IL-18",
+            "descripcion": "Vincula la gestión del agua con los ODS 6 (Agua limpia) y 11 (Ciudades sostenibles).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-01",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-19",
+            "descripcion": "Identifica minerales y rocas comunes en Venezuela (arcilla, hierro, cuarzo, granito).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-02",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-20",
+            "descripcion": "Describe procesos de formación de combustibles fósiles (petróleo, carbón) y su distribución en el país.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-03",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-21",
+            "descripcion": "Evalúa impactos ambientales y sociales de la minería legal e ilegal en zonas como el Arco Minero.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-04",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-22",
+            "descripcion": "Argumenta a favor de la transición energética hacia fuentes renovables (geotermia, hidroeléctrica sostenible).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-05",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-23",
+            "descripcion": "Reconoce el derecho soberano del Estado venezolano sobre sus recursos naturales no renovables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-04-06",
+            "competency_id": "COMP-CT-5-04",
+            "codigo": "CT-5TO-IL-24",
+            "descripcion": "Propone modelos de aprovechamiento comunitario y sostenible de recursos geológicos locales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-01",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-25",
+            "descripcion": "Interpreta columnas estratigráficas y principios de superposición y horizontalidad original.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-02",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-26",
+            "descripcion": "Identifica fósiles guía y explica su utilidad en la datación relativa de rocas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-03",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-27",
+            "descripcion": "Describe eventos geológicos clave en la historia de la Tierra (formación de Pangea, extinción K-Pg).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-04",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-28",
+            "descripcion": "Explica el principio de datación radiométrica y su aplicación en la escala geológica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-05",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-29",
+            "descripcion": "Relaciona cambios en la atmósfera y océanos con la evolución de la vida en la Tierra.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-05-06",
+            "competency_id": "COMP-CT-5-05",
+            "codigo": "CT-5TO-IL-30",
+            "descripcion": "Argumenta sobre la importancia de los yacimientos paleontológicos venezolanos (ej.: Urumaco).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-01",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-31",
+            "descripcion": "Identifica zonas de riesgo geológico en su comunidad (laderas inestables, cauces efímeros).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-02",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-32",
+            "descripcion": "Diseña un mapa de riesgos básico con base en observación de campo y datos históricos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-03",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-33",
+            "descripcion": "Propone medidas de mitigación ante inundaciones, deslizamientos o sequías prolongadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-04",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-34",
+            "descripcion": "Participa en simulacros escolares de respuesta ante emergencias geológicas o climáticas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-05",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-35",
+            "descripcion": "Evalúa la vulnerabilidad de infraestructuras críticas (escuelas, puentes) ante eventos extremos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-06-06",
+            "competency_id": "COMP-CT-5-06",
+            "codigo": "CT-5TO-IL-36",
+            "descripcion": "Vincula la reducción del riesgo de desastres con los ODS 11 y 13.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-01",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-37",
+            "descripcion": "Lee e interpreta curvas de nivel en mapas topográficos para deducir relieve.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-02",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-38",
+            "descripcion": "Utiliza coordenadas geográficas (latitud y longitud) para ubicar puntos en el territorio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-03",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-39",
+            "descripcion": "Representa datos espaciales (riesgos, recursos, usos del suelo) en mapas temáticos simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-04",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-40",
+            "descripcion": "Utiliza software libre o apps móviles para visualizar capas geoespaciales (Google Earth, QGIS).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-05",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-41",
+            "descripcion": "Analiza cambios en el uso del suelo mediante imágenes satelitales multitemporales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-07-06",
+            "competency_id": "COMP-CT-5-07",
+            "codigo": "CT-5TO-IL-42",
+            "descripcion": "Argumenta sobre la importancia de los SIG en la planificación territorial y ambiental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-01",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-43",
+            "descripcion": "Distingue entre variabilidad climática natural y cambio climático antropogénico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-02",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-44",
+            "descripcion": "Explica el efecto invernadero natural y su intensificación por emisiones de CO₂ y otros gases.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-03",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-45",
+            "descripcion": "Relaciona el derretimiento de glaciares y el nivel del mar con eventos climáticos extremos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-04",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-46",
+            "descripcion": "Analiza registros paleoclimáticos (núcleos de hielo, anillos de árboles) como evidencia histórica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-05",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-47",
+            "descripcion": "Propone acciones locales para mitigar emisiones y adaptarse al cambio climático.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-08-06",
+            "competency_id": "COMP-CT-5-08",
+            "codigo": "CT-5TO-IL-48",
+            "descripcion": "Vincula sus análisis con los ODS 13 (Acción climática) y 15 (Vida de ecosistemas terrestres).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-01",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-49",
+            "descripcion": "Identifica elementos de geodiversidad en su entorno (formaciones rocosas, cuevas, ríos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-02",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-50",
+            "descripcion": "Explica la interdependencia entre suelos saludables, cuencas hidrográficas y biodiversidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-03",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-51",
+            "descripcion": "Reconoce áreas protegidas geológicas en Venezuela (parques nacionales, monumentos naturales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-04",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-52",
+            "descripcion": "Promueve campañas contra la contaminación de ríos y la sobreexplotación de acuíferos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-05",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-53",
+            "descripcion": "Participa en actividades de reforestación para estabilizar cuencas y laderas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-09-06",
+            "competency_id": "COMP-CT-5-09",
+            "codigo": "CT-5TO-IL-54",
+            "descripcion": "Defiende el acceso al agua como derecho humano y bien común.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-01",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-55",
+            "descripcion": "Formula una pregunta investigable sobre una problemática geocientífica local (erosión, calidad del agua, riesgo sísmico).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-02",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-56",
+            "descripcion": "Diseña una metodología de campo segura y ética (muestreo, observación, entrevistas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-03",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-57",
+            "descripcion": "Recopila y organiza datos geológicos, hidrológicos o climáticos mediante tablas y mapas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-04",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-58",
+            "descripcion": "Analiza resultados con base en conceptos de Ciencias de la Tierra y los contrasta con hipótesis iniciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-05",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-59",
+            "descripcion": "Propone soluciones técnicas, educativas o comunitarias derivadas de su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CT-5-10-06",
+            "competency_id": "COMP-CT-5-10",
+            "codigo": "CT-5TO-IL-60",
+            "descripcion": "Comunica sus hallazgos en un informe o presentación oral con rigor científico y compromiso territorial.",
+            "nivel_esperado": 3
+        }
+    ]
+}

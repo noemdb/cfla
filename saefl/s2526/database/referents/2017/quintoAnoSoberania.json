@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "110",
+        "name": "[FS-5] FORMACIÓN PARA LA SOBERANÍA NACIONAL [pensumId=110]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-FS-5-01",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Analiza críticamente los fundamentos históricos, jurídicos y geopolíticos de la soberanía nacional venezolana.",
+            "descripcion": "Interpreta procesos históricos, marcos legales y dinámicas territoriales que definen la independencia, autodeterminación y defensa integral de la nación."
+        },
+        {
+            "id": "COMP-FS-5-02",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Evalúa las amenazas contemporáneas a la soberanía nacional en sus dimensiones política, económica, cultural y territorial.",
+            "descripcion": "Identifica formas de injerencia externa, bloqueos, desinformación, explotación de recursos y agresiones simbólicas o materiales contra Venezuela."
+        },
+        {
+            "id": "COMP-FS-5-03",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Comprende el rol de la Defensa Integral de la Nación como responsabilidad compartida entre Estado y pueblo.",
+            "descripcion": "Reconoce los componentes civil, militar y comunitario de la seguridad y defensa nacional, articulados en planes estratégicos y ejercicios populares."
+        },
+        {
+            "id": "COMP-FS-5-04",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Promueve la identidad nacional, la memoria histórica y los valores patrióticos desde una perspectiva crítica y emancipadora.",
+            "descripcion": "Rescata luchas independentistas, pensamiento bolivariano, resistencia popular y símbolos nacionales como pilares de la conciencia colectiva."
+        },
+        {
+            "id": "COMP-FS-5-05",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Analiza la geopolítica del Caribe y América Latina en el contexto de la integración regional y la multipolaridad global.",
+            "descripcion": "Examina alianzas estratégicas (ALBA, CELAC, Petrocaribe), disputas por recursos y el papel de Venezuela en la construcción de un orden internacional justo."
+        },
+        {
+            "id": "COMP-FS-5-06",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Evalúa el impacto del control tecnológico, mediático y financiero en la soberanía de los pueblos del Sur Global.",
+            "descripcion": "Critica la dependencia tecnológica, la hegemonía informativa y las sanciones económicas como mecanismos de dominación neocolonial."
+        },
+        {
+            "id": "COMP-FS-5-07",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Participa en la construcción de sistemas comunitarios de vigilancia, protección y respuesta ante amenazas a la soberanía local.",
+            "descripcion": "Organiza redes de comunicación, protocolos de alerta temprana y acciones colectivas para salvaguardar recursos, infraestructura y derechos en su entorno."
+        },
+        {
+            "id": "COMP-FS-5-08",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Defiende el derecho soberano de Venezuela sobre sus recursos naturales estratégicos, especialmente el petróleo, el gas y el arco minero.",
+            "descripcion": "Argumenta jurídica, histórica y éticamente contra la apropiación ilegítima de riquezas nacionales y promueve modelos de aprovechamiento colectivo y sostenible."
+        },
+        {
+            "id": "COMP-FS-5-09",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Desarrolla estrategias de comunicación alternativa para contrarrestar campañas de guerra psicológica y desinformación.",
+            "descripcion": "Crea contenidos veraces, contextualizados y pedagógicos que fortalezcan la conciencia crítica y la resiliencia informativa en su comunidad."
+        },
+        {
+            "id": "COMP-FS-5-10",
+            "referent_id": "1",
+            "pensum_id": 110,
+            "nombre": "Diseña proyectos formativos que integran soberanía, educación popular, ciencia y producción endógena.",
+            "descripcion": "Formula iniciativas que vinculan conocimiento técnico, autonomía productiva y defensa nacional en contextos escolares y comunitarios."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-FS-5-01-01",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-01",
+            "descripcion": "Explica el concepto de soberanía nacional desde la Constitución de la República Bolivariana de Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-01-02",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-02",
+            "descripcion": "Describe hitos históricos clave en la construcción de la independencia y la defensa territorial (1810, 1830, 1966).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-01-03",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-03",
+            "descripcion": "Analiza el contenido de la Ley Orgánica de la Fuerza Armada Nacional Bolivariana y su relación con la Defensa Integral.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-01-04",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-04",
+            "descripcion": "Interpreta mapas históricos y actuales sobre límites y disputas territoriales (Guayana Esequiba, islas del Caribe).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-01-05",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-05",
+            "descripcion": "Relaciona la Doctrina Monroe, el corolario Roosevelt y las intervenciones estadounidenses en América Latina con amenazas a la soberanía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-01-06",
+            "competency_id": "COMP-FS-5-01",
+            "codigo": "FS-5TO-IL-06",
+            "descripcion": "Argumenta por qué la autodeterminación de los pueblos es un principio inalienable del derecho internacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-01",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-07",
+            "descripcion": "Identifica formas de bloqueo económico, financiero y comercial impuestas contra Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-02",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-08",
+            "descripcion": "Reconoce tácticas de guerra híbrida: ciberataques, operaciones psicológicas, financiamiento de grupos desestabilizadores.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-03",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-09",
+            "descripcion": "Analiza cómo la desinformación mediática distorsiona la realidad nacional e internacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-04",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-10",
+            "descripcion": "Evalúa el impacto de sanciones unilaterales en la economía, salud y acceso a alimentos del pueblo venezolano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-05",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-11",
+            "descripcion": "Detecta narrativas coloniales en discursos políticos o culturales dirigidos contra Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-02-06",
+            "competency_id": "COMP-FS-5-02",
+            "codigo": "FS-5TO-IL-12",
+            "descripcion": "Propone acciones colectivas para contrarrestar amenazas no convencionales a la soberanía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-01",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-13",
+            "descripcion": "Define los cinco componentes de la Fuerza Armada Nacional Bolivariana y su misión constitucional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-02",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-14",
+            "descripcion": "Describe el rol de los Comités Locales de Abastecimiento y Producción (CLAP) y otras estructuras civiles en la defensa integral.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-03",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-15",
+            "descripcion": "Participa en simulacros o ejercicios de preparación civil ante emergencias o agresiones externas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-04",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-16",
+            "descripcion": "Explica el concepto de “guerra de todo el pueblo” como estrategia de resistencia nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-05",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-17",
+            "descripcion": "Identifica infraestructuras estratégicas (plantas eléctricas, refinerías, centros de salud) como objetivos de defensa prioritaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-03-06",
+            "competency_id": "COMP-FS-5-03",
+            "codigo": "FS-5TO-IL-18",
+            "descripcion": "Reconoce la importancia de la unidad cívico-militar en la preservación de la paz y la estabilidad nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-01",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-19",
+            "descripcion": "Reconoce fechas, símbolos y figuras históricas fundamentales de la identidad nacional venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-02",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-20",
+            "descripcion": "Interpreta el pensamiento de Simón Bolívar, Ezequiel Zamora y otros próceres en el contexto actual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-03",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-21",
+            "descripcion": "Valora la diversidad cultural, étnica y lingüística como expresión de la riqueza nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-04",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-22",
+            "descripcion": "Promueve actos cívicos escolares que fortalezcan el sentido de pertenencia y orgullo patrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-05",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-23",
+            "descripcion": "Contrasta visiones eurocéntricas de la historia con perspectivas desde el Sur Global y el pensamiento decolonial.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-04-06",
+            "competency_id": "COMP-FS-5-04",
+            "codigo": "FS-5TO-IL-24",
+            "descripcion": "Argumenta que la soberanía cultural es inseparable de la independencia política y económica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-01",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-25",
+            "descripcion": "Describe los objetivos y logros de la Alianza Bolivariana para los Pueblos de Nuestra América (ALBA).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-02",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-26",
+            "descripcion": "Analiza la importancia geoestratégica del Caribe para la seguridad y cooperación regional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-03",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-27",
+            "descripcion": "Evalúa el papel de Venezuela en la defensa de la paz y la no intervención en foros internacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-04",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-28",
+            "descripcion": "Explica cómo la multipolaridad mundial ofrece oportunidades para la autonomía de los países del Sur.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-05",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-29",
+            "descripcion": "Relaciona la integración energética (Petrocaribe) con la solidaridad y la justicia entre naciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-05-06",
+            "competency_id": "COMP-FS-5-05",
+            "codigo": "FS-5TO-IL-30",
+            "descripcion": "Vincula la soberanía regional con los ODS 16 (Paz, justicia e instituciones sólidas) y 17 (Alianzas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-01",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-31",
+            "descripcion": "Identifica monopolios tecnológicos (plataformas digitales, software, semiconductores) como herramientas de dominación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-02",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-32",
+            "descripcion": "Analiza cómo los medios hegemónicos construyen agendas y manipulan percepciones sobre Venezuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-03",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-33",
+            "descripcion": "Explica el funcionamiento de mecanismos financieros extraterritoriales (SWIFT, dólar como arma) contra países no alineados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-04",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-34",
+            "descripcion": "Evalúa el impacto de la deuda externa condicionada en la política pública de países del Sur Global.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-05",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-35",
+            "descripcion": "Propone estrategias para la soberanía tecnológica (software libre, redes comunitarias, formación técnica).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-06-06",
+            "competency_id": "COMP-FS-5-06",
+            "codigo": "FS-5TO-IL-36",
+            "descripcion": "Argumenta que la independencia económica es condición para la verdadera democracia y autodeterminación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-01",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-37",
+            "descripcion": "Organiza una red comunitaria de monitoreo de recursos naturales (agua, bosques, minerales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-02",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-38",
+            "descripcion": "Elabora un protocolo de respuesta ante actividades sospechosas (espionaje, tráfico ilícito, sabotaje).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-03",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-39",
+            "descripcion": "Participa en la creación de mapas comunitarios de riesgos y recursos estratégicos locales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-04",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-40",
+            "descripcion": "Establece canales de comunicación seguros con autoridades civiles y militares en caso de emergencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-05",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-41",
+            "descripcion": "Capacita a su comunidad en primeros auxilios, protección de infraestructura y resiliencia ante crisis.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-07-06",
+            "competency_id": "COMP-FS-5-07",
+            "codigo": "FS-5TO-IL-42",
+            "descripcion": "Promueve la participación juvenil en consejos comunales y estructuras de defensa integral.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-01",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-43",
+            "descripcion": "Cita artículos constitucionales que garantizan la propiedad estatal sobre recursos naturales estratégicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-02",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-44",
+            "descripcion": "Argumenta contra la explotación ilegal del Arco Minero del Orinoco por actores transnacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-03",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-45",
+            "descripcion": "Explica por qué el petróleo y el gas son instrumentos de desarrollo y no mercancías para la especulación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-04",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-46",
+            "descripcion": "Denuncia intentos de privatización o saqueo de riquezas nacionales mediante mecanismos jurídicos o mediáticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-05",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-47",
+            "descripcion": "Propone modelos de gestión comunal y ecológica para el aprovechamiento de recursos locales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-08-06",
+            "competency_id": "COMP-FS-5-08",
+            "codigo": "FS-5TO-IL-48",
+            "descripcion": "Vincula la defensa de los recursos con los derechos de los pueblos originarios y la justicia ambiental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-01",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-49",
+            "descripcion": "Identifica técnicas de manipulación informativa (fakenews, deepfakes, sesgo editorial).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-02",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-50",
+            "descripcion": "Verifica fuentes y contrasta información antes de compartirla en redes sociales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-03",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-51",
+            "descripcion": "Crea contenidos audiovisuales, escritos o gráficos que difundan logros y realidades nacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-04",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-52",
+            "descripcion": "Utiliza plataformas alternativas y libres para la comunicación comunitaria y educativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-05",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-53",
+            "descripcion": "Organiza talleres de alfabetización mediática y crítica en su escuela o barrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-09-06",
+            "competency_id": "COMP-FS-5-09",
+            "codigo": "FS-5TO-IL-54",
+            "descripcion": "Defiende el derecho a la comunicación como pilar de la democracia participativa y protagónica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-01",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-55",
+            "descripcion": "Formula un proyecto que vincule soberanía alimentaria, tecnológica o energética con la formación escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-02",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-56",
+            "descripcion": "Diseña un huerto escolar, taller de reparación o laboratorio comunitario como espacio de producción endógena.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-03",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-57",
+            "descripcion": "Integra saberes ancestrales, científicos y técnicos en propuestas de desarrollo local autónomo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-04",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-58",
+            "descripcion": "Establece alianzas con instituciones militares, universidades o consejos comunales para ejecutar su proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-05",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-59",
+            "descripcion": "Evalúa el impacto de su proyecto en términos de conciencia, autonomía y resiliencia comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FS-5-10-06",
+            "competency_id": "COMP-FS-5-10",
+            "codigo": "FS-5TO-IL-60",
+            "descripcion": "Presenta su iniciativa en foros escolares o públicos como modelo de formación para la soberanía.",
+            "nivel_esperado": 3
+        }
+    ]
+}

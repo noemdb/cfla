@@ -1,0 +1,31 @@
+todas las instancias de Carbon en español
+composer require jenssegers/date
+https://github.com/Jenssegers/Date
+Config/app.php
+'Jenssegers\Date\DateServiceProvider',
+'Date' => Jenssegers\Date\Date::class,
+
+Instalar laravelcollective
+composer require "laravelcollective/html":"^5.4.0"
+
+	'providers' => [
+    // ...
+    Collective\Html\HtmlServiceProvider::class,
+    //...
+    ]
+    
+	'aliases' => [
+    // ...
+      'Form' => Collective\Html\FormFacade::class,
+      'Html' => Collective\Html\HtmlFacade::class,
+    // ...
+	],
+
+
+******************************************************************************************
+ERROR
+
+composer dump-autoload
+Cannot create cache directory /home/vagrant/.composer/cache/repo/https---packagist.org/,
+FIX
+sudo chown -R $USER $HOME/.composer

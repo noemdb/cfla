@@ -1,0 +1,755 @@
+tablas para la logica del sistema
+
+General (Info de cabeceras)
+php artisan make:model 'Models\app\Institucion' -m -a &&
+php artisan make:model 'Models\app\Pescolar' -m -a &&
+php artisan make:model 'Models\app\Estudiante\TypeCi' -m -a &&
+php artisan make:model 'Models\app\Estudiante' -m -a &&
+php artisan make:model 'Models\app\CtaPagar' -m -a
+php artisan make:model 'Models\app\Planpago' -m -a
+
+Detalles del Institucion
+php artisan make:model 'Models\app\Institucion\Autoridad' -m -a &&
+php artisan make:model 'Models\app\Institucion\Tautoridad' -m -a &&
+php artisan make:model 'Models\app\Institucion\Aulas' -m -a
+php artisan make:model 'Models\app\Institucion\Banco' -m -a
+php artisan make:model 'Models\app\Institucion\Peducativo' -m -a
+
+Detalles del Pescolar
+php artisan make:model 'Models\app\Pescolar\Profesor' -m -a &&
+php artisan make:model 'Models\app\Pescolar\ProfesorGuia' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Peducativo' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Pestudio' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Pensum' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Lapso' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Grado' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Seccion' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Escala' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Asignatura' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Prelacion' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Baremo' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Prosecucion' -m -a &&
+
+php artisan make:model 'Models\app\Pescolar\AreaConocimiento' -m -a &&
+php artisan make:model 'Models\app\Pescolar\CampoConocimiento' -m -a
+
+Detalles del Profesores
+php artisan make:model 'Models\app\Profesor\AConocimiento' -m -a &&
+php artisan make:model 'Models\app\Pescolar\Asignatura' -m -a &&
+php artisan make:model 'Models\app\Profesor\Documento' -m -a &&
+php artisan make:model 'Models\app\Profesor\Recursos' -m -a &&
+php artisan make:model 'Models\app\Profesor\Tutoria' -m -a &&
+php artisan make:model 'Models\app\Profesor\Publicaciones' -m -a
+
+php artisan make:model 'Models\app\Profesor\Pevaluacion' -m -a &&
+php artisan make:model 'Models\app\Profesor\Activity' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Eparcial' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Objetivo' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Contenido' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Evaluacion' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Criterio' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Ecualitativa' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Edescriptiva' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Calificacion' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Tescala' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Escala' -m -a &&
+php artisan make:model 'Models\app\Profesor\Pevaluacion\Indicador' -m -a
+php artisan make:model 'Models\app\Profesor\ProfesorGestable' -m -a
+php artisan make:model 'Models\app\Profesor\EvaluacionGestable' -m -a
+
+php artisan make:model 'app\Profesor\Activity' -m
+php artisan make:model 'app\Profesor\Achievement' -m
+php artisan make:model 'app\Profesor\Annotation' -m
+
+Detalles del Estudiantes
+php artisan make:model 'Models\app\Estudiante\Tinscripcion' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Escolaridad' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Inscripcion' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Enrollment' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Census' -m &&
+php artisan make:model 'app\Estudiante\Census'
+php artisan make:model 'app\Estudiante\Enrollment'
+php artisan make:model 'app\Profesor\Inschistory' -m
+
+
+php artisan make:model 'Models\app\Estudiante\Programacion' -m -a &&
+php artisan make:model 'Models\app\Estudiante\MateriaPendiente' -m -a &&
+php artisan make:model 'Models\app\Estudiante\GrupoEstable' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Retiro' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Administrativa' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Representante' -m -a &&
+php artisan make:model 'Models\app\Estudiante\RepresentanteTest' -m -a &&
+php artisan make:model 'Models\app\Estudiante\PlanBenefico' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Ingreso' -m -a
+php artisan make:model 'Models\app\Estudiante\Descuento' -m -a
+php artisan make:model 'Models\app\Estudiante\CreditoAFavor' -m -a
+php artisan make:model 'Models\app\Estudiante\Promocion' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Boletin' -m -a
+php artisan make:model 'Models\app\Estudiante\BoletinAjuste' -m -a
+php artisan make:model 'Models\app\Estudiante\BoletinRevision' -m -a
+
+Detalles del Cuentas por cobrar
+php artisan make:model 'Models\app\Planpago\Cuentaxpagar' -m -a &&
+php artisan make:model 'Models\app\Planpago\ConceptoPago' -m -a &&
+php artisan make:model 'Models\app\Planpago\NomConceptoPago' -m -a &&
+
+php artisan make:model 'Models\app\Planpago\MetodoPago' -m -a &&
+php artisan make:model 'Models\app\Planpago\RegistroPago' -m -a
+php artisan make:model 'Models\app\Planpago\RegistroPagoCombinado' -m -a
+php artisan make:model 'Models\app\Planpago\Recursos' -m -a
+php artisan make:model 'Models\app\Planpago\Pago' -m -a
+php artisan make:model 'Models\app\Planpago\ConceptoCancelado' -m -a
+php artisan make:model 'Models\app\Planpago\CreditoAplicado' -m -a &&
+php artisan make:model 'Models\app\Planpago\AbonoAplicado' -m -a &&
+php artisan make:model 'Models\app\Planpago\DescuentoAplicado' -m -a
+php artisan make:model 'Models\app\Planpago\SyncData' -m -a
+php artisan make:model 'Models\app\Planpago\Currency' -m -a
+php artisan make:model 'Models\app\Planpago\ReferentialCurrency' -m -a
+php artisan make:model 'Models\app\Planpago\ExchangeRate' -m -a
+php artisan make:model 'Models\app\Planpago\Payment' -m -a
+php artisan make:model 'Models\app\Planpago\IngresoFraccion' -m -a
+
+/***********historico de notas**********/
+php artisan make:model 'Models\app\HistoricoNota' -m -a &&
+php artisan make:model 'Models\app\HistoricoNota\Hinstitucion' -m -a &&
+php artisan make:model 'Models\app\HistoricoNota\Hnota' -m -a
+php artisan make:model 'Models\app\HistoricoNota\Tevaluacion' -m -a &&
+php artisan make:model 'Models\app\HistoricoNota\Ointitucion' -m -a
+
+/***********Registro de Titulo**********/
+php artisan make:model 'Models\app\RegistroTitulo' -m -a &&
+php artisan make:model 'Models\app\RegistroTitulo\Titulo' -m -a &&
+php artisan make:model 'Models\app\HistoricoNota\Tevaluacion' -m -a
+
+/***********Representates**********/
+php artisan make:model 'Models\app\Planpago\Prepago' -m &&
+php artisan make:model 'Models\app\Planpago\Sugerencia' -m &&
+php artisan make:model 'Models\app\Planpago\Mbancario' -m &&
+php artisan make:model 'Models\app\Planpago\Centinela' -m
+php artisan make:model 'Models\app\Pescolar\Preinscripcion' -m
+php artisan make:model 'Models\app\Manual\Ayuda' -m
+
+
+/***********Cobranzas**********/
+php artisan make:model 'Models\app\Common\Status' -m -a &&
+php artisan make:model 'Models\app\Estudiante\Debtpay' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollPolical' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollNivel' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollActivity' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollDebtor' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollPromise' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollMessege' -m -a &&
+php artisan make:model 'Models\app\Cobranzas\CollPledge' -m -a &&
+
+
+/***********Recivos de Pago**********/
+php artisan make:model 'Models\app\Planpago\Recibo' -m -a &&
+php artisan make:model 'Models\app\Planpago\ReciboCash' -m -a &&
+php artisan make:model 'Models\app\Planpago\ReciboChange' -m -a &&
+php artisan make:model 'Models\app\Planpago\ReciboPago' -m -a &&
+
+/***********Devolucines**********/
+php artisan make:model 'app\Planpago\Refund' -m -a
+
+
+php artisan make:migration add_comment_final_to_seccions
+
+
+php artisan make:model 'app\Bot\Bmain' -m -a &&
+php artisan make:model 'app\Bot\Boption' -m -a &&
+php artisan make:model 'app\Bot\Bmessege' -m -a &&
+
+php artisan make:model 'app\Assistcontrol\AssitAttendance' -m
+php artisan make:model 'app\Assistcontrol\AssitSchedule' -m
+php artisan make:model 'app\Assistcontrol\AssitWeek' -m
+php artisan make:model 'app\Assistcontrol\AssitDay' -m
+php artisan make:model 'app\Assistcontrol\AssitTurn' -m
+php artisan make:model 'app\Assistcontrol\AssitHour' -m
+php artisan make:model 'app\Assistcontrol\AssitPermission' -m
+php artisan make:model 'app\Assistcontrol\AssitObservation' -m
+
+
+php artisan make:model 'app\Bienestar\StudentRecord' -m
+php artisan make:model 'app\Bienestar\Incident' -m
+php artisan make:model 'app\Bienestar\IncidentReason' -m
+php artisan make:model 'app\Bienestar\IncidentAgreement' -m
+php artisan make:model 'app\Bienestar\IncidentDescription' -m
+
+
+php artisan make:migration add_work_id_to_users_table --table=users
+php artisan make:migration add_card_id_to_users_table --table=users
+php artisan make:migration add_ident_to_users_table --table=users
+
+
+php artisan make:migration add_type_to_assit_hours_table --table=assit_hours
+php artisan make:migration add_assit_schedule_id_to_rols_table --table=rols
+php artisan make:migration add_assit_schedule_id_to_assit_days_table --table=assit_days
+php artisan make:migration add_assit_week_id_to_assit_days_table --table=assit_days
+php artisan make:migration add_forgering_assit_week_id_to_assit_days_table --table=assit_days
+php artisan make:migration del_assit_schedule_id_to_assit_days_table --table=assit_days
+
+php artisan make:migration add_assit_cargo_id_to_rols_table --table=rols
+
+php artisan make:migration add_worker_order_to_users_table --table=users
+
+---------------------------------------------------------------------------------------------------------
+
+php artisan make:migration add_area_to_bmains_table --table=bmains
+php artisan make:migration add_bmain_id_to_bmesseges_table --table=bmesseges
+
+php artisan make:migration add_status_late_payment_to_ingresos_table --table=ingresos
+php artisan make:migration add_exchange_ammount_late_payment_to_ingresos_table --table=ingresos
+php artisan make:migration add_date_reported_to_ingresos_table --table=ingresos
+
+php artisan make:migration add_date_status_blacklist_to_estudiants_table --table=estudiants
+php artisan make:migration add_date_status_blacklist_to_representants_table --table=representants
+
+
+php artisan make:migration add_date_cutnote_to_lapsos_table --table=lapsos
+
+---------------------------------------------------------------------------------------------------------
+
+php artisan make:model 'app\SenderMailer\Mailer' -m
+php artisan make:model 'app\SenderMailer\Mailed' -m
+
+
+php artisan make:migration add_mail_username_to_users_table --table=users
+php artisan make:migration add_mail_password_to_users_table --table=users
+php artisan make:migration add_mail_cc_address_to_users_table --table=users
+
+MAIL_USERNAME
+mail_username
+mail_password
+mail_cc_address
+
+php artisan make:migration add_status_adviders_to_representants_table --table=representants
+php artisan make:migration add_available_at_to_maileds_table --table=maileds
+php artisan make:migration add_pestudio_id_to_mailers_table --table=mailers
+
+
+
+
+
+php artisan make:migration add_observations_user_to_credito_a_favors_table --table=credito_a_favors
+
+
+php artisan make:migration drop_date_from_mailers_table --table=mailers
+
+php artisan make:migration add_observations_user_to_credito_a_favors_table --table=credito_a_favors
+
+
+php artisan make:migration add_status_bad_to_cuentaxpagars_table --table=cuentaxpagars
+
+
+php artisan make:migration add_atte_to_mailers_table --table=mailers
+
+
+php artisan make:migration add_status_inscription_affects_to_planpagos_table --table=planpagos
+php artisan make:migration add_enabled_for_administrative_to_planpagos_table --table=planpagos
+
+
+php artisan make:migration add_date_notify_email_to_incidents_table --table=incidents
+php artisan make:migration add_date_notify_email_to_incident_agreements_table --table=incident_agreements
+php artisan make:migration add_status_notify_agreement_to_incident_agreements_table --table=incident_agreements
+php artisan make:migration add_date_notify_agreement_email_to_incidents_table --table=incidents
+
+php artisan make:migration add_date_announcement_to_incidents_table --table=incidents
+
+php artisan make:migration add_user_id_to_incidents_table --table=incidents
+php artisan make:migration add_user_id_to_incident_agreements_table --table=incident_agreements
+php artisan make:migration add_user_id_to_student_records_table --table=student_records
+php artisan make:migration add_status_close_to_incidents_table --table=incidents
+php artisan make:migration add_status_pedagogical_corrective_to_incidents_table --table=incidents
+php artisan make:migration add_close_observations_corrective_to_incidents_table --table=incidents
+php artisan make:migration add_status_notify_close_to_incidents_table --table=incidents
+php artisan make:migration add_date_close_to_incidents_table --table=incidents
+
+php artisan make:migration alter_table_incidents_change_date_notify_email --table=incidents
+
+php artisan make:migration alter_table_incidents_change_type --table=incidents
+
+
+php artisan make:migration alter_table_incidents_change_date_close --table=incidents
+
+
+
+
+php artisan make:migration alter_table_incidents_change_date_notify_agreement_email --table=incidents
+
+php artisan make:migration alter_table_incidents_change_status_active --table=incidents
+
+
+php artisan make:model 'app\Services\Transaction' -m
+
+
+php artisan make:migration add_ingreso_id_table --table=concepto_cancelados
+
+php artisan make:migration add_ingreso_id_to_concepto_cancelados_table --table=concepto_cancelados
+
+
+
+php artisan make:migration add_status_census_taker_to_profesors_table --table=profesors
+php artisan make:migration add_status_census_taker_to_rols_table --table=rols
+php artisan make:migration add_date_start_census_to_lapsos_table --table=lapsos
+php artisan make:migration add_date_end_census_to_lapsos_table --table=lapsos
+
+
+php artisan make:migration add_institutions_to_enrollments_table --table=enrollments
+php artisan make:migration add_user_id_to_enrollments_table --table=enrollments
+
+php artisan make:migration add_exchange_ammount_rate_to_ingresos_table --table=ingresos
+
+php artisan make:migration insert_data_metodo_pagos_table --table=metodo_pagos
+php artisan make:migration insert_data_bancos_table --table=bancos
+
+
+php artisan make:model 'app\Planpago\CalendarEvent' -m &&
+
+
+
+polls
+
+php artisan make:model 'Models\app\Poll\PollMain' -m
+php artisan make:model 'Models\app\Poll\PollGroup' -m
+php artisan make:model 'Models\app\Poll\PollToken' -m
+php artisan make:model 'Models\app\Poll\PollQuestion' -m
+php artisan make:model 'Models\app\Poll\PollOption' -m
+php artisan make:model 'Models\app\Poll\PollAnswer' -m
+
+
+php artisan make:migration add_user_id_to_poll_mains --table=poll_mains
+php artisan make:migration add_status_notified_to_poll_mains --table=poll_mains
+php artisan make:migration add_status_notified_to_poll_tokens --table=poll_tokens
+php artisan make:migration add_status_test_to_poll_mains --table=poll_mains
+
+php artisan make:migration rename_status_notifliled_in_poll_mains_table --table=poll_mains
+php artisan make:migration rename_status_notifliled_in_poll_tokens_table --table=poll_tokens
+
+php artisan make:migration add_terminal_pos_to_ingresos_table --table=ingresos
+php artisan make:migration add_approval_pos_to_ingresos_table --table=ingresos
+php artisan make:migration add_sequence_pos_to_ingresos_table --table=ingresos
+php artisan make:migration add_trace_pos_to_ingresos_table --table=ingresos
+
+php artisan make:migration add_date_preclosing_to_lapsos_table --table=lapsos
+
+--------------------------------------------------------------------------------------
+
+php artisan make:model 'app\Planpago\CalendarEvent' -m &&
+
+php artisan make:model 'app\Services\Sequence' -m
+
+php artisan make:migration add_user_id_to_poll_mains --table=poll_mains
+
+php artisan make:migration add_user_id_to_poll_tokens --table=poll_tokens
+
+
+php artisan make:migration drop_representant_id_from_poll_tokens_table --table=poll_tokens
+php artisan make:migration drop_estudiant_id_from_poll_tokens_table --table=poll_tokens
+
+php artisan make:migration add_status_grid_to_poll_questions --table=poll_questions
+
+
+php artisan make:migration add_dir_address_to_profiles --table=profiles
+
+php artisan make:migration add_status_estudiant_to_poll_mains --table=poll_mains
+
+php artisan make:migration drop_status_representant_from_poll_mains_table --table=poll_mains
+
+php artisan make:migration drop_status_notified_from_poll_tokens_table --table=poll_tokens
+
+php artisan make:migration drop_status_notified_from_poll_mains_table --table=poll_mains
+
+php artisan make:migration add_autoridad_id_to_mailers --table=mailers
+
+php artisan make:migration add_status_test_to_mailers --table=mailers
+
+php artisan make:migration drop_status_notified_from_poll_mains_table --table=poll_mains
+
+php artisan make:migration add_status_carga_notas_to_pestudios --table=pestudios
+php artisan make:migration add_status_last_to_lapsos --table=lapsos
+
+
+
+php artisan make:migration add_description_profesor_to_incidents --table=incidents
+php artisan make:migration add_status_reiterative_to_incidents --table=incidents
+
+
+
+
+php artisan make:migration add_remision_resumen_final_to_pestudios_table --table=pestudios
+
+php artisan make:migration add_ci_list_to_poll_mains_table --table=poll_mains
+
+php artisan make:migration add_ci_list_to_mailers_table --table=mailers
+php artisan make:migration add_status_exclude_last_to_mailers_table --table=mailers
+php artisan make:migration add_status_exclude_last_to_poll_mains_table --table=poll_mains
+
+php artisan make:migration add_student_records_to_enrollmens_table --table=enrollments
+
+php artisan make:migration add_recommended_by_to_enrollmens_table --table=enrollments
+php artisan make:migration add_photo_to_enrollmens_table --table=enrollments
+php artisan make:migration add_estudiant_id_to_enrollmens_table --table=enrollments
+
+
+
+
+php artisan make:migration add_status_valoration_to_incidents --table=incidents
+php artisan make:migration add_reason_to_incidents --table=incidents
+
+
+php artisan make:migration add_category_to_incident_reasons --table=incident_reasons
+php artisan make:migration add_status_valoration_to_incident_reasons --table=incident_reasons
+
+php artisan make:migration create_incident_description_table
+
+
+php artisan make:migration alter_table_incidents_change_type --table=incidents
+
+php artisan make:migration add_status_valoration_to_incidents --table=incidents
+
+php artisan make:migration alter_table_incidents_change_description --table=incidents
+
+php artisan make:migration add_date_begin_to_pescolars --table=pescolars
+
+php artisan make:migration add_status_admite_to_censuses_table --table=censuses
+
+php artisan make:migration add_status_cancel_payment_to_planpagos --table=planpagos
+
+php artisan make:migration add_manager_id_to_pestudios --table=pestudios
+
+php artisan make:migration alter_table_rols_change_area --table=rols
+
+php artisan make:migration add_code_oficial_to_pestudios --table=pestudios
+
+php artisan make:migration add_status_active_to_profesor_gestables --table=profesor_gestables
+php artisan make:migration add_status_active_to_grupo_estables --table=grupo_estables
+
+php artisan make:migration create_catchments_table -m
+
+php artisan make:model 'app\Enrollment\CatchmentGroup' -m
+php artisan make:model 'app\Enrollment\CatchmentActivity' -m
+php artisan make:model 'app\Enrollment\Catchment' -m
+php artisan make:model 'app\Enrollment\CatchmentInterview' -m
+php artisan make:model 'app\Enrollment\CatchmentNotification' -m
+
+_____________________________________________________________________________________________
+
+php artisan make:model 'app\Incident\IncidentDuty' -m
+php artisan make:model 'app\Incident\IncidentFault' -m
+php artisan make:model 'app\Incident\IncidentCorrective' -m
+php artisan make:model 'app\Incident\Incident' -m
+php artisan make:model 'app\Incident\IncidentAgreement' -m
+php artisan make:model 'app\Incident\IncidentRelapse' -m
+php artisan make:model 'app\Incident\IncidentAction' -m
+
+incidence_duties
+incidence_faults
+incidence_correctives
+incidences
+incidence_agreements
+incidence_relapses
+
+
+php artisan make:migration add_status_inscripcion_active_to_pestudios --table=pestudios
+
+
+_____________________________________________________________________________________________
+
+php artisan make:migration add_grupo_estable_id_to_pevaluacions --table=pevaluacions
+php artisan make:migration add_grupo_estable_id_to_pevaluacions --table=pevaluacions
+
+
+php artisan make:migration add_group_id_to_catchments_table --table=catchments
+
+
+_____________________________________________________________________________________________
+
+
+php artisan make:model 'app\Permission\Pase' -m
+
+
+php artisan make:migration add_description_trainig_component_to_pestudios --table=pestudios
+php artisan make:migration add_status_execution_to_evaluacions --table=evaluacions
+
+
+php artisan make:model 'app\Cobranzas\CollCalendar' -m
+
+
+
+
+php artisan make:migration add_status_official_to_pevaluacions --table=pevaluacions
+
+php artisan make:migration add_status_inscription_affects_to_seccions --table=seccions
+
+
+
+php artisan make:model 'app/interrogation/Interview' -m
+php artisan make:model 'app/interrogation/InterviewQuestion' -m
+php artisan make:model 'app/interrogation/InterviewAnswer' -m
+php artisan make:model 'app/interrogation/InterviewAttendee' -m
+
+--------------------------------------------------------------------------
+
+php artisan make:migration add_leader_id_to_area_conocimientos --table=area_conocimientos
+php artisan make:migration add_peducativo_id_to_area_conocimientos --table=area_conocimientos
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+php artisan make:model 'app\SocialAction\CommunityAction' -m
+php artisan make:model 'app\SocialAction\CommunityHour' -m
+
+
+php artisan make:migration add_hour_social_to_grados --table=grados
+php artisan make:migration add_total_hour_social_to_grados --table=grados
+
+
+php artisan make:migration add_representant_date_birth_to_catchments --table=catchments
+php artisan make:migration add_status_foreign_to_catchments --table=catchments
+php artisan make:migration add_country_foreign_to_catchments --table=catchments
+php artisan make:migration add_status_siblings_college_to_catchments --table=catchments
+php artisan make:migration add_brothers_to_catchments --table=catchments
+php artisan make:migration add_status_accept_terms_to_catchments --table=catchments
+
+
+php artisan make:migration add_status_except_to_oinstitucions --table=oinstitucions
+
+content, classroom activities, teaching and learning
+php artisan make:migration add_content_to_lessons --table=lessons
+php artisan make:migration add_teaching_to_lessons --table=lessons
+php artisan make:migration add_learning_to_lessons --table=lessons
+
+
+php artisan make:migration add_finished_to_lessons --table=lessons
+
+php artisan make:migration add_manager_id_to_peducativos --table=peducativos
+
+
+php artisan make:model 'app\Blog\Contact' -m
+
+
+php artisan make:migration add_accepted_to_catchment_interviews_table --table=catchment_interviews
+php artisan make:migration add_rating_to_catchment_interviews_table --table=catchment_interviews
+php artisan make:migration add_observations_to_catchment_interviews_table --table=catchment_interviews
+
+php artisan make:migration add_token_to_catchment_interviews_table --table=catchment_interviews
+php artisan make:migration add_status_notified_to_catchment_interviews_table --table=catchment_interviews
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+Educational
+php artisan make:model 'app/Educational/DebateCompetition' -m
+php artisan make:model 'app/Educational/Debate' -m
+php artisan make:model 'app/Educational/DebateQuestion' -m
+php artisan make:model 'app/Educational/DebateOption' -m
+php artisan make:model 'app/Educational/DebateAnswer' -m
+php artisan make:model 'app/Educational/DebateGroup' -m
+
+
+php artisan make:migration add_status_representant_to_poll_mains_table --table=poll_mains
+
+php artisan make:migration add_status_standby_to_catchment_interviews --table=catchment_interviews
+
+
+php artisan make:migration add_status_component_to_pensums --table=pensums
+
+
+Inicial
+
+
+Cabeceras
+php artisan make:model 'app/Inicial/Eiplanningwk' -m
+php artisan make:model 'app/Inicial/Eiplanningbwk' -m
+php artisan make:model 'app/Inicial/Eiprojectk' -m
+php artisan make:model 'app/Inicial/Eispecialk' -m
+php artisan make:model 'app/Inicial/Eievaluationk' -m
+php artisan make:model 'app/Inicial/Eifinalk' -m
+php artisan make:model 'app/Inicial/EiLearningarea' -m
+php artisan make:model 'app/Inicial/EiLearningexpectation' -m
+
+
+
+Posiciones
+php artisan make:model 'app/Inicial/Eiplanningwsummary' -m
+php artisan make:model 'app/Inicial/Eiplanningwstrategy' -m
+
+php artisan make:model 'app/Inicial/Eiplanningbwsummary' -m
+php artisan make:model 'app/Inicial/Eiplanningbwstrategy' -m
+
+php artisan make:model 'app/Inicial/Eiprojectreview' -m
+php artisan make:model 'app/Inicial/Eiprojectsummary' -m
+php artisan make:model 'app/Inicial/Eiprojectkstrategy' -m
+
+php artisan make:model 'app/Inicial/Eispecialp' -m
+php artisan make:model 'app/Inicial/Eispecialact' -m
+php artisan make:model 'app/Inicial/Eispecialstrategy' -m
+
+php artisan make:model 'app/Inicial/Eievaluationp' -m
+
+php artisan make:model 'app/Inicial/Eifinalp' -m
+
+php artisan make:model 'app/Inicial/Eipedagogicalk' -m
+php artisan make:model 'app/Inicial/Eipedagogicalp' -m
+
+php artisan make:model 'app/SenderMailer/SendMailLogs' -m
+
+
+
+
+eiplanningwks, eiplanningwsummaries, eiplanningwstrategies
+eiplanningbwks, eiplanningbwsummaries
+eiprojectks, eiprojectreviews, eiprojectsummaries
+
+eispecialks, eispecialps, eispecialacts
+
+eipedagogicalks, eipedagogicalps
+
+eievaluationks, eievaluationps
+eifinalks, eifinalps
+
+php artisan make:migration add_group_id_to_debate_answers_table --table=debate_answers
+php artisan make:migration add_competition_id_to_debate_answers_table --table=debate_answers
+
+
+php artisan make:migration add_assistant_id_to_pestudios_table --table=pestudios
+php artisan make:migration add_deputy_id_to_pestudios_table --table=pestudios
+
+php artisan make:migration add_assistant_id_to_peducativos_table --table=peducativos
+php artisan make:migration add_deputy_id_to_peducativos_table --table=peducativos
+
+
+
+php artisan make:migration add_context_to_debate_competitions_table --table=debate_competitions
+php artisan make:migration add_context_to_debates_table --table=debates
+php artisan make:migration add_context_to_debate_questions_table --table=debate_questions
+php artisan make:migration add_context_to_debate_options_table --table=debate_options
+
+php artisan make:migration add_status_quota_to_mailers --table=mailers
+
+php artisan make:migration add_status_empirical_evidence_to_debates --table=debates
+
+php artisan make:migration add_mail_cc_address_to_autoridads_table --table=autoridads
+
+php artisan make:migration add_date_suspend_to_institucions_table --table=institucions
+
+php artisan make:migration add_show_quantitative_indicators_to_peducativos --table=peducativos
+
+php artisan make:migration add_academic_start_date_to_lapsos --table=lapsos
+
+php artisan make:migration add_show_quantitative_indicators_to_pestudios --table=pestudios
+
+php artisan make:migration add_whatsapp_to_representants --table=representants
+
+php artisan make:migration add_facebook_access_token_to_institucions --table=institucions
+php artisan make:migration add_facebook_access_token_date_to_institucions --table=institucions
+php artisan make:migration add_facebook_tier_institucions --table=institucions
+php artisan make:migration add_facebook_media_id_admon_to_institucions --table=institucions
+php artisan make:migration add_facebook_media_id_control_to_institucions --table=institucions
+
+php artisan make:migration add_status_whatsapp_to_coll_calendars --table=coll_calendars
+
+php artisan make:migration add_phone_old_to_representants --table=representants
+
+php artisan make:migration add_status_email_to_mailers --table=mailers
+php artisan make:migration add_status_whatsapp_to_mailers --table=mailers
+php artisan make:migration add_template_to_mailers --table=mailers
+
+php artisan make:model 'app/Integration/MetaResponse' -m
+
+php artisan make:migration add_status_whatsapp_verify_to_representants --table=representants
+
+php artisan make:migration add_status_quantitative_weighting_to_achievements --table=achievements
+
+php artisan make:migration modify_weighting_nullable_in_achievements
+
+php artisan make:model 'app/Meta/WebhookLog' -m
+
+php artisan make:model 'app/Meta/WebhookLog'
+
+php artisan make:model 'app/Meta/WebhookMessage' -m
+
+php artisan make:migration add_status_schedule_to_achievements --table=rols
+
+php artisan make:migration add_status_socials_to_pestudios --table=pestudios
+
+php artisan make:migration add_order_to_eiplanningwstrategies_table --table=eiplanningwstrategies
+php artisan make:migration add_order_to_eiplanningwsummaries_table --table=eiplanningwsummaries
+php artisan make:migration add_order_to_eiplanningbwsummaries_table --table=eiplanningwsummaries
+php artisan make:migration add_order_to_eiplanningbwstrategies_table --table=eiprojectps
+php artisan make:migration add_order_to_eiprojectreviews_table --table=eiprojectreviews
+php artisan make:migration add_order_to_eiprojectsummaries_table --table=eiprojectsummaries
+php artisan make:migration add_order_to_eispecialacts_table --table=eispecialacts
+php artisan make:migration add_order_to_eievaluationps_table --table=eievaluationps
+
+php artisan make:migration add_eiprojectk_id_to_eiplanningwks_table --table=eiplanningwks
+php artisan make:migration add_eiprojectk_id_to_eiplanningbwks_table --table=eiplanningbwks
+
+php artisan make:migration add_status_notice_to_estudiants --table=estudiants
+
+
+php artisan make:model 'app/Agentia/PromptContext' -m
+
+
+php artisan make:migration alter_table_refunds_change_credito_a_favor_id --table=refunds
+php artisan make:migration add_status_return_to_refunds_table --table=refunds
+
+
+php artisan make:migration add_general_to_mailers_table --table=mailers
+
+
+php artisan make:migration add_pevaluacion_id_to_debates_table --table=debates
+php artisan make:migration add_pensum_id_to_debate_questions_table --table=debate_questions
+php artisan make:migration add_user_id_to_debate_questions_table --table=debate_questions
+php artisan make:migration add_user_id_to_debate_options_table --table=debate_options
+
+php artisan make:migration add_order_to_eifinalks_table --table=eifinalks
+
+
+php artisan make:migration add_max_number_eiplanningwks_to_peducativos --table=peducativos
+php artisan make:migration add_max_number_eiplanningbwks_to_peducativos --table=peducativos
+php artisan make:migration add_max_number_eiprojectks_to_peducativos --table=peducativos
+php artisan make:migration add_max_number_eispecialks_to_peducativos --table=peducativos
+php artisan make:migration add_max_number_eievaluationks_to_peducativos --table=peducativos
+php artisan make:migration add_max_number_eifinalks_to_peducativos --table=peducativos
+
+php artisan make:migration add_justification_annulment_to_registro_pagos --table=registro_pagos
+
+
+php artisan make:migration add_status_prosecution_to_estudiants --table=estudiants
+
+php artisan make:migration add_status_late_payment_to_cuentaxpagars --table=cuentaxpagars
+php artisan make:migration add_enable_late_payment_to_cuentaxpagars --table=cuentaxpagars
+
+php artisan make:migration add_mail_logs_to_maileds --table=maileds
+
+php artisan make:migration add_estrategias_to_eiprojectsummarys --table=eiprojectsummarys
+php artisan make:migration add_estrategias_to_eiprojectreviews --table=eiprojectreviews
+
+php artisan make:migration add_expected_learnings_to_eifinalks --table=eifinalks
+
+php artisan make:migration add_expected_learnings_to_eifinalks --table=eifinalks
+
+php artisan make:migration add_specialist_observation_to_eifinalks --table=eifinalks
+
+
+php artisan make:migration add_quota_id_to_concepto_pagos --table=concepto_pagos
+
+
+php artisan make:migration add_whatsapp_to_profesors --table=profesors
+
+php artisan make:migration add_status_active_to_pensums --table=pensums
+
+php artisan make:migration add_status_active_diagnostic_to_pensums --table=pensums
+
+
+php artisan make:migration add_status_note_report_to_pevaluacions --table=pevaluacions
+
+
+
+php artisan make:migration add_status_control_to_retiros_table --table=retiros
+
+
+php artisan make:migration add_count_passes_to_estudiants_table --table=estudiants
+
+
+php artisan make:migration add_profile_to_diag_results_table --table=diag_results
+php artisan make:migration add_contrast_to_diag_results_table --table=diag_results

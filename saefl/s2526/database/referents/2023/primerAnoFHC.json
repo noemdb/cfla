@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "222",
+        "name": "[FHC-EMCT-1] FORMACIÓN HUMANA CRISTIANA [pensumId=222]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-FHC-EMCT-1-01",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Vive coherentemente los valores del Evangelio en su vida personal, escolar y comunitaria.",
+            "descripcion": "Integra principios cristianos como la fraternidad, la justicia, la verdad, la paz y el servicio en sus decisiones cotidianas, promoviendo una ética de amor y solidaridad."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-02",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Reflexiona críticamente sobre la fe cristiana desde una perspectiva liberadora y comprometida con los pobres.",
+            "descripcion": "Interpreta las enseñanzas de Jesús, la doctrina social de la Iglesia y la espiritualidad amigoniana en diálogo con los desafíos sociales, económicos y políticos del contexto venezolano."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-03",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Participa activamente en la comunidad eclesial y en iniciativas de pastoral juvenil con sentido misionero.",
+            "descripcion": "Se involucra en liturgias, grupos parroquiales, campañas solidarias y procesos de formación espiritual, asumiendo roles de liderazgo y corresponsabilidad."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-04",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Promueve la dignidad humana y los derechos fundamentales desde una visión cristiana de la persona.",
+            "descripcion": "Defiende la vida en todas sus etapas, rechaza toda forma de violencia, discriminación y exclusión, y actúa en favor de la justicia, la inclusión y la equidad."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-05",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Cuida la Creación como don de Dios y responsabilidad ética frente a la crisis ecológica.",
+            "descripcion": "Adopta estilos de vida sostenibles, critica el consumismo y la explotación irresponsable de los recursos naturales, y se compromete con la defensa del ambiente como expresión de justicia intergeneracional."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-06",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Desarrolla una espiritualidad integral que integra oración, reflexión, acción y celebración.",
+            "descripcion": "Cultiva hábitos de oración personal y comunitaria, medita la Palabra de Dios, participa en sacramentos y celebra la fe en clave de esperanza y alegría."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-07",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Diáloga respetuosamente con personas de otras tradiciones religiosas y culturales desde la identidad cristiana.",
+            "descripcion": "Reconoce la riqueza de la diversidad espiritual, practica el respeto mutuo, evita el proselitismo agresivo y busca puntos de encuentro para la construcción de la paz."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-08",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Asume el proyecto de vida como vocación al servicio del Reino de Dios y del bien común.",
+            "descripcion": "Discierne sus talentos, pasiones y opciones formativas o profesionales a la luz de la fe, orientando su futuro hacia el compromiso con la transformación social y la edificación de una sociedad más justa."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-09",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Vive la Pedagogía Amigoniana como camino de formación humana y cristiana basado en la alegría, el trabajo y el servicio.",
+            "descripcion": "Encarna los valores fundacionales de San Luis Amigó en su relación con compañeros, docentes y la comunidad, especialmente en la atención a los más vulnerables."
+        },
+        {
+            "id": "COMP-FHC-EMCT-1-10",
+            "referent_id": "2",
+            "pensum_id": 222,
+            "nombre": "Lidera iniciativas de evangelización comunitaria que respondan a necesidades reales con creatividad y compasión.",
+            "descripcion": "Organiza proyectos pastorales, catequesis, visitas misioneras o campañas de solidaridad que anuncien el Evangelio mediante hechos concretos de amor y cercanía."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-FHC-EMCT-1-01-01",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-01",
+            "descripcion": "Identifica valores evangélicos (misericordia, perdón, humildad) en situaciones cotidianas y los aplica en sus relaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-01-02",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-02",
+            "descripcion": "Actúa con coherencia entre su fe profesada y sus decisiones en contextos de presión grupal o tentación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-01-03",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-03",
+            "descripcion": "Promueve la reconciliación y el perdón en conflictos escolares o familiares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-01-04",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-04",
+            "descripcion": "Rechaza el chisme, la calumnia y la mentira como formas de violencia verbal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-01-05",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-05",
+            "descripcion": "Demuestra generosidad y disponibilidad para ayudar a compañeros en situación de necesidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-01-06",
+            "competency_id": "COMP-FHC-EMCT-1-01",
+            "codigo": "FHC-EMCT-1-IL-06",
+            "descripcion": "Argumenta por qué la coherencia ética es testimonio vivo del seguimiento a Cristo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-01",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-07",
+            "descripcion": "Interpreta pasajes bíblicos sobre la opción preferencial por los pobres (ej.: Mt 25, Lc 4).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-02",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-08",
+            "descripcion": "Relaciona la Doctrina Social de la Iglesia con problemas sociales actuales en Venezuela (pobreza, migración, exclusión).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-03",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-09",
+            "descripcion": "Analiza la vida y mensaje de Jesús como modelo de liberación integral (espiritual, social, política).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-04",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-10",
+            "descripcion": "Critica visiones individualistas o alienantes de la fe que ignoran la dimensión comunitaria y transformadora del Evangelio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-05",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-11",
+            "descripcion": "Reconoce en figuras históricas (monseñor Romero, Dorothy Day, Dom Hélder Câmara) ejemplos de fe comprometida con la justicia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-02-06",
+            "competency_id": "COMP-FHC-EMCT-1-02",
+            "codigo": "FHC-EMCT-1-IL-12",
+            "descripcion": "Propone respuestas evangélicas ante injusticias locales desde una mirada crítica y esperanzadora.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-01",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-13",
+            "descripcion": "Participa regularmente en actividades litúrgicas, grupos de oración o retiros espirituales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-02",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-14",
+            "descripcion": "Asume responsabilidades en equipos de pastoral escolar (liturgia, música, acólitos, animación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-03",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-15",
+            "descripcion": "Colabora en campañas de solidaridad organizadas por la Iglesia (colectas, visitas a hogares, acompañamiento).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-04",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-16",
+            "descripcion": "Invita a otros jóvenes a participar en espacios de formación y misión cristiana con testimonio y respeto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-05",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-17",
+            "descripcion": "Prepara y anima celebraciones escolares con sentido litúrgico y comunitario.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-03-06",
+            "competency_id": "COMP-FHC-EMCT-1-03",
+            "codigo": "FHC-EMCT-1-IL-18",
+            "descripcion": "Reconoce la comunidad eclesial como espacio de crecimiento espiritual, acogida y misión compartida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-01",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-19",
+            "descripcion": "Defiende la vida humana desde la concepción hasta la muerte natural en sus palabras y acciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-02",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-20",
+            "descripcion": "Rechaza el racismo, la xenofobia, la homofobia y toda forma de discriminación como contraria a la dignidad humana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-03",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-21",
+            "descripcion": "Promueve la inclusión de estudiantes con discapacidad o en situación de vulnerabilidad en la vida escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-04",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-22",
+            "descripcion": "Denuncia situaciones de abuso, maltrato o explotación en su entorno y busca ayuda adecuada.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-05",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-23",
+            "descripcion": "Argumenta que los derechos humanos tienen fundamento en la dignidad trascendente de la persona creada a imagen de Dios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-04-06",
+            "competency_id": "COMP-FHC-EMCT-1-04",
+            "codigo": "FHC-EMCT-1-IL-24",
+            "descripcion": "Participa en iniciativas que promuevan la justicia, la paz y la no violencia en su escuela o barrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-01",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-25",
+            "descripcion": "Aplica prácticas de cuidado ambiental en su vida diaria (ahorro de agua, reciclaje, reducción de plásticos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-02",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-26",
+            "descripcion": "Interpreta la encíclica *Laudato Si’* como llamado a la conversión ecológica integral.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-03",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-27",
+            "descripcion": "Critica el consumismo y la cultura del descarte como expresiones de idolatría del mercado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-04",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-28",
+            "descripcion": "Participa en huertos escolares, reforestación o limpieza de espacios públicos como acción ecológica concreta.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-05",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-29",
+            "descripcion": "Reconoce a los pueblos originarios como guardianes ancestrales de la Creación y aliados en la defensa ambiental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-05-06",
+            "competency_id": "COMP-FHC-EMCT-1-05",
+            "codigo": "FHC-EMCT-1-IL-30",
+            "descripcion": "Propone un estilo de vida sobrio, solidario y sostenible como respuesta evangélica a la crisis ecológica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-01",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-31",
+            "descripcion": "Mantiene un hábito regular de oración personal (lectura orante, examen de conciencia, gratitud).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-02",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-32",
+            "descripcion": "Participa en la Eucaristía dominical y en otros sacramentos con disposición interior y participación activa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-03",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-33",
+            "descripcion": "Reflexiona sobre su experiencia espiritual y la comparte en espacios de acompañamiento o discernimiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-04",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-34",
+            "descripcion": "Celebra momentos comunitarios (fiestas patronales, semanas vocacionales) con alegría y sentido de pertenencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-05",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-35",
+            "descripcion": "Integra la dimensión espiritual en su proyecto de vida académico y profesional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-06-06",
+            "competency_id": "COMP-FHC-EMCT-1-06",
+            "codigo": "FHC-EMCT-1-IL-36",
+            "descripcion": "Reconoce que la espiritualidad cristiana se expresa en el amor concreto al prójimo, no solo en ritos o devociones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-01",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-37",
+            "descripcion": "Reconoce y respeta las creencias religiosas de compañeros de otras tradiciones (islámica, judía, protestante, afrodescendiente).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-02",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-38",
+            "descripcion": "Participa en diálogos interreligiosos o actividades ecuménicas con apertura y respeto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-03",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-39",
+            "descripcion": "Evita imposiciones o burlas sobre las prácticas religiosas de otros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-04",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-40",
+            "descripcion": "Identifica valores compartidos (justicia, paz, solidaridad) como base para la colaboración interreligiosa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-05",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-41",
+            "descripcion": "Testimonia su fe con coherencia y respeto, sin caer en fanatismos ni proselitismo agresivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-07-06",
+            "competency_id": "COMP-FHC-EMCT-1-07",
+            "codigo": "FHC-EMCT-1-IL-42",
+            "descripcion": "Promueve la convivencia pacífica entre personas de distintas creencias como expresión del amor al prójimo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-01",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-43",
+            "descripcion": "Reflexiona sobre sus talentos, intereses y limitaciones como dones de Dios para el servicio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-02",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-44",
+            "descripcion": "Explora opciones vocacionales (laical, ministerial, consagrada, profesional) con acompañamiento espiritual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-03",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-45",
+            "descripcion": "Formula metas personales alineadas con el servicio al Reino de Dios y al bien común.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-04",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-46",
+            "descripcion": "Evalúa sus decisiones a la luz de criterios evangélicos: ¿esto construye comunión? ¿promueve la justicia?",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-05",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-47",
+            "descripcion": "Reconoce que toda profesión puede ser camino de santidad y servicio si se ejerce con ética y amor.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-08-06",
+            "competency_id": "COMP-FHC-EMCT-1-08",
+            "codigo": "FHC-EMCT-1-IL-48",
+            "descripcion": "Presenta su proyecto de vida como respuesta personal al llamado de Dios en el hoy de la historia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-01",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-49",
+            "descripcion": "Identifica los tres pilares de la Pedagogía Amigoniana: alegría, trabajo y servicio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-02",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-50",
+            "descripcion": "Vive la alegría cristiana incluso en medio de dificultades, como signo de esperanza.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-03",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-51",
+            "descripcion": "Asume el trabajo escolar y comunitario con responsabilidad, calidad y sentido de entrega.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-04",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-52",
+            "descripcion": "Se compromete en obras de misericordia corporales y espirituales, especialmente con los más marginados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-05",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-53",
+            "descripcion": "Reconoce en San Luis Amigó un modelo de educador comprometido con la juventud vulnerable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-09-06",
+            "competency_id": "COMP-FHC-EMCT-1-09",
+            "codigo": "FHC-EMCT-1-IL-54",
+            "descripcion": "Promueve la identidad amigoniana en su escuela mediante ejemplo, palabra y acción solidaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-01",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-55",
+            "descripcion": "Identifica necesidades espirituales o materiales en su comunidad escolar o barrial.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-02",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-56",
+            "descripcion": "Diseña una iniciativa pastoral (catequesis, visita a enfermos, taller de valores) con objetivos claros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-03",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-57",
+            "descripcion": "Moviliza a otros jóvenes para participar en su propuesta de evangelización.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-04",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-58",
+            "descripcion": "Ejecuta su proyecto con creatividad, sensibilidad y fidelidad al mensaje evangélico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-05",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-59",
+            "descripcion": "Evalúa el impacto de su iniciativa en términos de cercanía, esperanza y transformación comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FHC-EMCT-1-10-06",
+            "competency_id": "COMP-FHC-EMCT-1-10",
+            "codigo": "FHC-EMCT-1-IL-60",
+            "descripcion": "Comparte su experiencia misionera como testimonio de fe viva y comprometida.",
+            "nivel_esperado": 3
+        }
+    ]
+}

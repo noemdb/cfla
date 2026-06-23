@@ -1,0 +1,14 @@
+Enviar recibo de pago por email.
+
+Controller
+php artisan make:controller 'Administracion\Email\RegistroPago\sendTicketPaymentController'
+
+Notify
+php artisan make:job 'Email\RegistroPago\ProcessNotifyTicketPayment'
+php artisan make:job 'Email\RegistroPago\ProcessNotifyTicketPaymentSend'
+php artisan make:job 'Email\RegistroPago\ProcessNotifyTicketSend'
+
+MailQueuing
+php artisan make:mail 'Queue\RegistroPago\TicketEmailForQueuing'
+php artisan make:mail 'Queue\RegistroPago\SendTicketEmailForQueuing'
+

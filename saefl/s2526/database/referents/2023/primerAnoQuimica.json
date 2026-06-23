@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "133",
+        "name": "[QUIM-1A] QUÍMICA [pensumId=133]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-QUIM-1A-01",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Comprende la química como ciencia que estudia la composición, estructura y transformación de la materia.",
+            "descripcion": "Reconoce el método científico, las ramas de la química y su importancia en la vida cotidiana, la salud, la industria y el ambiente."
+        },
+        {
+            "id": "COMP-QUIM-1A-02",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Identifica y clasifica la materia en sustancias puras y mezclas según sus propiedades físicas y químicas.",
+            "descripcion": "Distingue entre elementos, compuestos, mezclas homogéneas y heterogéneas, y aplica métodos de separación adecuados a cada tipo."
+        },
+        {
+            "id": "COMP-QUIM-1A-03",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Aplica el Sistema Internacional de Unidades (SI) y técnicas de medición en experimentos químicos.",
+            "descripcion": "Utiliza instrumentos de laboratorio para medir masa, volumen, temperatura y densidad con precisión y seguridad."
+        },
+        {
+            "id": "COMP-QUIM-1A-04",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Describe la estructura atómica básica y la organización de los elementos en la tabla periódica.",
+            "descripcion": "Interpreta modelos atómicos simples, identifica partículas subatómicas y reconoce grupos y períodos en la tabla periódica."
+        },
+        {
+            "id": "COMP-QUIM-1A-05",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Clasifica y nombra compuestos inorgánicos según reglas básicas de la IUPAC.",
+            "descripcion": "Aplica nomenclatura sistemática a óxidos, hidróxidos, ácidos y sales binarias y ternarias."
+        },
+        {
+            "id": "COMP-QUIM-1A-06",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Interpreta cambios físicos y químicos en la materia y reconoce evidencias de reacciones químicas.",
+            "descripcion": "Distingue entre procesos reversibles e irreversibles, identifica reactivos y productos, y describe fenómenos como combustión, oxidación y neutralización."
+        },
+        {
+            "id": "COMP-QUIM-1A-07",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Diseña y ejecuta experimentos seguros para caracterizar sustancias y reacciones químicas.",
+            "descripcion": "Planifica procedimientos, selecciona materiales, aplica normas de bioseguridad y registra observaciones con rigor científico."
+        },
+        {
+            "id": "COMP-QUIM-1A-08",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Evalúa el impacto ambiental de procesos químicos domésticos e industriales.",
+            "descripcion": "Identifica contaminantes, residuos peligrosos y emisiones, proponiendo alternativas sostenibles alineadas con la química verde."
+        },
+        {
+            "id": "COMP-QUIM-1A-09",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Aplica conocimientos de química en contextos de salud, alimentación y bienestar comunitario.",
+            "descripcion": "Relaciona nutrientes, medicamentos, aditivos y contaminantes con su composición química y efectos biológicos."
+        },
+        {
+            "id": "COMP-QUIM-1A-10",
+            "referent_id": "2",
+            "pensum_id": 133,
+            "nombre": "Desarrolla proyectos investigativos que integran saberes químicos, ética científica y responsabilidad social.",
+            "descripcion": "Formula preguntas, diseña metodologías, analiza datos y comunica hallazgos con rigor, creatividad y compromiso con el entorno."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-QUIM-1A-01-01",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-01",
+            "descripcion": "Define la química como ciencia natural que estudia la materia y sus transformaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-02",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-02",
+            "descripcion": "Describe las etapas del método científico aplicado a un fenómeno químico observable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-03",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-03",
+            "descripcion": "Identifica ramas de la química (orgánica, inorgánica, analítica, bioquímica) y su aplicación en la vida diaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-04",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-04",
+            "descripcion": "Reconoce la importancia de la química en tecnologías cotidianas (medicinas, alimentos, materiales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-05",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-05",
+            "descripcion": "Argumenta por qué la química es fundamental para el desarrollo científico y tecnológico nacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-01-06",
+            "competency_id": "COMP-QUIM-1A-01",
+            "codigo": "QUIM-1A-IL-06",
+            "descripcion": "Relaciona la química con otras ciencias (física, biología, geografía) en el estudio de la naturaleza.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-01",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-07",
+            "descripcion": "Distingue entre sustancias puras (elementos y compuestos) y mezclas (homogéneas y heterogéneas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-02",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-08",
+            "descripcion": "Identifica ejemplos cotidianos de cada tipo de materia (agua destilada, aire, jugo de fruta, sal).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-03",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-09",
+            "descripcion": "Selecciona el método de separación adecuado (filtración, decantación, evaporación, imantación) según las propiedades de la mezcla.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-04",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-10",
+            "descripcion": "Diseña un procedimiento para separar los componentes de una mezcla compleja (arena, sal, limaduras de hierro).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-05",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-11",
+            "descripcion": "Explica por qué el agua potable es una mezcla y no una sustancia pura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-02-06",
+            "competency_id": "COMP-QUIM-1A-02",
+            "codigo": "QUIM-1A-IL-12",
+            "descripcion": "Argumenta que la pureza de una sustancia afecta su uso en medicina, industria o consumo humano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-01",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-13",
+            "descripcion": "Utiliza balanzas para medir masa con precisión en gramos y kilogramos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-02",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-14",
+            "descripcion": "Mide volúmenes con probetas, pipetas y buretas en mililitros y litros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-03",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-15",
+            "descripcion": "Registra temperaturas en grados Celsius con termómetros de laboratorio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-04",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-16",
+            "descripcion": "Calcula la densidad de sólidos y líquidos usando ρ = m/V.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-05",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-17",
+            "descripcion": "Aplica cifras significativas y unidades del SI en mediciones y cálculos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-03-06",
+            "competency_id": "COMP-QUIM-1A-03",
+            "codigo": "QUIM-1A-IL-18",
+            "descripcion": "Respeta protocolos de seguridad al manipular instrumentos y sustancias en el laboratorio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-01",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-19",
+            "descripcion": "Identifica protones, neutrones y electrones como partículas subatómicas fundamentales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-02",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-20",
+            "descripcion": "Describe el modelo atómico de Bohr de forma simplificada (núcleo y niveles de energía).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-03",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-21",
+            "descripcion": "Localiza elementos en la tabla periódica por su símbolo, número atómico y masa atómica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-04",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-22",
+            "descripcion": "Reconoce grupos (familias) y períodos en la tabla periódica y su relación con propiedades químicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-05",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-23",
+            "descripcion": "Identifica metales, no metales y metaloides en la tabla periódica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-04-06",
+            "competency_id": "COMP-QUIM-1A-04",
+            "codigo": "QUIM-1A-IL-24",
+            "descripcion": "Argumenta por qué la tabla periódica es una herramienta predictiva en química.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-01",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-25",
+            "descripcion": "Nombra y formula óxidos metálicos y no metálicos según reglas IUPAC básicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-02",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-26",
+            "descripcion": "Escribe fórmulas y nombres de hidróxidos y ácidos binarios (HCl, H₂S).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-03",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-27",
+            "descripcion": "Nombra sales neutras derivadas de ácidos binarios (NaCl, CaS).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-04",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-28",
+            "descripcion": "Utiliza prefijos y sufijos sistemáticos para compuestos inorgánicos simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-05",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-29",
+            "descripcion": "Identifica estados de oxidación en compuestos binarios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-05-06",
+            "competency_id": "COMP-QUIM-1A-05",
+            "codigo": "QUIM-1A-IL-30",
+            "descripcion": "Corrige errores comunes en la nomenclatura química en producciones propias o ajenas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-01",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-31",
+            "descripcion": "Distingue entre cambios físicos (fusión, evaporación) y químicos (combustión, oxidación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-02",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-32",
+            "descripcion": "Identifica evidencias de reacción química: cambio de color, formación de precipitado, liberación de gas, cambio de temperatura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-03",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-33",
+            "descripcion": "Describe la combustión de materiales orgánicos como reacción con el oxígeno que libera energía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-04",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-34",
+            "descripcion": "Explica la oxidación del hierro (herrumbre) como un proceso lento de reacción con el oxígeno y la humedad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-05",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-35",
+            "descripcion": "Describe la neutralización como reacción entre ácidos y bases que produce sal y agua.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-06-06",
+            "competency_id": "COMP-QUIM-1A-06",
+            "codigo": "QUIM-1A-IL-36",
+            "descripcion": "Argumenta que los cambios químicos transforman la identidad de las sustancias originales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-01",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-37",
+            "descripcion": "Elabora un protocolo experimental con objetivos, materiales, procedimiento y medidas de seguridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-02",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-38",
+            "descripcion": "Utiliza equipo de laboratorio (pipetas, probetas, mecheros) con precisión y cuidado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-03",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-39",
+            "descripcion": "Aplica normas de bioseguridad (uso de guantes, gafas, bata, campana de extracción).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-04",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-40",
+            "descripcion": "Registra observaciones cualitativas (color, olor, precipitado) y cuantitativas (masa, volumen, temperatura).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-05",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-41",
+            "descripcion": "Identifica variables independientes, dependientes y controladas en un experimento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-07-06",
+            "competency_id": "COMP-QUIM-1A-07",
+            "codigo": "QUIM-1A-IL-42",
+            "descripcion": "Presenta resultados en tablas y gráficos con unidades y cifras significativas correctas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-01",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-43",
+            "descripcion": "Identifica contaminantes químicos en el aire, agua y suelo (metales pesados, plásticos, detergentes).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-02",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-44",
+            "descripcion": "Relaciona procesos industriales (minería, petróleo) con impactos ambientales locales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-03",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-45",
+            "descripcion": "Propone estrategias de manejo seguro de residuos químicos en el laboratorio escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-04",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-46",
+            "descripcion": "Evalúa productos de limpieza o cosméticos por su composición y biodegradabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-05",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-47",
+            "descripcion": "Argumenta a favor de la química verde como alternativa sostenible en la producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-08-06",
+            "competency_id": "COMP-QUIM-1A-08",
+            "codigo": "QUIM-1A-IL-48",
+            "descripcion": "Vincula sus análisis con los ODS 6 (Agua limpia), 12 (Producción responsable) y 14 (Vida submarina).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-01",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-49",
+            "descripcion": "Identifica macronutrientes y micronutrientes por su composición química.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-02",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-50",
+            "descripcion": "Analiza etiquetas nutricionales para detectar aditivos, conservantes o colorantes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-03",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-51",
+            "descripcion": "Explica el mecanismo de acción de medicamentos comunes (analgésicos, antiácidos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-04",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-52",
+            "descripcion": "Relaciona el pH gástrico con la digestión y el uso de antiácidos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-05",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-53",
+            "descripcion": "Evalúa riesgos de sustancias tóxicas en el hogar (lejía, amoníaco, insecticidas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-09-06",
+            "competency_id": "COMP-QUIM-1A-09",
+            "codigo": "QUIM-1A-IL-54",
+            "descripcion": "Promueve hábitos de consumo informado basados en conocimientos químicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-01",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-55",
+            "descripcion": "Formula una pregunta investigable sobre un problema químico local (contaminación, calidad del agua, residuos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-02",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-56",
+            "descripcion": "Diseña una metodología segura, replicable y ética para abordar su pregunta.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-03",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-57",
+            "descripcion": "Recopila y organiza datos mediante tablas, gráficos y descripciones sistemáticas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-04",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-58",
+            "descripcion": "Analiza resultados con base en principios químicos y los contrasta con hipótesis iniciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-05",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-59",
+            "descripcion": "Propone soluciones técnicas, educativas o comunitarias derivadas de su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QUIM-1A-10-06",
+            "competency_id": "COMP-QUIM-1A-10",
+            "codigo": "QUIM-1A-IL-60",
+            "descripcion": "Comunica sus hallazgos en un informe o presentación oral con rigor, claridad y responsabilidad social.",
+            "nivel_esperado": 3
+        }
+    ]
+}

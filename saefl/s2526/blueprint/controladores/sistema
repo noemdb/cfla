@@ -1,0 +1,26 @@
+php artisan make:controller 'Authenticator\AuthCustomController'
+
+php artisan make:controller 'Moviles\AuthCustomController'
+
+
+Controller para vistas
+php artisan make:controller 'Admin\HomeController'
+
+php artisan make:controller 'Admin\Crud\UserController' --resource
+php artisan make:controller 'Admin\Crud\ProfileController' --resource
+php artisan make:controller 'Admin\Crud\RolController' --resource
+
+php artisan make:controller 'Admin\Json\Charts\UserController'
+php artisan make:controller 'Admin\Json\Charts\ProfileController'
+php artisan make:controller 'Admin\Json\Charts\RolController'
+
+php artisan make:controller 'Admin\Crud\TaskController' --resource && php artisan make:controller 'Admin\Crud\MessegeController' --resource && php artisan make:controller 'Admin\Crud\AlertController' --resource
+
+php artisan make:controller 'Admin\Json\Charts\TasksController' && php artisan make:controller 'Admin\Json\Charts\AlertController' && php artisan make:controller 'Admin\Json\Charts\MessegesController'
+
+php artisan make:controller 'Admin\Json\Navbar\TopController'
+
+
+
+//fix
+php artisan make:controller 'Admin\Fix\DB\HomeController'

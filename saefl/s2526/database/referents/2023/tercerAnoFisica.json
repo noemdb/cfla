@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "191",
+        "name": "[FISICA-1] FÍSICA [pensumId=191]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-FISICA-1-01",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Observa y describe fenómenos físicos en el entorno natural y tecnológico.",
+            "descripcion": "Identifica manifestaciones de la física en la cotidianidad, diferenciando cualitativamente fenómenos mecánicos, térmicos, eléctricos y lumínicos."
+        },
+        {
+            "id": "COMP-FISICA-1-02",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Interpreta el movimiento de los cuerpos mediante conceptos de cinemática.",
+            "descripcion": "Aplica modelos cinemáticos para describir trayectorias, velocidad y aceleración en movimientos rectilíneos y circulares simples."
+        },
+        {
+            "id": "COMP-FISICA-1-03",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Aplica las leyes de Newton para explicar la dinámica de los cuerpos.",
+            "descripcion": "Relaciona fuerzas con cambios en el movimiento, aplicando principios de inercia, acción-reacción y segunda ley de Newton en situaciones concretas."
+        },
+        {
+            "id": "COMP-FISICA-1-04",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Comprende los conceptos de trabajo, energía y potencia en sistemas mecánicos.",
+            "descripcion": "Diferencia formas de energía, aplica el principio de conservación y calcula trabajo y potencia en situaciones cotidianas."
+        },
+        {
+            "id": "COMP-FISICA-1-05",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Analiza las propiedades de fluidos y la presión en reposo y movimiento.",
+            "descripcion": "Explica fenómenos de presión, flotación y principio de Arquímedes en cuerpos sumergidos y sistemas hidráulicos."
+        },
+        {
+            "id": "COMP-FISICA-1-06",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Comprende los fenómenos térmicos y la transferencia de calor.",
+            "descripcion": "Interpreta escalas termométricas, diferencia caloría y temperatura, y explica mecanismos de transferencia térmica en el medio ambiente."
+        },
+        {
+            "id": "COMP-FISICA-1-07",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Caracteriza las ondas mecánicas y electromagnéticas en la naturaleza.",
+            "descripcion": "Describe propagación de ondas, reflexión, refracción, difracción e interpreta el espectro electromagnético."
+        },
+        {
+            "id": "COMP-FISICA-1-08",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Comprende fenómenos eléctricos y magnéticos básicos.",
+            "descripcion": "Interpreta cargas eléctricas, fuerzas de Coulomb, corriente eléctrica y fenómenos de inducción magnética en circuitos simples."
+        },
+        {
+            "id": "COMP-FISICA-1-09",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Aplica la física para interpretar tecnologías cotidianas y sustentables.",
+            "descripcion": "Relaciona principios físicos con funcionamiento de dispositivos tecnológicos, energías renovables y soluciones ingenieriles locales."
+        },
+        {
+            "id": "COMP-FISICA-1-10",
+            "referent_id": "2",
+            "pensum_id": 191,
+            "nombre": "Desarrolla habilidades de pensamiento científico mediante la experimentación física.",
+            "descripcion": "Formula hipótesis, diseña experimentos controlados, mide variables, analiza errores y comunica resultados siguiendo el método científico."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-FISICA-1-01-01",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-01",
+            "descripcion": "Clasifica fenómenos físicos observados en mecánicos, térmicos, eléctricos y ópticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-01-02",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-02",
+            "descripcion": "Mide magnitudes físicas fundamentales (longitud, masa, tiempo) con instrumentos adecuados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-01-03",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-03",
+            "descripcion": "Diferencia entre física, química y biología según objeto de estudio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-01-04",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-04",
+            "descripcion": "Identifica leyes físicas en tecnologías cotidianas (teléfono, bicicleta, refrigerador).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-01-05",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-05",
+            "descripcion": "Aplica notación científica para expresar magnitudes muy grandes o pequeñas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-01-06",
+            "competency_id": "COMP-FISICA-1-01",
+            "codigo": "FISICA-1-IL-06",
+            "descripcion": "Utiliza prefijos del sistema internacional para realizar conversiones de unidades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-01",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-07",
+            "descripcion": "Diferencia entre trayectoria, desplazamiento y distancia recorrida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-02",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-08",
+            "descripcion": "Calcula velocidad media y velocidad instantánea en movimientos uniformes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-03",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-09",
+            "descripcion": "Interpreta gráficas posición-tiempo y velocidad-tiempo en movimiento rectilíneo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-04",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-10",
+            "descripcion": "Aplica ecuaciones de movimiento rectilíneo uniformemente acelerado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-05",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-11",
+            "descripcion": "Describe componentes tangencial y centrípeta en movimiento circular uniforme.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-02-06",
+            "competency_id": "COMP-FISICA-1-02",
+            "codigo": "FISICA-1-IL-12",
+            "descripcion": "Interpreta gráficas de trayectoria parabólica en lanzamientos de proyectiles.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-01",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-13",
+            "descripcion": "Enuncia la primera ley de Newton y ejemplifica inercia en situaciones cotidianas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-02",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-14",
+            "descripcion": "Aplica segunda ley de Newton para calcular aceleración con fuerzas conocidas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-03",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-15",
+            "descripcion": "Identifica pares acción-reacción en interacciones físicas cotidianas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-04",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-16",
+            "descripcion": "Diferencia entre masa y peso considerando la aceleración gravitacional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-05",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-17",
+            "descripcion": "Calcula fuerza de fricción estática y cinética en superficies horizontales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-03-06",
+            "competency_id": "COMP-FISICA-1-03",
+            "codigo": "FISICA-1-IL-18",
+            "descripcion": "Aplica diagramas de cuerpo libre para analizar fuerzas en sistemas simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-01",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-19",
+            "descripcion": "Calcula trabajo mecánico realizado por fuerzas constantes en desplazamientos rectos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-02",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-20",
+            "descripcion": "Diferencia entre energía cinética, potencial gravitacional y potencial elástica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-03",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-21",
+            "descripcion": "Aplica el principio de conservación de la energía mecánica en sistemas simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-04",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-22",
+            "descripcion": "Calcula potencia desarrollada en actividades físicas y máquinas simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-05",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-23",
+            "descripcion": "Calcula eficiencia mecánica de dispositivos considerando pérdidas por fricción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-04-06",
+            "competency_id": "COMP-FISICA-1-04",
+            "codigo": "FISICA-1-IL-24",
+            "descripcion": "Interpreta transformaciones energéticas en sistemas oscilatorios y pendulares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-01",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-25",
+            "descripcion": "Calcula presión en fluidos en reposo usando ley de Pascal y principio de Arquímedes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-02",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-26",
+            "descripcion": "Explica flotación y hundimiento de cuerpos según densidad relativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-03",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-27",
+            "descripcion": "Aplica ecuación de continuidad para analizar flujo en tuberías de sección variable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-04",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-28",
+            "descripcion": "Calcula velocidad de salida de fluidos usando principio de Bernoulli.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-05",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-29",
+            "descripcion": "Explica funcionamiento de barómetros, manómetros y bombas hidráulicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-05-06",
+            "competency_id": "COMP-FISICA-1-05",
+            "codigo": "FISICA-1-IL-30",
+            "descripcion": "Interpreta viscosidad y resistencia al flujo en sistemas biológicos (sangre, savia).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-01",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-31",
+            "descripcion": "Convierte entre escalas Celsius, Fahrenheit y Kelvin en problemas de temperatura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-02",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-32",
+            "descripcion": "Diferencia entre calor, temperatura y energía térmica en situaciones cotidianas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-03",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-33",
+            "descripcion": "Calcula calor transferido usando capacidad calorífica específica y calor latente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-04",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-34",
+            "descripcion": "Explica conducción, convección y radiación con ejemplos cotidianos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-05",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-35",
+            "descripcion": "Interpreta procesos de cambio de estado y diagramas de calentamiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-06-06",
+            "competency_id": "COMP-FISICA-1-06",
+            "codigo": "FISICA-1-IL-36",
+            "descripcion": "Aplica ley de gases ideales para explicar comportamiento de gases a temperatura constante.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-01",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-37",
+            "descripcion": "Diferencia entre ondas transversales y longitudinales con ejemplos (cuerda, muelle, sonido).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-02",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-38",
+            "descripcion": "Calcula velocidad de propagación usando frecuencia y longitud de onda.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-03",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-39",
+            "descripcion": "Explica fenómenos de reflexión, refracción y difracción con diagramas de rayos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-04",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-40",
+            "descripcion": "Clasifica el espectro electromagnético según frecuencia, longitud de onda y energía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-05",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-41",
+            "descripcion": "Explica fenómenos de resonancia y batimentos en sistemas oscilatorios.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-07-06",
+            "competency_id": "COMP-FISICA-1-07",
+            "codigo": "FISICA-1-IL-42",
+            "descripcion": "Calcula distancias usando ecos y retraso temporal en propagación del sonido.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-01",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-43",
+            "descripcion": "Diferencia entre conductores, aisladores y semiconductores con ejemplos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-02",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-44",
+            "descripcion": "Calcula fuerza electrostática usando ley de Coulomb en cargas puntuales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-03",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-45",
+            "descripcion": "Diseña circuitos serie y paralelo calculando corriente, voltaje y resistencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-04",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-46",
+            "descripcion": "Aplica ley de Ohm para predecir comportamiento de circuitos eléctricos simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-05",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-47",
+            "descripcion": "Explica inducción electromagnética y su aplicación en generadores y transformadores.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-08-06",
+            "competency_id": "COMP-FISICA-1-08",
+            "codigo": "FISICA-1-IL-48",
+            "descripcion": "Calcula consumo energético y costo de operación de electrodomésticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-01",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-49",
+            "descripcion": "Explica funcionamiento de paneles solares y su eficiencia energética.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-02",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-50",
+            "descripcion": "Interpreta principios de conservación en el diseño de máquinas simples (palanca, polea, plano inclinado).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-03",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-51",
+            "descripcion": "Aplica física de fluidos para explicar funcionamiento de sistemas de riego local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-04",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-52",
+            "descripcion": "Evalúa impacto ambiental de diferentes fuentes energéticas (fósiles, renovables, nucleares).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-05",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-53",
+            "descripcion": "Diseña un prototipo de dispositivo de bajo costo usando principios físicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-09-06",
+            "competency_id": "COMP-FISICA-1-09",
+            "codigo": "FISICA-1-IL-54",
+            "descripcion": "Calcula rendimiento de sistemas de captación de agua de lluvia usando física básica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-01",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-55",
+            "descripcion": "Formula hipótesis testables sobre fenómenos físicos observables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-02",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-56",
+            "descripcion": "Diseña experimentos con variables independientes, dependientes y controladas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-03",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-57",
+            "descripcion": "Mide magnitudes físicas con instrumentos adecuados estimando error experimental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-04",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-58",
+            "descripcion": "Analiza datos experimentales identificando relaciones proporcionales y tabulares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-05",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-59",
+            "descripcion": "Elabora conclusiones basadas en evidencia y reconoce limitaciones del método.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-1-10-06",
+            "competency_id": "COMP-FISICA-1-10",
+            "codigo": "FISICA-1-IL-60",
+            "descripcion": "Comunica resultados mediante informes escritos y presentaciones con lenguaje técnico apropiado.",
+            "nivel_esperado": 3
+        }
+    ]
+}

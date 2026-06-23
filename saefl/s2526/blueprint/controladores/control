@@ -1,0 +1,73 @@
+php artisan make:controller 'Administracion\HomeController' &&
+php artisan make:controller 'Administracion\Crud\ConfiguracionController' --resource &&
+php artisan make:controller 'Administracion\Crud\EstudiantesController' --resource &&
+php artisan make:controller 'Administracion\Crud\PadresController' --resource &&
+php artisan make:controller 'Administracion\Crud\PagosAdelantadosController' --resource &&
+php artisan make:controller 'Administracion\Crud\CuentasCobrarController' --resource &&
+php artisan make:controller 'Administracion\Crud\OperacionesBancosController' --resource &&
+php artisan make:controller 'Administracion\Crud\AreaController' --resource
+
+php artisan make:controller 'Administracion\Tab\InicioController' &&
+php artisan make:controller 'Administracion\Tab\ConfiguracionController' &&
+php artisan make:controller 'Administracion\Tab\EstudiantesController' &&
+php artisan make:controller 'Administracion\Tab\PadresController' &&
+php artisan make:controller 'Administracion\Tab\RepresentantesController' &&
+php artisan make:controller 'Administracion\Tab\PagosAdelantadosController' &&
+php artisan make:controller 'Administracion\Tab\CuentasCobrarController' &&
+php artisan make:controller 'Administracion\Tab\OperacionesBancosController' &&
+
+
+php artisan make:controller 'Administracion\Tab\Inicio\HomeController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\HomeController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\InstitucionController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\AutoridadController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\BancoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PeducativoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PestudioController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\GradoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\SeccionController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\LapsoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PlanPagoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CuentaXPagarController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\ConceptoPagoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\PdescuentoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CcobroController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CbancarioController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\AreaConocimientoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\CampoConocimientoController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\HorarioController'
+php artisan make:controller 'Administracion\Tab\Configuracion\SyncDataController'
+php artisan make:controller 'Administracion\Tab\Configuracion\ExchangeRateController'
+
+php artisan make:controller 'Administracion\Tab\InscripcionController' &&
+php artisan make:controller 'Administracion\Tab\EnrollmentController' &&
+
+php artisan make:controller 'Administracion\Tab\Estudiante\HomeController' &&
+
+php artisan make:controller 'Administracion\Tab\PadresController' &&
+php artisan make:controller 'Administracion\Tab\PagosAdelantadosController' &&
+php artisan make:controller 'Administracion\Tab\RegistroPagosController' &&
+php artisan make:controller 'Administracion\Tab\CuentasCobrarController' &&
+php artisan make:controller 'Administracion\Tab\OperacionesBancosController' &&
+php artisan make:controller 'Administracion\Tab\AreaController'
+
+/*historico_notas*/
+php artisan make:controller 'Administracion\Tab\HistoricoNotaController' &&
+php artisan make:controller 'Administracion\Tab\HpensumController' &&
+php artisan make:controller 'Administracion\Tab\HnotaController' &&
+php artisan make:controller 'Administracion\Tab\Configuracion\OinstitucionController' &&
+
+/*Registro de Titulo*/
+php artisan make:controller 'Administracion\Tab\RegistroTituloController' &&
+php artisan make:controller 'Administracion\Tab\TituloController' &&
+php artisan make:controller 'Administracion\Tab\SocialActionController' &&
+
+
+//ajax
+php artisan make:controller 'Administracion\ajax\FillSelectController'
+
+
+php artisan make:controller 'Administracion\Tab\MailerController'
+
+
+php artisan make:controller 'Administracion\Tab\BienestarController'

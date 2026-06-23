@@ -1,0 +1,23 @@
+{
+    "bank_info": {
+        "country": "VE",
+        "code": "0163",
+        "name": "BANCO DEL TESORO, C.A. BANCO UNIVERSAL",
+        "acronym": "TESORO",
+        "thumbnail": "images/thumbnails/issuingBank/tesoro.png",
+        "no_bin_found_card_payment_allowed": true,
+        "tdd_pin_required": true,
+        "card_validation_config": {
+            "TDD": "OTP_BANK",
+            "TDC": "NONE"
+        },
+        "bank_card_validation": {
+            "TDC": false,
+            "TDD": true
+        }
+    },
+    "financial_card_emitter": {
+        "name": "VISA",
+        "thumbnail": "images/issuingcard/visa-icon.png"
+    }
+}

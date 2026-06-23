@@ -1,0 +1,13 @@
+{
+    "referente_normativo": {
+        "id": "2",
+        "pestudio_id": "4",
+        "name": "Propuesta de Reforma Curricular de Educación Media General Ciencia y Tecnología 32011",
+        "code": "DM/0044",
+        "version": "EMG-2023.1",
+        "description": "Propuesta curricular oficial para la Educación Media General Ciencia y Tecnología 32011 en Venezuela, vigente desde 2023.",
+        "active": true,
+        "vigencia_start": "2023-01-01",
+        "vigencia_end": null
+    }
+}

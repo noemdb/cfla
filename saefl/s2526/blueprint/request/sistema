@@ -1,0 +1,19 @@
+Form Request Validation
+php artisan make:request 'Admin\CreateUserRequest'
+php artisan make:request 'Admin\UpdateUserRequest'
+
+php artisan make:request 'Admin\CreateProfileRequest'
+php artisan make:request 'Admin\UpdateProfileRequest'
+
+php artisan make:request 'Admin\CreateRolRequest'
+php artisan make:request 'Admin\UpdateRolRequest'
+
+php artisan make:request 'Admin\CreateTaskRequest' && php artisan make:request 'Admin\UpdateTaskRequest'
+
+php artisan make:request 'Admin\CreateAlertRequest' && php artisan make:request 'Admin\UpdateAlertRequest'
+
+php artisan make:request 'Admin\CreateSettingRequest' && php artisan make:request 'Admin\UpdateSettingRequest'
+
+php artisan make:request 'Admin\CreateSelectOptRequest' && php artisan make:request 'Admin\UpdateSelectOptRequest'
+
+php artisan make:request 'Admin\CreateMessegeRequest' && php artisan make:request 'Admin\UpdateMessegeRequest'

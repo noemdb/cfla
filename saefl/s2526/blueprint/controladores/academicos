@@ -1,0 +1,15 @@
+php artisan make:controller 'Academico\HomeController'
+php artisan make:controller 'Academico\Tab\AdministracionController'
+php artisan make:controller 'Academico\Tab\ControlController'
+php artisan make:controller 'Academico\Tab\AuditController'
+php artisan make:controller 'Academico\Tab\UserController'
+php artisan make:controller 'Academico\Tab\MailerController'
+php artisan make:controller 'Academico\Tab\PollMainController'
+php artisan make:controller 'Academico\Tab\LessonController'
+php artisan make:controller 'Academico\Tab\InicialController'
+php artisan make:controller 'Academico\Tab\ActivitController'
+php artisan make:controller 'Academico\Tab\DiagnosticController'
+
+
+-------------------------------------------------------------
+php artisan make:controller 'Academico\Tab\ManagerRegisterController'

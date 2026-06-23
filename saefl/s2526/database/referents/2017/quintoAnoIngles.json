@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "103",
+        "name": "[IL-5] INGLÉS Y OTRAS LENGUAS EXTRANJERAS [pensumId=103]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-IL-5-01",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Comprende textos orales y escritos en inglés sobre temas cotidianos, académicos y profesionales.",
+            "descripcion": "Interpreta mensajes auténticos en contextos reales, identificando propósito, actitudes y detalles relevantes."
+        },
+        {
+            "id": "COMP-IL-5-02",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Produce textos orales y escritos en inglés con intención comunicativa clara y adecuación sociocultural.",
+            "descripcion": "Expresa ideas, opiniones y necesidades en situaciones formales e informales, respetando convenciones lingüísticas y culturales."
+        },
+        {
+            "id": "COMP-IL-5-03",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Utiliza el verbo modal 'can' y otras estructuras gramaticales básicas para expresar habilidades, permisos y posibilidades.",
+            "descripcion": "Aplica correctamente estructuras verbales en presente para describir capacidades personales y profesionales."
+        },
+        {
+            "id": "COMP-IL-5-04",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Reconoce y emplea vocabulario específico relacionado con oficios, profesiones y actividades laborales.",
+            "descripcion": "Identifica y utiliza términos técnicos y funcionales asociados al mundo del trabajo y la formación profesional."
+        },
+        {
+            "id": "COMP-IL-5-05",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Analiza críticamente modelos alimentarios globales y su influencia en la cultura local.",
+            "descripcion": "Contrasta hábitos alimenticios nacionales e internacionales, reflexionando sobre soberanía alimentaria y salud pública."
+        },
+        {
+            "id": "COMP-IL-5-06",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Describe acciones en curso utilizando el presente continuo en contextos tecnológicos y científicos.",
+            "descripcion": "Aplica el presente continuo para narrar procesos, experimentos o desarrollos en robótica, innovación o ciencia."
+        },
+        {
+            "id": "COMP-IL-5-07",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Participa en intercambios comunicativos simulados sobre proyectos de vida personal y profesional.",
+            "descripcion": "Negocia significados, pide aclaraciones y ofrece ayuda en diálogos estructurados sobre futuro laboral y metas personales."
+        },
+        {
+            "id": "COMP-IL-5-08",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Distingue entre sustantivos contables e incontables y aplica artículos determinados e indeterminados con precisión.",
+            "descripcion": "Selecciona correctamente 'a/an/the' y estructuras cuantificadoras según el tipo de sustantivo y contexto."
+        },
+        {
+            "id": "COMP-IL-5-09",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Lee y comprende menús, etiquetas nutricionales y textos informativos sobre alimentación saludable.",
+            "descripcion": "Extrae información relevante de materiales auténticos relacionados con nutrición, dietas y bienestar."
+        },
+        {
+            "id": "COMP-IL-5-10",
+            "referent_id": "1",
+            "pensum_id": 103,
+            "nombre": "Desarrolla proyectos investigativos en lengua extranjera con fuentes confiables y presentación oral estructurada.",
+            "descripcion": "Formula preguntas, recopila información y presenta hallazgos en inglés, integrando conocimientos de otras áreas."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-IL-5-01-01",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-01",
+            "descripcion": "Identifica el propósito comunicativo de un audio o video en inglés (informar, persuadir, entretener).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-01-02",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-02",
+            "descripcion": "Extrae información específica de un texto escrito sobre oficios o profesiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-01-03",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-03",
+            "descripcion": "Comprende instrucciones orales en inglés relacionadas con actividades de laboratorio o robótica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-01-04",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-04",
+            "descripcion": "Reconoce actitudes (aprobación, duda, sorpresa) en diálogos cotidianos en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-01-05",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-05",
+            "descripcion": "Identifica palabras clave en textos sobre alimentación saludable o sostenible.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-01-06",
+            "competency_id": "COMP-IL-5-01",
+            "codigo": "IL-5TO-IL-06",
+            "descripcion": "Sigue la secuencia lógica de un relato oral o escrito en tiempo presente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-01",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-07",
+            "descripcion": "Escribe un párrafo coherente describiendo sus habilidades personales usando 'I can'.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-02",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-08",
+            "descripcion": "Participa en un diálogo simulado solicitando permiso ('May I...?') o ofreciendo ayuda ('Would you like...?').",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-03",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-09",
+            "descripcion": "Redacta una lista de alimentos saludables con descripciones simples en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-04",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-10",
+            "descripcion": "Presenta oralmente su proyecto de vida profesional en inglés con claridad y fluidez básica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-05",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-11",
+            "descripcion": "Describe acciones que está realizando en un experimento o actividad técnica usando el presente continuo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-02-06",
+            "competency_id": "COMP-IL-5-02",
+            "codigo": "IL-5TO-IL-12",
+            "descripcion": "Adapta su registro lingüístico (formal/informal) según el destinatario y contexto comunicativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-01",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-13",
+            "descripcion": "Construye oraciones afirmativas con 'can' para describir habilidades físicas o intelectuales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-02",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-14",
+            "descripcion": "Formula preguntas con 'Can you...?' para solicitar ayuda o información.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-03",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-15",
+            "descripcion": "Escribe oraciones negativas con 'can't' para expresar limitaciones o prohibiciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-04",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-16",
+            "descripcion": "Distingue entre 'can' (habilidad) y 'may' (permiso) en contextos apropiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-05",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-17",
+            "descripcion": "Combina 'can' con verbos de acción específicos (swim, code, design, repair) en contextos laborales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-03-06",
+            "competency_id": "COMP-IL-5-03",
+            "codigo": "IL-5TO-IL-18",
+            "descripcion": "Corrige errores comunes en el uso de 'can' en producciones propias o ajenas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-01",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-19",
+            "descripcion": "Identifica profesiones técnicas y científicas en textos en inglés (engineer, technician, operator).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-02",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-20",
+            "descripcion": "Asocia oficios tradicionales (plumber, carpenter) con sus herramientas o funciones en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-03",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-21",
+            "descripcion": "Clasifica ocupaciones según sectores económicos (primario, secundario, terciario).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-04",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-22",
+            "descripcion": "Describe brevemente las responsabilidades de una profesión usando vocabulario técnico básico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-05",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-23",
+            "descripcion": "Relaciona habilidades personales con profesiones u oficios mediante frases en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-04-06",
+            "competency_id": "COMP-IL-5-04",
+            "codigo": "IL-5TO-IL-24",
+            "descripcion": "Lee y comprende anuncios de empleo simples en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-01",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-25",
+            "descripcion": "Compara la pirámide alimentaria tradicional venezolana con modelos internacionales en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-02",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-26",
+            "descripcion": "Identifica alimentos procesados vs. naturales en etiquetas nutricionales en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-03",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-27",
+            "descripcion": "Argumenta en inglés sobre la importancia de una dieta soberana y culturalmente pertinente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-04",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-28",
+            "descripcion": "Reconoce influencias externas en los hábitos alimenticios venezolanos a través de textos en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-05",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-29",
+            "descripcion": "Propone alternativas saludables y sostenibles en inglés frente a dietas globalizadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-05-06",
+            "competency_id": "COMP-IL-5-05",
+            "codigo": "IL-5TO-IL-30",
+            "descripcion": "Relaciona el ODS 2 (Hambre Cero) y ODS 3 (Salud) con prácticas alimentarias en textos en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-01",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-31",
+            "descripcion": "Formula oraciones en presente continuo para describir lo que está haciendo un robot o sistema automatizado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-02",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-32",
+            "descripcion": "Identifica verbos en presente continuo en textos sobre innovación tecnológica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-03",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-33",
+            "descripcion": "Distingue entre acciones habituales (presente simple) y acciones en progreso (presente continuo).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-04",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-34",
+            "descripcion": "Describe un experimento científico en curso usando el presente continuo con precisión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-05",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-35",
+            "descripcion": "Escribe un breve informe en tiempo real sobre una actividad de robótica usando el presente continuo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-06-06",
+            "competency_id": "COMP-IL-5-06",
+            "codigo": "IL-5TO-IL-36",
+            "descripcion": "Corrige errores de forma verbal en oraciones en presente continuo en producciones escritas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-01",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-37",
+            "descripcion": "Expresa metas profesionales futuras en un diálogo simulado en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-02",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-38",
+            "descripcion": "Pide aclaraciones durante una conversación usando frases como 'Could you repeat that?'.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-03",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-39",
+            "descripcion": "Responde preguntas sobre su formación y aspiraciones laborales en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-04",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-40",
+            "descripcion": "Ofrece y solicita ayuda en situaciones de trabajo en equipo en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-05",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-41",
+            "descripcion": "Mantiene una conversación breve sobre su proyecto de vida con pronunciación inteligible.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-07-06",
+            "competency_id": "COMP-IL-5-07",
+            "codigo": "IL-5TO-IL-42",
+            "descripcion": "Usa conectores básicos (and, but, because) para enlazar ideas en diálogos orales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-01",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-43",
+            "descripcion": "Clasifica sustantivos como contables o incontables en listas de alimentos o materiales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-02",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-44",
+            "descripcion": "Utiliza 'a/an' con sustantivos contables singulares en descripciones de objetos o profesiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-03",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-45",
+            "descripcion": "Aplica 'the' cuando se refiere a elementos específicos o ya mencionados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-04",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-46",
+            "descripcion": "Evita el uso innecesario de artículos con sustantivos incontables (ej.: 'bread', not 'a bread').",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-05",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-47",
+            "descripcion": "Construye oraciones con cuantificadores ('some', 'any', 'much', 'many') según el tipo de sustantivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-08-06",
+            "competency_id": "COMP-IL-5-08",
+            "codigo": "IL-5TO-IL-48",
+            "descripcion": "Corrige errores de artículo y cuantificación en textos sobre alimentación o tecnología.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-01",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-49",
+            "descripcion": "Interpreta símbolos y términos en menús internacionales en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-02",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-50",
+            "descripcion": "Identifica ingredientes alérgenos en etiquetas de productos en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-03",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-51",
+            "descripcion": "Extrae valores nutricionales (calorías, proteínas) de tablas en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-04",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-52",
+            "descripcion": "Compara dos productos alimenticios en inglés basado en su información nutricional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-05",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-53",
+            "descripcion": "Reconoce advertencias sanitarias en envases de alimentos en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-09-06",
+            "competency_id": "COMP-IL-5-09",
+            "codigo": "IL-5TO-IL-54",
+            "descripcion": "Formula recomendaciones dietéticas simples en inglés basadas en lectura de etiquetas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-01",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-55",
+            "descripcion": "Formula una pregunta de investigación en inglés sobre tecnología, alimentación o profesiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-02",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-56",
+            "descripcion": "Selecciona fuentes digitales confiables en inglés para su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-03",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-57",
+            "descripcion": "Organiza información recolectada en categorías temáticas en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-04",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-58",
+            "descripcion": "Presenta oralmente sus hallazgos con apoyo visual en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-05",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-59",
+            "descripcion": "Incluye citas o referencias simples en su presentación o informe en inglés.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IL-5-10-06",
+            "competency_id": "COMP-IL-5-10",
+            "codigo": "IL-5TO-IL-60",
+            "descripcion": "Responde preguntas del público en inglés durante su defensa de proyecto.",
+            "nivel_esperado": 3
+        }
+    ]
+}

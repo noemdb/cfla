@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "105",
+        "name": "[EF-5] EDUCACIÓN FÍSICA [pensumId=105]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-EF-5-01",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Aplica principios fisiológicos del entrenamiento para mejorar su condición física y salud integral.",
+            "descripcion": "Identifica y utiliza variables como frecuencia, intensidad, tiempo y tipo de ejercicio para desarrollar resistencia, fuerza, velocidad, flexibilidad y coordinación."
+        },
+        {
+            "id": "COMP-EF-5-02",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Diseña y ejecuta planes personales de actividad física orientados a la salud y el bienestar.",
+            "descripcion": "Formula metas realistas, selecciona actividades adecuadas y evalúa su progreso en función de parámetros fisiológicos y conductuales."
+        },
+        {
+            "id": "COMP-EF-5-03",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Participa activamente en actividades deportivas colectivas con sentido de cooperación y juego limpio.",
+            "descripcion": "Colabora en equipos, respeta reglas, resuelve conflictos y valora la diversidad de roles dentro del grupo."
+        },
+        {
+            "id": "COMP-EF-5-04",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Utiliza estrategias tácticas y técnicas en deportes tradicionales y emergentes.",
+            "descripcion": "Aplica conocimientos del juego (posicionamiento, pases, defensa, ataque) en contextos reales como el ajedrez corporal, fútbol, voleibol o juegos autóctonos."
+        },
+        {
+            "id": "COMP-EF-5-05",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Organiza y coordina eventos deportivos y recreativos en entornos escolares y comunitarios.",
+            "descripcion": "Planifica, ejecuta y evalúa actividades lúdico-deportivas considerando recursos, normas de seguridad y participación inclusiva."
+        },
+        {
+            "id": "COMP-EF-5-06",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Interpreta y aplica sistemas de notación y comunicación en actividades motrices estructuradas.",
+            "descripcion": "Comprende y utiliza códigos simbólicos (como la notación algebraica en ajedrez) para registrar, analizar y comunicar secuencias de movimientos."
+        },
+        {
+            "id": "COMP-EF-5-07",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Valora la actividad física como componente esencial de un estilo de vida saludable y sostenible.",
+            "descripcion": "Reconoce los beneficios físicos, emocionales y sociales del ejercicio regular y lo integra como hábito de vida."
+        },
+        {
+            "id": "COMP-EF-5-08",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Evalúa su desempeño motor mediante autoobservación y retroalimentación crítica.",
+            "descripcion": "Reflexiona sobre su ejecución, identifica áreas de mejora y ajusta sus estrategias de práctica."
+        },
+        {
+            "id": "COMP-EF-5-09",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Demuestra actitudes responsables en el uso de espacios, materiales e instalaciones deportivas.",
+            "descripcion": "Cuida el entorno físico, sigue normas de seguridad y promueve el uso equitativo de los recursos."
+        },
+        {
+            "id": "COMP-EF-5-10",
+            "referent_id": "1",
+            "pensum_id": 105,
+            "nombre": "Integra saberes corporales, culturales y ambientales en la práctica de actividades físicas significativas.",
+            "descripcion": "Relaciona la expresión motriz con la identidad local, la historia y el entorno natural, promoviendo prácticas respetuosas y contextualizadas."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-EF-5-01-01",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-01",
+            "descripcion": "Identifica las cualidades físicas básicas (resistencia, fuerza, velocidad, flexibilidad, coordinación) en diferentes actividades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-01-02",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-02",
+            "descripcion": "Mide su frecuencia cardíaca antes, durante y después del ejercicio para autorregular la intensidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-01-03",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-03",
+            "descripcion": "Ejecuta rutinas de calentamiento y enfriamiento adecuadas al tipo de actividad física.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-01-04",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-04",
+            "descripcion": "Describe cómo el entrenamiento sistemático mejora su rendimiento físico y salud cardiovascular.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-01-05",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-05",
+            "descripcion": "Aplica ejercicios específicos para desarrollar cada cualidad física en sesiones guiadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-01-06",
+            "competency_id": "COMP-EF-5-01",
+            "codigo": "EF-5TO-IL-06",
+            "descripcion": "Reconoce signos de fatiga o sobreesfuerzo y ajusta su esfuerzo en consecuencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-01",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-07",
+            "descripcion": "Establece metas semanales de actividad física basadas en su condición inicial.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-02",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-08",
+            "descripcion": "Registra en una bitácora personal su participación en actividades físicas fuera del aula.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-03",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-09",
+            "descripcion": "Selecciona actividades físicas que le resultan placenteras y sostenibles en el tiempo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-04",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-10",
+            "descripcion": "Evalúa su progreso en función de indicadores objetivos (ej.: tiempo, repeticiones, distancia).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-05",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-11",
+            "descripcion": "Propone ajustes a su plan personal ante dificultades o cambios en su contexto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-02-06",
+            "competency_id": "COMP-EF-5-02",
+            "codigo": "EF-5TO-IL-12",
+            "descripcion": "Relaciona su plan de actividad física con los ODS 3 (Salud) y 11 (Ciudades sostenibles).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-01",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-13",
+            "descripcion": "Asume roles diversos (jugador, árbitro, organizador) en juegos colectivos con responsabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-02",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-14",
+            "descripcion": "Resuelve desacuerdos durante el juego mediante diálogo y respeto a las reglas acordadas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-03",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-15",
+            "descripcion": "Celebra los logros del equipo por encima del individualismo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-04",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-16",
+            "descripcion": "Incluye a todos los compañeros en las actividades, sin discriminación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-05",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-17",
+            "descripcion": "Aplica normas de fair play incluso en situaciones competitivas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-03-06",
+            "competency_id": "COMP-EF-5-03",
+            "codigo": "EF-5TO-IL-18",
+            "descripcion": "Reflexiona sobre el valor del trabajo en equipo en contextos deportivos y cotidianos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-01",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-19",
+            "descripcion": "Ejecuta movimientos técnicos básicos en deportes colectivos (pase, recepción, lanzamiento).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-02",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-20",
+            "descripcion": "Toma decisiones tácticas en tiempo real durante el desarrollo de un juego.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-03",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-21",
+            "descripcion": "Utiliza la notación algebraica para registrar movimientos en partidas de ajedrez.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-04",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-22",
+            "descripcion": "Analiza jugadas propias o ajenas para identificar errores y oportunidades.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-05",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-23",
+            "descripcion": "Adapta su estrategia según las características del oponente o del equipo rival.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-04-06",
+            "competency_id": "COMP-EF-5-04",
+            "codigo": "EF-5TO-IL-24",
+            "descripcion": "Participa en torneos escolares aplicando reglas oficiales del deporte.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-01",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-25",
+            "descripcion": "Elabora un cronograma básico para la organización de un evento deportivo escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-02",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-26",
+            "descripcion": "Asigna roles y responsabilidades a los participantes en la planificación de una actividad recreativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-03",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-27",
+            "descripcion": "Verifica la disponibilidad y seguridad de los materiales antes de iniciar una actividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-04",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-28",
+            "descripcion": "Promueve la participación de estudiantes con diferentes niveles de habilidad motriz.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-05",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-29",
+            "descripcion": "Evalúa el impacto del evento en términos de participación, disfrute y aprendizaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-05-06",
+            "competency_id": "COMP-EF-5-05",
+            "codigo": "EF-5TO-IL-30",
+            "descripcion": "Presenta un informe simple sobre la organización y resultados de una actividad deportiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-01",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-31",
+            "descripcion": "Interpreta símbolos y coordenadas en tableros de ajedrez para seguir secuencias de juego.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-02",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-32",
+            "descripcion": "Registra sus propias jugadas utilizando la notación algebraica estándar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-03",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-33",
+            "descripcion": "Comunica verbalmente una secuencia de movimientos a un compañero usando el lenguaje técnico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-04",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-34",
+            "descripcion": "Reconstruye una partida a partir de una secuencia escrita de movimientos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-05",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-35",
+            "descripcion": "Utiliza apps o plataformas digitales para practicar la notación en contextos simulados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-06-06",
+            "competency_id": "COMP-EF-5-06",
+            "codigo": "EF-5TO-IL-36",
+            "descripcion": "Explica la utilidad de los sistemas de notación para el análisis y mejora del desempeño.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-01",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-37",
+            "descripcion": "Identifica beneficios físicos, emocionales y sociales de la actividad física regular.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-02",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-38",
+            "descripcion": "Relaciona el sedentarismo con riesgos para la salud (obesidad, ansiedad, bajo rendimiento).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-03",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-39",
+            "descripcion": "Incorpora pausas activas en su rutina diaria fuera del contexto escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-04",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-40",
+            "descripcion": "Argumenta la importancia de la educación física en la formación integral del adolescente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-05",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-41",
+            "descripcion": "Promueve entre sus pares hábitos de vida activa y saludable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-07-06",
+            "competency_id": "COMP-EF-5-07",
+            "codigo": "EF-5TO-IL-42",
+            "descripcion": "Vincula su práctica física con el cuidado del cuerpo como derecho humano.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-01",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-43",
+            "descripcion": "Observa videos o registros de su desempeño para identificar aspectos a mejorar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-02",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-44",
+            "descripcion": "Recibe retroalimentación del docente o compañeros con apertura y sin defensividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-03",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-45",
+            "descripcion": "Establece criterios personales para evaluar su progreso en habilidades motrices.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-04",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-46",
+            "descripcion": "Ajusta su técnica tras identificar errores en su ejecución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-05",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-47",
+            "descripcion": "Compara su desempeño actual con registros anteriores para evidenciar avances.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-08-06",
+            "competency_id": "COMP-EF-5-08",
+            "codigo": "EF-5TO-IL-48",
+            "descripcion": "Reflexiona por escrito sobre sus logros y desafíos en la Educación Física.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-01",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-49",
+            "descripcion": "Devuelve los materiales deportivos en buen estado y en su lugar correspondiente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-02",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-50",
+            "descripcion": "Reporta daños o riesgos en instalaciones o equipos al docente responsable.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-03",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-51",
+            "descripcion": "Cumple con las normas de higiene y seguridad establecidas para cada actividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-04",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-52",
+            "descripcion": "Evita comportamientos que pongan en riesgo su integridad o la de otros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-05",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-53",
+            "descripcion": "Participa en campañas de mantenimiento del espacio deportivo escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-09-06",
+            "competency_id": "COMP-EF-5-09",
+            "codigo": "EF-5TO-IL-54",
+            "descripcion": "Promueve el uso responsable de los recursos hídricos y energéticos en actividades físicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-01",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-55",
+            "descripcion": "Reconoce juegos y danzas tradicionales de su región como patrimonio cultural.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-02",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-56",
+            "descripcion": "Adapta actividades físicas al entorno natural (parques, ríos, montañas) con respeto ambiental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-03",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-57",
+            "descripcion": "Relaciona la expresión corporal con valores de la Pedagogía Amigoniana (solidaridad, alegría, servicio).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-04",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-58",
+            "descripcion": "Participa en actividades intergeneracionales que integren movimiento y cultura local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-05",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-59",
+            "descripcion": "Reflexiona sobre cómo su cuerpo expresa su identidad, historia y pertenencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-EF-5-10-06",
+            "competency_id": "COMP-EF-5-10",
+            "codigo": "EF-5TO-IL-60",
+            "descripcion": "Propone actividades físicas que integren saberes ancestrales y contemporáneos.",
+            "nivel_esperado": 3
+        }
+    ]
+}
