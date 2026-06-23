@@ -48,8 +48,12 @@ class AutoresponderController extends Controller
                 if ($this->message > 0 && $this->message < 9) {
                     $boption = Boption::where('bmain_id', $this->bmain_id)->where('key', $this->message)->first(); //dd($boption);
                     if ($boption) {
-                        $this->json_message = $this->getMenu();
-                        $this->json_message = $boption->text;
+                        // Opción 6: Tasa de cambio BCV — respuesta dinámica en vez de texto estático
+                        if ((int) $boption->key === 6) {
+                            $this->json_message = $this->getExchangeRateMessage();
+                        } else {
+                            $this->json_message = $boption->text;
+                        }
                     } else {
                         $this->json_message = 'Opción no encontrada';
                     }
@@ -77,6 +81,25 @@ class AutoresponderController extends Controller
                 array("message" => "Error ❌"),
                 array("message" => "JSON data is incomplete. Was the request sent by AutoResponder?")
             )));
+        }
+    }
+
+    /**
+     * Genera el mensaje con la tasa de cambio BCV del día.
+     * Se usa desde main() para la opción dinámica y desde sendExchangeRate().
+     */
+    protected function getExchangeRateMessage(): string
+    {
+        try {
+            $exchange_rate = ExchangeRate::whereDate('date', Carbon::now())->first();
+            if ($exchange_rate) {
+                return "*Tasa de Cambio BCV*  [" . Carbon::now()->format('d-m-y') . "]" .
+                    "\n ```Bs. " . f_float($exchange_rate->ammount) . "```";
+            }
+            return "\n - No hay tasa de cambio oficial registrada" .
+                "\n - Las tasas de cambio se registran de lunes a viernes";
+        } catch (\Exception $e) {
+            return "\n - No hay tasa de cambio oficial registrada:-";
         }
     }
 
@@ -242,19 +265,10 @@ class AutoresponderController extends Controller
         header("Access-Control-Max-Age: 3600");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-        $json_message = null;
         $data = json_decode(json_encode($request->all()), FALSE);
 
         if (!empty($data->query) && !empty($data->appPackageName) && !empty($data->messengerPackageName) && !empty($data->query->sender) && !empty($data->query->message)) {
-            $exchange_rate = ExchangeRate::whereDate('date', Carbon::now())->first();
-            if ($exchange_rate) {
-                $json_message =
-                    "*Tasa de Cambio BCV*  [" . Carbon::now()->format('d-m-y') . "]" .
-                    "\n ```Bs. " . f_float($exchange_rate->ammount) . "```";
-            } else {
-                $json_message = "\n - No hay tasa de cambio oficial registrada";
-                $json_message .= "\n - Las tasas de cambio se registran de lunes a viernes";
-            }
+            $json_message = $this->getExchangeRateMessage();
 
             $this->saveMessage($data);
 
