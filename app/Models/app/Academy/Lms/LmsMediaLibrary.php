@@ -24,6 +24,8 @@ class LmsMediaLibrary extends Model
         'size_bytes' => 'integer',
     ];
 
+    protected $appends = ['public_url', 'size_for_humans'];
+
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');

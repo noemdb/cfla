@@ -12,6 +12,7 @@ class ActivityView extends Component
     public $sections = [];
     public $resources = [];
     public $links = [];
+    public $htmlEmbeds = [];
 
     public function mount(Activity $activity): void
     {
@@ -35,6 +36,17 @@ class ActivityView extends Component
         $this->links = $activity->lmsLinks()
             ->where('is_visible', true)
             ->get();
+
+        $this->htmlEmbeds = $activity->lmsHtmlEmbeds()
+            ->where('is_visible', true)
+            ->get()
+            ->map(function ($embed) {
+                $embed->is_mermaid = preg_match(
+                    '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/',
+                    trim($embed->html_content ?? '')
+                ) === 1;
+                return $embed;
+            });
 
         LmsActivityLog::record($activity->id, auth()->id(), 'VIEW');
     }

@@ -146,6 +146,26 @@
     </section>
     @endif
 
+    {{-- HTML Embeds --}}
+    @if($htmlEmbeds->count())
+        <div class="space-y-4 html-embeds-container">
+        @foreach($htmlEmbeds as $embed)
+            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-xl p-4 html-embed-item">
+                @if($embed->title)
+                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $embed->title }}</h3>
+                @endif
+                @if($embed->is_mermaid ?? false)
+                    <x-mermaid::component :data="$embed->html_content" class="w-full" />
+                @else
+                    <div class="html-embed-content prose prose-sm max-w-none dark:prose-invert">
+                        {!! $embed->html_content !!}
+                    </div>
+                @endif
+            </div>
+        @endforeach
+        </div>
+    @endif
+
     {{-- Volver --}}
     <div class="pt-4">
         <a href="{{ route('student.lms.home') }}"
@@ -154,3 +174,5 @@
         </a>
     </div>
 </div>
+
+{{-- Mermaid.js se carga via <x-mermaid::component> @once --}}

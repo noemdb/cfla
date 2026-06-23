@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e8b8d6aafd595dc07a07081f9e4d4811",
+    "content-hash": "9503ef140fc71c2db8bd17589e337961",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2112,6 +2112,64 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "icehouse-ventures/laravel-mermaid",
+            "version": "v1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/icehouse-ventures/laravel-mermaid.git",
+                "reference": "7bbd163d3f1011c40a0bcb5caba5c92a59c68c0b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/icehouse-ventures/laravel-mermaid/zipball/7bbd163d3f1011c40a0bcb5caba5c92a59c68c0b",
+                "reference": "7bbd163d3f1011c40a0bcb5caba5c92a59c68c0b",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0 || ^12.0",
+                "php": ">=5.6.4"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Chartjs": "IcehouseVentures\\LaravelMermaid\\Facades\\Mermaid"
+                    },
+                    "providers": [
+                        "IcehouseVentures\\LaravelMermaid\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "IcehouseVentures\\LaravelMermaid\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Icehouse Ventures",
+                    "email": "tech@icehouseventures.co.nz"
+                }
+            ],
+            "description": "Simple package to generate diagrams in Laravel using the Mermaid.js library",
+            "keywords": [
+                "diagram",
+                "flowchart",
+                "icehouseventures",
+                "laravel",
+                "mermaid"
+            ],
+            "support": {
+                "issues": "https://github.com/icehouse-ventures/laravel-mermaid/issues",
+                "source": "https://github.com/icehouse-ventures/laravel-mermaid/tree/v1.4"
+            },
+            "time": "2025-03-14T21:22:42+00:00"
         },
         {
             "name": "laravel/framework",

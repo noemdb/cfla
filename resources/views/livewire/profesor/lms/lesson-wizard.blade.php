@@ -692,6 +692,38 @@
                                     </div>
                                 @endif
 
+                                {{-- HTML Embeds --}}
+                                @if(count($exportPreviewData['html_embeds'] ?? []) > 0)
+                                    <div class="border-t border-slate-200 pt-5">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            HTML Embeds
+                                        </h3>
+                                        <div class="space-y-3">
+                                            @foreach($exportPreviewData['html_embeds'] as $embed)
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl">
+                                                    @if(!empty($embed['title']))
+                                                        <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                    @endif
+                                                    <div class="text-sm text-slate-700 prose prose-sm max-w-none">
+                                                        @if($embed['is_mermaid'] ?? false)
+                                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                                 data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                 class="w-full">
+                                                                <div x-ref="target" class="w-full"></div>
+                                                            </div>
+                                                        @else
+                                                            {!! $embed['html_content'] !!}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- Enlaces --}}
                                 @if(count($exportPreviewData['links'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
@@ -725,6 +757,7 @@
                                     <span class="font-medium">{{ count($exportPreviewData['sections']) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($exportPreviewData['sections'])->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
                                     <span class="font-medium">{{ count($exportPreviewData['resources'] ?? []) }}</span> recursos ·
+                                    <span class="font-medium">{{ count($exportPreviewData['html_embeds'] ?? []) }}</span> embeds ·
                                     <span class="font-medium">{{ count($exportPreviewData['links'] ?? []) }}</span> enlaces
                                 </p>
                                 <div class="flex items-center gap-2">
@@ -763,6 +796,8 @@
                                         <span>{{ count($exportPreviewData['sections'] ?? []) }} secciones</span>
                                         <span class="text-slate-600">·</span>
                                         <span>{{ count($exportPreviewData['resources'] ?? []) }} recursos</span>
+                                        <span class="text-slate-600">·</span>
+                                        <span>{{ count($exportPreviewData['html_embeds'] ?? []) }} embeds</span>
                                         <span class="text-slate-600">·</span>
                                         <span>{{ count($exportPreviewData['links'] ?? []) }} enlaces</span>
                                     </div>
@@ -1063,6 +1098,38 @@
                                     </div>
                                 @endif
 
+                                {{-- HTML Embeds --}}
+                                @if(count($importPreviewData['html_embeds'] ?? []) > 0)
+                                    <div class="border-t border-slate-200 pt-5">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            HTML Embeds
+                                        </h3>
+                                        <div class="space-y-3">
+                                            @foreach($importPreviewData['html_embeds'] as $embed)
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl">
+                                                    @if(!empty($embed['title']))
+                                                        <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                    @endif
+                                                    <div class="text-sm text-slate-700 prose prose-sm max-w-none">
+                                                        @if($embed['is_mermaid'] ?? false)
+                                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                                 data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                 class="w-full">
+                                                                <div x-ref="target" class="w-full"></div>
+                                                            </div>
+                                                        @else
+                                                            {!! $embed['html_content'] !!}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- Enlaces --}}
                                 @if(count($importPreviewData['links'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
@@ -1096,6 +1163,7 @@
                                     <span class="font-medium">{{ count($importPreviewData['sections']) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($importPreviewData['sections'])->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
                                     <span class="font-medium">{{ count($importPreviewData['resources'] ?? []) }}</span> recursos ·
+                                    <span class="font-medium">{{ count($importPreviewData['html_embeds'] ?? []) }}</span> embeds ·
                                     <span class="font-medium">{{ count($importPreviewData['links'] ?? []) }}</span> enlaces
                                 </p>
                                 <div class="flex items-center gap-2">
@@ -1152,6 +1220,8 @@
                                             <span class="text-slate-600">·</span>
                                             <span>{{ count($importPreviewData['resources'] ?? []) }} recursos</span>
                                             <span class="text-slate-600">·</span>
+                                            <span>{{ count($importPreviewData['html_embeds'] ?? []) }} embeds</span>
+                                            <span class="text-slate-600">·</span>
                                             <span>{{ count($importPreviewData['links'] ?? []) }} enlaces</span>
                                         </div>
                                     @endif
@@ -1197,12 +1267,15 @@
 
         {{-- ═══════════ MODAL VISTA ESTUDIANTE (LISTA) ═══════════ --}}
         @if($showListStudentPreview && $listPreviewData)
-            <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="list-student-preview-{{ $listPreviewData['activity_id'] }}">
+            <div class="fixed inset-0 z-[9999] overflow-y-auto student-preview-modal" wire:key="list-student-preview-{{ $listPreviewData['activity_id'] }}">
                 <div class="fixed inset-0 bg-black/80 backdrop-blur-md" wire:click="closeListStudentPreview"></div>
-                <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                    <div class="relative w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative min-h-screen flex flex-col items-center p-4 pt-10"
+                     x-data="lessonPreviewSwiper">
+                    {{-- Card: header + Swiper (flex-1 = ocupa todo el espacio disponible) --}}
+                    <div class="w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0"
+                         wire:key="swiper-{{ $listPreviewData['activity_id'] }}">
                         {{-- Header --}}
-                        <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
+                        <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1223,14 +1296,17 @@
                             </button>
                         </div>
 
-                        {{-- Body --}}
-                        <div class="px-8 py-6 space-y-6 max-h-[75vh] overflow-y-auto bg-slate-50">
-                            {{-- Encabezado de la lección --}}
-                            <div class="border-b border-slate-200 pb-5">
-                                <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
-                                    {{ $listPreviewData['subject'] }}
-                                </p>
-                                <h1 class="text-2xl font-bold text-slate-900">{{ $listPreviewData['title'] }}</h1>
+                        {{-- Body: Swiper carrusel (autoHeight se ajusta al contenido) --}}
+                        <div class="w-full bg-slate-50 swiper overflow-hidden"
+                             x-ref="swiperContainer">
+                            <div class="swiper-wrapper">
+                                {{-- Slide 1: Encabezado de la lección --}}
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                    <div class="pb-5">
+                                        <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+                                            {{ $listPreviewData['subject'] }}
+                                        </p>
+                                        <h1 class="text-2xl font-bold text-slate-900">{{ $listPreviewData['title'] }}</h1>
                                 @if($listPreviewData['description'])
                                     <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $listPreviewData['description'] }}</p>
                                 @endif
@@ -1241,14 +1317,15 @@
                                     </p>
                                 @endif
                             </div>
+                        </div><!-- /slide:header -->
 
-                            {{-- Secciones --}}
-                            @forelse($listPreviewData['sections'] as $section)
-                                <div class="space-y-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
-                                        <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
-                                    </div>
+                        {{-- Secciones --}}
+                        @forelse($listPreviewData['sections'] as $section)
+                            <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
+                                    <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
+                                </div>
                                     @foreach($section['contents'] as $content)
                                         @if(($content['title'] ?? null))
                                             <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
@@ -1257,50 +1334,171 @@
                                             {!! nl2br(e($content['body'] ?? '')) !!}
                                         </div>
                                     @endforeach
-                                </div>
+                                    {{-- HTML Embeds asociados a esta sección --}}
+                                    @php
+                                        $sectionEmbeds = collect($listPreviewData['html_embeds'] ?? [])->where('section_id', $section['id']);
+                                    @endphp
+                                    @if($sectionEmbeds->count() > 0)
+                                        <div class="space-y-2 pt-2">
+                                            @foreach($sectionEmbeds as $embed)
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                    @if(!empty($embed['title']))
+                                                        <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                    @endif
+                                                    <div class="text-sm text-slate-700 prose prose-sm max-w-none html-embed-content">
+                                                        @if($embed['is_mermaid'] ?? false)
+                                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                                 data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                 data-mermaid-delay
+                                                                 class="w-full">
+                                                                <div x-ref="target" class="w-full"></div>
+                                                            </div>
+                                                        @else
+                                                            {!! $embed['html_content'] !!}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    {{-- Recursos vinculados a esta sección --}}
+                                    @php
+                                        $secResources = collect($listPreviewData['resources'] ?? [])->where('section_id', $section['id'])->values()->all();
+                                        $secLinks = collect($listPreviewData['links'] ?? [])->where('section_id', $section['id'])->values()->all();
+                                    @endphp
+                                    @if(count($secResources) > 0)
+                                        <div class="border-t border-slate-200 pt-3 mt-2 space-y-2">
+                                            @foreach($secResources as $res)
+                                                @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
+                                                    <div class="rounded-xl overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                                        <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
+                                                             onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
+                                                             class="w-full h-auto max-h-80 object-contain bg-slate-50">
+                                                        <div class="image-fallback hidden">
+                                                            <div class="flex items-center gap-3 p-3 bg-slate-100">
+                                                                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                                </div>
+                                                                <div class="min-w-0">
+                                                                    <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                                    <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-100">
+                                                            <span class="text-xs text-slate-600 truncate">{{ $res['display_name'] }}</span>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
+                                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                            <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if(count($secLinks) > 0)
+                                        <div class="space-y-2 pt-2">
+                                            @foreach($secLinks as $link)
+                                                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-sm font-medium text-blue-800 truncate">{{ $link['title'] }}</p>
+                                                        <p class="text-xs text-blue-500 truncate">{{ $link['url'] }}</p>
+                                                    </div>
+                                                    <span class="ml-auto text-[10px] font-medium text-blue-500 bg-blue-100 px-2 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div><!-- /slide:seccion -->
                             @empty
-                                <div class="text-center py-12">
-                                    <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                    </svg>
-                                    <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
-                                    <p class="text-xs text-slate-400 mt-1">Esta actividad no tiene secciones visibles para estudiantes.</p>
-                                </div>
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                    <div class="text-center py-12">
+                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                        <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
+                                        <p class="text-xs text-slate-400 mt-1">Esta actividad no tiene secciones visibles para estudiantes.</p>
+                                    </div>
+                                </div><!-- /slide:empty -->
                             @endforelse
 
-                            {{-- Recursos --}}
-                            @if(count($listPreviewData['resources'] ?? []) > 0)
-                                <div class="border-t border-slate-200 pt-5">
-                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                            {{-- Slide: Recursos no vinculados --}}
+                            @php
+                                $unlinkedResources = collect($listPreviewData['resources'] ?? [])->filter(fn($r) => empty($r['section_id']))->values()->all();
+                                $unlinkedLinks = collect($listPreviewData['links'] ?? [])->filter(fn($l) => empty($l['section_id']))->values()->all();
+                                $unlinkedEmbeds = collect($listPreviewData['html_embeds'] ?? [])->filter(fn($e) => empty($e['section_id']))->values()->all();
+                            @endphp
+                            @if(count($unlinkedResources) > 0)
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                    <div>
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                         </svg>
                                         Recursos descargables
                                     </h3>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        @foreach($listPreviewData['resources'] as $res)
-                                            <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
-                                                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                    </svg>
+                                        @foreach($unlinkedResources as $res)
+                                            @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
+                                                <div class="rounded-xl overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                                    <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
+                                                         onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
+                                                         class="w-full h-48 object-cover">
+                                                    <div class="image-fallback hidden">
+                                                        <div class="flex items-center gap-3 p-3 bg-slate-100">
+                                                            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                                                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                            </div>
+                                                            <div class="min-w-0">
+                                                                <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                                <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="px-3 py-2 bg-slate-50 border-t border-slate-100">
+                                                        <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
-                                                    <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                            @else
+                                                <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
+                                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                        <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                    </div>
+                                                    @if($listPreviewData['allow_downloads'])
+                                                        <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
+                                                    @endif
                                                 </div>
-                                                @if($listPreviewData['allow_downloads'])
-                                                    <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
-                                                @endif
-                                            </div>
+                                            @endif
                                         @endforeach
                                     </div>
-                                </div>
+                                </div><!-- /slide:recursos -->
                             @endif
 
-                            {{-- Enlaces --}}
-                            @if(count($listPreviewData['links'] ?? []) > 0)
-                                <div class="border-t border-slate-200 pt-5">
+                            {{-- Slide: Enlaces no vinculados --}}
+                            @if(count($unlinkedLinks) > 0)
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                    <div>
                                     <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -1308,7 +1506,7 @@
                                         Enlaces de interés
                                     </h3>
                                     <div class="space-y-2">
-                                        @foreach($listPreviewData['links'] as $link)
+                                        @foreach($unlinkedLinks as $link)
                                             <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
                                                 <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                                                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1323,21 +1521,120 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                </div>
+                                </div><!-- /slide:enlaces -->
                             @endif
-                        </div>
 
-                        {{-- Footer --}}
-                        <div class="px-8 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
-                            <p class="text-xs text-slate-400">
-                                <span class="font-medium">{{ count($listPreviewData['sections']) }}</span> secciones ·
-                                <span class="font-medium">{{ collect($listPreviewData['sections'])->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
-                                <span class="font-medium">{{ count($listPreviewData['resources'] ?? []) }}</span> recursos ·
-                                <span class="font-medium">{{ count($listPreviewData['links'] ?? []) }}</span> enlaces
-                            </p>
+                            {{-- Slide: HTML Embeds no vinculados --}}
+                            @if(count($unlinkedEmbeds) > 0)
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                    <div>
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            HTML Embeds
+                                        </h3>
+                                        <div class="space-y-3">
+                                            @foreach($unlinkedEmbeds as $embed)
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                    @if(!empty($embed['title']))
+                                                        <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                    @endif
+                                                    <div class="text-sm text-slate-700 prose prose-sm max-w-none html-embed-content">
+                                                        @if($embed['is_mermaid'] ?? false)
+                                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                                 data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                 data-mermaid-delay
+                                                                 class="w-full">
+                                                                <div x-ref="target" class="w-full"></div>
+                                                            </div>
+                                                        @else
+                                                            {!! $embed['html_content'] !!}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div><!-- /slide:embeds -->
+                            @endif
+
+                            {{-- Slide: Resumen --}}
+                            @php
+                                $totalSections = count($listPreviewData['sections']);
+                                $totalBlocks = collect($listPreviewData['sections'])->sum(fn($s) => count($s['contents']));
+                                $totalResources = count($listPreviewData['resources'] ?? []);
+                                $totalEmbeds = count($listPreviewData['html_embeds'] ?? []);
+                                $totalLinks = count($listPreviewData['links'] ?? []);
+                            @endphp
+                            <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                                <div class="flex items-center justify-center h-full">
+                                    <div class="text-center max-w-md">
+                                        <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4">Resumen de la lección</h3>
+                                        <div class="grid grid-cols-2 gap-3 text-left">
+                                            <div class="bg-slate-100 rounded-xl p-4">
+                                                <p class="text-2xl font-bold text-emerald-600">{{ $totalSections }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">Secciones</p>
+                                            </div>
+                                            <div class="bg-slate-100 rounded-xl p-4">
+                                                <p class="text-2xl font-bold text-blue-600">{{ $totalBlocks }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">Bloques</p>
+                                            </div>
+                                            @if($totalResources > 0)
+                                            <div class="bg-slate-100 rounded-xl p-4">
+                                                <p class="text-2xl font-bold text-amber-600">{{ $totalResources }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">Recursos</p>
+                                            </div>
+                                            @endif
+                                            @if($totalEmbeds > 0)
+                                            <div class="bg-slate-100 rounded-xl p-4">
+                                                <p class="text-2xl font-bold text-fuchsia-600">{{ $totalEmbeds }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">Embeds</p>
+                                            </div>
+                                            @endif
+                                            @if($totalLinks > 0)
+                                            <div class="bg-slate-100 rounded-xl p-4">
+                                                <p class="text-2xl font-bold text-blue-600">{{ $totalLinks }}</p>
+                                                <p class="text-xs text-slate-500 mt-1">Enlaces</p>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- /slide:resumen -->
+
+                        </div><!-- /swiper-wrapper -->
+                    </div><!-- /swiper-body -->
+                </div><!-- /card (header + Swiper) -->
+
+                    {{-- Footer: Navegación (fuera del card, al fondo del viewport con mt-auto) --}}
+                    <div class="w-full max-w-7xl mt-auto px-8 py-4 bg-white border-t border-slate-200 rounded-xl shadow-lg flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <button x-on:click="prev()"
+                                    class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                                    title="Anterior">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            </button>
+                            <button x-on:click="next()"
+                                    class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                                    title="Siguiente">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                        <div class="swiper-pagination-fraction text-sm font-medium text-slate-500" x-text="currentSlide + ' / ' + totalSlides"></div>
+                        <div class="flex items-center gap-2">
+                            <button x-on:click="toggleFullscreen"
+                                    class="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-white transition-all">
+                                ⛶ Pantalla completa
+                            </button>
                             <button wire:click="closeListStudentPreview"
-                                    class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-all">
-                                Cerrar vista
+                                    class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-all">
+                                Cerrar
                             </button>
                         </div>
                     </div>
@@ -1360,7 +1657,6 @@
             $gradoName = $pensum?->grado?->name ?? '—';
             $asignaturaName = $pensum?->asignatura?->name ?? '—';
             $seccionName = $pe?->seccion?->name ?? '—';
-            $twIdx = 0;
         @endphp
 
         <div wire:loading.flex
@@ -1418,18 +1714,14 @@
                                         <div class="h-1 bg-gradient-to-r from-purple-500/60 to-purple-400/30 shrink-0"></div>
                                         {{-- Content --}}
                                         <div class="p-4 flex flex-col gap-2">
-                                            <p class="text-sm font-semibold text-white leading-snug"
-                                               x-ref="tw-{{ $twIdx }}">{{ $comp->name }}</p>
-                                            @php $twIdx++; @endphp
+                                            <p class="text-sm font-semibold text-white leading-snug">{{ $comp->name }}</p>
                                             {{-- Indicators --}}
                                             @if($indCount > 0)
                                                 <div class="space-y-1">
                                                     @foreach($comp->indicators as $ind)
                                                         <div class="flex items-start gap-1.5">
                                                             <span class="w-1 h-1 rounded-full bg-purple-400/40 mt-1.5 shrink-0"></span>
-                                                            <p class="text-xs text-slate-400 leading-relaxed"
-                                                               x-ref="tw-{{ $twIdx }}">{{ $ind->description }}</p>
-                                                            @php $twIdx++; @endphp
+                                                            <p class="text-xs text-slate-400 leading-relaxed">{{ $ind->description }}</p>
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -1445,38 +1737,59 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
                                     </svg>
                                 </div>
-                                <p class="text-sm text-slate-500 italic"
-                                   x-ref="tw-{{ $twIdx }}">No hay competencias asociadas</p>
-                                @php $twIdx++; @endphp
+                                <p class="text-sm text-slate-500 italic">No hay competencias asociadas</p>
                             </div>
                         @endif
                     </div>
 
                     {{-- Indicadores de Logro (siempre visibles) --}}
-                    {{-- <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
-                        <div class="flex items-center gap-2 mb-3">
-                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Indicadores de Logro</span>
+                    <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
+                        {{-- Header --}}
+                        <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30">
+                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-bold text-emerald-200">Indicadores de Logro</h3>
+                                <p class="text-[11px] text-slate-500 truncate">Aprendizajes esperados de la actividad evaluativa</p>
+                            </div>
+                            @if($indicadoresLogro->isNotEmpty())
+                                <span class="shrink-0 text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                                    {{ $indicadoresLogro->count() }}
+                                </span>
+                            @endif
                         </div>
+
+                        {{-- Body --}}
                         @if($indicadoresLogro->isNotEmpty())
-                            <div class="space-y-1.5">
-                                @foreach($indicadoresLogro as $ind)
-                                    <div class="flex items-start gap-2">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
-                                        <span class="text-sm text-slate-300"
-                                              x-ref="tw-{{ $twIdx }}">{{ $ind->name }}</span>
-                                        @php $twIdx++; @endphp
-                                    </div>
-                                @endforeach
+                            <div class="p-4">
+                                <div class="space-y-1.5">
+                                    @foreach($indicadoresLogro as $ind)
+                                        <div class="flex items-start gap-3 px-3 py-2.5 bg-slate-800/30 border border-emerald-500/10 rounded-lg hover:border-emerald-500/20 transition-colors">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-slate-200">{{ $ind->name }}</p>
+                                                @if($ind->weighting)
+                                                    <p class="text-[10px] text-emerald-400/60 font-mono mt-0.5">{{ $ind->weighting }} pts</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         @else
-                            <p class="text-sm text-slate-500 italic"
-                               x-ref="tw-{{ $twIdx }}">No hay indicadores de logro asociados</p>
-                            @php $twIdx++; @endphp
+                            <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                                <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-3">
+                                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-slate-500 italic">No hay indicadores de logro asociados a esta actividad</p>
+                            </div>
                         @endif
-                    </div> --}}
+                    </div>
 
                     {{-- Actividad de referencia --}}
                     @if($act)
@@ -1500,57 +1813,6 @@
                 </div>
             </div>
         </div>
-
-        @script
-            <script>
-                (function() {
-                    var overlay = document.getElementById('llm-loading-overlay');
-                    if (!overlay) return;
-
-                    var started = false;
-
-                    var observer = new MutationObserver(function() {
-                        if (started) return;
-                        if (overlay.style.display === 'flex') {
-                            started = true;
-                            observer.disconnect();
-                            startTypewriter();
-                        }
-                    });
-
-                    observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
-
-                    function startTypewriter() {
-                        if (typeof Typed === 'undefined') {
-                            console.warn('Typed.js not loaded');
-                            return;
-                        }
-
-                        var items = [];
-                        overlay.querySelectorAll('[x-ref^="tw-"]').forEach(function(el) {
-                            items.push({ el: el, text: el.textContent });
-                        });
-
-                        if (!items.length) return;
-
-                        items.forEach(function(it) { it.el.textContent = ''; });
-
-                        var i = 0;
-                        var next = function() {
-                            if (i >= items.length) return;
-                            new Typed(items[i].el, {
-                                strings: [items[i].text],
-                                typeSpeed: 18,
-                                showCursor: false,
-                                contentType: 'text',
-                                onComplete: function() { i++; setTimeout(next, 50); }
-                            });
-                        };
-                        next();
-                    }
-                })();
-            </script>
-        @endscript
 
         {{-- Overlay de resultado (sin animación, se muestra inmediatamente al completar) --}}
         @if($showGenerationResult)
@@ -1656,10 +1918,14 @@
                 <h3 class="text-base font-bold text-emerald-400 mb-1">¡Lección publicada exitosamente!</h3>
                 <p class="text-sm text-slate-400 mb-4">El contenido ya está disponible para los estudiantes.</p>
                 <div class="flex items-center justify-center gap-3">
-                    <a href="{{ route('app.profesors.lms.editor', $selectedActivityId) }}"
-                       class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg font-medium transition-all">
+                    {{-- <button wire:click="openListStudentPreview({{ $selectedActivityId }})"
+                            class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm rounded-lg font-medium transition-all">
+                        👁️ Vista estudiante
+                    </button> --}}
+                    <button wire:click="goToStep(1)"
+                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm rounded-lg font-medium transition-all">
                         Editar contenido completo
-                    </a>
+                    </button>
                     <button wire:click="backToList"
                             class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded-lg font-medium transition-all">
                         Volver al listado
@@ -1667,11 +1933,31 @@
                 </div>
             </div>
         @else
+            <div x-data="{ previewCollapsed: true }">
+
+            {{-- Navegación entre pasos --}}
+            <div class="flex items-center justify-between my-4 border border-slate-700 rounded-lg px-4 py-2">
+                <button wire:click="goToStep({{ $currentStep - 1 }})"
+                        class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
+                    ← Anterior
+                </button>
+
+                <div class="flex items-center gap-2">
+                    @if($currentStep < 4)
+                        <button wire:click="goToStep({{ $currentStep + 1 }})"
+                                class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-all">
+                            Siguiente →
+                        </button>
+                    @endif
+                </div>
+            </div>
+
             {{-- Grid: formulario a la izquierda, preview a la derecha --}}
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
                 {{-- ═══ COLUMNA IZQUIERDA: FORMULARIO (3/5) ═══ --}}
-                <div class="lg:col-span-3 space-y-4">
+                <div :class="previewCollapsed ? 'lg:col-span-5' : 'lg:col-span-3'"
+                     class="space-y-4 transition-all duration-300 min-w-0">
 
                     {{-- STEP 1: Información de la Lección --}}
                     @if($currentStep === 1)
@@ -1823,99 +2109,626 @@
                                 </div>
                             </div>
 
-                            {{-- Secciones existentes --}}
+                            {{-- Secciones existentes como deck de tarjetas --}}
+                            @php
+                                // Colores de acento que ciclan por cada card
+                                $cardAccents = [
+                                    ['top' => 'border-t-emerald-500/60', 'badge' => 'bg-emerald-500/20 text-emerald-400', 'dot' => 'bg-emerald-400/70'],
+                                    ['top' => 'border-t-sky-500/60',    'badge' => 'bg-sky-500/20 text-sky-400',      'dot' => 'bg-sky-400/70'],
+                                    ['top' => 'border-t-violet-500/60', 'badge' => 'bg-violet-500/20 text-violet-400', 'dot' => 'bg-violet-400/70'],
+                                    ['top' => 'border-t-amber-500/60',  'badge' => 'bg-amber-500/20 text-amber-400',   'dot' => 'bg-amber-400/70'],
+                                    ['top' => 'border-t-rose-500/60',   'badge' => 'bg-rose-500/20 text-rose-400',     'dot' => 'bg-rose-400/70'],
+                                    ['top' => 'border-t-cyan-500/60',   'badge' => 'bg-cyan-500/20 text-cyan-400',     'dot' => 'bg-cyan-400/70'],
+                                ];
+                            @endphp
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             @foreach($wizardSections as $sIdx => $section)
-                                <div class="bg-slate-900/30 border border-slate-700 rounded-lg overflow-hidden">
-                                    <div class="flex items-center justify-between px-3 py-2 bg-slate-800/50">
-                                        <span class="text-sm font-medium text-slate-200">{{ $section['title'] }}</span>
-                                        <div class="flex items-center gap-1">
-                                            <button wire:click="toggleWizardSectionVisibility({{ $sIdx }})"
-                                                    class="text-[10px] px-2 py-0.5 rounded {{ $section['is_visible'] ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-500 bg-slate-700/50' }}">
-                                                {{ $section['is_visible'] ? 'Visible' : 'Oculto' }}
+                                @php
+                                    // ─── Accent for this card ─────────────────────
+                                    $accent = $cardAccents[$sIdx % count($cardAccents)];
+
+                                    // ─── Metadata ──────────────────────────────────
+                                    $contentCount = count($section['contents'] ?? []);
+                                    $totalWords = collect($section['contents'] ?? [])
+                                        ->sum(fn($c) => count(preg_split('/\s+/', trim(strip_tags($c['body'] ?? '')))));
+
+                                    // Extract section content for the prompt
+                                    $sectionTextPreview = collect($section['contents'] ?? [])
+                                        ->pluck('body')
+                                        ->filter()
+                                        ->map(fn($b) => strip_tags($b))
+                                        ->implode("\n");
+                                    $sectionTextPreview = \Illuminate\Support\Str::limit($sectionTextPreview, 500);
+                                    $sectionContentForPrompt = $sectionTextPreview ?: 'La sección no tiene contenido aún. Describe una imagen didáctica genérica que represente visualmente el título de la sección.';
+
+                                    // Build the Staff Engineer prompt template
+                                    $imagePrompt = "## Rol\n"
+                                        ."Eres un ilustrador educativo senior y diseñador instruccional con 15 años de experiencia creando recursos visuales pedagógicamente efectivos para entornos de aprendizaje presencial y digital. Dominas principios de comunicación visual, psicología cognitiva del aprendizaje y diseño universal para el aprendizaje (DUA).\n\n"
+                                        ."## Contexto pedagógico\n"
+                                        ."- **Grado/Nivel:** {$gradoName}\n"
+                                        ."- **Asignatura:** {$asignaturaName}\n"
+                                        ."- **Sección escolar:** {$seccionName}\n"
+                                        ."- **Título de la lección:** {$lessonTitle}\n"
+                                        ."- **Sección destino:** {$section['title']}\n"
+                                        ."- **Contenido de la sección:** {$sectionContentForPrompt}\n\n"
+                                        ."## Especificaciones técnicas del recurso visual\n"
+                                        ."- **Estilo gráfico:** Ilustración educativa profesional en estilo \«flat design\» con paleta de color armónica, saturada pero no fluorescente. Trazos vectoriales definidos sin sombras complejas ni degradados extensos. Composición ordenada con jerarquía visual clara (tamaño, color, posición).\n"
+                                        ."- **Proporción:** 16:9 horizontal. La imagen debe funcionar tanto en pantalla proyectada como en impresión tamaño carta (margen de 1\«).\n"
+                                        ."- **Resolución:** Mínimo 1920×1080px, 300 DPI si es vectorial.\n"
+                                        ."- **Tipografía:** NO incluir texto ni etiquetas en la imagen. Todo el texto debe poder añadirse por separado como capa independiente.\n"
+                                        ."- **Paleta de color:** Accesible para daltonismo (evitar rojo/verde como único contraste). Usar azul, naranja, amarillo, verde azulado como colores principales de distinción.\n"
+                                        ."- **Público objetivo:** Estudiantes de {$gradoName}. El nivel de abstracción, las metáforas visuales y el vocabulario gráfico deben ser apropiados para esta etapa educativa.\n\n"
+                                        ."## Instrucciones de contenido didáctico\n"
+                                        ."1. **Concepto central:** Representa visualmente la idea o proceso fundamental de la sección de manera concreta, evitando abstracciones que requieran texto explicativo.\n"
+                                        ."2. **Metáfora visual:** Usa una analogía visual que conecte el nuevo conocimiento con experiencias cotidianas del estudiante (si aplica).\n"
+                                        ."3. **Secuencia didáctica:** Si el contenido describe un proceso (causa-efecto, línea de tiempo, ciclo), represéntalo en 3-4 viñetas o pasos dentro de una misma composición.\n"
+                                        ."4. **Punto focal:** La composición debe tener un único elemento visual dominante que capture la atención primero, con elementos secundarios que amplíen o contextualicen.\n"
+                                        ."5. **Inclusión y diversidad:** Cualquier figura humana debe representar diversidad étnica, de género y funcional de manera natural y no estereotipada.\n"
+                                        ."6. **Fondo:** Neutro o contextual mínimo (sin texturas distractoras). El fondo no debe competir con el contenido pedagógico.\n\n"
+                                        ."## Restricciones\n"
+                                        ."- ❌ Sin texto renderizado en la imagen (ni títulos, ni etiquetas, ni pies de foto).\n"
+                                        ."- ❌ Sin elementos decorativos que no tengan función pedagógica directa.\n"
+                                        ."- ❌ Sin violencia, estereotipos de género/raza, representaciones inexactas científicamente.\n"
+                                        ."- ❌ Sin marcas de agua, logos o referencias a la herramienta generadora.\n"
+                                        ."- ✅ La imagen debe mantener legibilidad y contraste si se imprime en escala de grises.\n"
+                                        ."- ✅ El estilo debe ser coherente con otras imágenes didácticas de la misma lección (mantener misma paleta y nivel de detalle).\n\n"
+                                        ."## Formato de salida\n"
+                                        ."Genera ÚNICAMENTE la imagen solicitada. Sin descripciones adicionales, sin explicaciones, sin variantes. Entrega la imagen en el formato y proporción especificados.";
+                                @endphp
+
+                                {{-- ─── DECK CARD ─── --}}
+                                <div wire:key="section-card-{{ $sIdx }}"
+                                     x-data="{ showPrompt: false, actionsOpen: false }"
+                                     class="bg-slate-800/50 border border-slate-700/50 {{ $accent['top'] }} rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-600/50">
+
+                                    {{-- ═══ CARD HEADER ═══ --}}
+                                    <div class="flex items-start justify-between gap-3 px-4 py-3.5 bg-slate-800/30 border-b border-slate-700/30">
+                                        {{-- Left: identity + metadata --}}
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-2.5">
+                                                {{-- Section number badge --}}
+                                                <span class="flex items-center justify-center w-7 h-7 rounded-lg {{ $accent['badge'] }} text-[11px] font-bold shrink-0">
+                                                    {{ $sIdx + 1 }}
+                                                </span>
+                                                {{-- Title --}}
+                                                <h3 class="text-sm font-bold text-white truncate">{{ $section['title'] }}</h3>
+                                                {{-- Visibility pill --}}
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium leading-none
+                                                    {{ $section['is_visible'] ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/50 text-slate-500' }}">
+                                                    <span class="w-1.5 h-1.5 rounded-full {{ $section['is_visible'] ? 'bg-emerald-400' : 'bg-slate-500' }}"></span>
+                                                    {{ $section['is_visible'] ? 'Visible' : 'Oculto' }}
+                                                </span>
+                                            </div>
+                                            {{-- Metadata line --}}
+                                            <div class="flex items-center gap-1.5 mt-1.5 ml-9">
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-[10px] text-slate-400">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                                    {{ $contentCount }}
+                                                </span>
+                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-[10px] text-slate-400">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                                                    ~{{ number_format(max(0, $totalWords)) }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Right: action buttons --}}
+                                        {{-- Dropdown menu --}}
+                                        <div class="relative" @click.away="actionsOpen = false">
+                                            <button @click="actionsOpen = !actionsOpen"
+                                                    class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all"
+                                                    title="Acciones">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
+                                                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                                                    <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
+                                                </svg>
                                             </button>
-                                            <button wire:click="generateSectionContent({{ $sIdx }})"
-                                                    wire:loading.attr="disabled"
-                                                    wire:target="generateSectionContent({{ $sIdx }})"
-                                                    class="text-[10px] px-2 py-0.5 rounded inline-flex items-center gap-1
-                                                           text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20
-                                                           transition-all duration-200"
-                                                    title="Generar contenido con IA">
-                                                @if($generatingSection === $sIdx)
-                                                    <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                    </svg>
-                                                    Generando...
-                                                @else
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                                    </svg>
-                                                    IA
-                                                @endif
-                                            </button>
-                                            <button wire:click="$set('editingSectionIndex', {{ $sIdx }})"
-                                                    class="text-[10px] px-2 py-0.5 rounded text-slate-400 hover:text-white bg-slate-700/50 hover:bg-slate-700">
-                                                + Bloque
-                                            </button>
-                                            <button wire:click="removeWizardSection({{ $sIdx }})"
-                                                    wire:confirm="¿Eliminar esta sección?"
-                                                    class="text-[10px] px-2 py-0.5 rounded text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20">
-                                                ×
-                                            </button>
+                                            <div x-show="actionsOpen" x-cloak x-transition:enter.duration.150ms
+                                                 class="absolute right-0 top-full z-50 mt-1 w-48 py-1.5 bg-slate-800 border border-slate-600/50 rounded-xl shadow-2xl shadow-black/50">
+                                                {{-- Image prompt --}}
+                                                <button @click="showPrompt = !showPrompt; actionsOpen = false"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
+                                                               text-slate-300 hover:text-amber-300 hover:bg-amber-500/10">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                                    Imagen IA
+                                                </button>
+                                                {{-- IA generate --}}
+                                                <button wire:click="generateSectionContent({{ $sIdx }}); actionsOpen = false"
+                                                        wire:loading.attr="disabled"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
+                                                               text-slate-300 hover:text-purple-300 hover:bg-purple-500/10">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                    Generar IA
+                                                </button>
+                                                <hr class="border-slate-700/50 my-1">
+                                                {{-- Toggle visibility --}}
+                                                <button wire:click="toggleWizardSectionVisibility({{ $sIdx }}); actionsOpen = false"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
+                                                               {{ $section['is_visible'] ? 'text-emerald-300 hover:bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50' }}">
+                                                    @if($section['is_visible'])
+                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    @else
+                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22"/></svg>
+                                                    @endif
+                                                    {{ $section['is_visible'] ? 'Visible' : 'Oculto' }}
+                                                </button>
+                                                {{-- Add content block --}}
+                                                <button wire:click="$set('editingSectionIndex', {{ $editingSectionIndex === $sIdx ? 'null' : $sIdx }}); actionsOpen = false"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
+                                                               {{ $editingSectionIndex === $sIdx ? 'text-emerald-300 bg-emerald-500/10' : 'text-slate-300 hover:text-white hover:bg-slate-700/50' }}">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    {{ $editingSectionIndex === $sIdx ? 'Cerrar editor' : 'Agregar bloque' }}
+                                                </button>
+                                                {{-- Add resource --}}
+                                                <button wire:click="$set('resourcePanelSection', {{ $resourcePanelSection === $sIdx ? 'null' : $sIdx }}); actionsOpen = false"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
+                                                               {{ $resourcePanelSection === $sIdx ? 'text-amber-300 bg-amber-500/10' : 'text-slate-300 hover:text-amber-300 hover:bg-amber-500/10' }}">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    Agregar recurso
+                                                </button>
+                                                <hr class="border-slate-700/50 my-1">
+                                                {{-- Delete --}}
+                                                <button wire:click="removeWizardSection({{ $sIdx }}); actionsOpen = false"
+                                                        wire:confirm="¿Eliminar esta sección?"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    Eliminar sección
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+                                    {{-- ═══ IMAGE PROMPT DIALOG (expandable) ═══ --}}
+                                    <div x-show="showPrompt" x-cloak x-transition:enter.duration.200ms
+                                         class="border-b border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900">
+                                        <div class="p-4 space-y-3">
+                                            {{-- Header --}}
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="text-sm font-bold text-amber-300">Prompt — Imagen didáctica</h4>
+                                                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                                                            Copia este prompt y pégalo en un generador de imágenes con IA
+                                                            (<span class="text-slate-300">DALL·E, Midjourney, Stable Diffusion, Copilot</span>)
+                                                            para crear un recurso visual para esta sección.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button @click="showPrompt = false"
+                                                        class="p-1 hover:bg-slate-700/50 rounded-lg transition-colors shrink-0">
+                                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+
+                                            {{-- Prompt text --}}
+                                            <div class="relative" x-data="{}">
+                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-xl p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $imagePrompt }}</pre>
+                                                <button @click="
+                                                    const btn = $event.currentTarget;
+                                                    navigator.clipboard.writeText(btn.parentElement.querySelector('pre')?.textContent || '');
+                                                    btn.textContent = '✓ Copiado';
+                                                    setTimeout(() => btn.textContent = 'Copiar prompt', 2000);
+                                                "
+                                                        class="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-all"
+                                                        type="button">
+                                                    Copiar prompt
+                                                </button>
+                                            </div>
+
+                                            {{-- Footer --}}
+                                            <div class="flex items-center justify-between text-[10px] text-slate-500">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    La imagen generada podrás asociarla como recurso a esta sección al finalizar.
+                                                </span>
+                                                <span>{{ strlen($imagePrompt) }} caracteres</span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {{-- Error de generación --}}
+                                    {{-- ═══ GENERATION ERROR ═══ --}}
                                     @if($generatingSection === $sIdx && $generationError)
-                                        <div class="px-3 py-2 bg-red-500/10 border-b border-red-500/20">
+                                        <div class="px-4 py-2.5 bg-red-500/10 border-b border-red-500/20">
                                             <p class="text-xs text-red-400 flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 {{ $generationError }}
                                             </p>
                                         </div>
                                     @endif
 
-                                    <div class="divide-y divide-slate-700/50">
-                                        @foreach($section['contents'] as $cIdx => $content)
-                                            <div class="px-3 py-2 flex items-start justify-between gap-2">
-                                                <div class="min-w-0">
-                                                    @if($content['title'])
-                                                        <p class="text-xs font-medium text-slate-200">{{ $content['title'] }}</p>
-                                                    @endif
-                                                    <p class="text-xs text-slate-500 truncate">{{ \Illuminate\Support\Str::limit(strip_tags($content['body'] ?? ''), 60) }}</p>
+                                    {{-- ═══ CARD BODY: CONTENT BLOCKS ═══ --}}
+                                    <div class="px-4 py-3 space-y-2.5">
+                                        @forelse($section['contents'] as $cIdx => $content)
+                                            @php
+                                                $cleanBody = strip_tags($content['body'] ?? '');
+                                                $bodyLength = mb_strlen($cleanBody);
+                                                $isLong = $bodyLength > 250;
+                                                $contentWords = count(preg_split('/\s+/', trim($cleanBody)));
+                                                $contentType = $content['type'] ?? 'TEXT';
+                                            @endphp
+                                            <div wire:key="content-{{ $sIdx }}-{{ $cIdx }}"
+                                                 x-data="{ expanded: false }"
+                                                 class="group relative rounded-lg bg-slate-900/40 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-200">
+
+                                                {{-- Top accent bar --}}
+                                                <div class="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
+
+                                                <div class="flex items-start gap-3 p-3">
+                                                    {{-- Type indicator --}}
+                                                    <div class="flex flex-col items-center gap-1 mt-1 shrink-0">
+                                                        <span class="block w-2 h-2 rounded-full {{ $accent['dot'] }}"></span>
+                                                        <span class="block w-px h-full min-h-[1.5rem] bg-slate-700/30"></span>
+                                                    </div>
+
+                                                    {{-- Content --}}
+                                                    <div class="min-w-0 flex-1">
+                                                        @if($content['title'])
+                                                            <h4 class="text-xs font-semibold text-slate-200 mb-1">{{ $content['title'] }}</h4>
+                                                        @endif
+
+                                                        {{-- Body (collapsible) --}}
+                                                        <div class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap"
+                                                             :class="expanded ? '' : 'line-clamp-3'">
+                                                            {!! nl2br(e($cleanBody)) !!}
+                                                        </div>
+
+                                                        {{-- Expand/collapse toggle --}}
+                                                        @if($isLong)
+                                                            <button @click="expanded = !expanded"
+                                                                    class="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+                                                                <span x-show="!expanded">
+                                                                    Ver contenido completo
+                                                                    <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                                </span>
+                                                                <span x-show="expanded" x-cloak>
+                                                                    Ver menos
+                                                                    <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                                                                </span>
+                                                            </button>
+                                                        @endif
+
+                                                        {{-- Metadata --}}
+                                                        <div class="flex items-center gap-2 mt-1.5">
+                                                            <span class="inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-slate-600">
+                                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                                                {{ $contentType }}
+                                                            </span>
+                                                            <span class="text-slate-600">·</span>
+                                                            <span class="text-[9px] text-slate-600">{{ max(0, $contentWords) }} palabras</span>
+                                                            @if(!($content['is_visible'] ?? true))
+                                                                <span class="text-slate-600">·</span>
+                                                                <span class="text-[9px] text-slate-600 italic">oculto</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Delete content button --}}
+                                                    <button wire:click="removeWizardContent({{ $sIdx }}, {{ $cIdx }})"
+                                                            class="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-300 shrink-0"
+                                                            title="Eliminar bloque">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
                                                 </div>
-                                                <button wire:click="removeWizardContent({{ $sIdx }}, {{ $cIdx }})"
-                                                        class="text-red-400 hover:text-red-300 shrink-0">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                    </svg>
-                                                </button>
                                             </div>
-                                        @endforeach
+                                        @empty
+                                            {{-- Empty state for sections without content --}}
+                                            <div class="text-center py-6">
+                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                                </div>
+                                                <p class="text-xs text-slate-500 font-medium">Esta sección no tiene contenido</p>
+                                                <p class="text-[10px] text-slate-600 mt-0.5">Usa el botón <span class="text-slate-400 font-medium">+ Bloque</span> o genera con <span class="text-purple-400 font-medium">IA</span></p>
+                                            </div>
+                                        @endforelse
+
+                                        {{-- Recursos vinculados a esta sección --}}
+                                        @php
+                                            $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
+                                            $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
+                                            $secEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id'])->values()->all();
+                                            $hasSectionResources = count($secResources) > 0 || count($secLinks) > 0 || count($secEmbeds) > 0;
+                                        @endphp
+                                        @if($hasSectionResources)
+                                            <div class="border-t border-slate-700/40 pt-2.5 mt-2 space-y-1">
+                                                @foreach($secResources as $rIdx2 => $res)
+                                                    @php $resIndex = array_search($res, $wizardResources); $isImage = str_starts_with($res['media']['mime_type'] ?? '', 'image/'); @endphp
+                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-amber-500/30 transition-all">
+                                                        <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center shrink-0">
+                                                            <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                        </div>
+                                                        <span class="text-[11px] text-slate-300 truncate flex-1">{{ $res['display_name'] }}</span>
+                                                        <span class="text-[9px] text-slate-500 shrink-0">{{ $res['media']['size_for_humans'] ?? '' }}</span>
+                                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                            @if($isImage)
+                                                            <button wire:click="previewResourceImage({{ $resIndex }})"
+                                                                    class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
+                                                                    title="Vista previa">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                            </button>
+                                                            @endif
+                                                            <button wire:click="removeWizardResource({{ $resIndex }})"
+                                                                    class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
+                                                                    title="Eliminar recurso">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                                @foreach($secLinks as $link)
+                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-sky-500/30 transition-all">
+                                                        <div class="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
+                                                            <svg class="w-3 h-3 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                        </div>
+                                                        <div class="flex-1 min-w-0">
+                                                            <span class="text-[11px] text-slate-300 truncate block">{{ $link['title'] }}</span>
+                                                            <span class="text-[9px] text-slate-500 truncate block">{{ $link['url'] }}</span>
+                                                        </div>
+                                                        <span class="text-[9px] text-slate-500 bg-slate-700/40 px-1.5 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
+                                                        <button wire:click="removeWizardLink({{ array_search($link, $wizardLinks) }})"
+                                                                class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10 shrink-0">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                                @foreach($secEmbeds as $embed)
+                                                    @php $embedIndex = array_search($embed, $wizardHtmlEmbeds); @endphp
+                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-fuchsia-500/30 transition-all">
+                                                        <div class="w-6 h-6 rounded bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                                                            <svg class="w-3 h-3 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                                        </div>
+                                                        <span class="text-[11px] text-slate-300 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                                        <span class="text-[9px] text-slate-500 font-mono shrink-0 max-w-[100px] truncate">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 30) }}</span>
+                                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                            <button wire:click="previewExistingEmbed({{ $embedIndex }})"
+                                                                    class="text-slate-500 hover:text-fuchsia-300 transition-all text-xs p-0.5 rounded hover:bg-fuchsia-500/10"
+                                                                    title="Vista previa">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                            </button>
+                                                            <button wire:click="editWizardHtmlEmbed({{ $embedIndex }})"
+                                                                    class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
+                                                                    title="Editar embed">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                            </button>
+                                                            <button wire:click="removeWizardHtmlEmbed({{ $embedIndex }})"
+                                                                    class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
+                                                                    title="Eliminar embed">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
 
-                                    {{-- Formulario de contenido (inline) --}}
+                                    {{-- ═══ CARD FOOTER: INLINE CONTENT FORM ═══ --}}
                                     @if($editingSectionIndex === $sIdx)
-                                        <div class="px-3 py-3 bg-slate-900/50 border-t border-slate-700 space-y-2">
-                                            <input wire:model="contentTitle" placeholder="Título (opcional)"
-                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
-                                            <textarea wire:model="contentBody" rows="3" placeholder="Escribe el contenido…"
-                                                      class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"></textarea>
-                                            <div class="flex gap-2">
-                                                <button wire:click="addWizardContent({{ $sIdx }})"
-                                                        class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg">
-                                                    Agregar
-                                                </button>
-                                                <button wire:click="$set('editingSectionIndex', null)"
-                                                        class="px-3 py-1 text-xs text-slate-400 hover:text-white">
-                                                    Cancelar
-                                                </button>
+                                        <div class="border-t border-slate-700/50 bg-slate-900/50">
+                                            <div class="px-4 py-3 space-y-2.5">
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <span class="flex items-center justify-center w-5 h-5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">+</span>
+                                                    <span class="text-[11px] font-semibold text-slate-300">Nuevo bloque de contenido</span>
+                                                </div>
+                                                <input wire:model="contentTitle" placeholder="Título del bloque (opcional)"
+                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                <textarea wire:model="contentBody" rows="3" placeholder="Escribe o pega el contenido de la sección…"
+                                                          class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors resize-none"></textarea>
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex gap-2">
+                                                        <button wire:click="addWizardContent({{ $sIdx }})"
+                                                                class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors">
+                                                            Agregar bloque
+                                                        </button>
+                                                        <button wire:click="$set('editingSectionIndex', null)"
+                                                                class="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-slate-700/50 transition-colors">
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                    <span class="text-[9px] text-slate-600">El bloque se agrega al final de la sección</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- ═══ RESOURCE PANEL (paso 2) ═══ --}}
+                                    @if($resourcePanelSection === $sIdx)
+                                        <div class="border-t border-amber-500/20 bg-gradient-to-b from-amber-500/[0.03] to-slate-900/50"
+                                             x-data="{ resourceTab: 'file' }">
+                                            <div class="px-4 py-3 space-y-3">
+                                                {{-- Header --}}
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="flex items-center justify-center w-5 h-5 rounded bg-amber-500/20 text-amber-400 text-[9px] font-bold">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    </span>
+                                                    <span class="text-[11px] font-semibold text-slate-300">Agregar recurso a esta sección</span>
+                                                    <button wire:click="$set('resourcePanelSection', null)" class="ml-auto text-[9px] text-slate-500 hover:text-slate-300 transition-colors">Cerrar</button>
+                                                </div>
+
+                                                {{-- Sub-tabs --}}
+                                                <div class="flex gap-1">
+                                                    <button @click="resourceTab = 'file'"
+                                                            :class="resourceTab === 'file' ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                        Archivo
+                                                    </button>
+                                                    <button @click="resourceTab = 'link'"
+                                                            :class="resourceTab === 'link' ? 'text-sky-300 bg-sky-500/15 border-sky-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                        Enlace
+                                                    </button>
+                                                    <button @click="resourceTab = 'embed'"
+                                                            :class="resourceTab === 'embed' ? 'text-fuchsia-300 bg-fuchsia-500/15 border-fuchsia-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                                        HTML
+                                                    </button>
+                                                </div>
+
+                                                {{-- TAB: Archivo --}}
+                                                <div x-show="resourceTab === 'file'" x-cloak x-transition:enter.duration.150ms>
+                                                    <div class="flex gap-2 items-end">
+                                                        <div class="flex-1">
+                                                            <input wire:model="resourceName" placeholder="Nombre del recurso"
+                                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none transition-colors"/>
+                                                        </div>
+                                                        <div class="relative">
+                                                            <input wire:model="resourceFile" type="file" id="resourceFileInline-{{ $sIdx }}"
+                                                                   class="absolute inset-0 opacity-0 cursor-pointer"/>
+                                                            <label for="resourceFileInline-{{ $sIdx }}"
+                                                                   class="block px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border border-slate-600/50 hover:border-slate-500/50">
+                                                                <span class="flex items-center gap-1.5">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                                    Adjuntar
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                        <button wire:click="addWizardResourceSection({{ $sIdx }})"
+                                                                class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap">
+                                                            Subir
+                                                        </button>
+                                                    </div>
+                                                    @error('resourceFile') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                    @error('resourceName') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                </div>
+
+                                                {{-- TAB: Enlace --}}
+                                                <div x-show="resourceTab === 'link'" x-cloak x-transition:enter.duration.150ms>
+                                                    <div class="space-y-2">
+                                                        <input wire:model="linkTitle" placeholder="Título del enlace"
+                                                               class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none transition-colors"/>
+                                                        <div class="flex gap-2">
+                                                            <input wire:model="linkUrl" placeholder="https://…"
+                                                                   class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none transition-colors"/>
+                                                            <select wire:model="linkType"
+                                                                    class="bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-[10px] text-slate-200 focus:border-sky-500 focus:outline-none transition-colors">
+                                                                <option value="REFERENCE">Referencia</option>
+                                                                <option value="VIDEO">Video</option>
+                                                                <option value="DOCUMENT">Documento</option>
+                                                                <option value="INTERACTIVE">Interactivo</option>
+                                                            </select>
+                                                        </div>
+                                                        <button wire:click="addWizardLinkSection({{ $sIdx }})"
+                                                                class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded-lg transition-colors">
+                                                            Agregar enlace
+                                                        </button>
+                                                    </div>
+                                                    @error('linkTitle') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                    @error('linkUrl') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                </div>
+
+                                                {{-- TAB: HTML Embed --}}
+                                                <div x-show="resourceTab === 'embed'" x-cloak x-transition:enter.duration.150ms>
+                                                    <div class="space-y-2">
+                                                        <input wire:model="embedTitle" placeholder="Título del embed (opcional)"
+                                                               class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors"/>
+                                                        <textarea wire:model="embedHtml" rows="3" placeholder="Pega el código HTML, CSS o Mermaid…"
+                                                                  class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors resize-none font-mono"></textarea>
+                                                        <button wire:click="addWizardHtmlEmbedSection({{ $sIdx }})"
+                                                                class="px-3.5 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-medium rounded-lg transition-colors">
+                                                            Agregar HTML
+                                                        </button>
+                                                    </div>
+                                                    @error('embedHtml') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     @endif
                                 </div>
                             @endforeach
+                            </div>
+
+                            {{-- Recursos no vinculados a ninguna sección --}}
+                            @php
+                                $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
+                                $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
+                                $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
+                                $hasUnlinked = count($unlinkedResources) > 0 || count($unlinkedLinks) > 0 || count($unlinkedEmbeds) > 0;
+                            @endphp
+                            @if($hasUnlinked)
+                                <div class="border border-dashed border-slate-700/40 rounded-xl overflow-hidden mt-2">
+                                    <div class="px-4 py-2 bg-slate-800/30 border-b border-slate-700/20">
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Recursos sin sección asignada</span>
+                                    </div>
+                                    <div class="p-3 space-y-1">
+                                        @foreach($unlinkedResources as $res)
+                                            @php $resIndex = array_search($res, $wizardResources); $isImage = str_starts_with($res['media']['mime_type'] ?? '', 'image/'); @endphp
+                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-amber-500/30 transition-all">
+                                                <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center shrink-0">
+                                                    <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                </div>
+                                                <span class="text-[11px] text-slate-400 truncate flex-1">{{ $res['display_name'] }}</span>
+                                                <span class="text-[9px] text-slate-600">{{ $res['media']['size_for_humans'] ?? '' }}</span>
+                                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                    @if($isImage)
+                                                    <button wire:click="previewResourceImage({{ $resIndex }})"
+                                                            class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
+                                                            title="Vista previa">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    </button>
+                                                    @endif
+                                                    <button wire:click="removeWizardResource({{ $resIndex }})"
+                                                            class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
+                                                            title="Eliminar recurso">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                        @foreach($unlinkedLinks as $link)
+                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-sky-500/30 transition-all">
+                                                <div class="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
+                                                    <svg class="w-3 h-3 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <span class="text-[11px] text-slate-400 truncate block">{{ $link['title'] }}</span>
+                                                    <span class="text-[9px] text-slate-600 truncate block">{{ $link['url'] }}</span>
+                                                </div>
+                                                <span class="text-[9px] text-slate-600 bg-slate-700/30 px-1.5 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
+                                                <button wire:click="removeWizardLink({{ array_search($link, $wizardLinks) }})"
+                                                        class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10 shrink-0">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                        @foreach($unlinkedEmbeds as $embed)
+                                            @php $embedIndex = array_search($embed, $wizardHtmlEmbeds); @endphp
+                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-fuchsia-500/30 transition-all">
+                                                <div class="w-6 h-6 rounded bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                                                    <svg class="w-3 h-3 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                                </div>
+                                                <span class="text-[11px] text-slate-400 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                                <span class="text-[9px] text-slate-600 font-mono shrink-0 max-w-[100px] truncate">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 30) }}</span>
+                                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <button wire:click="previewExistingEmbed({{ $embedIndex }})"
+                                                            class="text-slate-500 hover:text-fuchsia-300 transition-all text-xs p-0.5 rounded hover:bg-fuchsia-500/10"
+                                                            title="Vista previa">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    </button>
+                                                    <button wire:click="editWizardHtmlEmbed({{ $embedIndex }})"
+                                                            class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
+                                                            title="Editar embed">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    </button>
+                                                    <button wire:click="removeWizardHtmlEmbed({{ $embedIndex }})"
+                                                            class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
+                                                            title="Eliminar embed">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
 
                             {{-- Agregar sección --}}
                             <div class="flex gap-2 pt-2">
@@ -1930,9 +2743,10 @@
                         </div>
                     @endif
 
-                    {{-- STEP 3: Recursos y Enlaces --}}
+                    {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
                     @if($currentStep === 3)
-                        <div class="w-full bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
+                        <div class="w-full bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden"
+                             x-data="{ activeTab: 'resources' }">
                             {{-- Header --}}
                             <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30">
                                 <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center shrink-0">
@@ -1942,15 +2756,52 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h2 class="text-sm font-bold text-white tracking-wide">Recursos y Enlaces</h2>
-                                    <p class="text-[11px] text-slate-500 truncate">Material descargable y enlaces de interés para la lección</p>
+                                    <p class="text-[11px] text-slate-500 truncate">Material descargable, HTML embeds y enlaces de interés para la lección</p>
                                 </div>
                             </div>
 
-                            {{-- Body --}}
-                            <div class="p-5 space-y-6">
+                            {{-- Tabs de navegación (tab-fill: ancho completo) --}}
+                            <div class="flex items-stretch gap-0.5 border-b border-slate-700/50 bg-slate-900/30 px-5">
+                                <button @click="activeTab = 'resources'"
+                                        :class="activeTab === 'resources' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <span class="hidden sm:inline">Archivos</span> descargables
+                                    <span class="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-full"
+                                          :class="activeTab === 'resources' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-slate-500'"
+                                          x-text="{{ count($wizardResources) }}"></span>
+                                </button>
+                                <button @click="activeTab = 'embeds'"
+                                        :class="activeTab === 'embeds' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                    </svg>
+                                    HTML Embeds
+                                    <span class="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-full"
+                                          :class="activeTab === 'embeds' ? 'bg-fuchsia-500/20 text-fuchsia-400' : 'bg-slate-700/50 text-slate-500'"
+                                          x-text="{{ count($wizardHtmlEmbeds) }}"></span>
+                                </button>
+                                <button @click="activeTab = 'links'"
+                                        :class="activeTab === 'links' ? 'text-sky-300 bg-sky-500/10 border-sky-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                    </svg>
+                                    <span class="hidden sm:inline">Enlaces</span> externos
+                                    <span class="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-full"
+                                          :class="activeTab === 'links' ? 'bg-sky-500/20 text-sky-400' : 'bg-slate-700/50 text-slate-500'"
+                                          x-text="{{ count($wizardLinks) }}"></span>
+                                </button>
+                            </div>
 
-                                {{-- ═══════ RECURSOS ═══════ --}}
-                                <div>
+                            {{-- Body: Tab panels --}}
+                            <div class="p-5">
+
+                                {{-- ═══ Tab: Archivos descargables ═══ --}}
+                                <div x-show="activeTab === 'resources'" x-cloak x-transition:enter.duration.200ms>
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1978,7 +2829,6 @@
                                                     };
                                                 @endphp
                                                 <div class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
-                                                    {{-- Icon --}}
                                                     <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0
                                                         @switch($icon)
                                                             @case('pdf') bg-red-500/15 @break
@@ -2021,12 +2871,10 @@
                                                             @endswitch
                                                         </svg>
                                                     </div>
-                                                    {{-- Info --}}
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-xs font-medium text-slate-200 truncate">{{ $res['display_name'] }}</p>
                                                         <p class="text-[10px] text-slate-500 truncate">{{ $res['media']['original_name'] ?? '' }} <span class="text-slate-600">·</span> {{ $res['media']['size_for_humans'] ?? '' }}</p>
                                                     </div>
-                                                    {{-- Remove --}}
                                                     <button wire:click="removeWizardResource({{ $rIdx }})"
                                                             class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
                                                             title="Eliminar recurso">
@@ -2052,6 +2900,17 @@
                                             <input wire:model="resourceName" placeholder="Nombre del recurso"
                                                    class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                         </div>
+                                        @if(count($wizardSections) > 0)
+                                            <div class="flex-none">
+                                                <select wire:model="resourceSectionId"
+                                                        class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
+                                                    <option value="">Sin sección</option>
+                                                    @foreach($wizardSections as $sec)
+                                                        <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                         <div class="relative">
                                             <input wire:model="resourceFile" type="file" id="resourceFile"
                                                    class="absolute inset-0 opacity-0 cursor-pointer"/>
@@ -2075,11 +2934,181 @@
                                     </div>
                                 </div>
 
-                                {{-- Divider --}}
-                                <div class="border-t border-slate-700/40"></div>
+                                {{-- ═══ Tab: HTML Embeds ═══ --}}
+                                <div x-show="activeTab === 'embeds'" x-cloak x-transition:enter.duration.200ms>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">HTML Embeds</h3>
+                                            @if($editingEmbedIndex !== null)
+                                                <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                                    Editando #{{ $editingEmbedIndex + 1 }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardHtmlEmbeds) }} embeds</span>
+                                    </div>
 
-                                {{-- ═══════ ENLACES ═══════ --}}
-                                <div>
+                                    @if(count($wizardHtmlEmbeds) > 0)
+                                        <div class="space-y-1.5 mb-3">
+                                            @foreach($wizardHtmlEmbeds as $eIdx => $embed)
+                                                <div class="flex items-start gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
+                                                    <div class="w-9 h-9 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div class="flex items-center gap-2">
+                                                            <p class="text-xs font-medium text-slate-200 truncate">{{ $embed['title'] ?? 'Embed HTML' }}</p>
+                                                            @if(!empty($embed['section_id']))
+                                                                <span class="text-[10px] font-medium px-1.5 py-0.5 rounded border text-amber-300 bg-amber-500/10 border-amber-500/20 shrink-0">
+                                                                    Sección {{ collect($wizardSections)->firstWhere('id', $embed['section_id'])['title'] ?? '' }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-[10px] text-slate-500 font-mono mt-1 line-clamp-2">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 120) }}</div>
+                                                    </div>
+                                                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                        <button wire:click="previewExistingEmbed({{ $eIdx }})"
+                                                                class="text-slate-400 hover:text-fuchsia-300 transition-all text-xs p-1 rounded hover:bg-fuchsia-500/10"
+                                                                title="Vista previa">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                            </svg>
+                                                        </button>
+                                                        <button wire:click="editWizardHtmlEmbed({{ $eIdx }})"
+                                                                class="text-slate-400 hover:text-amber-300 transition-all text-xs p-1 rounded hover:bg-amber-500/10"
+                                                                title="Editar embed">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                            </svg>
+                                                        </button>
+                                                        <button wire:click="removeWizardHtmlEmbed({{ $eIdx }})"
+                                                                class="text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
+                                                                title="Eliminar embed">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-3">
+                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            <p class="text-xs text-slate-500">Sin código HTML embebido aún. Agrega contenido HTML para la lección.</p>
+                                        </div>
+                                    @endif
+
+                                    {{-- Add HTML embed form --}}
+                                    <div class="space-y-2">
+                                        <div class="flex gap-2">
+                                            <div class="flex-1">
+                                                <input wire:model="embedTitle" placeholder="Título del embed (opcional)"
+                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                            </div>
+                                            @if(count($wizardSections) > 0)
+                                                <div class="flex-none">
+                                                    <select wire:model.live="embedSectionId"
+                                                            class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                        <option value="">Sin sección</option>
+                                                        @foreach($wizardSections as $sec)
+                                                            <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        {{-- Refinar prompt — tipo de diagrama + instrucciones --}}
+                                        <div class="flex gap-2">
+                                            <div class="flex-none">
+                                                <select wire:model.live="embedDiagramType"
+                                                        class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-fuchsia-500 focus:outline-none transition-colors min-w-[150px]">
+                                                    <option value="">Auto (elige el mejor)</option>
+                                                    <option value="graph">graph (flowchart)</option>
+                                                    <option value="sequence">sequenceDiagram</option>
+                                                    <option value="class">classDiagram</option>
+                                                    <option value="mindmap">mindmap</option>
+                                                    <option value="pie">pie</option>
+                                                    <option value="gantt">gantt</option>
+                                                    <option value="er">erDiagram</option>
+                                                    <option value="state">stateDiagram</option>
+                                                    <option value="journey">journey</option>
+                                                    <option value="gitgraph">gitgraph</option>
+                                                    <option value="timeline">timeline</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex-1">
+                                                <input wire:model="embedPromptRefinement" placeholder="Instrucciones adicionales para la IA (ej: 'enfócate en los pasos del proceso', 'incluye fechas específicas')"
+                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors"/>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <textarea wire:model="embedHtml" rows="4"
+                                                      placeholder="Pega aquí el código HTML (iframe, script, etc.)"
+                                                      class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y"></textarea>
+                                        </div>
+                                        <div class="flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <button wire:click="generateEmbedCard"
+                                                        wire:loading.attr="disabled"
+                                                        wire:target="generateEmbedCard"
+                                                        class="px-3 py-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:from-slate-700 disabled:to-slate-700 text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 shadow-lg shadow-fuchsia-900/30 disabled:shadow-none disabled:cursor-not-allowed">
+                                                    <svg wire:loading wire:target="generateEmbedCard" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                    </svg>
+                                                    <svg wire:loading.remove wire:target="generateEmbedCard" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                                                    </svg>
+                                                    <span wire:loading.remove wire:target="generateEmbedCard">✨ Generar diagrama</span>
+                                                    <span wire:loading wire:target="generateEmbedCard">Generando...</span>
+                                                </button>
+                                                @if(trim($embedHtml))
+                                                <button wire:click="previewGeneratedEmbed"
+                                                        class="px-2.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-600/50">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    Vista previa
+                                                </button>
+                                                @endif
+                                                <span class="text-[10px] text-slate-500 italic">Genera un diagrama Mermaid con el contenido de la sección</span>
+                                            </div>
+                                            <button wire:click="addWizardHtmlEmbed"
+                                                    class="px-4 py-2 {{ $editingEmbedIndex !== null ? 'bg-amber-600 hover:bg-amber-500' : 'bg-fuchsia-600 hover:bg-fuchsia-500' }} text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
+                                                @if($editingEmbedIndex !== null)
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                    Actualizar cambios
+                                                @else
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    Agregar Embed
+                                                @endif
+                                            </button>
+                                            @if($editingEmbedIndex !== null)
+                                                <button wire:click="cancelEditEmbed"
+                                                        class="px-3 py-2 text-slate-400 hover:text-white text-xs font-medium rounded-lg hover:bg-slate-700/50 transition-colors">
+                                                    Cancelar
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 leading-relaxed">
+                                            El código HTML se renderizará en la vista del estudiante. Usa con precaución: iframes, tablas, formularios, etc.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- ═══ Tab: Enlaces externos ═══ --}}
+                                <div x-show="activeTab === 'links'" x-cloak x-transition:enter.duration.200ms>
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2136,12 +3165,12 @@
                                     @endif
 
                                     {{-- Add link form --}}
-                                    <div class="flex gap-2 items-end">
-                                        <div class="flex-1">
+                                    <div class="flex flex-wrap gap-2 items-end">
+                                        <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkTitle" placeholder="Título del enlace"
                                                    class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                         </div>
-                                        <div class="flex-1">
+                                        <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkUrl" placeholder="https://…"
                                                    class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                         </div>
@@ -2153,6 +3182,15 @@
                                             <option value="DOCUMENT">Documento</option>
                                             <option value="OTHER">Otro</option>
                                         </select>
+                                        @if(count($wizardSections) > 0)
+                                            <select wire:model="linkSectionId"
+                                                    class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
+                                                <option value="">Sin sección</option>
+                                                @foreach($wizardSections as $sec)
+                                                    <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
+                                                @endforeach
+                                            </select>
+                                        @endif
                                         <button wire:click="addWizardLink"
                                                 class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2163,8 +3201,160 @@
                                     </div>
                                 </div>
 
+                            </div>{{-- /body tabs --}}
+                        </div>
+
+                        {{-- ═══════ MODAL PREVIEW EMBED EXISTENTE (global a los tabs) ═══════ --}}
+                        @php $previewEmbed = $previewEmbedIndex !== null ? ($wizardHtmlEmbeds[$previewEmbedIndex] ?? null) : null; @endphp
+                        @if($previewEmbed)
+                        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="existing-embed-preview-modal">
+                            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExistingEmbedPreview"></div>
+                            <div class="relative min-h-screen flex items-center justify-center p-4">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                                            </svg>
+                                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Vista previa del embed</h3>
+                                            @if(!empty($previewEmbed['title']))
+                                                <span class="text-xs text-slate-400 font-normal">— {{ $previewEmbed['title'] }}</span>
+                                            @endif
+                                        </div>
+                                        <button wire:click="closeExistingEmbedPreview"
+                                                class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-6">
+                                        @php
+                                            $previewContent = $previewEmbed['html_content'] ?? '';
+                                            $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', trim($previewContent)) === 1;
+                                        @endphp
+                                        @if($isMermaid)
+                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                 data-mermaid-code="{{ $previewContent }}"
+                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto">
+                                                <div x-ref="target" class="w-full"></div>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mt-3 text-center">Diagrama Mermaid renderizado en vivo</p>
+                                        @else
+                                            <div class="prose prose-sm max-w-none prose-invert">{!! $previewContent !!}</div>
+                                            <p class="text-xs text-amber-400 mt-3 text-center">ℹ️ Contenido HTML embebido</p>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-800/50 border-t border-slate-700">
+                                        <button wire:click="closeExistingEmbedPreview"
+                                                class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        @endif
+
+                        {{-- ═══════ MODAL PREVIEW DIAGRAMA (global a los tabs) ═══════ --}}
+                        @if($showEmbedPreview)
+                        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="embed-preview-modal">
+                            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeEmbedPreview"></div>
+                            <div class="relative min-h-screen flex items-center justify-center p-4">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                                            </svg>
+                                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Vista previa del diagrama</h3>
+                                            @if($embedTitle)
+                                                <span class="text-xs text-slate-400 font-normal">— {{ $embedTitle }}</span>
+                                            @endif
+                                        </div>
+                                        <button wire:click="closeEmbedPreview"
+                                                class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-6">
+                                        @php
+                                            $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', trim($embedHtml)) === 1;
+                                        @endphp
+                                        @if($isMermaid)
+                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                 data-mermaid-code="{{ $embedHtml }}"
+                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto">
+                                                <div x-ref="target" class="w-full"></div>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mt-3 text-center">Diagrama Mermaid renderizado en vivo</p>
+                                        @else
+                                            <div class="prose prose-sm max-w-none prose-invert">{!! $embedHtml !!}</div>
+                                            <p class="text-xs text-amber-400 mt-3 text-center">ℹ️ Este contenido no se reconoce como diagrama Mermaid. Se muestra como HTML.</p>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-800/50 border-t border-slate-700">
+                                        <button wire:click="closeEmbedPreview"
+                                                class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                            Cerrar
+                                        </button>
+                                        <button wire:click="addWizardHtmlEmbed"
+                                                class="px-4 py-2 text-xs font-medium text-white bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg transition-all">
+                                            Agregar Embed
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- ═══════ MODAL PREVIEW IMAGEN ═══════ --}}
+                        @php $previewResource = $previewResourceIndex !== null ? ($wizardResources[$previewResourceIndex] ?? null) : null; @endphp
+                        @if($previewResource)
+                        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="resource-image-preview-modal">
+                            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeResourcePreview"></div>
+                            <div class="relative min-h-screen flex items-center justify-center p-4">
+                                <div class="relative bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
+                                     x-data="{ imgWidth: 0, imgHeight: 0 }">
+                                    {{-- Header --}}
+                                    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <h3 class="text-sm font-bold text-white uppercase tracking-wider truncate">{{ $previewResource['display_name'] }}</h3>
+                                            <span class="text-xs text-slate-500 shrink-0">({{ $previewResource['media']['size_for_humans'] ?? '' }})</span>
+                                        </div>
+                                        <button wire:click="closeResourcePreview"
+                                                class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all shrink-0">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                    {{-- Body: imagen con dimensiones naturales --}}
+                                    <div class="p-4 flex items-center justify-center bg-black/40">
+                                        <img src="{{ $previewResource['media']['public_url'] }}"
+                                             alt="{{ $previewResource['display_name'] }}"
+                                             @load="imgWidth = $el.naturalWidth; imgHeight = $el.naturalHeight"
+                                             class="max-w-full h-auto rounded-lg shadow-lg object-contain"
+                                             :style="`max-height: min(80vh, ${imgHeight}px); max-width: min(90vw, ${imgWidth}px)`"
+                                             style="max-height: 80vh"/>
+                                    </div>
+                                    {{-- Footer: dimensiones --}}
+                                    <div class="flex items-center justify-between px-6 py-3 bg-slate-800/50 border-t border-slate-700">
+                                        <span class="text-[11px] text-slate-400">
+                                            <span x-text="imgWidth ? imgWidth + ' × ' + imgHeight + ' px' : 'Cargando dimensiones…'"></span>
+                                        </span>
+                                        <button wire:click="closeResourcePreview"
+                                                class="px-4 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                            Cerrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     @endif
 
                     {{-- STEP 4: Publicar --}}
@@ -2192,6 +3382,7 @@
                                     <span class="text-emerald-400 font-medium">{{ count($this->previewSections) }}</span> secciones visibles ·
                                     <span class="text-emerald-400 font-medium">{{ collect($this->previewSections)->sum(fn($s) => count($s['contents'])) }}</span> bloques de contenido ·
                                     <span class="text-emerald-400 font-medium">{{ count($wizardResources) }}</span> recursos ·
+                                    <span class="text-emerald-400 font-medium">{{ count($wizardHtmlEmbeds) }}</span> embeds ·
                                     <span class="text-emerald-400 font-medium">{{ count($wizardLinks) }}</span> enlaces
                                 </p>
                             </div>
@@ -2216,34 +3407,31 @@
                         </div>
                     @endif
 
-                    {{-- Navegación entre pasos --}}
-                    <div class="flex items-center justify-between">
-                        <button wire:click="goToStep({{ $currentStep - 1 }})"
-                                class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
-                            ← Anterior
-                        </button>
-
-                        <div class="flex items-center gap-2">
-                            @if($currentStep < 4)
-                                <button wire:click="goToStep({{ $currentStep + 1 }})"
-                                        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-all">
-                                    Siguiente →
-                                </button>
-                            @endif
-                        </div>
-                    </div>
                 </div>
 
                 {{-- ═══ COLUMNA DERECHA: VISTA PREVIA (2/5) ═══ --}}
-                <div class="lg:col-span-2">
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden sticky top-24">
+                <div :class="previewCollapsed ? 'lg:w-0 lg:overflow-hidden lg:opacity-0 pointer-events-none' : 'lg:col-span-2 lg:opacity-100'"
+                     class="min-w-0 relative transition-all duration-300" wire:key="right-column-preview">
+                    {{-- Contenido expandido --}}
+                    <div x-show="!previewCollapsed"
+                         x-transition:enter.duration.200.opacity
+                         x-transition:leave.duration.150.opacity
+                         class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden sticky top-24">
                         <div class="px-4 py-3 bg-slate-700/30 border-b border-slate-700 flex items-center gap-2">
                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                             </svg>
                             <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Vista Previa</span>
-                            <span class="text-[10px] text-slate-500 ml-auto">Modo estudiante</span>
+
+                            <button @click="previewCollapsed = true"
+                                    class="ml-auto flex items-center gap-1.5 text-[10px] text-slate-500 hover:text-slate-300 transition-colors"
+                                    title="Colapsar vista previa">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                                <span>Colapsar</span>
+                            </button>
                         </div>
 
                         <div class="p-4 space-y-4 max-h-[70vh] overflow-y-auto bg-white/5">
@@ -2275,6 +3463,43 @@
                                             {!! $content['body'] ?? '' !!}
                                         </div>
                                     @endforeach
+
+                                    {{-- Recursos vinculados a esta sección en preview --}}
+                                    @php
+                                        $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
+                                        $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
+                                        $secEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id'])->values()->all();
+                                        $hasSecResources = count($secResources) > 0 || count($secLinks) > 0 || count($secEmbeds) > 0;
+                                    @endphp
+                                    @if($hasSecResources)
+                                        <div class="border-t border-slate-700/40 pt-2 mt-2 space-y-1">
+                                            @foreach($secResources as $res)
+                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
+                                                    <svg class="w-3 h-3 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    <span class="text-[11px] text-slate-400 truncate flex-1">{{ $res['display_name'] }}</span>
+                                                    <span class="text-[9px] text-slate-600">{{ $res['media']['size_for_humans'] ?? '' }}</span>
+                                                </div>
+                                            @endforeach
+                                            @foreach($secLinks as $link)
+                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
+                                                    <svg class="w-3 h-3 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                    </svg>
+                                                    <span class="text-[11px] text-slate-400 truncate">{{ $link['title'] }}</span>
+                                                </div>
+                                            @endforeach
+                                            @foreach($secEmbeds as $embed)
+                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
+                                                    <svg class="w-3 h-3 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                    </svg>
+                                                    <span class="text-[11px] text-slate-400 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             @empty
                                 <div class="text-center py-8">
@@ -2285,11 +3510,16 @@
                                 </div>
                             @endforelse
 
-                            {{-- Recursos preview --}}
-                            @if(count($wizardResources) > 0)
+                            {{-- Recursos no vinculados (aparecen al final) --}}
+                            @php
+                                $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
+                                $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
+                                $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
+                            @endphp
+                            @if(count($unlinkedResources) > 0)
                                 <div class="border-t border-slate-700 pt-3 space-y-2">
                                     <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Recursos</h4>
-                                    @foreach($wizardResources as $res)
+                                    @foreach($unlinkedResources as $res)
                                         <div class="flex items-center gap-2">
                                             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -2299,12 +3529,10 @@
                                     @endforeach
                                 </div>
                             @endif
-
-                            {{-- Enlaces preview --}}
-                            @if(count($wizardLinks) > 0)
+                            @if(count($unlinkedLinks) > 0)
                                 <div class="border-t border-slate-700 pt-3 space-y-2">
                                     <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Enlaces</h4>
-                                    @foreach($wizardLinks as $link)
+                                    @foreach($unlinkedLinks as $link)
                                         <div class="flex items-center gap-2">
                                             <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -2315,10 +3543,50 @@
                                     @endforeach
                                 </div>
                             @endif
+                            @if(count($unlinkedEmbeds) > 0)
+                                <div class="border-t border-slate-700 pt-3 space-y-2">
+                                    <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">HTML Embeds</h4>
+                                    @foreach($unlinkedEmbeds as $embed)
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            <span class="text-xs text-slate-300">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Botón Guardar y Publicar --}}
+                        <div class="border-t border-slate-700/50 p-3 bg-slate-800/80">
+                            <button wire:click="confirmPublish"
+                                    wire:loading.attr="disabled"
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-bold rounded-xl transition-all duration-200">
+                                <svg wire:loading wire:target="confirmPublish" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Guardar y Publicar
+                            </button>
                         </div>
                     </div>
+
                 </div>
             </div>
+
+            {{-- Botón flotante expandir (fixed, fuera del grid) --}}
+            <button x-show="previewCollapsed" x-cloak
+                    @click="previewCollapsed = false"
+                    class="hidden lg:flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400 transition-all bg-slate-800/90 border border-slate-700 rounded-l-xl pl-3 pr-2.5 py-2 fixed right-0 top-1/2 -translate-y-1/2 z-40 cursor-pointer"
+                    title="Expandir vista previa">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                </svg>
+                <span>Previa</span>
+            </button>
 
             {{-- ═══════════ MODAL VISTA ESTUDIANTE (7xl) ═══════════ --}}
             @if($showStudentPreview)
@@ -2385,6 +3653,76 @@
                                                 {!! nl2br(e($content['body'] ?? '')) !!}
                                             </div>
                                         @endforeach
+                                        {{-- HTML Embeds asociados a esta sección --}}
+                                        @php
+                                            $sectionEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id']);
+                                        @endphp
+                                        @if($sectionEmbeds->count() > 0)
+                                            <div class="space-y-2 pt-2">
+                                                @foreach($sectionEmbeds as $embed)
+                                                    <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                        @if(!empty($embed['title']))
+                                                            <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                        @endif
+                                                        <div class="text-sm text-slate-700 prose prose-sm max-w-none html-embed-content">
+                                                            @if($embed['is_mermaid'] ?? false)
+                                                                <div wire:ignore x-data="mermaidEmbed()"
+                                                                     data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                     class="w-full">
+                                                                    <div x-ref="target" class="w-full"></div>
+                                                                </div>
+                                                            @else
+                                                                {!! $embed['html_content'] !!}
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        {{-- Recursos asociados a esta sección --}}
+                                        @php
+                                            $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
+                                            $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
+                                        @endphp
+                                        @if(count($secResources) > 0)
+                                            <div class="border-t border-slate-200 pt-3 mt-2 space-y-2">
+                                                @foreach($secResources as $res)
+                                                    <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
+                                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                            <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                        </div>
+                                                        @if($allowDownloads)
+                                                            <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if(count($secLinks) > 0)
+                                            <div class="space-y-2 pt-2">
+                                                @foreach($secLinks as $link)
+                                                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <p class="text-sm font-medium text-blue-800 truncate">{{ $link['title'] }}</p>
+                                                            <p class="text-xs text-blue-500 truncate">{{ $link['url'] }}</p>
+                                                        </div>
+                                                        <span class="ml-auto text-[10px] font-medium text-blue-500 bg-blue-100 px-2 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @empty
                                     <div class="text-center py-12">
@@ -2396,8 +3734,13 @@
                                     </div>
                                 @endforelse
 
-                                {{-- Recursos --}}
-                                @if(count($wizardResources) > 0)
+                                {{-- Recursos no vinculados a secciones (aparecen al final) --}}
+                                @php
+                                    $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
+                                    $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
+                                    $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
+                                @endphp
+                                @if(count($unlinkedResources) > 0)
                                     <div class="border-t border-slate-200 pt-5">
                                         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2406,7 +3749,7 @@
                                             Recursos descargables
                                         </h3>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            @foreach($wizardResources as $res)
+                                            @foreach($unlinkedResources as $res)
                                                 <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
                                                     <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
                                                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2425,9 +3768,7 @@
                                         </div>
                                     </div>
                                 @endif
-
-                                {{-- Enlaces --}}
-                                @if(count($wizardLinks) > 0)
+                                @if(count($unlinkedLinks) > 0)
                                     <div class="border-t border-slate-200 pt-5">
                                         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2436,7 +3777,7 @@
                                             Enlaces de interés
                                         </h3>
                                         <div class="space-y-2">
-                                            @foreach($wizardLinks as $link)
+                                            @foreach($unlinkedLinks as $link)
                                                 <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
                                                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                                                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2453,6 +3794,36 @@
                                         </div>
                                     </div>
                                 @endif
+                                @if(count($unlinkedEmbeds) > 0)
+                                    <div class="border-t border-slate-200 pt-5">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            HTML Embeds
+                                        </h3>
+                                        <div class="space-y-3">
+                                            @foreach($unlinkedEmbeds as $embed)
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                    @if(!empty($embed['title']))
+                                                        <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
+                                                    @endif
+                                                    <div class="text-sm text-slate-700 prose prose-sm max-w-none html-embed-content">
+                                                        @if($embed['is_mermaid'] ?? false)
+                                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                                 data-mermaid-code="{{ $embed['html_content'] }}"
+                                                                 class="w-full">
+                                                                <div x-ref="target" class="w-full"></div>
+                                                            </div>
+                                                        @else
+                                                            {!! $embed['html_content'] !!}
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             {{-- Footer --}}
@@ -2461,6 +3832,7 @@
                                     <span class="font-medium">{{ count($this->previewSections) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($this->previewSections)->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
                                     <span class="font-medium">{{ count($wizardResources) }}</span> recursos ·
+                                    <span class="font-medium">{{ count($wizardHtmlEmbeds) }}</span> embeds ·
                                     <span class="font-medium">{{ count($wizardLinks) }}</span> enlaces
                                 </p>
                                 <button wire:click="$toggle('showStudentPreview')"
@@ -2510,6 +3882,152 @@
                 </div>
             @endif
         @endif
+    </div>
 </div>
     @endif
+
 </div>
+
+{{-- ═══ Mermaid.js via icehouse-ventures/laravel-mermaid ═══ --}}
+@assets
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js" defer></script>
+    <style>
+        .student-preview-modal:fullscreen {
+            background: #f1f5f9;
+            overflow-y: auto;
+        }
+        .student-preview-modal:fullscreen > .bg-black\/80 {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+@endassets
+@script
+<script>
+    Alpine.data('mermaidEmbed', () => ({
+        init() {
+            const code = this.$el.getAttribute('data-mermaid-code') || '';
+            if (typeof mermaid === 'undefined') {
+                this.$nextTick(() => this.init());
+                return;
+            }
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'base',
+                themeVariables: { fontFamily: 'inherit', fontSize: '14px' }
+            });
+            if (this.$el.hasAttribute('data-mermaid-delay')) {
+                // Render diferido hasta que el slide esté activo
+                this.$el.addEventListener('slide-active', () => this.render(code), { once: true });
+            } else {
+                this.$nextTick(() => this.render(code));
+            }
+        },
+        async render(code) {
+            try {
+                const id = 'mermaid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+                const { svg } = await mermaid.render(id, code);
+                this.$refs.target.innerHTML = svg;
+            } catch (e) {
+                // Silently handle render errors
+            }
+        }
+    }));
+
+    Alpine.data('lessonPreviewSwiper', () => ({
+        currentSlide: 1,
+        totalSlides: 1,
+        _wait: null,
+
+        init() {
+            // Poll hasta que el DOM del modal esté listo (slides renderizadas)
+            this._wait = setInterval(() => {
+                const el = this.$el.querySelector('.swiper');
+                if (el && el.querySelectorAll('.swiper-slide').length > 0) {
+                    clearInterval(this._wait);
+                    this._wait = null;
+                    this.totalSlides = el.querySelectorAll('.swiper-slide').length;
+                    // Wait next frame so the browser has computed final layout dimensions
+                    requestAnimationFrame(() => this.initSwiper(el));
+                }
+            }, 50);
+        },
+
+        initSwiper(el) {
+            if (!el || el.swiper) return;
+
+            try {
+                const self = this;
+                // Swiper attaches itself as el.swiper on success
+                new window.Swiper(el, {
+                    modules: [window.SwiperNavigation, window.SwiperPagination],
+                    slidesPerView: 1,
+                    spaceBetween: 0,
+                    direction: 'horizontal',
+                    speed: 350,
+                    autoHeight: true,
+                    keyboard: { enabled: true },
+                    mousewheel: { sensitivity: 1 },
+                    grabCursor: true,
+                    on: {
+                        slideChange() {
+                            self.currentSlide = this.activeIndex + 1;
+                            self.$nextTick(() => self.triggerMermaid());
+                        },
+                        init() {
+                            self.currentSlide = 1;
+                            self.$nextTick(() => self.triggerMermaid());
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn('[LESSON_PREVIEW] Swiper init error:', e);
+            }
+        },
+
+        /** Access Swiper from the DOM element where Swiper attaches itself on init */
+        _getSwiper() {
+            return this.$refs.swiperContainer?.swiper || null;
+        },
+
+        prev() {
+            const s = this._getSwiper();
+            if (s) s.slidePrev();
+        },
+
+        next() {
+            const s = this._getSwiper();
+            if (s) s.slideNext();
+        },
+
+        triggerMermaid() {
+            const s = this._getSwiper();
+            if (!s) return;
+            const active = s.slides[s.activeIndex];
+            if (active) {
+                active.querySelectorAll('[data-mermaid-delay]').forEach(el => {
+                    el.dispatchEvent(new CustomEvent('slide-active'));
+                });
+            }
+        },
+
+        toggleFullscreen() {
+            const container = this.$el.closest('.student-preview-modal');
+            if (!document.fullscreenElement) {
+                container?.requestFullscreen?.();
+            } else {
+                document.exitFullscreen?.();
+            }
+        },
+
+        destroy() {
+            if (this._wait) clearInterval(this._wait);
+            const s = this._getSwiper();
+            s?.destroy?.();
+            if (document.fullscreenElement) {
+                document.exitFullscreen?.();
+            }
+        }
+    }));
+</script>
+@endscript

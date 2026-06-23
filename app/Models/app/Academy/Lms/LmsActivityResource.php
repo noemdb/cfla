@@ -11,7 +11,7 @@ class LmsActivityResource extends Model
     protected $table = 'lms_activity_resources';
 
     protected $fillable = [
-        'activity_id', 'media_id', 'uploaded_by',
+        'activity_id', 'section_id', 'media_id', 'uploaded_by',
         'display_name', 'description', 'sort_order', 'is_visible',
     ];
 
@@ -20,6 +20,11 @@ class LmsActivityResource extends Model
     public function activity()
     {
         return $this->belongsTo(Activity::class);
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(LmsActivitySection::class, 'section_id');
     }
 
     public function media()

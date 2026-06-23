@@ -58,9 +58,9 @@ return [
 
         'lms_media' => [
             'driver'     => 'local',
-            'root'       => storage_path('app/lms_media'),
+            'root'       => storage_path('app/public/lms_media'),
             'url'        => env('APP_URL') . '/storage/lms_media',
-            'visibility' => 'private',
+            'visibility' => 'public',
             'throw'      => false,
         ],
 

@@ -13,6 +13,7 @@
         "beyondcode/laravel-websockets": "^1.14",
         "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.2",
+        "icehouse-ventures/laravel-mermaid": "^1.4",
         "laravel/framework": "^10.10",
         "laravel/pulse": "^1.7",
         "laravel/reverb": "^1.4",

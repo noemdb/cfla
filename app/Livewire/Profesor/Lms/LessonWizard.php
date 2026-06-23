@@ -14,11 +14,13 @@ use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsActivitySection;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityLog;
+use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Instrument\DiagReferent;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -63,6 +65,9 @@ class LessonWizard extends Component
     public string $contentTitle = '';
     public string $contentBody = '';
 
+    // ─── Wizard: Panel de recursos por sección (paso 2) ─────────
+    public ?int $resourcePanelSection = null;
+
     // ─── Wizard: Generación con IA ─────────────────────────────
     public ?int $generatingSection = null;
     public bool $generatingStep1 = false;
@@ -105,13 +110,28 @@ class LessonWizard extends Component
     // ─── Wizard: Recursos temporales ───────────────────────────
     public $resourceFile;
     public string $resourceName = '';
+    public mixed $resourceSectionId = null;
     public array $wizardResources = [];
 
     // ─── Wizard: Enlaces temporales ────────────────────────────
     public string $linkTitle = '';
     public string $linkUrl = '';
     public string $linkType = 'REFERENCE';
+    public mixed $linkSectionId = null;
     public array $wizardLinks = [];
+
+    // ─── Wizard: HTML embeds temporales ────────────────────────
+    public array $wizardHtmlEmbeds = [];
+    public string $embedTitle = '';
+    public string $embedHtml = '';
+    public mixed $embedSectionId = null;
+    public ?int $previewEmbedIndex = null;
+    public ?int $editingEmbedIndex = null;
+    public ?int $previewResourceIndex = null;
+    public bool $generatingEmbedCard = false;
+    public bool $showEmbedPreview = false;
+    public string $embedDiagramType = '';
+    public string $embedPromptRefinement = '';
 
     // ─── Wizard: Publicación ───────────────────────────────────
     public string $pubStatus = 'DRAFT';
@@ -201,12 +221,21 @@ class LessonWizard extends Component
         $this->lessonDescription  = $activity->description ?? '';
         $this->allowDownloads     = $activity->lmsPublication?->allow_downloads ?? true;
 
-        // Cargar secciones existentes en el wizard
+        // Cargar secciones existentes en el wizard (sanear)
         $this->wizardSections = $activity->lmsSections()
             ->with('contents')
             ->orderBy('sort_order')
             ->get()
             ->toArray();
+
+        // Sanear títulos y cuerpos de contenido al cargar
+        foreach ($this->wizardSections as $sKey => $section) {
+            $this->wizardSections[$sKey]['title'] = $this->sanitizeText($section['title']);
+            foreach ($section['contents'] ?? [] as $cKey => $content) {
+                $this->wizardSections[$sKey]['contents'][$cKey]['title'] = $this->sanitizeText($content['title'] ?? null);
+                $this->wizardSections[$sKey]['contents'][$cKey]['body']  = $this->sanitizeText($content['body'] ?? '');
+            }
+        }
 
         $this->wizardResources = $activity->lmsResources()
             ->where('is_visible', true)
@@ -217,6 +246,13 @@ class LessonWizard extends Component
         $this->wizardLinks = $activity->lmsLinks()
             ->where('is_visible', true)
             ->get()
+            ->toArray();
+
+        $this->wizardHtmlEmbeds = $activity->lmsHtmlEmbeds()
+            ->where('is_visible', true)
+            ->get()
+            ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+            ->values()
             ->toArray();
 
         $this->currentStep = 1;
@@ -236,6 +272,8 @@ class LessonWizard extends Component
     public function goToStep(int $step): void
     {
         $this->currentStep = max(1, min(4, $step));
+        // Al volver al wizard desde el estado "guardado", ocultar el mensaje de éxito
+        $this->saved = false;
     }
 
     /**
@@ -256,9 +294,12 @@ class LessonWizard extends Component
         $this->wizardSections = [];
         $this->wizardResources = [];
         $this->wizardLinks = [];
+        $this->wizardHtmlEmbeds = [];
         $this->wizardReferents = null;
         $this->saved = false;
         $this->showPublishConfirm = false;
+        $this->editingSectionIndex = null;
+        $this->resourcePanelSection = null;
         $this->showGenerationResult = false;
         $this->generationType = null;
         $this->generationError = null;
@@ -297,6 +338,7 @@ class LessonWizard extends Component
                 'lmsResources' => fn($q) => $q->where('is_visible', true),
                 'lmsResources.media',
                 'lmsLinks' => fn($q) => $q->where('is_visible', true),
+                'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
             ])->findOrFail($activityId);
 
             // Reiniciar propiedades primero para forzar detección de cambio
@@ -314,6 +356,10 @@ class LessonWizard extends Component
                 'sections'      => $activity->lmsSections->toArray(),
                 'resources'     => $activity->lmsResources->toArray(),
                 'links'         => $activity->lmsLinks->toArray(),
+                'html_embeds'   => $activity->lmsHtmlEmbeds
+                    ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+                    ->values()
+                    ->toArray(),
             ];
 
             $this->showListStudentPreview = true;
@@ -329,6 +375,13 @@ class LessonWizard extends Component
     {
         $this->showListStudentPreview = false;
         $this->listPreviewData = null;
+    }
+
+    public function openStudentPreviewFromSaved(): void
+    {
+        if ($this->selectedActivityId) {
+            $this->openListStudentPreview($this->selectedActivityId);
+        }
     }
 
     // ─── List mode: Eliminar lección (todo el contenido LMS) ──
@@ -373,7 +426,7 @@ class LessonWizard extends Component
         );
 
         try {
-            \DB::transaction(function () use ($activity) {
+            DB::transaction(function () use ($activity) {
                 // Eliminar contenidos de cada sección
                 $sectionIds = $activity->lmsSections()->pluck('id');
                 \App\Models\app\Academy\Lms\LmsActivityContent::whereIn('section_id', $sectionIds)->delete();
@@ -495,6 +548,9 @@ PROMPT;
                 return;
             }
 
+            // Sanear antes de parsear (eliminar **, espacios extra, etc.)
+            $content = $this->sanitizeText($content);
+
             // ─── Parsear resultado: título y descripción ─────────
             [$this->lessonTitle, $this->lessonDescription] = $this->parseTitleDescription($content);
 
@@ -557,8 +613,8 @@ PROMPT;
         $this->wizardSections[$sectionIndex]['contents'][] = [
             'id'       => 'temp_' . uniqid(),
             'type'     => 'TEXT',
-            'title'    => $this->contentTitle ?: null,
-            'body'     => $this->contentBody,
+            'title'    => $this->sanitizeText($this->contentTitle) ?: null,
+            'body'     => $this->sanitizeText($this->contentBody),
             'is_visible' => true,
             'media'    => null,
         ];
@@ -667,12 +723,12 @@ PROMPT;
                 return;
             }
 
-            // ─── Agregar como nuevo bloque de contenido ─────────
+            // ─── Agregar como nuevo bloque de contenido (sanear) ─
             $this->wizardSections[$sectionIndex]['contents'][] = [
                 'id'       => 'temp_' . uniqid(),
                 'type'     => 'TEXT',
                 'title'    => null,
-                'body'     => $content,
+                'body'     => $this->sanitizeText($content),
                 'is_visible' => true,
                 'media'    => null,
             ];
@@ -854,7 +910,7 @@ PROMPT;
                 return;
             }
 
-            $content = trim($result['content'] ?? '');
+            $content = $this->sanitizeText($result['content'] ?? '');
 
             if (empty($content)) {
                 $this->generationError = 'La IA no generó contenido.';
@@ -862,7 +918,6 @@ PROMPT;
                 return;
             }
 
-            // ─── Parsear secciones ───────────────────────────────
             $this->wizardSections = [];
 
             // Dividir por marcadores de sección
@@ -969,13 +1024,13 @@ PROMPT;
 
                 $this->wizardSections[] = [
                     'id'         => 'temp_' . uniqid(),
-                    'title'      => $bTitle,
+                    'title'      => $this->sanitizeText($bTitle),
                     'is_visible' => true,
                     'contents'   => [[
                         'id'         => 'temp_' . uniqid(),
                         'type'       => 'TEXT',
                         'title'      => null,
-                        'body'       => $bBody,
+                        'body'       => $this->sanitizeText($bBody),
                         'is_visible' => true,
                         'media'      => null,
                     ]],
@@ -988,13 +1043,13 @@ PROMPT;
 
             $this->wizardSections[] = [
                 'id'         => 'temp_' . uniqid(),
-                'title'      => $sectionTitle,
+                'title'      => $this->sanitizeText($sectionTitle),
                 'is_visible' => true,
                 'contents'   => [[
                     'id'         => 'temp_' . uniqid(),
                     'type'       => 'TEXT',
                     'title'      => null,
-                    'body'       => $body ?: $text,
+                    'body'       => $this->sanitizeText($body ?: $text),
                     'is_visible' => true,
                     'media'      => null,
                 ]],
@@ -1015,6 +1070,7 @@ PROMPT;
 
         $this->wizardResources[] = [
             'id'           => 'temp_' . uniqid(),
+            'section_id'   => $this->resourceSectionId,
             'media_id'     => $media->id,
             'uploaded_by'  => auth()->id(),
             'display_name' => $this->resourceName,
@@ -1027,7 +1083,7 @@ PROMPT;
             ],
         ];
 
-        $this->reset('resourceFile', 'resourceName');
+        $this->reset('resourceFile', 'resourceName', 'resourceSectionId');
     }
 
     public function removeWizardResource(int $index): void
@@ -1044,13 +1100,15 @@ PROMPT;
         ]);
 
         $this->wizardLinks[] = [
-            'id'        => 'temp_' . uniqid(),
-            'title'     => $this->linkTitle,
-            'url'       => $this->linkUrl,
-            'link_type' => $this->linkType,
+            'id'         => 'temp_' . uniqid(),
+            'section_id' => $this->linkSectionId,
+            'title'      => $this->linkTitle,
+            'url'        => $this->linkUrl,
+            'link_type'  => $this->linkType,
+            'sort_order' => count($this->wizardLinks) + 1,
         ];
 
-        $this->reset('linkTitle', 'linkUrl');
+        $this->reset('linkTitle', 'linkUrl', 'linkSectionId');
         $this->linkType = 'REFERENCE';
     }
 
@@ -1060,7 +1118,392 @@ PROMPT;
         $this->wizardLinks = array_values($this->wizardLinks);
     }
 
+    // ─── Wizard: HTML Embeds ────────────────────────────────────
+
+    public function addWizardHtmlEmbed(): void
+    {
+        $this->validate([
+            'embedHtml' => 'required|string|min:1',
+        ]);
+
+        $data = [
+            'id'               => 'temp_' . uniqid(),
+            'section_id'       => $this->embedSectionId,
+            'title'            => $this->embedTitle ?: null,
+            'html_content'     => $this->embedHtml,
+            'render_condition' => 'ALWAYS',
+            'is_visible'       => true,
+        ];
+
+        if ($this->editingEmbedIndex !== null) {
+            // Actualizar embed existente
+            if (isset($this->wizardHtmlEmbeds[$this->editingEmbedIndex])) {
+                $data['id'] = $this->wizardHtmlEmbeds[$this->editingEmbedIndex]['id'];
+                $this->wizardHtmlEmbeds[$this->editingEmbedIndex] = $data;
+            }
+            $this->editingEmbedIndex = null;
+        } else {
+            $this->wizardHtmlEmbeds[] = $data;
+        }
+
+        $this->showEmbedPreview = false;
+        $this->previewEmbedIndex = null;
+        $this->reset('embedTitle', 'embedHtml', 'embedSectionId', 'embedDiagramType', 'embedPromptRefinement');
+    }
+
+    public function editWizardHtmlEmbed(int $index): void
+    {
+        if (!isset($this->wizardHtmlEmbeds[$index])) return;
+
+        $embed = $this->wizardHtmlEmbeds[$index];
+        $this->editingEmbedIndex = $index;
+        $this->embedTitle = $embed['title'] ?? '';
+        $this->embedHtml = $embed['html_content'] ?? '';
+        $this->embedSectionId = $embed['section_id'] ?? null;
+        $this->embedDiagramType = '';
+        $this->embedPromptRefinement = '';
+    }
+
+    public function cancelEditEmbed(): void
+    {
+        $this->editingEmbedIndex = null;
+        $this->reset('embedTitle', 'embedHtml', 'embedSectionId', 'embedDiagramType', 'embedPromptRefinement');
+    }
+
+    public function removeWizardHtmlEmbed(int $index): void
+    {
+        unset($this->wizardHtmlEmbeds[$index]);
+        $this->wizardHtmlEmbeds = array_values($this->wizardHtmlEmbeds);
+    }
+
+    // ─── Wizard: Agregar recurso/enlace/embed desde el panel de sección (paso 2) ──
+
+    public function addWizardResourceSection(int $sectionIndex): void
+    {
+        if (!isset($this->wizardSections[$sectionIndex])) return;
+        $this->resourceSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
+            ? (int) $this->wizardSections[$sectionIndex]['id']
+            : null;
+        $this->addWizardResource();
+        $this->resourcePanelSection = null;
+    }
+
+    public function addWizardLinkSection(int $sectionIndex): void
+    {
+        if (!isset($this->wizardSections[$sectionIndex])) return;
+        $this->linkSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
+            ? (int) $this->wizardSections[$sectionIndex]['id']
+            : null;
+        $this->addWizardLink();
+        $this->resourcePanelSection = null;
+    }
+
+    public function addWizardHtmlEmbedSection(int $sectionIndex): void
+    {
+        if (!isset($this->wizardSections[$sectionIndex])) return;
+        $this->embedSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
+            ? (int) $this->wizardSections[$sectionIndex]['id']
+            : null;
+        $this->addWizardHtmlEmbed();
+        $this->resourcePanelSection = null;
+    }
+
+    // ─── Wizard: Generar diagrama Mermaid con IA ───────────────
+
+    /**
+     * Genera código HTML con diagrama Mermaid usando el contenido
+     * de la sección seleccionada (embedSectionId) y el contexto
+     * completo de la lección.
+     */
+    public function generateEmbedCard(): void
+    {
+        if (!$this->embedSectionId) {
+            $this->notification()->warning(
+                'Selecciona una sección',
+                'Debes seleccionar una sección destino para generar el diagrama.'
+            );
+            return;
+        }
+
+        // Buscar la sección destino
+        $sectionIndex = null;
+        $sectionData = null;
+        foreach ($this->wizardSections as $i => $sec) {
+            if ((string) $sec['id'] === (string) $this->embedSectionId) {
+                $sectionIndex = $i;
+                $sectionData = $sec;
+                break;
+            }
+        }
+
+        if (!$sectionData) {
+            $this->notification()->error(
+                'Sección no encontrada',
+                'La sección seleccionada no existe en la lección.'
+            );
+            return;
+        }
+
+        $this->generatingEmbedCard = true;
+        $this->generationError = null;
+
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+
+        $gradeName    = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName  = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName  = $pevaluacion?->seccion?->name ?? '—';
+        $lapsoName    = $pevaluacion?->lapso?->name ?? '—';
+
+        // ─── Contexto completo de la actividad ───────────────────
+        $activityContext = collect([
+            'Título de la lección'   => $this->lessonTitle,
+            'Descripción'            => $this->lessonDescription,
+            'Tema generador'         => $activity->topic,
+            'Tejido temático'        => $activity->thematic,
+            'Actividad evaluativa'   => $activity->description,
+            'Enseñanza'              => $activity->teaching,
+            'Aprendizaje esperado'   => $activity->learning,
+            'Referentes teóricos'    => $activity->references,
+            'ODS/Sistematización'    => $activity->observations,
+        ])->filter()->map(fn($v, $k) => "• {$k}: {$v}")->implode("\n");
+
+        // ─── Contenido de la sección destino ─────────────────────
+        $sectionTitle = $sectionData['title'];
+        $sectionContents = collect($sectionData['contents'] ?? [])
+            ->map(fn($c) => ($c['title'] ?? '') . ($c['title'] ? "\n" : '') . ($c['body'] ?? ''))
+            ->filter()
+            ->implode("\n\n");
+
+        $sectionContentPreview = !empty($sectionContents)
+            ? $sectionContents
+            : '(La sección no tiene contenido aún. Genera contenido representativo basado en el nombre de la sección y el contexto de la actividad.)';
+
+        // ─── Indicadores de logro ────────────────────────────────
+        $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
+        $indicatorsText = $indicators->isNotEmpty()
+            ? $indicators->map(fn($n) => "• {$n}")->implode("\n")
+            : '—';
+
+        // ─── Referentes normativos ───────────────────────────────
+        $referentsText = $this->getReferentsContext(
+            $pevaluacion?->pensum?->pestudio_id,
+            $pevaluacion?->pensum
+        );
+
+        // ─── Grados y secciones disponibles (contexto curricular) ─
+        $allSectionTitles = collect($this->wizardSections)
+            ->pluck('title')
+            ->implode(', ');
+
+        // ══════════════════════════════════════════════════════════
+        //  STAFF ENGINEER PROMPT
+        // ══════════════════════════════════════════════════════════
+
+        $diagramTypeConstraint = '';
+        if (!empty($this->embedDiagramType)) {
+            $typeLabels = [
+                'graph'    => 'graph (flowchart)',
+                'sequence' => 'sequenceDiagram', 'class' => 'classDiagram',
+                'pie'      => 'pie', 'mindmap' => 'mindmap', 'gantt' => 'gantt',
+                'er'       => 'erDiagram', 'state' => 'stateDiagram',
+                'journey'  => 'journey', 'gitgraph' => 'gitgraph', 'timeline' => 'timeline',
+            ];
+            $label = $typeLabels[$this->embedDiagramType] ?? $this->embedDiagramType;
+            $diagramTypeConstraint = "\n\n**Tipo solicitado:** `{$label}`. Usa EXCLUSIVAMENTE este tipo de diagrama.\n";
+        }
+
+        $systemPrompt = <<<PROMPT
+Eres un Staff Engineer frontend especializado en diagramas Mermaid.js y Tailwind CSS 3.
+Tu tarea es generar código HTML autónomo para un diagrama Mermaid enmarcado en un card simple, que represente visualmente el contenido pedagógico de una sección de lección escolar.
+
+## Reglas técnicas estrictas:
+
+1. **Solo HTML + Tailwind** — etiquetas HTML estándar + clases Tailwind CSS (vía CDN). Sin Vue, React, Alpine.js ni frameworks JS.
+2. **Diagrama Mermaid.js** — el contenido central debe ser un diagrama Mermaid dentro de `<div class="mermaid">`.{$diagramTypeConstraint}Elige el tipo de diagrama que mejor represente el contenido:
+   - `graph TD/LR` (flowchart) — procesos, secuencias, pasos, jerarquías
+   - `sequenceDiagram` — líneas de tiempo, eventos ordenados
+   - `classDiagram` — clasificaciones, taxonomías
+   - `pie` — proporciones, distribución
+   - `mindmap` — exploración conceptual, lluvia de ideas
+   - `gantt` — cronogramas, planificación
+3. **Card simple, sin título** — el diagrama va dentro de un contenedor card minimalista:
+   ```html
+   <div class="w-full bg-white rounded-xl shadow-sm border border-gray-200">
+     <div class="p-3 sm:p-4 overflow-x-auto">
+       <div class="mermaid">
+         ... código del diagrama ...
+       </div>
+     </div>
+   </div>
+   ```
+4. **w-full obligatorio** — el card ocupa el 100% del ancho disponible del contenedor padre. Sin max-w ni mx-auto.
+5. **MOBILE-FIRST** — padding base reducido (p-3), escala con sm:p-4. El contenedor tiene overflow-x-auto para scroll horizontal si el diagrama es ancho.
+6. **Diagrama pedagógico** — el contenido del diagrama debe reflejar fielmente el contenido de la sección. Usa nodos con nombres descriptivos. Si la sección está vacía, genera contenido de muestra coherente con el contexto de la lección.
+7. **Sin scripts externos** — no incluyas CDN de mermaid ni de tailwind. Solo el HTML del card con el div.mermaid. Los scripts se cargan globalmente en la página.
+8. **Salida limpia** — NO incluyas ```html ni markdown. Responde SOLO HTML puro desde <div class="w-full...">. No generes solo el código mermaid suelto; el código mermaid SIEMPRE debe ir dentro de <div class="mermaid">...</div>, y este a su vez dentro del card contenedor.
+
+**Ejemplo de salida correcta:**
+<div class="w-full bg-white rounded-xl shadow-sm border border-gray-200">
+  <div class="p-3 sm:p-4 overflow-x-auto">
+    <div class="mermaid">
+graph TD
+  A[Inicio] --> B[Proceso]
+  B --> C[Resultado]
+    </div>
+  </div>
+</div>
+PROMPT;
+
+        $promptRefinementText = !empty($this->embedPromptRefinement)
+            ? trim($this->embedPromptRefinement)
+            : '(El docente no añadió instrucciones adicionales. Genera el diagrama según el contexto.)';
+
+        $userPrompt = <<<PROMPT
+### Datos del contexto educativo
+
+**Curso:** {$gradeName} · {$subjectName}
+**Sección escolar:** {$sectionName}
+**Lapso:** {$lapsoName}
+
+### Datos de la lección
+
+{$activityContext}
+
+### Indicadores de logro asociados
+
+{$indicatorsText}
+
+### Estructura completa de la lección
+
+Secciones: {$allSectionTitles}
+
+### Sección destino del card
+
+**Nombre:** {$sectionTitle}
+
+**Contenido:**
+{$sectionContentPreview}
+
+### Referentes normativos del plan de estudio
+
+{$referentsText}
+
+---
+
+Genera el código HTML del diagrama Mermaid para esta sección.
+El diagrama debe representar fielmente el contenido pedagógico y ser visualmente claro para estudiantes de secundaria.
+
+**Importante:** MOBILE-FIRST, w-full, card simple sin título. Diagrama Mermaid con nodos/relaciones que reflejen el contenido. Sin scripts — solo el card container con el div.mermaid.
+
+### Instrucciones adicionales del docente
+
+{$promptRefinementText}
+PROMPT;
+
+        // ─── Llamar al servicio con compactación ────────────────
+        try {
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                [
+                    'max_tokens'  => 2048,
+                    'temperature' => 0.7,
+                ],
+                3500
+            );
+
+            if (!$result['success']) {
+                $this->generationError = $result['error'];
+                $this->generatingEmbedCard = false;
+                $this->notification()->error('Error al generar diagrama', $result['error'] ?? 'Error desconocido');
+                return;
+            }
+
+            $html = trim($result['content'] ?? '');
+
+            // Limpiar posibles wrappers de markdown
+            $html = preg_replace('/^```(?:html)?\s*\n?/i', '', $html);
+            $html = preg_replace('/\n?```\s*$/s', '', $html);
+            $html = trim($html);
+
+            if (empty($html)) {
+                $this->generationError = 'La IA no generó contenido HTML.';
+                $this->generatingEmbedCard = false;
+                $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código HTML.');
+                return;
+            }
+
+            // Extraer solo el código Mermaid del wrapper HTML generado por la IA,
+            // para que ensureMermaidWrapper() lo detecte como código plano con is_mermaid=true
+            // y el renderizado use el package icehouse-ventures/laravel-mermaid (Alpine + wire:ignore)
+            if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $html, $m)) {
+                $inner = strip_tags(trim($m[1]));
+                $mermaidPattern = '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/';
+                if (preg_match($mermaidPattern, $inner)) {
+                    $html = $inner;
+                }
+            }
+
+            // Poner el código Mermaid plano en el textarea
+            $this->embedHtml = $html;
+
+            // Sugerir título basado en la sección
+            if (empty($this->embedTitle)) {
+                $this->embedTitle = 'Diagrama: ' . $sectionTitle;
+            }
+
+            $this->generatingEmbedCard = false;
+
+            $this->notification()->success(
+                'Diagrama generado',
+                'El diagrama Mermaid se generó correctamente. Revisa el resultado y haz clic en "Agregar Embed" para incorporarlo.'
+            );
+
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->generatingEmbedCard = false;
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        }
+    }
+
     // ─── Wizard: Paso 4 — Guardar y Publicar ───────────────────
+
+    public function previewGeneratedEmbed(): void
+    {
+        $this->showEmbedPreview = true;
+    }
+
+    public function closeEmbedPreview(): void
+    {
+        $this->showEmbedPreview = false;
+    }
+
+    public function previewExistingEmbed(int $index): void
+    {
+        if (isset($this->wizardHtmlEmbeds[$index])) {
+            $this->previewEmbedIndex = $index;
+        }
+    }
+
+    public function closeExistingEmbedPreview(): void
+    {
+        $this->previewEmbedIndex = null;
+    }
+
+    // ─── Wizard: Vista previa de imagen ────────────────────────
+
+    public function previewResourceImage(int $index): void
+    {
+        if (isset($this->wizardResources[$index])) {
+            $this->previewResourceIndex = $index;
+        }
+    }
+
+    public function closeResourcePreview(): void
+    {
+        $this->previewResourceIndex = null;
+    }
 
     public function confirmPublish(): void
     {
@@ -1075,24 +1518,35 @@ PROMPT;
     {
         $activityId = $this->selectedActivityId;
 
-        // 1. Guardar secciones
+        // 0. Guardar título y descripción en la actividad (sanear)
+        $this->selectedActivity->update([
+            'topic'       => $this->sanitizeText($this->lessonTitle),
+            'description' => $this->sanitizeText($this->lessonDescription),
+        ]);
+
+        // 1. Guardar secciones y construir mapa temp_ID → real_ID
+        $sectionIdMap = [];
         foreach ($this->wizardSections as $key => $sectionData) {
+            $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
+
             if (str_starts_with((string)$sectionData['id'], 'temp_')) {
+                $tempId = $sectionData['id'];
                 $section = LmsActivitySection::create([
                     'activity_id' => $activityId,
-                    'title'       => $sectionData['title'],
+                    'title'       => $sectionTitle,
                     'sort_order'  => $sectionData['sort_order'] ?? 1,
                     'is_visible'  => $sectionData['is_visible'],
                 ]);
 
                 // Actualizar el id temporal con el id real de BD
-                // para que el cleanup no elimine la sección recién creada
                 $this->wizardSections[$key]['id'] = $section->id;
+                // Registrar el mapeo para recursos/enlaces/embeds
+                $sectionIdMap[$tempId] = $section->id;
             } else {
                 $section = LmsActivitySection::find($sectionData['id']);
                 if ($section) {
                     $section->update([
-                        'title'      => $sectionData['title'],
+                        'title'      => $sectionTitle,
                         'is_visible' => $sectionData['is_visible'],
                     ]);
                 }
@@ -1108,8 +1562,8 @@ PROMPT;
                     LmsActivityContent::create([
                         'section_id' => $section->id,
                         'type'       => 'TEXT',
-                        'title'      => $contentData['title'] ?? null,
-                        'body'       => $contentData['body'] ?? '',
+                        'title'      => $this->sanitizeText($contentData['title'] ?? null),
+                        'body'       => $this->sanitizeText($contentData['body'] ?? ''),
                         'sort_order' => $i + 1,
                         'is_visible' => true,
                     ]);
@@ -1123,16 +1577,90 @@ PROMPT;
             ->whereNotIn('id', $existingIds)
             ->delete();
 
-        // 3. Guardar recursos (ya se subieron en addWizardResource)
-        // Los recursos ya se crearon en la BD al subirlos, solo aseguramos visibilidad
-        $visibleResourceIds = array_filter(array_map(fn($r) => is_numeric($r['id']) ? $r['id'] : null, $this->wizardResources));
+        // 3. Guardar recursos
+        $visibleResourceIds = [];
+        foreach ($this->wizardResources as $key => $res) {
+            if (str_starts_with((string)($res['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                    ? $sectionIdMap[$res['section_id']]
+                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+
+                $newRes = LmsActivityResource::create([
+                    'activity_id'  => $activityId,
+                    'section_id'   => $resolvedSectionId,
+                    'media_id'     => $res['media_id'],
+                    'uploaded_by'  => $res['uploaded_by'] ?? auth()->id(),
+                    'display_name' => $res['display_name'],
+                    'description'  => $res['description'] ?? '',
+                    'is_visible'   => true,
+                ]);
+                $this->wizardResources[$key]['id'] = $newRes->id;
+                $visibleResourceIds[] = $newRes->id;
+            } else {
+                $visibleResourceIds[] = (int) $res['id'];
+            }
+        }
         LmsActivityResource::where('activity_id', $activityId)
             ->whereNotIn('id', $visibleResourceIds)
             ->update(['is_visible' => false]);
-        LmsActivityResource::whereIn('id', $visibleResourceIds)
-            ->update(['is_visible' => true]);
 
-        // 4. Publicar
+        // 4. Guardar enlaces
+        $visibleLinkIds = [];
+        foreach ($this->wizardLinks as $key => $link) {
+            if (str_starts_with((string)($link['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                    ? $sectionIdMap[$link['section_id']]
+                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+
+                $newLink = LmsActivityLink::create([
+                    'activity_id' => $activityId,
+                    'section_id'  => $resolvedSectionId,
+                    'added_by'    => auth()->id(),
+                    'title'       => $link['title'],
+                    'url'         => $link['url'],
+                    'link_type'   => $link['link_type'] ?? 'REFERENCE',
+                    'sort_order'  => $link['sort_order'] ?? 1,
+                    'is_visible'  => true,
+                ]);
+                $this->wizardLinks[$key]['id'] = $newLink->id;
+                $visibleLinkIds[] = $newLink->id;
+            } else {
+                $visibleLinkIds[] = (int) $link['id'];
+            }
+        }
+        LmsActivityLink::where('activity_id', $activityId)
+            ->whereNotIn('id', $visibleLinkIds)
+            ->update(['is_visible' => false]);
+
+        // 5. Guardar HTML embeds
+        $visibleEmbedIds = [];
+        foreach ($this->wizardHtmlEmbeds as $key => $embed) {
+            if (str_starts_with((string)($embed['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                    ? $sectionIdMap[$embed['section_id']]
+                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+
+                $newEmbed = LmsHtmlEmbed::create([
+                    'activity_id'      => $activityId,
+                    'section_id'       => $resolvedSectionId,
+                    'added_by'         => auth()->id(),
+                    'title'            => $embed['title'] ?? null,
+                    'html_content'     => $embed['html_content'],
+                    'render_condition' => 'ALWAYS',
+                    'sort_order'       => $embed['sort_order'] ?? 1,
+                    'is_visible'       => true,
+                ]);
+                $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
+                $visibleEmbedIds[] = $newEmbed->id;
+            } else {
+                $visibleEmbedIds[] = (int) $embed['id'];
+            }
+        }
+        LmsHtmlEmbed::where('activity_id', $activityId)
+            ->whereNotIn('id', $visibleEmbedIds)
+            ->update(['is_visible' => false]);
+
+        // 6. Publicar
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
@@ -1144,6 +1672,7 @@ PROMPT;
 
         LmsActivityLog::record($activityId, auth()->id(), 'PUBLISH');
 
+        $this->showPublishConfirm = false;
         $this->saved = true;
         $this->dispatch('lesson-saved');
     }
@@ -1281,6 +1810,7 @@ PROMPT;
             'lmsResources' => fn($q) => $q->where('is_visible', true),
             'lmsResources.media',
             'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
         ])->findOrFail($this->exportActivityId);
 
         $this->exportPreviewData = [
@@ -1294,6 +1824,10 @@ PROMPT;
             'sections'      => $activity->lmsSections->toArray(),
             'resources'     => $activity->lmsResources->toArray(),
             'links'         => $activity->lmsLinks->toArray(),
+            'html_embeds'   => $activity->lmsHtmlEmbeds
+                ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+                ->values()
+                ->toArray(),
         ];
 
         $this->exportWizardStep = 2;
@@ -1461,6 +1995,7 @@ PROMPT;
             'lmsResources' => fn($q) => $q->where('is_visible', true),
             'lmsResources.media',
             'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
         ])->findOrFail($this->importSourceActivityId);
 
         $this->importPreviewData = [
@@ -1474,6 +2009,10 @@ PROMPT;
             'sections'      => $activity->lmsSections->toArray(),
             'resources'     => $activity->lmsResources->toArray(),
             'links'         => $activity->lmsLinks->toArray(),
+            'html_embeds'   => $activity->lmsHtmlEmbeds
+                ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+                ->values()
+                ->toArray(),
         ];
 
         $this->importWizardStep = 2;
@@ -1542,6 +2081,18 @@ PROMPT;
             $newLink = $link->replicate();
             $newLink->activity_id = $targetActivityId;
             $newLink->save();
+        }
+
+        // 3b. Copiar HTML embeds visibles
+        $embeds = LmsHtmlEmbed::where('activity_id', $sourceActivityId)
+            ->where('is_visible', true)
+            ->get();
+
+        foreach ($embeds as $embed) {
+            $newEmbed = $embed->replicate();
+            $newEmbed->activity_id = $targetActivityId;
+            $newEmbed->added_by = auth()->id();
+            $newEmbed->save();
         }
 
         // 4. Crear o actualizar la publicación en estado borrador si no existe
@@ -1934,5 +2485,61 @@ PROMPT;
         return view('livewire.profesor.lms.lesson-wizard', compact(
             'activities', 'listLapso', 'listPestudio', 'listGrado', 'listSeccion'
         ))->layout('profesors.layouts.app');
+    }
+
+    /**
+     * Asegura que el contenido de un embed con código Mermaid esté
+     * envuelto en el contenedor HTML + div.mermaid más CDN.
+     * Útil para embeds existentes guardados antes del wrapper automático.
+     */
+    private function ensureMermaidWrapper(array $embed): array
+    {
+        $content = trim($embed['html_content'] ?? '');
+        $mermaidPattern = '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/';
+
+        // 1. Ya procesado (flag is_mermaid)
+        if (!empty($embed['is_mermaid'])) {
+            return $embed;
+        }
+
+        // 2. Código Mermaid suelto (empieza con keyword)
+        if (preg_match($mermaidPattern, $content) === 1) {
+            $embed['is_mermaid'] = true;
+            // html_content se deja como está (código plano)
+            return $embed;
+        }
+
+        // 3. Formato legacy: tenía data-mermaid-code o div.mermaid con wrapper HTML
+        // Extraer el código de data-mermaid-code
+        if (preg_match('/data-mermaid-code="([^"]*)"/', $content, $m)) {
+            $code = htmlspecialchars_decode($m[1], ENT_QUOTES);
+            $embed['html_content'] = $code;
+            $embed['is_mermaid'] = true;
+            return $embed;
+        }
+
+        // 4. Formato legacy: div.mermaid con código inline
+        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content, $m)) {
+            $innerCode = strip_tags(trim($m[1]));
+            if (preg_match($mermaidPattern, $innerCode)) {
+                $embed['html_content'] = $innerCode;
+                $embed['is_mermaid'] = true;
+                return $embed;
+            }
+        }
+
+        // 5. No es mermaid → dejar intacto
+        $embed['is_mermaid'] = false;
+        return $embed;
+    }
+
+    /**
+     * Sanitiza texto delegando en LmsTextSanitizerService.
+     * Elimina espacios múltiples, saltos de línea excesivos,
+     * ** markdown (común en respuestas de IA) y espacios al inicio/final.
+     */
+    private function sanitizeText(?string $text, string $level = 'standard'): ?string
+    {
+        return app(\App\Services\Lms\LmsTextSanitizerService::class)->sanitize($text, $level);
     }
 }

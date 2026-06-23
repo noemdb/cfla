@@ -74,6 +74,12 @@ class Activity extends Model
                     ->orderBy('sort_order');
     }
 
+    public function lmsHtmlEmbeds()
+    {
+        return $this->hasMany(\App\Models\app\Academy\Lms\LmsHtmlEmbed::class, 'activity_id')
+                    ->orderBy('sort_order');
+    }
+
     public function lmsLogs()
     {
         return $this->hasMany(LmsActivityLog::class, 'activity_id');

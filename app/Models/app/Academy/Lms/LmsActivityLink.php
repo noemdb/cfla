@@ -13,7 +13,7 @@ class LmsActivityLink extends Model
     public const TYPES = ['REFERENCE', 'VIDEO', 'TOOL', 'DOCUMENT', 'OTHER'];
 
     protected $fillable = [
-        'activity_id', 'added_by', 'title', 'url',
+        'activity_id', 'section_id', 'added_by', 'title', 'url',
         'link_type', 'description', 'sort_order', 'is_visible',
     ];
 
@@ -22,6 +22,11 @@ class LmsActivityLink extends Model
     public function activity()
     {
         return $this->belongsTo(Activity::class);
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(LmsActivitySection::class, 'section_id');
     }
 
     public function addedBy()
