@@ -77,19 +77,19 @@
 
     <div class="flex-1 flex flex-col max-w-2xl mx-auto w-full h-screen" x-data>
         <!-- Header compacto -->
-        <div class="bg-emerald-600 px-4 py-2.5 flex items-center gap-3 flex-shrink-0">
-            <div class="w-9 h-9 rounded-full bg-emerald-500/30 flex items-center justify-center text-lg flex-shrink-0">
+        <div class="bg-emerald-600 px-3 py-1.5 flex items-center gap-2 flex-shrink-0">
+            <div class="w-8 h-8 rounded-full bg-emerald-500/30 flex items-center justify-center text-base flex-shrink-0">
                 🤖
             </div>
             <div class="flex-1 min-w-0">
                 <h1 class="text-sm font-semibold text-white truncate">Asistente SAEFL</h1>
-                <div class="flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                <div class="flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
                     <span class="text-xs text-emerald-200">En línea</span>
                 </div>
             </div>
-            <a href="/" class="text-white/80 hover:text-white transition-colors p-1">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="/" class="text-white/80 hover:text-white transition-colors p-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </a>

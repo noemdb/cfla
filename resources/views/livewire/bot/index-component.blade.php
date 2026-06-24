@@ -17,7 +17,7 @@
     <div
         id="chat-messages"
         x-ref="chatContainer"
-        class="flex-1 overflow-y-auto px-4 py-4 space-y-2"
+        class="flex-1 overflow-y-auto px-3 py-2 space-y-1"
         style="background: #0b141a; scroll-behavior: smooth;"
     >
         <template x-for="(msg, index) in messages" :key="index">
@@ -27,16 +27,16 @@
             >
                 <!-- Bot message with avatar -->
                 <template x-if="msg.type === 'bot'">
-                    <div class="flex items-end gap-2 max-w-[85%] sm:max-w-[75%]">
-                        <div class="w-7 h-7 rounded-full bg-emerald-600/20 flex items-center justify-center text-sm flex-shrink-0 mb-0.5">
+                    <div class="flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%]">
+                        <div class="w-6 h-6 rounded-full bg-emerald-600/20 flex items-center justify-center text-xs flex-shrink-0 mb-0.5">
                             🤖
                         </div>
                         <div
-                            class="px-3.5 py-2.5 text-sm leading-relaxed shadow-sm"
+                            class="px-3 py-1.5 text-sm leading-snug shadow-sm"
                             style="background: #1f2c33; color: #e9edef; border-radius: 12px 12px 12px 4px;"
                         >
                             <div x-html="formatBotText(msg.text)" class="break-words whitespace-pre-wrap"></div>
-                            <div class="flex items-center gap-1 mt-1.5">
+                            <div class="flex items-center gap-1 mt-0.5">
                                 <span class="text-[10px] opacity-50" x-text="msg.time"></span>
                             </div>
                         </div>
@@ -45,13 +45,13 @@
 
                 <!-- User message with double check -->
                 <template x-if="msg.type === 'user'">
-                    <div class="flex items-end gap-2 max-w-[85%] sm:max-w-[75%]">
+                    <div class="flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%]">
                         <div
-                            class="px-3.5 py-2.5 text-sm leading-relaxed shadow-sm"
+                            class="px-3 py-1.5 text-sm leading-snug shadow-sm"
                             style="background: #005c4b; color: #e9edef; border-radius: 12px 12px 4px 12px;"
                         >
                             <div x-html="escapeHtml(msg.text)" class="break-words"></div>
-                            <div class="flex items-center justify-end gap-1 mt-1.5">
+                            <div class="flex items-center justify-end gap-1 mt-0.5">
                                 <span class="text-[10px] opacity-50" x-text="msg.time"></span>
                                 <svg class="w-3.5 h-3.5 text-emerald-400/70" viewBox="0 0 16 11" fill="currentColor">
                                     <path d="M11.071.653a.457.457 0 0 0-.304-.102.493.493 0 0 0-.381.178l-6.19 7.636-2.011-2.095a.463.463 0 0 0-.336-.153.457.457 0 0 0-.334.145.552.552 0 0 0-.139.37c0 .14.046.27.139.385l2.368 2.466a.463.463 0 0 0 .335.153.458.458 0 0 0 .306-.116l6.718-8.273a.532.532 0 0 0 .118-.337.505.505 0 0 0-.14-.352z"/>
@@ -65,13 +65,13 @@
 
         <!-- Typing Indicator -->
         <div x-show="isTyping" class="flex justify-start">
-            <div class="flex items-end gap-2 max-w-[85%] sm:max-w-[75%]">
-                <div class="w-7 h-7 rounded-full bg-emerald-600/20 flex items-center justify-center text-sm flex-shrink-0 mb-0.5">🤖</div>
-                <div style="background: #1f2c33; border-radius: 12px 12px 12px 4px;" class="px-4 py-3">
-                    <div class="flex gap-1.5">
-                        <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
-                        <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
-                        <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
+            <div class="flex items-end gap-1.5 max-w-[85%] sm:max-w-[75%]">
+                <div class="w-6 h-6 rounded-full bg-emerald-600/20 flex items-center justify-center text-xs flex-shrink-0 mb-0.5">🤖</div>
+                <div style="background: #1f2c33; border-radius: 12px 12px 12px 4px;" class="px-3 py-2">
+                    <div class="flex gap-1">
+                        <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
+                        <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
+                        <span class="typing-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>
                     </div>
                 </div>
             </div>
@@ -82,17 +82,17 @@
     </div>
 
     <!-- Input Area -->
-    <div class="bg-gray-800 border-t border-gray-700 px-3 py-2.5 flex-shrink-0">
+    <div class="bg-gray-800 border-t border-gray-700 px-3 py-1.5 flex-shrink-0">
         <form
             wire:submit.prevent="sendMessage"
-            class="flex items-center gap-2"
+            class="flex items-center gap-1.5"
         >
             <div class="flex-1 flex items-center bg-gray-900 rounded-full border border-gray-700 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all duration-200">
                 <input
                     type="text"
                     wire:model="newMessage"
                     placeholder="Escribe un mensaje..."
-                    class="flex-1 bg-transparent text-gray-100 px-4 py-2.5 text-sm outline-none placeholder-gray-500 min-h-[44px]"
+                    class="flex-1 bg-transparent text-gray-100 px-3 py-1.5 text-sm outline-none placeholder-gray-500 min-h-[36px]"
                     x-on:keydown.enter.prevent="$wire.sendMessage()"
                     autofocus
                     autocomplete="off"
@@ -102,16 +102,16 @@
             </div>
             <button
                 type="submit"
-                class="touch-btn bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-400 text-white rounded-full min-w-[44px] h-[44px] flex items-center justify-center transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/30"
+                class="touch-btn bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-400 text-white rounded-full min-w-[36px] h-[36px] flex items-center justify-center transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/30"
                 wire:loading.attr="disabled"
                 aria-label="Enviar mensaje"
             >
-                <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
             </button>
         </form>
-        <p class="text-[10px] text-gray-500 mt-1.5 text-center">
+        <p class="text-[9px] text-gray-500 mt-0.5 text-center">
             Este asistente proporciona información académica y administrativa.
         </p>
     </div>
