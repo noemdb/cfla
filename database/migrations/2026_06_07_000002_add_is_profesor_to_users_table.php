@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_profesor')->default(false)->after('is_planner');
-            $table->index('is_profesor');
-        });
+        if (! Schema::hasColumn('users', 'is_profesor')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_profesor')->default(false)->after('is_planner');
+                $table->index('is_profesor');
+            });
+        }
     }
 
     /**
@@ -22,9 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['is_profesor']);
-            $table->dropColumn('is_profesor');
-        });
+        if (Schema::hasColumn('users', 'is_profesor')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropIndex(['is_profesor']);
+                $table->dropColumn('is_profesor');
+            });
+        }
     }
 };

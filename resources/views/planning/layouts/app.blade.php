@@ -8,9 +8,8 @@
 
     <title>@yield('title', 'Planificación - ' . config('app.name', 'SAEFL'))</title>
 
-    <!-- Favicon - Planificación Académica -->
-    <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='10' width='60' height='75' rx='5' fill='%23011827' stroke='%2310b981' stroke-width='3'/><rect x='30' y='5' width='40' height='15' rx='3' fill='%2310b981'/><path d='M35 45 L45 55 L65 35' stroke='%2310b981' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+    <!-- Favicon único SAEFL -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

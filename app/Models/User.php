@@ -19,12 +19,15 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
+        'is_active',
+        'is_admin',
         'is_planner',
         'is_diagnostic',
         'is_profesor',
+        'number_id',
     ];
 
 
@@ -51,8 +54,17 @@ class User extends Authenticatable
         'is_profesor' => 'boolean',
     ];
 
+    public function profile()
+    {
+        return $this->hasOne(\App\Models\sys\Profile::class);
+    }
+
     public function getFullNameAttribute()
     {
+        if ($this->relationLoaded('profile') && $this->profile) {
+            return trim($this->profile->firstname . ' ' . $this->profile->lastname);
+        }
+
         $user = DB::table('users')
             ->selectRaw("CONCAT(profiles.firstname, ' ', profiles.lastname) as fullname")
             ->join('profiles', 'users.id', '=', 'profiles.user_id')

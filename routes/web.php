@@ -125,6 +125,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
             Route::get('/competition', CompetitionIndex::class)->name('competition.index');
             Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
         });
+
+        // Módulo de Usuarios
+        Route::get('/users', \App\Livewire\Admin\Users\IndexComponent::class)->name('users.index');
     });
 
     // Rutas exclusivas para Administradores

@@ -1682,12 +1682,14 @@
                     @endif
                 </div>
 
-                <div class="space-y-4 text-left max-h-[60vh] overflow-y-auto">
+                <div class="space-y-4 text-left max-h-[60vh] overflow-y-auto"
+                     x-data="{ openCompetencias: false, openIndicadores: false }">
 
-                    {{-- Competencias (siempre visibles) --}}
+                    {{-- Competencias (acordeón, cerrado por defecto) --}}
                     <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
-                        {{-- Header --}}
-                        <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30">
+                        {{-- Header clickeable --}}
+                        <button @click="openCompetencias = !openCompetencias"
+                                class="w-full flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors text-left">
                             <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center shrink-0">
                                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
@@ -1697,98 +1699,57 @@
                                 <h3 class="text-sm font-bold text-purple-200">Competencias</h3>
                                 <p class="text-[11px] text-slate-500 truncate">Competencias fundamentales del pensum</p>
                             </div>
-                            @if($competencias?->isNotEmpty())
-                                <span class="shrink-0 text-xs font-medium text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
-                                    {{ $competencias->count() }}
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- Body: Grid con efecto máquina de escribir --}}
-                        @if($competencias?->isNotEmpty())
-                            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                @foreach($competencias as $comp)
-                                    @php $indCount = $comp->indicators?->count() ?? 0; @endphp
-                                    <div class="bg-slate-800/70 border border-purple-500/20 rounded-lg overflow-hidden">
-                                        {{-- Top accent bar --}}
-                                        <div class="h-1 bg-gradient-to-r from-purple-500/60 to-purple-400/30 shrink-0"></div>
-                                        {{-- Content --}}
-                                        <div class="p-4 flex flex-col gap-2">
-                                            <p class="text-sm font-semibold text-white leading-snug">{{ $comp->name }}</p>
-                                            {{-- Indicators --}}
-                                            @if($indCount > 0)
-                                                <div class="space-y-1">
-                                                    @foreach($comp->indicators as $ind)
-                                                        <div class="flex items-start gap-1.5">
-                                                            <span class="w-1 h-1 rounded-full bg-purple-400/40 mt-1.5 shrink-0"></span>
-                                                            <p class="text-xs text-slate-400 leading-relaxed">{{ $ind->description }}</p>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-3">
-                                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
-                                    </svg>
-                                </div>
-                                <p class="text-sm text-slate-500 italic">No hay competencias asociadas</p>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Indicadores de Logro (siempre visibles) --}}
-                    <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
-                        {{-- Header --}}
-                        <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30">
-                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center shrink-0">
-                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <div class="flex items-center gap-2 shrink-0">
+                                @if($competencias?->isNotEmpty())
+                                    <span class="text-xs font-medium text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
+                                        {{ $competencias->count() }}
+                                    </span>
+                                @endif
+                                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200"
+                                     :class="openCompetencias ? 'rotate-180' : ''"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-sm font-bold text-emerald-200">Indicadores de Logro</h3>
-                                <p class="text-[11px] text-slate-500 truncate">Aprendizajes esperados de la actividad evaluativa</p>
-                            </div>
-                            @if($indicadoresLogro->isNotEmpty())
-                                <span class="shrink-0 text-xs font-medium text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
-                                    {{ $indicadoresLogro->count() }}
-                                </span>
-                            @endif
-                        </div>
+                        </button>
 
-                        {{-- Body --}}
-                        @if($indicadoresLogro->isNotEmpty())
-                            <div class="p-4">
-                                <div class="space-y-1.5">
-                                    @foreach($indicadoresLogro as $ind)
-                                        <div class="flex items-start gap-3 px-3 py-2.5 bg-slate-800/30 border border-emerald-500/10 rounded-lg hover:border-emerald-500/20 transition-colors">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
-                                            <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-slate-200">{{ $ind->name }}</p>
-                                                @if($ind->weighting)
-                                                    <p class="text-[10px] text-emerald-400/60 font-mono mt-0.5">{{ $ind->weighting }} pts</p>
+                        {{-- Body colapsable --}}
+                        <div x-show="openCompetencias"
+                             x-cloak
+                             x-transition:enter.duration.150ms>
+                            @if($competencias?->isNotEmpty())
+                                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    @foreach($competencias as $comp)
+                                        @php $indCount = $comp->indicators?->count() ?? 0; @endphp
+                                        <div class="bg-slate-800/70 border border-purple-500/20 rounded-lg overflow-hidden">
+                                            <div class="h-1 bg-gradient-to-r from-purple-500/60 to-purple-400/30 shrink-0"></div>
+                                            <div class="p-4 flex flex-col gap-2">
+                                                <p class="text-sm font-semibold text-white leading-snug">{{ $comp->name }}</p>
+                                                @if($indCount > 0)
+                                                    <div class="space-y-1">
+                                                        @foreach($comp->indicators as $ind)
+                                                            <div class="flex items-start gap-1.5">
+                                                                <span class="w-1 h-1 rounded-full bg-purple-400/40 mt-1.5 shrink-0"></span>
+                                                                <p class="text-xs text-slate-400 leading-relaxed">{{ $ind->description }}</p>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                            </div>
-                        @else
-                            <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-3">
-                                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
+                            @else
+                                <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                                    <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-slate-500 italic">No hay competencias asociadas</p>
                                 </div>
-                                <p class="text-sm text-slate-500 italic">No hay indicadores de logro asociados a esta actividad</p>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
 
                     {{-- Actividad de referencia --}}
@@ -2931,6 +2892,138 @@
                                             </svg>
                                             Subir
                                         </button>
+                                    </div>
+
+                                    {{-- ═══ IMAGE PROMPT (como en paso 2, con selector de sección) ═══ --}}
+                                    @php
+                                        $step3ImageSection = $step3ImageSectionId
+                                            ? collect($wizardSections)->firstWhere('id', (int) $step3ImageSectionId)
+                                            : null;
+
+                                        $step3SectionContentForPrompt = '';
+                                        if ($step3ImageSection) {
+                                            $step3Text = collect($step3ImageSection['contents'] ?? [])
+                                                ->pluck('body')
+                                                ->map(fn($b) => strip_tags($b))
+                                                ->implode("\n");
+                                            $step3SectionContentForPrompt = \Illuminate\Support\Str::limit($step3Text, 500) ?: 'Describe un recurso visual genérico que complemente esta sección.';
+                                        } else {
+                                            $step3SectionContentForPrompt = 'No hay sección específica seleccionada. Crea un recurso visual genérico para la lección.';
+                                        }
+
+                                        $step3ImagePrompt = "## Rol\n"
+                                            ."Eres un ilustrador educativo senior y diseñador instruccional con 15 años de experiencia creando recursos visuales pedagógicamente efectivos para entornos de aprendizaje presencial y digital. Dominas principios de comunicación visual, psicología cognitiva del aprendizaje y diseño universal para el aprendizaje (DUA).\n\n"
+                                            ."## Contexto pedagógico\n"
+                                            ."- **Grado/Nivel:** {$gradoName}\n"
+                                            ."- **Asignatura:** {$asignaturaName}\n"
+                                            ."- **Sección escolar:** {$seccionName}\n"
+                                            ."- **Título de la lección:** {$lessonTitle}\n"
+                                            ."- **Sección destino:** ".($step3ImageSection ? $step3ImageSection['title'] : 'Sin sección específica')."\n"
+                                            ."- **Contenido de la sección:** {$step3SectionContentForPrompt}\n"
+                                            ."- **Tipo de recurso:** Imagen descargable / recurso visual complementario\n\n"
+                                            ."## Especificaciones técnicas del recurso visual\n"
+                                            ."- **Estilo gráfico:** Ilustración educativa profesional en estilo «flat design» con paleta de color armónica, saturada pero no fluorescente. Trazos vectoriales definidos sin sombras complejas ni degradados extensos. Composición ordenada con jerarquía visual clara (tamaño, color, posición).\n"
+                                            ."- **Proporción:** 16:9 horizontal. La imagen debe funcionar tanto en pantalla proyectada como en impresión tamaño carta (margen de 1\").\n"
+                                            ."- **Resolución:** Mínimo 1920×1080px, 300 DPI si es vectorial.\n"
+                                            ."- **Tipografía:** NO incluir texto ni etiquetas en la imagen. Todo el texto debe poder añadirse por separado como capa independiente.\n"
+                                            ."- **Paleta de color:** Accesible para daltonismo (evitar rojo/verde como único contraste). Usar azul, naranja, amarillo, verde azulado como colores principales de distinción.\n"
+                                            ."- **Público objetivo:** Estudiantes de {$gradoName}. El nivel de abstracción, las metáforas visuales y el vocabulario gráfico deben ser apropiados para esta etapa educativa.\n\n"
+                                            ."## Instrucciones de contenido didáctico\n"
+                                            ."1. **Concepto central:** Representa visualmente la idea o proceso fundamental de la sección de manera concreta, evitando abstracciones que requieran texto explicativo.\n"
+                                            ."2. **Metáfora visual:** Usa una analogía visual que conecte el nuevo conocimiento con experiencias cotidianas del estudiante (si aplica).\n"
+                                            ."3. **Secuencia didáctica:** Si el contenido describe un proceso (causa-efecto, línea de tiempo, ciclo), represéntalo en 3-4 viñetas o pasos dentro de una misma composición.\n"
+                                            ."4. **Punto focal:** La composición debe tener un único elemento visual dominante que capture la atención primero, con elementos secundarios que amplíen o contextualicen.\n"
+                                            ."5. **Inclusión y diversidad:** Cualquier figura humana debe representar diversidad étnica, de género y funcional de manera natural y no estereotipada.\n"
+                                            ."6. **Fondo:** Neutro o contextual mínimo (sin texturas distractoras). El fondo no debe competir con el contenido pedagógico.\n\n"
+                                            ."## Restricciones\n"
+                                            ."- ❌ Sin texto renderizado en la imagen (ni títulos, ni etiquetas, ni pies de foto).\n"
+                                            ."- ❌ Sin elementos decorativos que no tengan función pedagógica directa.\n"
+                                            ."- ❌ Sin violencia, estereotipos de género/raza, representaciones inexactas científicamente.\n"
+                                            ."- ❌ Sin marcas de agua, logos o referencias a la herramienta generadora.\n"
+                                            ."- ✅ La imagen debe mantener legibilidad y contraste si se imprime en escala de grises.\n"
+                                            ."- ✅ El estilo debe ser coherente con otras imágenes didácticas de la misma lección (mantener misma paleta y nivel de detalle).\n\n"
+                                            ."## Formato de salida\n"
+                                            ."Genera ÚNICAMENTE la imagen solicitada. Sin descripciones adicionales, sin explicaciones, sin variantes. Entrega la imagen en el formato y proporción especificados.";
+                                    @endphp
+
+                                    <div class="mt-3 border-t border-slate-700/30 pt-3"
+                                         x-data="{ showPrompt: false }">
+                                        <button @click="showPrompt = !showPrompt"
+                                                class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] font-medium transition-colors
+                                                       text-slate-400 hover:text-amber-300 hover:bg-amber-500/5">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                            </svg>
+                                            Imagen IA — Prompt para recurso visual
+                                            <svg class="w-3.5 h-3.5 ml-auto transition-transform" :class="showPrompt ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+
+                                        <div x-show="showPrompt" x-cloak x-transition:enter.duration.200ms
+                                             class="mt-3 p-4 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900 border border-amber-500/20 rounded-xl space-y-3">
+                                            {{-- Selector de sección --}}
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex items-center gap-2 text-[11px] text-slate-400 shrink-0">
+                                                    <svg class="w-3.5 h-3.5 text-amber-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                                    Sección:
+                                                </div>
+                                                <select wire:model.live="step3ImageSectionId"
+                                                        class="flex-1 bg-slate-800/80 border border-slate-600/50 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:border-amber-500/50 focus:outline-none">
+                                                    <option value="">— Seleccionar sección —</option>
+                                                    @foreach($wizardSections as $sec)
+                                                        <option value="{{ $sec['id'] }}">{{ $sec['title'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            {{-- Header --}}
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div class="flex items-start gap-3">
+                                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="text-sm font-bold text-amber-300">Prompt — Imagen didáctica</h4>
+                                                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                                                            Copia este prompt y pégalo en un generador de imágenes con IA
+                                                            (<span class="text-slate-300">DALL·E, Midjourney, Stable Diffusion, Copilot</span>)
+                                                            para crear un recurso visual descargable para la lección.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button @click="showPrompt = false"
+                                                        class="p-1 hover:bg-slate-700/50 rounded-lg transition-colors shrink-0">
+                                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+
+                                            {{-- Prompt text --}}
+                                            <div class="relative" x-data="{}">
+                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-xl p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $step3ImagePrompt }}</pre>
+                                                <button @click="
+                                                    const btn = $event.currentTarget;
+                                                    navigator.clipboard.writeText(btn.parentElement.querySelector('pre')?.textContent || '');
+                                                    btn.textContent = '✓ Copiado';
+                                                    setTimeout(() => btn.textContent = 'Copiar prompt', 2000);
+                                                "
+                                                        class="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-all"
+                                                        type="button">
+                                                    Copiar prompt
+                                                </button>
+                                            </div>
+
+                                            {{-- Footer --}}
+                                            <div class="flex items-center justify-between text-[10px] text-slate-500">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    La imagen generada podrás asociarla como recurso descargable a la lección.
+                                                </span>
+                                                <span>{{ strlen($step3ImagePrompt) }} caracteres</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

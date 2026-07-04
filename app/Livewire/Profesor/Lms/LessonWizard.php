@@ -96,6 +96,9 @@ class LessonWizard extends Component
     public int $importWizardStep = 1;
     public ?array $importPreviewData = null;
 
+    // ─── Step 3: Section selector for image prompt ─────────────
+    public mixed $step3ImageSectionId = null;
+
     // ─── Export wizard ─────────────────────────────────────────
     public int $exportWizardStep = 1;
     public ?array $exportPreviewData = null;
@@ -209,9 +212,10 @@ class LessonWizard extends Component
             'lmsSections.contents',
         ])->findOrFail($activityId);
 
+        $profesor = \App\Models\app\Academy\Profesor::where('user_id', auth()->id())->first();
         abort_unless(
             auth()->user()->is_admin
-            || $activity->pevaluacion->profesor_id === auth()->id(),
+            || ($profesor && $activity->pevaluacion->profesor_id === $profesor->id),
             403
         );
 
@@ -419,9 +423,10 @@ class LessonWizard extends Component
         $activity = Activity::findOrFail($activityId);
 
         // Verificar permisos
+        $profesor = \App\Models\app\Academy\Profesor::where('user_id', auth()->id())->first();
         abort_unless(
             auth()->user()->is_admin
-            || $activity->pevaluacion->profesor_id === auth()->id(),
+            || ($profesor && $activity->pevaluacion->profesor_id === $profesor->id),
             403
         );
 
@@ -530,7 +535,7 @@ PROMPT;
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 256],
+                ['max_tokens' => 256, 'timeout' => 120],
             );
 
             if (!$result['success']) {
@@ -705,7 +710,7 @@ PROMPT;
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 512],
+                ['max_tokens' => 512, 'timeout' => 120],
             );
 
             if (!$result['success']) {
@@ -858,24 +863,47 @@ PROMPT;
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Genera contenido pedagógico para una lección LMS.
 
-Estructura obligatoria (incluye //INICIO, //DESARROLLO, //CIERRE tal cual):
+Debes generar EXACTAMENTE el formato que se indica. NO expliques lo que vas a hacer, NO describas las reglas, NO incluyas meta-comentarios. Solamente escribe el contenido directamente.
+
+Estructura obligatoria: //INICIO, luego //DESARROLLO con MÍNIMO 5 bloques, luego //CIERRE (total mínimo 7 secciones).
+
+Ejemplo de formato (cambia el contenido, no la estructura):
 
 //INICIO
-Título de inicio (máx 10 palabras, atractivo para estudiantes)
-Contenido de inicio (1-2 párrafos, 80-150 palabras)
+La célula y sus partes fundamentales
+En esta lección exploraremos la célula como unidad fundamental de todos los seres vivos. Conoceremos sus partes principales y las funciones específicas que cumple cada una para mantener la vida. A través de ejemplos cotidianos y actividades prácticas entenderemos por qué es indispensable conocer su estructura y funcionamiento. La célula representa el nivel más básico de organización biológica y su estudio nos permite comprender procesos vitales esenciales como la nutrición, el crecimiento y la reproducción. Cada ser vivo, desde una bacteria hasta un ser humano complejo, está formado por células que trabajan en conjunto para mantener el organismo en equilibrio. Abordaremos también la diversidad celular existente en la naturaleza y cómo las características de cada tipo celular determinan las funciones específicas de los tejidos y órganos que conforman un ser vivo multicelular.
 
-//DESARROLLO (3 a 6 bloques, cada bloque separado por línea en blanco)
-Título del bloque (máx 10 palabras)
-Contenido del bloque (1-2 párrafos, 100-250 palabras)
+//DESARROLLO
+¿Qué es una célula y por qué es tan importante?
+Definiremos el concepto de célula y su importancia fundamental en el campo de la biología moderna. La célula es reconocida como la unidad estructural, funcional y de origen de todo ser vivo, constituyendo el bloque básico de construcción de la vida en nuestro planeta. Todos los organismos vivos están compuestos por células, ya sean organismos unicelulares como las bacterias y los protozoos, o multicelulares complejos como las plantas y los animales. Cada célula individual realiza funciones vitales esenciales como la nutrición, mediante la cual obtiene energía y materiales del entorno; la relación, que le permite detectar y responder a estímulos del medio ambiente; y la reproducción, que garantiza la continuidad de la vida a través de la división celular. El estudio de la célula ha revolucionado nuestra comprensión de la biología humana, la medicina y la biotecnología, permitiendo avances significativos en el tratamiento de enfermedades y en el desarrollo de nuevas terapias.
 
-Título del siguiente bloque
-Contenido
+Partes fundamentales de la célula
+Identificaremos y describiremos los componentes celulares básicos que comparten la mayoría de las células. La membrana plasmática es una estructura delgada que rodea la célula y regula el intercambio de sustancias entre el interior y el exterior celular, actuando como una barrera selectiva que permite el paso de nutrientes y la eliminación de desechos. El citoplasma es una sustancia gelatinosa que ocupa el espacio interior de la célula y contiene los orgánulos celulares, cada uno especializado en funciones particulares como la producción de energía o la síntesis de proteínas. El núcleo es el centro de control de la célula que almacena el material genético en forma de ADN, dirigiendo todas las actividades celulares y transmitiendo la información hereditaria a las células hijas durante la división. Cada una de estas partes cumple una función específica e indispensable para el funcionamiento adecuado del organismo en su conjunto.
+
+Célula animal versus célula vegetal
+Realizaremos una comparación detallada entre las características distintivas de la célula animal y la célula vegetal. Ambos tipos celulares comparten estructuras comunes como el núcleo, la membrana plasmática, las mitocondrias y el retículo endoplasmático, pero presentan diferencias fundamentales que determinan sus funciones específicas. La célula vegetal posee una pared celular rígida compuesta principalmente de celulosa que proporciona soporte estructural y protección, además de cloroplastos que contienen clorofila y permiten realizar la fotosíntesis, proceso mediante el cual las plantas convierten la energía solar en energía química. Las células vegetales también cuentan con una gran vacuola central que almacena agua y nutrientes, manteniendo la turgencia y presión interna necesaria para la estabilidad de la planta. En contraste, las células animales carecen de pared celular y cloroplastos, poseen vacuolas más pequeñas y múltiples, y presentan estructuras especializadas como los lisosomas y los centriolos que participan en la digestión celular y la división celular respectivamente.
+
+Funciones vitales que realiza la célula
+Explicaremos en detalle cómo las células llevan a cabo las tres funciones vitales esenciales para mantener la vida. La nutrición celular puede ser autótrofa, cuando la célula produce su propio alimento mediante fotosíntesis o quimiosíntesis, o heterótrofa, cuando obtiene nutrientes del medio externo mediante procesos de ingestión y digestión celular. La función de relación permite a las células detectar cambios en su entorno a través de receptores especializados en la membrana y responder adecuadamente mediante movimientos, secreciones o cambios metabólicos que garantizan su supervivencia y adaptación al medio. La reproducción celular puede ser asexual, mediante división simple como la fisión binaria en bacterias o la mitosis en células eucariotas, produciendo células genéticamente idénticas, o sexual, mediante la meiosis que genera células sexuales con variabilidad genética. Estos procesos vitales están finamente regulados por mecanismos moleculares complejos que aseguran el correcto funcionamiento del organismo.
+
+Aplicaciones del estudio celular en la vida cotidiana
+Reflexionaremos sobre la importancia práctica del conocimiento celular en diversos campos de la ciencia y la tecnología moderna. El estudio de las células ha permitido avances revolucionarios en la medicina, incluyendo el desarrollo de vacunas, la comprensión de enfermedades como el cáncer a nivel molecular y el desarrollo de terapias celulares y génicas que ofrecen nuevas esperanzas para enfermedades antes consideradas incurables. En la biotecnología, el conocimiento celular ha facilitado la producción de medicamentos mediante cultivos celulares, la creación de organismos genéticamente modificados para mejorar la producción de alimentos y el desarrollo de técnicas de clonación y edición genética como CRISPR. La investigación celular continúa abriendo nuevas fronteras en la ciencia, desde la medicina regenerativa con células madre hasta el desarrollo de biosensores y tejidos artificiales, demostrando que el estudio de la célula sigue siendo fundamental para el progreso humano.
+
+Importancia de la célula en los ecosistemas
+Analizaremos cómo las células, organizadas en tejidos y organismos, contribuyen al funcionamiento de los ecosistemas y al equilibrio de la vida en la Tierra. Los organismos unicelulares como las bacterias y las algas microscópicas realizan funciones ecológicas esenciales como la fijación de nitrógeno, la descomposición de materia orgánica y la producción de oxígeno mediante fotosíntesis, procesos que mantienen los ciclos biogeoquímicos fundamentales para la vida. Las células especializadas de organismos multicelulares forman tejidos con funciones específicas que permiten a las plantas realizar fotosíntesis, a los animales moverse y responder a su entorno, y a los hongos descomponer materia orgánica reciclando nutrientes.
 
 //CIERRE
-Título de cierre (máx 10 palabras)
-Contenido de cierre (1 párrafo, 80-150 palabras)
+Resumen y reflexión final sobre la célula
+Hemos aprendido que la célula es la unidad básica de la vida, con partes y funciones específicas que trabajan de manera coordinada. Comparamos las similitudes y diferencias entre células animales y vegetales, entendimos los procesos vitales que realizan y exploramos la importancia práctica del conocimiento celular en la medicina y la biotecnología. Estos conocimientos son fundamentales para comprender la biología y sus aplicaciones en la vida diaria. La célula nos recuerda que la vida, en su nivel más fundamental, comparte principios comunes que unen a todos los seres vivos, desde el organismo más simple hasta el más complejo, en un mismo árbol de la vida.
 
-Reglas: lenguaje acorde al grado, ejemplos concretos, alineado con referentes normativos. NO uses la palabra TITULO ni CONTENIDO como etiquetas.
+Reglas estrictas:
+- MÍNIMO 5 bloques en //DESARROLLO (más si el contenido lo requiere)
+- Cada bloque de DESARROLLO separado por una línea en blanco
+- Títulos cortos (máx 10 palabras), lenguaje acorde al grado
+- Cada contenido debe tener AL MENOS 200 palabras (aproximadamente 3-5 párrafos por bloque)
+- NO uses la palabra TÍTULO ni CONTENIDO como etiquetas dentro del contenido
+- NO incluyas explicaciones, introducciones ni comentarios — solo el formato indicado
+- Alineado con los referentes normativos y al contexto de la actividad
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -892,7 +920,7 @@ PROMPT;
 **Referentes normativos:**
 {$referentsText}
 
-Genera estructura completa leccion.
+Genera estructura completa leccion con //INICIO, minimo 5 bloques en //DESARROLLO y //CIERRE. Sin explicaciones ni meta-comentarios.
 PROMPT;
 
         // ─── Llamar al servicio con compactación ───────────────
@@ -900,7 +928,7 @@ PROMPT;
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 768],
+                ['max_tokens' => 768, 'timeout' => 120],
             );
 
             if (!$result['success']) {
@@ -1409,6 +1437,7 @@ PROMPT;
                 [
                     'max_tokens'  => 2048,
                     'temperature' => 0.7,
+                    'timeout'     => 120,
                 ],
                 3500
             );
@@ -2251,11 +2280,13 @@ PROMPT;
         if (!$result['success']) {
             $errorMsg = $result['error'] ?? '';
 
-            // HTTP 429 (rate limit) → fallback automático a Nvidia
-            if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit exceeded') || str_contains($errorMsg, 'free-models-per-day')) {
+            // HTTP 429 (rate limit) o timeout → fallback automático a Nvidia
+            if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit exceeded') || str_contains($errorMsg, 'free-models-per-day')
+                || str_contains($errorMsg, '28') || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')) {
+                $reason = str_contains($errorMsg, '429') ? 'límite de requests' : 'timeout de conexión';
                 $this->notification()->info(
                     'Usando NVIDIA (fallback)',
-                    'OpenRouter alcanzó el límite de requests. Usando modelo NVIDIA como alternativa.'
+                    "OpenRouter alcanzó el {$reason}. Usando modelo NVIDIA como alternativa."
                 );
 
                 /** @var NvidiaService $nvidia */
