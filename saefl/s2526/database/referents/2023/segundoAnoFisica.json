@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "154",
+        "name": "[FISICA-2A] FÍSICA [pensumId=154]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-FISICA-2A-01",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Analiza los fenómenos del movimiento rectilíneo uniforme y uniformemente variado en contextos cotidianos.",
+            "descripcion": "Interpreta gráficas de posición, velocidad y aceleración en función del tiempo, y resuelve problemas aplicando las leyes del movimiento."
+        },
+        {
+            "id": "COMP-FISICA-2A-02",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Comprende las leyes de Newton y su aplicación en situaciones de la vida real.",
+            "descripcion": "Explica el equilibrio de fuerzas, la inercia, la acción-reacción y la relación entre masa, fuerza y aceleración en sistemas dinámicos."
+        },
+        {
+            "id": "COMP-FISICA-2A-03",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Estudia los conceptos de trabajo, energía y potencia en sistemas mecánicos simples.",
+            "descripcion": "Calcula transformaciones energéticas (cinética, potencial, mecánica) y aplica el principio de conservación de la energía en contextos escolares y comunitarios."
+        },
+        {
+            "id": "COMP-FISICA-2A-04",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Aplica principios de la hidrostática e hidrodinámica al análisis de fluidos en reposo y en movimiento.",
+            "descripcion": "Utiliza conceptos como presión, densidad, principio de Pascal y Arquímedes para explicar fenómenos relacionados con el agua y otros fluidos."
+        },
+        {
+            "id": "COMP-FISICA-2A-05",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Explora los fundamentos de la termometría y la transmisión del calor en procesos naturales y tecnológicos.",
+            "descripcion": "Distingue entre temperatura y calor, identifica formas de transferencia térmica y analiza su impacto en el entorno y la salud."
+        },
+        {
+            "id": "COMP-FISICA-2A-06",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Evalúa el uso responsable de la energía en el hogar, la escuela y la comunidad.",
+            "descripcion": "Relaciona el consumo energético con impactos ambientales, económicos y sociales, proponiendo estrategias de ahorro y eficiencia."
+        },
+        {
+            "id": "COMP-FISICA-2A-07",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Diseña y construye dispositivos simples que demuestren principios físicos básicos.",
+            "descripcion": "Crea prototipos (planos inclinados, poleas, sistemas hidráulicos) utilizando materiales reciclables y recursos locales."
+        },
+        {
+            "id": "COMP-FISICA-2A-08",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Utiliza instrumentos de medición física con precisión y seguridad.",
+            "descripcion": "Opera cronómetros, reglas, balanzas, termómetros y sensores digitales para recolectar datos en experimentos escolares."
+        },
+        {
+            "id": "COMP-FISICA-2A-09",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Resuelve problemas cuantitativos aplicando fórmulas y unidades del Sistema Internacional (SI).",
+            "descripcion": "Realiza conversiones, cálculos y estimaciones con rigor, expresando resultados con cifras significativas y unidades adecuadas."
+        },
+        {
+            "id": "COMP-FISICA-2A-10",
+            "referent_id": "2",
+            "pensum_id": 154,
+            "nombre": "Desarrolla proyectos investigativos que integran física, tecnología y ciudadanía científica.",
+            "descripcion": "Formula preguntas, diseña experimentos, analiza datos y propone soluciones innovadoras a problemas locales relacionados con el movimiento, la energía o los fluidos."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-FISICA-2A-01-01",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-01",
+            "descripcion": "Interpreta gráficas de posición vs. tiempo para identificar movimientos uniformes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-01-02",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-02",
+            "descripcion": "Calcula la velocidad media y aceleración en trayectorias rectilíneas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-01-03",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-03",
+            "descripcion": "Resuelve problemas de caída libre y tiro vertical aplicando ecuaciones del MRUV.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-01-04",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-04",
+            "descripcion": "Relaciona el movimiento de vehículos, personas o objetos con modelos físicos estudiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-01-05",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-05",
+            "descripcion": "Construye gráficas de velocidad vs. tiempo y deduce la aceleración y desplazamiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-01-06",
+            "competency_id": "COMP-FISICA-2A-01",
+            "codigo": "FISICA-2A-IL-06",
+            "descripcion": "Argumenta por qué el movimiento es un concepto relativo al sistema de referencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-01",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-07",
+            "descripcion": "Identifica fuerzas en equilibrio en cuerpos en reposo o con movimiento uniforme.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-02",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-08",
+            "descripcion": "Aplica la segunda ley de Newton (F = m·a) para calcular fuerza, masa o aceleración.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-03",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-09",
+            "descripcion": "Reconoce pares acción-reacción en interacciones cotidianas (empujar una pared, caminar).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-04",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-10",
+            "descripcion": "Explica la inercia mediante ejemplos reales (frenado brusco, objetos en movimiento).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-05",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-11",
+            "descripcion": "Analiza cómo la fricción afecta el movimiento de los cuerpos en superficies diversas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-02-06",
+            "competency_id": "COMP-FISICA-2A-02",
+            "codigo": "FISICA-2A-IL-12",
+            "descripcion": "Relaciona las leyes de Newton con la seguridad vial y el uso de cinturones de seguridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-01",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-13",
+            "descripcion": "Calcula la energía cinética y potencial gravitatoria en sistemas mecánicos simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-02",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-14",
+            "descripcion": "Aplica el principio de conservación de la energía mecánica en ausencia de fricción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-03",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-15",
+            "descripcion": "Define trabajo como producto de fuerza por desplazamiento en la dirección de la fuerza.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-04",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-16",
+            "descripcion": "Calcula la potencia desarrollada en actividades humanas o máquinas simples.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-05",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-17",
+            "descripcion": "Relaciona transformaciones energéticas con procesos biológicos (metabolismo, ejercicio físico).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-03-06",
+            "competency_id": "COMP-FISICA-2A-03",
+            "codigo": "FISICA-2A-IL-18",
+            "descripcion": "Argumenta que la energía no se crea ni se destruye, solo se transforma.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-01",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-19",
+            "descripcion": "Calcula la presión ejercida por sólidos y fluidos en distintas situaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-02",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-20",
+            "descripcion": "Aplica el principio de Pascal para explicar el funcionamiento de prensas hidráulicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-03",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-21",
+            "descripcion": "Utiliza el principio de Arquímedes para determinar si un cuerpo flota o se hunde.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-04",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-22",
+            "descripcion": "Relaciona la densidad de sustancias con su comportamiento en mezclas (aceite-agua, aire-caliente).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-05",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-23",
+            "descripcion": "Explica fenómenos atmosféricos (presión barométrica, vientos) mediante principios de fluidos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-04-06",
+            "competency_id": "COMP-FISICA-2A-04",
+            "codigo": "FISICA-2A-IL-24",
+            "descripcion": "Diseña un sistema hidráulico simple (elevador, frenos) con materiales reciclables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-01",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-25",
+            "descripcion": "Distingue entre temperatura (grados) y calor (energía térmica).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-02",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-26",
+            "descripcion": "Identifica conducción, convección y radiación como formas de transferencia de calor.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-03",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-27",
+            "descripcion": "Explica el funcionamiento de termómetros y escalas termométricas (Celsius, Kelvin).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-04",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-28",
+            "descripcion": "Relaciona la dilatación térmica con aplicaciones prácticas (puentes, rieles, termostatos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-05",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-29",
+            "descripcion": "Analiza cómo el calor afecta la salud (golpe de calor, hipotermia) y el clima local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-05-06",
+            "competency_id": "COMP-FISICA-2A-05",
+            "codigo": "FISICA-2A-IL-30",
+            "descripcion": "Propone estrategias para mitigar el efecto de isla de calor en zonas urbanas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-01",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-31",
+            "descripcion": "Identifica hábitos de consumo energético ineficiente en su entorno inmediato.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-02",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-32",
+            "descripcion": "Propone acciones concretas para reducir el consumo de energía en el aula o en casa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-03",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-33",
+            "descripcion": "Relaciona el ahorro energético con la mitigación del cambio climático y la sostenibilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-04",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-34",
+            "descripcion": "Calcula el consumo energético de electrodomésticos a partir de su potencia y tiempo de uso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-05",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-35",
+            "descripcion": "Argumenta por qué el acceso equitativo a la energía es un derecho humano y un pilar del desarrollo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-06-06",
+            "competency_id": "COMP-FISICA-2A-06",
+            "codigo": "FISICA-2A-IL-36",
+            "descripcion": "Participa en campañas escolares de concienciación sobre el uso responsable de la energía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-01",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-37",
+            "descripcion": "Construye un plano inclinado para demostrar la reducción de fuerza necesaria para elevar cargas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-02",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-38",
+            "descripcion": "Diseña una polea fija o móvil con materiales reciclables para levantar objetos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-03",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-39",
+            "descripcion": "Crea un modelo de sistema hidráulico que transmita fuerza mediante fluidos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-04",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-40",
+            "descripcion": "Construye un péndulo para estudiar el período y la energía en oscilaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-05",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-41",
+            "descripcion": "Explica el funcionamiento de su prototipo utilizando vocabulario físico preciso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-07-06",
+            "competency_id": "COMP-FISICA-2A-07",
+            "codigo": "FISICA-2A-IL-42",
+            "descripcion": "Reflexiona sobre cómo los principios físicos permiten resolver problemas técnicos cotidianos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-01",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-43",
+            "descripcion": "Mide longitudes, tiempos y masas con instrumentos manuales y digitales con precisión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-02",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-44",
+            "descripcion": "Utiliza sensores de movimiento o fuerza en experimentos escolares con dispositivos móviles.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-03",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-45",
+            "descripcion": "Registra datos en tablas con unidades correctas y cifras significativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-04",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-46",
+            "descripcion": "Aplica protocolos de seguridad al manipular equipos de medición y materiales experimentales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-05",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-47",
+            "descripcion": "Calibra o verifica el estado de un instrumento antes de su uso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-08-06",
+            "competency_id": "COMP-FISICA-2A-08",
+            "codigo": "FISICA-2A-IL-48",
+            "descripcion": "Interpreta lecturas de instrumentos analógicos y digitales con rigor.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-01",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-49",
+            "descripcion": "Realiza conversiones entre unidades del SI (m/s a km/h, g a kg, J a kJ).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-02",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-50",
+            "descripcion": "Aplica fórmulas físicas para resolver problemas de movimiento, fuerza y energía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-03",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-51",
+            "descripcion": "Expresa resultados con el número correcto de cifras significativas y unidades del SI.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-04",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-52",
+            "descripcion": "Estima órdenes de magnitud en situaciones reales (altura de un edificio, masa de un vehículo).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-05",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-53",
+            "descripcion": "Verifica la coherencia dimensional de ecuaciones físicas (unidades a ambos lados).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-09-06",
+            "competency_id": "COMP-FISICA-2A-09",
+            "codigo": "FISICA-2A-IL-54",
+            "descripcion": "Argumenta la importancia del lenguaje matemático en la descripción de fenómenos físicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-01",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-55",
+            "descripcion": "Formula una pregunta investigable sobre un problema físico local (transporte, energía, agua).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-02",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-56",
+            "descripcion": "Diseña un experimento controlado para probar hipótesis sobre movimiento o energía.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-03",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-57",
+            "descripcion": "Recopila y organiza datos cuantitativos y cualitativos durante la ejecución del proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-04",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-58",
+            "descripcion": "Presenta resultados mediante gráficos, esquemas y argumentos basados en evidencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-05",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-59",
+            "descripcion": "Propone soluciones técnicas o sociales derivadas de su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-FISICA-2A-10-06",
+            "competency_id": "COMP-FISICA-2A-10",
+            "codigo": "FISICA-2A-IL-60",
+            "descripcion": "Defiende su proyecto ante una audiencia escolar con claridad, rigor y ética científica.",
+            "nivel_esperado": 3
+        }
+    ]
+}

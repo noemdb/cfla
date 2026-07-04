@@ -1,0 +1,113 @@
+
+
+
+
+php artisan make:seeder 'InstitucionTableSeeder' &&
+php artisan db:seed --class=InstitucionTableSeeder
+
+php artisan make:factory 'InstitucionFactory' --model='Models\app\Institucion' &&
+
+php artisan make:seeder 'AutoridadTableSeeder' &&
+php artisan db:seed --class=AutoridadTableSeeder
+
+php artisan make:seeder 'TautoridadTableSeeder' &&
+php artisan db:seed --class=TautoridadTableSeeder
+
+php artisan make:seeder 'BancoTableSeeder' &&
+php artisan db:seed --class=BancoTableSeeder
+
+php artisan make:seeder 'PlanPagoTableSeeder' &&
+php artisan db:seed --class=PlanPagoTableSeeder
+
+---------------------------------------------------------
+php artisan make:seeder 'RepresentantTableSeeder' &&
+php artisan db:seed --class=RepresentantTableSeeder
+---------------------------------------------------------
+---------------------------------------------------------
+php artisan make:seeder 'PlanBeneficoTableSeeder'
+php artisan db:seed --class=PlanBeneficoTableSeeder &&
+---------------------------------------------------------
+---------------------------------------------------------
+php artisan make:seeder 'EstudiantTableSeeder' &&
+php artisan db:seed --class=EstudiantTableSeeder
+---------------------------------------------------------
+
+---------------------------------------------------------
+php artisan make:seeder 'PeducativoTableSeeder' &&
+php artisan db:seed --class=PeducativoTableSeeder
+---------------------------------------------------------
+php artisan make:seeder 'PestudioTableSeeder' &&
+php artisan db:seed --class=PestudioTableSeeder
+---------------------------------------------------------
+php artisan make:seeder 'GradoTableSeeder'
+php artisan db:seed --class=GradoTableSeeder
+---------------------------------------------------------
+php artisan make:seeder 'SeccionTableSeeder' &&
+php artisan db:seed --class=SeccionTableSeeder
+
+php artisan make:seeder 'TinscripcionTableSeeder' &&
+php artisan db:seed --class=TinscripcionTableSeeder
+
+php artisan make:seeder 'InscripcionTableSeeder' &&
+php artisan db:seed --class=InscripcionTableSeeder
+
+php artisan make:seeder 'CuentaXPagarTableSeeder' &&
+php artisan db:seed --class=CuentaXPagarTableSeeder
+
+php artisan make:seeder 'NomConceptoPagoTableSeeder' &&
+php artisan db:seed --class=NomConceptoPagoTableSeeder
+
+php artisan make:seeder 'ConceptoPagoTableSeeder' &&
+php artisan db:seed --class=ConceptoPagoTableSeeder
+
+php artisan make:seeder 'DescuentoTableSeeder' &&
+php artisan db:seed --class=DescuentoTableSeeder
+
+php artisan make:seeder 'MetodoPagoTableSeeder' &&
+php artisan db:seed --class=MetodoPagoTableSeeder
+
+php artisan make:seeder 'IngresoTableSeeder' &&
+php artisan db:seed --class=IngresoTableSeeder
+
+php artisan make:seeder 'RegistroPagoTableSeeder'
+php artisan db:seed --class=RegistroPagoTableSeeder
+
+php artisan make:seeder 'PagoTableSeeder'
+php artisan db:seed --class=PagoTableSeeder
+
+php artisan make:seeder 'CreditoAFavorTableSeeder'
+php artisan db:seed --class=CreditoAFavorTableSeeder
+
+php artisan make:seeder 'ConceptoCanceladoTableSeeder'
+php artisan db:seed --class=ConceptoCanceladoTableSeeder
+
+php artisan make:seeder 'DescuentoAplicadoTableSeeder'
+php artisan db:seed --class=DescuentoAplicadoTableSeeder
+
+php artisan make:seeder 'CreditoAplicadoTableSeeder'
+php artisan db:seed --class=CreditoAplicadoTableSeeder
+
+php artisan make:seeder 'AdministrativaTableSeeder'
+php artisan db:seed --class=AdministrativaTableSeeder
+
+php artisan make:seeder 'TypeCisTableSeeder'
+php artisan db:seed --class=TypeCisTableSeeder
+
+php artisan make:seeder 'EscolaridadTableSeeder'
+php artisan db:seed --class=EscolaridadTableSeeder
+
+php artisan make:seeder 'UsersProfesorsTableSeeder'
+php artisan db:seed --class=UsersProfesorsTableSeeder
+
+
+
+
+
+php artisan make:seeder 'IncidentReasonDescriptionTableSeeder'
+php artisan make:seeder 'IncidentDescriptionTableSeeder'
+
+php artisan make:seeder 'CatchmentGroupTableSeeder'
+php artisan db:seed --class=CatchmentGroupTableSeeder
+
+php artisan make:seeder 'CatchmentActivityTableSeeder'
+php artisan db:seed --class=CatchmentActivityTableSeeder

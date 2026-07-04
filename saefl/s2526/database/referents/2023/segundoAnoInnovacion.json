@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "163",
+        "name": "[IN-TE-PR-2] INNOVACIÓN TECNOLÓGICA Y PRODUCTIVA [pensumId=163]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-IN-TE-PR-2-01",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Diseña y construye prototipos tecnológicos que resuelven problemas del entorno escolar o comunitario.",
+            "descripcion": "Aplica el pensamiento de diseño, la creatividad y el uso de materiales reciclables o de bajo costo para desarrollar soluciones funcionales y sostenibles."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-02",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Aplica principios de robótica educativa y programación básica en proyectos de innovación.",
+            "descripcion": "Utiliza kits de robótica, sensores y lenguajes de programación visual (como Scratch o Arduino) para crear dispositivos automatizados con propósito social."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-03",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Desarrolla iniciativas de producción endógena sostenible vinculadas a la economía local y solidaria.",
+            "descripcion": "Crea bienes o servicios útiles (alimentos, objetos, software, contenidos) mediante el uso eficiente de recursos locales, conocimientos técnicos y principios de cooperación."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-04",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Utiliza herramientas digitales y multimedia para documentar, comunicar y difundir sus proyectos productivos e innovadores.",
+            "descripcion": "Produce videos, podcasts, infografías, redes sociales o plataformas web que visibilizan procesos y resultados de sus iniciativas con calidad y ética."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-05",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Gestiona recursos humanos, materiales y financieros de manera transparente, eficiente y participativa.",
+            "descripcion": "Planifica presupuestos, distribuye tareas, cuida insumos y rinde cuentas sobre el uso de recursos en sus proyectos grupales."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-06",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Evalúa críticamente el impacto de sus proyectos en términos sociales, ambientales y educativos.",
+            "descripcion": "Mide logros, identifica lecciones aprendidas, reconoce errores y propone mejoras para futuras intervenciones colectivas."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-07",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Fomenta la inclusión, la equidad y la diversidad en la conformación y dinámica de sus grupos de trabajo.",
+            "descripcion": "Garantiza la participación de todos los miembros sin discriminación, valora distintas habilidades y promueve un ambiente de respeto y corresponsabilidad."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-08",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Integra saberes ancestrales, científicos y artísticos en la resolución creativa de problemas cotidianos.",
+            "descripcion": "Combina conocimientos tradicionales, técnicos y estéticos para diseñar soluciones innovadoras, contextualizadas y culturalmente pertinentes."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-09",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Promueve la soberanía tecnológica y la apropiación crítica de las herramientas digitales.",
+            "descripcion": "Critica la dependencia tecnológica externa, defiende el uso de software libre y aboga por la formación nacional en ciencia, tecnología e innovación."
+        },
+        {
+            "id": "COMP-IN-TE-PR-2-10",
+            "referent_id": "2",
+            "pensum_id": 163,
+            "nombre": "Presenta y defiende públicamente sus proyectos ante audiencias escolares, comunitarias o institucionales.",
+            "descripcion": "Comunica con claridad, coherencia y creatividad los objetivos, procesos y resultados de su trabajo colectivo, respondiendo a preguntas y retroalimentación."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-IN-TE-PR-2-01-01",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-01",
+            "descripcion": "Identifica un problema técnico o social en su entorno (escuela, barrio, hogar) susceptible de solución con tecnología.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-01-02",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-02",
+            "descripcion": "Elabora bocetos o maquetas conceptuales de su prototipo antes de construirlo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-01-03",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-03",
+            "descripcion": "Construye un prototipo funcional utilizando materiales reciclables, de bajo costo o reutilizados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-01-04",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-04",
+            "descripcion": "Prueba y ajusta su prototipo según retroalimentación de usuarios o compañeros.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-01-05",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-05",
+            "descripcion": "Explica cómo su prototipo resuelve el problema planteado y mejora condiciones de vida.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-01-06",
+            "competency_id": "COMP-IN-TE-PR-2-01",
+            "codigo": "IN-TE-PR-2-IL-06",
+            "descripcion": "Reflexiona sobre el valor del pensamiento de diseño en la innovación social y tecnológica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-01",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-07",
+            "descripcion": "Ensambla un robot educativo básico (con ruedas, sensores, actuadores) siguiendo instrucciones técnicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-02",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-08",
+            "descripcion": "Programa secuencias simples en un lenguaje visual (Scratch, MakeCode) para controlar movimientos o acciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-03",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-09",
+            "descripcion": "Utiliza sensores (luz, distancia, sonido) para que su dispositivo responda a estímulos del entorno.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-04",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-10",
+            "descripcion": "Resuelve errores de programación o conexión mediante prueba y error sistemático.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-05",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-11",
+            "descripcion": "Aplica la robótica a un propósito útil (riego automático, alarma, clasificador de residuos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-02-06",
+            "competency_id": "COMP-IN-TE-PR-2-02",
+            "codigo": "IN-TE-PR-2-IL-12",
+            "descripcion": "Argumenta por qué la robótica educativa fortalece el pensamiento lógico y la creatividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-01",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-13",
+            "descripcion": "Identifica recursos locales disponibles (materiales, saberes, espacios) para la producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-02",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-14",
+            "descripcion": "Diseña un producto útil (jabón, compost, mueble, app, pan) con fines prácticos o comerciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-03",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-15",
+            "descripcion": "Aplica técnicas artesanales, agrícolas o tecnológicas aprendidas en el proceso productivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-04",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-16",
+            "descripcion": "Calcula costos, precios justos y posibles excedentes para reinversión comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-05",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-17",
+            "descripcion": "Adopta prácticas sostenibles (reciclaje, bajo consumo, reutilización) en su producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-03-06",
+            "competency_id": "COMP-IN-TE-PR-2-03",
+            "codigo": "IN-TE-PR-2-IL-18",
+            "descripcion": "Vincula su iniciativa con principios de economía solidaria y soberanía local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-01",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-19",
+            "descripcion": "Graba y edita un video que muestre las etapas de su proyecto grupal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-02",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-20",
+            "descripcion": "Crea una cuenta o página en redes sociales para difundir sus iniciativas con responsabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-03",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-21",
+            "descripcion": "Diseña afiches, folletos o infografías con mensajes claros y atractivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-04",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-22",
+            "descripcion": "Produce un podcast o radioteatro que narre su experiencia colectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-05",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-23",
+            "descripcion": "Respeta derechos de autor y da crédito a fuentes o colaboradores en sus producciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-04-06",
+            "competency_id": "COMP-IN-TE-PR-2-04",
+            "codigo": "IN-TE-PR-2-IL-24",
+            "descripcion": "Utiliza lenguaje inclusivo, claro y contextualizado en todas sus comunicaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-01",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-25",
+            "descripcion": "Elabora un presupuesto estimado con ingresos y egresos previstos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-02",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-26",
+            "descripcion": "Distribuye tareas equitativamente y supervisa su cumplimiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-03",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-27",
+            "descripcion": "Cuida y mantiene en buen estado los materiales e insumos del grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-04",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-28",
+            "descripcion": "Rinde cuentas claras sobre el uso de recursos ante el grupo o la institución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-05",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-29",
+            "descripcion": "Busca apoyo institucional o comunitario cuando los recursos propios son insuficientes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-05-06",
+            "competency_id": "COMP-IN-TE-PR-2-05",
+            "codigo": "IN-TE-PR-2-IL-30",
+            "descripcion": "Promueve la transparencia y la honestidad en la gestión colectiva de bienes y fondos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-01",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-31",
+            "descripcion": "Define indicadores simples para medir el éxito de su proyecto (participación, impacto, calidad).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-02",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-32",
+            "descripcion": "Recoge retroalimentación de beneficiarios, compañeros y docentes sobre su iniciativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-03",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-33",
+            "descripcion": "Identifica aciertos y errores en la planificación y ejecución del proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-04",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-34",
+            "descripcion": "Propone mejoras concretas para futuras ediciones o nuevos proyectos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-05",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-35",
+            "descripcion": "Reconoce el aprendizaje colectivo más allá del producto final obtenido.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-06-06",
+            "competency_id": "COMP-IN-TE-PR-2-06",
+            "codigo": "IN-TE-PR-2-IL-36",
+            "descripcion": "Vincula su evaluación con criterios de sostenibilidad, equidad y replicabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-01",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-37",
+            "descripcion": "Asegura la participación de estudiantes con discapacidad, migrantes o de minorías en su grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-02",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-38",
+            "descripcion": "Escucha activamente todas las voces y facilita turnos equitativos de palabra.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-03",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-39",
+            "descripcion": "Resuelve conflictos internos mediante diálogo, mediación o consenso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-04",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-40",
+            "descripcion": "Valora las distintas habilidades (artísticas, técnicas, organizativas) de cada miembro.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-05",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-41",
+            "descripcion": "Evita jerarquías excluyentes y promueve la toma de decisiones colectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-07-06",
+            "competency_id": "COMP-IN-TE-PR-2-07",
+            "codigo": "IN-TE-PR-2-IL-42",
+            "descripcion": "Fomenta un clima de confianza, alegría y respeto mutuo en el equipo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-01",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-43",
+            "descripcion": "Consulta a adultos mayores o sabios comunitarios para incorporar saberes tradicionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-02",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-44",
+            "descripcion": "Aplica conocimientos científicos (química, física, biología) en su proceso productivo o creativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-03",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-45",
+            "descripcion": "Integra elementos estéticos (color, forma, ritmo, narrativa) en sus soluciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-04",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-46",
+            "descripcion": "Diseña prototipos que combinen funcionalidad, belleza y pertinencia cultural.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-05",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-47",
+            "descripcion": "Resuelve problemas cotidianos con creatividad, ingenio y recursos limitados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-08-06",
+            "competency_id": "COMP-IN-TE-PR-2-08",
+            "codigo": "IN-TE-PR-2-IL-48",
+            "descripcion": "Argumenta por qué la interdisciplinariedad enriquece la innovación social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-01",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-49",
+            "descripcion": "Identifica riesgos de la dependencia tecnológica externa en contextos escolares o nacionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-02",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-50",
+            "descripcion": "Utiliza software libre (LibreOffice, GIMP, Linux) en lugar de programas privativos cuando es posible.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-03",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-51",
+            "descripcion": "Defiende el derecho soberano de Venezuela a desarrollar su propia industria tecnológica.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-04",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-52",
+            "descripcion": "Promueve la formación técnica y científica como pilar del desarrollo endógeno.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-05",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-53",
+            "descripcion": "Critica la obsolescencia programada y el consumismo tecnológico como formas de dominación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-09-06",
+            "competency_id": "COMP-IN-TE-PR-2-09",
+            "codigo": "IN-TE-PR-2-IL-54",
+            "descripcion": "Propone estrategias para el mantenimiento, reparación y reutilización de equipos electrónicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-01",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-55",
+            "descripcion": "Prepara una presentación oral clara, estructurada y atractiva sobre su proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-02",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-56",
+            "descripcion": "Utiliza apoyos visuales (láminas, videos, prototipos) para reforzar su exposición.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-03",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-57",
+            "descripcion": "Responde con seguridad y argumentos a preguntas del público o jurado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-04",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-58",
+            "descripcion": "Destaca el aprendizaje colectivo y el impacto social de su iniciativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-05",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-59",
+            "descripcion": "Participa en ferias de ciencia, cultura o emprendimiento escolar o regional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-IN-TE-PR-2-10-06",
+            "competency_id": "COMP-IN-TE-PR-2-10",
+            "codigo": "IN-TE-PR-2-IL-60",
+            "descripcion": "Comparte su experiencia como modelo inspirador para otros grupos escolares.",
+            "nivel_esperado": 3
+        }
+    ]
+}

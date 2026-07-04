@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "102",
+        "name": "[CA-5] CASTELLANO [pensumId=102]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-CA-4-01",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Comprende textos expositivos y argumentativos identificando propósito, estructura y recursos discursivos.",
+            "descripcion": "Interpreta textos académicos, periodísticos y ensayísticos, reconociendo tesis, argumentos, contraargumentos y estrategias persuasivas."
+        },
+        {
+            "id": "COMP-CA-4-02",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Produce textos argumentativos coherentes, cohesionados y adaptados a distintos contextos comunicativos.",
+            "descripcion": "Escribe ensayos breves, cartas argumentativas y opiniones fundamentadas, respetando normas gramaticales y lógica discursiva."
+        },
+        {
+            "id": "COMP-CA-4-03",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Aplica estrategias de lectura crítica para analizar sesgos ideológicos, fuentes y credibilidad textual.",
+            "descripcion": "Evalúa la intencionalidad de medios de comunicación, redes sociales y textos institucionales desde una perspectiva ética y ciudadana."
+        },
+        {
+            "id": "COMP-CA-4-04",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Utiliza la paráfrasis, resumen y síntesis como herramientas para la comprensión y producción textual.",
+            "descripcion": "Reformula ideas ajenas sin alterar su sentido, distinguiendo entre cita, parafraseo y plagio."
+        },
+        {
+            "id": "COMP-CA-4-05",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Analiza el discurso lírico identificando elementos formales y temáticos en poesía venezolana y universal.",
+            "descripcion": "Reconoce figuras retóricas, ritmo, métrica libre, yo poético y función expresiva en obras contemporáneas y clásicas."
+        },
+        {
+            "id": "COMP-CA-4-06",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Valora la literatura como patrimonio cultural y herramienta de transformación social.",
+            "descripcion": "Establece relaciones entre obras literarias, identidad nacional, memoria histórica y justicia social, especialmente en autores venezolanos."
+        },
+        {
+            "id": "COMP-CA-4-07",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Participa en intercambios orales formales e informales con claridad, respeto y argumentación fundamentada.",
+            "descripcion": "Interviene en debates, mesas redondas y exposiciones orales, escuchando activamente y respondiendo con pertinencia."
+        },
+        {
+            "id": "COMP-CA-4-08",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Aplica normas ortográficas, gramaticales y de puntuación en la producción escrita formal.",
+            "descripcion": "Corrige errores de acentuación, concordancia, uso de signos de puntuación y registro léxico según el contexto."
+        },
+        {
+            "id": "COMP-CA-4-09",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Reconoce y utiliza diversos géneros discursivos según su finalidad comunicativa.",
+            "descripcion": "Selecciona el género adecuado para producir textos funcionales (informes, reseñas, manifiestos, guías) en contextos escolares y comunitarios."
+        },
+        {
+            "id": "COMP-CA-4-10",
+            "referent_id": "REF-EMG-2017",
+            "pensum_id": 102,
+            "nombre": "Desarrolla proyectos de investigación textual con fuentes confiables y citación ética.",
+            "descripcion": "Formula preguntas de indagación, recopila información de fuentes primarias y secundarias, y presenta hallazgos con rigor académico."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-CA-4-01-01",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-01",
+            "descripcion": "Identifica la tesis central en un texto argumentativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-01-02",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-02",
+            "descripcion": "Distingue entre argumentos, ejemplos y contraargumentos en un ensayo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-01-03",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-03",
+            "descripcion": "Reconoce el propósito comunicativo (persuadir, informar, criticar) de un texto periodístico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-01-04",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-04",
+            "descripcion": "Identifica conectores lógicos (causa, consecuencia, oposición) que organizan el discurso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-01-05",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-05",
+            "descripcion": "Relaciona la estructura del texto (introducción-desarrollo-conclusión) con su eficacia comunicativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-01-06",
+            "competency_id": "COMP-CA-4-01",
+            "codigo": "CA-5TO-IL-06",
+            "descripcion": "Detecta recursos retóricos (ironía, hipérbole, pregunta retórica) en textos argumentativos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-01",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-07",
+            "descripcion": "Formula una tesis clara y debatible en un ensayo breve.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-02",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-08",
+            "descripcion": "Organiza argumentos en párrafos coherentes con oraciones temáticas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-03",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-09",
+            "descripcion": "Utiliza conectores adecuados para garantizar la cohesión textual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-04",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-10",
+            "descripcion": "Adapta el registro lingüístico (formal/informal) al destinatario y propósito del texto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-05",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-11",
+            "descripcion": "Incluye evidencia relevante (datos, citas, ejemplos) para respaldar sus argumentos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-02-06",
+            "competency_id": "COMP-CA-4-02",
+            "codigo": "CA-5TO-IL-12",
+            "descripcion": "Concluye su texto reafirmando la tesis sin introducir ideas nuevas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-01",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-13",
+            "descripcion": "Identifica la fuente de un texto informativo y evalúa su autoridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-02",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-14",
+            "descripcion": "Reconoce manipulación emocional en titulares o publicaciones virales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-03",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-15",
+            "descripcion": "Contrasta versiones de un mismo hecho en distintos medios de comunicación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-04",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-16",
+            "descripcion": "Cuestiona la neutralidad aparente de un texto institucional o gubernamental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-05",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-17",
+            "descripcion": "Propone criterios para distinguir información verificable de opinión o desinformación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-03-06",
+            "competency_id": "COMP-CA-4-03",
+            "codigo": "CA-5TO-IL-18",
+            "descripcion": "Reflexiona sobre su propia posición ideológica al interpretar un texto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-01",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-19",
+            "descripcion": "Parafrasea un párrafo manteniendo el significado original y usando vocabulario propio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-02",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-20",
+            "descripcion": "Resume un texto extenso en no más de 1/3 de su extensión original.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-03",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-21",
+            "descripcion": "Sintetiza ideas de múltiples fuentes en un solo enunciado coherente.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-04",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-22",
+            "descripcion": "Evita el plagio mediante la cita textual o parafraseo con atribución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-05",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-23",
+            "descripcion": "Distingue entre idea principal y detalles secundarios en un texto académico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-04-06",
+            "competency_id": "COMP-CA-4-04",
+            "codigo": "CA-5TO-IL-24",
+            "descripcion": "Utiliza la paráfrasis como estrategia para comprender textos complejos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-01",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-25",
+            "descripcion": "Identifica el yo poético y lo distingue del autor real.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-02",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-26",
+            "descripcion": "Reconoce figuras literarias (metáfora, símil, personificación, hipérbole).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-03",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-27",
+            "descripcion": "Analiza el tema central de un poema (amor, muerte, libertad, identidad).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-04",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-28",
+            "descripcion": "Relaciona el ritmo y la métrica con la emoción transmitida en el poema.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-05",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-29",
+            "descripcion": "Compara dos poemas de autores venezolanos en cuanto a forma y contenido.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-05-06",
+            "competency_id": "COMP-CA-4-05",
+            "codigo": "CA-5TO-IL-30",
+            "descripcion": "Crea un poema breve aplicando recursos del discurso lírico estudiados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-01",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-31",
+            "descripcion": "Relaciona una obra literaria con problemas sociales actuales (migración, desigualdad, violencia).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-02",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-32",
+            "descripcion": "Identifica valores éticos promovidos o cuestionados en una narrativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-03",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-33",
+            "descripcion": "Reconoce la diversidad cultural representada en la literatura venezolana.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-04",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-34",
+            "descripcion": "Argumenta cómo la literatura puede inspirar acciones solidarias o transformadoras.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-05",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-35",
+            "descripcion": "Participa en clubes de lectura o tertulias literarias con aportes críticos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-06-06",
+            "competency_id": "COMP-CA-4-06",
+            "codigo": "CA-5TO-IL-36",
+            "descripcion": "Valora el acceso a la lectura como derecho humano y herramienta de emancipación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-01",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-37",
+            "descripcion": "Expone oralmente un tema con claridad, orden y apoyo visual.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-02",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-38",
+            "descripcion": "Escucha activamente y formula preguntas pertinentes a otros expositores.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-03",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-39",
+            "descripcion": "Defiende una postura en un debate con argumentos válidos y respeto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-04",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-40",
+            "descripcion": "Modula su voz, gestos y lenguaje corporal para reforzar su mensaje.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-05",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-41",
+            "descripcion": "Adapta su discurso oral al tipo de audiencia (compañeros, docentes, comunidad).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-07-06",
+            "competency_id": "COMP-CA-4-07",
+            "codigo": "CA-5TO-IL-42",
+            "descripcion": "Recibe retroalimentación oral con apertura y la incorpora a futuras intervenciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-01",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-43",
+            "descripcion": "Aplica correctamente las reglas de acentuación gráfica (agudas, graves, esdrújulas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-02",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-44",
+            "descripcion": "Utiliza signos de puntuación (coma, punto y coma, dos puntos) con propiedad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-03",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-45",
+            "descripcion": "Corrige errores de concordancia verbal y nominal en sus propios textos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-04",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-46",
+            "descripcion": "Evita muletillas, repeticiones innecesarias y vicios del lenguaje en textos formales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-05",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-47",
+            "descripcion": "Selecciona el léxico preciso según el campo semántico del tema tratado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-08-06",
+            "competency_id": "COMP-CA-4-08",
+            "codigo": "CA-5TO-IL-48",
+            "descripcion": "Revisa y edita sus textos en al menos dos versiones antes de entregarlos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-01",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-49",
+            "descripcion": "Elige el género discursivo adecuado para una situación comunicativa dada (carta, informe, reseña, manifiesto).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-02",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-50",
+            "descripcion": "Identifica las convenciones estructurales de un género (ej.: carta formal: fecha, destinatario, despedida).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-03",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-51",
+            "descripcion": "Adapta el contenido de un mismo mensaje a distintos géneros (ej.: noticia → resumen → infografía).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-04",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-52",
+            "descripcion": "Reconoce las diferencias entre géneros digitales (blog, tweet, hilo) y tradicionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-05",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-53",
+            "descripcion": "Produce un manifiesto escolar con lenguaje persuasivo y llamado a la acción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-09-06",
+            "competency_id": "COMP-CA-4-09",
+            "codigo": "CA-5TO-IL-54",
+            "descripcion": "Analiza cómo el género influye en la recepción del mensaje por parte del lector.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-01",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-55",
+            "descripcion": "Formula una pregunta de investigación clara, viable y relevante.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-02",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-56",
+            "descripcion": "Selecciona fuentes confiables (libros, revistas académicas, sitios institucionales).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-03",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-57",
+            "descripcion": "Organiza la información recolectada en categorías temáticas coherentes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-04",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-58",
+            "descripcion": "Cita fuentes en el cuerpo del texto y en la bibliografía según formato institucional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-05",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-59",
+            "descripcion": "Presenta hallazgos en un informe escrito con introducción, desarrollo y conclusiones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-CA-4-10-06",
+            "competency_id": "COMP-CA-4-10",
+            "codigo": "CA-5TO-IL-60",
+            "descripcion": "Defiende oralmente su investigación ante un jurado o audiencia escolar.",
+            "nivel_esperado": 3
+        }
+    ]
+}

@@ -1,0 +1,74 @@
+Añadir archivos al área de ensayo:
+git add .
+
+Ver los archivos que se han modificado,
+git status
+git status -v
+
+er el contenido modificado de los archivos,
+git diff
+git diff --chached
+git diff --stat
+
+Registrar cambios en el historial,
+git commit -m "Mis nuevos cambios"
+
+Añadir los cambios realizados en el proyecto directamente en el área de ensayo y en el historial
+git commit -am "Nuevos cambios
+
+Deshacer cambios en el área de ensayo y en el historial, git reset
+git reset
+
+Eliminar archivos del área de ensayo,
+git rm
+
+Listar, añadir y eliminar repositorios remotos,
+git remote -v
+
+Recibir actualizaciones de repositorios remotos, git fetch
+git fetch origin
+git merge origin/master
+
+Recibir actualizaciones de repositorios remotos, git pull
+git pull origin master
+
+Enviar actualizaciones a repositorios remotos, git push
+git push origin master
+
+errores
+git pull fails “unable to resolve reference” “unable to update local ref”
+rm .git/refs/remotes/origin/master
+git fetch
+git branch --set-upstream-to=origin/master
+
+
+Recuperar commit borrados
+//encuentra el sha del commit
+git fsck --lost-found
+//Recupera los archivos en repositorio local 
+git cherry-pick 7b84b1ac82fc97e6d418dda722bfa27aad06420f
+//agrega los archivos al area de prueba
+git add .
+//realiza el commir
+git commit -m
+//realiza el push
+git push origin master
+
+
+
+error: Entry 'filename.c' not uptodate. Cannot merge.
+
+git checkout --ours filename.c
+git checkout --theirs filename.c
+git add filename.c
+git commit -m "using theirs"
+git pull origin master
+
+Pull is not possible because you have unmerged files.
+git fetch origin
+git reset --hard origin/master
+git pull
+
+
+If you want to turn this warning off, type this in the git command line
+git config core.autocrlf true

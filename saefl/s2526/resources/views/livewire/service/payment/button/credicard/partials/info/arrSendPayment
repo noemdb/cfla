@@ -1,0 +1,88 @@
+array:3 [▼
+  "headers" => array:1 [▼
+    "Authorization" => "Bearer 050634d0-a399-11ed-b201-e74cdee9beb2"
+  ]
+  "query" => array:1 [▼
+    "payment_type" => "CARD_PAYMENT"
+  ]
+  "json" => array:9 [▼
+    "reason" => "Prueba"
+    "amount" => 1
+    "currency" => "VED"
+    "order_number" => "string"
+    "payer_name" => "Ariana"
+    "payer_email" => "arianamijares22@gmail.com"
+    "card_bank_code" => "0172"
+    "debit_card" => array:11 [▼
+      "card_number" => "5859480000000146871"
+      "expiration_month" => "06"
+      "expiration_year" => "24"
+      "holder_name" => "Ariana Dominguez"
+      "holder_id_doc" => "CI"
+      "holder_id" => "V016673906"
+      "card_type" => "DEBIT"
+      "account_type" => "CORRIENTE"
+      "pin" => "1234"
+      "cvc" => "941"
+      "bank_card_validation" => array:1 [▼
+        "token" => "123456"
+      ]
+    ]
+    "country" => "VE"
+  ]
+]
+
+
+body [
+  "reason" => "Prueba"
+  "amount" => 1
+  "currency" => "VED"
+  "order_number" => "string"
+  "payer_name" => "Ariana"
+  "payer_email" => "arianamijares22@gmail.com"
+  "card_bank_code" => "0172"
+  "debit_card" => array:11 [
+    "card_number" => "5859480000000146871"
+    "expiration_month" => "06"
+    "expiration_year" => "24"
+    "holder_name" => "Ariana Mijares"
+    "holder_id_doc" => "CI"
+    "holder_id" => "V016673906"
+    "card_type" => "DEBIT"
+    "account_type" => "CORRIENTE"
+    "pin" => "1234"
+    "cvc" => "941"
+    "bank_card_validation" => array:2 [
+      "rif" => "V000011111"
+      "token" => "123456"
+    ]
+  ]
+  "country" => "VE"
+]
+
+"raw": "{
+
+  "reason': "Prueba",
+  'amount': 1,
+  'currency': 'VED',
+  'order_number': 'string',
+  'payer_name': 'Ariana',
+  'payer_email': 'arianamijares22@gmail.com',
+  'card_bank_code': '0116',
+  'credit_card': {
+      'card_number': '4761340000000019',
+      'expiration_month': '12',
+      'expiration_year': '22',
+      'holder_name': 'Ariana Mijares',
+      'holder_id_doc': 'RIF',
+      'holder_id': 'V000001234',
+      'card_type': 'TDC',
+      'cvc': '946',
+      'currency': 'VED',
+      'bank_card_validation': {
+          'token': '123456'
+      }
+  }
+
+
+}",

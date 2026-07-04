@@ -1,0 +1,6 @@
+Controller para vistas
+php artisan make:controller 'Common\HomeController'
+
+php artisan make:controller 'Common\Crud\TaskController' --resource
+php artisan make:controller 'Common\Crud\MessegeController' --resource
+php artisan make:controller 'Common\Crud\AlertController' --resource

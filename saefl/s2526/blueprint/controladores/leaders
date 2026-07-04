@@ -1,0 +1,12 @@
+php artisan make:controller 'Leader\HomeController'
+php artisan make:controller 'Leader\Tab\LearningController'
+php artisan make:controller 'Leader\Tab\ControlController'
+php artisan make:controller 'Leader\Tab\AssitAttendanceController'
+
+php artisan make:controller 'Leader\Tab\UserController'
+php artisan make:controller 'Leader\Tab\MailerController'
+
+
+php artisan make:controller 'Profesor\Tab\LearningController'
+php artisan make:controller 'Leader\Tab\ActivityController'
+php artisan make:controller 'Leader\Tab\ProfesorController'

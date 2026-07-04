@@ -1,0 +1,4 @@
+php artisan make:controller 'Estudiant\HomeController' &&
+php artisan make:controller 'Estudiant\Tab\AdministracionController' &&
+php artisan make:controller 'Estudiant\Tab\ControlController' &&
+php artisan make:controller 'Estudiant\Tab\AulaController' &&

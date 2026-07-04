@@ -1,0 +1,4 @@
+#php artisan make:controller 'Common\Chart\ChartController'
+php artisan make:controller 'Common\Chart\TasksController'
+php artisan make:controller 'Common\Chart\AlertsController'
+php artisan make:controller 'Common\Chart\MessegesController'

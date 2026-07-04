@@ -2,6 +2,7 @@
 
 namespace App\Models\app\Admon;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -38,21 +39,42 @@ class ExchangeRate extends Model
         'user_id'
     ];
 
-    protected $dates = ['created_at','updated_at','date'];
+    protected $casts = [
+        'date' => 'date',
+    ];
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
     }
 
     public function currency()
     {
-        return $this->belongsTo('App\Models\app\Planpago\Currency');
+        return $this->belongsTo('App\Models\app\Admon\Currency');
     }
 
     public function currency_referential()
     {
-        return $this->belongsTo('App\Models\app\Planpago\ReferentialCurrency');
+        return $this->belongsTo('App\Models\app\Admon\ReferentialCurrency');
     }
 
+    public static function getAmmountExchange()
+    {
+        $exchange = ExchangeRate::whereDate('date', Carbon::now())
+            ->whereNotNull('ammount')
+            ->first();
+
+        return ($exchange) ? $exchange->ammount : null;
+    }
+
+    public static function getAmmountExchangeNear($date = null)
+    {
+        $date = $date ?: Carbon::now();
+        $exchange = ExchangeRate::whereDate('date', '<=', $date)
+            ->whereNotNull('ammount')
+            ->orderBy('date', 'desc')
+            ->first();
+
+        return ($exchange) ? $exchange->ammount : null;
+    }
 }

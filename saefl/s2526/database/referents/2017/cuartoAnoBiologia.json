@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "96",
+        "name": "[QU-4] QUÍMICA [pensumId=96]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-QU-4-01",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Aplica principios de la termodinámica química para analizar transformaciones energéticas en reacciones.",
+            "descripcion": "Interpreta conceptos como entalpía, entropía y energía libre de Gibbs para predecir la espontaneidad y dirección de procesos químicos."
+        },
+        {
+            "id": "COMP-QU-4-02",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Determina el equilibrio químico en sistemas reversibles mediante constantes y factores que lo alteran.",
+            "descripcion": "Utiliza la ley de acción de masas, el principio de Le Chatelier y cálculos de Kc/Kp para analizar sistemas en equilibrio."
+        },
+        {
+            "id": "COMP-QU-4-03",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Resuelve problemas cuantitativos sobre estequiometría en reacciones químicas balanceadas.",
+            "descripcion": "Calcula masas, volúmenes, concentraciones y rendimientos teóricos y reales en procesos químicos industriales o cotidianos."
+        },
+        {
+            "id": "COMP-QU-4-04",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Analiza propiedades ácido-base mediante teorías clásicas y modernas.",
+            "descripcion": "Aplica las definiciones de Arrhenius, Brønsted-Lowry y Lewis para identificar ácidos, bases, pares conjugados y pH en soluciones."
+        },
+        {
+            "id": "COMP-QU-4-05",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Diseña y ejecuta experimentos seguros para caracterizar sustancias y reacciones químicas.",
+            "descripcion": "Planifica procedimientos, selecciona materiales, aplica normas de bioseguridad y registra observaciones con rigor científico."
+        },
+        {
+            "id": "COMP-QU-4-06",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Evalúa el impacto ambiental de procesos químicos industriales y domésticos.",
+            "descripcion": "Identifica contaminantes, residuos peligrosos y emisiones, proponiendo alternativas sostenibles alineadas con la química verde."
+        },
+        {
+            "id": "COMP-QU-4-07",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Interpreta la cinética química para explicar la velocidad de las reacciones y sus factores condicionantes.",
+            "descripcion": "Relaciona concentración, temperatura, catalizadores y superficie de contacto con la rapidez de transformaciones químicas."
+        },
+        {
+            "id": "COMP-QU-4-08",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Comprende la estructura atómica y molecular como base de las propiedades de la materia.",
+            "descripcion": "Utiliza modelos atómicos, configuraciones electrónicas y enlaces químicos para explicar comportamientos físicos y químicos."
+        },
+        {
+            "id": "COMP-QU-4-09",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Aplica conocimientos de química en contextos de salud, alimentación y bienestar comunitario.",
+            "descripcion": "Relaciona nutrientes, medicamentos, aditivos y contaminantes con su composición química y efectos biológicos."
+        },
+        {
+            "id": "COMP-QU-4-10",
+            "referent_id": "1",
+            "pensum_id": 96,
+            "nombre": "Desarrolla proyectos investigativos que integran saberes químicos, ética científica y responsabilidad social.",
+            "descripcion": "Formula preguntas, diseña metodologías, analiza datos y comunica hallazgos con rigor, creatividad y compromiso con el entorno."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-QU-4-01-01",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-01",
+            "descripcion": "Define entalpía y distingue entre reacciones exotérmicas y endotérmicas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-01-02",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-02",
+            "descripcion": "Calcula la variación de entalpía (∆H) en reacciones a partir de datos tabulados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-01-03",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-03",
+            "descripcion": "Explica el concepto de entropía como medida del desorden en un sistema.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-01-04",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-04",
+            "descripcion": "Predice la espontaneidad de una reacción usando la energía libre de Gibbs (∆G = ∆H – T∆S).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-01-05",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-05",
+            "descripcion": "Relaciona transformaciones energéticas con procesos biológicos (ej.: respiración celular, fotosíntesis).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-01-06",
+            "competency_id": "COMP-QU-4-01",
+            "codigo": "QU-4TO-IL-06",
+            "descripcion": "Argumenta cómo la termodinámica sustenta tecnologías de aprovechamiento energético (combustibles, baterías).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-01",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-07",
+            "descripcion": "Escribe la expresión de la constante de equilibrio (Kc) para una reacción dada.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-02",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-08",
+            "descripcion": "Calcula Kc o Kp a partir de concentraciones o presiones en equilibrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-03",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-09",
+            "descripcion": "Aplica el principio de Le Chatelier para predecir el efecto de cambios en concentración, presión o temperatura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-04",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-10",
+            "descripcion": "Interpreta gráficas de concentración vs. tiempo para identificar el estado de equilibrio.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-05",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-11",
+            "descripcion": "Relaciona el valor de K con la posición del equilibrio (reactivos vs. productos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-02-06",
+            "competency_id": "COMP-QU-4-02",
+            "codigo": "QU-4TO-IL-12",
+            "descripcion": "Explica la importancia del equilibrio químico en procesos industriales (ej.: síntesis de amoníaco).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-01",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-13",
+            "descripcion": "Balancea ecuaciones químicas por tanteo o método algebraico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-02",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-14",
+            "descripcion": "Calcula masas molares y número de moles en compuestos dados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-03",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-15",
+            "descripcion": "Resuelve problemas de estequiometría masa-masa, masa-volumen y volumen-volumen.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-04",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-16",
+            "descripcion": "Determina el reactivo limitante y el rendimiento teórico en una reacción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-05",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-17",
+            "descripcion": "Calcula el porcentaje de rendimiento real en experimentos escolares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-03-06",
+            "competency_id": "COMP-QU-4-03",
+            "codigo": "QU-4TO-IL-18",
+            "descripcion": "Aplica la estequiometría a procesos cotidianos (ej.: combustión de gas, neutralización de acidez).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-01",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-19",
+            "descripcion": "Identifica ácidos y bases según la teoría de Arrhenius en soluciones acuosas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-02",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-20",
+            "descripcion": "Reconoce pares ácido-base conjugados según Brønsted-Lowry.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-03",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-21",
+            "descripcion": "Clasifica sustancias como ácidos o bases de Lewis en reacciones de coordinación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-04",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-22",
+            "descripcion": "Calcula el pH de soluciones ácidas o básicas fuertes a partir de su concentración.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-05",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-23",
+            "descripcion": "Interpreta escalas de pH y su relación con la acidez o basicidad de alimentos, suelos o aguas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-04-06",
+            "competency_id": "COMP-QU-4-04",
+            "codigo": "QU-4TO-IL-24",
+            "descripcion": "Explica el funcionamiento de indicadores ácido-base y buffers en sistemas biológicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-01",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-25",
+            "descripcion": "Elabora un protocolo experimental con objetivos, materiales, procedimiento y medidas de seguridad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-02",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-26",
+            "descripcion": "Utiliza equipo de laboratorio (pipetas, buretas, probetas) con precisión y cuidado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-03",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-27",
+            "descripcion": "Aplica normas de bioseguridad (uso de guantes, gafas, campana de extracción).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-04",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-28",
+            "descripcion": "Registra observaciones cualitativas (color, olor, precipitado) y cuantitativas (masa, volumen, temperatura).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-05",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-29",
+            "descripcion": "Identifica variables independientes, dependientes y controladas en un experimento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-05-06",
+            "competency_id": "COMP-QU-4-05",
+            "codigo": "QU-4TO-IL-30",
+            "descripcion": "Presenta resultados en tablas y gráficos con unidades y cifras significativas correctas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-01",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-31",
+            "descripcion": "Identifica contaminantes químicos en el aire, agua y suelo (metales pesados, plásticos, detergentes).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-02",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-32",
+            "descripcion": "Relaciona procesos industriales (minería, petróleo) con impactos ambientales locales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-03",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-33",
+            "descripcion": "Propone estrategias de manejo seguro de residuos químicos en el laboratorio escolar.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-04",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-34",
+            "descripcion": "Evalúa productos de limpieza o cosméticos por su composición y biodegradabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-05",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-35",
+            "descripcion": "Argumenta a favor de la química verde como alternativa sostenible en la producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-06-06",
+            "competency_id": "COMP-QU-4-06",
+            "codigo": "QU-4TO-IL-36",
+            "descripcion": "Vincula sus análisis con los ODS 6 (Agua limpia), 12 (Producción responsable) y 14 (Vida submarina).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-01",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-37",
+            "descripcion": "Define velocidad de reacción y la expresa como cambio de concentración por unidad de tiempo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-02",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-38",
+            "descripcion": "Explica cómo la concentración afecta la frecuencia de colisiones efectivas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-03",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-39",
+            "descripcion": "Describe el papel de los catalizadores en la reducción de la energía de activación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-04",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-40",
+            "descripcion": "Relaciona el aumento de temperatura con mayor energía cinética y velocidad de reacción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-05",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-41",
+            "descripcion": "Diseña un experimento para comparar la velocidad de reacción bajo distintas condiciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-07-06",
+            "competency_id": "COMP-QU-4-07",
+            "codigo": "QU-4TO-IL-42",
+            "descripcion": "Aplica la cinética química a procesos biológicos (ej.: digestión, fermentación).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-01",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-43",
+            "descripcion": "Escribe configuraciones electrónicas de elementos del período 1 al 4.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-02",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-44",
+            "descripcion": "Relaciona la posición en la tabla periódica con propiedades como electronegatividad y radio atómico.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-03",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-45",
+            "descripcion": "Distingue entre enlaces iónicos, covalentes y metálicos según diferencias de electronegatividad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-04",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-46",
+            "descripcion": "Representa estructuras de Lewis para moléculas simples y predice su geometría (VSEPR).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-05",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-47",
+            "descripcion": "Explica propiedades macroscópicas (punto de fusión, conductividad) a partir del tipo de enlace.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-08-06",
+            "competency_id": "COMP-QU-4-08",
+            "codigo": "QU-4TO-IL-48",
+            "descripcion": "Relaciona la hibridación y orbitales moleculares con la formación de enlaces complejos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-01",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-49",
+            "descripcion": "Identifica macronutrientes y micronutrientes por su composición química.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-02",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-50",
+            "descripcion": "Analiza etiquetas nutricionales para detectar aditivos, conservantes o colorantes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-03",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-51",
+            "descripcion": "Explica el mecanismo de acción de medicamentos comunes (analgésicos, antiácidos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-04",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-52",
+            "descripcion": "Relaciona el pH gástrico con la digestión y el uso de antiácidos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-05",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-53",
+            "descripcion": "Evalúa riesgos de sustancias tóxicas en el hogar (lejía, amoníaco, insecticidas).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-09-06",
+            "competency_id": "COMP-QU-4-09",
+            "codigo": "QU-4TO-IL-54",
+            "descripcion": "Promueve hábitos de consumo informado basados en conocimientos químicos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-01",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-55",
+            "descripcion": "Formula una pregunta investigable sobre un problema químico local (contaminación, calidad del agua, residuos).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-02",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-56",
+            "descripcion": "Diseña una metodología segura, replicable y ética para abordar su pregunta.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-03",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-57",
+            "descripcion": "Recopila y organiza datos mediante tablas, gráficos y descripciones sistemáticas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-04",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-58",
+            "descripcion": "Analiza resultados con base en principios químicos y los contrasta con hipótesis iniciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-05",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-59",
+            "descripcion": "Propone soluciones técnicas, educativas o comunitarias derivadas de su investigación.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-QU-4-10-06",
+            "competency_id": "COMP-QU-4-10",
+            "codigo": "QU-4TO-IL-60",
+            "descripcion": "Comunica sus hallazgos en un informe o presentación oral con rigor, claridad y responsabilidad social.",
+            "nivel_esperado": 3
+        }
+    ]
+}

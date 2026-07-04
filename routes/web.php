@@ -15,6 +15,7 @@ use App\Http\Controllers\VotingFingerprintController;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Diagnostic\IndexComponent as DiagnosticIndex;
 use App\Livewire\Admin\Educational\Competition\IndexComponent as CompetitionIndex;
+use App\Livewire\Bot\IndexComponent as BotIndex;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,8 @@ Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
 Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
 Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
+
+Route::get('/bot', BotIndex::class)->name('bot.index');
 
 Route::get('/censo', [CensusController::class, 'index'])->name('census');
 Route::get('/catchment/download-pdf/{token}', [CatchmentPDFController::class, 'downloadPDF'])->name('catchment.download.pdf');

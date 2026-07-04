@@ -1,0 +1,500 @@
+{
+    "area_formacion": {
+        "pensumId": "101",
+        "name": "[PG-4] PARTICIPACIÓN EN GRUPOS DE CREACIÓN, RECREACIÓN Y PRODUCCIÓN [pensumId=101]"
+    },
+    "competencias": [
+        {
+            "id": "COMP-PG-4-01",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Diseña y ejecuta proyectos colectivos de creación artística, cultural o tecnológica con propósito social.",
+            "descripcion": "Formula ideas originales, organiza equipos, asigna roles y produce obras o productos que respondan a necesidades o expresiones de su entorno escolar o comunitario."
+        },
+        {
+            "id": "COMP-PG-4-02",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Participa en actividades lúdicas, recreativas y deportivas que fortalezcan la convivencia, la salud y el trabajo en equipo.",
+            "descripcion": "Se involucra activamente en juegos, festivales, torneos o eventos culturales que promuevan el bienestar integral y la integración grupal."
+        },
+        {
+            "id": "COMP-PG-4-03",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Desarrolla iniciativas de producción endógena sostenible vinculadas a la economía local y solidaria.",
+            "descripcion": "Crea bienes o servicios útiles (alimentos, objetos, software, contenidos) mediante el uso eficiente de recursos locales, conocimientos técnicos y principios de cooperación."
+        },
+        {
+            "id": "COMP-PG-4-04",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Aplica metodologías de investigación-acción para diagnosticar y transformar realidades comunitarias.",
+            "descripcion": "Identifica problemas locales, recopila información con rigor, propone soluciones viables y las implementa en alianza con actores sociales."
+        },
+        {
+            "id": "COMP-PG-4-05",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Utiliza herramientas digitales y multimedia para documentar, comunicar y difundir sus proyectos colectivos.",
+            "descripcion": "Produce videos, podcasts, infografías, redes sociales o plataformas web que visibilicen procesos y resultados de sus iniciativas con calidad y ética."
+        },
+        {
+            "id": "COMP-PG-4-06",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Gestiona recursos humanos, materiales y financieros de manera transparente, eficiente y participativa.",
+            "descripcion": "Planifica presupuestos, distribuye tareas, cuida insumos y rinde cuentas sobre el uso de recursos en sus proyectos grupales."
+        },
+        {
+            "id": "COMP-PG-4-07",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Evalúa críticamente el impacto de sus proyectos en términos sociales, ambientales y educativos.",
+            "descripcion": "Mide logros, identifica lecciones aprendidas, reconoce errores y propone mejoras para futuras intervenciones colectivas."
+        },
+        {
+            "id": "COMP-PG-4-08",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Fomenta la inclusión, la equidad y la diversidad en la conformación y dinámica de sus grupos de trabajo.",
+            "descripcion": "Garantiza la participación de todos los miembros sin discriminación, valora distintas habilidades y promueve un ambiente de respeto y corresponsabilidad."
+        },
+        {
+            "id": "COMP-PG-4-09",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Integra saberes ancestrales, científicos y artísticos en la resolución creativa de problemas cotidianos.",
+            "descripcion": "Combina conocimientos tradicionales, técnicos y estéticos para diseñar soluciones innovadoras, contextualizadas y culturalmente pertinentes."
+        },
+        {
+            "id": "COMP-PG-4-10",
+            "referent_id": "1",
+            "pensum_id": 101,
+            "nombre": "Presenta y defiende públicamente sus proyectos ante audiencias escolares, comunitarias o institucionales.",
+            "descripcion": "Comunica con claridad, coherencia y creatividad los objetivos, procesos y resultados de su trabajo colectivo, respondiendo a preguntas y retroalimentación."
+        }
+    ],
+    "indicadores": [
+        {
+            "id": "IND-PG-4-01-01",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-01",
+            "descripcion": "Formula una idea original para un proyecto grupal (obra teatral, mural, app, huerto, campaña).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-01-02",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-02",
+            "descripcion": "Elabora un plan básico de acción con objetivos, actividades, cronograma y responsables.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-01-03",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-03",
+            "descripcion": "Asigna roles según las fortalezas e intereses de los miembros del grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-01-04",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-04",
+            "descripcion": "Produce un producto tangible o intangible (obra, prototipo, evento) con calidad y pertinencia.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-01-05",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-05",
+            "descripcion": "Relaciona su creación con temas de interés social, cultural o ambiental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-01-06",
+            "competency_id": "COMP-PG-4-01",
+            "codigo": "PG-4TO-IL-06",
+            "descripcion": "Reflexiona sobre el valor del trabajo colaborativo en la generación de conocimiento y cultura.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-01",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-07",
+            "descripcion": "Participa activamente en juegos tradicionales, deportivos o lúdicos organizados por la escuela.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-02",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-08",
+            "descripcion": "Colabora en la organización de festivales, ferias o celebraciones escolares.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-03",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-09",
+            "descripcion": "Demuestra espíritu deportivo, respeto a las reglas y compañerismo en actividades recreativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-04",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-10",
+            "descripcion": "Promueve la inclusión de todos los compañeros en actividades lúdicas, sin exclusión.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-05",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-11",
+            "descripcion": "Vincula la recreación con la salud física, mental y emocional del grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-02-06",
+            "competency_id": "COMP-PG-4-02",
+            "codigo": "PG-4TO-IL-12",
+            "descripcion": "Propone nuevas formas de juego o entretenimiento basadas en la cultura local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-01",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-13",
+            "descripcion": "Identifica recursos locales disponibles (materiales, saberes, espacios) para la producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-02",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-14",
+            "descripcion": "Diseña un producto útil (jabón, compost, mueble, software, pan) con fines prácticos o comerciales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-03",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-15",
+            "descripcion": "Aplica técnicas artesanales, agrícolas o tecnológicas aprendidas en el proceso productivo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-04",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-16",
+            "descripcion": "Calcula costos, precios justos y posibles excedentes para reinversión comunitaria.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-05",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-17",
+            "descripcion": "Adopta prácticas sostenibles (reciclaje, bajo consumo, reutilización) en su producción.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-03-06",
+            "competency_id": "COMP-PG-4-03",
+            "codigo": "PG-4TO-IL-18",
+            "descripcion": "Vincula su iniciativa con principios de economía solidaria y soberanía local.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-01",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-19",
+            "descripcion": "Formula una pregunta investigable sobre un problema comunitario (basura, inseguridad, acceso al agua).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-02",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-20",
+            "descripcion": "Recopila datos mediante encuestas, observación, entrevistas o revisión documental.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-03",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-21",
+            "descripcion": "Analiza la información recopilada y propone soluciones viables y participativas.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-04",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-22",
+            "descripcion": "Implementa una acción concreta derivada de su diagnóstico (campaña, taller, infraestructura).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-05",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-23",
+            "descripcion": "Involucra a actores locales (vecinos, consejos comunales, instituciones) en la solución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-04-06",
+            "competency_id": "COMP-PG-4-04",
+            "codigo": "PG-4TO-IL-24",
+            "descripcion": "Documenta todo el proceso como experiencia de investigación-acción transformadora.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-01",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-25",
+            "descripcion": "Graba y edita un video que muestre las etapas de su proyecto grupal.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-02",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-26",
+            "descripcion": "Crea una cuenta o página en redes sociales para difundir sus iniciativas con responsabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-03",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-27",
+            "descripcion": "Diseña afiches, folletos o infografías con mensajes claros y atractivos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-04",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-28",
+            "descripcion": "Produce un podcast o radioteatro que narre su experiencia colectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-05",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-29",
+            "descripcion": "Respeta derechos de autor y da crédito a fuentes o colaboradores en sus producciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-05-06",
+            "competency_id": "COMP-PG-4-05",
+            "codigo": "PG-4TO-IL-30",
+            "descripcion": "Utiliza lenguaje inclusivo, claro y contextualizado en todas sus comunicaciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-01",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-31",
+            "descripcion": "Elabora un presupuesto estimado con ingresos y egresos previstos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-02",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-32",
+            "descripcion": "Distribuye tareas equitativamente y supervisa su cumplimiento.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-03",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-33",
+            "descripcion": "Cuida y mantiene en buen estado los materiales e insumos del grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-04",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-34",
+            "descripcion": "Rinde cuentas claras sobre el uso de recursos ante el grupo o la institución.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-05",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-35",
+            "descripcion": "Busca apoyo institucional o comunitario cuando los recursos propios son insuficientes.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-06-06",
+            "competency_id": "COMP-PG-4-06",
+            "codigo": "PG-4TO-IL-36",
+            "descripcion": "Promueve la transparencia y la honestidad en la gestión colectiva de bienes y fondos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-01",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-37",
+            "descripcion": "Define indicadores simples para medir el éxito de su proyecto (participación, impacto, calidad).",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-02",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-38",
+            "descripcion": "Recoge retroalimentación de beneficiarios, compañeros y docentes sobre su iniciativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-03",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-39",
+            "descripcion": "Identifica aciertos y errores en la planificación y ejecución del proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-04",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-40",
+            "descripcion": "Propone mejoras concretas para futuras ediciones o nuevos proyectos.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-05",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-41",
+            "descripcion": "Reconoce el aprendizaje colectivo más allá del producto final obtenido.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-07-06",
+            "competency_id": "COMP-PG-4-07",
+            "codigo": "PG-4TO-IL-42",
+            "descripcion": "Vincula su evaluación con criterios de sostenibilidad, equidad y replicabilidad.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-01",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-43",
+            "descripcion": "Asegura la participación de estudiantes con discapacidad, migrantes o de minorías en su grupo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-02",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-44",
+            "descripcion": "Escucha activamente todas las voces y facilita turnos equitativos de palabra.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-03",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-45",
+            "descripcion": "Resuelve conflictos internos mediante diálogo, mediación o consenso.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-04",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-46",
+            "descripcion": "Valora las distintas habilidades (artísticas, técnicas, organizativas) de cada miembro.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-05",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-47",
+            "descripcion": "Evita jerarquías excluyentes y promueve la toma de decisiones colectiva.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-08-06",
+            "competency_id": "COMP-PG-4-08",
+            "codigo": "PG-4TO-IL-48",
+            "descripcion": "Fomenta un clima de confianza, alegría y respeto mutuo en el equipo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-01",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-49",
+            "descripcion": "Consulta a adultos mayores o sabios comunitarios para incorporar saberes tradicionales.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-02",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-50",
+            "descripcion": "Aplica conocimientos científicos (química, física, biología) en su proceso productivo o creativo.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-03",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-51",
+            "descripcion": "Integra elementos estéticos (color, forma, ritmo, narrativa) en sus soluciones.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-04",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-52",
+            "descripcion": "Diseña prototipos que combinen funcionalidad, belleza y pertinencia cultural.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-05",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-53",
+            "descripcion": "Resuelve problemas cotidianos con creatividad, ingenio y recursos limitados.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-09-06",
+            "competency_id": "COMP-PG-4-09",
+            "codigo": "PG-4TO-IL-54",
+            "descripcion": "Argumenta por qué la interdisciplinariedad enriquece la innovación social.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-01",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-55",
+            "descripcion": "Prepara una presentación oral clara, estructurada y atractiva sobre su proyecto.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-02",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-56",
+            "descripcion": "Utiliza apoyos visuales (láminas, videos, prototipos) para reforzar su exposición.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-03",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-57",
+            "descripcion": "Responde con seguridad y argumentos a preguntas del público o jurado.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-04",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-58",
+            "descripcion": "Destaca el aprendizaje colectivo y el impacto social de su iniciativa.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-05",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-59",
+            "descripcion": "Participa en ferias de ciencia, cultura o emprendimiento escolar o regional.",
+            "nivel_esperado": 3
+        },
+        {
+            "id": "IND-PG-4-10-06",
+            "competency_id": "COMP-PG-4-10",
+            "codigo": "PG-4TO-IL-60",
+            "descripcion": "Comparte su experiencia como modelo inspirador para otros grupos escolares.",
+            "nivel_esperado": 3
+        }
+    ]
+}

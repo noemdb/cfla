@@ -1,0 +1,20 @@
+//ajax
+php artisan make:controller 'Administracion\ajax\FillSelectController'
+php artisan make:controller 'Administracion\Ajax\FillDataTableController'
+php artisan make:controller 'Administracion\Ajax\ValidateExistController'
+php artisan make:controller 'Administracion\Ajax\ModalCreateController'
+php artisan make:controller 'Administracion\Ajax\FillPartialController'
+
+php artisan make:controller 'Common\Ajax\FillSelectController'
+
+php artisan make:controller 'Administracion\Ajax\Configuraciones\CuentaXPagarController'
+php artisan make:controller 'Administracion\Ajax\Configuraciones\ConceptoPagoController'
+php artisan make:controller 'Administracion\Ajax\Configuraciones\PlanBeneficoController'
+
+
+php artisan make:controller 'Administracion\Ajax\Api\RegistroPagoController'
+php artisan make:controller 'Administracion\Ajax\Api\AdministrativaController'
+php artisan make:controller 'Administracion\Ajax\Api\InscripcionController'
+
+
+php artisan make:controller 'Profesor\Ajax\FillPartialController'

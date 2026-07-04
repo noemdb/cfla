@@ -1,0 +1,276 @@
+{
+    "institucion": {
+        "nombre": "UE Colegio Fray Luis Amigó",
+        "direccion": "Av. Principal, Sector El Paraíso, Caracas",
+        "telefono": "+58 212-555-1234",
+        "email": "colegio@frayluisamigo.edu.ve",
+        "rif": "J-12345678-9",
+        "director": "Lic. María Fernanda Rodríguez",
+        "coordinador_academico": "Prof. Carlos Andrés Pérez"
+    },
+    "estudiante": {
+        "id": "EST-2024-00123",
+        "cedula": "28.123.456",
+        "nombre_completo": "Juan Carlos Rodríguez González",
+        "fecha_nacimiento": "15/03/2008",
+        "edad": 16,
+        "sexo": "Masculino",
+        "telefono_emergencia": "+58 412-555-7890",
+        "email": "jc.rodriguez@estudiante.edu.ve"
+    },
+    "grado": {
+        "id": "GRD-4TO",
+        "nombre": "Cuarto Año",
+        "seccion": "Sección 'A'",
+        "turno": "Mañana",
+        "tutor": "Prof. Ana María López"
+    },
+    "lapso_diagnostico": {
+        "id": "LAP-2024-I",
+        "nombre": "Lapso I - Diagnóstico Inicial",
+        "fecha_inicio": "15/01/2024",
+        "fecha_fin": "30/01/2024",
+        "ano_escolar": "2023-2024"
+    },
+    "instrumento_aplicado": {
+        "id": "DIAG-EMG-2024-v1",
+        "nombre": "Diagnóstico Inicial de Competencias Curriculares EMG 2024",
+        "version": "1.2",
+        "fecha_aplicacion_inicio": "16/01/2024",
+        "fecha_aplicacion_fin": "25/01/2024",
+        "total_preguntas": 85,
+        "preguntas_cerradas": 70,
+        "preguntas_abiertas": 15,
+        "proposito": "Identificar el nivel de desarrollo inicial de competencias curriculares para orientar la planificación docente.",
+        "alcance": "Evaluación diagnóstica inicial, no sumativa",
+        "limitaciones": "Considera solo evidencia recolectada en sesiones completadas"
+    },
+    "sesiones": {
+        "total_programadas": 6,
+        "completadas": 5,
+        "incompletas": 1,
+        "incompletas_detalle": [
+            {
+                "area": "Ciencias Naturales",
+                "motivo": "Interrupción eléctrica",
+                "duracion": "15 min de 60 min programados"
+            }
+        ]
+    },
+    "resultados_globales": {
+        "total_preguntas_respondidas": 78,
+        "preguntas_cerradas_respondidas": 65,
+        "preguntas_abiertas_respondidas": 13,
+        "aciertos_cerradas": 48,
+        "precision_global_cerradas": 73.8,
+        "nivel_global_cualitativo": "Developing",
+        "etiqueta_institucional": "Requiere acompañamiento",
+        "observaciones_generales": "El estudiante completó la mayoría de las sesiones programadas, mostrando disposición para la actividad. Se evidencia variabilidad en el desempeño según áreas."
+    },
+    "areas_evaluadas": [
+        {
+            "id": "MAT-4TO",
+            "nombre": "Matemática",
+            "total_preguntas": 20,
+            "preguntas_respondidas": 20,
+            "aciertos": 16,
+            "precision": 80.0,
+            "nivel_cualitativo": "Satisfactory",
+            "fortalezas": [
+                "Resolución de operaciones básicas (suma, resta, multiplicación)",
+                "Interpretación de gráficos simples",
+                "Cálculo de porcentajes básicos"
+            ],
+            "necesidades": [
+                "Resolución de problemas complejos con múltiples pasos",
+                "Aplicación de fórmulas geométricas",
+                "Interpretación de problemas verbales extensos"
+            ],
+            "observacion": "Buen desempeño en habilidades básicas, requiere fortalecimiento en pensamiento lógico complejo."
+        },
+        {
+            "id": "LL-4TO",
+            "nombre": "Lengua y Literatura",
+            "total_preguntas": 18,
+            "preguntas_respondidas": 18,
+            "aciertos": 12,
+            "precision": 66.7,
+            "nivel_cualitativo": "Developing",
+            "fortalezas": [
+                "Comprensión lectora de textos narrativos simples",
+                "Identificación de ideas principales",
+                "Ortografía básica"
+            ],
+            "necesidades": [
+                "Análisis crítico de textos",
+                "Producción escrita extensa",
+                "Uso de conectores y cohesión textual"
+            ],
+            "observacion": "Comprensión literal adecuada, necesita desarrollar habilidades de análisis y producción más complejas."
+        },
+        {
+            "id": "CN-4TO",
+            "nombre": "Ciencias Naturales",
+            "total_preguntas": 15,
+            "preguntas_respondidas": 10,
+            "aciertos": 6,
+            "precision": 60.0,
+            "nivel_cualitativo": "Developing",
+            "fortalezas": [
+                "Identificación de conceptos básicos de biología",
+                "Reconocimiento de procesos naturales simples"
+            ],
+            "necesidades": [
+                "Comprensión de procesos científicos complejos",
+                "Aplicación del método científico",
+                "Relación teoría-práctica"
+            ],
+            "observacion": "Evidencia limitada debido a sesión incompleta. Desempeño básico en conceptos fundamentales."
+        },
+        {
+            "id": "CS-4TO",
+            "nombre": "Ciencias Sociales",
+            "total_preguntas": 17,
+            "preguntas_respondidas": 15,
+            "aciertos": 11,
+            "precision": 73.3,
+            "nivel_cualitativo": "Developing",
+            "fortalezas": [
+                "Conocimiento de historia nacional básica",
+                "Identificación de instituciones venezolanas",
+                "Comprensión de derechos ciudadanos"
+            ],
+            "necesidades": [
+                "Análisis de procesos históricos complejos",
+                "Relación causa-efecto en contextos sociales",
+                "Pensamiento crítico sobre realidad social"
+            ],
+            "observacion": "Conocimiento factual adecuado, requiere desarrollo de habilidades analíticas."
+        }
+    ],
+    "contrastes_curriculares": [
+        {
+            "area": "Matemática",
+            "competencia": "Resuelve problemas matemáticos contextualizados",
+            "indicador": "MAT-4TO-IL-01: Identifica datos relevantes en problemas matemáticos",
+            "nivel_esperado": 3,
+            "nivel_observado": 3,
+            "brecha_valor": 0,
+            "brecha_etiqueta": "Sin brecha significativa",
+            "evidencia": "4 de 5 respuestas correctas en preguntas de identificación de datos",
+            "observacion_docente": "Buen desempeño en identificación básica de información"
+        },
+        {
+            "area": "Matemática",
+            "competencia": "Resuelve problemas matemáticos contextualizados",
+            "indicador": "MAT-4TO-IL-03: Selecciona operaciones adecuadas para resolver problemas",
+            "nivel_esperado": 3,
+            "nivel_observado": 2,
+            "brecha_valor": 1,
+            "brecha_etiqueta": "Brecha media",
+            "evidencia": "2 de 4 respuestas correctas en selección de operaciones",
+            "observacion_docente": "Dificultad para identificar operaciones en problemas complejos"
+        },
+        {
+            "area": "Lengua y Literatura",
+            "competencia": "Comprende y produce textos escritos",
+            "indicador": "LL-4TO-IL-02: Identifica ideas principales en textos narrativos",
+            "nivel_esperado": 3,
+            "nivel_observado": 3,
+            "brecha_valor": 0,
+            "brecha_etiqueta": "Sin brecha significativa",
+            "evidencia": "3 de 3 respuestas correctas en identificación de ideas",
+            "observacion_docente": "Adecuada comprensión literal"
+        },
+        {
+            "area": "Lengua y Literatura",
+            "competencia": "Comprende y produce textos escritos",
+            "indicador": "LL-4TO-IL-05: Produce textos coherentes con estructura adecuada",
+            "nivel_esperado": 3,
+            "nivel_observado": 2,
+            "brecha_valor": 1,
+            "brecha_etiqueta": "Brecha media",
+            "evidencia": "Respuesta abierta calificada como 'Developing' en rúbrica",
+            "observacion_docente": "Necesita mejorar cohesión y estructura textual"
+        },
+        {
+            "area": "Ciencias Naturales",
+            "competencia": "Aplica método científico en investigaciones",
+            "indicador": "CN-4TO-IL-03: Diseña experimentos simples",
+            "nivel_esperado": 3,
+            "nivel_observado": null,
+            "brecha_valor": null,
+            "brecha_etiqueta": "No evaluado por ausencia de evidencia",
+            "evidencia": "Pregunta no respondida (sesión incompleta)",
+            "observacion_docente": "Requiere evaluación complementaria"
+        }
+    ],
+    "perfil_diagnostico": {
+        "fortalezas_transversales": [
+            "Disposición positiva hacia las actividades",
+            "Persistencia en tareas iniciadas",
+            "Capacidad de concentración en actividades estructuradas",
+            "Habilidades básicas de cálculo y comprensión lectora"
+        ],
+        "necesidades_apoyo": [
+            "Desarrollo de pensamiento crítico y analítico",
+            "Fortalecimiento de habilidades de resolución de problemas complejos",
+            "Mejora en producción escrita extensa",
+            "Comprensión de procesos científicos metodológicos"
+        ],
+        "factores_actitudinales": [
+            "Participación activa en sesiones grupales",
+            "Respeto hacia consignas e instrucciones",
+            "Tolerancia moderada a la frustración",
+            "Colaboración con pares en actividades grupales"
+        ],
+        "sintesis_perfil": "Estudiante con disposición positiva y habilidades básicas consolidadas, que requiere acompañamiento focalizado en el desarrollo de pensamiento complejo y habilidades analíticas."
+    },
+    "recomendaciones_pedagogicas": {
+        "por_area": [
+            {
+                "area": "Matemática",
+                "recomendacion": "Implementar actividades de resolución de problemas progresivamente complejos, con enfoque en identificación de operaciones múltiples.",
+                "prioridad": "Alta",
+                "frecuencia": "Semanal",
+                "responsable": "Docente de Matemática"
+            },
+            {
+                "area": "Lengua y Literatura",
+                "recomendacion": "Desarrollar talleres de producción escrita con enfoque en estructura y cohesión textual, usando guías de escritura.",
+                "prioridad": "Media-Alta",
+                "frecuencia": "Bisemanal",
+                "responsable": "Docente de Lengua"
+            },
+            {
+                "area": "Ciencias Naturales",
+                "recomendacion": "Realizar evaluación complementaria del indicador no evaluado y reforzar metodología científica mediante experimentos guiados.",
+                "prioridad": "Media",
+                "frecuencia": "Quincenal",
+                "responsable": "Docente de Ciencias"
+            }
+        ],
+        "transversales": [
+            "Implementar estrategias de andamiaje para desarrollo de pensamiento crítico",
+            "Fomentar actividades que integren múltiples áreas de conocimiento",
+            "Establecer seguimiento quincenal de avances en habilidades prioritarias"
+        ],
+        "temporalizacion": {
+            "corto_plazo": "Primer mes: Evaluación y planificación de estrategias específicas",
+            "mediano_plazo": "Primer trimestre: Implementación de acompañamiento focalizado y seguimiento"
+        }
+    },
+    "referente_normativo": {
+        "nombre": "Reforma Curricular de Educación Media General 2017",
+        "version": "EMG-2017.1",
+        "resolucion": "DM/0033",
+        "vigencia": "Desde 2017"
+    },
+    "metadatos_generacion": {
+        "fecha_generacion": "01/02/2024",
+        "modelo_ia_utilizado": "gpt-4-turbo",
+        "version_system_prompt": "SYS-1.0",
+        "version_user_prompt": "USER-1.0",
+        "hash_datos": "a1b2c3d4e5f678901234567890123456"
+    }
+}

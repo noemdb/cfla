@@ -1,0 +1,64 @@
+@extends('administracion.layouts.dashboard.app')
+
+@section('title') Políticas de Cobranza - Registrar @endsection
+
+@section('main')
+
+    <main role="main" class="col-md-10 ml-sm-auto col-lg-10">
+
+        <div class="card card-primary mt-2">
+
+
+            <div class="card-header pb-0 mb-0 alert-secondary">
+                {{-- INI Menu rapido --}}
+                <div class="btn-group float-right pt-0 pb-2"> @include('administracion.collections.coll_politicals.menus.edit') </div>
+                {{-- FIN Menu rapido --}}
+
+                <h3>Actualizar <span class="font-weight-bolder">Política de Cobranza</span></h3>
+            </div>
+
+            <div class="card-body">
+
+                <div class="card-body">
+
+                    @include('administracion.elements.forms.errors')
+                    @include('administracion.elements.messeges.oper_ok')
+
+                    {!! Form::model($coll_political,['route' => ['administracion.collections.coll_politicals.update', $coll_political->id], 'method' => 'PUT', 'id'=>'form-update-collPolitical'.$coll_political->id, 'role'=>'form']) !!}
+
+                        <div class="card bd-callout bd-callout-primary">
+
+                            <h5 class="card-header pb-1 mb-1">
+                                <i class="{{ $icon_menus['editar'] ?? '' }} fa-1x text-dark float-right"></i>
+                                Datos
+                            </h5>
+
+                            <div class="card-body p-2">
+
+                                <div class="row">
+                                    <div class="col">
+
+                                        @include('administracion.collections.coll_politicals.form.fields')
+
+                                        <button type="submit" class="btn-user-update btn btn-primary btn-block" value="update" data-id="update" id="btn-update">
+                                            <i class="far fa-save"></i>
+                                            Actualizar
+                                        </button>
+                                    </div>
+                                    <div class="col-3">
+                                        @include('administracion.collections.coll_politicals.partials.resumen.create')
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    {!! Form::close() !!}
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+@endsection

@@ -1,0 +1,63 @@
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#pdfModal">
+    <i class="{{ $icon_menus['pdf'] ?? '' }} fa-1x"></i>
+</button>
+
+{!! Form::open([
+    'route' => 'administracion.administrativas.list.pdf',
+    'method' => 'POST',
+    'class' => '',
+    'role' => 'search',
+    'target' => '_blank',
+]) !!}
+
+<!-- Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">Imprime listado de estudiantes con inscripciones
+                    administrativas (PDF)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="list_pescolar" class="m-0 pt-2">Peŕodo Escolar a consultar</label>
+                {!! Form::select('pescolar_id', $list_pescolar, old('list_pescolar'), [
+                    'class' => 'form-control pb-2',
+                    'id' => 'pescolar_id',
+                    'placeholder' => 'Seleccione',
+                    'required' => 'required',
+                ]) !!}
+                <label for="order" class="m-0 pt-2">Ordenado por</label>
+                {!! Form::select(
+                    'order',
+                    ['ci_estudiant' => 'Identificador', 'lastname' => 'Apellidos y nombres'],
+                    old('order'),
+                    ['class' => 'form-control', 'id' => 'order_list', 'placeholder' => 'Seleccione', 'required' => 'required'],
+                ) !!}
+                <label for="orientacion" class="m-0 pt-2">Orientación</label>
+                {!! Form::select('orientacion', ['portrait' => 'Vertical', 'landscape' => 'Horizontal'], old('orientacion'), [
+                    'class' => 'form-control',
+                    'id' => 'order_list',
+                    'placeholder' => 'Seleccione',
+                    'required' => 'required',
+                ]) !!}
+                <label for="paper" class="m-0 pt-2">Tamaño del papel</label>
+                {!! Form::select('paper', ['lettet' => 'Carta', 'A4' => 'Oficio'], old('paper'), [
+                    'class' => 'form-control',
+                    'id' => 'order_list',
+                    'placeholder' => 'Seleccione',
+                    'required' => 'required',
+                ]) !!}
+            </div>
+            <div class="modal-footer">
+                {{-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
+                <button class="btn btn-primary btn-block pt-2 mt-2" type="submit">Descargar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{!! Form::close() !!}

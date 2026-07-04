@@ -1,0 +1,23 @@
+<?php
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| rutas para los graficos del usuario
+|
+*/
+/*profesors*/
+Route::get('charts/evaluacions/actividades', 'Chart\EvaluacionController@actividades')->name('profesors.evaluacions.actividades.chart');
+
+// Route::get('charts/profesors/genderxplan', 'Chart\profesorsController@genderxplan')->name('administracion.profesors.genderxplan.chart');
+// Route::get('charts/profesors/genderxgrado', 'Chart\profesorsController@genderxgrado')->name('administracion.profesors.genderxgrado.chart');
+// Route::get('charts/usersactives', 'Chart\UsersController@UserActive')->name('users.actives.chart');
+// Route::get('charts/usersmonth', 'Chart\UsersController@UsersMonth')->name('users.months.chart');
+// Route::get('models/charts/profiles', 'Chart\ProfileController@index')->name('viewchartprofiles');
+// Route::get('models/charts/rols', 'Chart\RolController@index')->name('viewchartrols');
+
+// Route::get('charts/configuraciones/bancos/ingresoxmonth', 'Chart\BancosController@IngresoXMonth')->name('administracion.configuraciones.bancos.ingresoxmonth.chart');
+
+
+?>

@@ -1,0 +1,72 @@
+----------------------------------------------------------------------------------------
+Export
+
+php artisan make:controller 'Administracion\EXCEL\RepresentantFullController' &&
+php artisan make:export RepresentantFulltExport --model=Representant
+
+php artisan make:controller 'Administracion\EXCEL\EstudiantFullController' &&
+php artisan make:export EstudiantFulltExport --model=Estudiant
+
+php artisan make:controller 'Administracion\EXCEL\InscripcionController' &&
+php artisan make:export InscripcionExport --model=Inscripcion
+
+php artisan make:controller 'Administracion\EXCEL\ProfesorController' &&
+php artisan make:export ProfesorExport --model=Profesor
+
+php artisan make:controller 'Administracion\EXCEL\PevaluacionController' &&
+php artisan make:export PevaluacionExport --model=Pevaluacion
+
+php artisan make:controller 'Administracion\EXCEL\EvaluacionController' &&
+php artisan make:export EvaluacionExport --model=Evaluacion
+
+php artisan make:controller 'Administracion\EXCEL\BoletinController' &&
+php artisan make:export BoletinExport --model=Boletin
+
+php artisan make:controller 'Administracion\EXCEL\BoletinAjusteController' &&
+php artisan make:export BoletinAjusteExport --model=BoletinAjuste
+
+php artisan make:controller 'Administracion\EXCEL\AdministrativaController'
+php artisan make:export AdministrativaExport --model=Administrativa
+
+php artisan make:controller 'Administracion\EXCEL\RepresentantController'
+php artisan make:export RepresentantExport --model=Representant
+
+php artisan make:controller 'Administracion\EXCEL\EstudiantController' &&
+php artisan make:export EstudiantExport --model=Estudiant
+
+php artisan make:controller 'Administracion\EXCEL\RepresentantController' &&
+php artisan make:export RepresentantExport --model='App\Models\app\Estudiante\Representant'
+
+php artisan make:controller 'Administracion\EXCEL\AbonoController' &&
+php artisan make:export AbonoExport --model=Abono
+
+php artisan make:controller 'Administracion\EXCEL\IngresoController' &&
+php artisan make:export IngresoExport --model=Ingreso
+
+php artisan make:controller 'Administracion\EXCEL\CreditoAFavorController' &&
+php artisan make:export CreditoAFavorExport --model=CreditoAFavor
+
+php artisan make:controller 'Administracion\EXCEL\RegistroPagoController' &&
+php artisan make:export RegistroPagoExport --model=RegistroPago
+
+php artisan make:controller 'Administracion\EXCEL\PagoAdelantadoController' &&
+php artisan make:export PagoAdelantadoExport --model=RegistroPago
+
+php artisan make:controller 'Administracion\EXCEL\CuentaXPagarController' &&
+php artisan make:export CuentaXPagarExport --model=Representant
+
+------------------------------------------------------------------------------------------
+Import
+
+php artisan make:import PrepagosCollectionImport
+php artisan make:import PrepagosImport --model=Prepagos
+php artisan make:import PrepagosImport
+
+php artisan make:import MbancariosImport
+php artisan make:import PreinscripcionImport
+
+
+
+php artisan make:import AssitAttendanceCollectionImport
+php artisan make:import AssitAttendanceImport --model=AssitAttendance
+php artisan make:import AssitAttendanceImport
