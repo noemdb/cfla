@@ -3,10 +3,6 @@ import "./bootstrap";
 // Import Flowbite
 import "flowbite";
 
-// Typewriter effect library
-import Typed from 'typed.js';
-window.Typed = Typed;
-
 // Make Chart.js available globally for Livewire/Alpine components
 import Chart from 'chart.js/auto';
 window.Chart = Chart;
