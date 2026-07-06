@@ -19,7 +19,7 @@ class PaymentForm extends Form
         'phone' => 'nullable|string',
         'comment' => 'nullable|string',
         'phone_1' => 'nullable|string',
-        'number_i_pay_1' => 'required|string|unique:ingresos,number_i_pay|unique:payments,number_i_pay_1',
+        'number_i_pay_1' => 'required|string|unique:s2526.ingresos,number_i_pay|unique:s2526.payments,number_i_pay_1',
         'banco_id_1' => 'required|integer',
         'banco_emisor_1' => 'required|string',
         'method_pay_id_1' => 'required|integer',

@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    // protected $connection = 's2526';
-    // protected $table = 'payments';
+    protected $connection = 's2526';
 
     use HasFactory;
 
