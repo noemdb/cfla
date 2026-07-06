@@ -10,21 +10,24 @@ use Illuminate\Support\Facades\Storage;
 
 class GmailController extends Controller
 {
-    protected $gmailService;
+    protected ?GmailService $gmailService = null;
 
-    public function __construct()
+    protected function gmail(): GmailService
     {
-        $this->gmailService = new GmailService();
+        if (! $this->gmailService) {
+            $this->gmailService = new GmailService();
+        }
+        return $this->gmailService;
     }
 
     public function redirectToGoogle()
     {
-        return redirect($this->gmailService->getAuthUrl());
+        return redirect($this->gmail()->getAuthUrl());
     }
 
     public function handleGoogleCallback(Request $request)
     {
-        $this->gmailService->handleCallback($request->code);
+        $this->gmail()->handleCallback($request->code);
         return redirect()->route('home')->with('success', 'Autenticación con Gmail completada');
     }
 

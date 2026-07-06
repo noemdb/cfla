@@ -17,12 +17,15 @@ class GmailService
         $this->client = new Client();
         $this->client->setApplicationName('Laravel Gmail API');
         $this->client->setScopes(Gmail::GMAIL_SEND);
-        $this->client->setAuthConfig(storage_path('app/google/credentials.json'));
         $this->client->setAccessType('offline');
         $this->client->setPrompt('select_account consent');
-        $this->client->setRedirectUri(route('google.callback'));
 
-        $this->loadToken();
+        $credentialsPath = storage_path('app/google/credentials.json');
+        if (file_exists($credentialsPath)) {
+            $this->client->setAuthConfig($credentialsPath);
+            $this->client->setRedirectUri(route('google.callback'));
+            $this->loadToken();
+        }
     }
 
     private function loadToken()
