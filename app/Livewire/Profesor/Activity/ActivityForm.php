@@ -138,6 +138,26 @@ class ActivityForm extends Form
     }
 
     /**
+     * Poblar el formulario desde un array de datos (usado para copiar desde s2526).
+     */
+    public function fillFromArray(array $data): static
+    {
+        $this->finicial = $data['finicial'] ?? null;
+        $this->ffinal = $data['ffinal'] ?? null;
+        $this->topic = $data['topic'] ?? null;
+        $this->thematic = $data['thematic'] ?? null;
+        $this->references = $data['references'] ?? null;
+        $this->teaching = $data['teaching'] ?? null;
+        $this->parseTeaching();
+        $this->learning = $data['learning'] ?? null;
+        $this->observations = $data['observations'] ?? null;
+        $this->description = $data['description'] ?? null;
+        $this->pevaluacion_id = $data['pevaluacion_id'] ?? null;
+
+        return $this;
+    }
+
+    /**
      * Escribir los valores del formulario a un modelo Activity.
      */
     public function applyToModel(Activity $activity): Activity

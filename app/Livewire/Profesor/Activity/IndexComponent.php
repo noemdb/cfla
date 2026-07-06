@@ -12,6 +12,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -32,6 +33,24 @@ class IndexComponent extends Component
     public $showDetailModal = false;
     public $detailActivity;
     public $showAchievementModal = false;
+
+    // S2526: Actividades de periodo anterior
+    public $showS2526Modal = false;
+    public $s2526Activities = [];
+    public $s2526PendingAchievements = [];
+    public $showS2526DetailModal = false;
+    public $s2526DetailActivity = [];
+    public $s2526DetailAchievements = [];
+    public $s2526Search = '';
+    public $s2526Lapso = '';
+    public $s2526SortField = 'finicial';
+    public $s2526SortDir = 'asc';
+    public $s2526Lapsos = [];
+    public $s2526Page = 1;
+    public $s2526PerPage = 15;
+    public $s2526Total = 0;
+    public $s2526LastPage = 1;
+    public $s2526From = 0;
 
     // Filters & Pagination
     public $search = '';
@@ -193,12 +212,30 @@ class IndexComponent extends Component
 
     public function save()
     {
-        $this->activityForm->validate();
+        try {
+            $this->activityForm->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Mostrar errores como toast notifications
+            foreach ($e->validator->errors()->all() as $msg) {
+                $this->notification()->error('Error de validación', $msg);
+            }
+            // Re-lanzar para que Livewire gestione los errores inline
+            throw $e;
+        }
 
         $this->activityForm->pevaluacion_id = $this->pevaluacion->id;
         $this->activityForm->applyToModel($this->activity);
 
         $this->activity->save();
+
+        // Crear achievements pendientes (copiados desde s2526)
+        if (!empty($this->s2526PendingAchievements)) {
+            foreach ($this->s2526PendingAchievements as $ach) {
+                $ach['activity_id'] = $this->activity->id;
+                Achievement::create($ach);
+            }
+            $this->s2526PendingAchievements = [];
+        }
 
         $this->notification()->success(
             '¡Excelente, buen trabajo!',
@@ -212,7 +249,14 @@ class IndexComponent extends Component
 
     public function saveAchievement()
     {
-        $this->achievementForm->validate();
+        try {
+            $this->achievementForm->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            foreach ($e->validator->errors()->all() as $msg) {
+                $this->notification()->error('Error de validación', $msg);
+            }
+            throw $e;
+        }
 
         if ($this->achievement_id) {
             $achievement = Achievement::findOrFail($this->achievement_id);
@@ -362,6 +406,226 @@ class IndexComponent extends Component
         $this->showAchievementModal = false;
         $this->activityForm->reset();
         $this->achievementForm->resetForm();
+        $this->s2526PendingAchievements = [];
+    }
+
+    // ─── S2526: ACTIVIDADES PERIODO ANTERIOR ──────────────────
+
+    public function openS2526Modal()
+    {
+        $this->s2526Search = '';
+        $this->s2526Lapso = '';
+        $this->s2526SortField = 'finicial';
+        $this->s2526SortDir = 'asc';
+        $this->s2526Page = 1;
+        $this->loadS2526Lapsos();
+        $this->loadS2526Activities();
+        $this->showS2526Modal = true;
+    }
+
+    public function closeS2526Modal()
+    {
+        $this->showS2526Modal = false;
+        $this->s2526Activities = null;
+    }
+
+    public function loadS2526Lapsos()
+    {
+        $this->s2526Lapsos = DB::connection('s2526')
+            ->table('lapsos')
+            ->join('pevaluacions', 'pevaluacions.lapso_id', '=', 'lapsos.id')
+            ->where('pevaluacions.pensum_id', $this->pevaluacion->pensum_id)
+            ->distinct()
+            ->orderBy('lapsos.name')
+            ->pluck('lapsos.name', 'lapsos.id')
+            ->toArray();
+    }
+
+    public function loadS2526Activities()
+    {
+        $query = DB::connection('s2526')
+            ->table('activities')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('lapsos', 'pevaluacions.lapso_id', '=', 'lapsos.id')
+            ->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
+            ->where('pevaluacions.pensum_id', $this->pevaluacion->pensum_id)
+            ->select(
+                'activities.*',
+                'lapsos.name as lapso_name',
+                'seccions.name as seccion_name'
+            );
+
+        // Búsqueda por texto
+        if ($this->s2526Search) {
+            $query->where(function ($q) {
+                $q->where('activities.topic', 'like', '%' . $this->s2526Search . '%')
+                  ->orWhere('activities.teaching', 'like', '%' . $this->s2526Search . '%')
+                  ->orWhere('activities.description', 'like', '%' . $this->s2526Search . '%');
+            });
+        }
+
+        // Filtro por lapso
+        if ($this->s2526Lapso) {
+            $query->where('pevaluacions.lapso_id', $this->s2526Lapso);
+        }
+
+        // Ordenamiento
+        $query->orderBy('activities.' . $this->s2526SortField, $this->s2526SortDir);
+
+        // Paginate manually to avoid Livewire serialization issues with stdClass
+        $total = $query->count();
+        $this->s2526Total = $total;
+        $this->s2526LastPage = max(1, (int) ceil($total / $this->s2526PerPage));
+        $this->s2526Page = min($this->s2526Page, $this->s2526LastPage);
+
+        $this->s2526From = ($this->s2526Page - 1) * $this->s2526PerPage + 1;
+
+        $items = $query
+            ->skip(($this->s2526Page - 1) * $this->s2526PerPage)
+            ->take($this->s2526PerPage)
+            ->get()
+            ->map(function ($item) {
+                return (array) $item;
+            })
+            ->toArray();
+
+        $this->s2526Activities = $items;
+    }
+
+    public function updatedS2526Search()
+    {
+        $this->s2526Page = 1;
+        $this->loadS2526Activities();
+    }
+
+    public function updatedS2526Lapso()
+    {
+        $this->s2526Page = 1;
+        $this->loadS2526Activities();
+    }
+
+    public function sortS2526($field)
+    {
+        if ($this->s2526SortField === $field) {
+            $this->s2526SortDir = $this->s2526SortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->s2526SortField = $field;
+            $this->s2526SortDir = 'asc';
+        }
+        $this->s2526Page = 1;
+        $this->loadS2526Activities();
+    }
+
+    public function gotoPageS2526($page)
+    {
+        $this->s2526Page = $page;
+        $this->loadS2526Activities();
+    }
+
+    public function s2526ViewDetail($index)
+    {
+        if (isset($this->s2526Activities[$index])) {
+            $this->s2526DetailActivity = $this->s2526Activities[$index];
+            $this->s2526DetailAchievements = DB::connection('s2526')
+                ->table('achievements')
+                ->where('activity_id', $this->s2526DetailActivity['id'])
+                ->get()
+                ->map(fn($item) => (array) $item)
+                ->toArray();
+            $this->showS2526DetailModal = true;
+        }
+    }
+
+    public function closeS2526DetailModal()
+    {
+        $this->showS2526DetailModal = false;
+        $this->s2526DetailActivity = [];
+        $this->s2526DetailAchievements = [];
+    }
+
+    public function s2526CopyToPlan($index)
+    {
+        if (!isset($this->s2526Activities[$index])) {
+            return;
+        }
+
+        $act = $this->s2526Activities[$index];
+
+        // Cerrar modales s2526
+        $this->showS2526Modal = false;
+        $this->showS2526DetailModal = false;
+
+        // Reset y preparar form de creación
+        $this->close();
+        $this->resetModel();
+        $this->activity_id = null;
+
+        // Poblar el form con los datos de la actividad del periodo anterior
+        $act['pevaluacion_id'] = $this->pevaluacion_id;
+        $this->activityForm->fillFromArray($act);
+
+        // Limpiar fechas para que el usuario establezca las nuevas
+        $this->activityForm->finicial = null;
+        $this->activityForm->ffinal = null;
+
+        // Cargar achievements de la actividad fuente desde s2526
+        $this->s2526PendingAchievements = DB::connection('s2526')
+            ->table('achievements')
+            ->where('activity_id', $act['id'])
+            ->get()
+            ->map(fn($item) => [
+                'name' => $item->name,
+                'weighting' => $item->weighting,
+                'status_quantitative_weighting' => $item->status_quantitative_weighting ?? false,
+            ])
+            ->toArray();
+
+        // Mostrar el formulario de creación
+        $this->modeCreator = true;
+    }
+
+    /**
+     * Copiar desde la actividad mostrada en el modal de detalle s2526.
+     */
+    public function s2526CopyFromDetail()
+    {
+        if (empty($this->s2526DetailActivity)) {
+            return;
+        }
+
+        $act = $this->s2526DetailActivity;
+
+        // Cerrar modales s2526
+        $this->showS2526Modal = false;
+        $this->showS2526DetailModal = false;
+
+        // Reset y preparar form de creación
+        $this->close();
+        $this->resetModel();
+        $this->activity_id = null;
+
+        // Poblar el form con los datos de la actividad del periodo anterior
+        $act['pevaluacion_id'] = $this->pevaluacion_id;
+        $this->activityForm->fillFromArray($act);
+
+        // Limpiar fechas para que el usuario establezca las nuevas
+        $this->activityForm->finicial = null;
+        $this->activityForm->ffinal = null;
+
+        // Cargar achievements de la actividad fuente desde s2526
+        $this->s2526PendingAchievements = DB::connection('s2526')
+            ->table('achievements')
+            ->where('activity_id', $act['id'])
+            ->get()
+            ->map(fn($item) => [
+                'name' => $item->name,
+                'weighting' => $item->weighting,
+                'status_quantitative_weighting' => $item->status_quantitative_weighting ?? false,
+            ])
+            ->toArray();
+
+        // Mostrar el formulario de creación
+        $this->modeCreator = true;
     }
 
     public function resetModel()

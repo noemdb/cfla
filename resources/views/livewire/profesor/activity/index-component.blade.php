@@ -31,6 +31,14 @@
                     @endif
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                    {{-- S2526: Actividades periodo anterior --}}
+                    <button wire:click="openS2526Modal"
+                        title="Actividades de períodos anteriores"
+                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                    </button>
                     {{-- PDF Resume --}}
                     <a href="{{ route('app.profesors.activities.resume', $pevaluacion->id) }}"
                         title="Resumen del Plan de Actividades"
@@ -62,11 +70,6 @@
                 </div>
             </div>
         </div>
-
-        {{-- Create Overlay (solo para nueva actividad) --}}
-        @if($modeCreator)
-            @include('livewire.profesor.activity.partials.create')
-        @endif
 
         {{-- Activities List --}}
         <div class="p-6">
@@ -176,7 +179,39 @@
                                     @endif
                                     <div><span class="font-medium text-gray-500">Tema:</span> {{ $item->topic }}</div>
                                     <div><span class="font-medium text-gray-500">T.Temático:</span> {{ $item->thematic }}</div>
-                                    <div><span class="font-medium text-gray-500">Enseñanza:</span> {{ Str::limit($item->teaching, 120) }}</div>
+                                    <div x-data="{ showTeaching: true }">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-medium text-gray-500">Enseñanza:</span>
+                                            @if($item->hasTeachingStructure())
+                                                <button @click="showTeaching = !showTeaching"
+                                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200"
+                                                    x-text="showTeaching ? 'Ver completo' : 'Ver estructura'">
+                                                </button>
+                                            @endif
+                                        </div>
+                                        {{-- Full text --}}
+                                        <div x-show="!showTeaching" class="mt-1">
+                                            {{ Str::limit($item->teaching, 120) }}
+                                        </div>
+                                        {{-- Structured view --}}
+                                        @if($item->hasTeachingStructure())
+                                            @php $sections = $item->getTeachingSections(); @endphp
+                                            <div x-show="showTeaching" x-cloak x-transition:enter.duration.200ms class="mt-1 space-y-2">
+                                                <div class="p-2 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
+                                                    <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-0.5">INICIO</div>
+                                                    <p class="text-xs text-gray-300">{{ $sections['INICIO'] ?? '' }}</p>
+                                                </div>
+                                                <div class="p-2 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+                                                    <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-0.5">DESARROLLO</div>
+                                                    <p class="text-xs text-gray-300">{{ $sections['DESARROLLO'] ?? '' }}</p>
+                                                </div>
+                                                <div class="p-2 bg-amber-500/5 border border-amber-500/10 rounded-lg">
+                                                    <div class="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-0.5">CIERRE</div>
+                                                    <p class="text-xs text-gray-300">{{ $sections['CIERRE'] ?? '' }}</p>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
                                     <div><span class="font-medium text-gray-500">Aprendizaje:</span> {{ Str::limit($item->learning, 120) }}</div>
                                 </div>
 
@@ -415,7 +450,7 @@
                             </div>
 
                             {{-- Col 2 --}}
-                            <div class="space-y-4" x-data="{ showTeaching: false }">
+                            <div class="space-y-4" x-data="{ showTeaching: true }">
                                 {{-- Enseñanza with structure toggle --}}
                                 <div>
                                     <div class="flex items-center justify-between mb-1">
@@ -702,5 +737,482 @@
                 </div>
             </div>
         </div>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- S2526 MODAL: Actividades de períodos anteriores              --}}
+    {{-- ============================================================ --}}
+    @if($showS2526Modal)
+        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="s2526-modal">
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526Modal"></div>
+
+            <div class="relative min-h-screen flex items-start justify-center p-4 pt-8 pb-24">
+                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
+
+                    {{-- Header --}}
+                    <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-violet-500/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Actividades de períodos anteriores</h3>
+                                <p class="text-[11px] text-gray-500 mt-0.5">
+                                    {{ $this->pevaluacion->pensum?->asignatura?->name ?? 'Asignatura' }} · {{ $this->pevaluacion->pensum?->grado?->name ?? 'Grado' }}
+                                </p>
+                            </div>
+                        </div>
+                        <button wire:click="closeS2526Modal"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Filters bar --}}
+                    <div class="px-6 py-3 border-b border-white/5 flex items-center gap-3 bg-gray-800/20 shrink-0">
+                        {{-- Search --}}
+                        <div class="relative flex-1">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input type="text" wire:model.live.debounce.300ms="s2526Search" placeholder="Buscar en actividades anteriores…"
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
+                            @if($s2526Search)
+                                <button wire:click="$set('s2526Search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            @endif
+                        </div>
+
+                        {{-- Lapso filter --}}
+                        <select wire:model.live="s2526Lapso"
+                            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
+                            <option value="">Todos los lapsos</option>
+                            @foreach($s2526Lapsos as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+
+                        {{-- Sort controls --}}
+                        <div class="flex items-center gap-1">
+                            <button wire:click="sortS2526('finicial')"
+                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
+                                    {{ $s2526SortField === 'finicial' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10' }}">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if($s2526SortField === 'finicial')
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
+                                    @endif
+                                </svg>
+                                Fecha
+                            </button>
+                            <button wire:click="sortS2526('topic')"
+                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200
+                                    {{ $s2526SortField === 'topic' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10' }}">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    @if($s2526SortField === 'topic')
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                                    @else
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
+                                    @endif
+                                </svg>
+                                Tema
+                            </button>
+                        </div>
+
+                        {{-- Results count --}}
+                        <span class="text-[11px] text-gray-500 shrink-0">
+                            {{ $s2526Total }} activ.
+                        </span>
+                    </div>
+
+                    {{-- Grid de actividades --}}
+                    <div class="overflow-y-auto overscroll-contain" style="max-height: calc(100vh - 220px);">
+                        <div class="p-6">
+                            @if(!empty($s2526Activities))
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($s2526Activities as $i => $act)
+                                        <div class="bg-gray-800/30 border border-white/5 rounded-xl hover:border-violet-500/30 transition-all duration-200 flex flex-col"
+                                            x-data="{ openMenu: false }"
+                                            @click.away="openMenu = false">
+
+                                            {{-- Card header --}}
+                                            <div class="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">
+                                                <div class="flex items-center gap-2 min-w-0">
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-400 shrink-0">
+                                                        {{ $s2526From + $loop->index }}
+                                                    </span>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20 shrink-0">
+                                                        {{ $act['lapso_name'] }}
+                                                    </span>
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                                                        {{ $act['seccion_name'] }}
+                                                    </span>
+                                                </div>
+
+                                                {{-- Actions menu --}}
+                                                <div class="relative">
+                                                    <button @click="openMenu = !openMenu"
+                                                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-700/50 transition-all duration-200">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <div x-show="openMenu" x-cloak
+                                                        class="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10">
+                                                        <div class="py-1">
+                                                            <button wire:click="s2526ViewDetail({{ $i }})"
+                                                                class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-gray-300 hover:bg-white/5 transition-all"
+                                                                @click="openMenu = false">
+                                                                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                                </svg>
+                                                                Ver detalle
+                                                            </button>
+                                                            <button wire:click="s2526CopyToPlan({{ $i }})"
+                                                                class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-gray-300 hover:bg-white/5 transition-all"
+                                                                @click="openMenu = false">
+                                                                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                                                </svg>
+                                                                Copiar a mi plan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Card body --}}
+                                            <div class="px-4 py-3 flex-1 space-y-1.5 text-sm text-gray-300">
+                                                <div class="flex items-center gap-2 text-[11px] text-gray-500 font-mono mb-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    {{ \Carbon\Carbon::parse($act['finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act['ffinal'])->format('d/m/Y') }}
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600 block mb-0.5">Tema</span>
+                                                    <p class="text-xs text-gray-200 leading-relaxed">{{ $act['topic'] }}</p>
+                                                </div>
+                                                @if(!empty($act['teaching']))
+                                                <div>
+                                                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-600 block mb-0.5">Enseñanza</span>
+                                                    <p class="text-xs text-gray-400 leading-relaxed">{{ Str::limit($act['teaching'], 80) }}</p>
+                                                </div>
+                                                @endif
+                                            </div>
+
+                                            {{-- Card footer --}}
+                                            <div class="px-4 py-2 border-t border-white/5 flex items-center justify-between bg-white/[0.015]">
+                                                @if(!empty($act['description']))
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                                        Act.Evaluativa
+                                                    </span>
+                                                @else
+                                                    <span class="text-[10px] text-gray-600">—</span>
+                                                @endif
+                                                @if(!empty($act['comments']))
+                                                    <span class="inline-flex items-center gap-1 text-[10px] text-cyan-400/70">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                                        </svg>
+                                                        J.Área
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-16">
+                                    <div class="w-14 h-14 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-gray-500">No se encontraron actividades en períodos anteriores</p>
+                                    @if($s2526Search || $s2526Lapso)
+                                        <p class="text-xs text-gray-600 mt-1">Intenta ajustar los filtros de búsqueda</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Pagination + Footer --}}
+                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between shrink-0">
+                        {{-- Pagination --}}
+                        @if($s2526LastPage > 1)
+                            <div class="flex items-center gap-1">
+                                {{-- Previous --}}
+                                <button wire:click="gotoPageS2526({{ $s2526Page - 1 }})"
+                                    {{ $s2526Page <= 1 ? 'disabled' : '' }}
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
+                                        {{ $s2526Page <= 1 ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10' }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+
+                                {{-- Page numbers --}}
+                                @for($page = 1; $page <= $s2526LastPage; $page++)
+                                    @if($page == $s2526Page)
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                            {{ $page }}
+                                        </span>
+                                    @elseif($page >= $s2526Page - 2 && $page <= $s2526Page + 2)
+                                        <button wire:click="gotoPageS2526({{ $page }})"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                            {{ $page }}
+                                        </button>
+                                    @elseif($page == 1 || $page == $s2526LastPage)
+                                        <button wire:click="gotoPageS2526({{ $page }})"
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                            {{ $page }}
+                                        </button>
+                                    @elseif($page == $s2526Page - 3 || $page == $s2526Page + 3)
+                                        <span class="text-xs text-gray-600 px-1">...</span>
+                                    @endif
+                                @endfor
+
+                                {{-- Next --}}
+                                <button wire:click="gotoPageS2526({{ $s2526Page + 1 }})"
+                                    {{ $s2526Page >= $s2526LastPage ? 'disabled' : '' }}
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
+                                        {{ $s2526Page >= $s2526LastPage ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10' }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+
+                                <span class="text-[10px] text-gray-600 ml-2">
+                                    Pág. {{ $s2526Page }} de {{ $s2526LastPage }}
+                                </span>
+                            </div>
+                        @else
+                            <div></div>
+                        @endif
+
+                        <button wire:click="closeS2526Modal"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- S2526 DETAIL MODAL --}}
+    @if($showS2526DetailModal && !empty($s2526DetailActivity))
+        @php $sAct = $s2526DetailActivity; @endphp
+        <div class="fixed inset-0 overflow-y-auto" style="z-index: 99999 !important;" wire:key="s2526-detail-modal">
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526DetailModal"></div>
+
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Detalles de la Actividad</h3>
+                                <p class="text-xs text-gray-500">
+                                    {{ $sAct['lapso_name'] }} · {{ $sAct['seccion_name'] }}
+                                </p>
+                            </div>
+                        </div>
+                        <button wire:click="closeS2526DetailModal"
+                            class="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+
+                        {{-- Status + Fechas --}}
+                        <div class="flex flex-wrap items-center gap-3 pb-4 border-b border-white/5">
+                            @if(!empty($sAct['description']))
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    Act. Evaluación
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    Sin actividad de evaluación
+                                </span>
+                            @endif
+                            <span class="text-xs text-gray-500 font-mono">
+                                {{ \Carbon\Carbon::parse($sAct['finicial'])->format('d/m/Y') }}
+                            </span>
+                            <span class="text-gray-600">→</span>
+                            <span class="text-xs text-gray-500 font-mono">
+                                {{ \Carbon\Carbon::parse($sAct['ffinal'])->format('d/m/Y') }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                {{ $sAct['lapso_name'] }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                {{ $sAct['seccion_name'] }}
+                            </span>
+                        </div>
+
+                        {{-- 2-column grid --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                            {{-- Col 1 --}}
+                            <div class="space-y-4">
+                                {{-- Actividad Evaluativa --}}
+                                @if(!empty($sAct['description']))
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Actividad Evaluativa</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['description'] }}</p>
+                                </div>
+                                @endif
+
+                                {{-- Tema generador --}}
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Tema Generador y Énfasis</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['topic'] }}</p>
+                                </div>
+
+                                {{-- Tejido temático --}}
+                                @if(!empty($sAct['thematic']))
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Tejido Temático</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['thematic'] }}</p>
+                                </div>
+                                @endif
+
+                                {{-- Referentes --}}
+                                @if(!empty($sAct['references']))
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referentes Teórico-Prácticos</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['references'] }}</p>
+                                </div>
+                                @endif
+                            </div>
+
+                            {{-- Col 2 --}}
+                            <div class="space-y-4">
+                                {{-- Enseñanza --}}
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Enseñanza / Actividad Globalizada</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{{ $sAct['teaching'] }}</p>
+                                </div>
+
+                                {{-- Aprendizaje --}}
+                                @if(!empty($sAct['learning']))
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Aprendizaje</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['learning'] }}</p>
+                                </div>
+                                @endif
+
+                                {{-- Observaciones / ODS --}}
+                                @if(!empty($sAct['observations']))
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">ODS / Sistematización</label>
+                                    <p class="text-sm text-gray-200 leading-relaxed">{{ $sAct['observations'] }}</p>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Comentario J.Área --}}
+                        @if(!empty($sAct['comments']))
+                        <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                </svg>
+                                <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Comentario [J.Área]</span>
+                            </div>
+                            <p class="text-sm text-gray-300 leading-relaxed">{{ $sAct['comments'] }}</p>
+                        </div>
+                        @endif
+
+                        {{-- Achievements --}}
+                        @if(!empty($s2526DetailAchievements))
+                        <div class="border-t border-white/5 pt-5">
+                            <div class="flex items-center gap-2 mb-3">
+                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                </svg>
+                                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                                    Indicadores / Logros ({{ count($s2526DetailAchievements) }})
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                @foreach($s2526DetailAchievements as $ach)
+                                    <div class="flex items-center gap-2 p-3 rounded-xl bg-gray-800/50 border border-white/5">
+                                        <div class="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                                            <span class="text-[10px] font-bold text-amber-400">{{ $loop->iteration }}</span>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-xs text-gray-200 leading-relaxed truncate" title="{{ $ach['name'] ?? '' }}">{{ $ach['name'] ?? '' }}</p>
+                                            @if(!empty($ach['weighting']))
+                                                <span class="text-[10px] text-gray-500 font-mono">Pond.: {{ $ach['weighting'] }}</span>
+                                            @endif
+                                        </div>
+                                        @if(!empty($ach['status_quantitative_weighting']) && $ach['status_quantitative_weighting'] !== 'false')
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                                                Cuant.
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                        {{-- Left: Copy button --}}
+                        <button wire:click="s2526CopyFromDetail"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/20 transition-all duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            Copiar a mi plan
+                        </button>
+
+                        {{-- Right: Close button --}}
+                        <button wire:click="closeS2526DetailModal"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Create Activity Modal (root level) --}}
+    @if($modeCreator)
+        @include('livewire.profesor.activity.partials.create')
     @endif
 </div>
