@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9503ef140fc71c2db8bd17589e337961",
+    "content-hash": "e63ddd68899efe34676bbd63d9f02b32",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -9109,6 +9109,55 @@
             "time": "2025-04-30T06:54:44+00:00"
         },
         {
+            "name": "iserter/laravel-claude-agents",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/iSerter/laravel-claude-agents.git",
+                "reference": "8868214ee3fe0eee4e865dd07dbb9832a05b6ddc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/iSerter/laravel-claude-agents/zipball/8868214ee3fe0eee4e865dd07dbb9832a05b6ddc",
+                "reference": "8868214ee3fe0eee4e865dd07dbb9832a05b6ddc",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "php": "^8.1"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ISerter\\LaravelClaudeAgents\\LaravelClaudeAgentsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ISerter\\LaravelClaudeAgents\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "iSerter",
+                    "email": "your-email@example.com"
+                }
+            ],
+            "description": "A collection of Claude AI agents and skills specifically designed for Laravel development",
+            "support": {
+                "issues": "https://github.com/iSerter/laravel-claude-agents/issues",
+                "source": "https://github.com/iSerter/laravel-claude-agents/tree/main"
+            },
+            "time": "2026-04-19T22:26:25+00:00"
+        },
+        {
             "name": "laravel/pint",
             "version": "v1.27.0",
             "source": {
@@ -11488,7 +11537,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "iserter/laravel-claude-agents": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

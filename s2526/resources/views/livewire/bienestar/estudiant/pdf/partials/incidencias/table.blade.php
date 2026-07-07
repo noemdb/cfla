@@ -1,1 +1,0 @@
-@include('livewire.bienestar.incident.table.crud')

@@ -4,11 +4,19 @@ namespace App\Models\app\Academy\Lms;
 
 use App\Models\User;
 use App\Models\app\Academy\Activity;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LmsActivityPublication extends Model
 {
+    use HasFactory;
+
     protected $table = 'lms_activity_publications';
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\LmsActivityPublicationFactory::new();
+    }
 
     protected $fillable = [
         'activity_id', 'published_by', 'status',

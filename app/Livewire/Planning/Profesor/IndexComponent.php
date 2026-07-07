@@ -67,6 +67,9 @@ class IndexComponent extends Component
     public $sortField = 'profesors.id';
     public $sortDirection = 'asc';
 
+    // Pagination
+    public $paginate = 15;
+
     // Confirm delete
     public $confirmDeleteId = null;
 
@@ -196,7 +199,7 @@ class IndexComponent extends Component
             $query->orderBy('profesors.id', $this->sortDirection);
         }
 
-        $profesors = $query->paginate(10);
+        $profesors = $query->paginate($this->paginate);
 
         // Load lapso data for each profesor (only for displayed page)
         foreach ($profesors as $profesor) {

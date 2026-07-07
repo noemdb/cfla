@@ -1,1 +1,0 @@
-@include('bienestars.incidents.pdf.profesor.partials.membrete')

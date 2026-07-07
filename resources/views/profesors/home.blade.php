@@ -19,7 +19,7 @@
         <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <span>{{ $lapso_active->pescolar->name ?? $lapso_active->academic_year ?? '2025-2026' }}</span>
+        <span>{{ $lapso_active->pescolar->name ?? $lapso_active->academic_year ?? '2026-2027' }}</span>
     </div>
 
     <span class="w-px h-4 bg-white/5"></span>
@@ -117,113 +117,144 @@
                     $ind = $indicadores->firstWhere('id', $lapsoItem->id);
                 @endphp
                 <div x-show="activeTab === {{ $tabNum }}" x-cloak>
-                    {{-- 6 KPI Boxes grid (3 columns like Planning indicator tabs) --}}
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {{-- ── Planificación ── --}}
+                    <div class="mb-6">
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Planificación
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
+                                label="Planes de Evaluación"
+                                value="{{ $ind['count_pevaluacions'] ?? 0 }}"
+                                color="emerald"
+                                subtext="Asignados en este lapso"
+                            />
 
-                        {{-- 1. Planes de Evaluación --}}
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
-                            label="Planes de Evaluación"
-                            value="{{ $ind['count_pevaluacions'] ?? 0 }}"
-                            color="emerald"
-                            subtext="Asignados en este lapso"
-                        />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>'
+                                label="Actividades Registradas"
+                                value="{{ $ind['act_total'] ?? 0 }}"
+                                color="blue"
+                                subtext="En todos los planes"
+                            />
 
-                        {{-- 2. Evaluaciones Registradas --}}
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
-                            label="Evaluaciones Registradas"
-                            value="{{ $ind['count_evaluacions'] ?? 0 }}"
-                            color="blue"
-                            subtext="Total de evaluaciones aplicadas"
-                        />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                                label="Con Evaluación"
+                                value="{{ $ind['act_con_eval'] ?? 0 }}"
+                                color="teal"
+                                subtext="Tienen actividad evaluativa"
+                            />
 
-                        {{-- 3. Notas Registradas (custom card with progress bar) --}}
-                        @php $porc = $ind['porc_notas_load'] ?? 0; @endphp
-                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl transition-all duration-300 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5">
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                    </svg>
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                                label="Aprobadas"
+                                value="{{ $ind['act_aprobadas'] ?? 0 }}"
+                                color="amber"
+                                subtext="Estatus = aprobado"
+                            />
+
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
+                                label="Enseñanza de Calidad"
+                                value="{{ $ind['act_calidad_ens'] ?? 0 }}"
+                                color="indigo"
+                                subtext="≥10 palabras significativas"
+                            />
+                        </div>
+                    </div>
+
+                    {{-- ── Diagnósticos ── --}}
+                    @php
+                        $diagTotal     = $ind['diag_total'] ?? 0;
+                        $diagCompleted = $ind['diag_completed'] ?? 0;
+                        $diagProgress  = $ind['diag_progress'] ?? 0;
+                        $diagHasData   = $diagTotal > 0;
+                    @endphp
+                    <div class="mb-6">
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            Diagnósticos
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>'
+                                label="Sesiones Totales"
+                                value="{{ $diagTotal }}"
+                                color="blue"
+                                subtext="Evaluaciones diagnósticas"
+                            />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                                label="Completados"
+                                value="{{ $diagCompleted }}"
+                                color="emerald"
+                                subtext="{{ $diagHasData ? $diagProgress . '% de avance' : 'Sin datos' }}"
+                            />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                                label="En Progreso"
+                                value="{{ $ind['diag_en_progreso'] ?? 0 }}"
+                                color="amber"
+                                subtext="Sesiones activas pendientes"
+                            />
+                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl transition-all duration-300 hover:border-indigo-500/30">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                        </svg>
+                                    </div>
                                 </div>
-                            </div>
-                            <p class="text-2xl font-bold text-white mb-1">{{ $porc }}%</p>
-                            <p class="text-[11px] font-medium text-purple-400 uppercase tracking-wider">Notas Registradas</p>
-                            <div class="progress-bar-sm mt-2">
-                                <div class="progress-bar-sm-fill {{ $porc >= 80 ? 'bg-emerald-400' : ($porc >= 50 ? 'bg-amber-400' : 'bg-red-400') }}"
-                                     style="width:{{ min($porc,100) }}%"></div>
-                            </div>
-                            <p class="text-[10px] text-gray-500 mt-1">Meta de carga de notas</p>
-                        </div>
-
-                        {{-- 4. Promedio General --}}
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>'
-                            label="Promedio General"
-                            value="{{ $ind['promedio'] !== null ? number_format($ind['promedio'], 2) : '—' }}"
-                            color="amber"
-                            subtext="Calificación promedio del lapso"
-                        />
-
-                        {{-- 5. Porcentaje Aprobados --}}
-                        @php $aprob = $ind['porc_aprobados'] ?? null; @endphp
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-                            label="Estudiantes Aprobados"
-                            value="{{ $aprob !== null ? number_format($aprob, 1) . '%' : '—' }}"
-                            color="rose"
-                            subtext="Porcentaje de aprobación"
-                        />
-
-                        {{-- 6. IRE --}}
-                        @php
-                            $ireValue = null;
-                            $ireCode  = null;
-                            $pestudios = $profesor?->pevaluacions()
-                                ->where('lapso_id', $lapsoItem->id)
-                                ->get()
-                                ->pluck('pensum.pestudio')
-                                ->filter()
-                                ->unique('id');
-                            if ($pestudios && $pestudios->isNotEmpty()) {
-                                $first   = $pestudios->first();
-                                $ireValue = $profesor?->getProfesorIRE($first->id, $lapsoItem->id);
-                                $ireCode  = $first->code;
-                            }
-                        @endphp
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>'
-                            label="Índice IRE"
-                            value="{{ $ireValue !== null ? number_format($ireValue, 1) . '%' : '—' }}"
-                            color="cyan"
-                            subtext="{{ $ireCode ? 'Vs. pares — ' . $ireCode : 'Rendimiento vs. colegas' }}"
-                        />
-
-                    </div>
-
-                    {{-- IRE Explanation Box --}}
-                    @if($ireValue !== null)
-                    <div class="mt-5 bg-cyan-500/5 border border-cyan-500/10 rounded-xl p-4">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 bg-cyan-500/10 rounded-lg flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-cyan-400">¿Qué es el IRE?</p>
-                                <p class="text-xs text-gray-400 mt-1 leading-relaxed">
-                                    Índice de Rendimiento en Evaluación. Mide tu eficiencia comparada con el promedio de tus colegas del mismo plan de estudio.
-                                    <span class="text-cyan-400">Más de 100% = superior al promedio.</span>
-                                </p>
-                                <p class="text-[10px] text-gray-500 mt-1">
-                                    <span class="text-cyan-500 font-medium">Fórmula:</span> IRE = (Notas cargadas / Promedio de pares) &times; 100
-                                </p>
+                                <p class="text-2xl font-bold text-white mb-1">{{ $diagProgress }}%</p>
+                                <p class="text-[11px] font-medium text-indigo-400 uppercase tracking-wider">Progreso</p>
+                                <div class="progress-bar-sm mt-2">
+                                    <div class="progress-bar-sm-fill {{ $diagProgress >= 80 ? 'bg-emerald-400' : ($diagProgress >= 50 ? 'bg-amber-400' : 'bg-indigo-400') }}"
+                                         style="width:{{ min($diagProgress,100) }}%"></div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">{{ $diagCompleted }}/{{ $diagTotal }} sesiones</p>
                             </div>
                         </div>
                     </div>
-                    @endif
+
+                    {{-- ── LMS / Lecciones ── --}}
+                    <div>
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            LMS / Lecciones
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                                label="Lecciones Publicadas"
+                                value="{{ $ind['lms_published'] ?? 0 }}"
+                                color="violet"
+                                subtext="Visibles para estudiantes"
+                            />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>'
+                                label="Secciones de Contenido"
+                                value="{{ $ind['lms_sections'] ?? 0 }}"
+                                color="teal"
+                                subtext="Estructuras de aprendizaje"
+                            />
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>'
+                                label="Recursos LMS"
+                                value="{{ $ind['lms_resources'] ?? 0 }}"
+                                color="pink"
+                                subtext="Materiales didácticos"
+                            />
+                        </div>
+                    </div>
                 </div>
             @endforeach
         </div>

@@ -1,1 +1,0 @@
-php artisan make:controller 'Admin\Database\FixDebateController'

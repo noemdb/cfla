@@ -207,11 +207,7 @@
             </table>
         </div>
 
-        @if($profesors->hasPages())
-            <div class="px-5 py-4 border-t border-white/5">
-                {{ $profesors->links() }}
-            </div>
-        @endif
+        @include('components.pagination-wrapper', ['paginator' => $profesors])
     </div>
 
     <!-- ===== MODAL: Confirmar Eliminación ===== -->

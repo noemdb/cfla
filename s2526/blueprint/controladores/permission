@@ -1,2 +1,0 @@
-php artisan make:controller 'Permission\HomeController'
-php artisan make:controller 'Permission\Tab\PaseController' --resource

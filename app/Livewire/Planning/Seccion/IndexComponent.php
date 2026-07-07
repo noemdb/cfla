@@ -33,6 +33,7 @@ class IndexComponent extends Component
     // Search & filters
     public $search = '';
     public $filter_grado = '';
+    public $paginate = 15;
 
     // Confirm delete
     public $confirmDeleteId = null;
@@ -80,12 +81,18 @@ class IndexComponent extends Component
 
         $seccions = $query->orderBy('grado_id')
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate($this->paginate);
 
         return view('livewire.planning.seccion.index-component', [
             'seccions' => $seccions,
         ]);
     }
+
+    // ─── PAGINATION & FILTERS ────────────────────────────────────
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingFilterGrado() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 
     // ─── FORM ────────────────────────────────────────────────────
 

@@ -1,3 +1,0 @@
-php artisan make:controller 'Restapi\Exchange\KurokuroController'
-php artisan make:controller 'Restapi\Exchange\CapriceController'
-php artisan make:controller 'Restapi\Exchange\GoutteController'

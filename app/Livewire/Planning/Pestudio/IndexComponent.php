@@ -48,6 +48,7 @@ class IndexComponent extends Component
     public $search = '';
     public $filter_status = '';
     public $filter_peducativo = '';
+    public $paginate = 15;
 
     // Confirm delete
     public $confirmDeleteId = null;
@@ -128,12 +129,19 @@ class IndexComponent extends Component
 
         $pestudios = $query->orderBy('order')
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate($this->paginate);
 
         return view('livewire.planning.pestudio.index-component', [
             'pestudios' => $pestudios,
         ]);
     }
+
+    // ─── PAGINATION & FILTERS ────────────────────────────────────
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingFilterPeducativo() { $this->resetPage(); }
+    public function updatingFilterStatus() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 
     // ─── FORM ────────────────────────────────────────────────────
 

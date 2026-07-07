@@ -79,11 +79,14 @@ class ActivityController extends Controller
         $list_grado   = $grados->pluck('name', 'id');
         $list_seccion = ($grado_id) ? Seccion::where('grado_id', $grado_id)->pluck('name', 'id') : collect();
         $list_lapso   = Lapso::orderBy('name', 'asc')->pluck('name', 'id');
+        $lapsos       = Lapso::orderBy('name', 'asc')->get();
+        $lapso_active = Lapso::find($lapso_id) ?? Lapso::current();
 
         return view('profesors.activities.index', compact(
             'pevaluacions', 'pestudio_id', 'list_pestudio',
             'grado_id', 'list_grado',
-            'seccion_id', 'list_seccion', 'lapso_id', 'list_lapso'
+            'seccion_id', 'list_seccion', 'lapso_id', 'list_lapso',
+            'lapsos', 'lapso_active'
         ));
     }
 

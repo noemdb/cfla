@@ -32,6 +32,7 @@ class IndexComponent extends Component
     public $search = '';
     public $filter_pestudio = '';
     public $filter_grado = '';
+    public $paginate = 15;
     public $listGrados = [];
 
     // Sort
@@ -85,6 +86,7 @@ class IndexComponent extends Component
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterPestudio() { $this->resetPage(); }
     public function updatingFilterGrado() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 
     // ─── RENDER ───────────────────────────────────────────────────
 
@@ -119,7 +121,7 @@ class IndexComponent extends Component
             $query->orderBy('pestudio_id')->orderBy('grado_id')->orderBy('asignatura_id');
         }
 
-        $pensums = $query->paginate(15);
+        $pensums = $query->paginate($this->paginate);
 
         return view('livewire.planning.pensum.index-component', [
             'pensums' => $pensums,

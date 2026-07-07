@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PestudioFactory extends Factory
 {
+    protected $model = \App\Models\app\Academy\Pestudio::class;
+
     /**
      * Define the model's default state.
      *

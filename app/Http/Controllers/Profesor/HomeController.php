@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Profesor;
 
 use App\Http\Controllers\Controller;
-use App\Models\app\Academy\Boletin;
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lms\LmsActivitySection;
+use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
+use App\Models\app\Instrument\DiagSession;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -86,46 +91,116 @@ class HomeController extends Controller
             }
         }
 
-        // ── Indicadores por lapso ──────────────────────────────
+        // ── Indicadores por lapso ─────────────────────────────
         $indicadores = collect([]);
+
+        // Pensums del profesor (para diagnósticos, no varía por lapso)
+        $pensumIds = $profesor
+            ? Pensum::whereHas('pevaluacions', fn($q) => $q->where('profesor_id', $profesor->id))
+                ->pluck('id')
+            : collect();
 
         if ($profesor) {
             foreach ($lapsos as $lapsoItem) {
-                $pevaluacions       = Pevaluacion::where('profesor_id', $profesor->id)
+                $pevaluacions = Pevaluacion::where('profesor_id', $profesor->id)
                     ->where('lapso_id', $lapsoItem->id)
                     ->get();
 
-                $count_pevaluacions = $pevaluacions->isNotEmpty() ? $pevaluacions->count() : 0;
-                $count_evaluacions  = Pevaluacion::count_evaluacion_prof_lapso($profesor->id, $lapsoItem->id);
+                // ── Diagnósticos ─────────────────────────────────
+                if ($pensumIds->isNotEmpty()) {
+                    $diagTotal = DiagSession::whereIn('pensum_id', $pensumIds)
+                        ->where('lapso_id', $lapsoItem->id)
+                        ->count();
 
-                $goal_notas = $profesor->goal_notas_load($lapsoItem->id);
-                $real_notas = $profesor->real_notas_load($lapsoItem->id);
+                    $diagCompleted = DiagSession::whereIn('pensum_id', $pensumIds)
+                        ->where('lapso_id', $lapsoItem->id)
+                        ->whereNotNull('completado_at')
+                        ->count();
 
-                $porc_notas_load = ($goal_notas > 0) ? 100 * ($real_notas / $goal_notas) : 0;
+                    $diagInProgress = DiagSession::whereIn('pensum_id', $pensumIds)
+                        ->where('lapso_id', $lapsoItem->id)
+                        ->where('activo', true)
+                        ->whereNull('completado_at')
+                        ->count();
 
-                if ($porc_notas_load > 99.85) {
-                    $porc_notas_load = 100.00;
+                    $diagProgress = $diagTotal > 0
+                        ? round(($diagCompleted / $diagTotal) * 100)
+                        : 0;
+                } else {
+                    $diagTotal      = 0;
+                    $diagCompleted  = 0;
+                    $diagInProgress = 0;
+                    $diagProgress   = 0;
                 }
 
-                $porc_notas_load = round($porc_notas_load, 1);
+                // ── Actividades Registradas ─────────────────────
+                $actTotal = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->count();
 
-                if ($goal_notas - $real_notas > 0 && $goal_notas - $real_notas < 6) {
-                    $porc_notas_load = 100;
-                }
+                $actWithEval = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->whereNotNull('description')
+                 ->where('description', '!=', '')
+                 ->count();
 
-                $promedio       = $profesor->getPromedio($lapsoItem->id, 2);
-                $porc_aprobados = $profesor->getPorcAprobados($lapsoItem->id, 1);
+                $actApproved = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->where('status', true)
+                 ->count();
+
+                // Actividades con enseñanza de calidad
+                // (≥10 palabras significativas en el campo teaching)
+                $activitiesTeaching = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->get(['teaching']);
+
+                $actCalidadEns = $activitiesTeaching->filter(
+                    fn($a) => $a->teachingWordsMayorCount(3) >= 10
+                )->count();
+
+                // ── LMS / Lecciones ──────────────────────────────
+                $lmsPublished = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->whereHas('lmsPublication', fn($q) =>
+                    (new LmsActivityPublication)->scopeVisibleNow($q)
+                )->count();
+
+                $lmsSections = LmsActivitySection::whereHas('activity.pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->count();
+
+                $lmsResources = LmsActivityResource::whereHas('activity.pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->count();
 
                 $indicador = collect([
                     'id'                 => $lapsoItem->id,
                     'lapso'              => $lapsoItem,
                     'name'               => $lapsoItem->name,
                     'code'               => $lapsoItem->code,
-                    'count_pevaluacions' => $count_pevaluacions,
-                    'count_evaluacions'  => $count_evaluacions,
-                    'porc_notas_load'    => $porc_notas_load,
-                    'promedio'           => $promedio,
-                    'porc_aprobados'     => $porc_aprobados,
+                    'count_pevaluacions' => $pevaluacions->isNotEmpty() ? $pevaluacions->count() : 0,
+                    // Actividades
+                    'act_total'          => $actTotal,
+                    'act_con_eval'       => $actWithEval,
+                    'act_aprobadas'      => $actApproved,
+                    'act_calidad_ens'    => $actCalidadEns,
+                    // Diagnósticos
+                    'diag_total'         => $diagTotal,
+                    'diag_completed'     => $diagCompleted,
+                    'diag_en_progreso'   => $diagInProgress,
+                    'diag_progress'      => $diagProgress,
+                    // LMS / Lecciones
+                    'lms_published'      => $lmsPublished,
+                    'lms_sections'       => $lmsSections,
+                    'lms_resources'      => $lmsResources,
                 ]);
 
                 $indicadores->push($indicador);

@@ -64,6 +64,31 @@ class Lapso extends Model
     }
 
     /**
+     * Deriva el año académico desde academic_start_date o finicial.
+     * Ejemplo: "2025-09-01" → "2025-2026", "2026-01-08" → "2025-2026"
+     */
+    public function getAcademicYearAttribute(): ?string
+    {
+        $date = $this->academic_start_date ?? $this->finicial;
+        if (! $date) {
+            return null;
+        }
+        $year = $date instanceof Carbon
+            ? (int) $date->format('Y')
+            : (int) Carbon::parse($date)->format('Y');
+
+        // Si el mes es agosto o posterior, el año académico arranca en ese año
+        // Si es antes (enero-julio), arrancó el año anterior
+        $month = $date instanceof Carbon
+            ? (int) $date->format('n')
+            : (int) Carbon::parse($date)->format('n');
+
+        $startYear = $month >= 8 ? $year : $year - 1;
+
+        return $startYear . '-' . ($startYear + 1);
+    }
+
+    /**
      * Retorna el lapso cuya fecha actual cae dentro de su rango (finicial - ffinal).
      * Si ningún lapso coincide, retorna el primero registrado como fallback.
      */

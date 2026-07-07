@@ -1,1 +1,0 @@
-<h6><span class="badge badge-{{ $planpago->color ?? 'dark'}}"> {{ $planpago->name }} </span> </h6>

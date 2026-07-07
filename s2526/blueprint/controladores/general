@@ -1,9 +1,0 @@
-php artisan make:controller 'General\Polls\PollMainController'
-php artisan make:controller 'General\Preinscripcion\IndexController'
-php artisan make:controller 'General\Enrollment\IndexController'
-php artisan make:controller 'General\Catchment\IndexController'
-php artisan make:controller 'General\Catchment\MainController'
-php artisan make:controller 'General\Interview\IndexController'
-
-php artisan make:controller 'General\Education\Competition\DebateController'
-php artisan make:controller 'General\Instrument\DiagnostigController'

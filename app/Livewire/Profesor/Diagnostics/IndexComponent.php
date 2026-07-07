@@ -68,6 +68,8 @@ class IndexComponent extends Component
     public $pensum_id = null;
     public $weighing = null;
     public $difficulty = null;
+    public $diag_main_id = null;
+    public $expected_answer = '';
 
     // Filtros y búsqueda
     public $search = '';
@@ -81,6 +83,11 @@ class IndexComponent extends Component
 
     public $sessionsGradoFilter = '';
     public $dateRange = '365';
+
+    // Sessions tab filters
+    public $searchSessions = '';
+    public $filterDateFrom = '';
+    public $filterDateTo = '';
 
     // New filters
     public $filterDiagMainId = '';
@@ -324,6 +331,7 @@ class IndexComponent extends Component
             $this->weighing = $this->editingQuestion->weighing ?? 1;
             $this->difficulty = $this->editingQuestion->difficulty ?? 'medium';
             $this->pensum_id = $this->editingQuestion->pensum_id;
+            $this->diag_main_id = $this->editingQuestion->diag_main_id;
 
             if ($this->tipo_pregunta === 'multiple') {
                 $this->options = $this->editingQuestion->options->map(function ($option, $index) {
@@ -361,6 +369,7 @@ class IndexComponent extends Component
                     'pregunta' => $this->pregunta,
                     'tipo_pregunta' => $this->tipo_pregunta,
                     'pensum_id' => $this->pensum_id,
+                    'diag_main_id' => $this->diag_main_id,
                     'orden' => $this->orden,
                     'weighing' => $this->weighing,
                     'difficulty' => $this->difficulty,
@@ -373,6 +382,7 @@ class IndexComponent extends Component
                     'pregunta' => $this->pregunta,
                     'tipo_pregunta' => $this->tipo_pregunta,
                     'pensum_id' => $this->pensum_id,
+                    'diag_main_id' => $this->diag_main_id,
                     'orden' => $this->orden ?: $nextOrder,
                     'activo' => $this->activo,
                     'weighing' => $this->weighing,
@@ -437,6 +447,13 @@ class IndexComponent extends Component
     {
         if ($this->wizardStep > 1) {
             $this->wizardStep--;
+        }
+    }
+
+    public function goToStep($step)
+    {
+        if ($step >= 1 && $step <= 3) {
+            $this->wizardStep = $step;
         }
     }
 
@@ -511,6 +528,27 @@ class IndexComponent extends Component
         $this->selectedSession = null;
     }
 
+    public function resetSessionFilters()
+    {
+        $this->searchSessions = '';
+        $this->filterDateFrom = '';
+        $this->filterDateTo = '';
+        $this->filterGradoId = '';
+        $this->filterSeccionId = '';
+        $this->filterDiagMainId = '';
+        $this->resetPage('sessionsPage');
+    }
+
+    public function viewSession($sessionId)
+    {
+        $this->openSessionModal($sessionId);
+    }
+
+    public function openAiReport($estudiantId, $diagMainId)
+    {
+        $this->getAIReport($estudiantId, $diagMainId);
+    }
+
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
@@ -583,6 +621,8 @@ class IndexComponent extends Component
         $this->weighing = 1;
         $this->difficulty = 'medium';
         $this->pensum_id = null;
+        $this->diag_main_id = null;
+        $this->expected_answer = '';
         $this->resetOptions();
         $this->resetValidation();
     }
@@ -912,8 +952,8 @@ class IndexComponent extends Component
 
         $questions = $this->getQuestionsPaginationView();
 
-        $sessions = DiagSession::with(['estudiant:id,name,lastname', 'pensum.asignatura:id,name'])
-            ->select(['id', 'estudiant_id', 'pensum_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo'])
+        $sessions = DiagSession::with(['estudiant:id,name,lastname', 'estudiant.grado', 'pensum.asignatura:id,name', 'diagMain', 'answers'])
+            ->select(['id', 'estudiant_id', 'pensum_id', 'diag_main_id', 'iniciado_at', 'completado_at', 'progreso', 'total_preguntas', 'activo'])
             ->when($pensumIds, function ($query) use ($pensumIds) {
                 $query->whereIn('pensum_id', $pensumIds);
             })

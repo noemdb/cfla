@@ -32,7 +32,7 @@
 
     <!-- Filters -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nombre o descripción..."
@@ -46,6 +46,16 @@
                     @foreach($grados as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Ver</label>
+                <select wire:model.live="paginate"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
                 </select>
             </div>
             <div class="flex items-end">
@@ -164,9 +174,7 @@
         </div>
 
         @if($seccions->hasPages())
-            <div class="px-5 py-4 border-t border-white/5">
-                {{ $seccions->links() }}
-            </div>
+            <x-pagination-wrapper :paginator="$seccions" />
         @endif
     </div>
 

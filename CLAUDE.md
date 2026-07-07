@@ -135,3 +135,65 @@ app/
 - **Multiple DB connections**: Configured for `s2526` and `s2425` database connections (commented out in models, used for multi-year data)
 - **COLUMN_COMMENTS constant**: Several models define `COLUMN_COMMENTS` for Spanish labeling of attributes
 - **Anonymous voting**: Polls use access tokens (no auth required) with optional browser fingerprinting via `VotingFingerprintController`
+
+## Claude Code Agents & Skills
+
+This project includes specialized Laravel agents and skills for Claude Code, installed via `iserter/laravel-claude-agents` and community definitions.
+
+### Available Agents (`.claude/agents/`)
+
+| Agent | Description |
+|-------|-------------|
+| **laravel-architect** | Architecture decisions, design patterns, schema planning |
+| **eloquent-specialist** | Eloquent models, relationships, N+1 prevention, migrations |
+| **laravel-api-developer** | API resources, Sanctum/Passport, rate limiting |
+| **laravel-testing-expert** | Pest PHP, feature/unit tests, TDD, code coverage |
+| **laravel-code-reviewer** | Code quality, security checks, best practices |
+| **laravel-architecture-reviewer** | Design validation, scalability, technical debt |
+| **laravel-debugger** | Error diagnosis, log analysis, query debugging |
+| **laravel-performance-optimizer** | Caching, queues, bottleneck identification, Octane |
+| **laravel-security-auditor** | OWASP Top 10, auth review, CSRF/XSS protection |
+| **laravel-documentation-engineer** | API docs, setup guides, changelogs |
+| **laravel-specialist** | General Laravel 10+ specialist (community definition) |
+
+### Available Skills (`.claude/skills/`)
+
+| Skill | Description |
+|-------|-------------|
+| **laravel-tdd** | Red-Green-Refactor with Pest PHP, database testing with factories |
+| **laravel-brainstorming** | Feature design, approach exploration, schema and API planning |
+| **laravel-systematic-debugging** | Four-phase debugging, root cause identification |
+| **eloquent-best-practices** | Query optimization, N+1 prevention, mass assignment, model events |
+| **laravel-api-resource-patterns** | Resource transformation, conditional attributes, pagination |
+| **laravel-validation-patterns** | Form Requests, custom rules, conditional/array validation |
+| **laravel-authorization-patterns** | Gates, Policies, middleware auth, Blade directives |
+| **laravel-queue-patterns** | Job batching, chaining, middleware, retry strategies |
+| **laravel-event-driven-architecture** | Events/listeners, subscribers, model observers, transaction safety |
+| **laravel-caching-strategies** | Cache tags, atomic locks, memoization, invalidation |
+| **laravel-notification-patterns** | Mail/database/broadcast/Slack, queueing, on-demand recipients |
+| **laravel-middleware-patterns** | Before/after/terminable patterns, groups, parameters |
+| **laravel-blade-component-patterns** | Components, slots, $attributes bag, stacks, view fragments |
+| **laravel-task-scheduling** | Frequency constraints, overlap prevention, onOneServer, hooks |
+| **laravel-feature-flags** | Pennant feature flags, A/B testing, scoping, gradual rollouts |
+
+### Invoking Agents
+
+In Claude Code, invoke an agent explicitly:
+
+```
+> Ask the laravel-architect to review the database schema
+> Have laravel-code-reviewer review recent changes
+> Ask laravel-performance-optimizer to analyze slow queries
+> Use eloquent-specialist to refactor the User model
+```
+
+### Official Laravel Plugins (optional)
+
+The official `laravel/agent-skills` plugins can be installed via Claude Code commands:
+
+```
+/plugin marketplace add laravel/agent-skills
+/plugin install laravel@laravel
+/plugin install laravel-cloud@laravel
+/plugin install laravel-nightwatch@laravel
+```

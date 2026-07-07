@@ -1,7 +1,0 @@
-php artisan make:controller 'Inicial\Tab\HomeInicialController'
-php artisan make:controller 'Inicial\Tab\EiplanningwkController'
-php artisan make:controller 'Inicial\Tab\EiplanningbwkController'
-php artisan make:controller 'Inicial\Tab\EiprojectkController'
-php artisan make:controller 'Inicial\Tab\EispecialkController'
-php artisan make:controller 'Inicial\Tab\EievaluationkController'
-php artisan make:controller 'Inicial\Tab\EifinalkController'
