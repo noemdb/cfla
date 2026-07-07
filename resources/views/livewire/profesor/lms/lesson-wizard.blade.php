@@ -648,7 +648,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $content['body'] ?? '' !!}
+                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
                                             </div>
                                         @endforeach
                                     </div>
@@ -1054,7 +1054,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $content['body'] ?? '' !!}
+                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
                                             </div>
                                         @endforeach
                                     </div>
@@ -1331,7 +1331,7 @@
                                             <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                         @endif
                                         <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                            {!! $content['body'] ?? '' !!}
+                                            {!! $this->renderContentBody($content['body'] ?? '') !!}
                                         </div>
                                     @endforeach
                                     {{-- HTML Embeds asociados a esta sección --}}
@@ -2064,7 +2064,11 @@
                             @php
                                 $totalSlides = count($wizardSections);
                                 $currentSlide = $wizardSections[$currentSlideIndex] ?? null;
-                                $slideBlocks = collect($currentSlide['contents'] ?? [])->pluck('body')->filter()->values();
+                                $slideBlocks = collect($currentSlide['contents'] ?? [])
+                                    ->pluck('body')
+                                    ->filter()
+                                    ->map(fn($b) => $this->renderContentBody($b))
+                                    ->values();
                                 $slideContent = $slideBlocks->implode("\n");
                                 $hasContent = $slideBlocks->isNotEmpty();
                             @endphp
@@ -2287,7 +2291,7 @@
                                                                 <div class="flex-1 overflow-y-auto p-5">
                                                                     <div class="prose prose-sm prose-slate max-w-none !text-gray-800"
                                                                          style="color: #1e293b !important;">
-                                                                        {!! $content['body'] ?? '' !!}
+                                                                        {!! $this->renderContentBody($content['body'] ?? '') !!}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -3252,7 +3256,7 @@
                                             <h4 class="text-xs font-medium text-slate-300">{{ $content['title'] }}</h4>
                                         @endif
                                         <div class="text-xs text-slate-400 leading-relaxed prose prose-invert max-w-none">
-                                            {!! $content['body'] ?? '' !!}
+                                            {!! $this->renderContentBody($content['body'] ?? '') !!}
                                         </div>
                                     @endforeach
 
@@ -3442,7 +3446,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $content['body'] ?? '' !!}
+                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
                                             </div>
                                         @endforeach
                                         {{-- HTML Embeds asociados a esta sección --}}

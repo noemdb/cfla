@@ -817,18 +817,17 @@ PROMPT;
         $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         $systemPrompt = <<<'PROMPT'
-Eres docente venezolano. Genera contenido HTML para una diapositiva de lecci├│n LMS.
+Eres docente venezolano. Genera contenido en formato Markdown para una diapositiva de lecci├│n LMS.
 
 Reglas:
-- Genera SOLO HTML v├ílido, sin etiquetas <html>/<body>/<head>
-- Usa <h2> para el t├¡tulo, <p> para p├írrafos, <ul>/<ol> para listas
-- <blockquote> para citas o definiciones importantes
-- <div class="bg-gray-50 rounded-xl p-4"> para destacar conceptos clave
-- Incluye clases Tailwind: text-gray-700, font-semibold, leading-relaxed, space-y-4, etc.
-- El HTML debe ser renderizable directamente dentro de un div contenedor
+- Usa Markdown est├índar: ## para t├¡tulos, - para listas, **negritas**, *cursivas*
+- > para citas o definiciones importantes
+- ``` para bloques de c├│digo si aplica
+- Incluye tablas cuando ayude a organizar informaci├│n comparativa
 - Texto claro, pedag├│gico, acorde al grado
 - 150-400 palabras de contenido ├║til
-- NO incluyas explicaciones, metadatos ni bloques de c├│digo markdown
+- NO generes HTML, NO uses etiquetas <html>/<body>/<div>
+- NO incluyas explicaciones, metadatos ni bloques de c├│digo markdown al inicio o final
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -847,7 +846,7 @@ PROMPT;
 
 **Diapositiva:** {$sectionTitle}
 
-Genera contenido HTML para esta diapositiva con clases Tailwind.
+Genera contenido en Markdown para esta diapositiva.
 PROMPT;
 
         try {
@@ -871,15 +870,16 @@ PROMPT;
                 return;
             }
 
-            // Limpiar posibles wrappers markdown
-            $content = preg_replace('/^```(?:html)?\s*\n?/i', '', $content);
+            // Limpiar posibles wrappers markdown (```, ```markdown, ```md)
+            $content = preg_replace('/^```(?:markdown|md|html)?\s*\n?/i', '', $content);
             $content = preg_replace('/\n?```\s*$/s', '', $content);
             $content = trim($content);
 
             // Reemplazar o crear el primer bloque de contenido de la diapositiva
+            $content = $this->sanitizeText($content, 'basic');
             if (!empty($this->wizardSections[$sectionIndex]['contents'])) {
                 // Actualizar el primer bloque existente
-                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $this->sanitizeText($content);
+                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $content;
                 $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'TEXT';
             } else {
                 // Crear nuevo bloque
@@ -887,7 +887,7 @@ PROMPT;
                     'id'         => 'temp_' . uniqid(),
                     'type'       => 'TEXT',
                     'title'      => null,
-                    'body'       => $this->sanitizeText($content),
+                    'body'       => $content,
                     'is_visible' => true,
                     'media'      => null,
                 ];
@@ -3028,6 +3028,23 @@ PROMPT;
         // 5. No es mermaid → dejar intacto
         $embed['is_mermaid'] = false;
         return $embed;
+    }
+
+    /**
+     * Renderiza el body de un bloque de contenido.
+     *
+     * Si el body contiene etiquetas HTML (<) se renderiza raw.
+     * En caso contrario se asume Markdown y se convierte a HTML.
+     */
+    public function renderContentBody(?string $body): string
+    {
+        if (empty($body)) {
+            return '';
+        }
+        if (\Illuminate\Support\Str::contains($body, '<')) {
+            return $body;
+        }
+        return \Illuminate\Support\Str::markdown($body);
     }
 
     /**
