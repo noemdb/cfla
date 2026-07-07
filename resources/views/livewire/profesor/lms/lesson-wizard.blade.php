@@ -2144,7 +2144,7 @@
                                     </div>
 
                                     {{-- Tab: Editor / Preview --}}
-                                    <div x-data="{ editorTab: 'edit' }">
+                                    <div x-data="{ editorTab: 'preview' }">
                                         {{-- Tab buttons --}}
                                         <div class="flex gap-0.5 mb-2">
                                             <button @click="editorTab = 'edit'"
@@ -2201,8 +2201,32 @@
                                                                                 {{ ($content['type'] ?? '') === 'MEDIA' ? 'bg-fuchsia-500/10 text-fuchsia-400' : '' }}">
                                                                         {{ $content['type'] ?? 'TEXT' }}
                                                                     </span>
-                                                                    <span class="text-slate-500 truncate max-w-[200px]">
-                                                                        {{ $content['title'] ? Str::limit($content['title'], 40) : 'sin titulo' }}
+                                                                    <span class="text-slate-500 truncate max-w-[200px]"
+                                                                          x-data="{ editing: false }"
+                                                                          x-cloak>
+                                                                        {{-- Display mode --}}
+                                                                        <span x-show="!editing"
+                                                                              class="inline-flex items-center gap-1 cursor-pointer hover:text-slate-300 transition-colors"
+                                                                              @click="editing = true">
+                                                                            <span class="truncate max-w-[160px]">{{ $content['title'] ? Str::limit($content['title'], 40) : 'sin título' }}</span>
+                                                                            <svg class="w-3 h-3 shrink-0 text-slate-600 hover:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                                        </span>
+                                                                        {{-- Edit mode --}}
+                                                                        <span x-show="editing"
+                                                                              x-cloak
+                                                                              class="inline-flex items-center gap-1">
+                                                                            <input x-ref="titleInput"
+                                                                                   wire:model.blur="wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title"
+                                                                                   @keydown.escape="editing = false"
+                                                                                   @keydown.enter="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
+                                                                                   x-init="$nextTick(() => $refs.titleInput?.focus())"
+                                                                                   class="w-full bg-slate-900/60 border border-emerald-500/40 rounded px-1.5 py-0.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400"/>
+                                                                            <button @click="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
+                                                                                    class="p-1 rounded transition-all text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15"
+                                                                                    title="Guardar título">
+                                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                                            </button>
+                                                                        </span>
                                                                     </span>
                                                                 </div>
                                                                 <div class="text-[10px] text-slate-600 leading-relaxed line-clamp-1">
