@@ -12,7 +12,6 @@ use LarAgent\Drivers\OpenAi\OpenAiDriver;
 use LarAgent\Drivers\OpenAi\OpenAiResponsesDriver;
 use LarAgent\Drivers\OpenAi\OpenRouter;
 use LarAgent\History\InMemoryChatHistory;
-use Redberry\MCPClient\Enums\Transporters;
 
 // config for Maestroerror/LarAgent
 return [
@@ -179,9 +178,9 @@ return [
         'store' => env('MCP_TOOL_CACHE_STORE', null),
     ],
 
-    'mcp_servers' => [
+    'mcp_servers' => class_exists(\Redberry\MCPClient\Enums\Transporters::class) ? [
         'github' => [
-            'type' => Transporters::HTTP,
+            'type' => \Redberry\MCPClient\Enums\Transporters::HTTP,
             'base_url' => 'https://api.githubcopilot.com/mcp',
             'timeout' => 30,
             'token' => env('GITHUB_API_TOKEN', null),
@@ -192,7 +191,7 @@ return [
             'id_type' => 'int',
         ],
         'mcp_server_memory' => [
-            'type' => Transporters::STDIO,
+            'type' => \Redberry\MCPClient\Enums\Transporters::STDIO,
             'command' => [
                 'npx',
                 '-y',
@@ -205,7 +204,7 @@ return [
             // milliseconds - polling interval for response (default: 20)
             'poll_interval' => 20,
         ],
-    ],
+    ] : [],
 
     /*
     |--------------------------------------------------------------------------
