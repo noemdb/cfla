@@ -23,6 +23,7 @@
         "maestroerror/laragent": "^1.4",
         "pusher/pusher-php-server": "^7.2",
         "rap2hpoutre/laravel-log-viewer": "^2.5",
+        "redberry/mcp-client-laravel": "^1.1",
         "resend/resend-laravel": "^0.19.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "wireui/wireui": "^2.5.1"
