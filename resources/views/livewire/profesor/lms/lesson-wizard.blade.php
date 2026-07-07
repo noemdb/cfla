@@ -648,7 +648,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! nl2br(e($content['body'] ?? '')) !!}
+                                                {!! $content['body'] ?? '' !!}
                                             </div>
                                         @endforeach
                                     </div>
@@ -1054,7 +1054,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! nl2br(e($content['body'] ?? '')) !!}
+                                                {!! $content['body'] ?? '' !!}
                                             </div>
                                         @endforeach
                                     </div>
@@ -1331,7 +1331,7 @@
                                             <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                         @endif
                                         <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                            {!! nl2br(e($content['body'] ?? '')) !!}
+                                            {!! $content['body'] ?? '' !!}
                                         </div>
                                     @endforeach
                                     {{-- HTML Embeds asociados a esta sección --}}
@@ -1660,7 +1660,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram"
              class="fixed inset-0 z-[9999] items-center justify-center bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay">
             <div class="max-w-4xl py-8 mx-auto px-6 space-y-5">
@@ -2051,654 +2051,329 @@
                         </div>
                     @endif
 
-                    {{-- STEP 2: Secciones y Contenido --}}
+                    {{-- STEP 2: Editor de Diapositivas (Slide Editor) --}}
                     @if($currentStep === 2)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-5 space-y-4">
-                            <div class="flex items-center gap-2 pb-3 border-b border-slate-700">
-                                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">2</span>
-                                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Contenido de la Lección</h2>
-                                <div class="ml-auto">
-                                    <button wire:click="generateStep2Sections"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium
-                                                   text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20
-                                                   transition-all duration-200">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                        </svg>
-                                        Generar estructura
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden"
+                             x-data="{
+                                showSlideList: false,
+                                editSlideTitle: false,
+                                slideTitleBuffer: '{{ addslashes($wizardSections[$currentSlideIndex]['title'] ?? '') }}'
+                             }">
+
+                            {{-- ===== SLIDE EDITOR INTERFACE ===== --}}
+                            @php
+                                $totalSlides = count($wizardSections);
+                                $currentSlide = $wizardSections[$currentSlideIndex] ?? null;
+                                $slideBlocks = collect($currentSlide['contents'] ?? [])->pluck('body')->filter()->values();
+                                $slideContent = $slideBlocks->implode("\n");
+                                $hasContent = $slideBlocks->isNotEmpty();
+                            @endphp
+
+                            {{-- Slide Navigation Bar --}}
+                            <div class="flex items-center justify-between gap-2 px-4 py-2.5 bg-slate-800/40 border-b border-slate-700/30">
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="prevSlide"
+                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex <= 0 ? 'opacity-40 pointer-events-none' : '' }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                        Anterior
+                                    </button>
+                                    <span class="text-slate-600 mx-1">|</span>
+                                    <button wire:click="nextSlide"
+                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex >= $totalSlides - 1 ? 'opacity-40 pointer-events-none' : '' }}">
+                                        Siguiente
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] text-slate-500 font-mono">
+                                        Diapositiva <span class="text-emerald-400 font-bold">{{ $currentSlideIndex + 1 }}</span> / {{ max(0, $totalSlides) }}
+                                    </span>
+                                    <button @click="showSlideList = !showSlideList"
+                                            class="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 rounded-lg transition-all"
+                                            title="Lista de diapositivas">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                     </button>
                                 </div>
                             </div>
 
-                            {{-- Secciones existentes como deck de tarjetas --}}
-                            @php
-                                // Colores de acento que ciclan por cada card
-                                $cardAccents = [
-                                    ['top' => 'border-t-emerald-500/60', 'badge' => 'bg-emerald-500/20 text-emerald-400', 'dot' => 'bg-emerald-400/70'],
-                                    ['top' => 'border-t-sky-500/60',    'badge' => 'bg-sky-500/20 text-sky-400',      'dot' => 'bg-sky-400/70'],
-                                    ['top' => 'border-t-violet-500/60', 'badge' => 'bg-violet-500/20 text-violet-400', 'dot' => 'bg-violet-400/70'],
-                                    ['top' => 'border-t-amber-500/60',  'badge' => 'bg-amber-500/20 text-amber-400',   'dot' => 'bg-amber-400/70'],
-                                    ['top' => 'border-t-rose-500/60',   'badge' => 'bg-rose-500/20 text-rose-400',     'dot' => 'bg-rose-400/70'],
-                                    ['top' => 'border-t-cyan-500/60',   'badge' => 'bg-cyan-500/20 text-cyan-400',     'dot' => 'bg-cyan-400/70'],
-                                ];
-                            @endphp
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            @foreach($wizardSections as $sIdx => $section)
-                                @php
-                                    // ─── Accent for this card ─────────────────────
-                                    $accent = $cardAccents[$sIdx % count($cardAccents)];
-
-                                    // ─── Metadata ──────────────────────────────────
-                                    $contentCount = count($section['contents'] ?? []);
-                                    $totalWords = collect($section['contents'] ?? [])
-                                        ->sum(fn($c) => count(preg_split('/\s+/', trim(strip_tags($c['body'] ?? '')))));
-
-                                    // Extract section content for the prompt
-                                    $sectionTextPreview = collect($section['contents'] ?? [])
-                                        ->pluck('body')
-                                        ->filter()
-                                        ->map(fn($b) => strip_tags($b))
-                                        ->implode("\n");
-                                    $sectionTextPreview = \Illuminate\Support\Str::limit($sectionTextPreview, 500);
-                                    $sectionContentForPrompt = $sectionTextPreview ?: 'La sección no tiene contenido aún. Describe una imagen didáctica genérica que represente visualmente el título de la sección.';
-
-                                    // Build the Staff Engineer prompt template
-                                    $imagePrompt = "## Rol\n"
-                                        ."Eres un ilustrador educativo senior y diseñador instruccional con 15 años de experiencia creando recursos visuales pedagógicamente efectivos para entornos de aprendizaje presencial y digital. Dominas principios de comunicación visual, psicología cognitiva del aprendizaje y diseño universal para el aprendizaje (DUA).\n\n"
-                                        ."## Contexto pedagógico\n"
-                                        ."- **Grado/Nivel:** {$gradoName}\n"
-                                        ."- **Asignatura:** {$asignaturaName}\n"
-                                        ."- **Sección escolar:** {$seccionName}\n"
-                                        ."- **Título de la lección:** {$lessonTitle}\n"
-                                        ."- **Sección destino:** {$section['title']}\n"
-                                        ."- **Contenido de la sección:** {$sectionContentForPrompt}\n\n"
-                                        ."## Especificaciones técnicas del recurso visual\n"
-                                        ."- **Estilo gráfico:** Ilustración educativa profesional en estilo \«flat design\» con paleta de color armónica, saturada pero no fluorescente. Trazos vectoriales definidos sin sombras complejas ni degradados extensos. Composición ordenada con jerarquía visual clara (tamaño, color, posición).\n"
-                                        ."- **Proporción:** 16:9 horizontal. La imagen debe funcionar tanto en pantalla proyectada como en impresión tamaño carta (margen de 1\«).\n"
-                                        ."- **Resolución:** Mínimo 1920×1080px, 300 DPI si es vectorial.\n"
-                                        ."- **Tipografía:** NO incluir texto ni etiquetas en la imagen. Todo el texto debe poder añadirse por separado como capa independiente.\n"
-                                        ."- **Paleta de color:** Accesible para daltonismo (evitar rojo/verde como único contraste). Usar azul, naranja, amarillo, verde azulado como colores principales de distinción.\n"
-                                        ."- **Público objetivo:** Estudiantes de {$gradoName}. El nivel de abstracción, las metáforas visuales y el vocabulario gráfico deben ser apropiados para esta etapa educativa.\n\n"
-                                        ."## Instrucciones de contenido didáctico\n"
-                                        ."1. **Concepto central:** Representa visualmente la idea o proceso fundamental de la sección de manera concreta, evitando abstracciones que requieran texto explicativo.\n"
-                                        ."2. **Metáfora visual:** Usa una analogía visual que conecte el nuevo conocimiento con experiencias cotidianas del estudiante (si aplica).\n"
-                                        ."3. **Secuencia didáctica:** Si el contenido describe un proceso (causa-efecto, línea de tiempo, ciclo), represéntalo en 3-4 viñetas o pasos dentro de una misma composición.\n"
-                                        ."4. **Punto focal:** La composición debe tener un único elemento visual dominante que capture la atención primero, con elementos secundarios que amplíen o contextualicen.\n"
-                                        ."5. **Inclusión y diversidad:** Cualquier figura humana debe representar diversidad étnica, de género y funcional de manera natural y no estereotipada.\n"
-                                        ."6. **Fondo:** Neutro o contextual mínimo (sin texturas distractoras). El fondo no debe competir con el contenido pedagógico.\n\n"
-                                        ."## Restricciones\n"
-                                        ."- ❌ Sin texto renderizado en la imagen (ni títulos, ni etiquetas, ni pies de foto).\n"
-                                        ."- ❌ Sin elementos decorativos que no tengan función pedagógica directa.\n"
-                                        ."- ❌ Sin violencia, estereotipos de género/raza, representaciones inexactas científicamente.\n"
-                                        ."- ❌ Sin marcas de agua, logos o referencias a la herramienta generadora.\n"
-                                        ."- ✅ La imagen debe mantener legibilidad y contraste si se imprime en escala de grises.\n"
-                                        ."- ✅ El estilo debe ser coherente con otras imágenes didácticas de la misma lección (mantener misma paleta y nivel de detalle).\n\n"
-                                        ."## Formato de salida\n"
-                                        ."Genera ÚNICAMENTE la imagen solicitada. Sin descripciones adicionales, sin explicaciones, sin variantes. Entrega la imagen en el formato y proporción especificados.";
-                                @endphp
-
-                                {{-- ─── DECK CARD ─── --}}
-                                <div wire:key="section-card-{{ $sIdx }}"
-                                     x-data="{ showPrompt: false, actionsOpen: false }"
-                                     class="bg-slate-800/50 border border-slate-700/50 {{ $accent['top'] }} rounded-xl shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-600/50">
-
-                                    {{-- ═══ CARD HEADER ═══ --}}
-                                    <div class="flex items-start justify-between gap-3 px-4 py-3.5 bg-slate-800/30 border-b border-slate-700/30">
-                                        {{-- Left: identity + metadata --}}
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center gap-2.5">
-                                                {{-- Section number badge --}}
-                                                <span class="flex items-center justify-center w-7 h-7 rounded-lg {{ $accent['badge'] }} text-[11px] font-bold shrink-0">
-                                                    {{ $sIdx + 1 }}
-                                                </span>
-                                                {{-- Title --}}
-                                                <h3 class="text-sm font-bold text-white truncate">{{ $section['title'] }}</h3>
-                                                {{-- Visibility pill --}}
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium leading-none
-                                                    {{ $section['is_visible'] ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/50 text-slate-500' }}">
-                                                    <span class="w-1.5 h-1.5 rounded-full {{ $section['is_visible'] ? 'bg-emerald-400' : 'bg-slate-500' }}"></span>
-                                                    {{ $section['is_visible'] ? 'Visible' : 'Oculto' }}
-                                                </span>
-                                            </div>
-                                            {{-- Metadata line --}}
-                                            <div class="flex items-center gap-1.5 mt-1.5 ml-9">
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-[10px] text-slate-400">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                                                    {{ $contentCount }}
-                                                </span>
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-[10px] text-slate-400">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                                                    ~{{ number_format(max(0, $totalWords)) }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {{-- Right: action buttons --}}
-                                        {{-- Dropdown menu --}}
-                                        <div class="relative" @click.away="actionsOpen = false">
-                                            <button @click="actionsOpen = !actionsOpen"
-                                                    class="flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all"
-                                                    title="Acciones">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <circle cx="5" cy="12" r="1.5" fill="currentColor"/>
-                                                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-                                                    <circle cx="19" cy="12" r="1.5" fill="currentColor"/>
-                                                </svg>
-                                            </button>
-                                            <div x-show="actionsOpen" x-cloak x-transition:enter.duration.150ms
-                                                 class="absolute right-0 top-full z-50 mt-1 w-48 py-1.5 bg-slate-800 border border-slate-600/50 rounded-xl shadow-2xl shadow-black/50">
-                                                {{-- Image prompt --}}
-                                                <button @click="showPrompt = !showPrompt; actionsOpen = false"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
-                                                               text-slate-300 hover:text-amber-300 hover:bg-amber-500/10">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                                                    Imagen IA
-                                                </button>
-                                                {{-- IA generate --}}
-                                                <button wire:click="generateSectionContent({{ $sIdx }}); actionsOpen = false"
-                                                        wire:loading.attr="disabled"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
-                                                               text-slate-300 hover:text-purple-300 hover:bg-purple-500/10">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                                    Generar IA
-                                                </button>
-                                                <hr class="border-slate-700/50 my-1">
-                                                {{-- Toggle visibility --}}
-                                                <button wire:click="toggleWizardSectionVisibility({{ $sIdx }}); actionsOpen = false"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
-                                                               {{ $section['is_visible'] ? 'text-emerald-300 hover:bg-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50' }}">
-                                                    @if($section['is_visible'])
-                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                    @else
-                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22"/></svg>
-                                                    @endif
-                                                    {{ $section['is_visible'] ? 'Visible' : 'Oculto' }}
-                                                </button>
-                                                {{-- Add content block --}}
-                                                <button wire:click="$set('editingSectionIndex', {{ $editingSectionIndex === $sIdx ? 'null' : $sIdx }}); actionsOpen = false"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
-                                                               {{ $editingSectionIndex === $sIdx ? 'text-emerald-300 bg-emerald-500/10' : 'text-slate-300 hover:text-white hover:bg-slate-700/50' }}">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                    {{ $editingSectionIndex === $sIdx ? 'Cerrar editor' : 'Agregar bloque' }}
-                                                </button>
-                                                {{-- Add resource --}}
-                                                <button wire:click="$set('resourcePanelSection', {{ $resourcePanelSection === $sIdx ? 'null' : $sIdx }}); actionsOpen = false"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors
-                                                               {{ $resourcePanelSection === $sIdx ? 'text-amber-300 bg-amber-500/10' : 'text-slate-300 hover:text-amber-300 hover:bg-amber-500/10' }}">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                    Agregar recurso
-                                                </button>
-                                                <hr class="border-slate-700/50 my-1">
-                                                {{-- Delete --}}
-                                                <button wire:click="removeWizardSection({{ $sIdx }}); actionsOpen = false"
-                                                        wire:confirm="¿Eliminar esta sección?"
-                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-[11px] font-medium text-left transition-colors text-red-400 hover:text-red-300 hover:bg-red-500/10">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    Eliminar sección
-                                                </button>
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-
-                                    {{-- ═══ IMAGE PROMPT DIALOG (expandable) ═══ --}}
-                                    <div x-show="showPrompt" x-cloak x-transition:enter.duration.200ms
-                                         class="border-b border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900">
-                                        <div class="p-4 space-y-3">
-                                            {{-- Header --}}
-                                            <div class="flex items-start justify-between gap-4">
-                                                <div class="flex items-start gap-3">
-                                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 class="text-sm font-bold text-amber-300">Prompt — Imagen didáctica</h4>
-                                                        <p class="text-[11px] text-slate-400 leading-relaxed">
-                                                            Copia este prompt y pégalo en un generador de imágenes con IA
-                                                            (<span class="text-slate-300">DALL·E, Midjourney, Stable Diffusion, Copilot</span>)
-                                                            para crear un recurso visual para esta sección.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <button @click="showPrompt = false"
-                                                        class="p-1 hover:bg-slate-700/50 rounded-lg transition-colors shrink-0">
-                                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                </button>
-                                            </div>
-
-                                            {{-- Prompt text --}}
-                                            <div class="relative" x-data="{}">
-                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-xl p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $imagePrompt }}</pre>
-                                                <button @click="
-                                                    const btn = $event.currentTarget;
-                                                    navigator.clipboard.writeText(btn.parentElement.querySelector('pre')?.textContent || '');
-                                                    btn.textContent = '✓ Copiado';
-                                                    setTimeout(() => btn.textContent = 'Copiar prompt', 2000);
-                                                "
-                                                        class="absolute top-3 right-3 px-2.5 py-1 text-[10px] font-medium text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-all"
-                                                        type="button">
-                                                    Copiar prompt
-                                                </button>
-                                            </div>
-
-                                            {{-- Footer --}}
-                                            <div class="flex items-center justify-between text-[10px] text-slate-500">
-                                                <span class="flex items-center gap-1">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                    La imagen generada podrás asociarla como recurso a esta sección al finalizar.
-                                                </span>
-                                                <span>{{ strlen($imagePrompt) }} caracteres</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- ═══ GENERATION ERROR ═══ --}}
-                                    @if($generatingSection === $sIdx && $generationError)
-                                        <div class="px-4 py-2.5 bg-red-500/10 border-b border-red-500/20">
-                                            <p class="text-xs text-red-400 flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                {{ $generationError }}
-                                            </p>
-                                        </div>
-                                    @endif
-
-                                    {{-- ═══ CARD BODY: CONTENT BLOCKS ═══ --}}
-                                    <div class="px-4 py-3 space-y-2.5">
-                                        @forelse($section['contents'] as $cIdx => $content)
-                                            @php
-                                                $cleanBody = strip_tags($content['body'] ?? '');
-                                                $bodyLength = mb_strlen($cleanBody);
-                                                $isLong = $bodyLength > 250;
-                                                $contentWords = count(preg_split('/\s+/', trim($cleanBody)));
-                                                $contentType = $content['type'] ?? 'TEXT';
-                                            @endphp
-                                            <div wire:key="content-{{ $sIdx }}-{{ $cIdx }}"
-                                                 x-data="{ expanded: false }"
-                                                 class="group relative rounded-lg bg-slate-900/40 border border-slate-700/30 hover:border-slate-600/50 transition-all duration-200">
-
-                                                {{-- Top accent bar --}}
-                                                <div class="absolute top-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-slate-600/30 to-transparent"></div>
-
-                                                <div class="flex items-start gap-3 p-3">
-                                                    {{-- Type indicator --}}
-                                                    <div class="flex flex-col items-center gap-1 mt-1 shrink-0">
-                                                        <span class="block w-2 h-2 rounded-full {{ $accent['dot'] }}"></span>
-                                                        <span class="block w-px h-full min-h-[1.5rem] bg-slate-700/30"></span>
-                                                    </div>
-
-                                                    {{-- Content --}}
-                                                    <div class="min-w-0 flex-1">
-                                                        @if($content['title'])
-                                                            <h4 class="text-xs font-semibold text-slate-200 mb-1">{{ $content['title'] }}</h4>
-                                                        @endif
-
-                                                        {{-- Body (collapsible) --}}
-                                                        <div class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap"
-                                                             :class="expanded ? '' : 'line-clamp-3'">
-                                                            {!! nl2br(e($cleanBody)) !!}
-                                                        </div>
-
-                                                        {{-- Expand/collapse toggle --}}
-                                                        @if($isLong)
-                                                            <button @click="expanded = !expanded"
-                                                                    class="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
-                                                                <span x-show="!expanded">
-                                                                    Ver contenido completo
-                                                                    <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                                                </span>
-                                                                <span x-show="expanded" x-cloak>
-                                                                    Ver menos
-                                                                    <svg class="w-3 h-3 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                                                                </span>
-                                                            </button>
-                                                        @endif
-
-                                                        {{-- Metadata --}}
-                                                        <div class="flex items-center gap-2 mt-1.5">
-                                                            <span class="inline-flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-slate-600">
-                                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                                                {{ $contentType }}
-                                                            </span>
-                                                            <span class="text-slate-600">·</span>
-                                                            <span class="text-[9px] text-slate-600">{{ max(0, $contentWords) }} palabras</span>
-                                                            @if(!($content['is_visible'] ?? true))
-                                                                <span class="text-slate-600">·</span>
-                                                                <span class="text-[9px] text-slate-600 italic">oculto</span>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-
-                                                    {{-- Delete content button --}}
-                                                    <button wire:click="removeWizardContent({{ $sIdx }}, {{ $cIdx }})"
-                                                            class="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-300 shrink-0"
-                                                            title="Eliminar bloque">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @empty
-                                            {{-- Empty state for sections without content --}}
-                                            <div class="text-center py-6">
-                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                                </div>
-                                                <p class="text-xs text-slate-500 font-medium">Esta sección no tiene contenido</p>
-                                                <p class="text-[10px] text-slate-600 mt-0.5">Usa el botón <span class="text-slate-400 font-medium">+ Bloque</span> o genera con <span class="text-purple-400 font-medium">IA</span></p>
-                                            </div>
-                                        @endforelse
-
-                                        {{-- Recursos vinculados a esta sección --}}
+                            {{-- Slide List (collapsible) --}}
+                            <div x-show="showSlideList" x-cloak x-transition:enter.duration.150ms
+                                 class="border-b border-slate-700/30 bg-slate-900/60">
+                                <div class="max-h-48 overflow-y-auto p-2 space-y-0.5">
+                                    @foreach($wizardSections as $sIdx2 => $sec)
                                         @php
-                                            $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
-                                            $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
-                                            $secEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id'])->values()->all();
-                                            $hasSectionResources = count($secResources) > 0 || count($secLinks) > 0 || count($secEmbeds) > 0;
+                                            $secContent = $sec['contents'][0]['body'] ?? '';
+                                            $hasSecContent = !empty($secContent);
                                         @endphp
-                                        @if($hasSectionResources)
-                                            <div class="border-t border-slate-700/40 pt-2.5 mt-2 space-y-1">
-                                                @foreach($secResources as $rIdx2 => $res)
-                                                    @php $resIndex = array_search($res, $wizardResources); $isImage = str_starts_with($res['media']['mime_type'] ?? '', 'image/'); @endphp
-                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-amber-500/30 transition-all">
-                                                        <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center shrink-0">
-                                                            <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                        </div>
-                                                        <span class="text-[11px] text-slate-300 truncate flex-1">{{ $res['display_name'] }}</span>
-                                                        <span class="text-[9px] text-slate-500 shrink-0">{{ $res['media']['size_for_humans'] ?? '' }}</span>
-                                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                            @if($isImage)
-                                                            <button wire:click="previewResourceImage({{ $resIndex }})"
-                                                                    class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
-                                                                    title="Vista previa">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                            </button>
-                                                            @endif
-                                                            <button wire:click="removeWizardResource({{ $resIndex }})"
-                                                                    class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
-                                                                    title="Eliminar recurso">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                                @foreach($secLinks as $link)
-                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-sky-500/30 transition-all">
-                                                        <div class="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
-                                                            <svg class="w-3 h-3 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                                        </div>
-                                                        <div class="flex-1 min-w-0">
-                                                            <span class="text-[11px] text-slate-300 truncate block">{{ $link['title'] }}</span>
-                                                            <span class="text-[9px] text-slate-500 truncate block">{{ $link['url'] }}</span>
-                                                        </div>
-                                                        <span class="text-[9px] text-slate-500 bg-slate-700/40 px-1.5 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
-                                                        <button wire:click="removeWizardLink({{ array_search($link, $wizardLinks) }})"
-                                                                class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10 shrink-0">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                        </button>
-                                                    </div>
-                                                @endforeach
-                                                @foreach($secEmbeds as $embed)
-                                                    @php $embedIndex = array_search($embed, $wizardHtmlEmbeds); @endphp
-                                                    <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg group hover:border-fuchsia-500/30 transition-all">
-                                                        <div class="w-6 h-6 rounded bg-fuchsia-500/10 flex items-center justify-center shrink-0">
-                                                            <svg class="w-3 h-3 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                                        </div>
-                                                        <span class="text-[11px] text-slate-300 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
-                                                        <span class="text-[9px] text-slate-500 font-mono shrink-0 max-w-[100px] truncate">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 30) }}</span>
-                                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                            <button wire:click="previewExistingEmbed({{ $embedIndex }})"
-                                                                    class="text-slate-500 hover:text-fuchsia-300 transition-all text-xs p-0.5 rounded hover:bg-fuchsia-500/10"
-                                                                    title="Vista previa">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                            </button>
-                                                            <button wire:click="editWizardHtmlEmbed({{ $embedIndex }})"
-                                                                    class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
-                                                                    title="Editar embed">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                            </button>
-                                                            <button wire:click="removeWizardHtmlEmbed({{ $embedIndex }})"
-                                                                    class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
-                                                                    title="Eliminar embed">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    {{-- ═══ CARD FOOTER: INLINE CONTENT FORM ═══ --}}
-                                    @if($editingSectionIndex === $sIdx)
-                                        <div class="border-t border-slate-700/50 bg-slate-900/50">
-                                            <div class="px-4 py-3 space-y-2.5">
-                                                <div class="flex items-center gap-2 mb-1">
-                                                    <span class="flex items-center justify-center w-5 h-5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">+</span>
-                                                    <span class="text-[11px] font-semibold text-slate-300">Nuevo bloque de contenido</span>
-                                                </div>
-                                                <input wire:model="contentTitle" placeholder="Título del bloque (opcional)"
-                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
-                                                <textarea wire:model="contentBody" rows="3" placeholder="Escribe o pega el contenido de la sección…"
-                                                          class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors resize-none"></textarea>
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex gap-2">
-                                                        <button wire:click="addWizardContent({{ $sIdx }})"
-                                                                class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors">
-                                                            Agregar bloque
-                                                        </button>
-                                                        <button wire:click="$set('editingSectionIndex', null)"
-                                                                class="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-slate-700/50 transition-colors">
-                                                            Cancelar
-                                                        </button>
-                                                    </div>
-                                                    <span class="text-[9px] text-slate-600">El bloque se agrega al final de la sección</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    {{-- ═══ RESOURCE PANEL (paso 2) ═══ --}}
-                                    @if($resourcePanelSection === $sIdx)
-                                        <div class="border-t border-amber-500/20 bg-gradient-to-b from-amber-500/[0.03] to-slate-900/50"
-                                             x-data="{ resourceTab: 'file' }">
-                                            <div class="px-4 py-3 space-y-3">
-                                                {{-- Header --}}
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    <span class="flex items-center justify-center w-5 h-5 rounded bg-amber-500/20 text-amber-400 text-[9px] font-bold">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                    </span>
-                                                    <span class="text-[11px] font-semibold text-slate-300">Agregar recurso a esta sección</span>
-                                                    <button wire:click="$set('resourcePanelSection', null)" class="ml-auto text-[9px] text-slate-500 hover:text-slate-300 transition-colors">Cerrar</button>
-                                                </div>
-
-                                                {{-- Sub-tabs --}}
-                                                <div class="flex gap-1">
-                                                    <button @click="resourceTab = 'file'"
-                                                            :class="resourceTab === 'file' ? 'text-amber-300 bg-amber-500/15 border-amber-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
-                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                        Archivo
-                                                    </button>
-                                                    <button @click="resourceTab = 'link'"
-                                                            :class="resourceTab === 'link' ? 'text-sky-300 bg-sky-500/15 border-sky-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
-                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                                        Enlace
-                                                    </button>
-                                                    <button @click="resourceTab = 'embed'"
-                                                            :class="resourceTab === 'embed' ? 'text-fuchsia-300 bg-fuchsia-500/15 border-fuchsia-500/30' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
-                                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-medium rounded-lg border transition-all">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                                        HTML
-                                                    </button>
-                                                </div>
-
-                                                {{-- TAB: Archivo --}}
-                                                <div x-show="resourceTab === 'file'" x-cloak x-transition:enter.duration.150ms>
-                                                    <div class="flex gap-2 items-end">
-                                                        <div class="flex-1">
-                                                            <input wire:model="resourceName" placeholder="Nombre del recurso"
-                                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-amber-500 focus:outline-none transition-colors"/>
-                                                        </div>
-                                                        <div class="relative">
-                                                            <input wire:model="resourceFile" type="file" id="resourceFileInline-{{ $sIdx }}"
-                                                                   class="absolute inset-0 opacity-0 cursor-pointer"/>
-                                                            <label for="resourceFileInline-{{ $sIdx }}"
-                                                                   class="block px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border border-slate-600/50 hover:border-slate-500/50">
-                                                                <span class="flex items-center gap-1.5">
-                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                                    Adjuntar
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                        <button wire:click="addWizardResourceSection({{ $sIdx }})"
-                                                                class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap">
-                                                            Subir
-                                                        </button>
-                                                    </div>
-                                                    @error('resourceFile') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
-                                                    @error('resourceName') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
-                                                </div>
-
-                                                {{-- TAB: Enlace --}}
-                                                <div x-show="resourceTab === 'link'" x-cloak x-transition:enter.duration.150ms>
-                                                    <div class="space-y-2">
-                                                        <input wire:model="linkTitle" placeholder="Título del enlace"
-                                                               class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none transition-colors"/>
-                                                        <div class="flex gap-2">
-                                                            <input wire:model="linkUrl" placeholder="https://…"
-                                                                   class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-sky-500 focus:outline-none transition-colors"/>
-                                                            <select wire:model="linkType"
-                                                                    class="bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-[10px] text-slate-200 focus:border-sky-500 focus:outline-none transition-colors">
-                                                                <option value="REFERENCE">Referencia</option>
-                                                                <option value="VIDEO">Video</option>
-                                                                <option value="DOCUMENT">Documento</option>
-                                                                <option value="INTERACTIVE">Interactivo</option>
-                                                            </select>
-                                                        </div>
-                                                        <button wire:click="addWizardLinkSection({{ $sIdx }})"
-                                                                class="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded-lg transition-colors">
-                                                            Agregar enlace
-                                                        </button>
-                                                    </div>
-                                                    @error('linkTitle') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
-                                                    @error('linkUrl') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
-                                                </div>
-
-                                                {{-- TAB: HTML Embed --}}
-                                                <div x-show="resourceTab === 'embed'" x-cloak x-transition:enter.duration.150ms>
-                                                    <div class="space-y-2">
-                                                        <input wire:model="embedTitle" placeholder="Título del embed (opcional)"
-                                                               class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors"/>
-                                                        <textarea wire:model="embedHtml" rows="3" placeholder="Pega el código HTML, CSS o Mermaid…"
-                                                                  class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors resize-none font-mono"></textarea>
-                                                        <button wire:click="addWizardHtmlEmbedSection({{ $sIdx }})"
-                                                                class="px-3.5 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-xs font-medium rounded-lg transition-colors">
-                                                            Agregar HTML
-                                                        </button>
-                                                    </div>
-                                                    @error('embedHtml') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
+                                        <button wire:click="goToSlide({{ $sIdx2 }}); $el.closest('[x-data]').__x.$data.showSlideList = false"
+                                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs
+                                                       {{ $sIdx2 === $currentSlideIndex ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 border border-transparent' }}">
+                                            <span class="flex items-center justify-center w-5 h-5 rounded bg-slate-700/60 text-[10px] font-mono shrink-0">{{ $sIdx2 + 1 }}</span>
+                                            <span class="truncate flex-1">{{ $sec['title'] }}</span>
+                                            @if($hasSecContent)
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
+                                            @else
+                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600/40 shrink-0"></span>
+                                            @endif
+                                        </button>
+                                    @endforeach
                                 </div>
-                            @endforeach
                             </div>
 
-                            {{-- Recursos no vinculados a ninguna sección --}}
-                            @php
-                                $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
-                                $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
-                                $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
-                                $hasUnlinked = count($unlinkedResources) > 0 || count($unlinkedLinks) > 0 || count($unlinkedEmbeds) > 0;
-                            @endphp
-                            @if($hasUnlinked)
-                                <div class="border border-dashed border-slate-700/40 rounded-xl overflow-hidden mt-2">
-                                    <div class="px-4 py-2 bg-slate-800/30 border-b border-slate-700/20">
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Recursos sin sección asignada</span>
+                            {{-- Slide Content Area --}}
+                            @if($currentSlide)
+                                <div class="px-4 py-3" wire:key="slide-{{ $currentSlideIndex }}">
+                                    {{-- Slide Title (editable inline) --}}
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 text-emerald-400 text-xs font-bold shrink-0">
+                                            {{ $currentSlideIndex + 1 }}
+                                        </span>
+                                        <input wire:model="wizardSections.{{ $currentSlideIndex }}.title"
+                                               class="flex-1 bg-transparent border-b border-transparent hover:border-slate-600 focus:border-emerald-500 text-sm font-bold text-white px-0 py-0.5 focus:outline-none transition-colors"
+                                               placeholder="Titulo de la diapositiva"/>
+                                        <button wire:click="toggleWizardSectionVisibility({{ $currentSlideIndex }})"
+                                                class="p-1.5 rounded-lg transition-all {{ ($currentSlide['is_visible'] ?? true) ? 'text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10' : 'text-slate-600 hover:text-slate-400 hover:bg-slate-700/50' }}"
+                                                title="{{ ($currentSlide['is_visible'] ?? true) ? 'Visible' : 'Oculto' }}">
+                                            @if($currentSlide['is_visible'] ?? true)
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22"/></svg>
+                                            @endif
+                                        </button>
                                     </div>
-                                    <div class="p-3 space-y-1">
-                                        @foreach($unlinkedResources as $res)
-                                            @php $resIndex = array_search($res, $wizardResources); $isImage = str_starts_with($res['media']['mime_type'] ?? '', 'image/'); @endphp
-                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-amber-500/30 transition-all">
-                                                <div class="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center shrink-0">
-                                                    <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+
+                                    {{-- Tab: Editor / Preview --}}
+                                    <div x-data="{ editorTab: 'edit' }">
+                                        {{-- Tab buttons --}}
+                                        <div class="flex gap-0.5 mb-2">
+                                            <button @click="editorTab = 'edit'"
+                                                    :class="editorTab === 'edit' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+                                                    class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all">
+                                                <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                Editor
+                                            </button>
+                                            <button @click="editorTab = 'preview'"
+                                                    :class="editorTab === 'preview' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+                                                    class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all">
+                                                <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                Vista previa
+                                            </button>
+                                        </div>
+
+                                        {{-- EDIT TAB: HTML Content Editor --}}
+                                        <div x-show="editorTab === 'edit'" x-transition:enter.duration.150ms>
+                                            @if(isset($wizardSections[$currentSlideIndex]['contents'][0]))
+                                                <textarea wire:model="wizardSections.{{ $currentSlideIndex }}.contents.0.body"
+                                                          rows="12"
+                                                          class="w-full bg-slate-950/80 border border-slate-700/50 rounded-lg px-4 py-3 text-xs text-slate-200 placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
+                                                          placeholder="<!-- Escribe o pega el contenido HTML de esta diapositiva -->"
+                                                          spellcheck="false"></textarea>
+                                            @else
+                                                <div class="text-center py-10 bg-slate-900/50 border border-dashed border-slate-700/50 rounded-lg">
+                                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                                    </div>
+                                                    <p class="text-xs text-slate-500 font-medium mb-1">Esta diapositiva esta vacia</p>
+                                                    <p class="text-[10px] text-slate-600">Usa los botones de abajo para generar contenido o escribe HTML directamente</p>
                                                 </div>
-                                                <span class="text-[11px] text-slate-400 truncate flex-1">{{ $res['display_name'] }}</span>
-                                                <span class="text-[9px] text-slate-600">{{ $res['media']['size_for_humans'] ?? '' }}</span>
-                                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                    @if($isImage)
-                                                    <button wire:click="previewResourceImage({{ $resIndex }})"
-                                                            class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
-                                                            title="Vista previa">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                    </button>
-                                                    @endif
-                                                    <button wire:click="removeWizardResource({{ $resIndex }})"
-                                                            class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
-                                                            title="Eliminar recurso">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
+                                            @endif
+
+                                            {{-- Block list with delete buttons --}}
+                                            @php
+                                                $allContents = $currentSlide['contents'] ?? [];
+                                                $blockCount = count($allContents);
+                                            @endphp
+                                            @if($blockCount > 0)
+                                                <div class="mt-3 space-y-1.5"
+                                                     x-data="{ previewIndex: null }">
+                                                    @foreach($allContents as $cIdx => $content)
+                                                        <div class="flex items-start gap-2 px-3 py-2 rounded-lg transition-all text-xs
+                                                                    {{ $cIdx === 0 ? 'bg-emerald-500/8 border border-emerald-500/10' : 'bg-slate-800/50 border border-slate-700/30 hover:bg-slate-800/80' }}">
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center gap-1.5 mb-0.5">
+                                                                    @if($cIdx === 0)
+                                                                        <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-400/60">Editor principal</span>
+                                                                    @endif
+                                                                    <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded
+                                                                                {{ ($content['type'] ?? 'TEXT') === 'TEXT' ? 'bg-sky-500/10 text-sky-400' : '' }}
+                                                                                {{ ($content['type'] ?? '') === 'HTML' ? 'bg-amber-500/10 text-amber-400' : '' }}
+                                                                                {{ ($content['type'] ?? '') === 'MEDIA' ? 'bg-fuchsia-500/10 text-fuchsia-400' : '' }}">
+                                                                        {{ $content['type'] ?? 'TEXT' }}
+                                                                    </span>
+                                                                    <span class="text-slate-500 truncate max-w-[200px]">
+                                                                        {{ $content['title'] ? Str::limit($content['title'], 40) : 'sin titulo' }}
+                                                                    </span>
+                                                                </div>
+                                                                <div class="text-[10px] text-slate-600 leading-relaxed line-clamp-1">
+                                                                    @php
+                                                                        $bodyText = strip_tags($content['body'] ?? '');
+                                                                        $bodyText = preg_replace('/\s+/', ' ', $bodyText);
+                                                                    @endphp
+                                                                    {{ $bodyText ? Str::limit(trim($bodyText), 100) : '(vacio)' }}
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex items-center gap-1 shrink-0">
+                                                                <button @click.prevent="previewIndex = {{ $cIdx }}"
+                                                                        class="p-1.5 rounded-lg transition-all
+                                                                               text-slate-600 hover:text-white hover:bg-slate-600/50">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                                </button>
+                                                                @if($blockCount > 1)
+                                                                    <button wire:click="removeWizardContent({{ $currentSlideIndex }}, {{ $cIdx }})"
+                                                                            wire:confirm="Eliminar este bloque de contenido?"
+                                                                            class="p-1.5 rounded-lg transition-all
+                                                                                   text-slate-600 hover:text-red-400 hover:bg-red-500/10">
+                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Preview modal for this block --}}
+                                                        <div x-show="previewIndex === {{ $cIdx }}"
+                                                             x-cloak
+                                                             x-transition:enter.duration.200
+                                                             class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                                                             @keydown.escape.window="previewIndex = null">
+                                                            {{-- Overlay --}}
+                                                            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                                                                 @click="previewIndex = null"></div>
+                                                            {{-- Modal card --}}
+                                                            <div class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                                                                {{-- Header --}}
+                                                                <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded
+                                                                                    {{ ($content['type'] ?? 'TEXT') === 'TEXT' ? 'bg-sky-100 text-sky-700' : '' }}
+                                                                                    {{ ($content['type'] ?? '') === 'HTML' ? 'bg-amber-100 text-amber-700' : '' }}
+                                                                                    {{ ($content['type'] ?? '') === 'MEDIA' ? 'bg-fuchsia-100 text-fuchsia-700' : '' }}">
+                                                                            {{ $content['type'] ?? 'TEXT' }}
+                                                                        </span>
+                                                                        <span class="text-sm font-semibold text-gray-800">
+                                                                            {{ $content['title'] ?? 'Sin titulo' }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <button @click="previewIndex = null"
+                                                                            class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all">
+                                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                    </button>
+                                                                </div>
+                                                                {{-- Body --}}
+                                                                <div class="flex-1 overflow-y-auto p-5">
+                                                                    <div class="prose prose-sm prose-slate max-w-none !text-gray-800"
+                                                                         style="color: #1e293b !important;">
+                                                                        {!! $content['body'] ?? '' !!}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
                                                 </div>
+                                            @endif
+                                        </div>
+
+                                        {{-- PREVIEW TAB: HTML Rendered --}}
+                                        <div x-show="editorTab === 'preview'" x-cloak x-transition:enter.duration.150ms>
+                                            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 min-h-[200px] overflow-x-auto shadow-sm">
+                                                @if($hasContent)
+                                                    <div class="prose prose-sm prose-slate max-w-none" style="color: #1e293b;">
+                                                        {!! $slideContent !!}
+                                                    </div>
+                                                @else
+                                                    <div class="text-center py-12 text-slate-400">
+                                                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <p class="text-sm font-medium">Sin contenido para previsualizar</p>
+                                                        <p class="text-xs mt-1">Genera contenido o escribe HTML en la pestana Editor</p>
+                                                    </div>
+                                                @endif
                                             </div>
-                                        @endforeach
-                                        @foreach($unlinkedLinks as $link)
-                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-sky-500/30 transition-all">
-                                                <div class="w-6 h-6 rounded bg-sky-500/10 flex items-center justify-center shrink-0">
-                                                    <svg class="w-3 h-3 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                            @if(str_contains($slideContent, 'class="mermaid"'))
+                                                <div class="flex items-center gap-1.5 mt-2 px-3 py-2 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg">
+                                                    <svg class="w-4 h-4 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <span class="text-[11px] text-fuchsia-300">Esta diapositiva contiene un diagrama Mermaid</span>
                                                 </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <span class="text-[11px] text-slate-400 truncate block">{{ $link['title'] }}</span>
-                                                    <span class="text-[9px] text-slate-600 truncate block">{{ $link['url'] }}</span>
-                                                </div>
-                                                <span class="text-[9px] text-slate-600 bg-slate-700/30 px-1.5 py-0.5 rounded shrink-0">{{ $link['link_type'] }}</span>
-                                                <button wire:click="removeWizardLink({{ array_search($link, $wizardLinks) }})"
-                                                        class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10 shrink-0">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                </button>
-                                            </div>
-                                        @endforeach
-                                        @foreach($unlinkedEmbeds as $embed)
-                                            @php $embedIndex = array_search($embed, $wizardHtmlEmbeds); @endphp
-                                            <div class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg group hover:border-fuchsia-500/30 transition-all">
-                                                <div class="w-6 h-6 rounded bg-fuchsia-500/10 flex items-center justify-center shrink-0">
-                                                    <svg class="w-3 h-3 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                                </div>
-                                                <span class="text-[11px] text-slate-400 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
-                                                <span class="text-[9px] text-slate-600 font-mono shrink-0 max-w-[100px] truncate">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 30) }}</span>
-                                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                    <button wire:click="previewExistingEmbed({{ $embedIndex }})"
-                                                            class="text-slate-500 hover:text-fuchsia-300 transition-all text-xs p-0.5 rounded hover:bg-fuchsia-500/10"
-                                                            title="Vista previa">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                    </button>
-                                                    <button wire:click="editWizardHtmlEmbed({{ $embedIndex }})"
-                                                            class="text-slate-500 hover:text-amber-300 transition-all text-xs p-0.5 rounded hover:bg-amber-500/10"
-                                                            title="Editar embed">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                    </button>
-                                                    <button wire:click="removeWizardHtmlEmbed({{ $embedIndex }})"
-                                                            class="text-red-400/60 hover:text-red-300 transition-all text-xs p-0.5 rounded hover:bg-red-500/10"
-                                                            title="Eliminar embed">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @endforeach
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Action Buttons --}}
+                                <div class="px-4 py-3 border-t border-slate-700/30 bg-slate-900/30">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <button wire:click="generateSlideText"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSlideText"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            Generar Texto
+                                        </button>
+                                        <button wire:click="generateSlideImage"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSlideImage"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                                            Generar Imagen
+                                        </button>
+                                        <button wire:click="generateSlideDiagram"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSlideDiagram"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                            Generar Diagrama
+                                        </button>
+
+                                        <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
+
+                                        <button wire:click="removeWizardSection({{ $currentSlideIndex }})"
+                                                wire:confirm="Eliminar esta diapositiva?"
+                                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all
+                                                       text-red-400/70 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Generation Error --}}
+                                @if($generatingSection === $currentSlideIndex && $generationError)
+                                    <div class="px-4 py-2.5 bg-red-500/10 border-t border-red-500/20">
+                                        <p class="text-xs text-red-400 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            {{ $generationError }}
+                                        </p>
+                                    </div>
+                                @endif
+                            @else
+                                {{-- Empty State: No slides --}}
+                                <div class="p-8 text-center">
+                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-slate-400 mb-2">No hay diapositivas</h3>
+                                    <p class="text-xs text-slate-500 mb-4">Agrega una seccion o genera la estructura con IA para empezar.</p>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <button wire:click="generateStep2Sections"
+                                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
+                                                       text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            Generar estructura con IA
+                                        </button>
                                     </div>
                                 </div>
                             @endif
 
-                            {{-- Agregar sección --}}
-                            <div class="flex gap-2 pt-2">
+                            {{-- Add Section --}}
+                            <div class="flex gap-2 px-4 py-3 border-t border-slate-700/30 bg-slate-800/20">
                                 <input wire:model="newSectionTitle" wire:keydown.enter="addWizardSection"
-                                       placeholder="Nueva sección (ej: Introducción)…"
+                                       placeholder="Nueva diapositiva (ej: Introduccion)..."
                                        class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
                                 <button wire:click="addWizardSection"
-                                        class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg font-medium transition-all">
-                                    + Sección
+                                        class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg font-medium transition-all whitespace-nowrap">
+                                    + Diapositiva
                                 </button>
                             </div>
                         </div>
@@ -3743,7 +3418,7 @@
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
                                             <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! nl2br(e($content['body'] ?? '')) !!}
+                                                {!! $content['body'] ?? '' !!}
                                             </div>
                                         @endforeach
                                         {{-- HTML Embeds asociados a esta sección --}}

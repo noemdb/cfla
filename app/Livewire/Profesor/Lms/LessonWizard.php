@@ -18,6 +18,7 @@ use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Instrument\DiagReferent;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
+use App\Services\NapkinAiService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
@@ -67,6 +68,10 @@ class LessonWizard extends Component
 
     // ─── Wizard: Panel de recursos por sección (paso 2) ─────────
     public ?int $resourcePanelSection = null;
+
+    // ─── Slide navigation (paso 2) ────────────────────────────
+    public int $currentSlideIndex = 0;
+    public bool $showSlideHtmlPreview = false;
 
     // ─── Wizard: Generación con IA ─────────────────────────────
     public ?int $generatingSection = null;
@@ -278,6 +283,24 @@ class LessonWizard extends Component
         $this->currentStep = max(1, min(4, $step));
         // Al volver al wizard desde el estado "guardado", ocultar el mensaje de éxito
         $this->saved = false;
+    }
+
+    // ─── Slide navigation (paso 2) ────────────────────────────
+
+    public function goToSlide(int $index): void
+    {
+        $max = max(0, count($this->wizardSections) - 1);
+        $this->currentSlideIndex = max(0, min($max, $index));
+    }
+
+    public function nextSlide(): void
+    {
+        $this->goToSlide($this->currentSlideIndex + 1);
+    }
+
+    public function prevSlide(): void
+    {
+        $this->goToSlide($this->currentSlideIndex - 1);
     }
 
     /**
@@ -752,6 +775,396 @@ PROMPT;
         }
     }
 
+    // ─── Slide editor: Generar texto HTML para diapositiva actual ──
+
+    /**
+     * Genera contenido HTML para la diapositiva (secci├│n) actual usando IA.
+     * Similar a generateSectionContent() pero produce HTML sem├íntico
+     * con clases Tailwind en lugar de texto plano.
+     */
+    public function generateSlideText(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+
+        $this->generatingSection = $sectionIndex;
+        $this->generationError = null;
+
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+
+        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+
+        $activityContext = collect([
+            'Tema generador'       => $activity->topic,
+            'Tejido tem├ítico'      => $activity->thematic,
+            'Actividad evaluativa' => $activity->description,
+            'Ense├▒anza'            => $activity->teaching,
+            'Aprendizaje esperado' => $activity->learning,
+            'Referentes te├│ricos'  => $activity->references,
+            'ODS/Sistematizaci├│n'  => $activity->observations,
+        ])->filter()->map(fn($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
+
+        $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
+        $indicatorsText = $indicators->isNotEmpty()
+            ? $indicators->map(fn($n) => "├ó—ó {$n}")->implode("\n")
+            : '—';
+
+        $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+
+        $systemPrompt = <<<'PROMPT'
+Eres docente venezolano. Genera contenido HTML para una diapositiva de lecci├│n LMS.
+
+Reglas:
+- Genera SOLO HTML v├ílido, sin etiquetas <html>/<body>/<head>
+- Usa <h2> para el t├¡tulo, <p> para p├írrafos, <ul>/<ol> para listas
+- <blockquote> para citas o definiciones importantes
+- <div class="bg-gray-50 rounded-xl p-4"> para destacar conceptos clave
+- Incluye clases Tailwind: text-gray-700, font-semibold, leading-relaxed, space-y-4, etc.
+- El HTML debe ser renderizable directamente dentro de un div contenedor
+- Texto claro, pedag├│gico, acorde al grado
+- 150-400 palabras de contenido ├║til
+- NO incluyas explicaciones, metadatos ni bloques de c├│digo markdown
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto
+
+**Curso:** {$gradeName} · {$subjectName}
+
+**Actividad pedag├│gica:
+{$activityContext}
+
+**Indicadores de logro:**
+{$indicatorsText}
+
+**Referentes normativos:**
+{$referentsText}
+
+**Diapositiva:** {$sectionTitle}
+
+Genera contenido HTML para esta diapositiva con clases Tailwind.
+PROMPT;
+
+        try {
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 1024, 'timeout' => 120],
+            );
+
+            if (!$result['success']) {
+                $this->generationError = $result['error'];
+                $this->generatingSection = null;
+                $this->notification()->error('Error al generar', $result['error']);
+                return;
+            }
+
+            $content = trim($result['content'] ?? '');
+            if (empty($content)) {
+                $this->generationError = 'La IA no gener├│ contenido.';
+                $this->generatingSection = null;
+                return;
+            }
+
+            // Limpiar posibles wrappers markdown
+            $content = preg_replace('/^```(?:html)?\s*\n?/i', '', $content);
+            $content = preg_replace('/\n?```\s*$/s', '', $content);
+            $content = trim($content);
+
+            // Reemplazar o crear el primer bloque de contenido de la diapositiva
+            if (!empty($this->wizardSections[$sectionIndex]['contents'])) {
+                // Actualizar el primer bloque existente
+                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $this->sanitizeText($content);
+                $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'TEXT';
+            } else {
+                // Crear nuevo bloque
+                $this->wizardSections[$sectionIndex]['contents'][] = [
+                    'id'         => 'temp_' . uniqid(),
+                    'type'       => 'TEXT',
+                    'title'      => null,
+                    'body'       => $this->sanitizeText($content),
+                    'is_visible' => true,
+                    'media'      => null,
+                ];
+            }
+
+            $this->notification()->success(
+                'Texto generado',
+                "El contenido HTML de \"{$sectionTitle}\" se gener├│ correctamente."
+            );
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->notification()->error('Error', $e->getMessage());
+        } finally {
+            $this->generatingSection = null;
+        }
+    }
+
+    // ─── Slide editor: Generar imagen para diapositiva actual ─────
+
+    /**
+     * Abre el panel de prompt de imagen para la diapositiva actual
+     * y crea un bloque <img> placeholder en el contenido.
+     */
+    public function generateSlideImage(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
+        $sectionBody = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
+            ->pluck('body')
+            ->filter()
+            ->map(fn($b) => strip_tags($b))
+            ->implode("\n");
+        $sectionPreview = \Illuminate\Support\Str::limit($sectionBody, 300) ?: 'Contenido pedagógico de la sección';
+
+        $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
+
+        // ─── Estrategia 1: napkin.ai ─────────────────────────────────
+        $napkinPrompt = <<<PROMPT
+Genera un diagrama visual sobre el tema: "{$sectionTitle}".
+
+Contexto pedagógico:
+- Grado: {$gradeName}
+- Asignatura: {$subjectName}
+- Contenido de la sección: {$sectionPreview}
+
+El diagrama debe representar visualmente los conceptos clave de forma clara y pedagógica,
+apropiado para estudiantes del grado indicado.
+PROMPT;
+
+        $svgHtml = null;
+
+        try {
+            /** @var NapkinAiService $napkin */
+            $napkin = app(NapkinAiService::class);
+            $napkinResult = $napkin->generateDiagram($napkinPrompt, [
+                'style'     => 'educational_diagram',
+                'resolution' => '1024x1024',
+            ]);
+
+            if ($napkinResult['success'] && ($napkinResult['svg_html'] || $napkinResult['image_url'])) {
+                $svgHtml = $napkin->buildEmbedHtml(
+                    $napkinResult['svg_html'],
+                    $napkinResult['image_url'],
+                    'Diagrama: ' . $sectionTitle
+                );
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('generateSlideImage: napkin.ai falló', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // ─── Estrategia 2: IA (OpenRouter → Nvidia) genera SVG ──────
+        if (empty($svgHtml)) {
+            $aiPrompt = <<<PROMPT
+Eres un diseñador de diagramas educativos. Genera únicamente código SVG válido para un diagrama
+pedagógico sobre: "{$sectionTitle}".
+
+Contexto:
+- Grado: {$gradeName}
+- Asignatura: {$subjectName}
+- Contenido: {$sectionPreview}
+
+REQUISITOS DEL SVG:
+- Debe ser un diagrama visual atractivo (colores, formas, conexiones, etiquetas).
+- Usa <svg> con viewBox, xmlns="http://www.w3.org/2000/svg".
+- friendly colors, readable fonts (sans-serif), tamaño proporcionado.
+- Sin JS, sin CSS externo, sin CDNs. Todo inline en el SVG.
+- Sin etiquetas HTML envolventes. Solo <svg>...</svg>.
+- El SVG debe autocentrarse y escalar bien (usa viewBox).
+
+Responde SOLO el código SVG, sin markdown, sin explicaciones.
+PROMPT;
+
+            $aiResult = $this->askWithCompaction(
+                'Eres un diseñador de diagramas educativos. Genera únicamente SVG válido y auto-contenido.',
+                $aiPrompt,
+                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 120]
+            );
+
+            if ($aiResult['success'] && $aiResult['content']) {
+                $rawSvg = $aiResult['content'];
+                // Limpiar wrappers de markdown
+                $rawSvg = preg_replace('/^```(?:svg|html)?\s*\n?/i', '', $rawSvg);
+                $rawSvg = preg_replace('/\n?```\s*$/s', '', $rawSvg);
+                $rawSvg = trim($rawSvg);
+
+                // Validar que comience con <svg
+                if (preg_match('/^<svg[\s>]/i', $rawSvg)) {
+                    $svgHtml = app(NapkinAiService::class)->buildEmbedHtml(
+                        $rawSvg, null, 'Diagrama: ' . $sectionTitle
+                    );
+                }
+            }
+        }
+
+        // ─── Insertar el SVG en la sección ──────────────────────────
+        if (!empty($svgHtml)) {
+            $this->wizardSections[$sectionIndex]['contents'][] = [
+                'id'         => 'temp_' . uniqid(),
+                'type'       => 'TEXT',
+                'title'      => 'Diagrama: ' . $sectionTitle,
+                'body'       => $svgHtml,
+                'is_visible' => true,
+                'media'      => null,
+            ];
+
+            $this->notification()->success(
+                'Diagrama SVG generado',
+                "Se generó un diagrama educativo para \"{$sectionTitle}\"."
+            );
+            return;
+        }
+
+        // ─── Error: ninguna estrategia funcionó ──────────────────────
+        $this->notification()->error(
+            'Error al generar diagrama',
+            'No se pudo generar el diagrama SVG. Intenta de nuevo o usa el editor HTML.'
+        );
+    }
+
+    // ─── Slide editor: Generar diagrama Mermaid para diapositiva actual ──
+
+    /**
+     * Genera c├│digo HTML con diagrama Mermaid para la diapositiva actual
+     * usando el contenido de la secci├│n y el contexto de la lecci├│n.
+     * Reutiliza la l├│gica existente de generateEmbedCard() pero inyecta
+     * el resultado directamente en el contenido de la diapositiva.
+     */
+    public function generateSlideDiagram(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+
+        $sectionData = $this->wizardSections[$sectionIndex];
+        $sectionTitle = $sectionData['title'] ?? 'Secci├│n';
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+
+        $gradeName    = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName  = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName  = $pevaluacion?->seccion?->name ?? '—';
+
+        $activityContext = collect([
+            'T├¡tulo de la lecci├│n'   => $this->lessonTitle,
+            'Tema generador'         => $activity->topic,
+            'Tejido tem├ítico'        => $activity->thematic,
+            'Actividad evaluativa'   => $activity->description,
+            'Ense├▒anza'              => $activity->teaching,
+            'Aprendizaje esperado'   => $activity->learning,
+        ])->filter()->map(fn($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
+
+        $sectionContents = collect($sectionData['contents'] ?? [])
+            ->map(fn($c) => ($c['title'] ?? '') . ($c['title'] ? "\n" : '') . ($c['body'] ?? ''))
+            ->filter()
+            ->implode("\n\n");
+
+        $sectionContentPreview = !empty($sectionContents)
+            ? $sectionContents
+            : '(La secci├│n no tiene contenido a├║n.)';
+
+        $systemPrompt = <<<'PROMPT'
+Eres un Staff Engineer frontend especializado en diagramas Mermaid.js y Tailwind CSS.
+Genera c├│digo HTML aut├│nomo para un diagrama Mermaid enmarcado en un card simple.
+
+Reglas:
+1. Solo HTML + Tailwind (v├¡a CDN). Sin Vue, React, Alpine.js.
+2. El diagrama Mermaid dentro de <div class="mermaid">...</div>
+3. Card contenedor: <div class="w-full max-w-full bg-white rounded-xl shadow-sm border border-gray-200"><div class="p-3 sm:p-4 overflow-x-auto"><div class="mermaid">...
+4. w-full max-w-full, mobile-first (p-3, sm:p-4)
+5. Elige el tipo de diagrama seg├║n el contenido (graph, sequenceDiagram, mindmap, etc.)
+6. Sin scripts externos. Sin wrappers markdown. Solo HTML puro.
+7. El diagrama debe reflejar fielmente el contenido pedag├│gico.
+
+CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
+- El diagrama debe visualizarse correctamente en pantallas anchas (1920px+) y estrechas (320px+).
+- El contenedor debe usar max-w-full y overflow-x-auto para evitar desbordamiento.
+- Mermaid renderiza el SVG con width:100%; height:auto; cuando el contenedor lo permite.
+- Asegura que el overflow-x-auto del wrapping permita scroll horizontal sin truncar nodos.
+- En pantallas grandes el diagrama debe ocupar el ancho disponible sin estirarse desproporcionadamente.
+- NO uses max-w-2xl ni max-w-4xl que limiten el ancho del diagrama en monitores grandes.
+- Prefiere graph LR (horizontal) o graph TB (vertical) seg├║n el contenido, con nodos de texto razonables.
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto educativo
+**Curso:** {$gradeName} · {$subjectName} · Sec. {$sectionName}
+
+### Actividad pedag├│gica
+{$activityContext}
+
+### Diapositiva destino
+**Nombre:** {$sectionTitle}
+**Contenido:**
+{$sectionContentPreview}
+
+Genera el c├│digo HTML del diagrama Mermaid para esta diapositiva.
+Recuerda: el diagrama debe ser RESPONSIVE, visible correctamente desde
+pantallas de celular hasta monitores anchos (condici├│n no negociable).
+PROMPT;
+
+        try {
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 2048, 'temperature' => 0.7, 'timeout' => 120],
+                3500
+            );
+
+            if (!$result['success']) {
+                $this->generationError = $result['error'];
+                $this->generatingSection = null;
+                $this->notification()->error('Error al generar diagrama', $result['error'] ?? 'Error desconocido');
+                return;
+            }
+
+            $html = trim($result['content'] ?? '');
+            $html = preg_replace('/^```(?:html)?\s*\n?/i', '', $html);
+            $html = preg_replace('/\n?```\s*$/s', '', $html);
+            $html = trim($html);
+
+            if (empty($html)) {
+                $this->generationError = 'La IA no gener├│ c├│digo HTML.';
+                $this->generatingSection = null;
+                $this->notification()->error('Respuesta vac├¡a', 'La IA no gener├│ ning├║n c├│digo HTML.');
+                return;
+            }
+
+            // Agregar como bloque de contenido HTML
+            $this->wizardSections[$sectionIndex]['contents'][] = [
+                'id'         => 'temp_' . uniqid(),
+                'type'       => 'HTML',
+                'title'      => 'Diagrama: ' . $sectionTitle,
+                'body'       => $html,
+                'is_visible' => true,
+                'media'      => null,
+            ];
+
+            $this->notification()->success(
+                'Diagrama generado',
+                "El diagrama Mermaid para \"{$sectionTitle}\" se gener├│ correctamente."
+            );
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->generatingSection = null;
+        }
+    }
+
     /**
      * Obtiene los referentes normativos con competencias e indicadores
      * como arreglo estructurado para mostrar en el paso 1 del wizard.
@@ -928,7 +1341,7 @@ PROMPT;
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 768, 'timeout' => 120],
+                ['max_tokens' => 4096, 'timeout' => 180],
             );
 
             if (!$result['success']) {
@@ -1555,6 +1968,7 @@ PROMPT;
 
         // 1. Guardar secciones y construir mapa temp_ID → real_ID
         $sectionIdMap = [];
+        $mermaidEmbedIds = []; // IDs de LmsHtmlEmbed creados desde secciones con Mermaid
         foreach ($this->wizardSections as $key => $sectionData) {
             $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
 
@@ -1588,14 +2002,59 @@ PROMPT;
                 }
 
                 foreach ($sectionData['contents'] as $i => $contentData) {
-                    LmsActivityContent::create([
-                        'section_id' => $section->id,
-                        'type'       => 'TEXT',
-                        'title'      => $this->sanitizeText($contentData['title'] ?? null),
-                        'body'       => $this->sanitizeText($contentData['body'] ?? ''),
-                        'sort_order' => $i + 1,
-                        'is_visible' => true,
-                    ]);
+                    $rawBody = $contentData['body'] ?? '';
+                    $contentType = $contentData['type'] ?? 'TEXT';
+
+                    // ─── Detectar diagramas Mermaid ────────────────────
+                    // Caso 1: contenido envuelto en <div class="mermaid">
+                    $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+
+                    // Caso 2: código Mermaid plano (sin HTML wrapper) — contenido
+                    // guardado antes de que existiera la lógica de detección.
+                    if (!$isMermaid && $rawBody !== '' && !str_contains($rawBody, '<')) {
+                        $trimmed = trim(strip_tags($rawBody));
+                        $isMermaid = preg_match(
+                            '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/',
+                            $trimmed
+                        ) === 1;
+                    }
+
+                    if ($isMermaid) {
+                        $mermaidCode = $rawBody;
+                        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m)) {
+                            $mermaidCode = trim(strip_tags($m[1]));
+                        } elseif (!str_contains($rawBody, '<')) {
+                            // Raw Mermaid code — usar tal cual
+                            $mermaidCode = $this->sanitizeText($rawBody);
+                        } else {
+                            // <div class="mermaid"> detectado pero no se pudo extraer — sanitizar genérico
+                            $mermaidCode = trim(strip_tags($rawBody));
+                        }
+
+                        // Guardar como LmsHtmlEmbed (se renderiza con <x-mermaid::component>)
+                        $mermaidEmbed = LmsHtmlEmbed::create([
+                            'activity_id'      => $activityId,
+                            'section_id'       => $section->id,
+                            'added_by'         => auth()->id(),
+                            'title'            => ($contentData['title'] ?? null) ?: 'Diagrama',
+                            'html_content'     => $mermaidCode,
+                            'render_condition' => 'ALWAYS',
+                            'sort_order'       => $i + 1,
+                            'is_visible'       => true,
+                        ]);
+                        $mermaidEmbedIds[] = $mermaidEmbed->id;
+                    } else {
+                        // Contenido normal (texto, HTML sin Mermaid)
+                        $safeBody = $this->sanitizeText($rawBody);
+                        LmsActivityContent::create([
+                            'section_id' => $section->id,
+                            'type'       => $contentType,
+                            'title'      => $this->sanitizeText($contentData['title'] ?? null),
+                            'body'       => $safeBody,
+                            'sort_order' => $i + 1,
+                            'is_visible' => true,
+                        ]);
+                    }
                 }
             }
         }
@@ -1662,7 +2121,7 @@ PROMPT;
             ->update(['is_visible' => false]);
 
         // 5. Guardar HTML embeds
-        $visibleEmbedIds = [];
+        $visibleEmbedIds = $mermaidEmbedIds; // Incluir embeds creados desde secciones Mermaid
         foreach ($this->wizardHtmlEmbeds as $key => $embed) {
             if (str_starts_with((string)($embed['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
@@ -2280,10 +2739,17 @@ PROMPT;
         if (!$result['success']) {
             $errorMsg = $result['error'] ?? '';
 
-            // HTTP 429 (rate limit) o timeout → fallback automático a Nvidia
+            // Errores de conexión/API en OpenRouter → fallback automático a Nvidia
             if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit exceeded') || str_contains($errorMsg, 'free-models-per-day')
-                || str_contains($errorMsg, '28') || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')) {
-                $reason = str_contains($errorMsg, '429') ? 'límite de requests' : 'timeout de conexión';
+                || str_contains($errorMsg, '404') || str_contains($errorMsg, '500')
+                || str_contains($errorMsg, '28') || str_contains($errorMsg, '52')
+                || str_contains($errorMsg, 'cURL error')
+                || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')
+                || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')) {
+                $reason = str_contains($errorMsg, '429') ? 'límite de requests'
+                    : (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') ? 'error del modelo'
+                    : (str_contains($errorMsg, '52') || str_contains($errorMsg, 'Empty reply') ? 'servidor cerró conexión'
+                    : 'timeout de conexión'));
                 $this->notification()->info(
                     'Usando NVIDIA (fallback)',
                     "OpenRouter alcanzó el {$reason}. Usando modelo NVIDIA como alternativa."

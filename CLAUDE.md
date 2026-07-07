@@ -45,7 +45,7 @@ php artisan pulse:check
 ## Architecture
 
 ### Tech Stack
-- **Backend**: Laravel 10, PHP 8.1+
+- **Backend**: Laravel 10, PHP 8.3+
 - **Frontend**: Blade + Livewire 3 + Alpine.js + Tailwind CSS 3 + WireUI 2
 - **Build**: Vite + laravel-vite-plugin
 - **Database**: MySQL (primary), SQLite (testing)
@@ -55,6 +55,7 @@ php artisan pulse:check
 - **PDF**: barryvdh/laravel-dompdf
 - **Email**: Gmail API via google/apiclient, Resend
 - **QR**: simplesoftwareio/simple-qrcode
+- **AI Agents**: maestroerror/laragent (framework para crear agentes de IA en Laravel)
 
 ### Directory Structure
 
@@ -155,6 +156,9 @@ This project includes specialized Laravel agents and skills for Claude Code, ins
 | **laravel-security-auditor** | OWASP Top 10, auth review, CSRF/XSS protection |
 | **laravel-documentation-engineer** | API docs, setup guides, changelogs |
 | **laravel-specialist** | General Laravel 10+ specialist (community definition) |
+| **laravel-expert-agent** | Laravel 12+ expert - Eloquent, Artisan, API, testing, best practices |
+| **laravel-simplifier** | Simplifies PHP/Laravel code for clarity & maintainability |
+| **voltagent-laravel-specialist** | VoltAgent's Laravel 10+ specialist - queues, APIs, Eloquent |
 
 ### Available Skills (`.claude/skills/`)
 
@@ -175,6 +179,7 @@ This project includes specialized Laravel agents and skills for Claude Code, ins
 | **laravel-blade-component-patterns** | Components, slots, $attributes bag, stacks, view fragments |
 | **laravel-task-scheduling** | Frequency constraints, overlap prevention, onOneServer, hooks |
 | **laravel-feature-flags** | Pennant feature flags, A/B testing, scoping, gradual rollouts |
+| **starter-kit-upgrade** | Pull upstream improvements from Laravel starter kits (personalizado) |
 
 ### Invoking Agents
 

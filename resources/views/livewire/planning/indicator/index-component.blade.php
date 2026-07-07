@@ -38,42 +38,39 @@
     </div>
 
     <!-- Global KPI Boxes -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <x-indicator-box
-            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
-            label="Inscritos" value="{{ number_format($totalInscritos) }}" color="blue" />
-        <x-indicator-box
-            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
-            label="Planes de Evaluación" value="{{ number_format($totalPevaluacions) }}" color="emerald" />
+    <div class="grid grid-cols-3 gap-4 mb-8">
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
             label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
+        <x-indicator-box
+            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            label="Diagnósticos" value="{{ number_format($totalDiagActive) }}" color="emerald" />
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
             label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="amber" />
     </div>
 
     <!-- Filters: Lapso + Peducativo + Pestudio + Profesor -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 rounded-2xl mb-6">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-xl mb-4">
         {{-- Lapso selector --}}
-        <div class="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-white/5">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mr-2">Período:</span>
+        <div class="flex flex-wrap gap-1 mb-2 pb-2 border-b border-white/5">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 w-full mb-1">Período:</span>
             @foreach($lapsos as $lapso)
                 <button wire:click="$set('selectedLapsoId', {{ $lapso->id }})"
-                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 {{ $selectedLapsoId == $lapso->id ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10' }}">
-                    {{ $lapso->name }}
-                    <span class="block text-[9px] text-gray-500">{{ $lapso->finicial?->format('d/m') }} - {{ $lapso->ffinal?->format('d/m') }}</span>
+                    class="flex-1 min-w-0 px-2 py-1.5 rounded-lg text-xs font-bold text-center transition-all duration-200 {{ $selectedLapsoId == $lapso->id ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10' }}">
+                    <span>{{ $lapso->name }}</span>
+                    <span class="text-[9px] text-gray-500 ml-1">{{ $lapso->finicial?->format('d/m') }} – {{ $lapso->ffinal?->format('d/m') }}</span>
                 </button>
             @endforeach
         </div>
 
         {{-- 3 filter dropdowns --}}
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2">
             {{-- Peducativo filter --}}
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Educativo:</span>
                 <select wire:model.live="selectedPeducativoId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($peducativos as $ped)
                         <option value="{{ $ped->id }}">{{ $ped->name }}</option>
@@ -82,10 +79,10 @@
             </div>
 
             {{-- Pestudio filter --}}
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Estudio:</span>
                 <select wire:model.live="selectedPestudioId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($pestudios as $pest)
                         <option value="{{ $pest->id }}">{{ $pest->name }}</option>
@@ -94,10 +91,10 @@
             </div>
 
             {{-- Grado filter --}}
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Grado:</span>
                 <select wire:model.live="selectedGradoId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($gradosOptions as $grd)
                         <option value="{{ $grd->id }}">{{ $grd->name }}</option>
@@ -106,10 +103,10 @@
             </div>
 
             {{-- Profesor filter --}}
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Profesor:</span>
                 <select wire:model.live="selectedProfesorId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-3 py-2 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
+                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
                     <option value="">Todos</option>
                     @foreach($profesoresOptions as $prof)
                         <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
@@ -138,10 +135,10 @@
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     Actividades
                 </button>
-                <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
                     class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
-                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    Planes de Evaluación
+                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Diagnóstico
                 </button>
             </nav>
         </div>
@@ -163,19 +160,7 @@
                                 <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
                                 <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
                             </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <x-indicator-box
-                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
-                                    label="Inscritos"
-                                    value="{{ number_format($item->inscritos) }}"
-                                    color="blue"
-                                />
-                                <x-indicator-box
-                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>'
-                                    label="Evaluaciones Registradas"
-                                    value="{{ number_format($item->pevaluacions_count) }}"
-                                    color="emerald"
-                                />
+                            <div class="grid grid-cols-2 gap-4">
                                 <x-indicator-box
                                     icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                     label="Actividades Registradas"
@@ -241,8 +226,6 @@
                                             <tr class="border-b border-white/5">
                                                 <th class="text-left px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
                                                 <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Planes Evaluación</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Notas Cargadas</th>
                                                 <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas">IEE</th>
                                                 <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas para el corte de notas">IEE-CN</th>
                                                 <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Índice Relativo de Rendimiento en Evaluación">IRE</th>
@@ -261,16 +244,6 @@
                                                             @if($teacher->activities_count > 0)
                                                                 <small class="text-gray-500">[{{ $teacher->approval_rate }}%]</small>
                                                             @endif
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-3 py-3 text-center">
-                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
-                                                            {{ $teacher->pevaluacions_count }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-3 py-3 text-center">
-                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
-                                                            {{ $teacher->boletins_count }}
                                                         </span>
                                                     </td>
                                                     <td class="px-3 py-3 text-center">
@@ -410,155 +383,138 @@
             </div>
 
             {{-- ═══════════════════════════════════════════════════════════════════
-                 TAB 4: Planes de Evaluación  — summary per Peducativo (Chart.js)
-                 Charts created in x-init (before x-show hides them) so canvases
-                 have valid dimensions. Bar chart uses $watch + resize() on tab
-                 activation to handle responsive sizing after being hidden.
+                 TAB 4: Diagnóstico — aggregate indicators
                  ═══════════════════════════════════════════════════════════════════ --}}
             <div x-show="activeTab === 4" x-cloak>
-                <div class="space-y-8">
-                    {{-- Summary comparison bar chart --}}
-                    @if($tab4Data->isNotEmpty())
-                        <div class="bg-gray-800/30 border border-white/5 rounded-2xl p-6 mb-4">
-                            <h4 class="text-sm font-bold text-cyan-400 mb-4">Comparativa entre Programas Educativos</h4>
-                            <div class="h-56 md:h-64">
-                                <canvas
-                                    x-init="
-                                        const createBarChart = () => {
-                                            if ($el.__chart) $el.__chart.destroy();
-                                            const labels = [@foreach($tab4Data as $i)'{{ addslashes($i->peducativo?->code ?? $i->peducativo?->name) }}',@endforeach];
-                                            const pevData = [{{ $tab4Data->pluck('pev_count')->implode(',') }}];
-                                            const actData = [{{ $tab4Data->pluck('act_count')->implode(',') }}];
-                                            const bolData = [{{ $tab4Data->pluck('boletins_count')->implode(',') }}];
-                                            $el.__chart = new Chart($el.getContext('2d'), {
-                                                type: 'bar',
-                                                data: {
-                                                    labels: labels,
-                                                    datasets: [
-                                                        { label: 'Planes de Evaluación', data: pevData, backgroundColor: '#06b6d4', borderRadius: 4 },
-                                                        { label: 'Actividades', data: actData, backgroundColor: '#10b981', borderRadius: 4 },
-                                                        { label: 'Notas Cargadas', data: bolData, backgroundColor: '#8b5cf6', borderRadius: 4 },
-                                                    ]
-                                                },
-                                                options: {
-                                                    responsive: true, maintainAspectRatio: false,
-                                                    plugins: {
-                                                        legend: { labels: { color: '#9ca3af', font: { size: 11 }, boxWidth: 12, padding: 16 } }
-                                                    },
-                                                    scales: {
-                                                        x: { ticks: { color: '#6b7280' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                                                        y: { beginAtZero: true, ticks: { color: '#6b7280', precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                                                    }
-                                                }
-                                            });
-                                        };
-                                        createBarChart();
-                                        if (activeTab !== 4) {
-                                            $watch('activeTab', (val) => {
-                                                if (val === 4) $nextTick(() => { if ($el.__chart) $el.__chart.resize(); });
-                                            });
-                                        }
-                                    "
-                                ></canvas>
-                            </div>
-                        </div>
-                    @endif
+                <div class="space-y-6">
+                    {{-- Diagnostic KPI row --}}
+                    @php
+                        $diagTotalSessions = $tab4DiagData->sum('total_sessions');
+                        $diagCompletedSessions = $tab4DiagData->sum('completed_sessions');
+                        $diagAvgPrecision = $diagTotalSessions > 0
+                            ? round($tab4DiagData->avg('avg_precision') ?? 0, 1) : 0;
+                        $diagCompletionRate = $diagTotalSessions > 0
+                            ? round(($diagCompletedSessions / $diagTotalSessions) * 100, 1) : 0;
+                        $diagStudents = $tab4DiagData->sum('students_evaluated');
+                    @endphp
 
-                    @forelse($tab4Data as $item)
-                        <div>
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                                    <span class="text-indigo-400 text-xs font-bold">{{ $item->peducativo?->code ?? '' }}</span>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <x-indicator-box
+                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>'
+                            label="Total Sesiones" value="{{ number_format($diagTotalSessions) }}" color="cyan" />
+                        <x-indicator-box
+                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                            label="Completadas" value="{{ number_format($diagCompletedSessions) }}" color="emerald" />
+                        <x-indicator-box
+                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>'
+                            label="Precisión Prom." value="{{ $diagAvgPrecision }}%" color="amber" />
+                        <x-indicator-box
+                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
+                            label="Estudiantes Eval." value="{{ number_format($diagStudents) }}" color="purple" />
+                    </div>
+
+                    {{-- Question-level indicators --}}
+                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Resumen de Preguntas</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
-                                <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Preguntas Cargadas</p>
+                                    <p class="text-xl font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
+                                </div>
                             </div>
-                            <div class="bg-gray-800/30 border border-white/5 rounded-2xl p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h4 class="text-sm font-bold text-cyan-400">Resumen de Planes de Evaluación</h4>
-                                    @php
-                                        $lapsoName = $lapsos->firstWhere('id', $selectedLapsoId)?->name ?? 'Período actual';
-                                    @endphp
-                                    <span class="text-xs text-gray-500">{{ $lapsoName }}</span>
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {{-- Chart.js Doughnut (responsive:false — fixed dimensions work even when hidden) --}}
-                                    <div class="flex items-center justify-center h-48 bg-white/[0.02] rounded-xl border border-white/5">
-                                        <div class="text-center">
-                                            <canvas
-                                                x-init="
-                                                    if ($el.__chart) $el.__chart.destroy();
-                                                    const donutTotal = {{ $item->pev_count + $item->act_count + $item->boletins_count }};
-                                                    $el.__chart = new Chart($el.getContext('2d'), {
-                                                        type: 'doughnut',
-                                                        data: {
-                                                            labels: ['Planes de Evaluación', 'Actividades', 'Notas Cargadas'],
-                                                            datasets: [{
-                                                                data: [{{ $item->pev_count }}, {{ $item->act_count }}, {{ $item->boletins_count }}],
-                                                                backgroundColor: ['#06b6d4', '#10b981', '#8b5cf6'],
-                                                                borderWidth: 2,
-                                                                borderColor: '#111827',
-                                                            }]
-                                                        },
-                                                        options: {
-                                                            responsive: false,
-                                                            maintainAspectRatio: true,
-                                                            cutout: '72%',
-                                                            plugins: {
-                                                                legend: { display: false },
-                                                                tooltip: {
-                                                                    callbacks: {
-                                                                        label: function(ctx) {
-                                                                            const t = ctx.dataset.data.reduce((a,b) => a+b, 0);
-                                                                            const pct = t > 0 ? ((ctx.raw / t) * 100).toFixed(1) : 0;
-                                                                            return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    });
-                                                "
-                                                class="w-32 h-32 mx-auto mb-3" width="128" height="128">
-                                            </canvas>
-                                            <div class="flex items-center justify-center gap-3 text-xs">
-                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>Planes: {{ $item->pev_count }}</span>
-                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Actividades: {{ $item->act_count }}</span>
-                                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span>Notas: {{ $item->boletins_count }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {{-- Stats list --}}
-                                    <div class="space-y-3">
-                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                                            <span class="text-sm text-gray-400">Planes de Evaluación</span>
-                                            <span class="text-sm font-bold text-white font-mono">{{ $item->pev_count }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                                            <span class="text-sm text-gray-400">Actividades Registradas</span>
-                                            <span class="text-sm font-bold text-white font-mono">{{ $item->act_count }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                                            <span class="text-sm text-gray-400">Notas Cargadas</span>
-                                            <span class="text-sm font-bold text-white font-mono">{{ $item->boletins_count }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center p-3 bg-white/[0.02] rounded-xl border border-white/5">
-                                            <span class="text-sm text-gray-400">Actividades por Plan</span>
-                                            <span class="text-sm font-bold text-white font-mono">{{ $item->avg_per_plan }}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center p-3 bg-cyan-500/5 rounded-xl border border-cyan-500/10">
-                                            <span class="text-sm text-cyan-400 font-medium">Total Combinado</span>
-                                            <span class="text-sm font-bold text-cyan-400 font-mono">{{ $item->pev_count + $item->act_count }}</span>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con Opciones de Respuesta</p>
+                                    <p class="text-xl font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
+                                </div>
+                            </div>
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Cobertura Pensum</p>
+                                    <p class="text-xl font-bold text-white">{{ $diagPensumCoveragePct }}%</p>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center py-16">
-                            <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                            <p class="text-gray-500 font-medium">No hay datos de planes de evaluación</p>
+                    </div>
+
+                    {{-- Completion progress bar --}}
+                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
+                            <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
                         </div>
-                    @endforelse
+                        <div class="w-full bg-gray-700/50 rounded-full h-2.5">
+                            <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                                 style="width: {{ $diagCompletionRate }}%"></div>
+                        </div>
+                    </div>
+
+                    {{-- Per-diagnostic breakdown table --}}
+                    <div class="bg-gray-800/30 border border-white/5 rounded-xl overflow-hidden">
+                        <div class="px-5 py-4 border-b border-white/5">
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Desempeño por Diagnóstico</h4>
+                        </div>
+                        @if($tab4DiagData->isNotEmpty())
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead>
+                                        <tr class="border-b border-white/5">
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Sesiones</th>
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Completadas</th>
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Estudiantes</th>
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
+                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Progreso</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        @foreach($tab4DiagData as $item)
+                                            @php $pct = $item->total_sessions > 0 ? round(($item->completed_sessions / $item->total_sessions) * 100) : 0; @endphp
+                                            <tr class="hover:bg-white/[0.02] transition-colors">
+                                                <td class="py-3 px-4">
+                                                    <span class="text-xs font-medium text-white">{{ $item->diag_main->name }}</span>
+                                                </td>
+                                                <td class="py-3 px-4 text-center text-xs text-gray-400">{{ number_format($item->total_sessions) }}</td>
+                                                <td class="py-3 px-4 text-center">
+                                                    <span class="text-xs font-medium text-emerald-400">{{ number_format($item->completed_sessions) }}</span>
+                                                </td>
+                                                <td class="py-3 px-4 text-center text-xs text-gray-400">{{ number_format($item->students_evaluated) }}</td>
+                                                <td class="py-3 px-4 text-center">
+                                                    <span class="text-xs font-medium {{ ($item->avg_precision ?? 0) >= 70 ? 'text-emerald-400' : (($item->avg_precision ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
+                                                        {{ $item->avg_precision }}%
+                                                    </span>
+                                                </td>
+                                                <td class="py-3 px-4 text-right">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <div class="w-20 bg-gray-700/50 rounded-full h-1.5">
+                                                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $pct }}%"></div>
+                                                        </div>
+                                                        <span class="text-[10px] text-gray-500 w-8 text-right">{{ $pct }}%</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="p-8 text-center">
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <p class="text-gray-500 text-sm mb-1">Sin diagnósticos activos</p>
+                                <p class="text-gray-600 text-xs">No hay diagnósticos activos para el período seleccionado.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 

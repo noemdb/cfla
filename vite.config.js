@@ -17,4 +17,27 @@ export default defineConfig({
             ],
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules/tw-elements')) {
+                        return 'tw-elements';
+                    }
+                    if (id.includes('node_modules/chart.js')) {
+                        return 'chart';
+                    }
+                    if (id.includes('node_modules/chartjs-plugin-datalabels')) {
+                        return 'chart';
+                    }
+                    if (id.includes('node_modules/swiper')) {
+                        return 'swiper';
+                    }
+                    if (id.includes('node_modules/flowbite')) {
+                        return 'flowbite';
+                    }
+                },
+            },
+        },
+    },
 });

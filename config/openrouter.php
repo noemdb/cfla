@@ -23,7 +23,7 @@ return [
     | Default generation parameters
     |--------------------------------------------------------------------------
     */
-    'max_tokens' => env('OPENROUTER_MAX_TOKENS', 1024),
+    'max_tokens' => env('OPENROUTER_MAX_TOKENS', 8192),
 
     'temperature' => env('OPENROUTER_TEMPERATURE', 0.7),
 

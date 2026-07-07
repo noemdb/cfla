@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.1",
+        "php": "^8.3",
         "barryvdh/laravel-dompdf": "^3.1",
         "beyondcode/laravel-websockets": "^1.14",
         "google/apiclient": "^2.18",
@@ -20,6 +20,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.8",
+        "maestroerror/laragent": "^1.4",
         "pusher/pusher-php-server": "^7.2",
         "rap2hpoutre/laravel-log-viewer": "^2.5",
         "resend/resend-laravel": "^0.19.0",

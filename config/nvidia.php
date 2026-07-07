@@ -24,7 +24,7 @@ return [
     | Default generation parameters
     |--------------------------------------------------------------------------
     */
-    'max_tokens' => env('NVIDIA_MAX_TOKENS', 2048),
+    'max_tokens' => env('NVIDIA_MAX_TOKENS', 8192),
 
     'temperature' => env('NVIDIA_TEMPERATURE', 0.7),
 

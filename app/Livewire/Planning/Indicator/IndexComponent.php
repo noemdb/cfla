@@ -9,11 +9,11 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
-use App\Models\app\Academy\Boletin;
-use App\Models\app\Academy\Evaluacion;
-use App\Models\app\Academy\Inscripcion;
-use App\Models\app\Learner\Estudiant;
-use Illuminate\Support\Facades\DB;
+use App\Models\app\Instrument\DiagMain;
+use App\Models\app\Instrument\DiagQuestion;
+use App\Models\app\Instrument\DiagSession;
+use App\Models\app\Instrument\DiagReport;
+use App\Models\app\Instrument\DiagResult;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -45,14 +45,18 @@ class IndexComponent extends Component
     // ─── Tab 3: Actividades (nested by lapso → peducativo) ────────────────────────────
     public $tab3Data = [];
 
-    // ─── Tab 4: Planes de Evaluación (per peducativo summary) ────────────────────────
-    public $tab4Data = [];
+    // ─── Tab 4: Diagnóstico (aggregate indicators) ────────────────────────────────────
+    public $tab4DiagData = [];
+
+    // ─── Tab 4: Question-level indicators ──────────────────────────────
+    public $diagTotalQuestions = 0;
+    public $diagQuestionsWithOptions = 0;
+    public $diagPensumCoveragePct = 0;
 
     // ─── Totals for global KPI boxes ───────────────────────────────────
-    public $totalInscritos = 0;
-    public $totalPevaluacions = 0;
     public $totalActivities = 0;
     public $totalProfesoresActivos = 0;
+    public $totalDiagActive = 0;
 
     public function mount()
     {
@@ -198,14 +202,10 @@ class IndexComponent extends Component
         $this->peducativoMainIndicators = $filteredPeducativos->map(function ($peducativo) use ($lapsoId) {
             $pestudios = $this->getPestudiosForPeducativo($peducativo->id);
 
-            $totalInscritos = 0;
-            $totalPevaluacions = 0;
             $totalActivities = 0;
             $totalProfesores = collect();
 
             foreach ($pestudios as $pestudio) {
-                $totalInscritos += $pestudio->getInscritosCount($lapsoId);
-                $totalPevaluacions += $pestudio->getPevaluacionsCount($lapsoId);
                 $totalActivities += $pestudio->getActivitiesCount($lapsoId);
                 $totalProfesores = $totalProfesores->merge(
                     $pestudio->getProfesors($lapsoId)
@@ -215,15 +215,11 @@ class IndexComponent extends Component
             return (object) [
                 'peducativo' => $peducativo,
                 'pestudios' => $pestudios,
-                'inscritos' => $totalInscritos,
-                'pevaluacions_count' => $totalPevaluacions,
                 'activities_count' => $totalActivities,
                 'profesores_count' => $totalProfesores->unique('id')->count(),
             ];
         });
 
-        $this->totalInscritos = $this->peducativoMainIndicators->sum('inscritos');
-        $this->totalPevaluacions = $this->peducativoMainIndicators->sum('pevaluacions_count');
         $this->totalActivities = $this->peducativoMainIndicators->sum('activities_count');
         $this->totalProfesoresActivos = Profesor::where('status_active', 'true')->count();
 
@@ -325,35 +321,65 @@ class IndexComponent extends Component
             }
         }
 
-        // ══ TAB 4: Evaluation plans summary per peducativo ══
-        $this->tab4Data = $filteredPeducativos->map(function ($peducativo) use ($lapsoId) {
-            $pestudios = $this->getPestudiosForPeducativo($peducativo->id);
+        // ══ TAB 4: Diagnóstico — aggregate indicators ══
+        $this->tab4DiagData = collect();
+        $diagLapso = $this->lapsos->firstWhere('id', $this->selectedLapsoId);
+        if ($diagLapso) {
+            $diagMains = DiagMain::where('active', true)->where('lapso_id', $diagLapso->id)->get();
+            $this->totalDiagActive = $diagMains->count();
 
-            $pevCount = 0;
-            $actCount = 0;
-            $boletinsCount = 0;
+            $this->tab4DiagData = $diagMains->map(function ($dm) use ($diagLapso) {
+                $sessions = DiagSession::where('diag_main_id', $dm->id)
+                    ->where('lapso_id', $diagLapso->id);
+                $totalSessions = (clone $sessions)->count();
+                $completedSessions = (clone $sessions)->whereNotNull('completado_at')->count();
+                $studentsEvaluated = (clone $sessions)->distinct('estudiant_id')->count('estudiant_id');
 
-            foreach ($pestudios as $pestudio) {
-                $pevCount += $pestudio->getPevaluacionsCount($lapsoId);
-                $actCount += $pestudio->getActivitiesCount($lapsoId);
-                try {
-                    $boletinsCount += $pestudio->getBoletins($lapsoId)->count();
-                } catch (\Exception $e) {
-                    // Silently handle missing boletin data
-                }
-            }
+                $reportIds = DiagReport::where('diag_main_id', $dm->id)
+                    ->where('lapso_id', $diagLapso->id)->pluck('id');
+                $avgPrecision = $reportIds->isNotEmpty()
+                    ? round(DiagResult::whereIn('report_id', $reportIds)->avg('precision') ?? 0, 1)
+                    : 0;
 
-            $avgPerPlan = $pevCount > 0 ? round($actCount / $pevCount, 1) : 0;
+                $totalAnswered = DiagResult::whereIn('report_id', $reportIds)->sum('total_answered_questions');
 
-            return (object) [
-                'peducativo' => $peducativo,
-                'pev_count' => $pevCount,
-                'act_count' => $actCount,
-                'avg_per_plan' => $avgPerPlan,
-                'total' => $pevCount + $actCount,
-                'boletins_count' => $boletinsCount,
-            ];
-        });
+                return (object) [
+                    'diag_main' => $dm,
+                    'total_sessions' => $totalSessions,
+                    'completed_sessions' => $completedSessions,
+                    'students_evaluated' => $studentsEvaluated,
+                    'avg_precision' => $avgPrecision,
+                    'total_answered' => $totalAnswered,
+                ];
+            });
+
+            // ── Question-level aggregate indicators ──
+            $activeDiagMainIds = $diagMains->pluck('id');
+
+            $this->diagTotalQuestions = DiagQuestion::whereIn('diag_main_id', $activeDiagMainIds)
+                ->whereNotNull('pregunta')
+                ->where('pregunta', '<>', '')
+                ->count();
+
+            $this->diagQuestionsWithOptions = DiagQuestion::whereIn('diag_main_id', $activeDiagMainIds)
+                ->whereHas('options', function ($q) {
+                    $q->whereNotNull('opcion')->where('opcion', '<>', '');
+                })
+                ->count();
+
+            $pensumsWithQuestions = DiagQuestion::whereIn('diag_main_id', $activeDiagMainIds)
+                ->whereNotNull('pensum_id')
+                ->distinct()
+                ->count('pensum_id');
+
+            $totalPensumsInScope = \App\Models\app\Academy\Pensum::whereIn('pestudio_id', $diagMains->pluck('pestudio_id')->filter())
+                ->count();
+
+            $this->diagPensumCoveragePct = $totalPensumsInScope > 0
+                ? round(($pensumsWithQuestions / $totalPensumsInScope) * 100, 1)
+                : 0;
+        }
+
     }
 
     public function render()
