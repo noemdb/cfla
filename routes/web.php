@@ -183,6 +183,11 @@ Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])-
         Route::get('/', \App\Livewire\Planning\Pestudio\IndexComponent::class)->name('index');
     });
 
+    // Módulo de Áreas de Conocimiento
+    Route::prefix('area-conocimientos')->name('area-conocimientos.')->group(function () {
+        Route::get('/', \App\Livewire\Planning\AreaConocimiento\IndexComponent::class)->name('index');
+    });
+
     // Módulo de Programas Educativos
     Route::prefix('peducativos')->name('peducativos.')->group(function () {
         Route::get('/', \App\Livewire\Planning\Peducativo\IndexComponent::class)->name('index');
