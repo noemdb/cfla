@@ -362,7 +362,11 @@ class LessonWizard extends Component
 
         try {
             $activity = Activity::with([
+                'pevaluacion.lapso',
+                'pevaluacion.seccion',
+                'pevaluacion.pensum.grado',
                 'pevaluacion.pensum.asignatura',
+                'pevaluacion.pensum.pestudio.peducativo.pescolar.institucion',
                 'lmsPublication',
                 'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
                 'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
@@ -391,6 +395,15 @@ class LessonWizard extends Component
                     ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
                     ->values()
                     ->toArray(),
+                // Portada institucional
+                'institution'    => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->name ?? '',
+                'periodo'       => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->name ?? '',
+                'plan_educativo' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->name ?? '',
+                'plan_estudio'  => $activity->pevaluacion?->pensum?->pestudio?->name ?? '',
+                'grado'         => $activity->pevaluacion?->pensum?->grado?->name ?? '',
+                'seccion'       => $activity->pevaluacion?->seccion?->name ?? '',
+                'pensum'        => $activity->pevaluacion?->pensum?->asignatura?->name ?? '',
+                'lapso'         => $activity->pevaluacion?->lapso?->name ?? '',
             ];
 
             $this->showListStudentPreview = true;
