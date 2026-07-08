@@ -1302,38 +1302,47 @@
                             <div class="swiper-wrapper">
                                 {{-- Slide 1: Portada institucional --}}
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
-                                    {{-- Membrete: logos + institución --}}
-                                    <div class="flex items-center justify-center gap-6 md:gap-10 mb-6">
-                                        <img src="{{ asset('image/brand/512.png') }}"
-                                             alt=""
-                                             class="w-16 h-16 md:w-20 md:h-20 object-contain opacity-90">
-                                        <div class="text-center">
-                                            <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide leading-tight">
-                                                {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
-                                            </h2>
-                                            <p class="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-[0.15em] mt-0.5">
-                                                Coordinación Académica — Plan de Lección
-                                            </p>
+                                    {{-- Membrete institucional --}}
+                                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 overflow-hidden">
+                                        {{-- Fila superior: logos + institución --}}
+                                        <div class="flex items-center justify-center gap-5 md:gap-10 px-5 pt-5 pb-3">
+                                            <img src="{{ asset('image/brand/512.png') }}"
+                                                 alt=""
+                                                 class="w-14 h-14 md:w-20 md:h-20 object-contain drop-shadow-sm">
+                                            <div class="text-center">
+                                                <h2 class="text-sm md:text-lg font-bold text-slate-800 leading-tight">
+                                                    {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
+                                                </h2>
+                                                <p class="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-[0.15em] mt-0.5">
+                                                    Coordinación Académica — Plan de Lección
+                                                </p>
+                                            </div>
+                                            <img src="{{ asset('image/avatar/uecfla.jpg') }}"
+                                                 alt=""
+                                                 class="w-12 h-12 md:w-[4.5rem] md:h-[4.5rem] object-contain rounded-full ring-2 ring-slate-100 drop-shadow-sm">
                                         </div>
-                                        <img src="{{ asset('image/avatar/uecfla.jpg') }}"
-                                             alt=""
-                                             class="w-14 h-14 md:w-18 md:h-18 object-contain rounded-full opacity-90">
-                                    </div>
 
-                                    {{-- Línea divisoria --}}
-                                    <div class="border-t border-slate-200 mb-5"></div>
+                                        {{-- Línea divisoria --}}
+                                        <div class="border-t border-slate-200 mx-5"></div>
 
-                                    {{-- Indicación superior --}}
-                                    <div class="text-center mb-5">
-                                        <span class="inline-block text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-1">
-                                            {{ $listPreviewData['pensum'] }} · {{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}
-                                        </span>
-                                        <p class="text-[10px] text-slate-400">
-                                            {{ $listPreviewData['plan_estudio'] }}
-                                            @if($listPreviewData['lapso'])
-                                                — {{ $listPreviewData['lapso'] }}
-                                            @endif
-                                        </p>
+                                        {{-- Fila inferior: referencia académica (como membrete impreso) --}}
+                                        <div class="px-5 py-2.5 bg-slate-50/80">
+                                            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] md:text-xs text-slate-600">
+                                                <span class="font-semibold text-slate-800">{{ $listPreviewData['pensum'] }}</span>
+                                                <span class="text-slate-300">|</span>
+                                                <span>{{ $listPreviewData['grado'] }}</span>
+                                                <span class="text-slate-300">|</span>
+                                                <span>{{ $listPreviewData['seccion'] }}</span>
+                                                @if($listPreviewData['plan_estudio'])
+                                                    <span class="text-slate-300">|</span>
+                                                    <span class="text-slate-500">{{ $listPreviewData['plan_estudio'] }}</span>
+                                                @endif
+                                                @if($listPreviewData['lapso'])
+                                                    <span class="text-slate-300">|</span>
+                                                    <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {{-- Bloques de datos --}}
