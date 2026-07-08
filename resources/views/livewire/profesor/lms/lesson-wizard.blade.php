@@ -645,11 +645,12 @@
                                         </div>
                                         @foreach($section['contents'] as $content)
                                             @if(($content['title'] ?? null))
-                                                <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
+                                                <div class="flex items-start gap-2 mb-2">
+                                                    <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
+                                                    <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content['title'] }}</h3>
+                                                </div>
                                             @endif
-                                            <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
-                                            </div>
+                                            <x-lms-content-renderer :body="$content['body'] ?? ''" />
                                         @endforeach
                                     </div>
                                 @empty
@@ -1051,11 +1052,12 @@
                                         </div>
                                         @foreach($section['contents'] as $content)
                                             @if(($content['title'] ?? null))
-                                                <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
+                                                <div class="flex items-start gap-2 mb-2">
+                                                    <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
+                                                    <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content['title'] }}</h3>
+                                                </div>
                                             @endif
-                                            <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
-                                            </div>
+                                            <x-lms-content-renderer :body="$content['body'] ?? ''" />
                                         @endforeach
                                     </div>
                                 @empty
@@ -1297,177 +1299,148 @@
                         </div>
 
                         {{-- Body: Swiper carrusel (autoHeight se ajusta al contenido) --}}
-                        <div class="w-full bg-slate-50 swiper overflow-hidden"
+                        <div class="w-full bg-stone-50 swiper overflow-hidden"
                              x-ref="swiperContainer">
                             <div class="swiper-wrapper">
-                                {{-- Slide 1: Portada institucional --}}
-                                <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8 flex flex-col min-h-[65vh]">
-                                    {{-- Membrete institucional --}}
-                                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5 overflow-hidden shrink-0">
-                                        {{-- Fila superior: logo + institución --}}
-                                        <div class="flex items-center justify-center gap-4 md:gap-6 px-5 pt-5 pb-3">
-                                            <img src="{{ asset('image/avatar/uecfla.jpg') }}"
-                                                 alt=""
-                                                 class="w-14 h-14 md:w-20 md:h-20 object-contain rounded-full ring-2 ring-slate-100 drop-shadow-sm shrink-0">
-                                            <div class="text-center">
-                                                <h2 class="text-sm md:text-lg font-bold text-slate-800 leading-tight">
-                                                    {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
-                                                </h2>
-                                                <p class="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-[0.15em] mt-0.5">
-                                                    Coordinación Académica — Plan de Lección
+                                {{-- Slide 1: Portada institucional — rediseño armónico, profesional, institucional --}}
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-10 flex flex-col min-h-[65vh] bg-stone-50">
+                                    {{-- ═══════ LETTERHEAD (top) ═══════ --}}
+                                    <div class="shrink-0">
+                                        {{-- Barra de acento institucional (buttery yellow) --}}
+                                        <div class="h-[3px] w-24 rounded-full bg-amber-400 mb-5"></div>
+
+                                        {{-- Logo + institución en formato letterhead --}}
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div class="flex items-center gap-3 md:gap-4">
+                                                <img src="{{ asset('image/avatar/uecfla.jpg') }}"
+                                                     alt=""
+                                                     class="w-10 h-10 md:w-14 md:h-14 object-contain rounded-full ring-1 ring-stone-200/80 shrink-0">
+                                                <div>
+                                                    <h2 class="text-sm md:text-base font-semibold text-stone-800 leading-tight tracking-tight">
+                                                        {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
+                                                    </h2>
+                                                    <p class="text-[11px] text-stone-400 font-medium mt-0.5">
+                                                        @if($listPreviewData['institution_city'])
+                                                            {{ $listPreviewData['institution_city'] }}
+                                                            @if($listPreviewData['institution_rif']) · @endif
+                                                        @endif
+                                                        @if($listPreviewData['institution_rif'])
+                                                            RIF {{ $listPreviewData['institution_rif'] }}
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="hidden sm:block text-right shrink-0">
+                                                <p class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+                                                    {{ $listPreviewData['plan_estudio'] ?: 'Plan de Estudio' }}
                                                 </p>
+                                                @if($listPreviewData['plan_estudio_code'])
+                                                    <p class="text-[10px] text-stone-400 mt-0.5">Cód. {{ $listPreviewData['plan_estudio_code'] }}</p>
+                                                @endif
                                             </div>
                                         </div>
 
-                                        {{-- Línea divisoria --}}
-                                        <div class="border-t border-slate-200 mx-5"></div>
+                                        {{-- Línea divisoria sutil --}}
+                                        <div class="border-t border-stone-200 mt-4 mb-6"></div>
+                                    </div>
 
-                                        {{-- Fila inferior: referencia académica (como membrete impreso) --}}
-                                        <div class="px-5 py-2.5 bg-slate-50/80">
-                                            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] md:text-xs text-slate-600">
-                                                <span class="font-semibold text-slate-800">{{ $listPreviewData['pensum'] }}</span>
-                                                <span class="text-slate-300">|</span>
-                                                <span>{{ $listPreviewData['grado'] }}</span>
-                                                <span class="text-slate-300">|</span>
-                                                <span>{{ $listPreviewData['seccion'] }}</span>
-                                                @if($listPreviewData['plan_estudio'])
-                                                    <span class="text-slate-300">|</span>
-                                                    <span class="text-slate-500">{{ $listPreviewData['plan_estudio'] }}</span>
+                                    {{-- ═══════ CONTENIDO CENTRAL ═══════ --}}
+                                    <div class="flex-1 flex flex-col items-center justify-center min-h-0 py-4 md:py-6">
+                                        {{-- Referencia académica compacta (reemplaza la fila de pipes) --}}
+                                        <div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-5">
+                                            <span class="px-2.5 py-0.5 text-[11px] font-semibold text-stone-600 bg-stone-100 rounded-md border border-stone-200/60">{{ $listPreviewData['pensum'] }}</span>
+                                            <span class="text-stone-300 text-[10px]">/</span>
+                                            <span class="text-xs text-stone-500">{{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}</span>
+                                            @if($listPreviewData['lapso'])
+                                                <span class="text-stone-300 text-[10px]">/</span>
+                                                <span class="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">{{ $listPreviewData['lapso'] }}</span>
+                                            @endif
+                                        </div>
+
+                                        {{-- Título principal --}}
+                                        <h1 class="text-2xl md:text-3xl font-bold text-stone-900 leading-tight text-center w-full">
+                                            {{ $listPreviewData['title'] }}
+                                        </h1>
+
+                                        @if($listPreviewData['description'])
+                                            <p class="text-sm md:text-base text-stone-500 mt-2.5 w-full text-center leading-relaxed">
+                                                {{ $listPreviewData['description'] }}
+                                            </p>
+                                        @endif
+
+                                        {{-- Metadatos: tejido temático + referencias --}}
+                                        @if($listPreviewData['thematic'] || $listPreviewData['references'])
+                                            <div class="mt-5 space-y-1 text-center w-full">
+                                                @if($listPreviewData['thematic'])
+                                                    <p class="text-[11px] text-stone-400">
+                                                        <span class="font-medium text-stone-500">Tejido temático:</span>
+                                                        {{ $listPreviewData['thematic'] }}
+                                                    </p>
                                                 @endif
-                                                @if($listPreviewData['lapso'])
-                                                    <span class="text-slate-300">|</span>
-                                                    <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
+                                                @if($listPreviewData['references'])
+                                                    <p class="text-[11px] text-stone-400">
+                                                        <span class="font-medium text-stone-500">Ref. teórico-prácticos:</span>
+                                                        {{ $listPreviewData['references'] }}
+                                                    </p>
                                                 @endif
+                                            </div>
+                                        @endif
+
+                                        {{-- Fecha + duración --}}
+                                        @if($listPreviewData['start_date'])
+                                            <div class="mt-5 flex items-center justify-center gap-1.5 text-xs text-stone-400">
+                                                <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                                <span>{{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}</span>
+                                                @php
+                                                    $start = \Carbon\Carbon::parse($listPreviewData['start_date']);
+                                                    $end   = \Carbon\Carbon::parse($listPreviewData['end_date']);
+                                                    $days  = $start->diffInDays($end) + 1;
+                                                @endphp
+                                                <span class="text-stone-300 mx-0.5">·</span>
+                                                <span>{{ $days }} día{{ $days !== 1 ? 's' : '' }}</span>
+                                                @if($listPreviewData['activity_status'])
+                                                    <span class="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 rounded">APROBADO</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- ═══════ PIE INFORMATIVO (bottom) ═══════ --}}
+                                    <div class="shrink-0">
+                                        <div class="border-t border-stone-200 pt-4">
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                                                {{-- Col 1: Datos del curso --}}
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Curso</p>
+                                                    <p class="text-stone-700 font-medium">{{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}</p>
+                                                    @if($listPreviewData['seccion_students'])
+                                                        <p class="text-[11px] text-stone-400">{{ $listPreviewData['seccion_students'] }} estudiantes</p>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Col 2: Asignatura y horario --}}
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Asignatura</p>
+                                                    <p class="text-stone-700 font-medium">{{ $listPreviewData['pensum'] }}</p>
+                                                    @if($listPreviewData['asignatura_hours'])
+                                                        <p class="text-[11px] text-stone-400">{{ $listPreviewData['asignatura_hours'] }} h/sem · Cód. {{ $listPreviewData['asignatura_code'] ?? '' }}</p>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Col 3: Periodo y lapso --}}
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Periodo</p>
+                                                    <p class="text-stone-700 font-medium">{{ $listPreviewData['periodo'] ?? $listPreviewData['plan_educativo'] }}</p>
+                                                    @if($listPreviewData['lapso_finicial'])
+                                                        <p class="text-[11px] text-stone-400">{{ \Carbon\Carbon::parse($listPreviewData['lapso_finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['lapso_ffinal'])->format('d/m/Y') }}</p>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {{-- Cuerpo: actividad + datos ocupan el espacio vertical --}}
-                                    <div class="flex flex-col flex-1 min-h-0 justify-center gap-5">
-                                        {{-- Actividad: título principal con más peso visual --}}
-                                        <div class="text-center">
-                                            <h1 class="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
-                                                {{ $listPreviewData['title'] }}
-                                            </h1>
-                                            @if($listPreviewData['description'])
-                                                <p class="text-xs md:text-sm text-slate-500 mt-1.5 max-w-lg mx-auto leading-relaxed">
-                                                    {{ $listPreviewData['description'] }}
-                                                </p>
-                                            @endif
-                                            @if($listPreviewData['thematic'])
-                                                <p class="text-[11px] text-slate-400 mt-1.5 max-w-lg mx-auto">
-                                                    <span class="font-medium text-slate-500">Tejido temático:</span>
-                                                    {{ $listPreviewData['thematic'] }}
-                                                </p>
-                                            @endif
-                                            @if($listPreviewData['references'])
-                                                <p class="text-[11px] text-slate-400 mt-0.5 max-w-lg mx-auto">
-                                                    <span class="font-medium text-slate-500">Ref. teórico-prácticos:</span>
-                                                    {{ $listPreviewData['references'] }}
-                                                </p>
-                                            @endif
-                                            @if($listPreviewData['start_date'])
-                                                <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-center gap-1">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                    <span>{{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}</span>
-                                                    @php
-                                                        $start = \Carbon\Carbon::parse($listPreviewData['start_date']);
-                                                        $end   = \Carbon\Carbon::parse($listPreviewData['end_date']);
-                                                        $days  = $start->diffInDays($end) + 1;
-                                                    @endphp
-                                                    <span class="text-slate-300 mx-1">·</span>
-                                                    <span class="text-slate-500">{{ $days }} día{{ $days !== 1 ? 's' : '' }}</span>
-                                                    @if($listPreviewData['activity_status'])
-                                                        <span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 rounded">APROBADO</span>
-                                                    @endif
-                                                </p>
-                                            @endif
-                                        </div>
-
-                                        {{-- Datos institucionales / profesionales (más compactos) --}}
-                                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100 shrink-0">
-                                        {{-- Institucional --}}
-                                        <div class="px-4 py-3 flex items-start gap-3">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24 pt-0.5">Institucional</span>
-                                            <div class="text-xs space-y-1">
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="text-slate-800 font-medium">{{ $listPreviewData['institution'] }}</span>
-                                                    @if($listPreviewData['institution_rif'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">RIF {{ $listPreviewData['institution_rif'] }}</span>
-                                                    @endif
-                                                    @if($listPreviewData['institution_city'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['institution_city'] }}</span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-slate-500">
-                                                    <span class="text-slate-700">{{ $listPreviewData['periodo'] }}</span>
-                                                    @if($listPreviewData['periodo_finicial'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span>{{ \Carbon\Carbon::parse($listPreviewData['periodo_finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['periodo_ffinal'])->format('d/m/Y') }}</span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="text-slate-700">{{ $listPreviewData['plan_educativo'] }}</span>
-                                                    @if($listPreviewData['plan_educativo_desc'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['plan_educativo_desc'] }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {{-- Profesional --}}
-                                        <div class="px-4 py-3 flex items-start gap-3">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24 pt-0.5">Profesional</span>
-                                            <div class="text-xs space-y-1">
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="text-slate-700">{{ $listPreviewData['plan_estudio'] }}</span>
-                                                    @if($listPreviewData['plan_estudio_code'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">Cód. {{ $listPreviewData['plan_estudio_code'] }}</span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="text-slate-700">{{ $listPreviewData['grado'] }}</span>
-                                                    @if($listPreviewData['grado_code'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['grado_code'] }}</span>
-                                                    @endif
-                                                    <span class="text-slate-300">•</span>
-                                                    <span class="text-slate-700">{{ $listPreviewData['seccion'] }}</span>
-                                                    @if($listPreviewData['seccion_desc'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['seccion_desc'] }}</span>
-                                                    @endif
-                                                    @if($listPreviewData['seccion_students'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['seccion_students'] }} est.</span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="text-slate-700">{{ $listPreviewData['pensum'] }}</span>
-                                                    @if($listPreviewData['asignatura_code'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">Cód. {{ $listPreviewData['asignatura_code'] }}</span>
-                                                    @endif
-                                                    @if($listPreviewData['asignatura_hours'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ $listPreviewData['asignatura_hours'] }} h/sem</span>
-                                                    @endif
-                                                </div>
-                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                                    <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
-                                                    @if($listPreviewData['lapso_finicial'])
-                                                        <span class="text-slate-300">•</span>
-                                                        <span class="text-slate-500">{{ \Carbon\Carbon::parse($listPreviewData['lapso_finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['lapso_ffinal'])->format('d/m/Y') }}</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- /data-card -->
-                                </div><!-- /flex-1 body -->
-                            </div><!-- /slide:portada -->
+                                </div><!-- /slide:portada -->
 
                         {{-- Secciones --}}
                         @forelse($listPreviewData['sections'] as $section)
@@ -1477,12 +1450,32 @@
                                     <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
                                 </div>
                                     @foreach($section['contents'] as $content)
+                                        @php
+                                            $rawBody = $content['body'] ?? '';
+                                            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                        @endphp
                                         @if(($content['title'] ?? null))
-                                            <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
+                                            <div class="flex items-start gap-2 mb-2">
+                                                <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
+                                                <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content['title'] }}</h3>
+                                            </div>
                                         @endif
-                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                            {!! $this->renderContentBody($content['body'] ?? '') !!}
-                                        </div>
+                                        @if($isMermaid)
+                                            @php
+                                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                                $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                            @endphp
+                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                 data-mermaid-code="{{ $mermaidCode }}"
+                                                 data-mermaid-delay
+                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">
+                                                <div x-ref="target" class="w-full"></div>
+                                            </div>
+                                        @else
+                                            <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
+                                                {!! $this->renderContentBody($rawBody) !!}
+                                            </div>
+                                        @endif
                                     @endforeach
                                     {{-- HTML Embeds asociados a esta sección --}}
                                     @php
@@ -1810,7 +1803,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration"
              class="fixed inset-0 z-[9999] items-center justify-center bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay">
             <div class="max-w-4xl py-8 mx-auto px-6 space-y-5">
@@ -2493,6 +2486,14 @@
                                                        text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
                                             Generar Imagen
+                                        </button>
+                                        <button wire:click="generateSectionIllustration"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSectionIllustration"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>
+                                            Generar Ilustración
                                         </button>
                                         <button wire:click="generateSlideDiagram"
                                                 wire:loading.attr="disabled"
@@ -3720,7 +3721,10 @@
                                                 $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
                                             @endphp
                                             @if($content['title'])
-                                                <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
+                                                <div class="flex items-start gap-2 mb-2">
+                                                    <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
+                                                    <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content['title'] }}</h3>
+                                                </div>
                                             @endif
                                             @if($isMermaid)
                                                 @php

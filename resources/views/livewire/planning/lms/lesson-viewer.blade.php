@@ -60,11 +60,12 @@
                 @forelse($section->visibleContents as $content)
                     <div class="pt-4 first:pt-0">
                         @if($content->title)
-                            <h3 class="text-sm font-semibold text-slate-800 mb-2">{{ $content->title }}</h3>
+                            <div class="flex items-start gap-2 mb-2">
+                                <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
+                                <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content->title }}</h3>
+                            </div>
                         @endif
-                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                            {!! nl2br(e($content->body ?? '')) !!}
-                        </div>
+                        <x-lms-content-renderer :body="$content->body ?? ''" :sanitize="false" />
                     </div>
                 @empty
                     <p class="text-sm text-slate-400 italic py-4">Sin contenido en esta sección.</p>

@@ -180,16 +180,75 @@ This project includes specialized Laravel agents and skills for Claude Code, ins
 | **laravel-task-scheduling** | Frequency constraints, overlap prevention, onOneServer, hooks |
 | **laravel-feature-flags** | Pennant feature flags, A/B testing, scoping, gradual rollouts |
 | **starter-kit-upgrade** | Pull upstream improvements from Laravel starter kits (personalizado) |
+| **impeccable** | Design refinement — polish, simplify, animate, clarify, bolder/quieter UI |
+| **design-taste-frontend** | Anti-slop frontend skill — ships premium, non-generic interfaces |
+| **minimalist-ui** | Clean editorial-style interfaces with warm monochrome palette |
+| **high-end-visual-design** | Premium agency-grade visual design (typography, spacing, shadows) |
+| **industrial-brutalist-ui** | Raw mechanical Swiss typographic + military terminal aesthetics |
+| **brandkit** | Premium brand-kit image generation for identity systems |
+| **redesign-existing-projects** | Upgrade existing websites to premium quality without breaking functionality |
+| **stitch-design-taste** | Semantic design system skill enforcing premium, anti-generic standards |
+| **gpt-taste** | Elite UX/UI with GSAP motion, Python-driven randomization, gapless bento grids |
+| **imagegen-frontend-web** | Premium conversion-aware web design image generation |
+| **imagegen-frontend-mobile** | Premium mobile app screen concept generation |
+| **image-to-code** | Generate websites from design images |
+| **full-output-enforcement** | Override LLM truncation for complete code generation |
 
-### Invoking Agents
+### TasteSkill Variants
 
-In Claude Code, invoke an agent explicitly:
+The Design Taste Frontend skill (`design-taste-frontend`) includes the following variants that can be activated in prompts:
+
+| Variant | When to use |
+|---------|-------------|
+| `design-taste-frontend` (default) | General-purpose anti-slop frontend for landing pages, portfolios, redesigns |
+| `design-taste-frontend-v1` | Original v1 — backward compatibility for projects depending on exact v1 behavior |
+| `minimalist-ui` | Clean editorial-style interfaces, warm monochrome, typographic contrast |
+| `industrial-brutalist-ui` | Raw mechanical, Swiss typographic print + military terminal aesthetic |
+| `high-end-visual-design` | Agency-grade visual design with premium typography, shadows, spacing |
+| `brandkit` | Premium brand identity, logo systems, mood boards |
+| `redesign-existing-projects` | Upgrade existing UIs to premium quality without breaking functionality |
+| `gpt-taste` | Elite UX/UI with GSAP ScrollTrigger, gapless bento grids, micro-images |
+| `stitch-design-taste` | Semantic design system for Google Stitch |
+
+In prompts, activate via: `Activa TasteSkill (variant: minimalist-ui)` or similar.
+
+### Impeccable Commands
+
+Use these commands inline in prompts for design refinement:
+
+| Command | Effect |
+|---------|--------|
+| `/quieter` | Tone down aggressive colors and heavy elements |
+| `/bolder` | Increase contrast, weight, and presence |
+| `/simplify` | Remove visual noise and redundant elements |
+| `/polish` | Improve hierarchy, spacing, and alignment |
+| `/animate` | Add Alpine.js transitions (x-transition) |
+| `/clarify` | Make labels, errors, and copy more clear |
+| `/colorize` | Apply or refine color palette |
+| `/extract` | Extract design tokens from existing UI |
+
+### Design Context (Emil Kowalski)
+
+This project includes a design philosophy reference at `docs/design-context-emil.md` inspired by Emil Kowalski (animations.dev). It covers:
+
+- **Palette**: Yellow accent (#f5d06a), Radix-based neutral scale, Tailwind stone/slate
+- **Typography**: Inter (sans), Commit Mono / JetBrains Mono (code)
+- **Components**: No identical card rows, generous spacing, clear hierarchy
+- **Micro-interactions**: Alpine `x-transition` with 150–300ms, ease-out/in
+- **Anti-patterns**: No generic gradients, no beige premium, no Jane Doe placeholders
+
+Reference in prompts: `Sigue docs/design-context-emil.md para colores y tipografía.`
+
+### Invoking Agents & Skills
+
+In Claude Code, invoke explicitly:
 
 ```
 > Ask the laravel-architect to review the database schema
 > Have laravel-code-reviewer review recent changes
-> Ask laravel-performance-optimizer to analyze slow queries
-> Use eloquent-specialist to refactor the User model
+> Use impeccable to polish the login component
+> Activa TasteSkill (variant: minimalist-ui) for the dashboard
+> Sigue docs/design-context-emil.md y aplica /simplify y /polish
 ```
 
 ### Official Laravel Plugins (optional)

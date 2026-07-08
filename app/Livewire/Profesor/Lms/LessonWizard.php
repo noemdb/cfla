@@ -1077,6 +1077,87 @@ PROMPT;
         );
     }
 
+    // ─── Slide editor: Generar ilustración SVG para diapositiva actual ───
+
+    /**
+     * Genera una ilustración SVG educativa para la diapositiva/sección actual
+     * usando el servicio GenerateIllustrationLesson (prompt SVG-educativo-v3).
+     * Inserta el resultado como un bloque de contenido en la sección.
+     */
+    public function generateSectionIllustration(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'] ?? 'Sección';
+
+        $sectionBody = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
+            ->pluck('body')
+            ->filter()
+            ->map(fn($b) => strip_tags($b))
+            ->implode("\n");
+
+        $sectionBody = \Illuminate\Support\Str::limit($sectionBody, 2000) ?: 'Contenido pedagógico de la sección';
+
+        $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
+
+        try {
+            /** @var \App\Services\Lms\GenerateIllustrationLesson $service */
+            $service = app(\App\Services\Lms\GenerateIllustrationLesson::class);
+
+            $result = $service->generate(
+                sectionTitle: $sectionTitle,
+                sectionBody: $sectionBody,
+                gradeName: $gradeName,
+                subjectName: $subjectName,
+                lessonTitle: $this->lessonTitle,
+            );
+
+            if (!$result['success'] || empty($result['svg'])) {
+                $this->notification()->error(
+                    'Error al generar ilustración',
+                    $result['error'] ?? 'No se pudo generar la ilustración SVG.'
+                );
+                return;
+            }
+
+            // Envolver el SVG en HTML embed para renderizado
+            $svgHtml = app(\App\Services\NapkinAiService::class)->buildEmbedHtml(
+                $result['svg'],
+                null,
+                'Ilustración: ' . $sectionTitle
+            );
+
+            $this->wizardSections[$sectionIndex]['contents'][] = [
+                'id'         => 'temp_' . uniqid(),
+                'type'       => 'TEXT',
+                'title'      => 'Ilustración: ' . $sectionTitle,
+                'body'       => $svgHtml,
+                'is_visible' => true,
+                'media'      => null,
+            ];
+
+            $this->notification()->success(
+                'Ilustración generada',
+                "Se generó una ilustración SVG educativa para \"{$sectionTitle}\"."
+            );
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('generateSectionIllustration: error', [
+                'section' => $sectionTitle,
+                'error'   => $e->getMessage(),
+            ]);
+
+            $this->notification()->error(
+                'Error al generar ilustración',
+                'Ocurrió un error inesperado. Intenta de nuevo.'
+            );
+        }
+    }
+
     // ─── Slide editor: Generar diagrama Mermaid para diapositiva actual ──
 
     /**

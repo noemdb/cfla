@@ -95,7 +95,8 @@ export default {
     },
   },
   plugins: [
-    flowbitePlugin
+    flowbitePlugin,
+    require('@tailwindcss/typography'),
   ],
 
   safelist: ['animate-[fade-in_1s_ease-in-out]', 'animate-[fade-in-down_1s_ease-in-out]', 'animate-[data-te-animation-delay]']
