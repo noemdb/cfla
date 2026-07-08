@@ -67,7 +67,7 @@
         </div>
 
         {{-- Grid de actividades --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($activities as $item)
                 @php
                     $pub = $item->lmsPublication;
@@ -77,81 +77,113 @@
                     $totalContents = $sections->sum(fn($s) => $s->contents_count ?? 0);
                     $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
                 @endphp
-                <div wire:key="activity-card-{{ $item->id }}" class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden hover:border-slate-600 transition-all duration-200 group {{ $hasLmsContent ? 'ring-1 ring-emerald-500/10' : '' }}">
-                    {{-- Cabecera de la card --}}
-                    <div class="p-4 space-y-2">
-                        <div class="flex items-start justify-between gap-2">
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold inline-flex items-center gap-1
-                                {{ !$pub ? 'bg-slate-700 text-slate-400' : match($pub->status) {
-                                    'PUBLISHED' => 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-                                    'SCHEDULED' => 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
-                                    'ARCHIVED' => 'bg-slate-700 text-slate-400',
-                                    default => 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-                                } }}">
-                                @if($pub?->status === 'PUBLISHED')
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                @elseif($pub?->status === 'SCHEDULED')
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                                @endif
-                                {{ $pub ? match($pub->status) { 'PUBLISHED' => 'Publicado', 'SCHEDULED' => 'Programado', 'ARCHIVED' => 'Archivado', default => 'Borrador' } : 'Sin LMS' }}
-                            </span>
-                            <span class="text-[11px] text-slate-500 font-mono shrink-0">
-                                {{ \Carbon\Carbon::parse($item->finicial)->format('d/m') }} — {{ \Carbon\Carbon::parse($item->ffinal)->format('d/m') }}
-                            </span>
-                        </div>
+                <div wire:key="activity-card-{{ $item->id }}"
+                     class="relative bg-slate-800/40 border border-slate-700/60 rounded-xl overflow-hidden mt-2
+                            transition-all duration-200 group
+                            hover:bg-slate-800/60 hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/10
+                            {{ $hasLmsContent ? 'ring-1 ring-emerald-500/15' : '' }}">
+                    @if($hasLmsContent)
+                        <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
+                    @endif
 
-                        <h3 class="text-sm font-semibold text-white leading-snug">
+                    {{-- Badge de estado + fecha --}}
+                    <div class="flex items-start justify-between gap-2 px-5 pt-5 pb-2">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            @if($pub)
+                                <span @class([
+                                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide',
+                                    'bg-emerald-500/12 text-emerald-400 border border-emerald-500/20' => $pub->status === 'PUBLISHED',
+                                    'bg-cyan-500/12 text-cyan-400 border border-cyan-500/20'        => $pub->status === 'SCHEDULED',
+                                    'bg-slate-700/60 text-slate-500 border border-slate-600/50'      => $pub->status === 'ARCHIVED',
+                                    'bg-amber-500/12 text-amber-400 border border-amber-500/20'      => true,
+                                ])>
+                                    @if($pub->status === 'PUBLISHED')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    @elseif($pub->status === 'SCHEDULED')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    @elseif($pub->status === 'ARCHIVED')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg>
+                                    @else
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    @endif
+                                    {{ match($pub->status) {
+                                        'PUBLISHED' => 'Publicado',
+                                        'SCHEDULED' => 'Programado',
+                                        'ARCHIVED'  => 'Archivado',
+                                        default     => 'Borrador',
+                                    } }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-slate-500 bg-slate-700/40 border border-slate-600/40">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                    N.PUB
+                                </span>
+                            @endif
+                        </div>
+                        <span class="shrink-0 text-[11px] font-mono text-slate-600">
+                            {{ \Carbon\Carbon::parse($item->finicial)->format('d/m') }}
+                            <span class="text-slate-700">—</span>
+                            {{ \Carbon\Carbon::parse($item->ffinal)->format('d/m') }}
+                        </span>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-5 pb-2 space-y-3">
+                        {{-- Título --}}
+                        <h3 class="text-sm font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors duration-200">
                             {{ $item->topic ?? 'Actividad sin título' }}
                         </h3>
 
-                        <div class="text-xs text-slate-400 space-y-0.5">
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                </svg>
-                                {{ $item->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                </svg>
-                                {{ $item->pevaluacion?->pensum?->grado?->name ?? '—' }} Sec. {{ $item->pevaluacion?->seccion?->name ?? '—' }}
-                            </div>
+                        {{-- Metadata: asignatura + grado --}}
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+                            @if($item->pevaluacion?->pensum?->asignatura?->name)
+                                <span class="inline-flex items-center gap-1.5 text-slate-400">
+                                    <svg class="w-3.5 h-3.5 text-emerald-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    {{ $item->pevaluacion->pensum->asignatura->name }}
+                                </span>
+                            @endif
+                            @if($item->pevaluacion?->pensum?->grado?->name)
+                                <span class="inline-flex items-center gap-1.5 text-slate-400">
+                                    <svg class="w-3.5 h-3.5 text-blue-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    {{ $item->pevaluacion->pensum->grado->name }}
+                                    @if($item->pevaluacion?->seccion?->name)
+                                        <span class="text-slate-600">·</span>
+                                        Sec. {{ $item->pevaluacion->seccion->name }}
+                                    @endif
+                                </span>
+                            @endif
                         </div>
 
+                        {{-- Descripción --}}
                         @if($item->description)
-                            <p class="text-xs text-slate-500 line-clamp-2">{{ $item->description }}</p>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">{{ $item->description }}</p>
                         @endif
 
                         {{-- Indicadores LMS --}}
-                        <div class="flex flex-wrap items-center gap-2 pt-1">
+                        <div class="flex flex-wrap items-center gap-2 pt-0.5">
                             @if($hasLmsContent)
-                                <div class="flex items-center gap-1.5 text-[10px] text-emerald-400/70 font-medium">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                    </svg>
-                                    <span>{{ $sections->count() }} sec.</span>
-                                    <span class="text-slate-600">·</span>
-                                    <span>{{ $totalContents }} cont.</span>
-                                </div>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/8 text-emerald-400/80 border border-emerald-500/15">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                    <span>{{ $sections->count() }} {{ Str::plural('sección', $sections->count()) }}</span>
+                                    @if($totalContents > 0)
+                                        <span class="text-slate-600">·</span>
+                                        <span>{{ $totalContents }} {{ Str::plural('contenido', $totalContents) }}</span>
+                                    @endif
+                                </span>
                                 @if($resources->count() > 0)
-                                    <span class="inline-flex items-center gap-0.5 text-[10px] text-blue-400/70">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                        </svg>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-500/8 text-blue-400/80 border border-blue-500/15">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                         {{ $resources->count() }}
                                     </span>
                                 @endif
                                 @if($links->count() > 0)
-                                    <span class="inline-flex items-center gap-0.5 text-[10px] text-cyan-400/70">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                        </svg>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-cyan-500/8 text-cyan-400/80 border border-cyan-500/15">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                                         {{ $links->count() }}
                                     </span>
                                 @endif
                                 @if($pub?->published_at)
-                                    <span class="text-[10px] text-slate-600 ml-auto">
+                                    <span class="ml-auto text-[10px] text-slate-600">
                                         {{ \Carbon\Carbon::parse($pub->published_at)->format('d/m/Y') }}
                                     </span>
                                 @endif
@@ -162,64 +194,54 @@
                     </div>
 
                     {{-- Acciones --}}
-                    <div class="px-4 py-3 bg-slate-900/30 border-t border-slate-700/50 flex items-center gap-1.5">
+                    <div class="mt-2 px-5 py-3 bg-slate-900/40 border-t border-slate-700/40 flex items-center gap-2">
                         <button wire:click="showDetails({{ $item->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium
-                                       bg-slate-700/50 text-slate-300 hover:bg-slate-700 border border-slate-600/50 transition-all duration-200">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium
+                                       bg-slate-700/40 text-slate-300 hover:bg-slate-700/60 hover:text-white border border-slate-600/40 hover:border-slate-500/60 transition-all duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             Detalle
                         </button>
                         <a href="{{ route('app.profesors.lms.lesson.wizard') }}?activity_id={{ $item->id }}"
-                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium
-                                       {{ $hasLmsContent ? 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20' }} transition-all duration-200">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                       {{ $hasLmsContent
+                                           ? 'bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 border border-purple-500/20 hover:border-purple-500/40'
+                                           : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/40' }}">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             {{ $hasLmsContent ? 'Editar' : 'Asistente' }}
                         </a>
 
-                        {{-- Exportar (siempre visible) --}}
-                        <button wire:click="showExport({{ $item->id }})"
-                                title="Exportar contenido a otra sección"
-                                class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-all duration-200">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
-                            </svg>
-                        </button>
-
-                        {{-- Importar (deshabilitado si ya tiene contenido LMS) --}}
-                        <button wire:click="showImport({{ $item->id }})"
-                                title="{{ $hasLmsContent ? 'Esta actividad ya tiene contenido LMS' : 'Importar contenido de otra sección' }}"
-                                class="p-1.5 rounded-lg border border-transparent transition-all duration-200
-                                       {{ $hasLmsContent ? 'text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20' }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-                            </svg>
-                        </button>
-
-                        {{-- Vista estudiante (solo si hay contenido LMS) --}}
-                        @if($hasLmsContent)
-                            <button wire:click="openListStudentPreview({{ $item->id }})"
-                                    title="Vista del estudiante"
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
+                        <div class="flex items-center gap-1 ml-1">
+                            {{-- Exportar --}}
+                            <button wire:click="showExport({{ $item->id }})"
+                                    title="Exportar contenido a otra sección"
+                                    class="p-2 rounded-lg text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-all duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                             </button>
 
-                            {{-- Eliminar lección --}}
-                            <button wire:click="confirmDeleteLesson({{ $item->id }})"
-                                    title="Eliminar lección"
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
+                            {{-- Importar --}}
+                            <button wire:click="showImport({{ $item->id }})"
+                                    title="{{ $hasLmsContent ? 'Esta actividad ya tiene contenido LMS' : 'Importar contenido de otra sección' }}"
+                                    class="p-2 rounded-lg transition-all duration-200 border border-transparent
+                                           {{ $hasLmsContent ? 'text-slate-600 cursor-not-allowed' : 'text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                             </button>
-                        @endif
+
+                            {{-- Vista estudiante --}}
+                            @if($hasLmsContent)
+                                <button wire:click="openListStudentPreview({{ $item->id }})"
+                                        title="Vista del estudiante"
+                                        class="p-2 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+
+                                {{-- Eliminar lección --}}
+                                <button wire:click="confirmDeleteLesson({{ $item->id }})"
+                                        title="Eliminar lección"
+                                        class="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            @endif
+                        </div>
                     </div>
                 </div>
             @empty
@@ -333,26 +355,23 @@
                                 </div>
 
                                 {{-- Col 2 --}}
-                                <div class="space-y-4" x-data="{ showTeaching: false }">
-                                    {{-- Enseñanza with structure toggle --}}
+                                <div class="space-y-4" x-data="{ showFullTeaching: false }">
+                                    {{-- Enseñanza / Actividad Globalizada --}}
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
                                             <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Enseñanza / Actividad Globalizada</label>
                                             @if($detailActivity->hasTeachingStructure())
-                                                <button @click="showTeaching = !showTeaching"
+                                                <button @click="showFullTeaching = !showFullTeaching"
                                                     class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200"
-                                                    x-text="showTeaching ? 'Ver completo' : 'Ver estructura'">
+                                                    x-text="showFullTeaching ? 'Ver estructura' : 'Ver completo'">
                                                 </button>
                                             @endif
                                         </div>
 
-                                        {{-- Teaching full text (default visible) --}}
-                                        <p class="text-sm text-gray-200 leading-relaxed" x-show="!showTeaching">{{ $detailActivity->teaching }}</p>
-
-                                        {{-- Teaching structured view (toggle) --}}
+                                        {{-- Teaching structured view (default visible) --}}
                                         @if($detailActivity->hasTeachingStructure())
                                             @php $sections = $detailActivity->getTeachingSections(); @endphp
-                                            <div x-show="showTeaching" x-cloak x-transition:enter.duration.200ms class="space-y-3">
+                                            <div x-show="!showFullTeaching" x-transition:enter.duration.200ms class="space-y-3">
                                                 <div class="p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
                                                     <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-1">INICIO</div>
                                                     <p class="text-sm text-gray-200">{{ $sections['INICIO'] ?? '' }}</p>
@@ -366,6 +385,12 @@
                                                     <p class="text-sm text-gray-200">{{ $sections['CIERRE'] ?? '' }}</p>
                                                 </div>
                                             </div>
+
+                                            {{-- Teaching full text (toggle) --}}
+                                            <p class="text-sm text-gray-200 leading-relaxed" x-show="showFullTeaching" x-cloak x-transition:enter.duration.200ms>{{ $detailActivity->teaching }}</p>
+                                        @else
+                                            {{-- No structure detected: show plain text --}}
+                                            <p class="text-sm text-gray-200 leading-relaxed">{{ $detailActivity->teaching }}</p>
                                         @endif
                                     </div>
 
@@ -1702,7 +1727,7 @@
                                 </div><!-- /slide:embeds -->
                             @endif
 
-                            {{-- Slide: Resumen --}}
+                            {{-- Slide: Resumen — información completa de la lección --}}
                             @php
                                 $totalSections = count($listPreviewData['sections']);
                                 $totalBlocks = collect($listPreviewData['sections'])->sum(fn($s) => count($s['contents']));
@@ -1710,44 +1735,171 @@
                                 $totalEmbeds = count($listPreviewData['html_embeds'] ?? []);
                                 $totalLinks = count($listPreviewData['links'] ?? []);
                             @endphp
-                            <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
-                                <div class="flex items-center justify-center h-full">
-                                    <div class="text-center max-w-md">
-                                        <div class="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                                            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-10">
+                                <div class="max-w-3xl mx-auto space-y-6">
+
+                                    {{-- ── Cabecera del resumen ── --}}
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </div>
-                                        <h3 class="text-lg font-bold text-slate-800 mb-4">Resumen de la lección</h3>
-                                        <div class="grid grid-cols-2 gap-3 text-left">
-                                            <div class="bg-slate-100 rounded-xl p-4">
-                                                <p class="text-2xl font-bold text-emerald-600">{{ $totalSections }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">Secciones</p>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-stone-800">Resumen de la lección</h3>
+                                            <p class="text-xs text-stone-500">{{ $listPreviewData['pensum'] }} · {{ $listPreviewData['grado'] }} {{ $listPreviewData['seccion'] }}</p>
+                                        </div>
+                                    </div>
+
+                                    {{-- ── Título + Descripción ── --}}
+                                    <div class="bg-white rounded-xl border border-stone-200 p-5 space-y-2">
+                                        <h4 class="text-base font-bold text-stone-800 leading-snug">{{ $listPreviewData['title'] }}</h4>
+                                        @if($listPreviewData['description'])
+                                            <p class="text-sm text-stone-500 leading-relaxed">{{ $listPreviewData['description'] }}</p>
+                                        @endif
+                                        @if($listPreviewData['thematic'] || $listPreviewData['references'])
+                                            <div class="pt-2 space-y-1 text-xs text-stone-400 border-t border-stone-100">
+                                                @if($listPreviewData['thematic'])
+                                                    <p><span class="font-medium text-stone-500">Tejido temático:</span> {{ $listPreviewData['thematic'] }}</p>
+                                                @endif
+                                                @if($listPreviewData['references'])
+                                                    <p><span class="font-medium text-stone-500">Ref. teórico-prácticos:</span> {{ $listPreviewData['references'] }}</p>
+                                                @endif
                                             </div>
-                                            <div class="bg-slate-100 rounded-xl p-4">
-                                                <p class="text-2xl font-bold text-blue-600">{{ $totalBlocks }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">Bloques</p>
+                                        @endif
+                                    </div>
+
+                                    {{-- ── Estructura de Enseñanza (Inicio · Desarrollo · Cierre) ── --}}
+                                    @if($listPreviewData['has_teaching_structure'] ?? false)
+                                        <div class="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                                            <div class="px-5 py-3 bg-amber-50 border-b border-amber-100">
+                                                <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider">Estructura de Enseñanza</h4>
                                             </div>
-                                            @if($totalResources > 0)
-                                            <div class="bg-slate-100 rounded-xl p-4">
-                                                <p class="text-2xl font-bold text-amber-600">{{ $totalResources }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">Recursos</p>
+                                            <div class="p-5 space-y-4">
+                                                @foreach($listPreviewData['teaching_sections'] as $ts)
+                                                    <div>
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
+                                                            @switch($ts['title'])
+                                                                @case('INICIO') bg-blue-50 text-blue-700 border border-blue-200 @break
+                                                                @case('DESARROLLO') bg-emerald-50 text-emerald-700 border border-emerald-200 @break
+                                                                @case('CIERRE') bg-amber-50 text-amber-700 border border-amber-200 @break
+                                                                @default bg-stone-50 text-stone-600 border border-stone-200
+                                                            @endswitch
+                                                        ">
+                                                            @switch($ts['title'])
+                                                                @case('INICIO') → @break
+                                                                @case('DESARROLLO') ◆ @break
+                                                                @case('CIERRE') ● @break
+                                                                @default •
+                                                            @endswitch
+                                                            {{ $ts['title'] }}
+                                                        </span>
+                                                        <p class="text-sm text-stone-600 mt-1.5 leading-relaxed">{{ $ts['content'] }}</p>
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                            @endif
-                                            @if($totalEmbeds > 0)
-                                            <div class="bg-slate-100 rounded-xl p-4">
-                                                <p class="text-2xl font-bold text-fuchsia-600">{{ $totalEmbeds }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">Embeds</p>
+                                        </div>
+                                    @elseif($listPreviewData['teaching'])
+                                        <div class="bg-white rounded-xl border border-stone-200 p-5">
+                                            <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Enseñanza / Actividad Globalizada</h4>
+                                            <p class="text-sm text-stone-600 leading-relaxed whitespace-pre-line">{{ $listPreviewData['teaching'] }}</p>
+                                        </div>
+                                    @endif
+
+                                    {{-- ── Secciones (lista compacta) ── --}}
+                                    @if($totalSections > 0)
+                                        <div class="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                                            <div class="px-5 py-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider">Secciones</h4>
+                                                <span class="text-[10px] text-stone-400 font-mono">{{ $totalSections }} secciones · {{ $totalBlocks }} bloques</span>
                                             </div>
-                                            @endif
-                                            @if($totalLinks > 0)
-                                            <div class="bg-slate-100 rounded-xl p-4">
-                                                <p class="text-2xl font-bold text-blue-600">{{ $totalLinks }}</p>
-                                                <p class="text-xs text-slate-500 mt-1">Enlaces</p>
+                                            <div class="divide-y divide-stone-100">
+                                                @foreach($listPreviewData['sections'] as $sec)
+                                                    <div class="px-5 py-3 flex items-center justify-between gap-3 hover:bg-stone-50/50 transition-colors">
+                                                        <div class="min-w-0 flex-1">
+                                                            <p class="text-sm font-medium text-stone-700 truncate">{{ $sec['title'] }}</p>
+                                                            @if(count($sec['contents'] ?? []) > 0)
+                                                                <p class="text-xs text-stone-400 mt-0.5">
+                                                                    {{ count($sec['contents']) }} contenido{{ count($sec['contents']) !== 1 ? 's' : '' }}
+                                                                    @foreach($sec['contents'] as $ci => $c)
+                                                                        @if($c['title'] ?? null)
+                                                                            <span class="inline">· {{ $c['title'] }}</span>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </p>
+                                                            @else
+                                                                <p class="text-xs text-stone-400 italic mt-0.5">Sin contenido</p>
+                                                            @endif
+                                                        </div>
+                                                        <span class="shrink-0 text-xs font-mono text-stone-400">{{ count($sec['contents'] ?? []) }}</span>
+                                                    </div>
+                                                @endforeach
                                             </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- ── Estadísticas ── --}}
+                                    <div class="bg-white rounded-xl border border-stone-200 p-5">
+                                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3">Contenido de la lección</h4>
+                                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                                            <div class="bg-emerald-50 rounded-lg p-3 text-center">
+                                                <p class="text-xl font-bold text-emerald-600">{{ $totalSections }}</p>
+                                                <p class="text-[10px] text-emerald-500/70 mt-0.5">Secciones</p>
+                                            </div>
+                                            <div class="bg-blue-50 rounded-lg p-3 text-center">
+                                                <p class="text-xl font-bold text-blue-600">{{ $totalBlocks }}</p>
+                                                <p class="text-[10px] text-blue-500/70 mt-0.5">Bloques</p>
+                                            </div>
+                                            @if($totalResources > 0 || $totalEmbeds > 0 || $totalLinks > 0)
+                                                @if($totalResources > 0)
+                                                <div class="bg-amber-50 rounded-lg p-3 text-center">
+                                                    <p class="text-xl font-bold text-amber-600">{{ $totalResources }}</p>
+                                                    <p class="text-[10px] text-amber-500/70 mt-0.5">Recursos</p>
+                                                </div>
+                                                @endif
+                                                @if($totalEmbeds > 0)
+                                                <div class="bg-fuchsia-50 rounded-lg p-3 text-center">
+                                                    <p class="text-xl font-bold text-fuchsia-600">{{ $totalEmbeds }}</p>
+                                                    <p class="text-[10px] text-fuchsia-500/70 mt-0.5">Embeds</p>
+                                                </div>
+                                                @endif
+                                                @if($totalLinks > 0)
+                                                <div class="bg-cyan-50 rounded-lg p-3 text-center">
+                                                    <p class="text-xl font-bold text-cyan-600">{{ $totalLinks }}</p>
+                                                    <p class="text-[10px] text-cyan-500/70 mt-0.5">Enlaces</p>
+                                                </div>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>
+
+                                    {{-- ── Ficha técnica compacta ── --}}
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                        <div class="bg-stone-50 rounded-lg p-3">
+                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Asignatura</p>
+                                            <p class="text-stone-700 font-medium mt-0.5 truncate">{{ $listPreviewData['pensum'] }}</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-3">
+                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Curso</p>
+                                            <p class="text-stone-700 font-medium mt-0.5">{{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-3">
+                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Lapso</p>
+                                            <p class="text-stone-700 font-medium mt-0.5">{{ $listPreviewData['lapso'] ?? '—' }}</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-3">
+                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Duración</p>
+                                            <p class="text-stone-700 font-medium mt-0.5">
+                                                @if($listPreviewData['start_date'])
+                                                    {{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m') }} —
+                                                    {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m') }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div><!-- /slide:resumen -->
 

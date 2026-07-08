@@ -421,6 +421,12 @@ class LessonWizard extends Component
                 'thematic'          => $activity->thematic ?? '',
                 'references'        => $activity->references ?? '',
                 'activity_status'   => $activity->status ?? false,
+                'teaching'          => $activity->teaching ?? '',
+                'has_teaching_structure' => $activity->hasTeachingStructure(),
+                'teaching_sections' => collect($activity->getTeachingSections())
+                    ->map(fn($content, $title) => compact('title', 'content'))
+                    ->values()
+                    ->toArray(),
             ];
 
             $this->showListStudentPreview = true;
