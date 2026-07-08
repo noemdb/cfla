@@ -19,4 +19,9 @@ class Pescolar extends Model
     {
         return $this->hasMany(Peducativo::class, 'pescolar_id');
     }
+
+    public function institucion()
+    {
+        return $this->belongsTo(\App\Models\app\Entity\Institucion::class, 'institucion_id');
+    }
 }
