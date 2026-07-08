@@ -1304,11 +1304,11 @@
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
                                     {{-- Membrete institucional --}}
                                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 overflow-hidden">
-                                        {{-- Fila superior: logos + institución --}}
-                                        <div class="flex items-center justify-center gap-5 md:gap-10 px-5 pt-5 pb-3">
-                                            <img src="{{ asset('image/brand/512.png') }}"
+                                        {{-- Fila superior: logo + institución --}}
+                                        <div class="flex items-center justify-center gap-4 md:gap-6 px-5 pt-5 pb-3">
+                                            <img src="{{ asset('image/avatar/uecfla.jpg') }}"
                                                  alt=""
-                                                 class="w-14 h-14 md:w-20 md:h-20 object-contain drop-shadow-sm">
+                                                 class="w-14 h-14 md:w-20 md:h-20 object-contain rounded-full ring-2 ring-slate-100 drop-shadow-sm shrink-0">
                                             <div class="text-center">
                                                 <h2 class="text-sm md:text-lg font-bold text-slate-800 leading-tight">
                                                     {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
@@ -1317,9 +1317,6 @@
                                                     Coordinación Académica — Plan de Lección
                                                 </p>
                                             </div>
-                                            <img src="{{ asset('image/avatar/uecfla.jpg') }}"
-                                                 alt=""
-                                                 class="w-12 h-12 md:w-[4.5rem] md:h-[4.5rem] object-contain rounded-full ring-2 ring-slate-100 drop-shadow-sm">
                                         </div>
 
                                         {{-- Línea divisoria --}}
