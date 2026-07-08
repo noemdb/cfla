@@ -1947,6 +1947,8 @@ PROMPT;
                         'title'      => $sectionTitle,
                         'is_visible' => $sectionData['is_visible'] ?? true,
                     ]);
+                    // Limpiar contenidos previos para evitar duplicados
+                    LmsActivityContent::where('section_id', $section->id)->delete();
                 }
             }
 

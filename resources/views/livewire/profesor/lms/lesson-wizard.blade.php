@@ -3494,7 +3494,7 @@
                                                 @endphp
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $mermaidCode }}"
-                                                     class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">
+                                                     class="w-full bg-white rounded-xl p-4 border border-slate-200">
                                                     <div x-ref="target" class="w-full"></div>
                                                 </div>
                                             @else
@@ -3916,6 +3916,10 @@
 @script
 <script>
     Alpine.data('mermaidEmbed', () => ({
+        zoom: 1,
+        _zoomContainer: null,
+        _zoomDisplay: null,
+
         init() {
             const code = this.$el.getAttribute('data-mermaid-code') || '';
             if (typeof mermaid === 'undefined') {
@@ -3928,20 +3932,93 @@
                 themeVariables: { fontFamily: 'inherit', fontSize: '14px' }
             });
             if (this.$el.hasAttribute('data-mermaid-delay')) {
-                // Render diferido hasta que el slide esté activo
                 this.$el.addEventListener('slide-active', () => this.render(code), { once: true });
             } else {
                 this.$nextTick(() => this.render(code));
             }
         },
+
         async render(code) {
             try {
                 const id = 'mermaid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
                 const { svg } = await mermaid.render(id, code);
                 this.$refs.target.innerHTML = svg;
+                this.$nextTick(() => this.setupZoomUI());
             } catch (e) {
                 // Silently handle render errors
             }
+        },
+
+        setupZoomUI() {
+            const target = this.$refs.target;
+            if (!target) return;
+
+            // Centrar y preparar el SVG
+            const svgEl = target.querySelector('svg');
+            if (svgEl) {
+                svgEl.style.margin = '0 auto';
+                svgEl.style.display = 'block';
+                svgEl.style.maxWidth = '100%';
+                svgEl.style.height = 'auto';
+
+                // Envolver SVG en contenedor para zoom
+                const wrap = document.createElement('div');
+                wrap.style.overflow = 'auto';
+                wrap.style.display = 'flex';
+                wrap.style.justifyContent = 'center';
+                wrap.style.padding = '4px 0';
+                svgEl.parentNode.insertBefore(wrap, svgEl);
+                wrap.appendChild(svgEl);
+                this._zoomContainer = wrap;
+                this.applyZoom();
+            }
+
+            // Crear toolbar de zoom (solo si no existe ya)
+            if (target.parentNode.querySelector('.mermaid-zoom-toolbar')) return;
+
+            const toolbar = document.createElement('div');
+            toolbar.className = 'mermaid-zoom-toolbar flex items-center justify-center gap-2 mt-3 pt-2 border-t border-slate-100';
+            toolbar.innerHTML =
+                '<button class="zoom-btn" data-action="out" title="Reducir zoom">' +
+                    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>' +
+                '</button>' +
+                '<span class="zoom-pct text-[11px] font-mono text-slate-500 min-w-[36px] text-center">100%</span>' +
+                '<button class="zoom-btn" data-action="in" title="Aumentar zoom">' +
+                    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>' +
+                '</button>' +
+                '<span class="w-px h-4 bg-slate-200 mx-1"></span>' +
+                '<button class="zoom-reset text-[10px] font-medium text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-md transition-all" title="Restablecer zoom">↺ Restablecer</button>';
+
+            toolbar.querySelector('[data-action="out"]').onclick = () => this.zoomOut();
+            toolbar.querySelector('[data-action="in"]').onclick = () => this.zoomIn();
+            toolbar.querySelector('.zoom-reset').onclick = () => this.resetZoom();
+            this._zoomDisplay = toolbar.querySelector('.zoom-pct');
+
+            target.parentNode.appendChild(toolbar);
+        },
+
+        applyZoom() {
+            if (this._zoomContainer) {
+                this._zoomContainer.style.transform = 'scale(' + this.zoom + ')';
+                this._zoomContainer.style.transformOrigin = 'top center';
+                this._zoomContainer.style.transition = 'transform 0.2s ease';
+            }
+            if (this._zoomDisplay) {
+                this._zoomDisplay.textContent = Math.round(this.zoom * 100) + '%';
+            }
+        },
+
+        zoomIn() {
+            this.zoom = Math.min(this.zoom + 0.25, 3);
+            this.applyZoom();
+        },
+        zoomOut() {
+            this.zoom = Math.max(this.zoom - 0.25, 0.25);
+            this.applyZoom();
+        },
+        resetZoom() {
+            this.zoom = 1;
+            this.applyZoom();
         }
     }));
 
