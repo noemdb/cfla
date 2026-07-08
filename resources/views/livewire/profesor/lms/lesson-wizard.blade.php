@@ -3996,14 +3996,53 @@
             border-top: 1px solid #e2e8f0;
             margin: 1rem 0;
         }
+
+        /* Mermaid zoom & fullscreen */
+        .mermaid-zoom-toolbar {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        [x-data="mermaidEmbed()"]:fullscreen {
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: auto;
+        }
+        [x-data="mermaidEmbed()"]:fullscreen .mermaid-zoom-toolbar {
+            opacity: 1 !important;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+        }
+        .dark [x-data="mermaidEmbed()"]:fullscreen {
+            background: #0f172a;
+        }
+        .zoom-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 @endassets
 @script
 <script>
     Alpine.data('mermaidEmbed', () => ({
         zoom: 1,
-        _zoomContainer: null,
+        panX: 0,
+        panY: 0,
+        _container: null,
+        _svg: null,
+        _toolbar: null,
         _zoomDisplay: null,
+        _isDragging: false,
+        _dragStartX: 0,
+        _dragStartY: 0,
+        _dragPanX: 0,
+        _dragPanY: 0,
+        _touchDist: 0,
+        _isFullscreen: false,
 
         init() {
             const code = this.$el.getAttribute('data-mermaid-code') || '';
@@ -4028,82 +4067,298 @@
                 const id = 'mermaid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
                 const { svg } = await mermaid.render(id, code);
                 this.$refs.target.innerHTML = svg;
-                this.$nextTick(() => this.setupZoomUI());
+                this.$nextTick(() => this.setupUI());
             } catch (e) {
                 // Silently handle render errors
             }
         },
 
-        setupZoomUI() {
+        setupUI() {
             const target = this.$refs.target;
             if (!target) return;
 
-            // Centrar y preparar el SVG
             const svgEl = target.querySelector('svg');
-            if (svgEl) {
-                svgEl.style.margin = '0 auto';
-                svgEl.style.display = 'block';
-                svgEl.style.maxWidth = '100%';
-                svgEl.style.height = 'auto';
+            if (!svgEl) return;
 
-                // Envolver SVG en contenedor para zoom
-                const wrap = document.createElement('div');
-                wrap.style.overflow = 'auto';
-                wrap.style.display = 'flex';
-                wrap.style.justifyContent = 'center';
-                wrap.style.padding = '4px 0';
-                svgEl.parentNode.insertBefore(wrap, svgEl);
-                wrap.appendChild(svgEl);
-                this._zoomContainer = wrap;
-                this.applyZoom();
-            }
+            // Preparar SVG
+            svgEl.style.display = 'block';
+            svgEl.style.maxWidth = '100%';
+            svgEl.style.height = 'auto';
+            svgEl.style.margin = '0 auto';
+            svgEl.style.cursor = 'grab';
+            svgEl.style.userSelect = 'none';
+            svgEl.style.pointerEvents = 'all';
 
-            // Crear toolbar de zoom (solo si no existe ya)
-            if (target.parentNode.querySelector('.mermaid-zoom-toolbar')) return;
+            // El contenedor padre es el div de la plantilla (w-full bg-* rounded-xl p-4 overflow-x-auto)
+            const container = svgEl.parentNode;
+            container.style.position = 'relative';
+            container.style.overflow = 'hidden';
+            container.style.cursor = 'grab';
+            this._container = container;
+            this._svg = svgEl;
+
+            // ── Eventos de interacci├│n ──
+            container.addEventListener('mousedown', (e) => this._startDrag(e));
+            document.addEventListener('mousemove', (e) => this._onDrag(e));
+            document.addEventListener('mouseup', () => this._stopDrag());
+            container.addEventListener('wheel', (e) => this._onWheel(e), { passive: false });
+            container.addEventListener('dblclick', (e) => this._onDblClick(e));
+
+            // Touch events
+            container.addEventListener('touchstart', (e) => this._onTouchStart(e), { passive: false });
+            container.addEventListener('touchmove', (e) => this._onTouchMove(e), { passive: false });
+            container.addEventListener('touchend', () => this._onTouchEnd());
+
+            this._createToolbar();
+            this._applyTransform();
+        },
+
+        _createToolbar() {
+            const target = this.$refs.target;
+            if (!target || target.parentNode.querySelector('.mermaid-zoom-toolbar')) return;
+
+            const isDark = target.closest('.bg-slate-800, .bg-slate-900');
+            const themeClass = isDark
+                ? 'bg-slate-700/80 border-slate-600/50 text-slate-200'
+                : 'bg-white/90 border-slate-200/80 text-slate-700 shadow-sm';
 
             const toolbar = document.createElement('div');
-            toolbar.className = 'mermaid-zoom-toolbar flex items-center justify-center gap-2 mt-3 pt-2 border-t border-slate-100';
-            toolbar.innerHTML =
-                '<button class="zoom-btn" data-action="out" title="Reducir zoom">' +
-                    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>' +
-                '</button>' +
-                '<span class="zoom-pct text-[11px] font-mono text-slate-500 min-w-[36px] text-center">100%</span>' +
-                '<button class="zoom-btn" data-action="in" title="Aumentar zoom">' +
-                    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>' +
-                '</button>' +
-                '<span class="w-px h-4 bg-slate-200 mx-1"></span>' +
-                '<button class="zoom-reset text-[10px] font-medium text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-md transition-all" title="Restablecer zoom">↺ Restablecer</button>';
+            toolbar.className = 'mermaid-zoom-toolbar flex items-center gap-1 px-2 py-1.5 rounded-lg border '
+                + themeClass
+                + ' absolute top-2 right-2 z-10 opacity-0 hover:opacity-100 transition-opacity duration-200';
+            // Show toolbar on hover of container
+            target.parentNode.addEventListener('mouseenter', () => { toolbar.style.opacity = '1'; });
+            target.parentNode.addEventListener('mouseleave', () => {
+                if (this.zoom === 1 && this.panX === 0 && this.panY === 0) {
+                    toolbar.style.opacity = '0';
+                }
+            });
 
-            toolbar.querySelector('[data-action="out"]').onclick = () => this.zoomOut();
-            toolbar.querySelector('[data-action="in"]').onclick = () => this.zoomIn();
-            toolbar.querySelector('.zoom-reset').onclick = () => this.resetZoom();
+            toolbar.innerHTML =
+                '<button class="zoom-act p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors" data-action="out" title="Reducir zoom (Ctrl+scroll)">'
+                    + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>'
+                + '</button>'
+                + '<span class="zoom-pct text-[10px] font-mono min-w-[32px] text-center select-none">100%</span>'
+                + '<button class="zoom-act p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors" data-action="in" title="Aumentar zoom (Ctrl+scroll)">'
+                    + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>'
+                + '</button>'
+                + '<span class="w-px h-4 mx-0.5 bg-current opacity-20"></span>'
+                + '<button class="zoom-act p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors zoom-fit" title="Ajustar al ancho">'
+                    + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>'
+                + '</button>'
+                + '<button class="zoom-act p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors zoom-fs" title="Pantalla completa">'
+                    + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>'
+                + '</button>'
+                + '<span class="w-px h-4 mx-0.5 bg-current opacity-20"></span>'
+                + '<button class="zoom-act p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors zoom-reset" title="Restablecer zoom">'
+                    + '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 4v6h6m16 10v-6h-6M3.51 9a9 9 0 0114.85-3.36M20.49 15a9 9 0 01-14.85 3.36"/></svg>'
+                + '</button>';
+
+            toolbar.querySelector('[data-action="out"]').onclick = () => this._stepZoom(-1);
+            toolbar.querySelector('[data-action="in"]').onclick = () => this._stepZoom(1);
+            toolbar.querySelector('.zoom-fit').onclick = () => this._fitToWidth();
+            toolbar.querySelector('.zoom-fs').onclick = () => this._toggleFullscreen();
+            toolbar.querySelector('.zoom-reset').onclick = () => this._resetTransform();
             this._zoomDisplay = toolbar.querySelector('.zoom-pct');
 
             target.parentNode.appendChild(toolbar);
+            this._toolbar = toolbar;
+
+            // Mostrar toolbar si ya hay zoom activo
+            if (this.zoom !== 1 || this.panX !== 0 || this.panY !== 0) {
+                toolbar.style.opacity = '1';
+            }
         },
 
-        applyZoom() {
-            if (this._zoomContainer) {
-                this._zoomContainer.style.transform = 'scale(' + this.zoom + ')';
-                this._zoomContainer.style.transformOrigin = 'top center';
-                this._zoomContainer.style.transition = 'transform 0.2s ease';
+        // ── Transformaci├│n (zoom + pan) ──
+        _applyTransform() {
+            if (!this._svg || !this._container) return;
+
+            const t = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
+            this._svg.style.transform = t;
+            this._svg.style.transformOrigin = 'top left';
+
+            // Actualizar cursor: mostrar si se puede arrastrar cuando hay zoom
+            if (this.zoom > 1 || this.panX !== 0 || this.panY !== 0) {
+                this._container.style.cursor = this._isDragging ? 'grabbing' : 'grab';
+            } else {
+                this._container.style.cursor = 'default';
             }
+
             if (this._zoomDisplay) {
                 this._zoomDisplay.textContent = Math.round(this.zoom * 100) + '%';
             }
+            if (this._toolbar && this.zoom === 1 && this.panX === 0 && this.panY === 0) {
+                this._toolbar.style.opacity = '0';
+            }
         },
 
-        zoomIn() {
-            this.zoom = Math.min(this.zoom + 0.25, 3);
-            this.applyZoom();
+        // ── Mouse wheel zoom ──
+        _onWheel(e) {
+            if (!e.ctrlKey && !e.metaKey) return; // Solo con Ctrl/Cmd
+            e.preventDefault();
+            const dir = e.deltaY > 0 ? -1 : 1;
+            const step = this.zoom * 0.12; // Proporcional al zoom actual
+            const newZoom = Math.max(0.25, Math.min(6, this.zoom + dir * step));
+
+            // Zoom hacia la posici├│n del mouse
+            if (this._container && this._svg) {
+                const rect = this._container.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const ratio = newZoom / this.zoom;
+                this.panX = mx - (mx - this.panX) * ratio;
+                this.panY = my - (my - this.panY) * ratio;
+            }
+            this.zoom = newZoom;
+            this._applyTransform();
         },
-        zoomOut() {
-            this.zoom = Math.max(this.zoom - 0.25, 0.25);
-            this.applyZoom();
+
+        // ── Mouse drag pan ──
+        _startDrag(e) {
+            if (e.button !== 0) return; // Solo bot├│n izquierdo
+            if (this.zoom <= 1 && this.panX === 0 && this.panY === 0) return; // Sin zoom → sin arrastre
+            this._isDragging = true;
+            this._dragStartX = e.clientX;
+            this._dragStartY = e.clientY;
+            this._dragMoved = false;
+            this._dragPanX = this.panX;
+            this._dragPanY = this.panY;
+            this._svg.style.cursor = 'grabbing';
+            this._container.style.cursor = 'grabbing';
+            this._container.style.userSelect = 'none';
         },
-        resetZoom() {
+
+        _onDrag(e) {
+            if (!this._isDragging) return;
+            const dx = e.clientX - this._dragStartX;
+            const dy = e.clientY - this._dragStartY;
+            if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return; // Deadzone para evitar arrastres accidentales
+            this._dragMoved = true;
+            this.panX = this._dragPanX + dx;
+            this.panY = this._dragPanY + dy;
+            this._applyTransform();
+        },
+
+        _stopDrag() {
+            if (!this._isDragging) return;
+            this._isDragging = false;
+            if (this._svg) this._svg.style.cursor = 'grab';
+            if (this._container) this._container.style.userSelect = '';
+        },
+
+        // ── Double-click zoom ──
+        _onDblClick(e) {
+            e.preventDefault();
+            if (this._container && this._svg) {
+                const rect = this._container.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+                const targetZoom = this.zoom >= 1.5 ? 1 : 2.5;
+                const ratio = targetZoom / this.zoom;
+                this.panX = mx - (mx - this.panX) * ratio;
+                this.panY = my - (my - this.panY) * ratio;
+                this.zoom = targetZoom;
+                this._applyTransform();
+            }
+        },
+
+        // ── Touch drag + pinch ──
+        _onTouchStart(e) {
+            if (e.touches.length === 1) {
+                this._isDragging = true;
+                this._dragStartX = e.touches[0].clientX;
+                this._dragStartY = e.touches[0].clientY;
+                this._dragPanX = this.panX;
+                this._dragPanY = this.panY;
+            } else if (e.touches.length === 2) {
+                this._isDragging = false;
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                this._touchDist = Math.sqrt(dx * dx + dy * dy);
+            }
+        },
+
+        _onTouchMove(e) {
+            e.preventDefault();
+            if (e.touches.length === 1 && this._isDragging) {
+                // Arrastre con un dedo
+                const dx = e.touches[0].clientX - this._dragStartX;
+                const dy = e.touches[0].clientY - this._dragStartY;
+                this.panX = this._dragPanX + dx;
+                this.panY = this._dragPanY + dy;
+                this._applyTransform();
+            } else if (e.touches.length === 2) {
+                // Pinch-to-zoom
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (this._touchDist > 0) {
+                    const ratio = dist / this._touchDist;
+                    const newZoom = Math.max(0.25, Math.min(6, this.zoom * ratio));
+                    if (this._container && this._svg) {
+                        const rect = this._container.getBoundingClientRect();
+                        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                        const r = newZoom / this.zoom;
+                        this.panX = mx - (mx - this.panX) * r;
+                        this.panY = my - (my - this.panY) * r;
+                    }
+                    this.zoom = newZoom;
+                    this._applyTransform();
+                }
+                this._touchDist = dist;
+            }
+        },
+
+        _onTouchEnd() {
+            this._isDragging = false;
+        },
+
+        // ── Botones del toolbar ──
+        _stepZoom(dir) {
+            const step = this.zoom * 0.2;
+            this.zoom = Math.max(0.25, Math.min(6, this.zoom + dir * step));
+            this._applyTransform();
+        },
+
+        _fitToWidth() {
+            if (!this._svg || !this._container) return;
+            const cw = this._container.clientWidth;
+            // Obtener el ancho natural del SVG (sin constraint de max-width)
+            const origMaxW = this._svg.style.maxWidth;
+            this._svg.style.maxWidth = 'none';
+            const natW = this._svg.scrollWidth || this._svg.getBoundingClientRect().width || cw;
+            this._svg.style.maxWidth = origMaxW || '100%';
+            if (natW > 0 && cw > 0) {
+                this.zoom = Math.max(0.25, Math.min(2, (cw - 32) / natW));
+            } else {
+                this.zoom = 1;
+            }
+            this.panX = 0;
+            this.panY = 0;
+            this._applyTransform();
+        },
+
+        _toggleFullscreen() {
+            const fsEl = this.$el; // Elemento con x-data="mermaidEmbed()" (tiene bg, padding)
+            if (!document.fullscreenElement) {
+                fsEl?.requestFullscreen?.();
+                this._isFullscreen = true;
+            } else {
+                document.exitFullscreen?.();
+                this._isFullscreen = false;
+            }
+        },
+
+        _resetTransform() {
             this.zoom = 1;
-            this.applyZoom();
+            this.panX = 0;
+            this.panY = 0;
+            this._applyTransform();
+            if (this._toolbar) {
+                this._toolbar.style.opacity = '0';
+            }
         }
     }));
 
