@@ -1301,119 +1301,153 @@
                              x-ref="swiperContainer">
                             <div class="swiper-wrapper">
                                 {{-- Slide 1: Portada institucional --}}
-                                <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
-                                    {{-- Actividad (título principal) --}}
-                                    <div class="text-center mb-6 pb-6 border-b border-slate-200">
-                                        <span class="inline-block text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-2">
-                                            {{ $listPreviewData['pensum'] }}
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                                    {{-- Membrete: logos + institución --}}
+                                    <div class="flex items-center justify-center gap-6 md:gap-10 mb-6">
+                                        <img src="{{ asset('image/brand/512.png') }}"
+                                             alt=""
+                                             class="w-16 h-16 md:w-20 md:h-20 object-contain opacity-90">
+                                        <div class="text-center">
+                                            <h2 class="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wide leading-tight">
+                                                {{ $listPreviewData['institution'] ?: 'U.E. Colegio Fray Luis Amigó' }}
+                                            </h2>
+                                            <p class="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-[0.15em] mt-0.5">
+                                                Coordinación Académica — Plan de Lección
+                                            </p>
+                                        </div>
+                                        <img src="{{ asset('image/avatar/uecfla.jpg') }}"
+                                             alt=""
+                                             class="w-14 h-14 md:w-18 md:h-18 object-contain rounded-full opacity-90">
+                                    </div>
+
+                                    {{-- Línea divisoria --}}
+                                    <div class="border-t border-slate-200 mb-5"></div>
+
+                                    {{-- Indicación superior --}}
+                                    <div class="text-center mb-5">
+                                        <span class="inline-block text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-1">
+                                            {{ $listPreviewData['pensum'] }} · {{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}
                                         </span>
-                                        <h1 class="text-2xl font-bold text-slate-900 leading-tight">
+                                        <p class="text-[10px] text-slate-400">
+                                            {{ $listPreviewData['plan_estudio'] }}
+                                            @if($listPreviewData['lapso'])
+                                                — {{ $listPreviewData['lapso'] }}
+                                            @endif
+                                        </p>
+                                    </div>
+
+                                    {{-- Bloques de datos --}}
+                                    <div class="space-y-4">
+                                        {{-- Institucional --}}
+                                        <div>
+                                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                                <span class="w-4 h-px bg-slate-300"></span>
+                                                Institucional
+                                                <span class="flex-1 h-px bg-slate-300"></span>
+                                            </h3>
+                                            <div class="grid grid-cols-1 gap-1.5">
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Institución</p>
+                                                        <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['institution'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Periodo Escolar</p>
+                                                        <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['periodo'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Plan Educativo</p>
+                                                        <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['plan_educativo'] }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Profesional --}}
+                                        <div>
+                                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                                <span class="w-4 h-px bg-slate-300"></span>
+                                                Profesional
+                                                <span class="flex-1 h-px bg-slate-300"></span>
+                                            </h3>
+                                            <div class="grid grid-cols-2 gap-1.5">
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Plan de Estudio</p>
+                                                        <p class="text-[11px] font-medium text-slate-800 truncate">{{ $listPreviewData['plan_estudio'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Grado</p>
+                                                        <p class="text-[11px] font-medium text-slate-800 truncate">{{ $listPreviewData['grado'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-cyan-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Sección</p>
+                                                        <p class="text-[11px] font-medium text-slate-800 truncate">{{ $listPreviewData['seccion'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm">
+                                                    <div class="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Asignatura</p>
+                                                        <p class="text-[11px] font-medium text-slate-800 truncate">{{ $listPreviewData['pensum'] }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2.5 bg-white rounded-lg px-3.5 py-2 border border-slate-100 shadow-sm col-span-2">
+                                                    <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <p class="text-[10px] font-semibold text-slate-400 uppercase">Lapso</p>
+                                                        <p class="text-[11px] font-medium text-slate-800 truncate">{{ $listPreviewData['lapso'] }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Línea divisoria inferior + título actividad --}}
+                                    <div class="border-t border-slate-200 mt-5 pt-4 text-center">
+                                        <h1 class="text-base md:text-lg font-bold text-slate-900 leading-tight">
                                             {{ $listPreviewData['title'] }}
                                         </h1>
                                         @if($listPreviewData['description'])
-                                            <p class="text-sm text-slate-500 mt-2 max-w-lg mx-auto leading-relaxed">{{ $listPreviewData['description'] }}</p>
+                                            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">{{ $listPreviewData['description'] }}</p>
                                         @endif
                                         @if($listPreviewData['start_date'])
-                                            <p class="text-xs text-slate-400 mt-3">
-                                                <svg class="inline w-3.5 h-3.5 -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <p class="text-[10px] text-slate-400 mt-2">
+                                                <svg class="inline w-3 h-3 -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                                 {{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }}
                                                 — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}
                                             </p>
                                         @endif
-                                    </div>
-
-                                    {{-- Institucional --}}
-                                    <div class="mb-5">
-                                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                            <span class="w-4 h-px bg-slate-300"></span>
-                                            Institucional
-                                            <span class="w-4 h-px bg-slate-300"></span>
-                                        </h2>
-                                        <div class="grid grid-cols-1 gap-2">
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Institución</p>
-                                                    <p class="text-sm font-medium text-slate-800 truncate">{{ $listPreviewData['institution'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Periodo Escolar</p>
-                                                    <p class="text-sm font-medium text-slate-800 truncate">{{ $listPreviewData['periodo'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Plan Educativo</p>
-                                                    <p class="text-sm font-medium text-slate-800 truncate">{{ $listPreviewData['plan_educativo'] }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {{-- Profesional --}}
-                                    <div>
-                                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                            <span class="w-4 h-px bg-slate-300"></span>
-                                            Profesional
-                                            <span class="w-4 h-px bg-slate-300"></span>
-                                        </h2>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Plan de Estudio</p>
-                                                    <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['plan_estudio'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Grado</p>
-                                                    <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['grado'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sección</p>
-                                                    <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['seccion'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Asignatura</p>
-                                                    <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['pensum'] }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-start gap-3 bg-white rounded-lg px-4 py-2.5 border border-slate-100 shadow-sm">
-                                                <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5">
-                                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Lapso</p>
-                                                    <p class="text-xs font-medium text-slate-800 truncate">{{ $listPreviewData['lapso'] }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div><!-- /slide:portada -->
 
