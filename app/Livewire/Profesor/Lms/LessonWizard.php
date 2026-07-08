@@ -1094,7 +1094,7 @@ Eres un Staff Engineer frontend especializado en diagramas Mermaid.js y Tailwind
 Genera c├│digo HTML aut├│nomo para un diagrama Mermaid enmarcado en un card simple.
 
 Reglas:
-1. Solo HTML + Tailwind (v├¡a CDN). Sin Vue, React, Alpine.js.
+1. Solo HTML plano. NO incluyas scripts CDN, etiquetas &lt;script&gt;, &lt;link&gt;, &lt;meta&gt;, &lt;html&gt;, &lt;head&gt; ni &lt;body&gt;. Sin Vue, React, Alpine.js.
 2. El diagrama Mermaid dentro de <div class="mermaid">...</div>
 3. Card contenedor: <div class="w-full max-w-full bg-white rounded-xl shadow-sm border border-gray-200"><div class="p-3 sm:p-4 overflow-x-auto"><div class="mermaid">...
 4. w-full max-w-full, mobile-first (p-3, sm:p-4)
@@ -1147,6 +1147,15 @@ PROMPT;
             $html = trim($result['content'] ?? '');
             $html = preg_replace('/^```(?:html)?\s*\n?/i', '', $html);
             $html = preg_replace('/\n?```\s*$/s', '', $html);
+            $html = trim($html);
+
+            // Limpiar scripts CDN y wrappers de documento completo que la IA pueda incluir
+            $html = preg_replace('/<script\b[^>]*src=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*><\/script>\s*/i', '', $html);
+            $html = preg_replace('/<script\b[^>]*src=["\'][^"\']*mermaid[^"\']*["\'][^>]*><\/script>\s*/i', '', $html);
+            $html = preg_replace('/<script>mermaid\.initialize\(.*?<\/script>\s*/is', '', $html);
+            $html = preg_replace('/<\/?(?:html|head|body)[^>]*>\s*/i', '', $html);
+            $html = preg_replace('/<meta[^>]*>\s*/i', '', $html);
+            $html = preg_replace('/<link\b[^>]*href=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*>\s*/i', '', $html);
             $html = trim($html);
 
             if (empty($html)) {
