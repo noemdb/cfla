@@ -8,7 +8,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "beyondcode/laravel-websockets": "^1.14",
         "google/apiclient": "^2.18",
@@ -20,10 +20,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.8",
-        "maestroerror/laragent": "^1.4",
         "pusher/pusher-php-server": "^7.2",
         "rap2hpoutre/laravel-log-viewer": "^2.5",
-        "redberry/mcp-client-laravel": "^1.1",
         "resend/resend-laravel": "^0.19.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "wireui/wireui": "^2.5.1"
@@ -75,9 +73,11 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
+            "pestphp/pest-plugin": true
+        },
+        "platform": {
+          "php": "8.2"
+      }
     },
     "minimum-stability": "stable",
     "prefer-stable": true
