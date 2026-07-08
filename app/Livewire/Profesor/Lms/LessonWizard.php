@@ -83,6 +83,9 @@ class LessonWizard extends Component
     public bool $showGenerationResult = false;
     public ?string $generationType = null; // 'step1' | 'step2' | 'section'
 
+    // ─── Wizard: Vista previa profesor (full-screen dialog) ──
+    public bool $showFullPreview = false;
+
     // ─── Export/Import ─────────────────────────────────────────
     public bool $showExportModal = false;
     public bool $showImportModal = false;
@@ -329,6 +332,7 @@ class LessonWizard extends Component
         $this->resourcePanelSection = null;
         $this->showGenerationResult = false;
         $this->generationType = null;
+        $this->showFullPreview = false;
         $this->generationError = null;
         $this->lessonTitle = '';
         $this->lessonDescription = '';
@@ -817,17 +821,22 @@ PROMPT;
         $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         $systemPrompt = <<<'PROMPT'
-Eres docente venezolano. Genera contenido en formato Markdown para una diapositiva de lecci├│n LMS.
+Eres docente venezolano. Genera contenido pedagógico extenso en formato Markdown.
 
-Reglas:
-- Usa Markdown est├índar: ## para t├¡tulos, - para listas, **negritas**, *cursivas*
-- > para citas o definiciones importantes
-- ``` para bloques de c├│digo si aplica
-- Incluye tablas cuando ayude a organizar informaci├│n comparativa
-- Texto claro, pedag├│gico, acorde al grado
-- 150-400 palabras de contenido ├║til
-- NO generes HTML, NO uses etiquetas <html>/<body>/<div>
-- NO incluyas explicaciones, metadatos ni bloques de c├│digo markdown al inicio o final
+EXTENSIÓN OBLIGATORIA: Mínimo 500 caracteres.
+Si generas menos de 500 caracteres tu respuesta será rechazada.
+Para alcanzar 500 caracteres necesitas: título (##) + 4-5 oraciones + tabla o lista.
+
+Estructura mínima:
+1. ## Título llamativo
+2. Párrafo introductorio (2-3 oraciones)
+3. Tabla o lista con información clave
+4. Párrafo de desarrollo con ejemplos
+5. Párrafo de cierre
+
+Usa Markdown estándar: ## títulos, **negritas**, tablas | |, listas -, *cursivas*.
+NO uses HTML, NO uses ```, NO incluyas explicaciones.
+Responde SOLO con el contenido Markdown.
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -846,14 +855,14 @@ PROMPT;
 
 **Diapositiva:** {$sectionTitle}
 
-Genera contenido en Markdown para esta diapositiva.
+INSTRUCCIÓN: Genera contenido EXTENSO en Markdown. Mínimo 500 caracteres obligatorio.
 PROMPT;
 
         try {
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 1024, 'timeout' => 120],
+                ['max_tokens' => 2048, 'timeout' => 120],
             );
 
             if (!$result['success']) {
@@ -864,6 +873,9 @@ PROMPT;
             }
 
             $content = trim($result['content'] ?? '');
+            // DEBUG: enviar raw a la consola
+            $this->dispatch('debug-raw', ['raw' => $content, 'length' => mb_strlen($content), 'model' => $result['model'] ?? '?']);
+
             if (empty($content)) {
                 $this->generationError = 'La IA no gener├│ contenido.';
                 $this->generatingSection = null;
@@ -875,27 +887,28 @@ PROMPT;
             $content = preg_replace('/\n?```\s*$/s', '', $content);
             $content = trim($content);
 
-            // Reemplazar o crear el primer bloque de contenido de la diapositiva
+            // Sanitizar
             $content = $this->sanitizeText($content, 'basic');
-            if (!empty($this->wizardSections[$sectionIndex]['contents'])) {
-                // Actualizar el primer bloque existente
-                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $content;
-                $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'TEXT';
-            } else {
-                // Crear nuevo bloque
-                $this->wizardSections[$sectionIndex]['contents'][] = [
-                    'id'         => 'temp_' . uniqid(),
-                    'type'       => 'TEXT',
-                    'title'      => null,
-                    'body'       => $content,
-                    'is_visible' => true,
-                    'media'      => null,
-                ];
+            // Limitar a 1500 caracteres (cortando correctamente con mb_substr)
+            if (mb_strlen($content) > 1500) {
+                $content = mb_substr($content, 0, 1500);
             }
+            // Siempre agregar como nuevo bloque adicional
+            $this->wizardSections[$sectionIndex]['contents'][] = [
+                'id'         => 'temp_' . uniqid(),
+                'type'       => 'TEXT',
+                'title'      => null,
+                'body'       => $content,
+                'is_visible' => true,
+                'media'      => null,
+            ];
+
+            $charCount = mb_strlen($content);
+            $this->dispatch('show-preview');
 
             $this->notification()->success(
                 'Texto generado',
-                "El contenido HTML de \"{$sectionTitle}\" se gener├│ correctamente."
+                "{$sectionTitle}: {$charCount} caracteres generados"
             );
         } catch (\Throwable $e) {
             $this->generationError = $e->getMessage();
@@ -1907,6 +1920,54 @@ PROMPT;
             $this->generatingEmbedCard = false;
             $this->notification()->error('Error inesperado', $e->getMessage());
         }
+    }
+
+    // ─── Wizard: Paso 2 — Guardado incremental ────────────────
+
+    public function saveStep2(): void
+    {
+        $activityId = $this->selectedActivityId;
+
+        foreach ($this->wizardSections as $key => $sectionData) {
+            $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
+
+            if (str_starts_with((string)$sectionData['id'], 'temp_')) {
+                $section = LmsActivitySection::create([
+                    'activity_id' => $activityId,
+                    'title'       => $sectionTitle,
+                    'sort_order'  => $sectionData['sort_order'] ?? 1,
+                    'is_visible'  => $sectionData['is_visible'] ?? true,
+                ]);
+                // Reemplazar el id temporal con el real
+                $this->wizardSections[$key]['id'] = $section->id;
+            } else {
+                $section = LmsActivitySection::find($sectionData['id']);
+                if ($section) {
+                    $section->update([
+                        'title'      => $sectionTitle,
+                        'is_visible' => $sectionData['is_visible'] ?? true,
+                    ]);
+                }
+            }
+
+            if ($section && !empty($sectionData['contents'])) {
+                foreach ($sectionData['contents'] as $i => $contentData) {
+                    LmsActivityContent::create([
+                        'section_id' => $section->id,
+                        'type'       => $contentData['type'] ?? 'TEXT',
+                        'title'      => $this->sanitizeText($contentData['title'] ?? null),
+                        'body'       => $this->sanitizeText($contentData['body'] ?? ''),
+                        'sort_order' => $i + 1,
+                        'is_visible' => $contentData['is_visible'] ?? true,
+                    ]);
+                }
+            }
+        }
+
+        $this->notification()->success(
+            'Guardado',
+            count($this->wizardSections) . ' secciones y sus bloques guardados correctamente'
+        );
     }
 
     // ─── Wizard: Paso 4 — Guardar y Publicar ───────────────────
@@ -3028,6 +3089,33 @@ PROMPT;
         // 5. No es mermaid → dejar intacto
         $embed['is_mermaid'] = false;
         return $embed;
+    }
+
+    /**
+     * Renderiza el contenido de la diapositiva actual para la vista previa.
+     * Renderiza todos los bloques de contenido de la diapositiva actual.
+     */
+    public function slidePreviewContent(): string
+    {
+        $currentSlide = $this->wizardSections[$this->currentSlideIndex] ?? null;
+        if (!$currentSlide) {
+            return '';
+        }
+
+        $blocks = collect($currentSlide['contents'] ?? [])
+            ->pluck('body')
+            ->filter()
+            ->map(fn(string $body): string => $this->renderContentBody($body))
+            ->values();
+
+        // Envolver cada bloque en un contenedor con margen inferior
+        $rendered = $blocks->map(fn(string $html, int $idx): string =>
+            '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
+                . "\n" . $html . "\n"
+            . '</div>'
+        );
+
+        return $rendered->implode("\n");
     }
 
     /**

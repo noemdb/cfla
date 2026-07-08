@@ -1894,7 +1894,7 @@
                 </div>
             </div>
         @else
-            <div x-data="{ previewCollapsed: true }">
+            <div>
 
             {{-- Navegación entre pasos --}}
             <div class="flex items-center justify-between my-4 border border-slate-700 rounded-lg px-4 py-2">
@@ -1917,7 +1917,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
                 {{-- ═══ COLUMNA IZQUIERDA: FORMULARIO (3/5) ═══ --}}
-                <div :class="previewCollapsed ? 'lg:col-span-5' : 'lg:col-span-3'"
+                <div class="lg:col-span-5"
                      class="space-y-4 transition-all duration-300 min-w-0">
 
                     {{-- STEP 1: Información de la Lección --}}
@@ -2064,13 +2064,6 @@
                             @php
                                 $totalSlides = count($wizardSections);
                                 $currentSlide = $wizardSections[$currentSlideIndex] ?? null;
-                                $slideBlocks = collect($currentSlide['contents'] ?? [])
-                                    ->pluck('body')
-                                    ->filter()
-                                    ->map(fn($b) => $this->renderContentBody($b))
-                                    ->values();
-                                $slideContent = $slideBlocks->implode("\n");
-                                $hasContent = $slideBlocks->isNotEmpty();
                             @endphp
 
                             {{-- Slide Navigation Bar --}}
@@ -2148,7 +2141,8 @@
                                     </div>
 
                                     {{-- Tab: Editor / Preview --}}
-                                    <div x-data="{ editorTab: 'preview' }">
+                                    <div x-data="{ editorTab: 'preview' }"
+                                         @show-preview.window="editorTab = 'preview'">
                                         {{-- Tab buttons --}}
                                         <div class="flex gap-0.5 mb-2">
                                             <button @click="editorTab = 'edit'"
@@ -2304,9 +2298,10 @@
                                         {{-- PREVIEW TAB: HTML Rendered --}}
                                         <div x-show="editorTab === 'preview'" x-cloak x-transition:enter.duration.150ms>
                                             <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 min-h-[200px] overflow-x-auto shadow-sm">
-                                                @if($hasContent)
-                                                    <div class="prose prose-sm prose-slate max-w-none" style="color: #1e293b;">
-                                                        {!! $slideContent !!}
+                                                @php $previewContent = trim($this->slidePreviewContent()); @endphp
+                                                @if(!empty($previewContent))
+                                                    <div class="slide-preview-wrapper" style="color: #1e293b; line-height: 1.7;">
+                                                        {!! $previewContent !!}
                                                     </div>
                                                 @else
                                                     <div class="text-center py-12 text-slate-400">
@@ -2316,7 +2311,10 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            @if(str_contains($slideContent, 'class="mermaid"'))
+                                            @php
+                                                $hasMermaid = str_contains($previewContent, 'class="mermaid"');
+                                            @endphp
+                                            @if($hasMermaid)
                                                 <div class="flex items-center gap-1.5 mt-2 px-3 py-2 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg">
                                                     <svg class="w-4 h-4 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                     <span class="text-[11px] text-fuchsia-300">Esta diapositiva contiene un diagrama Mermaid</span>
@@ -2330,6 +2328,7 @@
                                 <div class="px-4 py-3 border-t border-slate-700/30 bg-slate-900/30">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <button wire:click="generateSlideText"
+                                                @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideText"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
@@ -2352,6 +2351,27 @@
                                                        text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                                             Generar Diagrama
+                                        </button>
+
+                                        <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
+
+                                        {{-- Guardar secciones y bloques --}}
+                                        <button wire:click="saveStep2"
+                                                wire:loading.attr="disabled"
+                                                wire:target="saveStep2"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 active:scale-[0.97]">
+                                            <svg wire:loading wire:target="saveStep2" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                            Guardar
+                                        </button>
+
+                                        {{-- Vista estudiante --}}
+                                        <button wire:click="$toggle('showStudentPreview')"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            Vista estudiante
                                         </button>
 
                                         <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
@@ -3205,184 +3225,202 @@
 
                 </div>
 
-                {{-- ═══ COLUMNA DERECHA: VISTA PREVIA (2/5) ═══ --}}
-                <div :class="previewCollapsed ? 'lg:w-0 lg:overflow-hidden lg:opacity-0 pointer-events-none' : 'lg:col-span-2 lg:opacity-100'"
-                     class="min-w-0 relative transition-all duration-300" wire:key="right-column-preview">
-                    {{-- Contenido expandido --}}
-                    <div x-show="!previewCollapsed"
-                         x-transition:enter.duration.200.opacity
-                         x-transition:leave.duration.150.opacity
-                         class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden sticky top-24">
-                        <div class="px-4 py-3 bg-slate-700/30 border-b border-slate-700 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Vista Previa</span>
-
-                            <button @click="previewCollapsed = true"
-                                    class="ml-auto flex items-center gap-1.5 text-[10px] text-slate-500 hover:text-slate-300 transition-colors"
-                                    title="Colapsar vista previa">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                                <span>Colapsar</span>
-                            </button>
-                        </div>
-
-                        <div class="p-4 space-y-4 max-h-[70vh] overflow-y-auto bg-white/5">
-                            {{-- Header preview --}}
-                            <div class="border-b border-slate-700 pb-3">
-                                <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-                                    {{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura' }}
-                                </p>
-                                <h2 class="text-base font-bold text-white">{{ $lessonTitle ?: 'Título de la lección' }}</h2>
-                                @if($lessonDescription)
-                                    <p class="text-xs text-slate-400 mt-1">{{ $lessonDescription }}</p>
-                                @endif
-                                @if($selectedActivity)
-                                    <p class="text-[10px] text-slate-500 mt-1">
-                                        {{ \Carbon\Carbon::parse($selectedActivity->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($selectedActivity->ffinal)->format('d/m/Y') }}
-                                    </p>
-                                @endif
-                            </div>
-
-                            {{-- Secciones preview --}}
-                            @forelse($this->previewSections as $section)
-                                <div class="space-y-2">
-                                    <h3 class="text-sm font-semibold text-slate-100">{{ $section['title'] }}</h3>
-                                    @foreach($section['contents'] as $content)
-                                        @if($content['title'])
-                                            <h4 class="text-xs font-medium text-slate-300">{{ $content['title'] }}</h4>
-                                        @endif
-                                        <div class="text-xs text-slate-400 leading-relaxed prose prose-invert max-w-none">
-                                            {!! $this->renderContentBody($content['body'] ?? '') !!}
-                                        </div>
-                                    @endforeach
-
-                                    {{-- Recursos vinculados a esta sección en preview --}}
-                                    @php
-                                        $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
-                                        $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
-                                        $secEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id'])->values()->all();
-                                        $hasSecResources = count($secResources) > 0 || count($secLinks) > 0 || count($secEmbeds) > 0;
-                                    @endphp
-                                    @if($hasSecResources)
-                                        <div class="border-t border-slate-700/40 pt-2 mt-2 space-y-1">
-                                            @foreach($secResources as $res)
-                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
-                                                    <svg class="w-3 h-3 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                    </svg>
-                                                    <span class="text-[11px] text-slate-400 truncate flex-1">{{ $res['display_name'] }}</span>
-                                                    <span class="text-[9px] text-slate-600">{{ $res['media']['size_for_humans'] ?? '' }}</span>
-                                                </div>
-                                            @endforeach
-                                            @foreach($secLinks as $link)
-                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
-                                                    <svg class="w-3 h-3 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                    </svg>
-                                                    <span class="text-[11px] text-slate-400 truncate">{{ $link['title'] }}</span>
-                                                </div>
-                                            @endforeach
-                                            @foreach($secEmbeds as $embed)
-                                                <div class="flex items-center gap-2 px-2 py-1.5 bg-slate-800/30 border border-slate-700/20 rounded-lg">
-                                                    <svg class="w-3 h-3 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                                                    </svg>
-                                                    <span class="text-[11px] text-slate-400 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
-                                </div>
-                            @empty
-                                <div class="text-center py-8">
-                                    <svg class="w-10 h-10 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                    </svg>
-                                    <p class="text-xs text-slate-600">Agrega secciones y contenido en el paso 2</p>
-                                </div>
-                            @endforelse
-
-                            {{-- Recursos no vinculados (aparecen al final) --}}
-                            @php
-                                $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
-                                $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
-                                $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
-                            @endphp
-                            @if(count($unlinkedResources) > 0)
-                                <div class="border-t border-slate-700 pt-3 space-y-2">
-                                    <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Recursos</h4>
-                                    @foreach($unlinkedResources as $res)
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                            </svg>
-                                            <span class="text-xs text-slate-300">{{ $res['display_name'] }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                            @if(count($unlinkedLinks) > 0)
-                                <div class="border-t border-slate-700 pt-3 space-y-2">
-                                    <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Enlaces</h4>
-                                    @foreach($unlinkedLinks as $link)
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                            </svg>
-                                            <span class="text-xs text-slate-300">{{ $link['title'] }}</span>
-                                            <span class="text-[10px] text-slate-500">({{ $link['link_type'] }})</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                            @if(count($unlinkedEmbeds) > 0)
-                                <div class="border-t border-slate-700 pt-3 space-y-2">
-                                    <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">HTML Embeds</h4>
-                                    @foreach($unlinkedEmbeds as $embed)
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-                                            </svg>
-                                            <span class="text-xs text-slate-300">{{ $embed['title'] ?? 'Embed HTML' }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- Botón Guardar y Publicar --}}
-                        <div class="border-t border-slate-700/50 p-3 bg-slate-800/80">
-                            <button wire:click="confirmPublish"
-                                    wire:loading.attr="disabled"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-bold rounded-xl transition-all duration-200">
-                                <svg wire:loading wire:target="confirmPublish" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                </svg>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Guardar y Publicar
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
-            {{-- Botón flotante expandir (fixed, fuera del grid) --}}
-            <button x-show="previewCollapsed" x-cloak
-                    @click="previewCollapsed = false"
+            {{-- Botón flotante: abrir preview full-screen --}}
+            <button wire:click="$set('showFullPreview', true)"
                     class="hidden lg:flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400 transition-all bg-slate-800/90 border border-slate-700 rounded-l-xl pl-3 pr-2.5 py-2 fixed right-0 top-1/2 -translate-y-1/2 z-40 cursor-pointer"
-                    title="Expandir vista previa">
+                    title="Vista previa">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                 </svg>
                 <span>Previa</span>
             </button>
+
+            {{-- ═══════════ MODAL VISTA PREVIA (full-screen) ═══════════ --}}
+            @if($showFullPreview)
+                <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="full-preview-modal">
+                    <div class="fixed inset-0 bg-slate-900/95 backdrop-blur-md"
+                         wire:click="$set('showFullPreview', false)"></div>
+
+                    <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
+                        <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+
+                            {{-- Header --}}
+                            <div class="flex items-center justify-between px-6 py-4 bg-slate-700/50 border-b border-slate-700">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <div>
+                                        <h2 class="text-sm font-bold text-white uppercase tracking-wider">Vista Previa</h2>
+                                        <p class="text-[11px] text-slate-400">Así se verá la lección al publicarse</p>
+                                    </div>
+                                </div>
+                                <button wire:click="$set('showFullPreview', false)"
+                                        class="p-2 hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-white">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {{-- Body --}}
+                            <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                                {{-- Header preview --}}
+                                <div class="border-b border-slate-700 pb-4">
+                                    <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">
+                                        {{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura' }}
+                                    </p>
+                                    <h2 class="text-xl font-bold text-white">{{ $lessonTitle ?: 'Título de la lección' }}</h2>
+                                    @if($lessonDescription)
+                                        <p class="text-sm text-slate-400 mt-1">{{ $lessonDescription }}</p>
+                                    @endif
+                                    @if($selectedActivity)
+                                        <p class="text-xs text-slate-500 mt-2">
+                                            {{ \Carbon\Carbon::parse($selectedActivity->finicial)->format('d/m/Y') }} &mdash; {{ \Carbon\Carbon::parse($selectedActivity->ffinal)->format('d/m/Y') }}
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Secciones --}}
+                                @forelse($this->previewSections as $section)
+                                    <div class="space-y-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1 h-5 bg-emerald-500 rounded-full"></span>
+                                            <h3 class="text-base font-bold text-slate-100">{{ $section['title'] }}</h3>
+                                        </div>
+                                        @foreach($section['contents'] as $content)
+                                            @php
+                                                $rawBody = $content['body'] ?? '';
+                                                $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                            @endphp
+                                            @if($content['title'])
+                                                <h4 class="text-sm font-semibold text-slate-300">{{ $content['title'] }}</h4>
+                                            @endif
+                                            @if($isMermaid)
+                                                @php
+                                                    preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                                    $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                @endphp
+                                                <div wire:ignore x-data="mermaidEmbed()"
+                                                     data-mermaid-code="{{ $mermaidCode }}"
+                                                     class="w-full bg-slate-800 rounded-xl p-4 overflow-x-auto border border-slate-700/50">
+                                                    <div x-ref="target" class="w-full"></div>
+                                                </div>
+                                            @else
+                                                <div class="text-sm text-slate-400 leading-relaxed prose prose-invert prose-sm max-w-none">
+                                                    {!! $this->renderContentBody($rawBody) !!}
+                                                </div>
+                                            @endif
+                                        @endforeach
+
+                                        {{-- Recursos vinculados a esta sección --}}
+                                        @php
+                                            $secResources = collect($wizardResources)->where('section_id', $section['id'])->values()->all();
+                                            $secLinks = collect($wizardLinks)->where('section_id', $section['id'])->values()->all();
+                                            $secEmbeds = collect($wizardHtmlEmbeds)->where('section_id', $section['id'])->values()->all();
+                                            $hasSecResources = count($secResources) > 0 || count($secLinks) > 0 || count($secEmbeds) > 0;
+                                        @endphp
+                                        @if($hasSecResources)
+                                            <div class="border-t border-slate-700/40 pt-3 mt-2 space-y-2">
+                                                @foreach($secResources as $res)
+                                                    <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 border border-slate-700/20 rounded-lg">
+                                                        <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                        </svg>
+                                                        <span class="text-sm text-slate-300 truncate flex-1">{{ $res['display_name'] }}</span>
+                                                        <span class="text-xs text-slate-500">{{ $res['media']['size_for_humans'] ?? '' }}</span>
+                                                    </div>
+                                                @endforeach
+                                                @foreach($secLinks as $link)
+                                                    <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 border border-slate-700/20 rounded-lg">
+                                                        <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                        </svg>
+                                                        <span class="text-sm text-slate-300 truncate flex-1">{{ $link['title'] }}</span>
+                                                        <span class="text-xs text-slate-500">({{ $link['link_type'] }})</span>
+                                                    </div>
+                                                @endforeach
+                                                @foreach($secEmbeds as $embed)
+                                                    <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 border border-slate-700/20 rounded-lg">
+                                                        <svg class="w-4 h-4 text-fuchsia-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                        </svg>
+                                                        <span class="text-sm text-slate-300 truncate flex-1">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="text-center py-12">
+                                        <svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                        <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
+                                        <p class="text-xs text-slate-600 mt-1">Agrega secciones y contenido en el paso 2 del asistente.</p>
+                                    </div>
+                                @endforelse
+
+                                {{-- Recursos no vinculados (aparecen al final) --}}
+                                @php
+                                    $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
+                                    $unlinkedLinks = collect($wizardLinks)->filter(fn($l) => empty($l['section_id']))->values()->all();
+                                    $unlinkedEmbeds = collect($wizardHtmlEmbeds)->filter(fn($e) => empty($e['section_id']))->values()->all();
+                                @endphp
+                                @if(count($unlinkedResources) > 0)
+                                    <div class="border-t border-slate-700 pt-4 space-y-2">
+                                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                            Recursos
+                                        </h4>
+                                        @foreach($unlinkedResources as $res)
+                                            <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 rounded-lg">
+                                                <span class="text-sm text-slate-300">{{ $res['display_name'] }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if(count($unlinkedLinks) > 0)
+                                    <div class="border-t border-slate-700 pt-4 space-y-2">
+                                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                            Enlaces
+                                        </h4>
+                                        @foreach($unlinkedLinks as $link)
+                                            <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 rounded-lg">
+                                                <span class="text-sm text-slate-300">{{ $link['title'] }}</span>
+                                                <span class="text-xs text-slate-500">({{ $link['link_type'] }})</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                @if(count($unlinkedEmbeds) > 0)
+                                    <div class="border-t border-slate-700 pt-4 space-y-2">
+                                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                            HTML Embeds
+                                        </h4>
+                                        @foreach($unlinkedEmbeds as $embed)
+                                            <div class="flex items-center gap-3 px-3 py-2 bg-slate-700/30 rounded-lg">
+                                                <span class="text-sm text-slate-300">{{ $embed['title'] ?? 'Embed HTML' }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             {{-- ═══════════ MODAL VISTA ESTUDIANTE (7xl) ═══════════ --}}
             @if($showStudentPreview)
@@ -3442,12 +3480,28 @@
                                             <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
                                         </div>
                                         @foreach($section['contents'] as $content)
+                                            @php
+                                                $rawBody = $content['body'] ?? '';
+                                                $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                            @endphp
                                             @if($content['title'])
                                                 <h3 class="text-sm font-semibold text-slate-700">{{ $content['title'] }}</h3>
                                             @endif
-                                            <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                                {!! $this->renderContentBody($content['body'] ?? '') !!}
-                                            </div>
+                                            @if($isMermaid)
+                                                @php
+                                                    preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                                    $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                @endphp
+                                                <div wire:ignore x-data="mermaidEmbed()"
+                                                     data-mermaid-code="{{ $mermaidCode }}"
+                                                     class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">
+                                                    <div x-ref="target" class="w-full"></div>
+                                                </div>
+                                            @else
+                                                <div class="slide-block">
+                                                    {!! $this->renderContentBody($rawBody) !!}
+                                                </div>
+                                            @endif
                                         @endforeach
                                         {{-- HTML Embeds asociados a esta sección --}}
                                         @php
@@ -3695,6 +3749,167 @@
         .student-preview-modal:fullscreen > .bg-black\/80 {
             opacity: 0;
             pointer-events: none;
+        }
+        /* ── Slide Preview: Enhanced Styling (shared: preview tab + student modal) ── */
+        .slide-preview-wrapper,
+        .slide-block {
+            font-size: 0.9375rem;
+            line-height: 1.75;
+            color: #1e293b;
+        }
+        /* Card: applies to both .slide-block standalone and .slide-preview-wrapper > .slide-block */
+        .slide-block {
+            margin-bottom: 1.25rem;
+            padding: 1.25rem 1.5rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.625rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04);
+            transition: box-shadow 0.2s ease;
+        }
+        .slide-block:last-child {
+            margin-bottom: 0;
+        }
+        .slide-block:hover {
+            box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.06);
+        }
+        .slide-block-even {
+            background: #ffffff;
+        }
+        .slide-block-odd {
+            background: #fafbfc;
+        }
+        /* Content styling within any slide container */
+        .slide-preview-wrapper h2,
+        .slide-block h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: -0.01em;
+        }
+        .slide-preview-wrapper h3,
+        .slide-block h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 1rem 0 0.5rem 0;
+        }
+        .slide-preview-wrapper h4,
+        .slide-block h4 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 0.75rem 0 0.4rem 0;
+        }
+        .slide-preview-wrapper p,
+        .slide-block p {
+            margin: 0 0 0.75rem 0;
+            color: #334155;
+        }
+        .slide-preview-wrapper p:last-child,
+        .slide-block p:last-child {
+            margin-bottom: 0;
+        }
+        .slide-preview-wrapper ul,
+        .slide-preview-wrapper ol,
+        .slide-block ul,
+        .slide-block ol {
+            margin: 0.5rem 0 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        .slide-preview-wrapper li,
+        .slide-block li {
+            margin-bottom: 0.3rem;
+            color: #334155;
+        }
+        .slide-preview-wrapper li::marker,
+        .slide-block li::marker {
+            color: #14b8a6;
+        }
+        .slide-preview-wrapper table,
+        .slide-block table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0.75rem 0;
+            font-size: 0.875rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .slide-preview-wrapper thead,
+        .slide-block thead {
+            background: #f1f5f9;
+        }
+        .slide-preview-wrapper th,
+        .slide-block th {
+            padding: 0.625rem 0.875rem;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .slide-preview-wrapper td,
+        .slide-block td {
+            padding: 0.625rem 0.875rem;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .slide-preview-wrapper tbody tr:last-child td,
+        .slide-block tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .slide-preview-wrapper tbody tr:nth-child(even),
+        .slide-block tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .slide-preview-wrapper tbody tr:hover,
+        .slide-block tbody tr:hover {
+            background: #f1f5f9;
+        }
+        /* Bold / Italic */
+        .slide-preview-wrapper strong,
+        .slide-block strong {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .slide-preview-wrapper em,
+        .slide-block em {
+            font-style: italic;
+            color: #475569;
+        }
+        /* Inline code */
+        .slide-preview-wrapper code,
+        .slide-block code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.8125em;
+            color: #be185d;
+            border: 1px solid #e2e8f0;
+        }
+        /* Blockquotes */
+        .slide-preview-wrapper blockquote,
+        .slide-block blockquote {
+            border-left: 3px solid #14b8a6;
+            padding: 0.5rem 1rem;
+            margin: 0.75rem 0;
+            background: #f0fdfa;
+            border-radius: 0 0.375rem 0.375rem 0;
+            color: #475569;
+        }
+        /* Horizontal rule */
+        .slide-preview-wrapper hr,
+        .slide-block hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 1rem 0;
         }
     </style>
 @endassets
