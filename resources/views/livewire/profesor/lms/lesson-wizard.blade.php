@@ -1343,7 +1343,7 @@
                                     </div>
 
                                     {{-- Cuerpo: actividad + datos ocupan el espacio vertical --}}
-                                    <div class="flex flex-col flex-1 min-h-0 justify-center gap-4">
+                                    <div class="flex flex-col flex-1 min-h-0 justify-center gap-5">
                                         {{-- Actividad: título principal con más peso visual --}}
                                         <div class="text-center">
                                             <h1 class="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
@@ -1354,10 +1354,32 @@
                                                     {{ $listPreviewData['description'] }}
                                                 </p>
                                             @endif
+                                            @if($listPreviewData['thematic'])
+                                                <p class="text-[11px] text-slate-400 mt-1.5 max-w-lg mx-auto">
+                                                    <span class="font-medium text-slate-500">Tejido temático:</span>
+                                                    {{ $listPreviewData['thematic'] }}
+                                                </p>
+                                            @endif
+                                            @if($listPreviewData['references'])
+                                                <p class="text-[11px] text-slate-400 mt-0.5 max-w-lg mx-auto">
+                                                    <span class="font-medium text-slate-500">Ref. teórico-prácticos:</span>
+                                                    {{ $listPreviewData['references'] }}
+                                                </p>
+                                            @endif
                                             @if($listPreviewData['start_date'])
                                                 <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-center gap-1">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                                     <span>{{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}</span>
+                                                    @php
+                                                        $start = \Carbon\Carbon::parse($listPreviewData['start_date']);
+                                                        $end   = \Carbon\Carbon::parse($listPreviewData['end_date']);
+                                                        $days  = $start->diffInDays($end) + 1;
+                                                    @endphp
+                                                    <span class="text-slate-300 mx-1">·</span>
+                                                    <span class="text-slate-500">{{ $days }} día{{ $days !== 1 ? 's' : '' }}</span>
+                                                    @if($listPreviewData['activity_status'])
+                                                        <span class="ml-1 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 rounded">APROBADO</span>
+                                                    @endif
                                                 </p>
                                             @endif
                                         </div>
@@ -1365,29 +1387,82 @@
                                         {{-- Datos institucionales / profesionales (más compactos) --}}
                                         <div class="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100 shrink-0">
                                         {{-- Institucional --}}
-                                        <div class="px-4 py-2.5 flex items-center gap-3">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24">Institucional</span>
-                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                                                <span class="text-slate-800 font-medium">{{ $listPreviewData['institution'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-slate-600">{{ $listPreviewData['periodo'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-slate-600">{{ $listPreviewData['plan_educativo'] }}</span>
+                                        <div class="px-4 py-3 flex items-start gap-3">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24 pt-0.5">Institucional</span>
+                                            <div class="text-xs space-y-1">
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="text-slate-800 font-medium">{{ $listPreviewData['institution'] }}</span>
+                                                    @if($listPreviewData['institution_rif'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">RIF {{ $listPreviewData['institution_rif'] }}</span>
+                                                    @endif
+                                                    @if($listPreviewData['institution_city'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['institution_city'] }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-slate-500">
+                                                    <span class="text-slate-700">{{ $listPreviewData['periodo'] }}</span>
+                                                    @if($listPreviewData['periodo_finicial'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span>{{ \Carbon\Carbon::parse($listPreviewData['periodo_finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['periodo_ffinal'])->format('d/m/Y') }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="text-slate-700">{{ $listPreviewData['plan_educativo'] }}</span>
+                                                    @if($listPreviewData['plan_educativo_desc'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['plan_educativo_desc'] }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                         {{-- Profesional --}}
-                                        <div class="px-4 py-2.5 flex items-center gap-3">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24">Profesional</span>
-                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                                                <span class="text-slate-800 font-medium">{{ $listPreviewData['plan_estudio'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-slate-600">{{ $listPreviewData['grado'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-slate-600">{{ $listPreviewData['seccion'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="text-slate-600">{{ $listPreviewData['pensum'] }}</span>
-                                                <span class="text-slate-300">•</span>
-                                                <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
+                                        <div class="px-4 py-3 flex items-start gap-3">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24 pt-0.5">Profesional</span>
+                                            <div class="text-xs space-y-1">
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="text-slate-700">{{ $listPreviewData['plan_estudio'] }}</span>
+                                                    @if($listPreviewData['plan_estudio_code'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">Cód. {{ $listPreviewData['plan_estudio_code'] }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="text-slate-700">{{ $listPreviewData['grado'] }}</span>
+                                                    @if($listPreviewData['grado_code'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['grado_code'] }}</span>
+                                                    @endif
+                                                    <span class="text-slate-300">•</span>
+                                                    <span class="text-slate-700">{{ $listPreviewData['seccion'] }}</span>
+                                                    @if($listPreviewData['seccion_desc'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['seccion_desc'] }}</span>
+                                                    @endif
+                                                    @if($listPreviewData['seccion_students'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['seccion_students'] }} est.</span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="text-slate-700">{{ $listPreviewData['pensum'] }}</span>
+                                                    @if($listPreviewData['asignatura_code'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">Cód. {{ $listPreviewData['asignatura_code'] }}</span>
+                                                    @endif
+                                                    @if($listPreviewData['asignatura_hours'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ $listPreviewData['asignatura_hours'] }} h/sem</span>
+                                                    @endif
+                                                </div>
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                                    <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
+                                                    @if($listPreviewData['lapso_finicial'])
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-slate-500">{{ \Carbon\Carbon::parse($listPreviewData['lapso_finicial'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['lapso_ffinal'])->format('d/m/Y') }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </div><!-- /data-card -->
