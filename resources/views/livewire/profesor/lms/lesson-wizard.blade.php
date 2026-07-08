@@ -1301,9 +1301,9 @@
                              x-ref="swiperContainer">
                             <div class="swiper-wrapper">
                                 {{-- Slide 1: Portada institucional --}}
-                                <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                                <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8 flex flex-col min-h-[65vh]">
                                     {{-- Membrete institucional --}}
-                                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 overflow-hidden">
+                                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5 overflow-hidden shrink-0">
                                         {{-- Fila superior: logo + institución --}}
                                         <div class="flex items-center justify-center gap-4 md:gap-6 px-5 pt-5 pb-3">
                                             <img src="{{ asset('image/avatar/uecfla.jpg') }}"
@@ -1342,26 +1342,28 @@
                                         </div>
                                     </div>
 
-                                    {{-- Actividad: título principal con más peso visual --}}
-                                    <div class="mb-5 text-center">
-                                        <h1 class="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
-                                            {{ $listPreviewData['title'] }}
-                                        </h1>
-                                        @if($listPreviewData['description'])
-                                            <p class="text-xs md:text-sm text-slate-500 mt-1.5 max-w-lg mx-auto leading-relaxed">
-                                                {{ $listPreviewData['description'] }}
-                                            </p>
-                                        @endif
-                                        @if($listPreviewData['start_date'])
-                                            <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                <span>{{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}</span>
-                                            </p>
-                                        @endif
-                                    </div>
+                                    {{-- Cuerpo: actividad + datos ocupan el espacio vertical --}}
+                                    <div class="flex flex-col flex-1 min-h-0 justify-center gap-4">
+                                        {{-- Actividad: título principal con más peso visual --}}
+                                        <div class="text-center">
+                                            <h1 class="text-xl md:text-2xl font-bold text-slate-900 leading-tight">
+                                                {{ $listPreviewData['title'] }}
+                                            </h1>
+                                            @if($listPreviewData['description'])
+                                                <p class="text-xs md:text-sm text-slate-500 mt-1.5 max-w-lg mx-auto leading-relaxed">
+                                                    {{ $listPreviewData['description'] }}
+                                                </p>
+                                            @endif
+                                            @if($listPreviewData['start_date'])
+                                                <p class="text-[11px] text-slate-400 mt-2 flex items-center justify-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    <span>{{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m/Y') }}</span>
+                                                </p>
+                                            @endif
+                                        </div>
 
-                                    {{-- Datos institucionales / profesionales (más compactos) --}}
-                                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100">
+                                        {{-- Datos institucionales / profesionales (más compactos) --}}
+                                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-100 shrink-0">
                                         {{-- Institucional --}}
                                         <div class="px-4 py-2.5 flex items-center gap-3">
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24">Institucional</span>
@@ -1388,8 +1390,9 @@
                                                 <span class="font-medium text-indigo-600">{{ $listPreviewData['lapso'] }}</span>
                                             </div>
                                         </div>
-                                    </div>
-                                </div><!-- /slide:portada -->
+                                    </div><!-- /data-card -->
+                                </div><!-- /flex-1 body -->
+                            </div><!-- /slide:portada -->
 
                         {{-- Secciones --}}
                         @forelse($listPreviewData['sections'] as $section)
