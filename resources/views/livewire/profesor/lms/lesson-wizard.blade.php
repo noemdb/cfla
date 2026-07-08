@@ -1368,7 +1368,7 @@
                                         <div class="px-4 py-2.5 flex items-center gap-3">
                                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 w-24">Institucional</span>
                                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                                                <span class="text-slate-800 font-medium truncate max-w-[160px]" title="{{ $listPreviewData['institution'] }}">{{ $listPreviewData['institution'] }}</span>
+                                                <span class="text-slate-800 font-medium">{{ $listPreviewData['institution'] }}</span>
                                                 <span class="text-slate-300">•</span>
                                                 <span class="text-slate-600">{{ $listPreviewData['periodo'] }}</span>
                                                 <span class="text-slate-300">•</span>
