@@ -3482,7 +3482,7 @@
                         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="mobileTocOpen = false"></div>
                         <div class="absolute bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 rounded-t-2xl p-4 max-h-[50vh] overflow-y-auto">
                             <div class="flex items-center justify-between mb-3 px-1">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Indice</span>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Índice</span>
                                 <button @click="mobileTocOpen = false" class="p-1.5 text-slate-500 hover:text-white rounded-lg hover:bg-slate-700/50">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
