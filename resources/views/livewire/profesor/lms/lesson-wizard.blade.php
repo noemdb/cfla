@@ -3463,6 +3463,48 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Botón TOC flotante (mobile) --}}
+                <div x-data="{ mobileTocOpen: false }"
+                     x-init="$watch('mobileTocOpen', val => document.body.classList.toggle('overflow-hidden', val))">
+                    {{-- Floating button --}}
+                    <button @click="mobileTocOpen = true"
+                            class="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-xl shadow-emerald-900/30 flex items-center justify-center transition-all active:scale-90">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    {{-- Overlay TOC --}}
+                    <div x-show="mobileTocOpen" x-cloak
+                         x-transition:enter.duration.200
+                         class="lg:hidden fixed inset-0 z-[9999]">
+                        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="mobileTocOpen = false"></div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 rounded-t-2xl p-4 max-h-[50vh] overflow-y-auto">
+                            <div class="flex items-center justify-between mb-3 px-1">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Indice</span>
+                                <button @click="mobileTocOpen = false" class="p-1.5 text-slate-500 hover:text-white rounded-lg hover:bg-slate-700/50">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                            <div class="space-y-0.5">
+                                @foreach($this->previewSections as $sIdx => $section)
+                                    @php
+                                        $hasContent = !empty(array_filter($section['contents'] ?? [], fn($c) => !empty($c['body'])));
+                                    @endphp
+                                    <button @click="mobileTocOpen = false; document.querySelector('[x-data=\'tocNavigation()\']')?.__x.$data.scrollTo({{ $sIdx }})"
+                                            class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all text-sm hover:bg-slate-700/50">
+                                        <span class="flex items-center justify-center w-6 h-6 rounded {{ $hasContent ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/60 text-slate-500' }} text-xs font-mono shrink-0">
+                                            {{ $sIdx + 1 }}
+                                        </span>
+                                        <span class="text-slate-300 font-medium truncate">{{ $section['title'] }}</span>
+                                        <span class="w-1.5 h-1.5 rounded-full shrink-0 ml-auto {{ $hasContent ? 'bg-emerald-400/60' : 'bg-slate-600/40' }}"></span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             {{-- ═══════════ MODAL VISTA ESTUDIANTE (7xl) ═══════════ --}}
