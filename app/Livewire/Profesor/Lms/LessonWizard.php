@@ -3116,15 +3116,31 @@ PROMPT;
         $blocks = collect($currentSlide['contents'] ?? [])
             ->pluck('body')
             ->filter()
-            ->map(fn(string $body): string => $this->renderContentBody($body))
             ->values();
 
-        // Envolver cada bloque en un contenedor con margen inferior
-        $rendered = $blocks->map(fn(string $html, int $idx): string =>
-            '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
+        $rendered = $blocks->map(function (string $body, int $idx): string {
+            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
+
+            if ($isMermaid) {
+                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m);
+                $mermaidCode = trim(strip_tags($m[1] ?? ''));
+
+                return '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
+                    . "\n"
+                    . '<div wire:ignore x-data="mermaidEmbed()"'
+                    . ' data-mermaid-code="' . htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8') . '"'
+                    . ' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
+                    . '<div x-ref="target" class="w-full"></div>'
+                    . '</div>'
+                    . "\n"
+                    . '</div>';
+            }
+
+            $html = $this->renderContentBody($body);
+            return '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
                 . "\n" . $html . "\n"
-            . '</div>'
-        );
+                . '</div>';
+        });
 
         return $rendered->implode("\n");
     }

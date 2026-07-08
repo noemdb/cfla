@@ -2312,7 +2312,7 @@
                                                 @endif
                                             </div>
                                             @php
-                                                $hasMermaid = str_contains($previewContent, 'class="mermaid"');
+                                                $hasMermaid = str_contains($previewContent, 'x-data="mermaidEmbed()"');
                                             @endphp
                                             @if($hasMermaid)
                                                 <div class="flex items-center gap-1.5 mt-2 px-3 py-2 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-lg">
