@@ -1735,30 +1735,30 @@
                                 $totalEmbeds = count($listPreviewData['html_embeds'] ?? []);
                                 $totalLinks = count($listPreviewData['links'] ?? []);
                             @endphp
-                            <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-10">
-                                <div class="max-w-3xl mx-auto space-y-6">
+                            <div class="swiper-slide overflow-y-auto w-full h-auto p-4 md:p-6">
+                                <div class="max-w-3xl mx-auto space-y-3">
 
                                     {{-- ── Cabecera del resumen ── --}}
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 class="text-lg font-bold text-stone-800">Resumen de la lección</h3>
-                                            <p class="text-xs text-stone-500">{{ $listPreviewData['pensum'] }} · {{ $listPreviewData['grado'] }} {{ $listPreviewData['seccion'] }}</p>
+                                            <h3 class="text-sm font-bold text-stone-800">Resumen de la lección</h3>
+                                            <p class="text-[11px] text-stone-500">{{ $listPreviewData['pensum'] }} · {{ $listPreviewData['grado'] }} {{ $listPreviewData['seccion'] }}</p>
                                         </div>
                                     </div>
 
                                     {{-- ── Título + Descripción ── --}}
-                                    <div class="bg-white rounded-xl border border-stone-200 p-5 space-y-2">
-                                        <h4 class="text-base font-bold text-stone-800 leading-snug">{{ $listPreviewData['title'] }}</h4>
+                                    <div class="bg-white rounded-lg border border-stone-200 p-3 space-y-1">
+                                        <h4 class="text-sm font-bold text-stone-800 leading-snug">{{ $listPreviewData['title'] }}</h4>
                                         @if($listPreviewData['description'])
-                                            <p class="text-sm text-stone-500 leading-relaxed">{{ $listPreviewData['description'] }}</p>
+                                            <p class="text-xs text-stone-500 leading-relaxed">{{ $listPreviewData['description'] }}</p>
                                         @endif
                                         @if($listPreviewData['thematic'] || $listPreviewData['references'])
-                                            <div class="pt-2 space-y-1 text-xs text-stone-400 border-t border-stone-100">
+                                            <div class="pt-1.5 space-y-0.5 text-xs text-stone-400 border-t border-stone-100">
                                                 @if($listPreviewData['thematic'])
                                                     <p><span class="font-medium text-stone-500">Tejido temático:</span> {{ $listPreviewData['thematic'] }}</p>
                                                 @endif
@@ -1771,14 +1771,14 @@
 
                                     {{-- ── Estructura de Enseñanza (Inicio · Desarrollo · Cierre) ── --}}
                                     @if($listPreviewData['has_teaching_structure'] ?? false)
-                                        <div class="bg-white rounded-xl border border-stone-200 overflow-hidden">
-                                            <div class="px-5 py-3 bg-amber-50 border-b border-amber-100">
-                                                <h4 class="text-xs font-bold text-amber-800 uppercase tracking-wider">Estructura de Enseñanza</h4>
+                                        <div class="bg-white rounded-lg border border-stone-200 overflow-hidden">
+                                            <div class="px-3 py-2 bg-amber-50 border-b border-amber-100">
+                                                <h4 class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Estructura de Enseñanza</h4>
                                             </div>
-                                            <div class="p-5 space-y-4">
+                                            <div class="p-3 space-y-2">
                                                 @foreach($listPreviewData['teaching_sections'] as $ts)
                                                     <div>
-                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
                                                             @switch($ts['title'])
                                                                 @case('INICIO') bg-blue-50 text-blue-700 border border-blue-200 @break
                                                                 @case('DESARROLLO') bg-emerald-50 text-emerald-700 border border-emerald-200 @break
@@ -1794,104 +1794,82 @@
                                                             @endswitch
                                                             {{ $ts['title'] }}
                                                         </span>
-                                                        <p class="text-sm text-stone-600 mt-1.5 leading-relaxed">{{ $ts['content'] }}</p>
+                                                        <p class="text-xs text-stone-600 mt-1 leading-relaxed">{{ $ts['content'] }}</p>
                                                     </div>
                                                 @endforeach
                                             </div>
                                         </div>
                                     @elseif($listPreviewData['teaching'])
-                                        <div class="bg-white rounded-xl border border-stone-200 p-5">
-                                            <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Enseñanza / Actividad Globalizada</h4>
-                                            <p class="text-sm text-stone-600 leading-relaxed whitespace-pre-line">{{ $listPreviewData['teaching'] }}</p>
+                                        <div class="bg-white rounded-lg border border-stone-200 p-3">
+                                            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Enseñanza / Actividad Globalizada</h4>
+                                            <p class="text-xs text-stone-600 leading-relaxed whitespace-pre-line">{{ $listPreviewData['teaching'] }}</p>
                                         </div>
                                     @endif
 
                                     {{-- ── Secciones (lista compacta) ── --}}
                                     @if($totalSections > 0)
-                                        <div class="bg-white rounded-xl border border-stone-200 overflow-hidden">
-                                            <div class="px-5 py-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
-                                                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider">Secciones</h4>
-                                                <span class="text-[10px] text-stone-400 font-mono">{{ $totalSections }} secciones · {{ $totalBlocks }} bloques</span>
+                                        <div class="bg-white rounded-lg border border-stone-200 overflow-hidden">
+                                            <div class="px-3 py-2 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+                                                <h4 class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Secciones</h4>
+                                                <span class="text-[10px] text-stone-400 font-mono">{{ $totalSections }} · {{ $totalBlocks }} bloques</span>
                                             </div>
                                             <div class="divide-y divide-stone-100">
                                                 @foreach($listPreviewData['sections'] as $sec)
-                                                    <div class="px-5 py-3 flex items-center justify-between gap-3 hover:bg-stone-50/50 transition-colors">
+                                                    <div class="px-3 py-2 flex items-center justify-between gap-2 hover:bg-stone-50/50 transition-colors">
                                                         <div class="min-w-0 flex-1">
-                                                            <p class="text-sm font-medium text-stone-700 truncate">{{ $sec['title'] }}</p>
+                                                            <p class="text-xs font-medium text-stone-700 truncate">{{ $sec['title'] }}</p>
                                                             @if(count($sec['contents'] ?? []) > 0)
-                                                                <p class="text-xs text-stone-400 mt-0.5">
-                                                                    {{ count($sec['contents']) }} contenido{{ count($sec['contents']) !== 1 ? 's' : '' }}
+                                                                <p class="text-[11px] text-stone-400">
                                                                     @foreach($sec['contents'] as $ci => $c)
                                                                         @if($c['title'] ?? null)
-                                                                            <span class="inline">· {{ $c['title'] }}</span>
+                                                                            <span>· {{ $c['title'] }}</span>
                                                                         @endif
                                                                     @endforeach
                                                                 </p>
-                                                            @else
-                                                                <p class="text-xs text-stone-400 italic mt-0.5">Sin contenido</p>
                                                             @endif
                                                         </div>
-                                                        <span class="shrink-0 text-xs font-mono text-stone-400">{{ count($sec['contents'] ?? []) }}</span>
+                                                        <span class="shrink-0 text-[11px] font-mono text-stone-400">{{ count($sec['contents'] ?? []) }}</span>
                                                     </div>
                                                 @endforeach
                                             </div>
                                         </div>
                                     @endif
 
-                                    {{-- ── Estadísticas ── --}}
-                                    <div class="bg-white rounded-xl border border-stone-200 p-5">
-                                        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3">Contenido de la lección</h4>
-                                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                                            <div class="bg-emerald-50 rounded-lg p-3 text-center">
-                                                <p class="text-xl font-bold text-emerald-600">{{ $totalSections }}</p>
-                                                <p class="text-[10px] text-emerald-500/70 mt-0.5">Secciones</p>
-                                            </div>
-                                            <div class="bg-blue-50 rounded-lg p-3 text-center">
-                                                <p class="text-xl font-bold text-blue-600">{{ $totalBlocks }}</p>
-                                                <p class="text-[10px] text-blue-500/70 mt-0.5">Bloques</p>
-                                            </div>
-                                            @if($totalResources > 0 || $totalEmbeds > 0 || $totalLinks > 0)
-                                                @if($totalResources > 0)
-                                                <div class="bg-amber-50 rounded-lg p-3 text-center">
-                                                    <p class="text-xl font-bold text-amber-600">{{ $totalResources }}</p>
-                                                    <p class="text-[10px] text-amber-500/70 mt-0.5">Recursos</p>
-                                                </div>
-                                                @endif
-                                                @if($totalEmbeds > 0)
-                                                <div class="bg-fuchsia-50 rounded-lg p-3 text-center">
-                                                    <p class="text-xl font-bold text-fuchsia-600">{{ $totalEmbeds }}</p>
-                                                    <p class="text-[10px] text-fuchsia-500/70 mt-0.5">Embeds</p>
-                                                </div>
-                                                @endif
-                                                @if($totalLinks > 0)
-                                                <div class="bg-cyan-50 rounded-lg p-3 text-center">
-                                                    <p class="text-xl font-bold text-cyan-600">{{ $totalLinks }}</p>
-                                                    <p class="text-[10px] text-cyan-500/70 mt-0.5">Enlaces</p>
-                                                </div>
-                                                @endif
-                                            @endif
+                                    {{-- ── Estadísticas + Ficha técnica en grid compacto ── --}}
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                        <div class="bg-emerald-50 rounded-lg p-2.5 text-center">
+                                            <p class="text-lg font-bold text-emerald-600">{{ $totalSections }}</p>
+                                            <p class="text-[9px] text-emerald-500/70">Secciones</p>
                                         </div>
-                                    </div>
-
-                                    {{-- ── Ficha técnica compacta ── --}}
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                                        <div class="bg-stone-50 rounded-lg p-3">
-                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Asignatura</p>
-                                            <p class="text-stone-700 font-medium mt-0.5 truncate">{{ $listPreviewData['pensum'] }}</p>
+                                        <div class="bg-blue-50 rounded-lg p-2.5 text-center">
+                                            <p class="text-lg font-bold text-blue-600">{{ $totalBlocks }}</p>
+                                            <p class="text-[9px] text-blue-500/70">Bloques</p>
                                         </div>
-                                        <div class="bg-stone-50 rounded-lg p-3">
-                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Curso</p>
-                                            <p class="text-stone-700 font-medium mt-0.5">{{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}</p>
+                                        <div class="bg-amber-50 rounded-lg p-2.5 text-center">
+                                            <p class="text-lg font-bold text-amber-600">{{ max($totalResources, 0) }}</p>
+                                            <p class="text-[9px] text-amber-500/70">Recursos</p>
                                         </div>
-                                        <div class="bg-stone-50 rounded-lg p-3">
-                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Lapso</p>
-                                            <p class="text-stone-700 font-medium mt-0.5">{{ $listPreviewData['lapso'] ?? '—' }}</p>
+                                        <div class="bg-fuchsia-50 rounded-lg p-2.5 text-center">
+                                            <p class="text-lg font-bold text-fuchsia-600">{{ max($totalEmbeds, 0) }}</p>
+                                            <p class="text-[9px] text-fuchsia-500/70">Embeds</p>
                                         </div>
-                                        <div class="bg-stone-50 rounded-lg p-3">
-                                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Duración</p>
-                                            <p class="text-stone-700 font-medium mt-0.5">
+                                        <div class="bg-cyan-50 rounded-lg p-2.5 text-center">
+                                            <p class="text-lg font-bold text-cyan-600">{{ max($totalLinks, 0) }}</p>
+                                            <p class="text-[9px] text-cyan-500/70">Enlaces</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-2.5">
+                                            <p class="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Curso</p>
+                                            <p class="text-stone-700 font-medium text-xs leading-tight mt-0.5">{{ $listPreviewData['grado'] }} · {{ $listPreviewData['seccion'] }}</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-2.5">
+                                            <p class="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Lapso</p>
+                                            <p class="text-stone-700 font-medium text-xs mt-0.5">{{ $listPreviewData['lapso'] ?? '—' }}</p>
+                                        </div>
+                                        <div class="bg-stone-50 rounded-lg p-2.5">
+                                            <p class="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Duración</p>
+                                            <p class="text-stone-700 font-medium text-xs mt-0.5">
                                                 @if($listPreviewData['start_date'])
-                                                    {{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m') }} —
+                                                    {{ \Carbon\Carbon::parse($listPreviewData['start_date'])->format('d/m') }}—
                                                     {{ \Carbon\Carbon::parse($listPreviewData['end_date'])->format('d/m') }}
                                                 @else
                                                     —
