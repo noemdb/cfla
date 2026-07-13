@@ -21,6 +21,9 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        // Solo usuarios activos pueden iniciar sesión
+        $credentials['is_active'] = 'enable';
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
