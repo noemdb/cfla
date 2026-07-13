@@ -38,29 +38,44 @@ class ActivityController extends Controller
         $grado_id    = $request->grado_id ?? null;
         $seccion_id  = $request->seccion_id ?? null;
         $lapso_id    = $request->lapso_id ?? Lapso::current()?->id;
+        $sort        = $request->sort ?? 'pevaluacions.created_at';
+        $direction   = $request->direction ?? 'desc';
 
         if (!$profesor) {
             return redirect()->route('app.profesors.home')
                 ->with('error', 'No se encontró el perfil de profesor.');
         }
 
-        $pevaluacions = Pevaluacion::select('pevaluacions.*')
+        // ── Columnas permitidas para sort ──
+        $allowedSorts = [
+            'asignaturas.name', 'grados.name', 'lapsos.name',
+            'pevaluacions.finicial', 'pevaluacions.created_at',
+        ];
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'pevaluacions.created_at';
+            $direction = 'desc';
+        }
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        $pevaluacionsQuery = Pevaluacion::select('pevaluacions.*')
             ->join('pensums', 'pensums.id', '=', 'pevaluacions.pensum_id')
             ->join('pestudios', 'pestudios.id', '=', 'pensums.pestudio_id')
+            ->join('asignaturas', 'pensums.asignatura_id', '=', 'asignaturas.id')
+            ->join('grados', 'pensums.grado_id', '=', 'grados.id')
+            ->join('lapsos', 'pevaluacions.lapso_id', '=', 'lapsos.id')
             ->where('pevaluacions.profesor_id', $profesor->id)
             ->where('pestudios.planning_module', true)
-            ->where('pestudios.status_active', 'true')
-            ->orderBy('pevaluacions.created_at', 'desc');
+            ->where('pestudios.status_active', 'true');
 
-        $pevaluacions = ($pestudio_id) ? $pevaluacions->where('pensums.pestudio_id', $pestudio_id) : $pevaluacions;
-        $pevaluacions = ($grado_id)    ? $pevaluacions->where('pensums.grado_id', $grado_id) : $pevaluacions;
-        $pevaluacions = ($seccion_id)  ? $pevaluacions->where('pevaluacions.seccion_id', $seccion_id) : $pevaluacions;
-        $pevaluacions = ($lapso_id)    ? $pevaluacions->where('pevaluacions.lapso_id', $lapso_id) : $pevaluacions;
+        $pevaluacionsQuery = ($pestudio_id) ? $pevaluacionsQuery->where('pensums.pestudio_id', $pestudio_id) : $pevaluacionsQuery;
+        $pevaluacionsQuery = ($grado_id)    ? $pevaluacionsQuery->where('pensums.grado_id', $grado_id) : $pevaluacionsQuery;
+        $pevaluacionsQuery = ($seccion_id)  ? $pevaluacionsQuery->where('pevaluacions.seccion_id', $seccion_id) : $pevaluacionsQuery;
+        $pevaluacionsQuery = ($lapso_id)    ? $pevaluacionsQuery->where('pevaluacions.lapso_id', $lapso_id) : $pevaluacionsQuery;
 
-        $pevaluacions = $pevaluacions->with([
+        $pevaluacions = $pevaluacionsQuery->with([
             'activities.achievements', 'pensum.asignatura',
             'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
-        ])->paginate(10);
+        ])->orderBy($sort, $direction)->paginate(10);
 
         // ── Listas para filtros ─────────────────────────────
         $list_pestudio = Pestudio::where('planning_module', true)
@@ -86,7 +101,7 @@ class ActivityController extends Controller
             'pevaluacions', 'pestudio_id', 'list_pestudio',
             'grado_id', 'list_grado',
             'seccion_id', 'list_seccion', 'lapso_id', 'list_lapso',
-            'lapsos', 'lapso_active'
+            'lapsos', 'lapso_active', 'sort', 'direction'
         ));
     }
 

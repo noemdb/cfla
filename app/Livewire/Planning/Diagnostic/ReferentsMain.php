@@ -3,6 +3,7 @@
 namespace App\Livewire\Planning\Diagnostic;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 use Livewire\Attributes\Layout;
@@ -13,10 +14,11 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Grado;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ReferentsMain extends Component
 {
-    use WithPagination, WireUiActions;
+    use WithPagination, WireUiActions, WithFileUploads;
 
     // ─── VIEW STATE ───────────────────────────────────────────────
 
@@ -105,6 +107,43 @@ class ReferentsMain extends Component
      * Model instance for the detail modal
      */
     public $detailItem = null;
+
+    // ─── IMPORT MODAL ─────────────────────────────────────────────
+
+    /**
+     * Show the import JSON modal
+     */
+    public $showImportModal = false;
+
+    /**
+     * Uploaded JSON file for import
+     */
+    public $importJsonFile = null;
+
+    /**
+     * Available referents for the import select
+     */
+    public $importReferents = [];
+
+    /**
+     * Selected referent ID for import
+     */
+    public $importReferentId = '';
+
+    /**
+     * Parsed JSON preview data
+     */
+    public $importPreview = null;
+
+    /**
+     * Import status message
+     */
+    public $importStatus = '';
+
+    /**
+     * True when import is in progress
+     */
+    public $importing = false;
 
     // ─── FORM DATA ────────────────────────────────────────────────
 
@@ -650,6 +689,292 @@ class ReferentsMain extends Component
     {
         $this->detailModal = false;
         $this->detailItem = null;
+    }
+
+    // ─── IMPORT MODAL ───────────────────────────────────────────
+
+    /**
+     * Open the import JSON modal for a specific referent.
+     * Pre-selects the referent and its associated pestudio's pensums.
+     */
+    public function openImportModal(?int $referentId = null): void
+    {
+        $this->showModal = false;
+        $this->detailModal = false;
+
+        $this->resetImportForm();
+
+        $this->importReferents = DiagReferent::with('pestudio')
+            ->orderBy('name')
+            ->get();
+
+        if ($referentId) {
+            $this->importReferentId = (string) $referentId;
+        }
+
+        $this->showImportModal = true;
+    }
+
+    /**
+     * Close import modal and reset state.
+     */
+    public function closeImportModal(): void
+    {
+        $this->showImportModal = false;
+        $this->resetImportForm();
+    }
+
+    /**
+     * Reset import form state.
+     */
+    protected function resetImportForm(): void
+    {
+        $this->importJsonFile = null;
+        $this->importReferentId = '';
+        $this->importPreview = null;
+        $this->importStatus = '';
+        $this->importing = false;
+    }
+
+    /**
+     * When the JSON file is uploaded, auto-parse it and show preview.
+     * Extracts pensumId from area_formacion.pensumId in the JSON.
+     */
+    public function updatedImportJsonFile(): void
+    {
+        $this->validate([
+            'importJsonFile' => 'required|file|mimes:json|max:2048',
+        ]);
+
+        $content = $this->importJsonFile->get();
+        $data = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->importStatus = 'error:Error al decodificar JSON: ' . json_last_error_msg();
+            $this->importPreview = null;
+            return;
+        }
+
+        if (!isset($data['competencias']) || !isset($data['indicadores'])) {
+            $this->importStatus = 'error:El JSON no contiene las claves "competencias" y/o "indicadores".';
+            $this->importPreview = null;
+            return;
+        }
+
+        // Extract pensumId from the JSON itself
+        $pensumId = $data['area_formacion']['pensumId'] ?? null;
+
+        if (!$pensumId) {
+            $this->importStatus = 'error:El JSON no contiene area_formacion.pensumId.';
+            $this->importPreview = null;
+            return;
+        }
+
+        // Verify the pensum exists
+        $pensum = Pensum::find((int) $pensumId);
+
+        if (!$pensum) {
+            $this->importStatus = "error:El pensum ID {$pensumId} del JSON no existe en la base de datos.";
+            $this->importPreview = null;
+            return;
+        }
+
+        $this->importPreview = $data;
+        $this->importStatus = 'ok:Área: ' . ($pensum->asignatura?->name ?? '—') .
+            ' | ' . count($data['competencias']) . ' competencia(s) y ' .
+            count($data['indicadores']) . ' indicador(es).';
+    }
+
+    /**
+     * Load and parse the uploaded JSON file (alias for manual trigger).
+     */
+    public function loadImportPreview(): void
+    {
+        if ($this->importJsonFile) {
+            $this->updatedImportJsonFile();
+        } else {
+            $this->importStatus = 'error:No se ha cargado ningún archivo JSON.';
+        }
+    }
+
+    /**
+     * Import competencies and indicators from the JSON preview.
+     * Uses a two-pass approach: insert competencies first, then
+     * map indicators to their new competency IDs.
+     */
+    public function importData(): void
+    {
+        if (!$this->importPreview) {
+            return;
+        }
+
+        $this->importing = true;
+        $this->importStatus = '';
+
+        $data = $this->importPreview;
+
+        // Extract pensumId from the JSON data
+        $pensumId = (int) ($data['area_formacion']['pensumId'] ?? 0);
+
+        // Validate selections
+        $this->validate([
+            'importReferentId' => 'required|integer|exists:diag_referents,id',
+        ]);
+
+        if (!$pensumId || !Pensum::find($pensumId)) {
+            $this->importStatus = 'error:El pensum ID del JSON no es válido o no existe en la base de datos.';
+            $this->importing = false;
+            return;
+        }
+
+        $referentId = (int) $this->importReferentId;
+
+        DB::beginTransaction();
+        try {
+            $errors = [
+                'competencias' => [],
+                'indicadores'  => [],
+            ];
+
+            // ── Pass 1: Insert competencies ──
+            $competenciasInserted = 0;
+            $competencyIdMap = []; // JSON competency ID → DB competency ID
+
+            foreach ($data['competencias'] as $comp) {
+                $compName = trim($comp['nombre'] ?? '');
+                $compDesc = trim($comp['descripcion'] ?? '');
+
+                if (empty($compName)) {
+                    $errors['competencias'][] = 'Competencia sin nombre, omitida.';
+                    continue;
+                }
+
+                // Check for name uniqueness within this referent/pensum
+                $existing = DiagCompetency::where('referent_id', $referentId)
+                    ->where('pensum_id', $pensumId)
+                    ->where('name', $compName)
+                    ->first();
+
+                if ($existing) {
+                    $competencyIdMap[$comp['id']] = $existing->id;
+                    continue;
+                }
+
+                $competency = DiagCompetency::create([
+                    'referent_id' => $referentId,
+                    'pensum_id'   => $pensumId,
+                    'name'        => $compName,
+                    'description' => $compDesc,
+                ]);
+
+                $competencyIdMap[$comp['id']] = $competency->id;
+                $competenciasInserted++;
+            }
+
+            // ── Pass 2: Insert indicators ──
+            $indicatorsInserted = 0;
+            $indicatorsSkipped = 0;
+
+            foreach ($data['indicadores'] as $ind) {
+                $indCode = trim($ind['codigo'] ?? '');
+                $indDesc = trim($ind['descripcion'] ?? '');
+                $indLevel = (int) ($ind['nivel_esperado'] ?? 3);
+
+                if (empty($indCode) || empty($indDesc)) {
+                    $errors['indicadores'][] = 'Indicador sin código o descripción, omitido.';
+                    continue;
+                }
+
+                // Map JSON competency_id to DB competency ID
+                $jsonCompId = $ind['competency_id'];
+                $dbCompId = $competencyIdMap[$jsonCompId] ?? null;
+
+                if (!$dbCompId) {
+                    $errors['indicadores'][] = "Indicador {$indCode}: no se pudo mapear a una competencia (ID JSON: {$jsonCompId}).";
+                    $indicatorsSkipped++;
+                    continue;
+                }
+
+                // Validate expected_level
+                if (!in_array($indLevel, [1, 2, 3, 4])) {
+                    $indLevel = 3;
+                }
+
+                // Check for code uniqueness within the competency
+                $existing = DiagIndicator::where('competency_id', $dbCompId)
+                    ->where('code', $indCode)
+                    ->first();
+
+                if ($existing) {
+                    $errors['indicadores'][] = "Código '{$indCode}' ya existe para esta competencia, omitido.";
+                    $indicatorsSkipped++;
+                    continue;
+                }
+
+                DiagIndicator::create([
+                    'competency_id'  => $dbCompId,
+                    'code'           => $indCode,
+                    'description'    => $indDesc,
+                    'expected_level' => $indLevel,
+                ]);
+
+                $indicatorsInserted++;
+            }
+
+            DB::commit();
+
+            // Build status message
+            $parts = [];
+            if ($competenciasInserted > 0) {
+                $parts[] = "{$competenciasInserted} competencia(s) insertada(s)";
+            }
+            if ($indicatorsInserted > 0) {
+                $parts[] = "{$indicatorsInserted} indicador(es) insertado(s)";
+            }
+            if ($indicatorsSkipped > 0) {
+                $parts[] = "{$indicatorsSkipped} indicador(es) omitido(s)";
+            }
+
+            $message = 'Importación completada. ' . implode(', ', $parts) . '.';
+            $this->importStatus = $parts ? "ok:{$message}" : 'warning:No se insertaron registros nuevos.';
+
+            $this->notification()->success(
+                'Importación completada',
+                $message
+            );
+
+            // Reset preview so user can load another
+            $this->importPreview = null;
+
+            // Refresh the current view
+            $this->resetPage();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->importStatus = 'error:Error en la importación: ' . $e->getMessage();
+            $this->notification()->error(
+                'Error de importación',
+                'Ocurrió un error durante la importación: ' . $e->getMessage()
+            );
+        } finally {
+            $this->importing = false;
+        }
+    }
+
+    /**
+     * Find the blueprint JSON file for a given pensum ID.
+     *
+     * Scans the blueprint/lesson/json/ directory for a file
+     * containing [pensumId={$id}] in its name.
+     *
+     * @param  int  $pensumId
+     * @return string|null
+     */
+    protected function findBlueprintFile(int $pensumId): ?string
+    {
+        $pattern = base_path("blueprint/lesson/json/*[pensumId={$pensumId}]*.json");
+        $files = glob($pattern);
+
+        return $files[0] ?? null;
     }
 
     // ─── FILTER UPDATES ──────────────────────────────────────────

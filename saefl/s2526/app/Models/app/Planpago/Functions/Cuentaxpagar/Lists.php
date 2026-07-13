@@ -21,7 +21,7 @@ trait Lists {
 
     public static function list_cuentaxpagar_date_last() /* usada para llenar los objetos de formularios select*/
     {
-        $pescolar_finicial = Session::get('pescolar_finicial'); //dd($finical);
+        $pescolar_finicial = Session::get('pescolar_finicial'); //dd($finicial);
         $ano = Carbon::parse($pescolar_finicial)->format('Y'); //dd($pescolar,$ano);
         $meses = collect();
         $list = collect();
@@ -44,7 +44,7 @@ trait Lists {
 
     public static function list_cuentaxpagar_date() /* usada para llenar los objetos de formularios select*/
     {
-        $pescolar_finicial = Session::get('pescolar_finicial'); //dd($finical);
+        $pescolar_finicial = Session::get('pescolar_finicial'); //dd($inicial);
         $ano = Carbon::parse($pescolar_finicial)->format('Y'); //dd($pescolar,$ano);
         $meses = collect();
         $list = collect();

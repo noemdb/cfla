@@ -1,6 +1,7 @@
 <div class="fade-in">
     {{-- Loading overlay --}}
-    <div wire:loading.flex class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm items-center justify-center">
+    <div wire:loading.flex wire:target="openImportModal,loadImportPreview,importData,createReferent,createCompetency,createIndicator,saveReferent,saveCompetency,saveIndicator,confirmDeleteReferent,confirmDeleteCompetency,confirmDeleteIndicator,deleteReferent,deleteCompetency,deleteIndicator,toggleReferentActive"
+         class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm items-center justify-center">
         <div class="flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-900 border border-white/10">
             <svg class="w-5 h-5 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -186,6 +187,13 @@
                                         class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </button>
+                                    <button wire:click="openImportModal({{ $referent->id }})"
+                                        title="Importar competencias desde JSON"
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
                                         </svg>
                                     </button>
                                     <button wire:click="editReferent({{ $referent->id }})"
@@ -802,6 +810,237 @@
             </div>
         </div>
     @endif
+
+    {{-- ─── IMPORT MODAL ─── --}}
+    <div x-data="{ showImportModal: @entangle('showImportModal') }"
+         x-show="showImportModal"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         class="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+         style="display: none;">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showImportModal = false"></div>
+        <div class="relative bg-gray-900 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            {{-- Header --}}
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Importar desde JSON</h3>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Carga competencias e indicadores desde archivos blueprint</p>
+                        </div>
+                    </div>
+                    <button @click="showImportModal = false"
+                        class="w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-6 py-5 space-y-5">
+
+                    {{-- Step 1: Upload JSON File --}}
+                    <div x-data>
+                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                            Archivo JSON
+                        </label>
+                        {{-- File upload dropzone --}}
+                        <div
+                            @click="$refs.fileInput.click()"
+                            class="relative group cursor-pointer rounded-xl border-2 border-dashed border-white/10 hover:border-emerald-500/40 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-200 px-4 py-6">
+                            <input type="file" wire:model="importJsonFile" accept=".json"
+                                x-ref="fileInput"
+                                class="hidden">
+
+                            {{-- Loading state --}}
+                            <div wire:loading wire:target="importJsonFile"
+                                class="flex flex-col items-center gap-2">
+                                <svg class="w-8 h-8 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span class="text-[11px] text-gray-400 font-medium">Cargando archivo...</span>
+                            </div>
+
+                            {{-- Default state (no file) --}}
+                            <div wire:loading.remove wire:target="importJsonFile"
+                                class="flex flex-col items-center gap-2">
+                                @if($importJsonFile && method_exists($importJsonFile, 'getClientOriginalName'))
+                                    {{-- File selected --}}
+                                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs font-bold text-emerald-400">{{ $importJsonFile->getClientOriginalName() }}</p>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">Archivo cargado correctamente</p>
+                                    </div>
+                                @else
+                                    {{-- No file --}}
+                                    <div class="w-10 h-10 rounded-full bg-gray-800/80 flex items-center justify-center group-hover:bg-emerald-500/10 transition-all duration-200">
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-emerald-400 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                        </svg>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs font-bold text-gray-400 group-hover:text-emerald-400 transition-all duration-200">
+                                            Seleccionar archivo JSON
+                                        </p>
+                                        <p class="text-[10px] text-gray-600 mt-0.5">Solo archivos .json</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @error('importJsonFile')
+                            <p class="text-[10px] text-red-400 mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Step 2: Select Referent (card grid) --}}
+                    <div class="pt-4">
+                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                            Referente Normativo
+                            <span class="text-gray-600 font-normal normal-case ml-2">Seleccione el referente para la importación</span>
+                        </label>
+                        <div class="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+                            @foreach($importReferents as $referent)
+                                @php $isSelected = (int) $importReferentId === (int) $referent->id; @endphp
+                                <button type="button" wire:click="$set('importReferentId', '{{ $referent->id }}')"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-left transition-all duration-200
+                                        {{ $isSelected
+                                            ? 'border-emerald-500/50 bg-emerald-500/10 ring-1 ring-emerald-500/20'
+                                            : 'border-white/5 bg-gray-800/30 hover:border-white/10 hover:bg-gray-800/50' }}">
+                                    {{-- Selected indicator --}}
+                                    <div class="shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200
+                                        {{ $isSelected ? 'border-emerald-400 bg-emerald-400' : 'border-gray-600' }}">
+                                        @if($isSelected)
+                                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                        @endif
+                                    </div>
+                                    {{-- Content --}}
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-semibold {{ $isSelected ? 'text-emerald-300' : 'text-gray-200' }} truncate">
+                                            {{ $referent->name }}
+                                        </p>
+                                        @if($referent->pestudio)
+                                            <p class="text-[10px] text-gray-500 mt-0.5 truncate">{{ $referent->pestudio->name }}</p>
+                                        @endif
+                                    </div>
+                                </button>
+                            @endforeach
+                        </div>
+                        @error('importReferentId')
+                            <p class="text-[10px] text-red-400 mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Step 3: Load Preview --}}
+                    <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                        <p class="text-[10px] text-gray-500">
+                            Los datos se importarán según el <code class="text-gray-400 bg-gray-800/50 px-1.5 py-0.5 rounded">area_formacion.pensumId</code> del JSON
+                        </p>
+                        <button wire:click="loadImportPreview" wire:loading.attr="disabled"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-50"
+                            {{ !$importJsonFile || !$importReferentId ? 'disabled' : '' }}>
+                            <span wire:loading.remove wire:target="loadImportPreview">
+                                <svg class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                                </svg>
+                                Cargar vista previa
+                            </span>
+                            <span wire:loading wire:target="loadImportPreview">Cargando...</span>
+                        </button>
+                    </div>
+
+                    {{-- Status Message --}}
+                    @if($importStatus)
+                        @php
+                            $statusType = explode(':', $importStatus, 2)[0] ?? '';
+                            $statusMsg = explode(':', $importStatus, 2)[1] ?? $importStatus;
+                        @endphp
+                        <div class="px-4 py-3 rounded-xl text-xs font-medium
+                            {{ $statusType === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
+                            {{ $statusType === 'warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
+                            {{ $statusType === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
+                            {{ $statusMsg }}
+                        </div>
+                    @endif
+
+                    {{-- Preview --}}
+                    @if($importPreview)
+                        <div class="space-y-4 pt-2 border-t border-white/5">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold text-white uppercase tracking-wider">
+                                    Vista previa
+                                    <span class="text-gray-500 font-normal normal-case ml-2">
+                                        ({{ count($importPreview['competencias']) }} competencias · {{ count($importPreview['indicadores']) }} indicadores)
+                                    </span>
+                                </h4>
+                                <button wire:click="importData" wire:loading.attr="disabled"
+                                    class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="importData">
+                                        <svg class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                                        </svg>
+                                        Importar datos
+                                    </span>
+                                    <span wire:loading wire:target="importData">Importando...</span>
+                                </button>
+                            </div>
+
+                            {{-- Loading overlay for import --}}
+                            <div wire:loading.flex wire:target="importData" class="items-center gap-2 px-4 py-3 rounded-xl bg-gray-800/50 border border-white/5">
+                                <svg class="w-4 h-4 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span class="text-xs text-gray-300">Importando datos, por favor espere...</span>
+                            </div>
+
+                            {{-- Competencies preview --}}
+                            <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                @foreach($importPreview['competencias'] as $comp)
+                                    <div class="px-4 py-3 rounded-xl bg-gray-800/30 border border-white/5">
+                                        <div class="flex items-start gap-3">
+                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold shrink-0">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                                </svg>
+                                            </span>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="text-xs font-semibold text-white">{{ $comp['nombre'] }}</p>
+                                                @if(!empty($comp['descripcion']))
+                                                    <p class="text-[10px] text-gray-400 mt-0.5 line-clamp-2">{{ $comp['descripcion'] }}</p>
+                                                @endif
+                                            </div>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+                                                {{ count(array_filter($importPreview['indicadores'] ?? [], fn($i) => ($i['competency_id'] ?? '') === ($comp['id'] ?? ''))) }} ind.
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Footer --}}
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
+                    <button @click="showImportModal = false"
+                        class="px-5 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                        Cerrar
+                    </button>
+                </div>
+        </div>
+    </div>
 </div>
 
 @push('styles')

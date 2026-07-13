@@ -1,0 +1,149 @@
+{
+  "area_formacion": {
+    "pensumId": "97",
+    "name": "[BI-4] BIOLOGÍA [pensumId=97]"
+  },
+  "competencias": [
+    {
+      "id": "COMP-BI-4-01",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Analiza los procesos moleculares y celulares que sustentan la vida, con énfasis en la expresión génica y la biotecnología.",
+      "descripcion": "Interpreta la estructura del ADN, la transcripción, traducción y regulación génica, y evalúa aplicaciones biotecnológicas en salud, agricultura y medio ambiente."
+    },
+    {
+      "id": "COMP-BI-4-02",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Evalúa el impacto de las tecnologías genómicas en la medicina, la agricultura y la conservación de la biodiversidad.",
+      "descripcion": "Examina casos de ingeniería genética, terapia génica, organismos transgénicos y edición genética (CRISPR), considerando implicaciones éticas, sociales y ecológicas."
+    },
+    {
+      "id": "COMP-BI-4-03",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Comprende los mecanismos de la herencia y la variabilidad genética en poblaciones humanas y no humanas.",
+      "descripcion": "Aplica leyes de Mendel, analiza patrones de herencia (autosómica, ligada al sexo) y explica fuentes de variabilidad como mutaciones y recombinación."
+    },
+    {
+      "id": "COMP-BI-4-04",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Investiga la organización y función de los sistemas corporales humanos en condiciones normales y patológicas.",
+      "descripcion": "Relaciona la estructura y fisiología de sistemas (nervioso, endocrino, inmunológico, reproductivo) con su rol en la homeostasis y la salud integral."
+    },
+    {
+      "id": "COMP-BI-4-05",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Promueve prácticas de salud sexual y reproductiva basadas en evidencia científica y derechos humanos.",
+      "descripcion": "Analiza métodos anticonceptivos, prevención de ITS, planificación familiar y acceso equitativo a servicios de salud, con enfoque de género y juventud."
+    },
+    {
+      "id": "COMP-BI-4-06",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Estudia la dinámica de los ecosistemas y los ciclos biogeoquímicos en contextos locales y globales.",
+      "descripcion": "Describe flujos de energía, ciclos del carbono, nitrógeno y agua, y evalúa alteraciones antrópicas como el cambio climático y la contaminación."
+    },
+    {
+      "id": "COMP-BI-4-07",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Diseña y ejecuta investigaciones sobre biodiversidad, endemismo y conservación en entornos venezolanos.",
+      "descripcion": "Aplica métodos de muestreo, identificación taxonómica y análisis de amenazas para proponer estrategias de protección de especies y hábitats."
+    },
+    {
+      "id": "COMP-BI-4-08",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Reflexiona críticamente sobre dilemas bioéticos derivados del avance científico y tecnológico.",
+      "descripcion": "Debate temas como manipulación genética, clonación, patentes de vida y acceso a tecnologías, desde perspectivas científicas, éticas y culturales."
+    },
+    {
+      "id": "COMP-BI-4-09",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Aplica principios de microbiología en la comprensión de enfermedades, fermentaciones y bioprocesos.",
+      "descripcion": "Identifica microorganismos beneficiosos y patógenos, y comprende su rol en la salud, la industria alimentaria y el tratamiento de residuos."
+    },
+    {
+      "id": "COMP-BI-4-10",
+      "referent_id": "1",
+      "pensum_id": 97,
+      "nombre": "Desarrolla proyectos investigativos interdisciplinarios que integran biología, ciudadanía y sostenibilidad.",
+      "descripcion": "Formula preguntas, diseña metodologías, recopila datos y propone soluciones a problemas ambientales, sanitarios o alimentarios del entorno escolar o comunitario."
+    }
+  ],
+  "indicadores": [
+    { "id": "IND-BI-4-01-01", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-01", "descripcion": "Describe la estructura del ADN y su función como material hereditario.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-01-02", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-02", "descripcion": "Explica los procesos de transcripción y traducción en la síntesis de proteínas.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-01-03", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-03", "descripcion": "Identifica promotores, intrones, exones y codones en una secuencia génica.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-01-04", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-04", "descripcion": "Relaciona mutaciones puntuales con cambios en la secuencia de aminoácidos y posibles efectos fenotípicos.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-01-05", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-05", "descripcion": "Explica cómo la regulación génica permite la diferenciación celular en organismos multicelulares.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-01-06", "competency_id": "COMP-BI-4-01", "codigo": "BI-4TO-IL-06", "descripcion": "Argumenta sobre el potencial de la biotecnología para resolver problemas en salud o agricultura.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-02-01", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-07", "descripcion": "Describe el proceso de creación de un organismo transgénico (ej.: maíz Bt).", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-02-02", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-08", "descripcion": "Explica el principio de la edición genética mediante CRISPR-Cas9.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-02-03", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-09", "descripcion": "Analiza ventajas y riesgos de los cultivos transgénicos en el contexto venezolano.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-02-04", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-10", "descripcion": "Evalúa el uso de terapia génica en enfermedades hereditarias (ej.: fibrosis quística).", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-02-05", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-11", "descripcion": "Debate sobre la patentabilidad de genes y sus implicaciones para la soberanía alimentaria.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-02-06", "competency_id": "COMP-BI-4-02", "codigo": "BI-4TO-IL-12", "descripcion": "Relaciona la biotecnología con los ODS 2 (Hambre cero) y 3 (Salud y bienestar).", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-03-01", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-13", "descripcion": "Resuelve cruces monohíbridos y dihíbridos aplicando las leyes de Mendel.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-03-02", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-14", "descripcion": "Identifica patrones de herencia autosómica dominante, recesiva y ligada al cromosoma X.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-03-03", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-15", "descripcion": "Construye árboles genealógicos para rastrear la transmisión de rasgos hereditarios.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-03-04", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-16", "descripcion": "Explica cómo la recombinación genética durante la meiosis aumenta la variabilidad.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-03-05", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-17", "descripcion": "Distingue entre mutaciones somáticas y germinales y sus consecuencias evolutivas.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-03-06", "competency_id": "COMP-BI-4-03", "codigo": "BI-4TO-IL-18", "descripcion": "Relaciona la diversidad genética con la resiliencia de poblaciones frente a cambios ambientales.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-04-01", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-19", "descripcion": "Describe la organización y función del sistema nervioso central y periférico.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-04-02", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-20", "descripcion": "Explica la comunicación neuroendocrina y su papel en la homeostasis.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-04-03", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-21", "descripcion": "Analiza el funcionamiento del sistema inmunológico frente a patógenos.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-04-04", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-22", "descripcion": "Describe los órganos y procesos del sistema reproductor humano masculino y femenino.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-04-05", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-23", "descripcion": "Relaciona desequilibrios hormonales con trastornos como diabetes o hipotiroidismo.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-04-06", "competency_id": "COMP-BI-4-04", "codigo": "BI-4TO-IL-24", "descripcion": "Argumenta sobre la importancia de la prevención y detección temprana de enfermedades sistémicas.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-05-01", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-25", "descripcion": "Identifica métodos anticonceptivos hormonales, de barrera y definitivos.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-05-02", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-26", "descripcion": "Explica formas de transmisión y prevención de ITS, incluyendo el VIH/SIDA.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-05-03", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-27", "descripcion": "Argumenta a favor del acceso universal a la educación sexual integral y servicios de salud reproductiva.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-05-04", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-28", "descripcion": "Reconoce los derechos sexuales y reproductivos como derechos humanos fundamentales.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-05-05", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-29", "descripcion": "Promueve actitudes responsables, respetuosas y libres de estigma en torno a la sexualidad.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-05-06", "competency_id": "COMP-BI-4-05", "codigo": "BI-4TO-IL-30", "descripcion": "Vincula la salud reproductiva con los ODS 3 (Salud) y 5 (Igualdad de género).", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-06-01", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-31", "descripcion": "Describe el flujo de energía en cadenas y redes tróficas.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-06-02", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-32", "descripcion": "Explica los ciclos biogeoquímicos del carbono, nitrógeno y agua.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-06-03", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-33", "descripcion": "Analiza cómo la deforestación y la quema afectan el ciclo del carbono y el clima.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-06-04", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-34", "descripcion": "Relaciona la eutrofización con el exceso de nutrientes y la pérdida de biodiversidad acuática.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-06-05", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-35", "descripcion": "Propone acciones para mitigar el impacto humano en los ciclos naturales.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-06-06", "competency_id": "COMP-BI-4-06", "codigo": "BI-4TO-IL-36", "descripcion": "Vincula sus análisis con los ODS 13 (Acción climática), 14 (Vida submarina) y 15 (Vida de ecosistemas terrestres).", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-07-01", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-37", "descripcion": "Aplica técnicas de muestreo (transectos, cuadrantes) en estudios de biodiversidad local.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-07-02", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-38", "descripcion": "Identifica especies nativas, endémicas y exóticas en su entorno escolar o comunitario.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-07-03", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-39", "descripcion": "Utiliza claves dicotómicas o apps digitales para clasificar organismos.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-07-04", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-40", "descripcion": "Evalúa amenazas a la biodiversidad (fragmentación, caza ilegal, contaminación).", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-07-05", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-41", "descripcion": "Propone estrategias de conservación in situ y ex situ para especies vulnerables.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-07-06", "competency_id": "COMP-BI-4-07", "codigo": "BI-4TO-IL-42", "descripcion": "Participa en campañas de sensibilización sobre la riqueza biológica venezolana.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-08-01", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-43", "descripcion": "Analiza dilemas éticos en la manipulación genética de embriones humanos.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-08-02", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-44", "descripcion": "Debate sobre los límites éticos de la clonación terapéutica vs. reproductiva.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-08-03", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-45", "descripcion": "Evalúa implicaciones sociales del uso de pruebas genéticas predictivas.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-08-04", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-46", "descripcion": "Reflexiona sobre el derecho a no saber información genética personal.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-08-05", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-47", "descripcion": "Argumenta desde una postura crítica sobre la mercantilización de la vida.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-08-06", "competency_id": "COMP-BI-4-08", "codigo": "BI-4TO-IL-48", "descripcion": "Propone marcos regulatorios para el uso responsable de tecnologías emergentes.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-09-01", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-49", "descripcion": "Clasifica microorganismos (bacterias, virus, hongos, protozoos) por características estructurales.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-09-02", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-50", "descripcion": "Explica el papel de bacterias en la fermentación láctica y alcohólica.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-09-03", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-51", "descripcion": "Describe mecanismos de acción de antibióticos y el problema de la resistencia antimicrobiana.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-09-04", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-52", "descripcion": "Identifica microorganismos patógenos asociados a enfermedades comunes (dengue, malaria, cólera).", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-09-05", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-53", "descripcion": "Aplica medidas de higiene y bioseguridad para prevenir infecciones.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-09-06", "competency_id": "COMP-BI-4-09", "codigo": "BI-4TO-IL-54", "descripcion": "Reconoce el uso de microorganismos en el tratamiento de aguas residuales y compostaje.", "nivel_esperado": 3 },
+
+    { "id": "IND-BI-4-10-01", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-55", "descripcion": "Formula una pregunta investigable sobre un problema biológico local (calidad del agua, biodiversidad urbana, salud reproductiva).", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-10-02", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-56", "descripcion": "Diseña una metodología ética, segura y replicable para abordar su pregunta.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-10-03", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-57", "descripcion": "Recopila datos cualitativos y cuantitativos mediante observación, encuestas o experimentación.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-10-04", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-58", "descripcion": "Analiza resultados con base en conceptos biológicos y los contrasta con hipótesis iniciales.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-10-05", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-59", "descripcion": "Propone soluciones educativas, técnicas o comunitarias derivadas de su investigación.", "nivel_esperado": 3 },
+    { "id": "IND-BI-4-10-06", "competency_id": "COMP-BI-4-10", "codigo": "BI-4TO-IL-60", "descripcion": "Comunica sus hallazgos en un informe o presentación oral con rigor científico y compromiso social.", "nivel_esperado": 3 }
+  ]
+}
