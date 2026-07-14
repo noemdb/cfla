@@ -29,7 +29,29 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './condensed.css';
+/* ── Condensed UI Overrides (debe ir después de @tailwind utilities) ── */
+.p-8  { padding: 1.5rem; }                       /* was 2rem    → -25% */
+.p-6  { padding: 1.25rem; }                      /* was 1.5rem  → -17% */
+.p-5  { padding: 1.125rem; }                     /* was 1.25rem → -10% */
+
+.px-8 { padding-left: 1.5rem; padding-right: 1.5rem; }     /* was 2rem → -25% */
+.px-6 { padding-left: 1.25rem; padding-right: 1.25rem; }   /* was 1.5rem → -17% */
+.px-5 { padding-left: 1rem; padding-right: 1rem; }          /* was 1.25rem → -20% */
+
+.py-5 { padding-top: 1.125rem; padding-bottom: 1.125rem; }  /* was 1.25rem → -10% */
+
+.gap-8 { gap: 1.5rem; }                          /* was 2rem    → -25% */
+.gap-6 { gap: 1.25rem; }                         /* was 1.5rem  → -17% */
+
+.mb-8 { margin-bottom: 1.5rem; }                 /* was 2rem    → -25% */
+.mb-6 { margin-bottom: 1.25rem; }                /* was 1.5rem  → -17% */
+
+.mt-6 { margin-top: 1.25rem; }                   /* was 1.5rem  → -17% */
+.mt-4 { margin-top: 0.75rem; }                   /* was 1rem    → -25% */
+
+.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }  /* was 1.5rem → -17% */
+.space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }  /* was 1rem   → -25% */
+.space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }   /* was 0.75rem → -33% */
 
 /* Estilos personalizados para el sistema de votación */
 .voting-card {
