@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ dark: localStorage.getItem('theme') !== 'light' }">
 
 <head>
     <meta charset="utf-8">
@@ -12,6 +13,9 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="apple-touch-icon" href="{{ asset('image/brand/512.png') }}" sizes="512x512">
     <meta name="theme-color" content="#0d9488">
+
+    <!-- Flash-free theme (blocking, antes de cualquier render) -->
+    <script>if(localStorage.getItem('theme')!=='light'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}</script>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -35,7 +39,10 @@
 
     <!-- Navbar compartido para todos los roles -->
     <x-role-navbar subtitle="Panel del Profesor">
-        <x-slot:navbarInfo>@yield('navbar-info')</x-slot:navbarInfo>
+        <x-slot:navbarInfo>
+            <x-theme-toggle />
+            @yield('navbar-info')
+        </x-slot:navbarInfo>
         @include('components.navbars.profesor-items')
         @include('components.navbars.admin-items')
         @include('components.navbars.planning-items')

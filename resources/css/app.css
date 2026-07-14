@@ -29,6 +29,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light Mode Overrides ── */
+html:not(.dark) body {
+    @apply bg-white text-gray-900 !important;
+    background-image: none !important;
+}
+
+html:not(.dark) .bg-gray-900\/40,
+html:not(.dark) .bg-gray-900\/50,
+html:not(.dark) .bg-gray-800\/95 {
+    @apply bg-white/90 border-gray-200 !important;
+}
+
+html:not(.dark) .border-white\/5,
+html:not(.dark) .border-white\/10 {
+    @apply border-gray-200 !important;
+}
+
+html:not(.dark) .text-white {
+    @apply text-gray-900 !important;
+}
+
+html:not(.dark) .text-gray-100,
+html:not(.dark) .text-gray-300 {
+    @apply text-gray-700 !important;
+}
+
+html:not(.dark) .text-gray-400 {
+    @apply text-gray-500 !important;
+}
+
+html:not(.dark) .text-gray-500 {
+    @apply text-gray-600 !important;
+}
+
+html:not(.dark) .text-emerald-400 {
+    @apply text-emerald-600 !important;
+}
+
+html:not(.dark) .text-emerald-400\/60 {
+    @apply text-emerald-600/80 !important;
+}
+
+html:not(.dark) .bg-emerald-500\/10,
+html:not(.dark) .bg-emerald-500\/5 {
+    @apply bg-emerald-100 !important;
+}
+
+html:not(.dark) .bg-white\/5 {
+    @apply bg-gray-100 !important;
+}
+
+html:not(.dark) .hover\:bg-emerald-500\/20:hover,
+html:not(.dark) .hover\:bg-white\/5:hover {
+    @apply bg-emerald-100 !important;
+}
+
+html:not(.dark) ::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb {
+    background: #94a3b8 !important;
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+    background: #64748b !important;
+}
+
 /* ── Condensed UI Overrides (debe ir después de @tailwind utilities) ── */
 .p-8  { padding: 1.5rem; }                       /* was 2rem    → -25% */
 .p-6  { padding: 1.25rem; }                      /* was 1.5rem  → -17% */

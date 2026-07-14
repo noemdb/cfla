@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ dark: localStorage.getItem('theme') !== 'light' }">
 
 <head>
     <meta charset="utf-8">
@@ -10,6 +11,9 @@
 
     <!-- Favicon único SAEFL -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+
+    <!-- Flash-free theme (blocking, antes de cualquier render) -->
+    <script>if(localStorage.getItem('theme')!=='light'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}</script>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -311,7 +315,9 @@
                             <p class="text-xs text-emerald-500">{{ Auth::user()->role_label }}</p>
                         </div>
 
-                        <form method="POST" action="{{ route('logout') }}">
+                        <x-theme-toggle />
+
+                    <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
                                 class="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-emerald-500/20 rounded-lg border border-white/5 transition-all duration-300 group">
