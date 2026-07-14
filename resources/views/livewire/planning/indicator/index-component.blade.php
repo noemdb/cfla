@@ -1,17 +1,6 @@
 <div class="fade-in">
-    {{-- Loading overlay --}}
-    <div wire:loading
-         class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-        <div class="bg-gray-900/90 border border-white/10 rounded-lg px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-3">
-            {{-- Animated spinner --}}
-            <div class="relative w-14 h-14">
-                <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-cyan-400 animate-spin"></div>
-                <div class="absolute inset-2 rounded-full border-4 border-transparent border-t-emerald-400 animate-spin" style="animation-duration: 0.8s; animation-direction: reverse;"></div>
-            </div>
-            <span class="text-sm font-bold text-gray-300 tracking-widest uppercase">Cargando</span>
-        </div>
-    </div>
+    {{-- Loading sutil (bottom-right) --}}
+    <x-loading-simple />
 
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -66,32 +55,31 @@
             @endforeach
         </nav>
 
-        {{-- Filters compactos en una fila --}}
-        <div class="px-3 py-2 flex flex-wrap items-center gap-2">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mr-0.5">Filtros:</span>
+        {{-- 4 filters en grid de ancho completo --}}
+        <div class="px-3 py-2 grid grid-cols-4 gap-2">
             <select wire:model.live="selectedPeducativoId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[120px] appearance-none cursor-pointer">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Educativo: Todos</option>
                 @foreach($peducativos as $ped)
                     <option value="{{ $ped->id }}">{{ $ped->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedPestudioId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[120px] appearance-none cursor-pointer">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Estudio: Todos</option>
                 @foreach($pestudios as $pest)
                     <option value="{{ $pest->id }}">{{ $pest->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedGradoId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[90px] appearance-none cursor-pointer">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">Grado: Todos</option>
                 @foreach($gradosOptions as $grd)
                     <option value="{{ $grd->id }}">{{ $grd->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedProfesorId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[130px] appearance-none cursor-pointer">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">Profesor: Todos</option>
                 @foreach($profesoresOptions as $prof)
                     <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
