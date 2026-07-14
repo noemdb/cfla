@@ -1,5 +1,5 @@
 <!-- Sección de Oferta Académica - Pensum con Modal de Imagen -->
-<section class="py-4">
+<section class="py-3">
     <div class="max-w-7xl mx-auto text-center">
         <!-- Text header removed as it is now in main -->
 

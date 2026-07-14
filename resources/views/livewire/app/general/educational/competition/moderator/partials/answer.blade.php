@@ -104,7 +104,7 @@
                     <div class="flex gap-3 w-full md:w-auto">
                         {{-- Pausar: visible cuando Alpine tiene active=true --}}
                         <button x-show="active" @click="active = false; clearInterval(iv); $wire.pause(s)"
-                            class="flex-1 md:flex-none px-8 py-4 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-3 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -114,7 +114,7 @@
                         </button>
                         {{-- Iniciar / Continuar: visible cuando Alpine tiene active=false --}}
                         <button x-show="!active" wire:click="start"
-                            class="flex-1 md:flex-none px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
@@ -123,7 +123,7 @@
                             <span x-text="started ? 'Continuar' : 'Iniciar'"></span>
                         </button>
                         <button wire:click="finished"
-                            class="flex-1 md:flex-none px-8 py-4 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-3 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"

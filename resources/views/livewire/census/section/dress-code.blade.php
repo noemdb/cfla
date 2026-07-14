@@ -6,7 +6,7 @@
     <div class="relative w-full max-w-lg rounded-lg bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide">
                 Código de Vestimenta
             </h3>
@@ -68,7 +68,7 @@
         </div>
 
         {{-- Footer --}}
-        <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end px-6 py-3 border-t border-gray-200 dark:border-gray-700">
             <x-button primary label="Entendido" wire:click="closeDressCode" />
         </div>
     </div>

@@ -69,11 +69,11 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($lapsos as $lapso)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-4 text-sm text-gray-400 font-mono">{{ $lapso->id }}</td>
-                            <td class="px-4 py-4">
+                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $lapso->id }}</td>
+                            <td class="px-4 py-3">
                                 <span class="text-sm font-bold text-white font-mono">{{ $lapso->code }}</span>
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm text-gray-200 font-medium">{{ $lapso->name }}</span>
                                     @if($lapso->is_current)
@@ -89,16 +89,16 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-sm text-gray-400 hidden md:table-cell font-mono">
+                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell font-mono">
                                 {{ $lapso->finicial ? $lapso->finicial->format('d/m/Y') : '—' }}
                             </td>
-                            <td class="px-4 py-4 text-sm text-gray-400 hidden md:table-cell font-mono">
+                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell font-mono">
                                 {{ $lapso->ffinal ? $lapso->ffinal->format('d/m/Y') : '—' }}
                             </td>
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 <span class="text-sm text-gray-300">{{ $lapso->pevaluacions_count }}</span>
                             </td>
-                            <td class="px-4 py-4 text-center">
+                            <td class="px-4 py-3 text-center">
                                 @if($lapso->is_current)
                                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -110,7 +110,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $lapso->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
@@ -155,7 +155,7 @@
         </div>
 
         @if($lapsos->hasPages())
-            <div class="px-5 py-4 border-t border-white/5">
+            <div class="px-5 py-3 border-t border-white/5">
                 {{ $lapsos->links() }}
             </div>
         @endif

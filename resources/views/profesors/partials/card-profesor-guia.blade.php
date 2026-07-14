@@ -79,7 +79,7 @@
 
         {{-- Footer link to reports (only if reports exist) --}}
         @if(isset($tieneReportesDiagnosticos) && $tieneReportesDiagnosticos)
-        <div class="border-t border-white/5 px-5 py-4 flex justify-end">
+        <div class="border-t border-white/5 px-5 py-3 flex justify-end">
             <a href="#"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                 <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

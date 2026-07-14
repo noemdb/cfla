@@ -233,7 +233,7 @@
                             <input
                                 type="text"
                                 name="options[${optionIndex}][label]"
-                                class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none"
+                                class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none"
                                 placeholder="Introduce la opción..."
                                 required
                             >

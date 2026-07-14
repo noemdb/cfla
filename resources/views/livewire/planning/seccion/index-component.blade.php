@@ -90,33 +90,33 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($seccions as $seccion)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-4 text-sm text-gray-400 font-mono">{{ $seccion->id }}</td>
-                            <td class="px-4 py-4">
+                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $seccion->id }}</td>
+                            <td class="px-4 py-3">
                                 <span class="text-lg font-bold text-white">{{ $seccion->name }}</span>
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3">
                                 <span class="text-sm text-gray-200 font-medium">{{ $seccion->description ?: '—' }}</span>
                                 @if($seccion->observation)
                                     <span class="block text-[10px] text-gray-500 mt-0.5">{{ \Illuminate\Support\Str::limit($seccion->observation, 40) }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-sm text-gray-400 hidden md:table-cell">
+                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell">
                                 {{ $seccion->grado?->name ?? '—' }}
                             </td>
-                            <td class="px-4 py-4 text-sm text-gray-400 hidden lg:table-cell">
+                            <td class="px-4 py-3 text-sm text-gray-400 hidden lg:table-cell">
                                 {{ $seccion->grado?->pestudio?->code ?? '—' }}
                             </td>
-                            <td class="px-4 py-4 text-center">
+                            <td class="px-4 py-3 text-center">
                                 <span class="inline-flex items-center justify-center min-w-[2.5rem] h-8 rounded-lg bg-white/5 text-gray-300 text-sm font-bold px-2">
                                     {{ $seccion->amount_student ?? '—' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 <span class="text-sm {{ $seccion->inscripcions_count > 0 ? 'text-cyan-400' : 'text-gray-500' }}">
                                     {{ $seccion->inscripcions_count }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-center">
+                            <td class="px-4 py-3 text-center">
                                 @if($seccion->status_active === 'true')
                                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -129,7 +129,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $seccion->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"

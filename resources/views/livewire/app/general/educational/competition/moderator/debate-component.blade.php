@@ -12,7 +12,7 @@
                     <li class="group">
                         <div class="flex items-center gap-2">
                             <button type="button" wire:click="active({{ $item->id }})"
-                                class="grow flex items-center justify-between px-4 py-4 rounded-lg border transition-all duration-300
+                                class="grow flex items-center justify-between px-4 py-3 rounded-lg border transition-all duration-300
                                 {{ $item->id == $active_id
                                     ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-500/20 shadow-lg'
                                     : 'bg-gray-800/40 border-emerald-500/10 text-gray-300 hover:border-emerald-500/40 hover:bg-gray-800/60' }}">

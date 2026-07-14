@@ -3,7 +3,7 @@
 @section('title', 'Diagnóstico Académico')
 
 @section('content')
-    <div class="py-4">
+    <div class="py-3">
         @livewire('diagnostic')
     </div>
 @endsection

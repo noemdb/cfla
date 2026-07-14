@@ -146,18 +146,18 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($pensums as $pensum)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-4 text-sm text-gray-400 font-mono">{{ $pensum->id }}</td>
-                            <td class="px-4 py-4">
+                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $pensum->id }}</td>
+                            <td class="px-4 py-3">
                                 <span class="text-sm font-bold text-white">{{ $pensum->pestudio?->code ?? '—' }}</span>
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3">
                                 <span class="text-sm text-gray-200 font-medium">{{ $pensum->grado?->name ?? '—' }}</span>
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3">
                                 <span class="text-sm text-gray-200">{{ $pensum->asignatura?->name ?? '—' }}</span>
                                 <span class="block text-[10px] text-gray-500 mt-0.5 font-mono">{{ $pensum->asignatura?->code ?? '' }}</span>
                             </td>
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 @if($pensum->status_component === 'true')
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[10px] font-bold rounded-md border border-purple-500/20">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -167,7 +167,7 @@
                                     <span class="text-gray-500 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 @if($pensum->status_active)
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -181,7 +181,7 @@
                                 @endif
                             </td>
                             {{-- Competencias agrupadas por referente normativo --}}
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 @php
                                     $groups = $pensum->diagCompetencies
                                         ->groupBy(fn($c) => $c->referent?->code ?? 'N/A')
@@ -201,12 +201,12 @@
                                     <span class="text-gray-500 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-center hidden lg:table-cell">
+                            <td class="px-4 py-3 text-center hidden lg:table-cell">
                                 <span class="inline-flex items-center justify-center min-w-[2rem] h-7 rounded-lg bg-white/5 text-gray-300 text-sm font-bold px-2">
                                     {{ $pensum->pevaluacions_count }}
                                 </span>
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $pensum->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
@@ -251,7 +251,7 @@
         </div>
 
         @if($pensums->hasPages())
-            <div class="px-5 py-4 border-t border-white/5">
+            <div class="px-5 py-3 border-t border-white/5">
                 {{ $pensums->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif

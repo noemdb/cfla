@@ -9,7 +9,7 @@
 <body class="bg-gradient-to-br from-gray-900 via-green-900 to-slate-900 min-h-screen">
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm border-b border-green-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
+        <div class="container mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <img src="{{ asset('image/brand/512.png') }}" alt="Logo" class="w-12 h-12 rounded-lg">

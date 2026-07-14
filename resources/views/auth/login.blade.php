@@ -56,7 +56,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-3 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
                     <span>Entrar</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

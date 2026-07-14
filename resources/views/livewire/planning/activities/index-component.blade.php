@@ -160,7 +160,7 @@
                 @foreach($tabsLapsos as $index => $lapsoItem)
                     @php $isActive = $lapsoItem->id == $lapso_id; @endphp
                     <button wire:click="selectLapso({{ $lapsoItem->id }})"
-                        class="flex-1 px-6 py-4 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
+                        class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
                                {{ $isActive ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}"
                     >
                         <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

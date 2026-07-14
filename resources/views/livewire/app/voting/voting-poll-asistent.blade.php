@@ -277,7 +277,7 @@
                             @endif
 
                             <button wire:click="nextPoll"
-                                class="group flex items-center gap-3 px-10 py-4 rounded-[1.25rem] transition-all font-black uppercase tracking-widest text-[10px] {{ $hasVoted || $isLoadingFingerprint || $isExpired ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 hover:bg-blue-700' : 'bg-gray-800 text-gray-600 cursor-not-allowed' }}"
+                                class="group flex items-center gap-3 px-10 py-3 rounded-[1.25rem] transition-all font-black uppercase tracking-widest text-[10px] {{ $hasVoted || $isLoadingFingerprint || $isExpired ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20 hover:bg-blue-700' : 'bg-gray-800 text-gray-600 cursor-not-allowed' }}"
                                 {{ !$hasVoted && !$isLoadingFingerprint && !$isExpired ? 'disabled' : '' }}>
                                 {{ $currentPollIndex == $totalPolls - 1 ? 'Finalizar Todo' : 'Siguiente Encuesta' }}
                                 <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none"
@@ -402,7 +402,7 @@
                                     </div>
                                 </div>
                                 <button wire:click="showParticipationDetails({{ $session->id }})"
-                                    class="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 rounded-lg hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/10">
+                                    class="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 rounded-lg hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/10">
                                     VER ESPECIFICACIONES TÉCNICAS
                                 </button>
                             </div>
@@ -414,7 +414,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
                     @if (Route::has('voting.asistent'))
                         <a href="{{ route('voting.asistent') }}"
-                            class="group px-8 py-4 bg-gray-800 text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gray-700 hover:text-white transition-all border border-white/5 flex items-center gap-3">
+                            class="group px-8 py-3 bg-gray-800 text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-gray-700 hover:text-white transition-all border border-white/5 flex items-center gap-3">
                             <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

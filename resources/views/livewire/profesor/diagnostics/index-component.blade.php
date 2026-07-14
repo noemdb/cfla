@@ -12,7 +12,7 @@
     {{-- Main card --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         {{-- Header: Área de Formación Selector --}}
-        <div class="border-b border-white/5 px-6 py-4">
+        <div class="border-b border-white/5 px-6 py-3">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

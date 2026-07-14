@@ -200,7 +200,7 @@
             class="w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 overflow-hidden">
 
             <!-- Modal header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <div class="flex items-center justify-between px-6 py-3 border-b border-white/5">
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isEditing ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4' }}"></path>
@@ -301,7 +301,7 @@
                 </div>
 
                 <!-- Modal footer -->
-                <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/5">
+                <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-white/5">
                     <button type="button" wire:click="$set('modeForm', false)"
                         class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-300">
                         Cancelar

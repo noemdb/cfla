@@ -104,7 +104,7 @@
             <div x-show="open" x-collapse x-cloak>
                 <div class="p-6 pt-0 border-t border-white/5">
                     <div
-                        class="text-[10px] text-gray-500 py-4 font-bold uppercase tracking-widest flex items-center gap-2">
+                        class="text-[10px] text-gray-500 py-3 font-bold uppercase tracking-widest flex items-center gap-2">
                         <span class="w-8 h-[1px] bg-white/10"></span>
                         Grados/Años Con malla curricular cargada
                     </div>

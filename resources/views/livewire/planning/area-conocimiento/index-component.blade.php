@@ -397,7 +397,7 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95">
                 {{-- Header --}}
-                <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+                <div class="flex items-center justify-between px-6 py-3 border-b border-white/10">
                     <h2 class="text-lg font-bold text-white">Asignaturas Adscritas — {{ $campoAreaName }}</h2>
                     <button type="button" @@click="$wire.closeCampoManager()"
                             class="p-1.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
@@ -534,7 +534,7 @@
 
                 </div>
                 {{-- Footer --}}
-                <div class="flex justify-end px-6 py-4 border-t border-white/10">
+                <div class="flex justify-end px-6 py-3 border-t border-white/10">
                     <x-button flat label="Cerrar" wire:click="closeCampoManager" />
                 </div>
             </div>

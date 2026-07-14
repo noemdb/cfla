@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <div class="text-center py-4">
+            <div class="text-center py-3">
                 <div class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Reporte de pago</div>
                 <div class="text-sm text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold mb-2">
                     Asistente</div>

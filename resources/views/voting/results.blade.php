@@ -24,7 +24,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-4 border-b border-emerald-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-3 border-b border-emerald-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-emerald-500/50">
@@ -45,7 +45,7 @@
 
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-4 border-b border-blue-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-3 border-b border-blue-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-indigo-600/30 rounded-full flex items-center justify-center border border-blue-500/50">
@@ -71,7 +71,7 @@
 
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 px-6 py-4 border-b border-teal-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 px-6 py-3 border-b border-teal-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-teal-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-teal-500/50">
@@ -122,7 +122,7 @@
                         class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden h-fit">
                         <!-- Header de la encuesta -->
                         <div
-                            class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-4 border-b border-emerald-800/50">
+                            class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-3 border-b border-emerald-800/50">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 min-w-0">
                                     <h2 class="text-lg font-bold text-white mb-2 truncate" title="{{ $poll->title }}">

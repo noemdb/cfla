@@ -13,7 +13,7 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
 
         {{-- Alert: Observación Coord.Eval. --}}
-        <div class="border-b border-white/5 px-6 py-4 bg-amber-500/5">
+        <div class="border-b border-white/5 px-6 py-3 bg-amber-500/5">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-2">
@@ -391,7 +391,7 @@
                 <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -603,7 +603,7 @@
                 <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -664,7 +664,7 @@
                 <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -773,7 +773,7 @@
                 <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
 
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
+                    <div class="px-6 py-3 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-violet-500/10 rounded-lg flex items-center justify-center">
                                 <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1045,7 +1045,7 @@
                 <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

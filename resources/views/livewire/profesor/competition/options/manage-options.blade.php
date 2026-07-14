@@ -7,7 +7,7 @@
         <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
             {{-- Header --}}
-            <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+            <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
                         <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

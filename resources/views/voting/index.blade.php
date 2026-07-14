@@ -94,7 +94,7 @@
                         class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-lg shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
                         <!-- Header de la tarjeta -->
                         <div
-                            class="bg-gradient-to-r from-green-500/30 to-green-600/30 backdrop-blur-sm px-6 py-4 border-b border-green-500/30">
+                            class="bg-gradient-to-r from-green-500/30 to-green-600/30 backdrop-blur-sm px-6 py-3 border-b border-green-500/30">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
                                     <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>

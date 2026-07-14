@@ -2,11 +2,11 @@
 
 <div class="text-sm md:text-md lg:text-lg xl:text-lg">{{$item->description ?? null}}</div>
 
-<div class="hidden sm:block md:py-2 lg:py-4 h-9 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
+<div class="hidden sm:block md:py-2 lg:py-3 h-9 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
     {{ Str::limit($item->body,100,'...') ?? null }}
 </div>
 
-<div class="hidden sm:block md:py-2 lg:py-4 h-9 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
+<div class="hidden sm:block md:py-2 lg:py-3 h-9 sm:h-24 md:h-44 lg:h-full xl:h-full text-xs border-t-2 mt-2 max-w-full overflow-hidden text-wrap word-break">
     {!! $item->insert ?? null !!}
 </div>
 

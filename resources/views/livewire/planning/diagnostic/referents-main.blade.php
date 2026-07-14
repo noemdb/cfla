@@ -464,7 +464,7 @@
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showModal', false)"></div>
             <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white">
                         @if($viewMode === 'referents')
                             {{ $editingId ? 'Editar Referente' : 'Nuevo Referente' }}
@@ -580,7 +580,7 @@
                     @endif
                 </div>
 
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex items-center justify-between">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex items-center justify-between">
                     <button wire:click="$set('showModal', false)"
                         class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 transition-all duration-200">
                         Cancelar
@@ -604,7 +604,7 @@
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeDetailModal"></div>
             <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 {{-- Header --}}
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -801,7 +801,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex justify-end">
                     <button wire:click="closeDetailModal"
                         class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar
@@ -823,7 +823,7 @@
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showImportModal = false"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
                             <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1033,7 +1033,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex justify-end">
                     <button @click="showImportModal = false"
                         class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar

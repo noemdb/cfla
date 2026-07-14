@@ -273,7 +273,7 @@
                     <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                         {{-- Header --}}
-                        <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                        <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,7 +484,7 @@
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
                     <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
                         {{-- Header --}}
-                        <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                        <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -778,7 +778,7 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="flex items-center justify-between px-8 py-4 bg-slate-100 border-t border-slate-200">
+                            <div class="flex items-center justify-between px-8 py-3 bg-slate-100 border-t border-slate-200">
                                 <p class="text-xs text-slate-400">
                                     <span class="font-medium">{{ count($exportPreviewData['sections']) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($exportPreviewData['sections'])->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
@@ -892,7 +892,7 @@
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
                     <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
                         {{-- Header --}}
-                        <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
+                        <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1185,7 +1185,7 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="flex items-center justify-between px-8 py-4 bg-slate-100 border-t border-slate-200">
+                            <div class="flex items-center justify-between px-8 py-3 bg-slate-100 border-t border-slate-200">
                                 <p class="text-xs text-slate-400">
                                     <span class="font-medium">{{ count($importPreviewData['sections']) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($importPreviewData['sections'])->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
@@ -1370,7 +1370,7 @@
                                     </div>
 
                                     {{-- ═══════ CONTENIDO CENTRAL ═══════ --}}
-                                    <div class="flex-1 flex flex-col items-center justify-center min-h-0 py-4 md:py-6">
+                                    <div class="flex-1 flex flex-col items-center justify-center min-h-0 py-3 md:py-6">
                                         {{-- Referencia académica compacta (reemplaza la fila de pipes) --}}
                                         <div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-5">
                                             <span class="px-2.5 py-0.5 text-[11px] font-semibold text-stone-600 bg-stone-100 rounded-md border border-stone-200/60">{{ $listPreviewData['pensum'] }}</span>
@@ -1886,7 +1886,7 @@
                 </div><!-- /card (header + Swiper) -->
 
                     {{-- Footer: Navegación (fuera del card, al fondo del viewport con mt-auto) --}}
-                    <div class="w-full max-w-7xl mt-auto px-8 py-4 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-between">
+                    <div class="w-full max-w-7xl mt-auto px-8 py-3 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <button x-on:click="prev()"
                                     class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
@@ -3308,7 +3308,7 @@
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExistingEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
                                 <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
-                                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+                                    <div class="flex items-center justify-between px-6 py-3 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
@@ -3342,7 +3342,7 @@
                                             <p class="text-xs text-amber-400 mt-3 text-center">ℹ️ Contenido HTML embebido</p>
                                         @endif
                                     </div>
-                                    <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-800/50 border-t border-slate-700">
+                                    <div class="flex items-center justify-end gap-2 px-6 py-3 bg-slate-800/50 border-t border-slate-700">
                                         <button wire:click="closeExistingEmbedPreview"
                                                 class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
                                             Cerrar
@@ -3359,7 +3359,7 @@
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
                                 <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
-                                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+                                    <div class="flex items-center justify-between px-6 py-3 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
@@ -3392,7 +3392,7 @@
                                             <p class="text-xs text-amber-400 mt-3 text-center">ℹ️ Este contenido no se reconoce como diagrama Mermaid. Se muestra como HTML.</p>
                                         @endif
                                     </div>
-                                    <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-800/50 border-t border-slate-700">
+                                    <div class="flex items-center justify-end gap-2 px-6 py-3 bg-slate-800/50 border-t border-slate-700">
                                         <button wire:click="closeEmbedPreview"
                                                 class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
                                             Cerrar
@@ -3416,7 +3416,7 @@
                                 <div class="relative bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden"
                                      x-data="{ imgWidth: 0, imgHeight: 0 }">
                                     {{-- Header --}}
-                                    <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700">
+                                    <div class="flex items-center justify-between gap-3 px-6 py-3 border-b border-slate-700">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -3528,7 +3528,7 @@
                         <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
 
                             {{-- Header --}}
-                            <div class="flex items-center justify-between px-6 py-4 bg-slate-700/50 border-b border-slate-700">
+                            <div class="flex items-center justify-between px-6 py-3 bg-slate-700/50 border-b border-slate-700">
                                 <div class="flex items-center gap-3">
                                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -4046,7 +4046,7 @@
                             </div>
 
                             {{-- Footer --}}
-                            <div class="px-8 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
+                            <div class="px-8 py-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
                                 <p class="text-xs text-slate-400">
                                     <span class="font-medium">{{ count($this->previewSections) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($this->previewSections)->sum(fn($s) => count($s['contents'])) }}</span> bloques ·

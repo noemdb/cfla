@@ -19,7 +19,7 @@
                      @click.away="$wire.close()">
 
                     {{-- ─── HEADER ─── --}}
-                    <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-emerald-500/5 shrink-0">
+                    <div class="px-6 py-3 border-b border-white/5 flex items-center justify-between bg-emerald-500/5 shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

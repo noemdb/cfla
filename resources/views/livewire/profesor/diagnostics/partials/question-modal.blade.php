@@ -4,7 +4,7 @@
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeQuestionModal"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
-            <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
+            <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
                 <div>
                     <h3 class="text-sm font-bold text-white">
                         {{ $editingQuestion ? 'Editar Pregunta' : 'Nueva Pregunta' }}
@@ -19,7 +19,7 @@
             </div>
 
             {{-- Steps Indicator --}}
-            <div class="px-6 py-4 border-b border-white/5">
+            <div class="px-6 py-3 border-b border-white/5">
                 <div class="flex items-center gap-2">
                     @foreach(['Tipo y Área', 'Contenido', 'Configuración'] as $i => $stepName)
                         @php $stepNum = $i + 1; @endphp
@@ -259,7 +259,7 @@
             </div>
 
             {{-- Footer --}}
-            <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex items-center justify-between">
+            <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex items-center justify-between">
                 <button wire:click="closeQuestionModal"
                     class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                     Cancelar

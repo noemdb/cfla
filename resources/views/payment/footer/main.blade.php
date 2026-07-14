@@ -15,7 +15,7 @@
 
     @include('payment.footer.buttonTop')
 
-    <div class="py-4 px-6 text-center">
+    <div class="py-3 px-6 text-center">
         <div class="text-lg font-bold text-emerald-400/80 mb-1">SAEFL</div>
         <div class="flex items-center justify-center gap-2 text-[10px] text-gray-500">
             <span>© 2024</span>

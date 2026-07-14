@@ -1,4 +1,4 @@
-<div class=" flex items-center justify-center  px-4  py-4">
+<div class=" flex items-center justify-center  px-4  py-3">
     <div class="max-w-md w-full space-y-2">
         <!-- Header -->
         <div class="text-center">

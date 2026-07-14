@@ -104,8 +104,8 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($profesors as $profesor)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-4 text-sm text-gray-400 font-mono">{{ $profesor->id }}</td>
-                            <td class="px-4 py-4">
+                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $profesor->id }}</td>
+                            <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-xs font-bold shrink-0">
                                         {{ strtoupper(substr($profesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($profesor->lastname ?? '', 0, 1)) }}
@@ -116,7 +116,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 hidden md:table-cell">
+                            <td class="px-4 py-3 hidden md:table-cell">
                                 @php
                                     $pevaluacionPestudios = $profesor->pevaluacions
                                         ->groupBy(fn($p) => $p->pensum?->pestudio?->id)
@@ -134,7 +134,7 @@
                                     <span class="text-gray-600 text-[10px]">—</span>
                                 @endforelse
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3">
                                 <div class="flex items-center justify-center gap-1">
                                     @foreach($lapsos as $lapso)
                                         @php
@@ -149,7 +149,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-4 py-4 hidden lg:table-cell">
+                            <td class="px-4 py-3 hidden lg:table-cell">
                                 <div class="flex items-center justify-center gap-1">
                                     @foreach($lapsos as $lapso)
                                         @php
@@ -165,14 +165,14 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-4 py-4 hidden lg:table-cell">
+                            <td class="px-4 py-3 hidden lg:table-cell">
                                 @if($profesor->user)
                                     <span class="text-sm text-gray-300 font-mono">{{ $profesor->user->username }}</span>
                                 @else
                                     <span class="text-gray-600 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $profesor->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"

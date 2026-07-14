@@ -123,19 +123,19 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center py-4 border-t border-white/5">
+                        <div class="flex justify-between items-center py-3 border-t border-white/5">
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Duración</p>
                             <p class="text-sm font-bold text-white">{{ $poll->time_active }} min</p>
                         </div>
 
                         @if ($poll->date)
-                            <div class="flex justify-between items-center py-4 border-t border-white/5">
+                            <div class="flex justify-between items-center py-3 border-t border-white/5">
                                 <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Inicio</p>
                                 <p class="text-sm font-bold text-white">{{ $poll->date->format('d/m/Y H:i') }}</p>
                             </div>
                         @endif
 
-                        <div class="flex justify-between items-center py-4 border-t border-white/5">
+                        <div class="flex justify-between items-center py-3 border-t border-white/5">
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Creación</p>
                             <p class="text-sm font-bold text-white">{{ $poll->created_at->format('d/m/Y') }}</p>
                         </div>
@@ -175,11 +175,11 @@
                         </h3>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <div
-                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-5 py-4 text-emerald-400 font-mono text-xs truncate">
+                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-5 py-3 text-emerald-400 font-mono text-xs truncate">
                                 {{ url('/poll/voting/' . $poll->access_token) }}
                             </div>
                             <button onclick="copyToClipboard('{{ url('/poll/voting/' . $poll->access_token) }}')"
-                                class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
+                                class="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
                                 COPIAR ENLACE
                             </button>
                         </div>
