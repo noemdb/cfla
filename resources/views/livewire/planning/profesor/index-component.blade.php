@@ -213,7 +213,7 @@
     <!-- ===== MODAL: Confirmar Eliminación ===== -->
     <x-modal title="Eliminar Profesor" blur="lg" wire:model="confirmDeleteId" max-width="md" persistent>
         <div class="p-6 text-center">
-            <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+            <svg class="w-16 h-16 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este profesor?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el profesor del sistema. Solo se puede eliminar si no tiene cargas académicas asociadas.</p>
             <div class="flex justify-center gap-3">
@@ -232,7 +232,7 @@
                 title="Cerrar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <div class="flex items-center gap-3 mb-4">
+            <div class="flex items-center gap-3 mb-3">
                 <div class="w-14 h-14 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-lg font-bold">
                     {{ strtoupper(substr($previewProfesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($previewProfesor->lastname ?? '', 0, 1)) }}
                 </div>
@@ -325,7 +325,7 @@
             {{-- ═══ Paso 1: Datos Personales ═══ --}}
             @if($wizardStep === 1)
             <div>
-                <h3 class="text-sm font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                     Datos Personales
                 </h3>
@@ -385,7 +385,7 @@
             {{-- ═══ Paso 2: Contacto ═══ --}}
             @if($wizardStep === 2)
             <div>
-                <h3 class="text-sm font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     Información de Contacto
                 </h3>
@@ -435,7 +435,7 @@
             {{-- ═══ Paso 3: Cuenta y Rol ═══ --}}
             @if($wizardStep === 3)
             <div>
-                <h3 class="text-sm font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     Cuenta de Usuario y Rol
                 </h3>

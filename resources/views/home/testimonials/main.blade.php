@@ -1,7 +1,7 @@
 <x-card>
     
     @slot('header')
-        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class=" bg-green-100 mb-3 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             Experiencias
         </h3>
     @endslot
@@ -23,11 +23,11 @@
             <div class="mb-6 flex justify-center">
                 <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(1).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
             </div>
-            <h5 class="mb-4 text-lg font-semibold">Maria Smantha</h5>
-            <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
+            <h5 class="mb-3 text-lg font-semibold">Maria Smantha</h5>
+            <h6 class="mb-3 font-semibold text-primary dark:text-primary-500">
                 Lcda. Administración
             </h6>
-            <p class="mb-4">
+            <p class="mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
                     viewBox="0 0 24 24">
                     <path
@@ -85,11 +85,11 @@
             <div class="mb-6 flex justify-center">
                 <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(2).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
             </div>
-            <h5 class="mb-4 text-lg font-semibold">Lisa Rocca</h5>
-            <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
+            <h5 class="mb-3 text-lg font-semibold">Lisa Rocca</h5>
+            <h6 class="mb-3 font-semibold text-primary dark:text-primary-500">
                 Diseñadora
             </h6>
-            <p class="mb-4">
+            <p class="mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
                     viewBox="0 0 24 24">
                     <path
@@ -140,11 +140,11 @@
                 <div class="mb-6 flex justify-center">
                     <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(4).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
                 </div>
-                <h5 class="mb-4 text-lg font-semibold">Marlene Oropeza</h5>
-                <h6 class="mb-4 font-semibold text-primary dark:text-primary-400">
+                <h5 class="mb-3 text-lg font-semibold">Marlene Oropeza</h5>
+                <h6 class="mb-3 font-semibold text-primary dark:text-primary-400">
                     Abogada
                 </h6>
-                <p class="mb-4 text-neutral-600 dark:text-neutral-300">
+                <p class="mb-3 text-neutral-600 dark:text-neutral-300">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
                         viewBox="0 0 24 24">
                         <path

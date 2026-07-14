@@ -3,7 +3,7 @@
 
     <div class="grid md:grid-cols-1">
         @if ($is_regular)
-            <div class="p-4 mb-4 text-sm text-red-100 bg-red-900 border border-red-700 rounded-lg shadow-lg animate-pulse"
+            <div class="p-4 mb-3 text-sm text-red-100 bg-red-900 border border-red-700 rounded-lg shadow-lg animate-pulse"
                 role="alert">
                 <div class="flex items-center mb-2">
                     <x-icon name="exclamation-circle" class="w-5 h-5 mr-2 text-red-200" />
@@ -16,10 +16,10 @@
             </div>
         @endif
 
-        <p class="mb-4 text-gray-400">Por favor, ingresa tu cédula de identidad para consultar el estatus del censo de
+        <p class="mb-3 text-gray-400">Por favor, ingresa tu cédula de identidad para consultar el estatus del censo de
             tus representados, o registrar uno nuevo</p>
 
-        <div class="mb-4 space-y-2">
+        <div class="mb-3 space-y-2">
             <x-input wire:model="representant_ci" label="Cédula de Identidad" placeholder="Ej: 12345678"
                 right-icon="identification" />
         </div>

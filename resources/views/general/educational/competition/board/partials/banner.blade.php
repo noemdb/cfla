@@ -1,6 +1,6 @@
 <div id="informational-banner" tabindex="-1"
     class="fixed top-0 start-0 z-50 flex flex-col justify-between w-full p-4 border-b border-gray-200 md:flex-row bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-    <div class="mb-4 md:mb-0 md:me-4">
+    <div class="mb-3 md:mb-0 md:me-4">
         <h2 class="mb-1 text-base font-semibold text-gray-900 dark:text-white">Integration is the key</h2>
         <p class="flex items-center text-sm font-normal text-gray-500 dark:text-gray-400">You can integrate Flowbite
             with many tools to make your work even more efficient and lightning fast based on Tailwind CSS.</p>

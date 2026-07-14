@@ -1,6 +1,6 @@
 <div>
     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-4">Editar Pregunta</h4>
+        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Editar Pregunta</h4>
 
         <div class="space-y-4">
             @include('livewire.profesor.competition.form.question.fields')

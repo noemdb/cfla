@@ -3,7 +3,7 @@
     <h5 class="text-gray-500 mb-2 text-lg font-bold leading-tight dark:text-neutral-50">     
         Ingrese los datos del madre y el padre.
     </h5>
-    <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
+    <p class="mb-3 text-base text-neutral-600 dark:text-neutral-200">
         @include('livewire.app.enrollment.form.parents')
     </p>
 

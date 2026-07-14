@@ -111,7 +111,7 @@
                             <div class="p-6 md:p-8">
                                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <div class="flex-1">
-                                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                                        <div class="flex flex-wrap items-center gap-3 mb-3">
                                             <h3
                                                 class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
                                                 {{ $poll->title }}</h3>

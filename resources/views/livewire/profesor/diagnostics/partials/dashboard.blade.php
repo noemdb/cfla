@@ -62,7 +62,7 @@
 
     {{-- Progress Overview --}}
     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Progreso General</h4>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Progreso General</h4>
         <div class="space-y-3">
             <div>
                 <div class="flex items-center justify-between text-xs mb-1">

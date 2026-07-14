@@ -35,7 +35,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-3">
                     Guía de Confirmación de Prosecución
                 </h1>
                 <p class="text-lg text-green-200 mb-8">
@@ -55,7 +55,7 @@
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-12">
-                <h2 class="text-lg font-bold text-white mb-4">Proceso Paso a Paso</h2>
+                <h2 class="text-lg font-bold text-white mb-3">Proceso Paso a Paso</h2>
                 <p class="text-green-200 text-lg">Sigue estos pasos para completar la confirmación exitosamente</p>
             </div>
 
@@ -77,7 +77,7 @@
                     <div class="p-8">
                         <div class="grid md:grid-cols-2 gap-8 items-center">
                             <div>
-                                <h4 class="text-lg font-semibold text-white mb-4">¿Qué necesitas hacer?</h4>
+                                <h4 class="text-lg font-semibold text-white mb-3">¿Qué necesitas hacer?</h4>
                                 <ul class="space-y-3 text-gray-300">
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@
                             </div>
 
                             <div class="bg-gray-900 rounded-lg p-6 border border-green-600">
-                                <h5 class="text-lg font-semibold text-white mb-4">Ejemplo de entrada:</h5>
+                                <h5 class="text-lg font-semibold text-white mb-3">Ejemplo de entrada:</h5>
                                 <div class="space-y-3">
                                     <div class="bg-gray-800 rounded-lg p-4 border-2 border-green-500">
                                         <label class="block text-green-200 text-sm mb-2">Cédula de Identidad</label>
@@ -150,7 +150,7 @@
                     <div class="p-8">
                         <div class="grid md:grid-cols-2 gap-8 items-start">
                             <div>
-                                <h4 class="text-lg font-semibold text-white mb-4">¿Cómo seleccionar?</h4>
+                                <h4 class="text-lg font-semibold text-white mb-3">¿Cómo seleccionar?</h4>
                                 <ul class="space-y-3 text-gray-300 mb-6">
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -206,7 +206,7 @@
                             </div>
 
                             <div class="bg-gray-900 rounded-lg p-6 border border-blue-600">
-                                <h5 class="text-lg font-semibold text-white mb-4">Ejemplo de selección:</h5>
+                                <h5 class="text-lg font-semibold text-white mb-3">Ejemplo de selección:</h5>
                                 <div class="space-y-3">
                                     <!-- Estudiante 1 -->
                                     <div class="border-2 border-green-600 rounded-lg p-4 bg-green-900/20">
@@ -268,7 +268,7 @@
                     <div class="p-8">
                         <div class="grid md:grid-cols-2 gap-8 items-start">
                             <div>
-                                <h4 class="text-lg font-semibold text-white mb-4">¿Qué obtienes?</h4>
+                                <h4 class="text-lg font-semibold text-white mb-3">¿Qué obtienes?</h4>
                                 <ul class="space-y-3 text-gray-300 mb-6">
                                     <li class="flex items-start">
                                         <svg class="w-5 h-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,11 +310,11 @@
                             </div>
 
                             <div class="bg-gray-900 rounded-lg p-6 border border-purple-600">
-                                <h5 class="text-lg font-semibold text-white mb-4">Pantalla de confirmación:</h5>
+                                <h5 class="text-lg font-semibold text-white mb-3">Pantalla de confirmación:</h5>
 
                                 <!-- Simulación de pantalla final -->
                                 <div class="bg-gray-800 rounded-lg p-4 border border-green-600">
-                                    <div class="text-center mb-4">
+                                    <div class="text-center mb-3">
                                         <div class="w-16 h-16 mx-auto mb-3 bg-green-600 rounded-full flex items-center justify-center">
                                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -324,7 +324,7 @@
                                         <p class="text-gray-300 text-sm">Registro exitoso</p>
                                     </div>
 
-                                    <div class="bg-green-900/20 rounded-lg p-3 mb-4">
+                                    <div class="bg-green-900/20 rounded-lg p-3 mb-3">
                                         <h6 class="text-white text-sm font-medium mb-2">Estudiantes confirmados:</h6>
                                         <div class="space-y-1 text-xs">
                                             <div class="flex justify-between text-gray-300">
@@ -338,7 +338,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="text-center mb-4">
+                                    <div class="text-center mb-3">
                                         <div class="w-20 h-20 mx-auto bg-white rounded-lg flex items-center justify-center mb-2">
                                             <div class="w-16 h-16 bg-gray-800 rounded grid grid-cols-4 gap-0.5 p-1">
                                                 <div class="bg-gray-600 rounded-sm"></div>
@@ -383,7 +383,7 @@
     <section class="py-16 px-4 bg-gray-800/50">
         <div class="container mx-auto max-w-4xl">
             <div class="text-center mb-12">
-                <h2 class="text-lg font-bold text-white mb-4">Preguntas Frecuentes</h2>
+                <h2 class="text-lg font-bold text-white mb-3">Preguntas Frecuentes</h2>
                 <p class="text-green-200">Resuelve tus dudas sobre el proceso de confirmación</p>
             </div>
 
@@ -459,7 +459,7 @@
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-4xl text-center">
             <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-8 shadow-2xl">
-                <h2 class="text-lg font-bold text-white mb-4">¿Listo para confirmar?</h2>
+                <h2 class="text-lg font-bold text-white mb-3">¿Listo para confirmar?</h2>
                 <p class="text-green-100 text-lg mb-8">
                     Sigue los pasos de esta guía y completa la confirmación de prosecución de tus estudiantes
                 </p>
@@ -480,7 +480,7 @@
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-green-700 py-8 px-4">
         <div class="container mx-auto max-w-4xl text-center">
-            <div class="flex items-center justify-center mb-4">
+            <div class="flex items-center justify-center mb-3">
                 <img src="{{ asset('image/brand/512.png') }}" alt="Logo" class="w-8 h-8 rounded mr-3">
                 <span class="text-white font-semibold">{{ config('app.name') }}</span>
             </div>

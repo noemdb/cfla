@@ -1,7 +1,7 @@
 <div class="text-sm font-medium">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
         <div class="col-span-12 lg:col-span-5 text-start">
-            <div class="flex items-center justify-between mb-4 border-b border-emerald-500/10 pb-2">
+            <div class="flex items-center justify-between mb-3 border-b border-emerald-500/10 pb-2">
                 <span class="text-xs font-black uppercase tracking-widest text-emerald-500/60">Banco de
                     Interrogantes</span>
                 <div class="flex items-center gap-3">
@@ -98,7 +98,7 @@
             @else
                 <div
                     class="h-full flex flex-col items-center justify-center py-20 bg-gray-900/20 rounded-lg border border-dashed border-emerald-500/10 opacity-50">
-                    <svg class="w-16 h-16 text-emerald-500/20 mb-4" fill="none" stroke="currentColor"
+                    <svg class="w-16 h-16 text-emerald-500/20 mb-3" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />

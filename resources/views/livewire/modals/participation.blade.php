@@ -164,7 +164,7 @@
                         <!-- Código QR -->
                         <div class="space-y-4">
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-center">
+                                <h4 class="text-lg font-semibold text-white mb-3 flex items-center justify-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -235,7 +235,7 @@
                         <!-- Ticket de Participación -->
                         <div class="space-y-4">
                             <div class="bg-gray-700/50 rounded-lg p-4">
-                                <h4 class="text-lg font-semibold text-white mb-4 flex items-center justify-center">
+                                <h4 class="text-lg font-semibold text-white mb-3 flex items-center justify-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -250,7 +250,7 @@
                                     class="bg-white rounded-lg p-6 max-w-sm mx-auto shadow-lg"
                                     style="font-family: 'Courier New', monospace;">
                                     <!-- Header del Ticket -->
-                                    <div class="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
+                                    <div class="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-3">
                                         <div class="text-lg font-bold text-gray-800">MÓDULO DE VOTACIONES</div>
                                         <div class="text-sm text-gray-600">Comprobante de Participación</div>
                                         <div class="text-xs text-gray-500 mt-1">{{ now()->format('d/m/Y H:i:s') }}

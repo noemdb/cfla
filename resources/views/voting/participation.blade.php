@@ -8,7 +8,7 @@
             <!-- Header -->
             <div class="text-center mb-8">
                 <div
-                    class="inline-flex items-center px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-300 text-sm font-medium border border-emerald-500/30 mb-4">
+                    class="inline-flex items-center px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-300 text-sm font-medium border border-emerald-500/30 mb-3">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -28,7 +28,7 @@
                         <div
                             class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-8 py-6 text-center border-b border-emerald-800/50">
                             <div
-                                class="w-16 h-16 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/50">
+                                class="w-16 h-16 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-500/50">
                                 <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -42,7 +42,7 @@
                         <!-- Contenido del certificado -->
                         <div class="p-8">
                             <div class="text-center mb-8">
-                                <p class="text-gray-300 text-lg mb-4">
+                                <p class="text-gray-300 text-lg mb-3">
                                     Se certifica que el portador de este documento ha participado exitosamente en la
                                     encuesta:
                                 </p>

@@ -1,8 +1,8 @@
 <x-modal-card title="No se encontró ningún registro" blur wire:model="modalEmpty" max-width="lg" align="center">
     <div class="bg-gray-900/90 text-center p-6 rounded-lg border border-emerald-500/30">
-        <div class="mb-4">
+        <div class="mb-3">
             <div
-                class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 mb-4">
+                class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 mb-3">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                     aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round"

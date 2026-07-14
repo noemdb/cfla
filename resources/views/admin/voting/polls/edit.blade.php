@@ -72,7 +72,7 @@
 
                     <!-- Información General -->
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Información General</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-3">Información General</h2>
                         <div class="space-y-4">
                             <div>
                                 <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
@@ -106,10 +106,10 @@
 
                     <!-- Opciones de Votación -->
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Opciones de Votación</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 mb-3">Opciones de Votación</h2>
 
                         @if ($poll->votes_count > 0)
-                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-3">
                                 <div class="flex items-center">
                                     <svg class="w-5 h-5 text-orange-600 mr-2" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -174,7 +174,7 @@
                     <!-- Estadísticas actuales -->
                     @if ($poll->votes_count > 0)
                         <div class="bg-white rounded-lg shadow p-6">
-                            <h2 class="text-lg font-semibold text-gray-900 mb-4">Estadísticas Actuales</h2>
+                            <h2 class="text-lg font-semibold text-gray-900 mb-3">Estadísticas Actuales</h2>
                             <div class="grid md:grid-cols-3 gap-3">
                                 <div class="text-center p-4 bg-blue-50 rounded-lg">
                                     <div class="text-lg font-bold text-blue-600">{{ $poll->votes_count }}</div>

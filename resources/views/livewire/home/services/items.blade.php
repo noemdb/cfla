@@ -21,7 +21,7 @@
                     <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                    <h4 class="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
                         Inicial</h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
@@ -36,7 +36,7 @@
 
                     <hr class="my-4 border-emerald-500/30" />
 
-                    <div class="flex justify-center items-center gap-2 mb-4">
+                    <div class="flex justify-center items-center gap-2 mb-3">
                         <div
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
                             $120
@@ -70,7 +70,7 @@
                     <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-200" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                    <h4 class="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
                         Primaria</h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
@@ -83,7 +83,7 @@
                         personal y social.
                     </p>
                     <hr class="my-4 border-emerald-500/30" />
-                    <div class="flex justify-center items-center gap-2 mb-4">
+                    <div class="flex justify-center items-center gap-2 mb-3">
                         <div
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
                             $120
@@ -112,7 +112,7 @@
                     <x-icon name="cog" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Media General
+                    <h4 class="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-100 text-center">Media General
                     </h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
@@ -125,7 +125,7 @@
                         continuar estudios superiores.
                     </p>
                     <hr class="my-4 border-emerald-500/30" />
-                    <div class="flex justify-center items-center gap-2 mb-4">
+                    <div class="flex justify-center items-center gap-2 mb-3">
                         <div
                             class="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-emerald-500/20">
                             $120

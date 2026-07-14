@@ -1,6 +1,6 @@
 <div class="h-full flex flex-col group cursor-pointer" wire:click="setStart">
     <!-- Header -->
-    <div class="flex items-center space-x-3 mb-4">
+    <div class="flex items-center space-x-3 mb-3">
         <div class="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
             <x-icon name="document-text" class="w-8 h-8 text-emerald-400" />
         </div>
@@ -12,7 +12,7 @@
     <!-- Content -->
     <div class="flex-1 flex flex-col">
         <div
-            class="relative overflow-hidden rounded-lg mb-4 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm border border-emerald-500/20 shadow-lg">
+            class="relative overflow-hidden rounded-lg mb-3 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm border border-emerald-500/20 shadow-lg">
             <div class="flex justify-center p-6 border-b border-emerald-500/10">
                 <img class="w-24 h-24 filter drop-shadow-[0_0_10px_rgba(16,185,129,0.3)] transform group-hover:scale-110 transition-transform duration-500"
                     src="{{ asset('image/logo/report-payment.png') }}" alt="" />

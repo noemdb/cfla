@@ -9,8 +9,8 @@
             <!-- Header Principal -->
             <div class="text-center mb-12">
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl">
-                    <div class="text-6xl mb-4">🤖</div>
-                    <h1 class="text-4xl font-bold text-white mb-4">
+                    <div class="text-6xl mb-3">🤖</div>
+                    <h1 class="text-4xl font-bold text-white mb-3">
                         Guía del Asistente de Participación
                     </h1>
                     <p class="text-gray-300 text-lg">
@@ -29,7 +29,7 @@
 
             <!-- Índice de Contenidos -->
             <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-6 shadow-2xl mb-8">
-                <h2 class="text-lg font-bold text-white mb-4 flex items-center">
+                <h2 class="text-lg font-bold text-white mb-3 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
@@ -198,7 +198,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -206,7 +206,7 @@
                             </svg>
                             URL de Acceso Directo
                         </h3>
-                        <div class="bg-gray-900/50 rounded-lg p-4 mb-4">
+                        <div class="bg-gray-900/50 rounded-lg p-4 mb-3">
                             <div class="font-mono text-green-400 text-lg text-center">
                                 /voting/asistent
                             </div>
@@ -294,7 +294,7 @@
                             1</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Inicialización del Sistema</h3>
-                            <div class="bg-gray-700/50 rounded-lg p-4 mb-4">
+                            <div class="bg-gray-700/50 rounded-lg p-4 mb-3">
                                 <p class="text-gray-300 mb-3">
                                     Al acceder al asistente, el sistema automáticamente:
                                 </p>
@@ -355,7 +355,7 @@
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Navegación por las Encuestas</h3>
                             <div class="bg-gray-700/50 rounded-lg p-4">
-                                <p class="text-gray-300 mb-4">
+                                <p class="text-gray-300 mb-3">
                                     El asistente te presenta las encuestas una por una, mostrando:
                                 </p>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -438,7 +438,7 @@
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Navegación entre Encuestas</h3>
                             <div class="bg-gray-700/50 rounded-lg p-4">
-                                <p class="text-gray-300 mb-4">
+                                <p class="text-gray-300 mb-3">
                                     El asistente ofrece múltiples opciones de navegación:
                                 </p>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -475,7 +475,7 @@
                 <div class="space-y-6">
                     <div
                         class="bg-gradient-to-r from-indigo-700/20 to-indigo-800/20 rounded-lg p-6 border border-indigo-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
@@ -544,7 +544,7 @@
 
                     <div
                         class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
@@ -552,7 +552,7 @@
                             </svg>
                             Flujo de Navegación Completo
                         </h3>
-                        <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
+                        <div class="flex flex-wrap items-center justify-center gap-3 mb-3">
                             <div class="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
                                 1. Inicialización
                             </div>
@@ -600,7 +600,7 @@
                 <div class="space-y-6">
                     <div
                         class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -608,7 +608,7 @@
                             </svg>
                             Alert Inteligente de Confirmación
                         </h3>
-                        <p class="text-gray-300 mb-4">
+                        <p class="text-gray-300 mb-3">
                             Después de confirmar cada voto, el asistente muestra un alert inteligente con información
                             detallada sobre tu progreso y las encuestas restantes.
                         </p>
@@ -643,7 +643,7 @@
                     </div>
 
                     <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -669,7 +669,7 @@
 
                     <div
                         class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-lg p-6 border border-purple-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-purple-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -678,7 +678,7 @@
                             </svg>
                             Estadísticas en Tiempo Real
                         </h3>
-                        <p class="text-gray-300 mb-4">
+                        <p class="text-gray-300 mb-3">
                             El alert muestra estadísticas actualizadas de tu progreso:
                         </p>
                         <div class="grid grid-cols-3 gap-3">
@@ -710,7 +710,7 @@
                 <div class="space-y-6">
                     <div
                         class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-lg p-6 border border-purple-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z"
@@ -718,7 +718,7 @@
                             </svg>
                             Generación Automática de QR
                         </h3>
-                        <p class="text-gray-300 mb-4">
+                        <p class="text-gray-300 mb-3">
                             El asistente genera automáticamente un código QR único para cada voto que registres. Estos
                             códigos sirven como comprobantes permanentes de tu participación.
                         </p>
@@ -754,7 +754,7 @@
 
                     <div
                         class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -762,7 +762,7 @@
                             </svg>
                             Resumen Final con QR
                         </h3>
-                        <p class="text-gray-300 mb-4">
+                        <p class="text-gray-300 mb-3">
                             Al completar todas las encuestas, el asistente muestra un resumen completo con todos tus códigos
                             QR:
                         </p>
@@ -791,7 +791,7 @@
                     </div>
 
                     <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -802,7 +802,7 @@
                             </svg>
                             Modal de Detalles de Participación
                         </h3>
-                        <p class="text-gray-300 mb-4">
+                        <p class="text-gray-300 mb-3">
                             Desde el resumen final, puedes hacer clic en "Ver detalles de participación" para abrir un modal
                             completo con:
                         </p>
@@ -842,7 +842,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div class="bg-gradient-to-r from-red-700/20 to-red-800/20 rounded-lg p-6 border border-red-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
@@ -900,7 +900,7 @@
 
                     <div
                         class="bg-gradient-to-r from-yellow-700/20 to-yellow-800/20 rounded-lg p-6 border border-yellow-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -935,7 +935,7 @@
 
                     <div
                         class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
-                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

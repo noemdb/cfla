@@ -117,7 +117,7 @@
 
                             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
                                 wire:key="grado-{{ $pestudio->id }}-{{ $grado->id }}">
-                                <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+                                <div class="flex items-center justify-between mb-3 pb-4 border-b border-white/5">
                                     <h3 class="font-bold text-emerald-100">{{ $grado->name }}</h3>
                                     <div class="flex flex-col items-end gap-2">
                                         <div class="flex items-center gap-2">

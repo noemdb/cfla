@@ -336,7 +336,7 @@
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h2 class="text-4xl font-black text-white mb-4 tracking-tight uppercase">¡Proceso Finalizado!</h2>
+                <h2 class="text-4xl font-black text-white mb-3 tracking-tight uppercase">¡Proceso Finalizado!</h2>
                 <p class="text-gray-400 font-medium max-w-md mx-auto leading-relaxed">Has completado exitosamente todas
                     las encuestas activas en este ciclo de participación.</p>
             </div>

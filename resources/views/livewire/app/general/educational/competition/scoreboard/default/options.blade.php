@@ -28,7 +28,7 @@
         Opciones:
     </div>
 </div>
-<div class="grid mb-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-4 md:grid-cols-2 bg-white dark:bg-gray-800">
+<div class="grid mb-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-3 md:grid-cols-2 bg-white dark:bg-gray-800">
     @forelse ($options as $item)
         <figure  {{ ($item->status_option_correct && $question->status_over_time) ? "style=background-color:#ccc" : null}} class="flex flex-col items-center justify-start p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">                    
             <blockquote class="max-w-2xl mx-auto mb-2 text-gray-500 lg:mb-2 dark:text-gray-400">

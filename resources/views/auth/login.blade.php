@@ -7,7 +7,7 @@
     <div class="w-full max-w-md">
         <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/20 rounded-lg shadow-2xl overflow-hidden p-8 fade-in">
             <div class="mb-8 text-center text-white">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 rounded-full mb-4 border border-emerald-500/20">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 rounded-full mb-3 border border-emerald-500/20">
                     <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>

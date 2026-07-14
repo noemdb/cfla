@@ -37,7 +37,7 @@
                 <div
                     class="w-full h-full flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 p-8 text-center">
                     <div
-                        class="w-24 h-24 mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-500">
+                        class="w-24 h-24 mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-500">
                         <i class="bx bx-image-alt text-5xl"></i>
                     </div>
                     <h3

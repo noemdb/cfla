@@ -8,7 +8,7 @@
         
                 <div class="font-bold p-2">{{$grado->name}}</div>
         
-                <div class="grid m-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-4 md:grid-cols-2 bg-white dark:bg-gray-800 ">
+                <div class="grid m-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-3 md:grid-cols-2 bg-white dark:bg-gray-800 ">
         
                     @forelse ($seccions as $item)
                         <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 dark:border-gray-700">

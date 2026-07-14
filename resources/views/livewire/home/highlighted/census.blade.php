@@ -1,6 +1,6 @@
 <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="flex items-center space-x-3 mb-4">
+    <div class="flex items-center space-x-3 mb-3">
         <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
             <x-icon name="bars-3" class="w-8 h-8 text-emerald-400" />
         </div>
@@ -11,7 +11,7 @@
 
     <!-- Content -->
     <div class="flex-1 flex flex-col">
-        <div class="relative overflow-hidden rounded-lg mb-4 group">
+        <div class="relative overflow-hidden rounded-lg mb-3 group">
             <div class="flex justify-center bg-gray-800/50 p-6 rounded-lg border border-emerald-500/20">
                 <div
                     class="grid place-items-center h-24 w-24 bg-emerald-900/30 rounded-full border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">

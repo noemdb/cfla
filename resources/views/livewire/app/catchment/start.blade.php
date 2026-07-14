@@ -33,7 +33,7 @@
             </div>
 
             <div class="mt-2">
-                <p class="text-xs mb-4 text-neutral-600 dark:text-neutral-200">
+                <p class="text-xs mb-3 text-neutral-600 dark:text-neutral-200">
                     Fase 1. Registro Inicial: Manifiesta tu interés para optar a este proceso de matriculación escolar.
                 </p>
             </div>            

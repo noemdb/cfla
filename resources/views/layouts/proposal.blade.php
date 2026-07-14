@@ -130,7 +130,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Contacto Comercial</h3>
+                    <h3 class="text-lg font-semibold mb-3">Contacto Comercial</h3>
                     <div class="space-y-2 text-gray-300">
                         <p class="flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Soporte Técnico</h3>
+                    <h3 class="text-lg font-semibold mb-3">Soporte Técnico</h3>
                     <div class="space-y-2 text-gray-300">
                         <p class="flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold mb-4">Información Legal</h3>
+                    <h3 class="text-lg font-semibold mb-3">Información Legal</h3>
                     <div class="space-y-2 text-gray-300 text-sm">
                         <p>Esta propuesta es válida por 30 días</p>
                         <p>Precios sujetos a términos y condiciones</p>

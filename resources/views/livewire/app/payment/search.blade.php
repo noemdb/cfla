@@ -29,7 +29,7 @@
             <!-- Input Form -->
             <div class="">
                 <x-input label="Cédula del Representante" placeholder="Ej: 12345678" wire:model="ci"
-                    icon="identification" hint="Sin puntos ni guiones" class="mb-4" />
+                    icon="identification" hint="Sin puntos ni guiones" class="mb-3" />
 
                 <x-button emerald full label="Continuar" icon="check" wire:click="search" class="" />
             </div>

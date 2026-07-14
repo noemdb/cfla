@@ -3,7 +3,7 @@
         <!-- Paso 1: Solicitar CI del Representante -->
         <div class="text-center">
             <div class="mb-6">
-                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center shadow-xl border-2 border-green-600">
+                <div class="w-20 h-20 mx-auto mb-3 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center shadow-xl border-2 border-green-600">
                     <x-icon name="identification" class="w-10 h-10 text-green-100" />
                 </div>
                 <h2 class="text-lg font-bold text-white mb-2">
@@ -47,7 +47,7 @@
         <!-- Paso 2: Seleccionar Estudiantes -->
         <div>
             <div class="mb-6">
-                <div class="flex items-center mb-4">
+                <div class="flex items-center mb-3">
                     <div class="w-12 h-12 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center mr-4 border-2 border-green-600">
                         <x-icon name="users" class="w-6 h-6 text-green-100" />
                     </div>
@@ -172,7 +172,7 @@
         <!-- Paso 3: Confirmación y Descarga -->
         <div class="text-center">
             <div class="mb-6">
-                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center shadow-xl animate-pulse border-2 border-green-500">
+                <div class="w-20 h-20 mx-auto mb-3 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center shadow-xl animate-pulse border-2 border-green-500">
                     <x-icon name="check-circle" class="w-10 h-10 text-green-100" />
                 </div>
                 <h2 class="text-lg font-bold text-white mb-2">
@@ -184,7 +184,7 @@
             </div>
 
             <div class="bg-gradient-to-r from-green-900/40 to-green-800/40 rounded-lg p-6 mb-6 border border-green-700">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center justify-center">
+                <h3 class="text-lg font-semibold text-white mb-3 flex items-center justify-center">
                     <x-icon name="users" class="w-5 h-5 mr-2 text-green-300" />
                     Estudiantes Confirmados para Prosecución
                 </h3>
@@ -216,18 +216,18 @@
             </div>
 
             <div class="mb-6">
-                <h3 class="text-lg font-semibold text-white mb-4 flex items-center justify-center">
+                <h3 class="text-lg font-semibold text-white mb-3 flex items-center justify-center">
                     <x-icon name="qrcode" class="w-5 h-5 mr-2 text-green-300" />
                     Código QR para Descarga de Planilla
                 </h3>
-                <div class="flex justify-center mb-4">
+                <div class="flex justify-center mb-3">
                     <div class="bg-white p-6 rounded-lg shadow-2xl border-4 border-green-600">
                         @if($qrCode)
                             <img src="{{ $qrCode }}" alt="Código QR" class="w-48 h-48">
                         @endif
                     </div>
                 </div>
-                <p class="text-sm text-gray-300 mb-4 bg-green-900/30 p-3 rounded-lg border border-green-700">
+                <p class="text-sm text-gray-300 mb-3 bg-green-900/30 p-3 rounded-lg border border-green-700">
                     Escanee el código QR o use el botón de descarga para obtener su planilla de prosecución
                 </p>
             </div>

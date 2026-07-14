@@ -12,7 +12,7 @@
                     @amigonianos_sf
                 </div>
             </h5>
-            <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
+            <p class="mb-3 text-base text-neutral-600 dark:text-neutral-200">
             <div class="w-full aspect-square border-spacing-2 rounded shadow">
                 <blockquote class="instagram-media"
                     data-instgrm-permalink="https://www.instagram.com/p/CREoJCUJfql/?utm_source=ig_embed&amp;utm_campaign=loading"
@@ -123,7 +123,7 @@
                     @cflasf.oficial
                 </div>
             </h5>
-            <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
+            <p class="mb-3 text-base text-neutral-600 dark:text-neutral-200">
             <div class="w-full aspect-square border-spacing-2 rounded shadow">
                 <blockquote class="instagram-media"
                     data-instgrm-permalink="https://www.instagram.com/p/Cwp3arzrjU0/?utm_source=ig_embed&amp;utm_campaign=loading"
@@ -237,11 +237,11 @@
                 @cramigoniano
             </div>
         </h5>
-        <p class="mb-4 text-base text-neutral-600 dark:text-neutral-200">
+        <p class="mb-3 text-base text-neutral-600 dark:text-neutral-200">
         <div class="w-full aspect-square border-spacing-2 rounded shadow">
 
             <div class="border rounded">
-                <img data-te-lazy-src="{{ asset('image/social/cramigoniano.png') }}" data-te-lazy-load-init class="mx-auto mb-4 xs:w-1/2 sm:w-3/4 md:w-full rounded-sm md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                <img data-te-lazy-src="{{ asset('image/social/cramigoniano.png') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-sm md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
             </div>
 
 

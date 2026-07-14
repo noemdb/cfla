@@ -1,7 +1,7 @@
 <x-card title="CONTACTO">
 
     @slot('header')
-        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class=" bg-green-100 mb-3 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             CONTÁCTANOS
         </h3>
     @endslot
@@ -16,17 +16,17 @@
                     <h2 class="text-lg font-semibold text-center mb-8">Comunícate</h2>
 
                     <form>
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="block font-semibold mb-2" for="name">Nombre</label>
                             <input class="border p-2 w-full" type="text" id="name">
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="block font-semibold mb-2" for="email">Email</label>
                             <input class="border p-2 w-full" type="email" id="email">
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="block font-semibold mb-2" for="message">Mensaje</label>
                             <textarea class="border p-2 w-full" id="message"></textarea>
                         </div>

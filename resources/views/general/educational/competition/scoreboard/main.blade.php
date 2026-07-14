@@ -6,7 +6,7 @@
                     <div
                         class="diagnostic-card border border-emerald-500/10 rounded-lg p-6 shadow-2xl backdrop-blur-md">
                         <div
-                            class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
+                            class="mb-3 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
                             Información de la Competición</div>
                         <livewire:app.general.educational.competition.scoreboard.competition-component
                             :id="$competition->id" />
@@ -14,7 +14,7 @@
                     <div
                         class="diagnostic-card border border-emerald-500/10 rounded-lg p-6 shadow-2xl backdrop-blur-md">
                         <div
-                            class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
+                            class="mb-3 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
                             Estado del Debate</div>
                         <livewire:app.general.educational.competition.scoreboard.debate-component :id="$competition->id" />
                     </div>

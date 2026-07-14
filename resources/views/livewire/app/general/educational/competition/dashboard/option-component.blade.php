@@ -8,7 +8,7 @@
                 <div class="text-sm font-normal">Categoría: <span class=" font-bold">{{$question->category}}</span></div>
             </div>            
             
-            <div id="alert-border-1" class="flex items-center justify-center p-4 mb-4 text-blue-800 border-t-4 border-blue-300 bg-blue-50 dark:text-blue-400 dark:bg-gray-800 dark:border-blue-800" role="alert">
+            <div id="alert-border-1" class="flex items-center justify-center p-4 mb-3 text-blue-800 border-t-4 border-blue-300 bg-blue-50 dark:text-blue-400 dark:bg-gray-800 dark:border-blue-800" role="alert">
                 <div class="ms-3 text-sm font-medium">
                     {{$question->text}} 
                 </div>
@@ -20,7 +20,7 @@
                 Opciones:
             </div>
         </div>
-        <div class="grid mb-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-4 md:grid-cols-2 bg-white dark:bg-gray-800">
+        <div class="grid mb-2 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-3 md:grid-cols-2 bg-white dark:bg-gray-800">
             @forelse ($options as $item)
                 <figure class="flex flex-col items-center justify-start p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">                    
                     <blockquote class="max-w-2xl mx-auto mb-2 text-gray-500 lg:mb-2 dark:text-gray-400">

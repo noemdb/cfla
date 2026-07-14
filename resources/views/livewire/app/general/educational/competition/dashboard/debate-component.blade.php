@@ -1,6 +1,6 @@
 <div>
     <div class="md:flex my-2">
-        <ul class="flex-column space-y space-y-4 text-sm font-medium text-gray-500 dark:text-gray-400 md:me-4 mb-4 md:mb-0">
+        <ul class="flex-column space-y space-y-4 text-sm font-medium text-gray-500 dark:text-gray-400 md:me-4 mb-3 md:mb-0">
     
             @forelse ($debates as $item)
     

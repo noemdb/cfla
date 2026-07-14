@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
     <div>
         @php
             $name = 'ammount_1';
@@ -23,7 +23,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
     <div>
         @php
             $name = 'banco_id_1';
@@ -44,7 +44,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
     <div>
         @php
             $name = 'method_pay_id_1';

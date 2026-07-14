@@ -1,7 +1,7 @@
 <div class="m-1 w-full">
 
     <div class="m-2 w-full diagnostic-card rounded-lg p-6 shadow-2xl border border-emerald-500/20">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-emerald-500/20 rounded-lg">
                     <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

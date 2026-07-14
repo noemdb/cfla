@@ -13,7 +13,7 @@
                         </svg>
                         Participación Confirmada
                     </div>
-                    <h1 class="text-4xl font-black text-white mb-4 tracking-tight">¡Gracias por participar!</h1>
+                    <h1 class="text-4xl font-black text-white mb-3 tracking-tight">¡Gracias por participar!</h1>
                     <p class="text-gray-400 font-medium">Tu comprobante digital de participación está listo.</p>
                 </div>
 

@@ -1,7 +1,7 @@
 <div>
     <!-- Encabezado -->
     <x-card title="Registro de Visitas" subtitle="Historial de accesos al sistema"
-        class="mb-4 dark:bg-secondary-800/50 dark:border-secondary-700">
+        class="mb-3 dark:bg-secondary-800/50 dark:border-secondary-700">
         <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
             <!-- Filtro por días -->
             <x-native-select wire:model.live="daysFilter" label="Periodo" :options="[
@@ -28,7 +28,7 @@
     </x-card>
 
     <!-- Estadísticas -->
-    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 mb-3 sm:grid-cols-3">
         <x-card class="hover:shadow-md transition-shadow dark:bg-secondary-800/50 dark:border-secondary-700">
             <div class="flex items-center">
                 <x-icon name="users" class="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />

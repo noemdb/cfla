@@ -7,7 +7,7 @@
 
         @if (!$verificationCode)
 
-            <p class="mb-4 text-gray-400">Ingresa tu dirección de correo electrónico</p>
+            <p class="mb-3 text-gray-400">Ingresa tu dirección de correo electrónico</p>
             <div class="mb-2 space-y-2">
                 <x-input wire:model="email" label="Correo Electrónico" placeholder="Tu email"
                     right-icon="at-symbol" description="Inform your full name" />
@@ -20,10 +20,10 @@
 
         @else
 
-            <p class="mb-4 text-gray-400">Se ha enviado un código a tu correo electrónico</p>
+            <p class="mb-3 text-gray-400">Se ha enviado un código a tu correo electrónico</p>
 
             <x-card>
-                <p class="mb-4 font-extrabold text-gray-400">
+                <p class="mb-3 font-extrabold text-gray-400">
                     Tu dirección de correo electrónico es:
                     <span class="font-normal">{{ $email ?? null }}</span>
                 </p>

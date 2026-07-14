@@ -2,7 +2,7 @@
 <div class="space-y-6">
     {{-- Performance by Pensum --}}
     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Rendimiento por Área de Formación</h4>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Rendimiento por Área de Formación</h4>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
@@ -56,7 +56,7 @@
     {{-- Question Type Distribution --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Distribución por Tipo de Pregunta</h4>
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Distribución por Tipo de Pregunta</h4>
             @php
                 $typeStats = $analytics['by_question_type'] ?? [];
                 $totalType = array_sum(array_column($typeStats, 'count'));
@@ -83,7 +83,7 @@
         </div>
 
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Distribución por Dificultad</h4>
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Distribución por Dificultad</h4>
             @php
                 $diffStats = $analytics['by_difficulty'] ?? [];
                 $totalDiff = array_sum(array_column($diffStats, 'count'));
@@ -149,7 +149,7 @@
     {{-- Detailed Performance by Area --}}
     @if(!empty($analytics['detailed_pensum']))
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Desglose por Área</h4>
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Desglose por Área</h4>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>

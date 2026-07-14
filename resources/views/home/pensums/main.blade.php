@@ -46,7 +46,7 @@
                             Formulario de Inscripción<br>
                             <span class="text-amber-600">Danzas Joropo Recio</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mb-4">
+                        <p class="text-sm text-gray-600 mb-3">
                             Complete todos los campos. La información se usará solo para inscripción y seguridad.
                         </p>
 

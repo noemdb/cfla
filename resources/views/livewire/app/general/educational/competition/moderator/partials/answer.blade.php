@@ -2,7 +2,7 @@
     @if ($question->status_active)
         @if (!$question->status_over_time)
             <div class="diagnostic-card border border-emerald-500/20 rounded-lg p-6 bg-gray-950/40">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                         <span class="text-xs font-black uppercase tracking-widest text-emerald-500">Cronómetro en

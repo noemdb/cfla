@@ -3,11 +3,11 @@
     <div class="mb-6 flex justify-center">
         @include('svg.person-fill',['w'=>'64','h'=>'64'])
     </div>
-    <h5 class="mb-4 text-lg font-semibold">Maria Smantha</h5>
-    <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
+    <h5 class="mb-3 text-lg font-semibold">Maria Smantha</h5>
+    <h6 class="mb-3 font-semibold text-primary dark:text-primary-500">
         Lcda. Administración
     </h6>
-    <p class="mb-4">
+    <p class="mb-3">
         @include('svg.quotationOpen')
     <div>
         La institución educativa se distingue por sus modernas instalaciones, que propician un ambiente óptimo para el
@@ -50,11 +50,11 @@
     <div class="mb-6 flex justify-center">
         @include('svg.person',['w'=>'64','h'=>'64'])
     </div>
-    <h5 class="mb-4 text-lg font-semibold">Lisa Rocca</h5>
-    <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
+    <h5 class="mb-3 text-lg font-semibold">Lisa Rocca</h5>
+    <h6 class="mb-3 font-semibold text-primary dark:text-primary-500">
         Diseñadora
     </h6>
-    <p class="mb-4">
+    <p class="mb-3">
         @include('svg.quotationOpen')
         Es una institución comprometida con la educación integral de sus estudiantes. Los estudiantes no solo reciben
         una educación de calidad, sino que también tienen la oportunidad de desarrollar sus habilidades personales y
@@ -86,11 +86,11 @@
         <div class="mb-6 flex justify-center">
             @include('svg.person-fill',['w'=>'64','h'=>'64'])
         </div>
-        <h5 class="mb-4 text-lg font-semibold">Marlene Oropeza</h5>
-        <h6 class="mb-4 font-semibold text-primary dark:text-primary-400">
+        <h5 class="mb-3 text-lg font-semibold">Marlene Oropeza</h5>
+        <h6 class="mb-3 font-semibold text-primary dark:text-primary-400">
             Abogada
         </h6>
-        <p class="mb-4 text-neutral-600 dark:text-neutral-300">
+        <p class="mb-3 text-neutral-600 dark:text-neutral-300">
             @include('svg.quotationOpen')
             Mi hija me dijo: cuando llegué a la clases, estaba un poco nerviosa. Era un lugar nuevo y no conocía a
             nadie. Sin embargo, rápidamente me sentí como en casa. Los profesores son muy amables y comprensivos, y

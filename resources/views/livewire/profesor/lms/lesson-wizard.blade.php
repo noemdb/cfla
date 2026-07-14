@@ -246,7 +246,7 @@
                 </div>
             @empty
                 <div class="col-span-full text-center py-16">
-                    <svg class="w-16 h-16 text-slate-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                     <p class="text-sm font-medium text-slate-400">No hay actividades disponibles</p>
@@ -1470,7 +1470,7 @@
                         {{-- Secciones --}}
                         @forelse($listPreviewData['sections'] as $section)
                             <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
-                                <div class="flex items-center gap-2 mb-4">
+                                <div class="flex items-center gap-2 mb-3">
                                     <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
                                     <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
                                 </div>
@@ -2150,7 +2150,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <h3 class="text-base font-bold text-emerald-400 mb-1">¡Lección publicada exitosamente!</h3>
-                <p class="text-sm text-slate-400 mb-4">El contenido ya está disponible para los estudiantes.</p>
+                <p class="text-sm text-slate-400 mb-3">El contenido ya está disponible para los estudiantes.</p>
                 <div class="flex items-center justify-center gap-3">
                     {{-- <button wire:click="openListStudentPreview({{ $selectedActivityId }})"
                             class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm rounded-lg font-medium transition-all">
@@ -2679,11 +2679,11 @@
                             @else
                                 {{-- Empty State: No slides --}}
                                 <div class="p-8 text-center">
-                                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-700/30 flex items-center justify-center">
                                         <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                     </div>
                                     <h3 class="text-sm font-bold text-slate-400 mb-2">No hay diapositivas</h3>
-                                    <p class="text-xs text-slate-500 mb-4">Agrega una seccion o genera la estructura con IA para empezar.</p>
+                                    <p class="text-xs text-slate-500 mb-3">Agrega una seccion o genera la estructura con IA para empezar.</p>
                                     <div class="flex items-center justify-center gap-3">
                                         <button wire:click="generateStep2Sections"
                                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium

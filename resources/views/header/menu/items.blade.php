@@ -1,5 +1,5 @@
 <ul class="mr-auto flex flex-col md:flex-row text-green-200 items-end" data-te-navbar-nav-ref>
-    <li class="mb-4 md:mb-0 md:pr-2 border-b-2 border-green-200" data-te-nav-item-ref>
+    <li class="mb-3 md:mb-0 md:pr-2 border-b-2 border-green-200" data-te-nav-item-ref>
         <!-- Logo de tu aplicación -->
         @include('livewire.home.header.icon')
         U.E. Colegio Fray Luis Amigó

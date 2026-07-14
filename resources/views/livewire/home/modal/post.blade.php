@@ -49,7 +49,7 @@
         </div>
     @else
         <div class="p-8 text-center text-gray-400">
-            <i class="bx bx-loader-alt animate-spin text-4xl mb-4"></i>
+            <i class="bx bx-loader-alt animate-spin text-4xl mb-3"></i>
             <p>Cargando información...</p>
         </div>
     @endif

@@ -134,7 +134,7 @@
                     </div>
 
                     <!-- Progress Bar -->
-                    <div class="relative w-full h-4 bg-white/5 rounded-full overflow-hidden border border-white/5 mb-4">
+                    <div class="relative w-full h-4 bg-white/5 rounded-full overflow-hidden border border-white/5 mb-3">
                         <div class="absolute inset-y-0 left-0 bg-gradient-to-r {{ $index === 0 ? 'from-emerald-600 to-emerald-400' : 'from-blue-600 to-blue-400' }} rounded-full transition-all duration-1000 ease-out"
                             style="width: {{ $result['percentage'] }}%">
                             <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
