@@ -1099,13 +1099,14 @@ PROMPT;
                 $rawSvg = preg_replace('/\n?```\s*$/s', '', $rawSvg);
                 $rawSvg = trim($rawSvg);
 
-                // Validar que comience con <svg
-                if (preg_match('/^<svg[\s>]/i', $rawSvg)) {
+                // Extraer <svg>...</svg> aunque haya texto antes/después
+                if (preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
+                    $rawSvg = $svgMatch[0];
                     $title = e('Diagrama: ' . $sectionTitle);
                     $svgHtml = '<figure class="my-6">' . "\n"
                         . '  <figcaption class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">'
                         . $title . '</figcaption>' . "\n"
-                        . '  <div class="flex justify-center bg-gray-50 dark:bg-gray-800 rounded-xl p-4">'
+                        . '  <div class="flex justify-center rounded-xl p-2">'
                         . "\n    " . $rawSvg . "\n  </div>\n"
                         . '</figure>';
                 }
@@ -3526,6 +3527,62 @@ PROMPT;
             return $body;
         }
         return \Illuminate\Support\Str::markdown($body);
+    }
+
+    /**
+     * Renderiza el body de un bloque de contenido para el modal de previsualización.
+     *
+     * Si el body contiene un diagrama Mermaid (<div class="mermaid">),
+     * lo envuelve en el componente Alpine mermaidEmbed() para que se renderice
+     * correctamente sin que Mermaid haga auto-scan del DOM.
+     *
+     * En caso contrario delega en renderContentBody().
+     */
+    public function renderPreviewContent(string $body): string
+    {
+        // Detectar si el body contiene un div.mermaid
+        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m)) {
+            $mermaidCode = trim(strip_tags($m[1]));
+            if (!empty($mermaidCode)) {
+                // Envolver en mermaidEmbed() como lo hace slidePreviewContent()
+                return '<div class="slide-block">'
+                    . "\n"
+                    . '<div wire:ignore x-data="mermaidEmbed()"'
+                    . ' data-mermaid-code="' . htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8') . '"'
+                    . ' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
+                    . '<div x-ref="target" class="w-full"></div>'
+                    . '</div>'
+                    . "\n"
+                    . '</div>';
+            }
+        }
+        return $this->renderContentBody($body);
+    }
+
+    /**
+     * Renderiza las preguntas de repaso con formato visual mejorado.
+     * Procesa el markdown, extrae el título principal si existe,
+     * y envuelve cada pregunta/respuesta en un diseño tipo card.
+     */
+    public function renderReviewQuestions(string $markdown): string
+    {
+        if (empty($markdown)) {
+            return '';
+        }
+
+        // Eliminar el título "## Preguntas de Repaso" si existe (lo mostramos como heading de sección)
+        $body = preg_replace('/^##\s+Preguntas?\s+de\s+Repaso\s*\n+/im', '', $markdown);
+        $body = trim($body);
+
+        if (empty($body)) {
+            return '';
+        }
+
+        // Convertir markdown a HTML
+        $html = \Illuminate\Support\Str::markdown($body);
+
+        // Envolver en un contenedor con estilos dedicados
+        return '<div class="review-questions">' . "\n" . $html . "\n" . '</div>';
     }
 
     /**

@@ -2425,13 +2425,13 @@
                                         <div class="flex gap-0.5 mb-2">
                                             <button @click="editorTab = 'edit'"
                                                     :class="editorTab === 'edit' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
-                                                    class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all">
+                                                    class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all text-center">
                                                 <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 Editor
                                             </button>
                                             <button @click="editorTab = 'preview'"
                                                     :class="editorTab === 'preview' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
-                                                    class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all">
+                                                    class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all text-center">
                                                 <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                 Vista previa
                                             </button>
@@ -2563,7 +2563,7 @@
                                                                 <div class="flex-1 overflow-y-auto p-5">
                                                                     <div class="prose prose-sm prose-slate max-w-none !text-gray-800"
                                                                          style="color: #1e293b !important;">
-                                                                        {!! $this->renderContentBody($content['body'] ?? '') !!}
+                                                                        {!! $this->renderPreviewContent($content['body'] ?? '') !!}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -2641,12 +2641,12 @@
                                         </button>
 
                                         {{-- Vista estudiante --}}
-                                        <button wire:click="$toggle('showStudentPreview')"
+                                        {{-- <button wire:click="$toggle('showStudentPreview')"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             Vista estudiante
-                                        </button>
+                                        </button> --}}
 
                                         <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
 
@@ -4068,6 +4068,19 @@ Cómo...?"
                                     </div>
                                 @endforelse
 
+                                {{-- ═══ Preguntas de Repaso ═══ --}}
+                                @if(!empty($reviewQuestions))
+                                    <div class="border-t border-slate-200 pt-5 mt-6 space-y-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1 h-6 bg-amber-500 rounded-full"></span>
+                                            <h2 class="text-lg font-bold text-slate-800">Preguntas de Repaso</h2>
+                                        </div>
+                                        <div class="slide-block">
+                                            {!! $this->renderReviewQuestions($reviewQuestions) !!}
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- Recursos no vinculados a secciones (aparecen al final) --}}
                                 @php
                                     $unlinkedResources = collect($wizardResources)->filter(fn($r) => empty($r['section_id']))->values()->all();
@@ -4163,7 +4176,7 @@ Cómo...?"
                             {{-- Footer --}}
                             <div class="px-8 py-2 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
                                 <p class="text-xs text-slate-400">
-                                    <span class="font-medium">{{ count($this->previewSections) }}</span> secciones ·
+                                    <span class="font-medium">{{ count($this->previewSections) + (empty($reviewQuestions) ? 0 : 1) }}</span> secciones ·
                                     <span class="font-medium">{{ collect($this->previewSections)->sum(fn($s) => count($s['contents'])) }}</span> bloques ·
                                     <span class="font-medium">{{ count($wizardResources) }}</span> recursos ·
                                     <span class="font-medium">{{ count($wizardHtmlEmbeds) }}</span> embeds ·
@@ -4216,12 +4229,26 @@ Cómo...?"
                 </div>
             @endif
 
-            {{-- ═══ BOTÓN FLOTANTE GUARDAR ═══ --}}
-            <div class="fixed bottom-6 right-6 z-50">
+            {{-- ═══ BOTONES FLOTANTES: Vista estudiante + Guardar (group button) ═══ --}}
+            <div class="fixed bottom-6 right-6 z-50 flex">
+                <button wire:click="$toggle('showStudentPreview')"
+                        title="Vista estudiante"
+                        class="inline-flex items-center justify-center w-11 h-11 rounded-l-xl text-sm font-semibold transition-all duration-200
+                               text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20
+                               border border-fuchsia-500/20 hover:border-fuchsia-500/40
+                               active:scale-[0.95]
+                               border-r-0">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </button>
+
                 <button wire:click="saveStep2"
                         wire:loading.attr="disabled"
                         wire:target="saveStep2"
-                        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                        title="Guardar lección"
+                        class="inline-flex items-center justify-center w-11 h-11 rounded-r-xl text-sm font-semibold transition-all duration-200
                                shadow-lg shadow-blue-500/20
                                text-white bg-gradient-to-br from-blue-500 to-blue-600
                                hover:from-blue-400 hover:to-blue-500
@@ -4234,8 +4261,6 @@ Cómo...?"
                     <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                     </svg>
-                    <span wire:loading.remove wire:target="saveStep2">Guardar lección</span>
-                    <span wire:loading wire:target="saveStep2">Guardando...</span>
                 </button>
             </div>
 
@@ -4446,10 +4471,117 @@ Cómo...?"
             align-items: center;
             justify-content: center;
         }
+        /* ── Review Questions: cards for each Q&A pair ── */
+        .review-questions {
+            counter-reset: rq-counter;
+        }
+        .review-questions h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #d97706;
+            margin: 1.5rem 0 0.75rem 0;
+            padding: 0.5rem 0.75rem;
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .review-questions h3:first-child {
+            margin-top: 0;
+        }
+        .review-questions ol,
+        .review-questions ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+        }
+        .review-questions ol > li,
+        .review-questions ul > li {
+            counter-increment: rq-counter;
+            position: relative;
+            padding: 1rem 1rem 1rem 3rem;
+            margin-bottom: 0.75rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.625rem;
+            box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+            color: #334155;
+            font-size: 0.9375rem;
+            line-height: 1.7;
+        }
+        .review-questions ol > li:hover,
+        .review-questions ul > li:hover {
+            border-color: #fcd34d;
+            box-shadow: 0 2px 8px rgb(251 191 36 / 0.1);
+        }
+        .review-questions ol > li::before,
+        .review-questions ul > li::before {
+            content: counter(rq-counter);
+            position: absolute;
+            left: 0.625rem;
+            top: 0.875rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f59e0b;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 999px;
+            line-height: 1;
+        }
+        .review-questions ul > li::before {
+            content: '';
+            width: 0.625rem;
+            height: 0.625rem;
+            background: #f59e0b;
+            top: 1.15rem;
+            left: 1.125rem;
+        }
+        .review-questions ol > li strong,
+        .review-questions ul > li strong {
+            display: block;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
+            font-size: 0.975rem;
+        }
+        .review-questions ol > li em,
+        .review-questions ul > li em {
+            color: #64748b;
+            font-style: italic;
+        }
+        .review-questions ol > li > p,
+        .review-questions ul > li > p {
+            margin: 0;
+        }
+        .review-questions ol > li > p:first-of-type,
+        .review-questions ul > li > p:first-of-type {
+            display: inline;
+        }
+        .review-questions ol > li > *:last-child,
+        .review-questions ul > li > *:last-child {
+            margin-bottom: 0;
+        }
     </style>
 @endassets
 @script
 <script>
+    // ── Inicialización única de Mermaid (previene auto-scan del DOM) ──
+    (function initMermaidOnce() {
+        if (typeof mermaid !== 'undefined' && !window._mermaidInitialized) {
+            mermaid.initialize({
+                startOnLoad: false,
+                suppressErrorRendering: true,
+                theme: 'base',
+                themeVariables: { fontFamily: 'inherit', fontSize: '14px' }
+            });
+            window._mermaidInitialized = true;
+        }
+    })();
+
     Alpine.data('mermaidEmbed', () => ({
         zoom: 1,
         panX: 0,
@@ -4468,15 +4600,10 @@ Cómo...?"
 
         init() {
             const code = this.$el.getAttribute('data-mermaid-code') || '';
-            if (typeof mermaid === 'undefined') {
+            if (typeof mermaid === 'undefined' || !window._mermaidInitialized) {
                 this.$nextTick(() => this.init());
                 return;
             }
-            mermaid.initialize({
-                startOnLoad: false,
-                theme: 'base',
-                themeVariables: { fontFamily: 'inherit', fontSize: '14px' }
-            });
             if (this.$el.hasAttribute('data-mermaid-delay')) {
                 this.$el.addEventListener('slide-active', () => this.render(code), { once: true });
             } else {
