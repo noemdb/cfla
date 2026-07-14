@@ -11,7 +11,7 @@
             <div class="flex flex-col md:flex-row">
 
                 <div class="p-6 flex-1 relative z-10">
-                    <div class="flex items-center mb-3">
+                    <div class="flex items-center mb-2">
                         <div
                             class="flex-shrink-0 p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg border border-emerald-200 dark:border-emerald-500/20 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-500/20 transition-colors duration-300">
                             @if ($category->icon_svg)

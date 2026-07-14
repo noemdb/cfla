@@ -1,6 +1,6 @@
 <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="flex items-center space-x-3 mb-3">
+    <div class="flex items-center space-x-3 mb-2">
         <div class="p-2 bg-yellow-900/30 rounded-lg border border-yellow-500/30">
             <x-icon name="credit-card" class="w-8 h-8 text-yellow-400" />
         </div>

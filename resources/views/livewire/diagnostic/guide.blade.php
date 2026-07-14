@@ -1,7 +1,7 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-12">
-        <div class="flex items-center justify-center mb-3">
+        <div class="flex items-center justify-center mb-2">
             <svg class="w-12 h-12 text-green-500 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
@@ -66,12 +66,12 @@
             <!-- Overview Tab -->
             <div class="space-y-8">
                 <div class="text-center mb-8">
-                    <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-lg font-bold text-white mb-3">¿Qué es el Diagnóstico Educativo?</h2>
+                    <h2 class="text-lg font-bold text-white mb-2">¿Qué es el Diagnóstico Educativo?</h2>
                     <p class="text-gray-300 text-lg max-w-3xl mx-auto">
                         Es una herramienta diseñada para evaluar tus conocimientos actuales en diferentes áreas de formación, 
                         permitiendo identificar fortalezas y oportunidades de mejora en tu proceso de aprendizaje.
@@ -80,7 +80,7 @@
 
                 <div class="grid md:grid-cols-3 gap-6">
                     <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-lg border border-blue-700/50">
-                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
                             </svg>
@@ -90,7 +90,7 @@
                     </div>
 
                     <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-lg border border-purple-700/50">
-                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-2">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
@@ -111,7 +111,7 @@
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">1</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-2">Identificación del Estudiante</h3>
-                            <p class="text-gray-300 mb-3">Ingresa tu cédula de identidad para acceder al sistema. El sistema verificará tu información y te dará la bienvenida.</p>
+                            <p class="text-gray-300 mb-2">Ingresa tu cédula de identidad para acceder al sistema. El sistema verificará tu información y te dará la bienvenida.</p>
                             <div class="bg-gray-700 p-4 rounded-lg">
                                 <div class="flex items-center text-yellow-400 mb-2">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +128,7 @@
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">2</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-2">Selección del Área de Formación</h3>
-                            <p class="text-gray-300 mb-3">En el dashboard verás todas las áreas disponibles con su progreso actual. Selecciona el área que deseas evaluar.</p>
+                            <p class="text-gray-300 mb-2">En el dashboard verás todas las áreas disponibles con su progreso actual. Selecciona el área que deseas evaluar.</p>
                             <div class="grid md:grid-cols-2 gap-3">
                                 <div class="bg-gray-700 p-4 rounded-lg">
                                     <div class="flex items-center justify-between mb-2">
@@ -163,7 +163,7 @@
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">3</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-2">Responder las Preguntas</h3>
-                            <p class="text-gray-300 mb-3">El sistema te presentará preguntas de forma aleatoria. Responde con honestidad y según tu conocimiento actual.</p>
+                            <p class="text-gray-300 mb-2">El sistema te presentará preguntas de forma aleatoria. Responde con honestidad y según tu conocimiento actual.</p>
                             <div class="bg-gray-700 p-4 rounded-lg">
                                 <div class="flex items-center text-blue-400 mb-2">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">4</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-2">Revisar Resultados</h3>
-                            <p class="text-gray-300 mb-3">Una vez completado el diagnóstico, podrás revisar todas tus respuestas y obtener un resumen de tu desempeño.</p>
+                            <p class="text-gray-300 mb-2">Una vez completado el diagnóstico, podrás revisar todas tus respuestas y obtener un resumen de tu desempeño.</p>
                         </div>
                     </div>
                 </div>
@@ -198,7 +198,7 @@
                 <div class="grid gap-8">
                     <!-- Multiple Choice -->
                     <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-6 rounded-lg border border-blue-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -206,11 +206,11 @@
                             </div>
                             <h3 class="text-lg font-semibold text-white">Selección Múltiple</h3>
                         </div>
-                        <p class="text-gray-300 mb-3">Preguntas con varias opciones donde debes seleccionar la respuesta que mejor refleje tu conocimiento o experiencia.</p>
+                        <p class="text-gray-300 mb-2">Preguntas con varias opciones donde debes seleccionar la respuesta que mejor refleje tu conocimiento o experiencia.</p>
                         
                         <div class="bg-gray-700 p-4 rounded-lg">
-                            <h4 class="text-white font-medium mb-3">Ejemplo:</h4>
-                            <p class="text-gray-300 mb-3">¿Cuál es tu nivel de conocimiento en programación orientada a objetos?</p>
+                            <h4 class="text-white font-medium mb-2">Ejemplo:</h4>
+                            <p class="text-gray-300 mb-2">¿Cuál es tu nivel de conocimiento en programación orientada a objetos?</p>
                             <div class="space-y-2">
                                 <div class="flex items-center p-2 bg-gray-600 rounded">
                                     <span class="w-4 h-4 rounded-full border-2 border-gray-400 mr-3"></span>
@@ -234,7 +234,7 @@
 
                     <!-- Scale Questions -->
                     <div class="bg-gradient-to-r from-purple-900/30 to-purple-800/20 p-6 rounded-lg border border-purple-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
@@ -242,11 +242,11 @@
                             </div>
                             <h3 class="text-lg font-semibold text-white">Escala Numérica</h3>
                         </div>
-                        <p class="text-gray-300 mb-3">Evalúa tu nivel de conocimiento o confianza en una escala del 1 al 10.</p>
+                        <p class="text-gray-300 mb-2">Evalúa tu nivel de conocimiento o confianza en una escala del 1 al 10.</p>
                         
                         <div class="bg-gray-700 p-4 rounded-lg">
-                            <h4 class="text-white font-medium mb-3">Ejemplo:</h4>
-                            <p class="text-gray-300 mb-3">En una escala del 1 al 10, ¿qué tan confiado te sientes resolviendo problemas de algoritmos?</p>
+                            <h4 class="text-white font-medium mb-2">Ejemplo:</h4>
+                            <p class="text-gray-300 mb-2">En una escala del 1 al 10, ¿qué tan confiado te sientes resolviendo problemas de algoritmos?</p>
                             <div class="flex items-center space-x-2 mb-2">
                                 <span class="text-lg font-bold text-purple-400">7</span>
                                 <span class="text-gray-400">/ 10</span>
@@ -263,7 +263,7 @@
 
                     <!-- Open Text -->
                     <div class="bg-gradient-to-r from-green-900/30 to-green-800/20 p-6 rounded-lg border border-green-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -271,11 +271,11 @@
                             </div>
                             <h3 class="text-lg font-semibold text-white">Respuesta Abierta</h3>
                         </div>
-                        <p class="text-gray-300 mb-3">Preguntas que requieren una respuesta escrita donde puedes expresar tu conocimiento con tus propias palabras.</p>
+                        <p class="text-gray-300 mb-2">Preguntas que requieren una respuesta escrita donde puedes expresar tu conocimiento con tus propias palabras.</p>
                         
                         <div class="bg-gray-700 p-4 rounded-lg">
-                            <h4 class="text-white font-medium mb-3">Ejemplo:</h4>
-                            <p class="text-gray-300 mb-3">Describe brevemente qué entiendes por "desarrollo sostenible":</p>
+                            <h4 class="text-white font-medium mb-2">Ejemplo:</h4>
+                            <p class="text-gray-300 mb-2">Describe brevemente qué entiendes por "desarrollo sostenible":</p>
                             <div class="bg-gray-600 p-3 rounded border-l-4 border-green-500">
                                 <p class="text-white italic">
                                     "El desarrollo sostenible es un enfoque que busca satisfacer las necesidades del presente sin comprometer la capacidad de las futuras generaciones para satisfacer sus propias necesidades..."
@@ -293,7 +293,7 @@
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-lg border border-yellow-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -318,7 +318,7 @@
                     </div>
 
                     <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-lg border border-blue-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
@@ -343,7 +343,7 @@
                     </div>
 
                     <div class="bg-gradient-to-br from-green-900/50 to-green-800/30 p-6 rounded-lg border border-green-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -368,7 +368,7 @@
                     </div>
 
                     <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-lg border border-purple-700/50">
-                        <div class="flex items-center mb-3">
+                        <div class="flex items-center mb-2">
                             <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>

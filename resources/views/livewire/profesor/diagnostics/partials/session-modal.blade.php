@@ -55,7 +55,7 @@
                 {{-- Progress Bar --}}
                 @if($selectedSession->completado_at)
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Progreso de Respuestas</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Progreso de Respuestas</h4>
                         @php
                             $totalQ = $selectedSession->answers->count();
                             $correctQ = $selectedSession->answers->where('is_correct', 1)->count();
@@ -63,7 +63,7 @@
                             $unansweredQ = max(0, ($selectedSession->diagMain?->questions->count() ?? $totalQ) - $totalQ);
                             $pct = $totalQ > 0 ? round(($correctQ / $totalQ) * 100) : 0;
                         @endphp
-                        <div class="grid grid-cols-3 gap-3 mb-3">
+                        <div class="grid grid-cols-3 gap-3 mb-2">
                             <div class="text-center">
                                 <span class="block text-lg font-bold text-emerald-400">{{ $correctQ }}</span>
                                 <span class="text-[10px] text-gray-500">Correctas</span>
@@ -85,7 +85,7 @@
 
                     {{-- Answers Table --}}
                     <div>
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Respuestas</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Respuestas</h4>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead>

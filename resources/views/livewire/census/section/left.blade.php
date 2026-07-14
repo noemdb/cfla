@@ -8,7 +8,7 @@
         </div>
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
         @php $jornadaProxima = App\Models\app\Academy\Catchment::getJornadaProxima(); @endphp
-        <div class="mb-3 font-semibold text-lg rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">
+        <div class="mb-2 font-semibold text-lg rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">
             {{ $jornadaProxima['label'] }}, a las 2pm.
         </div>
 

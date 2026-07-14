@@ -5,7 +5,7 @@
         <div class="w-full">
             <div class="text-center">
                 <div class="">
-                    <img data-te-lazy-src="{{ asset('image/authority/1.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                    <img data-te-lazy-src="{{ asset('image/authority/1.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                 </div>
                 <div class="bg-green-800 rounded text-white">
                     <p class="dark:text-neutral-400">FRAY</p>
@@ -20,7 +20,7 @@
         <div class="w-full">
             <div class="text-center">
                 <div class="">
-                    <img data-te-lazy-src="{{ asset('image/authority/2.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                    <img data-te-lazy-src="{{ asset('image/authority/2.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                 </div>
                 <div class="bg-primary-800 rounded text-white">
                     <p class="dark:text-neutral-400">DRA.</p>
@@ -37,7 +37,7 @@
         <div class="w-full">
             <div class="text-center">
                 <div class="">
-                    <img data-te-lazy-src="{{ asset('image/authority/3.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                    <img data-te-lazy-src="{{ asset('image/authority/3.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                 </div>
                 <div class="bg-indigo-800 rounded text-white">
                     <p class="dark:text-neutral-400">.</p>
@@ -53,7 +53,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/4.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/4.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
@@ -72,7 +72,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/5.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/5.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
@@ -91,7 +91,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/6.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/6.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
@@ -110,7 +110,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/7.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/7.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
@@ -129,7 +129,7 @@
             <div class="text-center">
                 <div id="p1" class="flex flex-col">
                     <div id="h1" class="flex-start">
-                        <img data-te-lazy-src="{{ asset('image/authority/8.jpg') }}" data-te-lazy-load-init class="mx-auto mb-3 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
+                        <img data-te-lazy-src="{{ asset('image/authority/8.jpg') }}" data-te-lazy-load-init class="mx-auto mb-2 xs:w-1/2 sm:w-3/4 md:w-full rounded-full md:p-4 opacity-80 hover:opacity-100 hover:scale-110 ease-in duration-150" alt="Avatar" />
                     </div>
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">

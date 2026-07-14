@@ -141,7 +141,7 @@
                         <tr>
                             <td colspan="8" class="px-5 py-16 text-center">
                                 <div>
-                                    <svg class="w-14 h-14 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                     </svg>
                                     <p class="text-gray-500 font-medium mb-1">No hay lapsos registrados</p>
@@ -164,7 +164,7 @@
     <!-- ===== MODAL: Confirmar Eliminación ===== -->
     <x-modal title="Eliminar Lapso" blur="lg" wire:model="confirmDeleteId" max-width="md" x-on:close="confirmDeleteId = null" persistent>
         <div class="p-6 text-center">
-            <svg class="w-16 h-16 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este lapso?</h3>
@@ -210,7 +210,7 @@
 
             {{-- Sección 1: Datos del Lapso --}}
             <div>
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -249,7 +249,7 @@
 
             {{-- Sección 2: Fechas --}}
             <div class="border-t border-white/5 pt-5">
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -283,7 +283,7 @@
 
             {{-- Sección 3: Censo Escolar --}}
             <div class="border-t border-white/5 pt-5">
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
@@ -316,7 +316,7 @@
 
             {{-- Sección 4: Pre-Cierre --}}
             <div class="border-t border-white/5 pt-5">
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -377,7 +377,7 @@
 
                     {{-- Columna: Identificación --}}
                     <div class="bg-white/5 rounded-lg p-5">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3">Identificación</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Identificación</h4>
                         <dl class="space-y-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</dt>
@@ -400,7 +400,7 @@
 
                     {{-- Columna: Fechas --}}
                     <div class="bg-white/5 rounded-lg p-5">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3">Fechas Académicas</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Fechas Académicas</h4>
                         <dl class="space-y-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Inicio</dt>
@@ -423,7 +423,7 @@
 
                     {{-- Columna: Estadísticas --}}
                     <div class="bg-white/5 rounded-lg p-5">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3">Estadísticas</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Estadísticas</h4>
                         <dl class="space-y-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Carga Académica</dt>
@@ -454,7 +454,7 @@
                 {{-- Censo Escolar --}}
                 @if($previewLapso->date_start_census || $previewLapso->date_end_census)
                     <div class="bg-white/5 rounded-lg p-5">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3">Censo Escolar</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Censo Escolar</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Fecha Inicio</dt>
@@ -479,7 +479,7 @@
                 {{-- Pre-Cierre --}}
                 @if($previewLapso->date_preclosing)
                     <div class="bg-white/5 rounded-lg p-5">
-                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3">Pre-Cierre</h4>
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-2">Pre-Cierre</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Fecha Pre-Cierre</dt>

@@ -32,7 +32,7 @@
             <div
                 class="rounded-lg border border-red-100 dark:border-red-900 bg-gray-50 dark:bg-gray-800/50 p-4">
                 <h4
-                    class="mb-3 flex items-center gap-2 font-bold text-red-700 dark:text-red-400 uppercase text-sm tracking-wide">
+                    class="mb-2 flex items-center gap-2 font-bold text-red-700 dark:text-red-400 uppercase text-sm tracking-wide">
                     <x-icon name="x-circle" class="w-5 h-5 shrink-0" />
                     No está permitido:
                 </h4>

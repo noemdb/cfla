@@ -119,7 +119,7 @@
                 <div x-show="activeTab === {{ $tabNum }}" x-cloak>
                     {{-- ── Planificación ── --}}
                     <div class="mb-6">
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -176,7 +176,7 @@
                         $diagHasData   = $diagTotal > 0;
                     @endphp
                     <div class="mb-6">
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                             <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                             </svg>
@@ -205,7 +205,7 @@
                                 subtext="Sesiones activas pendientes"
                             />
                             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg transition-all duration-300 hover:border-indigo-500/30">
-                                <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-start justify-between mb-2">
                                     <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
@@ -225,7 +225,7 @@
 
                     {{-- ── LMS / Lecciones ── --}}
                     <div>
-                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <p class="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                             <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
@@ -262,7 +262,7 @@
     @else
     {{-- Empty State (Planning pattern) --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-12 text-center">
-        <svg class="w-16 h-16 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-16 h-16 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
         </svg>
         <p class="text-lg font-medium text-gray-400">Sin indicadores disponibles</p>

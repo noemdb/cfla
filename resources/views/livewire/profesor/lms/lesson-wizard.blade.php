@@ -246,7 +246,7 @@
                 </div>
             @empty
                 <div class="col-span-full text-center py-16">
-                    <svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-16 h-16 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                     <p class="text-sm font-medium text-slate-400">No hay actividades disponibles</p>
@@ -425,7 +425,7 @@
 
                             {{-- Achievements --}}
                             <div class="border-t border-white/5 pt-4">
-                                <div class="flex items-center gap-2 mb-3">
+                                <div class="flex items-center gap-2 mb-2">
                                     <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                                     </svg>
@@ -680,7 +680,7 @@
                                     </div>
                                 @empty
                                     <div class="text-center py-12">
-                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                         </svg>
                                         <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
@@ -691,7 +691,7 @@
                                 {{-- Recursos --}}
                                 @if(count($exportPreviewData['resources'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                             </svg>
@@ -721,7 +721,7 @@
                                 {{-- HTML Embeds --}}
                                 @if(count($exportPreviewData['html_embeds'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
@@ -753,7 +753,7 @@
                                 {{-- Enlaces --}}
                                 @if(count($exportPreviewData['links'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
@@ -803,7 +803,7 @@
                         @if($exportWizardStep === 3)
                             <div class="px-6 py-5 space-y-5">
                                 <div class="text-center pb-2">
-                                    <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                                    <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
                                         <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                         </svg>
@@ -1087,7 +1087,7 @@
                                     </div>
                                 @empty
                                     <div class="text-center py-12">
-                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                         </svg>
                                         <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
@@ -1098,7 +1098,7 @@
                                 {{-- Recursos --}}
                                 @if(count($importPreviewData['resources'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                             </svg>
@@ -1128,7 +1128,7 @@
                                 {{-- HTML Embeds --}}
                                 @if(count($importPreviewData['html_embeds'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
@@ -1160,7 +1160,7 @@
                                 {{-- Enlaces --}}
                                 @if(count($importPreviewData['links'] ?? []) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
@@ -1211,7 +1211,7 @@
                             @php $selectedAct = collect($importAvailableActivities)->firstWhere('id', $importSourceActivityId); @endphp
                             <div class="px-6 py-5 space-y-5">
                                 <div class="text-center pb-2">
-                                    <div class="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-3">
+                                    <div class="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-2">
                                         <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
                                         </svg>
@@ -1470,7 +1470,7 @@
                         {{-- Secciones --}}
                         @forelse($listPreviewData['sections'] as $section)
                             <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
-                                <div class="flex items-center gap-2 mb-3">
+                                <div class="flex items-center gap-2 mb-2">
                                     <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
                                     <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
                                 </div>
@@ -1596,7 +1596,7 @@
                             @empty
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
                                     <div class="text-center py-12">
-                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                         </svg>
                                         <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
@@ -1614,7 +1614,7 @@
                             @if(count($unlinkedResources) > 0)
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
                                     <div>
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                         </svg>
@@ -1667,7 +1667,7 @@
                             @if(count($unlinkedLinks) > 0)
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
                                     <div>
-                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                         </svg>
@@ -1696,7 +1696,7 @@
                             @if(count($unlinkedEmbeds) > 0)
                                 <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
                                     <div>
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
@@ -2014,7 +2014,7 @@
                                 </div>
                             @else
                                 <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                    <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-3">
+                                    <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-2">
                                         <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
                                         </svg>
@@ -2150,7 +2150,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <h3 class="text-base font-bold text-emerald-400 mb-1">¡Lección publicada exitosamente!</h3>
-                <p class="text-sm text-slate-400 mb-3">El contenido ya está disponible para los estudiantes.</p>
+                <p class="text-sm text-slate-400 mb-2">El contenido ya está disponible para los estudiantes.</p>
                 <div class="flex items-center justify-center gap-3">
                     {{-- <button wire:click="openListStudentPreview({{ $selectedActivityId }})"
                             class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm rounded-lg font-medium transition-all">
@@ -2237,7 +2237,7 @@
                             @if($wizardReferents && count($wizardReferents) > 0)
                                 <div class="border-t border-slate-700 pt-4 mt-2"
                                      x-data="{ expandedReferent: null }">
-                                    <div class="flex items-center gap-2 mb-3">
+                                    <div class="flex items-center gap-2 mb-2">
                                         <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
@@ -2395,7 +2395,7 @@
                             @if($currentSlide)
                                 <div class="px-4 py-3" wire:key="slide-{{ $currentSlideIndex }}">
                                     {{-- Slide Title (editable inline) --}}
-                                    <div class="flex items-center gap-2 mb-3">
+                                    <div class="flex items-center gap-2 mb-2">
                                         <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 text-emerald-400 text-xs font-bold shrink-0">
                                             {{ $currentSlideIndex + 1 }}
                                         </span>
@@ -2442,7 +2442,7 @@
                                                           spellcheck="false"></textarea>
                                             @else
                                                 <div class="text-center py-10 bg-slate-900/50 border border-dashed border-slate-700/50 rounded-lg">
-                                                    <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
                                                         <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                                     </div>
                                                     <p class="text-xs text-slate-500 font-medium mb-1">Esta diapositiva esta vacia</p>
@@ -2578,7 +2578,7 @@
                                                     </div>
                                                 @else
                                                     <div class="text-center py-12 text-slate-400">
-                                                        <svg class="w-10 h-10 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                         <p class="text-sm font-medium">Sin contenido para previsualizar</p>
                                                         <p class="text-xs mt-1">Genera contenido o escribe HTML en la pestana Editor</p>
                                                     </div>
@@ -2679,11 +2679,11 @@
                             @else
                                 {{-- Empty State: No slides --}}
                                 <div class="p-8 text-center">
-                                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-slate-700/30 flex items-center justify-center">
+                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
                                         <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                     </div>
                                     <h3 class="text-sm font-bold text-slate-400 mb-2">No hay diapositivas</h3>
-                                    <p class="text-xs text-slate-500 mb-3">Agrega una seccion o genera la estructura con IA para empezar.</p>
+                                    <p class="text-xs text-slate-500 mb-2">Agrega una seccion o genera la estructura con IA para empezar.</p>
                                     <div class="flex items-center justify-center gap-3">
                                         <button wire:click="generateStep2Sections"
                                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
@@ -2767,7 +2767,7 @@
 
                                 {{-- ═══ Tab: Archivos descargables ═══ --}}
                                 <div x-show="activeTab === 'resources'" x-cloak x-transition:enter.duration.200ms>
-                                    <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -2778,7 +2778,7 @@
                                     </div>
 
                                     @if(count($wizardResources) > 0)
-                                        <div class="space-y-1.5 mb-3">
+                                        <div class="space-y-1.5 mb-2">
                                             @foreach($wizardResources as $rIdx => $res)
                                                 @php
                                                     $ext = strtolower(pathinfo($res['media']['original_name'] ?? '', PATHINFO_EXTENSION));
@@ -2851,7 +2851,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-3">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
                                             <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
@@ -3033,7 +3033,7 @@
 
                                 {{-- ═══ Tab: HTML Embeds ═══ --}}
                                 <div x-show="activeTab === 'embeds'" x-cloak x-transition:enter.duration.200ms>
-                                    <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -3049,7 +3049,7 @@
                                     </div>
 
                                     @if(count($wizardHtmlEmbeds) > 0)
-                                        <div class="space-y-1.5 mb-3">
+                                        <div class="space-y-1.5 mb-2">
                                             @foreach($wizardHtmlEmbeds as $eIdx => $embed)
                                                 <div class="flex items-start gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
                                                     <div class="w-9 h-9 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -3096,7 +3096,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-3">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
                                             <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
@@ -3206,7 +3206,7 @@
 
                                 {{-- ═══ Tab: Enlaces externos ═══ --}}
                                 <div x-show="activeTab === 'links'" x-cloak x-transition:enter.duration.200ms>
-                                    <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center justify-between mb-2">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -3217,7 +3217,7 @@
                                     </div>
 
                                     @if(count($wizardLinks) > 0)
-                                        <div class="space-y-1.5 mb-3">
+                                        <div class="space-y-1.5 mb-2">
                                             @foreach($wizardLinks as $lIdx => $link)
                                                 @php
                                                     $badge = match($link['link_type']) {
@@ -3253,7 +3253,7 @@
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-3">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
                                             <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                             </svg>
@@ -3554,7 +3554,7 @@
                             <div class="flex flex-1 overflow-hidden min-h-0" x-data="tocNavigation()">
                                 {{-- ═══ SIDEBAR TOC ═══ --}}
                                 <aside class="hidden lg:block w-56 shrink-0 border-r border-slate-700/50 bg-slate-800/80 overflow-y-auto p-3 sticky top-0 self-start max-h-[calc(100vh-12rem)]">
-                                    <div class="flex items-center gap-1.5 mb-3 px-1">
+                                    <div class="flex items-center gap-1.5 mb-2 px-1">
                                         <span class="text-xs text-slate-400">📑</span>
                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Índice</span>
                                         <span class="ml-auto text-[10px] font-mono text-slate-600">{{ count($this->previewSections) }} sec.</span>
@@ -3679,7 +3679,7 @@
                                     </div>
                                 @empty
                                     <div class="text-center py-12">
-                                        <svg class="w-16 h-16 text-slate-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-16 h-16 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                         </svg>
                                         <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
@@ -3762,7 +3762,7 @@
                          class="lg:hidden fixed inset-0 z-[9999]">
                         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="mobileTocOpen = false"></div>
                         <div class="absolute bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 rounded-t-2xl p-4 max-h-[50vh] overflow-y-auto">
-                            <div class="flex items-center justify-between mb-3 px-1">
+                            <div class="flex items-center justify-between mb-2 px-1">
                                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Índice</span>
                                 <button @click="mobileTocOpen = false" class="p-1.5 text-slate-500 hover:text-white rounded-lg hover:bg-slate-700/50">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -3945,7 +3945,7 @@
                                     </div>
                                 @empty
                                     <div class="text-center py-12">
-                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-16 h-16 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                         </svg>
                                         <p class="text-sm font-medium text-slate-500">No hay contenido disponible</p>
@@ -3961,7 +3961,7 @@
                                 @endphp
                                 @if(count($unlinkedResources) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                             </svg>
@@ -3989,7 +3989,7 @@
                                 @endif
                                 @if(count($unlinkedLinks) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
@@ -4015,7 +4015,7 @@
                                 @endif
                                 @if(count($unlinkedEmbeds) > 0)
                                     <div class="border-t border-slate-200 pt-5">
-                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>

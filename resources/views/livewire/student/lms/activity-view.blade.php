@@ -87,7 +87,7 @@
     {{-- Recursos descargables --}}
     @if($resources->count())
     <section class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
-        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-2">
             Recursos
         </h2>
         <ul class="space-y-2">

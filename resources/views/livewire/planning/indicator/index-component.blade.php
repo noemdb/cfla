@@ -51,7 +51,7 @@
     </div>
 
     <!-- Filters: Lapso + Peducativo + Pestudio + Profesor -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-lg mb-3">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-lg mb-2">
         {{-- Lapso selector --}}
         <div class="flex flex-wrap gap-1 mb-2 pb-2 border-b border-white/5">
             <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 w-full mb-1">Período:</span>
@@ -152,7 +152,7 @@
                 <div class="space-y-8">
                     @forelse($peducativoMainIndicators as $item)
                         <div>
-                            <div class="flex items-center gap-3 mb-3">
+                            <div class="flex items-center gap-3 mb-2">
                                 <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
                                     <span class="text-cyan-400 text-xs font-bold">{{ $item->peducativo?->code ?? '' }}</span>
                                 </div>
@@ -178,7 +178,7 @@
                         @if(!$loop->last)<hr class="border-white/5 my-6">@endif
                     @empty
                         <div class="text-center py-16">
-                            <svg class="w-16 h-16 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <svg class="w-16 h-16 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <p class="text-gray-500 font-medium">No hay programas educativos activos</p>
                             <p class="text-gray-600 text-sm mt-1">Activa un programa educativo con planificación para ver indicadores.</p>
                         </div>
@@ -196,7 +196,7 @@
 
                 @if(isset($tab2Data[$lapsoId]) && count($tab2Data[$lapsoId]) > 0)
                     <!-- Peducativo nav-tabs (uses selected lapso only) -->
-                    <div class="border-b border-white/5 mb-3">
+                    <div class="border-b border-white/5 mb-2">
                         <nav class="flex overflow-x-auto -mb-px">
                             @foreach($peducativos as $peducativo)
                                 @php $ieePROM = $tab2Data[$lapsoId][$peducativo->id]['ieePROM'] ?? 0; @endphp
@@ -296,7 +296,7 @@
 
                 @if(isset($tab3Data[$lapsoId]) && count($tab3Data[$lapsoId]) > 0)
                     <!-- Peducativo nav-tabs (uses selected lapso only) -->
-                    <div class="border-b border-white/5 mb-3">
+                    <div class="border-b border-white/5 mb-2">
                         <nav class="flex overflow-x-auto -mb-px">
                             @foreach($peducativos as $peducativo)
                                 @php
@@ -368,7 +368,7 @@
                                 </div>
                             @else
                                 <div class="bg-white/5 rounded-lg p-6 text-center">
-                                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                                     <p class="text-gray-500 text-sm mb-1">Sin actividades registradas</p>
                                     <p class="text-gray-600 text-xs">No hay actividades planificadas para este período en {{ $peducativo->name }}.</p>
                                 </div>
@@ -415,7 +415,7 @@
 
                     {{-- Question-level indicators --}}
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Resumen de Preguntas</h4>
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Resumen de Preguntas</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
@@ -449,7 +449,7 @@
 
                     {{-- Completion progress bar --}}
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-                        <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center justify-between mb-2">
                             <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
                             <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
                         </div>
@@ -509,7 +509,7 @@
                             </div>
                         @else
                             <div class="p-8 text-center">
-                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 <p class="text-gray-500 text-sm mb-1">Sin diagnósticos activos</p>
                                 <p class="text-gray-600 text-xs">No hay diagnósticos activos para el período seleccionado.</p>
                             </div>

@@ -1,6 +1,6 @@
 <!-- Team Section -->
 <div class="space-y-2">
-    <h6 class="flex items-center font-bold uppercase text-emerald-400 text-xs tracking-wider mb-3">
+    <h6 class="flex items-center font-bold uppercase text-emerald-400 text-xs tracking-wider mb-2">
         <x-icon name="users" class="w-4 h-4 mr-2" />
         Nuestro Equipo
     </h6>
@@ -14,7 +14,7 @@
 
 <!-- Contact Section -->
 <div class="space-y-3">
-    <h6 class="flex items-center font-bold uppercase text-emerald-400 text-xs tracking-wider mb-3">
+    <h6 class="flex items-center font-bold uppercase text-emerald-400 text-xs tracking-wider mb-2">
         Contacto
     </h6>
     <div class="text-xs text-gray-400 space-y-3">

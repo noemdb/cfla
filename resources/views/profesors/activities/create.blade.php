@@ -47,7 +47,7 @@
              class="lg:col-span-1">
             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5 sticky top-24">
                 {{-- Toggle button inside sidebar --}}
-                <div class="flex items-center justify-between mb-3 pb-3 border-b border-white/5">
+                <div class="flex items-center justify-between mb-2 pb-3 border-b border-white/5">
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
                         <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -71,7 +71,7 @@
             {{-- Button to show resumen again (visible when collapsed) --}}
             <div x-show="!resumenOpen"
                  x-transition
-                 class="mb-3">
+                 class="mb-2">
                 <button @click="resumenOpen = true"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

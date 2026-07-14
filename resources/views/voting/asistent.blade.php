@@ -63,7 +63,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold text-white mb-3">No hay encuestas activas</h3>
+                        <h3 class="text-lg font-bold text-white mb-2">No hay encuestas activas</h3>
                         <p class="text-gray-400 text-lg mb-8">
                             Actualmente no hay encuestas disponibles para participar.
                         </p>

@@ -93,7 +93,7 @@
             @if($editingSectionId === $section['id'])
             <div class="px-4 py-3 bg-slate-900/30 border-t border-slate-700"
                  x-data="{ tab: 'text' }">
-                <div class="flex gap-2 mb-3">
+                <div class="flex gap-2 mb-2">
                     <button @click="tab='text'"
                             :class="tab==='text' ? 'text-emerald-400 border-emerald-400' : 'text-slate-400 border-transparent'"
                             class="text-xs pb-1 border-b-2 transition-colors">

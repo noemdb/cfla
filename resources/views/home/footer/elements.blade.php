@@ -1,5 +1,5 @@
 <div class="">
-    <h6 class="flex items-center justify-center mb-3 font-semibold uppercase md:justify-start text-emerald-100">
+    <h6 class="flex items-center justify-center mb-2 font-semibold uppercase md:justify-start text-emerald-100">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
             class="w-4 h-4 mr-3 text-emerald-500">
             <path
@@ -18,32 +18,32 @@
 </div>
 <!-- Products section -->
 <div class="">
-    <h6 class="flex justify-center mb-3 font-semibold uppercase md:justify-start text-emerald-100">
+    <h6 class="flex justify-center mb-2 font-semibold uppercase md:justify-start text-emerald-100">
         Planes de Formación
     </h6>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#services" class="text-gray-400 hover:text-emerald-400 transition-colors">Educación Inicial</a>
     </p>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#services" class="text-gray-400 hover:text-emerald-400 transition-colors">Educación Primaria</a>
     </p>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#services" class="text-gray-400 hover:text-emerald-400 transition-colors">Media General Ciencia y
             Tecnología</a>
     </p>
 </div>
 <!-- Useful links section -->
 <div class="">
-    <h6 class="flex justify-center mb-3 font-semibold uppercase md:justify-start text-emerald-100">
+    <h6 class="flex justify-center mb-2 font-semibold uppercase md:justify-start text-emerald-100">
         Enlaces útiles
     </h6>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#hero" class="text-gray-400 hover:text-emerald-400 transition-colors">Destacados</a>
     </p>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#gallery" class="text-gray-400 hover:text-emerald-400 transition-colors">Galería</a>
     </p>
-    <p class="mb-3">
+    <p class="mb-2">
         <a href="#testimonials" class="text-gray-400 hover:text-emerald-400 transition-colors">Experiencias</a>
     </p>
     <p>
@@ -52,10 +52,10 @@
 </div>
 <!-- Contact section -->
 <div>
-    <h6 class="flex justify-center mb-3 font-semibold uppercase md:justify-start text-emerald-100">
+    <h6 class="flex justify-center mb-2 font-semibold uppercase md:justify-start text-emerald-100">
         Contacto
     </h6>
-    <p class="flex items-center justify-center mb-3 md:justify-start text-gray-400">
+    <p class="flex items-center justify-center mb-2 md:justify-start text-gray-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
             class="w-5 h-5 mr-3 text-emerald-500">
             <path
@@ -65,7 +65,7 @@
         </svg>
         AVENIDA LA PAZ CON AVENIDA CEDEÑO FRENTE A LA PLAZA JUAN JOSE DE MAYA. SAN FELIPE ESTADO YARACUY. VENEZUELA.
     </p>
-    <p class="flex items-center justify-center mb-3 md:justify-start text-gray-400">
+    <p class="flex items-center justify-center mb-2 md:justify-start text-gray-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
             class="w-5 h-5 mr-3 text-emerald-500">
             <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
@@ -73,7 +73,7 @@
         </svg>
         colegiofrayluisa@gmail.com
     </p>
-    <p class="flex items-center justify-center mb-3 md:justify-start text-gray-400">
+    <p class="flex items-center justify-center mb-2 md:justify-start text-gray-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
             class="w-5 h-5 mr-3 text-emerald-500">
             <path fill-rule="evenodd"

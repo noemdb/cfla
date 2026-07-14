@@ -194,7 +194,7 @@
             </div>
         @empty
             <div class="col-span-full py-16 text-center">
-                <svg class="w-14 h-14 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
                 <p class="text-gray-500 font-medium mb-1">No hay áreas de conocimiento registradas</p>
@@ -213,7 +213,7 @@
     <!-- ===== MODAL: Confirmar Eliminación ===== -->
     <x-modal title="Eliminar Área de Conocimiento" blur="lg" wire:model="confirmDeleteId" max-width="md" x-on:close="confirmDeleteId = null" persistent>
         <div class="p-6 text-center">
-            <svg class="w-16 h-16 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta área de conocimiento?</h3>
@@ -249,7 +249,7 @@
 
             {{-- Sección 1: Identificación --}}
             <div>
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
@@ -298,7 +298,7 @@
 
             {{-- Sección 2: Códigos --}}
             <div class="border-t border-white/5 pt-5">
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                     </svg>
@@ -340,7 +340,7 @@
 
             {{-- Sección 3: Descripción y Observaciones --}}
             <div class="border-t border-white/5 pt-5">
-                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
                     </svg>
@@ -412,7 +412,7 @@
 
                     {{-- Formulario rápido --}}
                     <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                        <h4 class="text-xs font-bold text-emerald-400 mb-3 flex items-center gap-2">
+                        <h4 class="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-2">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>

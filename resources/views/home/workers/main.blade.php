@@ -1,7 +1,7 @@
 <x-card>
 
     @slot('header')
-    <h3 class=" bg-green-100 mb-3 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
+    <h3 class=" bg-green-100 mb-2 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
         Cuerpo docente
     </h3>
     @endslot

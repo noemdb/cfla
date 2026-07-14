@@ -125,7 +125,7 @@
             </div>
         @empty
             <div class="col-span-full py-20 bg-gray-900/20 border border-white/5 rounded-lg text-center">
-                <svg class="w-16 h-16 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor"
+                <svg class="w-16 h-16 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>

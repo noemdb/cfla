@@ -14,7 +14,7 @@
                 {{-- <x-select placeholder="Seleccione Grado/Año" wire:model.live="grado_id" :options="$list_grado" option-value="id" option-label="name" /> --}}
 
                 <!-- Academic Structure Section -->
-                <div class="mt-8 mb-3">
+                <div class="mt-8 mb-2">
                     <h3
                         class="text-sm font-bold text-emerald-400 uppercase tracking-[0.2em] mb-6 flex items-center justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@
                         @forelse ($peducativos as $peducativo)
                             <div
                                 class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/10 rounded-lg p-5 hover:border-emerald-500/40 transition-all duration-300">
-                                <div class="flex items-center space-x-3 mb-3 border-b border-emerald-500/10 pb-3">
+                                <div class="flex items-center space-x-3 mb-2 border-b border-emerald-500/10 pb-3">
                                     <div class="bg-emerald-500/10 p-2 rounded-lg">
                                         <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">

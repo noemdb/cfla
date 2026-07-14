@@ -36,7 +36,7 @@
 @endphp
 
 <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg transition-all duration-300 hover:border-{{ $color }}-500/30 hover:shadow-lg hover:shadow-{{ $color }}-500/5">
-    <div class="flex items-start justify-between mb-3">
+    <div class="flex items-start justify-between mb-2">
         <div class="w-10 h-10 {{ $c['bg'] }} rounded-lg flex items-center justify-center {{ $c['icon'] }}">
             {!! $icon !!}
         </div>

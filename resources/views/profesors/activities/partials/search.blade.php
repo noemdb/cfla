@@ -1,4 +1,4 @@
-<form method="GET" action="{{ route($route ?? 'app.profesors.activities.index') }}" class="mb-3">
+<form method="GET" action="{{ route($route ?? 'app.profesors.activities.index') }}" class="mb-2">
     <input type="hidden" name="lapso_id" value="{{ $lapso_id ?? '' }}">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
         {{-- Plan de Estudio --}}

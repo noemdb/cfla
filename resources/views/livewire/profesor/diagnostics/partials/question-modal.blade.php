@@ -225,7 +225,7 @@
                     @if($pregunta)
                         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Vista previa</h4>
-                            <p class="text-sm text-gray-200 mb-3">{{ $pregunta }}</p>
+                            <p class="text-sm text-gray-200 mb-2">{{ $pregunta }}</p>
                             @if($tipo_pregunta === 'multiple')
                                 <div class="space-y-1.5">
                                     @foreach($options as $index => $option)

@@ -223,7 +223,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="py-12 text-center">
-                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
                                 </svg>
                                 <p class="text-sm font-medium text-gray-400">
@@ -363,7 +363,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="py-12 text-center">
-                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                 </svg>
                                 <p class="text-sm font-medium text-gray-400">No hay competencias para este referente</p>
@@ -441,7 +441,7 @@
                     @empty
                         <tr>
                             <td colspan="4" class="py-12 text-center">
-                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                                 <p class="text-sm font-medium text-gray-400">No hay indicadores para esta competencia</p>
@@ -905,7 +905,7 @@
 
                     {{-- Step 2: Select Referent (card grid) --}}
                     <div class="pt-4">
-                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3">
+                        <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">
                             Referente Normativo
                             <span class="text-gray-600 font-normal normal-case ml-2">Seleccione el referente para la importación</span>
                         </label>

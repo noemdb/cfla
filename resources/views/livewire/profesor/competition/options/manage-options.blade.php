@@ -108,7 +108,7 @@
 
                     {{-- Divider --}}
                     <div class="border-t border-white/5 pt-4">
-                        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">
+                        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
                             {{ $editOptionId ? 'Editar Opción' : 'Nueva Opción' }}
                         </h4>
 

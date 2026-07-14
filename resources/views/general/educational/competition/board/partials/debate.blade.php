@@ -4,7 +4,7 @@
 
         <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Debates de la Competición</h5>
 
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+        <p class="mb-2 font-normal text-gray-700 dark:text-gray-400">
 
 
             <div class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">

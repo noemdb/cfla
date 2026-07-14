@@ -7,7 +7,7 @@
     <div class="px-4 py-8 mx-auto w-full sm:px-6 lg:px-8 fade-in">
         <div
             class="mb-8 flex flex-col md:flex-row md:items-center justify-between bg-gray-900/40 backdrop-blur-md p-6 rounded-lg border border-white/5 shadow-xl shadow-blue-500/5">
-            <div class="mb-3 md:mb-0">
+            <div class="mb-2 md:mb-0">
                 <h1 class="text-lg font-extrabold text-white mb-2 tracking-tight">Auditoría de Respuestas</h1>
                 <p class="text-blue-400 font-medium">Revisión de respuestas emitidas para: <span
                         class="text-emerald-300">"{{ $competition->name }}"</span></p>

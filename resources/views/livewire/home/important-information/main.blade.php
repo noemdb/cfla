@@ -37,7 +37,7 @@
                 <div
                     class="w-full h-full flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/20 p-8 text-center">
                     <div
-                        class="w-24 h-24 mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-500">
+                        class="w-24 h-24 mb-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-500">
                         <i class="bx bx-image-alt text-5xl"></i>
                     </div>
                     <h3
@@ -87,7 +87,7 @@
 
                 <div
                     class="mt-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-white/5">
-                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3 text-center">Protocolo por
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 text-center">Protocolo por
                         Incumplimiento</p>
                     <div class="grid grid-cols-1 gap-3">
                         <div

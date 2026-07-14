@@ -3,7 +3,7 @@
     @if ($debates->isNotEmpty())
 
         <div class="md:flex my-2 gap-3">
-            <ul class="flex-column space-y-3 text-sm font-medium md:me-4 mb-3 md:mb-0 min-w-[250px]">
+            <ul class="flex-column space-y-3 text-sm font-medium md:me-4 mb-2 md:mb-0 min-w-[250px]">
                 <li
                     class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 px-4 rounded-lg font-black uppercase tracking-widest text-center shadow-lg backdrop-blur-md">
                     {{ $grado->name ?? 'Grado no seleccionado' }}

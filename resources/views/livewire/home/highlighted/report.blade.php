@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="p-6">
-            <p class="text-xs mb-3 text-neutral-600 dark:text-neutral-200">
+            <p class="text-xs mb-2 text-neutral-600 dark:text-neutral-200">
                 Usando esta opción es necesaria la verificación, concialición y registro de los datos ingresados, estas
                 actividades cumplen con un lapso de tiempo (uno (1) o dos (2) días) para ser correctamente procesados en
                 el <span class=" text-green-950 font-bold">SAEFL</span>.

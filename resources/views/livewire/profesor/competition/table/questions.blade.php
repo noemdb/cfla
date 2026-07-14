@@ -1,6 +1,6 @@
 <div class="space-y-4">
     {{-- Filters bar --}}
-    <div class="flex flex-col lg:flex-row items-start lg:items-center gap-3 mb-3">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center gap-3 mb-2">
         {{-- Search --}}
         <div class="relative flex-1 w-full">
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">

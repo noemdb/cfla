@@ -6,7 +6,7 @@
 
         @if (! $question->status_over_time)
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 mb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 mb-2">
                 <div class="col-span-4 text-center">
                     <div class=" font-bold text-lg mb-2 border-t-2 border-gray-600">Cronómetro</div>
                 </div>

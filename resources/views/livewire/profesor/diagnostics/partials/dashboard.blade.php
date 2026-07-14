@@ -62,7 +62,7 @@
 
     {{-- Progress Overview --}}
     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Progreso General</h4>
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Progreso General</h4>
         <div class="space-y-3">
             <div>
                 <div class="flex items-center justify-between text-xs mb-1">
@@ -98,7 +98,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         {{-- Recent Questions --}}
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Preguntas Recientes</h4>
                 <button wire:click="setActiveTab('questions')" class="text-[10px] text-purple-400 hover:text-purple-300 font-medium">Ver todas →</button>
             </div>
@@ -118,7 +118,7 @@
 
         {{-- Recent Sessions --}}
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Sesiones Recientes</h4>
                 <button wire:click="setActiveTab('sessions')" class="text-[10px] text-purple-400 hover:text-purple-300 font-medium">Ver todas →</button>
             </div>

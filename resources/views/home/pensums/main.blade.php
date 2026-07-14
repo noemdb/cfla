@@ -42,11 +42,11 @@
                     role="dialog" aria-modal="true" aria-labelledby="modal-headline">
 
                     <div class="p-6">
-                        <h2 class="text-lg font-bold text-gray-800 mb-3">
+                        <h2 class="text-lg font-bold text-gray-800 mb-2">
                             Formulario de Inscripción<br>
                             <span class="text-amber-600">Danzas Joropo Recio</span>
                         </h2>
-                        <p class="text-sm text-gray-600 mb-3">
+                        <p class="text-sm text-gray-600 mb-2">
                             Complete todos los campos. La información se usará solo para inscripción y seguridad.
                         </p>
 

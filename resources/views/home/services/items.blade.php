@@ -24,7 +24,7 @@
 
                 </div>
                 <div class="p-6">
-                    <h4 class="mb-3 text-lg font-semibold">Educación Primaria</h4>
+                    <h4 class="mb-2 text-lg font-semibold">Educación Primaria</h4>
                     <hr />
                     <p class="mt-4">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
@@ -77,7 +77,7 @@
 
                 </div>
                 <div class="p-6">
-                    <h4 class="mb-3 text-lg font-semibold">Media General Ciencia y Tenología</h4>
+                    <h4 class="mb-2 text-lg font-semibold">Media General Ciencia y Tenología</h4>
                     <hr />
                     <p class="mt-4">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"

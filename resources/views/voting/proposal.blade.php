@@ -9,7 +9,7 @@
         <section class="mb-16">
             <div class="bg-white rounded-lg shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-8">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-3">Resumen</h2>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-2">Resumen</h2>
                     <div class="w-24 h-1 gradient-primary mx-auto rounded-full"></div>
                 </div>
 
@@ -47,7 +47,7 @@
 
                     <div class="relative">
                         <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-lg p-8 text-white">
-                            <h4 class="text-lg font-semibold mb-3">Beneficios Clave</h4>
+                            <h4 class="text-lg font-semibold mb-2">Beneficios Clave</h4>
                             <ul class="space-y-3">
                                 <li class="flex items-center">
                                     <svg class="w-5 h-5 mr-3 text-blue-200" fill="none" stroke="currentColor"
@@ -99,7 +99,7 @@
         <!-- Funcionalidades Principales -->
         <section class="mb-16 print-break">
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-900 mb-3">Funcionalidades Principales</h2>
+                <h2 class="text-4xl font-bold text-gray-900 mb-2">Funcionalidades Principales</h2>
                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Cada componente ha sido diseñado pensando en la experiencia del usuario y la seguridad integral
                 </p>
@@ -363,7 +363,7 @@
         <section class="mb-16 print-break">
             <div class="bg-gray-900 text-white rounded-lg p-8 lg:p-12">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold mb-3">Arquitectura Técnica</h2>
+                    <h2 class="text-4xl font-bold mb-2">Arquitectura Técnica</h2>
                     <p class="text-lg text-gray-300 max-w-3xl mx-auto">
                         Construido sobre tecnologías modernas y escalables para garantizar rendimiento y confiabilidad
                     </p>
@@ -372,14 +372,14 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="bg-gray-800 rounded-lg p-6">
-                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-2">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h6a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2v-4a2 2 0 00-2-2m8-8V6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold mb-3">Backend Robusto</h3>
+                        <h3 class="text-lg font-bold mb-2">Backend Robusto</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Laravel 10+ Framework</li>
                             <li>• Base de datos MySQL/PostgreSQL</li>
@@ -390,14 +390,14 @@
                     </div>
 
                     <div class="bg-gray-800 rounded-lg p-6">
-                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-2">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold mb-3">Frontend Moderno</h3>
+                        <h3 class="text-lg font-bold mb-2">Frontend Moderno</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Livewire para interactividad</li>
                             <li>• Tailwind CSS responsive</li>
@@ -408,14 +408,14 @@
                     </div>
 
                     <div class="bg-gray-800 rounded-lg p-6">
-                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-2">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-bold mb-3">Seguridad Integral</h3>
+                        <h3 class="text-lg font-bold mb-2">Seguridad Integral</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Encriptación HTTPS/TLS</li>
                             <li>• Validación CSRF</li>
@@ -428,8 +428,8 @@
 
                 <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6">
-                        <h3 class="text-lg font-bold mb-3">Escalabilidad</h3>
-                        <p class="text-blue-100 mb-3">
+                        <h3 class="text-lg font-bold mb-2">Escalabilidad</h3>
+                        <p class="text-blue-100 mb-2">
                             Arquitectura diseñada para crecer, desde 100 hasta 1000+ usuarios
                             simultáneos.
                         </p>
@@ -443,8 +443,8 @@
                     </div>
 
                     <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-6">
-                        <h3 class="text-lg font-bold mb-3">Monitoreo</h3>
-                        <p class="text-green-100 mb-3">
+                        <h3 class="text-lg font-bold mb-2">Monitoreo</h3>
+                        <p class="text-green-100 mb-2">
                             Supervisión 24/7 con alertas proactivas y métricas detalladas de rendimiento y uso.
                         </p>
                         <div class="flex items-center text-green-200">
@@ -463,7 +463,7 @@
         <!-- Casos de Uso -->
         <section class="mb-16">
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-900 mb-3">Casos de Uso Ideales</h2>
+                <h2 class="text-4xl font-bold text-gray-900 mb-2">Casos de Uso Ideales</h2>
                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Nuestro sistema se adapta perfectamente a diversos escenarios organizacionales
                 </p>
@@ -472,83 +472,83 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Empresas Corporativas</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Empresas Corporativas</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de junta directiva, decisiones estratégicas, encuestas de satisfacción laboral
                     </p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Instituciones Educativas</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Instituciones Educativas</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones estudiantiles, evaluaciones docentes, decisiones académicas participativas
                     </p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Organizaciones Civiles</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Organizaciones Civiles</h3>
                     <p class="text-gray-600 text-sm">
                         Consultas ciudadanas, elecciones de representantes, decisiones comunitarias
                     </p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Asociaciones Profesionales</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Asociaciones Profesionales</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de colegios profesionales, decisiones gremiales, encuestas sectoriales
                     </p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">ONGs y Fundaciones</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">ONGs y Fundaciones</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de patronatos, decisiones de financiamiento, consultas a beneficiarios
                     </p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
-                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-2">
                         <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Eventos y Conferencias</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Eventos y Conferencias</h3>
                     <p class="text-gray-600 text-sm">
                         Votaciones en tiempo real, encuestas de audiencia, selección de ponencias
                     </p>
@@ -559,7 +559,7 @@
         <!-- Paquetes y Precios -->
         <section class="mb-16 print-break">
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-900 mb-3">Implementación</h2>
+                <h2 class="text-4xl font-bold text-gray-900 mb-2">Implementación</h2>
                 <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Soluciones flexibles adaptadas a las necesidades y presupuesto de su organización
                 </p>
@@ -815,7 +815,7 @@
         {{-- <section class="mb-16">
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-8 lg:p-12">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-3">Cronograma de Implementación</h2>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-2">Cronograma de Implementación</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                         Proceso estructurado y eficiente para poner en marcha su sistema de votaciones
                     </p>
@@ -824,11 +824,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
                             <span class="text-lg font-bold text-blue-600">1</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Análisis y Diseño</h3>
-                        <p class="text-gray-600 text-sm mb-3">Semana 1-2</p>
+                        <p class="text-gray-600 text-sm mb-2">Semana 1-2</p>
                         <ul class="text-gray-600 text-sm space-y-1">
                             <li>• Reunión de requerimientos</li>
                             <li>• Diseño de arquitectura</li>
@@ -837,11 +837,11 @@
                     </div>
 
                     <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
                             <span class="text-lg font-bold text-green-600">2</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Desarrollo</h3>
-                        <p class="text-gray-600 text-sm mb-3">Semana 3-6</p>
+                        <p class="text-gray-600 text-sm mb-2">Semana 3-6</p>
                         <ul class="text-gray-600 text-sm space-y-1">
                             <li>• Configuración del sistema</li>
                             <li>• Personalización de marca</li>
@@ -850,11 +850,11 @@
                     </div>
 
                     <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-2">
                             <span class="text-lg font-bold text-purple-600">3</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Pruebas</h3>
-                        <p class="text-gray-600 text-sm mb-3">Semana 7-8</p>
+                        <p class="text-gray-600 text-sm mb-2">Semana 7-8</p>
                         <ul class="text-gray-600 text-sm space-y-1">
                             <li>• Pruebas de funcionalidad</li>
                             <li>• Pruebas de seguridad</li>
@@ -863,11 +863,11 @@
                     </div>
 
                     <div class="bg-white rounded-lg p-6 shadow-lg">
-                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
                             <span class="text-lg font-bold text-orange-600">4</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Lanzamiento</h3>
-                        <p class="text-gray-600 text-sm mb-3">Semana 9</p>
+                        <p class="text-gray-600 text-sm mb-2">Semana 9</p>
                         <ul class="text-gray-600 text-sm space-y-1">
                             <li>• Capacitación de usuarios</li>
                             <li>• Puesta en producción</li>
@@ -893,7 +893,7 @@
         <section class="mb-16">
             <div class="bg-white rounded-lg shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-12">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-3">Garantías y Soporte</h2>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-2">Garantías y Soporte</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                         Su tranquilidad es nuestra prioridad. Ofrecemos garantías sólidas y soporte continuo
                     </p>
@@ -1014,7 +1014,7 @@
         <!-- Call to Action -->
         <section class="mb-16">
             <div class="gradient-primary rounded-lg p-8 lg:p-12 text-white text-center">
-                <h2 class="text-4xl font-bold mb-3">¿Listo para Revolucionar sus Votaciones?</h2>
+                <h2 class="text-4xl font-bold mb-2">¿Listo para Revolucionar sus Votaciones?</h2>
                 <p class="text-lg text-blue-100 mb-8 max-w-3xl mx-auto">
                     Únase a las organizaciones que ya confían en nuestro sistema para sus procesos de votación más
                     importantes.

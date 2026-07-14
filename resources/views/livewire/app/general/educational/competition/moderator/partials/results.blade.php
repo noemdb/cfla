@@ -23,7 +23,7 @@
                             class="bg-gray-900/40 border border-emerald-500/20 rounded-lg p-6 transition-all duration-300 hover:scale-[1.02] hover:bg-gray-900/60 group">
                             <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Sección</div>
                             <h4
-                                class="text-4xl font-black text-white mb-3 group-hover:text-emerald-300 transition-colors">
+                                class="text-4xl font-black text-white mb-2 group-hover:text-emerald-300 transition-colors">
                                 {{ $item->name }}
                             </h4>
                             <div class="flex items-end justify-between">

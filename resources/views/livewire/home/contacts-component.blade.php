@@ -22,7 +22,7 @@
                             Mensaje</h2>
 
                         <div class="max-w-2xl mx-auto space-y-4">
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label class="block mb-2 font-semibold text-emerald-700 dark:text-emerald-300"
                                     for="name">Nombre</label>
                                 <input wire:model="name"
@@ -35,7 +35,7 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label class="block mb-2 font-semibold text-emerald-700 dark:text-emerald-300"
                                     for="email">Email</label>
                                 <input wire:model="email"
@@ -48,7 +48,7 @@
                                 @enderror
                             </div>
 
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <label class="block mb-2 font-semibold text-emerald-700 dark:text-emerald-300"
                                     for="message">Mensaje</label>
                                 <textarea wire:model="message" rows="4"
@@ -73,7 +73,7 @@
                 <div
                     class="mt-12 p-6 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-emerald-200 dark:border-emerald-500/20">
                     <div
-                        class="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-100 border-b border-emerald-200 dark:border-emerald-500/20 pb-2">
+                        class="mb-2 text-lg font-bold text-emerald-800 dark:text-emerald-100 border-b border-emerald-200 dark:border-emerald-500/20 pb-2">
                         Otros
                         canales de comunicación:</div>
 

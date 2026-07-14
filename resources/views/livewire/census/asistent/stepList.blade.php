@@ -1,6 +1,6 @@
 <div class="mx-auto w-full max-w-lg">
-    <h2 class="mb-3 text-lg font-bold text-white">Resultados de Consulta</h2>
-    <p class="mb-3 text-gray-300 font-medium">Estos son los registros asociados a tu cédula.</p>
+    <h2 class="mb-2 text-lg font-bold text-white">Resultados de Consulta</h2>
+    <p class="mb-2 text-gray-300 font-medium">Estos son los registros asociados a tu cédula.</p>
 
     @include('livewire.census.asistent._flashAlert')
 
@@ -23,7 +23,7 @@
             @endphp
             
             <div class="p-5 bg-[#1a1a1b] border border-[#2d2f33] rounded-[24px] shadow-lg relative overflow-hidden transition-all duration-300 hover:border-gray-500">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2">
                     <div>
                         <h3 class="text-lg font-bold text-white">{{ $catchment->firstname }} {{ $catchment->lastname }}</h3>
                         <p class="text-sm font-medium text-gray-400">A cursar: <span class="text-gray-200">{{ $catchment->grado->name ?? 'No especificado' }}</span></p>

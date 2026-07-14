@@ -1,7 +1,7 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-white mb-3">
+        <h1 class="text-4xl font-bold text-white mb-2">
             Diagnóstico Académico
         </h1>
         <p class="text-gray-300 text-lg mb-6">
@@ -73,7 +73,7 @@
                 wire:click="startDiagnostic({{ $pensum['id'] }})">
 
                 <!-- Progress Ring -->
-                <div class="flex justify-between items-start mb-3">
+                <div class="flex justify-between items-start mb-2">
                     <div class="flex-1">
                         <!-- Added completion icon for completed areas -->
                         <div class="flex items-center mb-2">
@@ -114,7 +114,7 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="flex justify-between items-center mb-3">
+                <div class="flex justify-between items-center mb-2">
                     <div class="text-sm text-gray-400">
                         <span
                             class="@if ($pensum['is_completed']) text-green-300 @else text-green-400 @endif">{{ $pensum['completed_questions'] }}</span>
@@ -226,7 +226,7 @@
                     @forelse($answeredQuestions as $index => $item)
                         <div class="bg-gray-700 rounded-lg p-4">
                             <!-- Question -->
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <div class="flex items-start justify-between mb-2">
                                     <h4 class="text-lg font-semibold text-white">
                                         Pregunta {{ $index + 1 }}

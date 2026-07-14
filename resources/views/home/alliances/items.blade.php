@@ -24,12 +24,12 @@
                         </div>
                     </div>
                     <div class="p-6">
-                        <h5 class="mb-3 text-lg font-bold text-violet-800">Kurios</h5>
-                        {{-- <p class="mb-3 text-neutral-500 dark:text-neutral-300">
+                        <h5 class="mb-2 text-lg font-bold text-violet-800">Kurios</h5>
+                        {{-- <p class="mb-2 text-neutral-500 dark:text-neutral-300">
                             <small>Published <u>13.01.2022</u> by
                                 <a href="#!">Anna Maria Doe</a></small>
                         </p> --}}
-                        <p class="mb-3 pb-2 text-xs">
+                        <p class="mb-2 pb-2 text-xs">
                             Es una empresa que desarrolla e implementa programas curriculares de robótica y tecnología
                             en instituciones académicas.
                             <br>

@@ -1,7 +1,7 @@
 <div class="space-y-6 text-white antialiased">
     <div class="flex flex-col items-center">
         <div
-            class="w-20 h-20 bg-emerald-900/40 rounded-lg flex items-center justify-center mb-3 border border-emerald-500/30">
+            class="w-20 h-20 bg-emerald-900/40 rounded-lg flex items-center justify-center mb-2 border border-emerald-500/30">
             <x-icon name="identification" class="w-12 h-12 text-emerald-400" />
         </div>
         <h2 class="text-lg font-bold">Identificación</h2>
@@ -31,7 +31,7 @@
         @if ($representant)
             <div
                 class="bg-emerald-900/20 border border-emerald-500/30 p-6 rounded-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-3 mb-2">
                     <div
                         class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
                         {{ substr($representant->name, 0, 1) }}

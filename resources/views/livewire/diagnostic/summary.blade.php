@@ -32,14 +32,14 @@
 
         <!-- Completion Message -->
         <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
-            <div class="flex items-center mb-3">
+            <div class="flex items-center mb-2">
                 <svg class="w-8 h-8 text-green-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <h2 class="text-lg font-semibold text-green-400">¡Felicitaciones!</h2>
             </div>
-            <p class="text-gray-300 mb-3">
+            <p class="text-gray-300 mb-2">
                 Has completado exitosamente el diagnóstico para
                 <strong>{{ $selectedPensum->asignatura->full_name ?? 'esta área' }}</strong>.
                 Tus respuestas han sido registradas y serán utilizadas para mejorar las estrategias de aprendizaje.
@@ -93,7 +93,7 @@
                             @foreach ($answeredQuestions as $index => $item)
                                 <div class="bg-gray-700 rounded-lg p-4">
                                     <!-- Question Header -->
-                                    <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-start justify-between mb-2">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-2">
                                                 <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded">
@@ -167,7 +167,7 @@
                         </div>
                     @else
                         <div class="text-center py-8">
-                            <svg class="w-16 h-16 text-gray-500 mx-auto mb-3" fill="none" stroke="currentColor"
+                            <svg class="w-16 h-16 text-gray-500 mx-auto mb-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">

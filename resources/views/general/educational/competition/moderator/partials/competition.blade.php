@@ -8,15 +8,15 @@
             <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
                 {{$competition->name}}</h5>
         </a>
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{$competition->description}}</p>
+        <p class="mb-2 font-normal text-gray-700 dark:text-gray-400">{{$competition->description}}</p>
         <div x-data="{ open: false }">
             <button  class=" font-bold border-gray-200 p-2 m-2" @click="open = ! open">Leer más</button>         
             <div x-show="open" @click.outside="open = false">
-                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{$competition->motive}}</p>
+                <p class="mb-2 font-normal text-gray-700 dark:text-gray-400">{{$competition->motive}}</p>
             </div>
         </div>
 
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{$competition->date}}</p>
+        <p class="mb-2 font-normal text-gray-700 dark:text-gray-400">{{$competition->date}}</p>
         
     </div>
 

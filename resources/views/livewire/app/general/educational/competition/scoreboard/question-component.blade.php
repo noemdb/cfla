@@ -4,7 +4,7 @@
         @if ($question)
             {{-- Contenedor interno con fondo blanco para generar profundidad y contraste --}}
             <div class="border border-emerald-200/60 rounded-lg p-6 bg-white shadow-sm">
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between mb-2">
                     <div class="flex-1">
                         {{-- Label: Pregunta Activa --}}
                         <div class="text-xs font-bold text-emerald-800 uppercase tracking-widest mb-2">

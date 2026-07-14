@@ -7,7 +7,7 @@
     @php /* @endphp
     <section class="bg-gradient-to-br from-blue-400 to-purple-600 text-white py-20">
         <div class="container mx-auto text-center">
-            <h1 class="text-4xl font-bold mb-3">Bienvenido a StudyAI</h1>
+            <h1 class="text-4xl font-bold mb-2">Bienvenido a StudyAI</h1>
             <p class="text-lg mb-6">Transforma tu forma de estudiar con tecnología de vanguardia.</p>
             <button 
                 onclick="loginWithGoogle()" 
@@ -73,7 +73,7 @@
 
     <section class="bg-gradient-to-br from-purple-600 to-blue-400 text-white py-20 text-center">
         <div class="container mx-auto">
-            <h2 class="text-lg font-bold mb-3">Únete a StudyAI</h2>
+            <h2 class="text-lg font-bold mb-2">Únete a StudyAI</h2>
             <p class="mb-6">Transforma tu experiencia de aprendizaje con herramientas inteligentes y tecnología avanzada.</p>
             <button 
                 onclick="loginWithGoogle()" 

@@ -8,7 +8,7 @@
             <!-- Header -->
             <div class="text-center mb-12">
                 <div
-                    class="inline-flex items-center px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-300 text-sm font-medium border border-emerald-500/30 mb-3">
+                    class="inline-flex items-center px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-300 text-sm font-medium border border-emerald-500/30 mb-2">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -16,12 +16,12 @@
                     </svg>
                     Sistema de Votación Digital
                 </div>
-                <h1 class="text-4xl font-bold text-white mb-3">Encuestas Disponibles</h1>
+                <h1 class="text-4xl font-bold text-white mb-2">Encuestas Disponibles</h1>
                 <p class="text-gray-300 text-lg">Selecciona una encuesta para participar y hacer escuchar tu voz</p>
             </div>
 
             <!-- Estadísticas generales -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
                 <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg p-6 border border-emerald-500/30">
                     <div class="flex items-center">
                         <div
@@ -107,12 +107,12 @@
                         </div>
                         <!-- Contenido de la tarjeta -->
                         <div class="p-6">
-                            <h3 class="text-lg font-bold text-white mb-3 line-clamp-2">{{ $poll->title }}</h3>
+                            <h3 class="text-lg font-bold text-white mb-2 line-clamp-2">{{ $poll->title }}</h3>
                             @if ($poll->description)
-                                <p class="text-gray-300 text-sm mb-3 line-clamp-3">{{ $poll->description }}</p>
+                                <p class="text-gray-300 text-sm mb-2 line-clamp-3">{{ $poll->description }}</p>
                             @endif
                             <!-- Opciones preview -->
-                            <div class="mb-3">
+                            <div class="mb-2">
                                 <p class="text-green-200 text-sm font-medium mb-2">Opciones disponibles:</p>
                                 <div class="space-y-1">
                                     @foreach ($poll->options->take(3) as $option)
@@ -128,7 +128,7 @@
                                 </div>
                             </div>
                             <!-- Estadísticas -->
-                            <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-lg p-4 mb-3">
+                            <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-lg p-4 mb-2">
                                 <div class="grid grid-cols-2 gap-3 text-center">
                                     <div>
                                         <p class="text-lg font-bold text-white">{{ $poll->votes_count ?? 0 }}</p>
@@ -142,7 +142,7 @@
                             </div>
                             <!-- Tiempo restante -->
                             @if ($poll->time_active)
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     @php
                                         $endTime = \Carbon\Carbon::parse($poll->date)->addMinutes($poll->time_active);
                                         $timeRemaining = $endTime->diffInMinutes(now());
@@ -172,7 +172,7 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="mb-3">
+                                <div class="mb-2">
                                     <div
                                         class="flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg px-3 py-2 border border-green-500/30">
                                         <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor"
@@ -235,7 +235,7 @@
                                         d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
                                     </path>
                                 </svg>
-                                <h3 class="text-lg font-bold text-white mb-3">No hay encuestas disponibles</h3>
+                                <h3 class="text-lg font-bold text-white mb-2">No hay encuestas disponibles</h3>
                                 <p class="text-gray-300 mb-6">Actualmente no hay encuestas activas para participar.</p>
                                 <button onclick="window.location.reload()"
                                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">

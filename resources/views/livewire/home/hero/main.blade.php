@@ -28,10 +28,10 @@
                         class="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-24 max-w-5xl z-10 pointer-events-none">
                         <div class="pointer-events-auto">
                             <!-- Title Area -->
-                            <div class="mb-3 sm:mb-6 opacity-0 translate-y-8 transition-all duration-700 delay-300"
+                            <div class="mb-2 sm:mb-6 opacity-0 translate-y-8 transition-all duration-700 delay-300"
                                 data-hero-animate>
                                 <div
-                                    class="inline-flex items-center gap-2 px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase rounded-full backdrop-blur-md shadow-lg bg-emerald-100/90 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-500/30">
+                                    class="inline-flex items-center gap-2 px-3 py-1 mb-2 text-xs font-bold tracking-wider uppercase rounded-full backdrop-blur-md shadow-lg bg-emerald-100/90 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-500/30">
                                     <span
                                         class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
                                     Destacado
@@ -42,7 +42,7 @@
                             </div>
 
                             <!-- Body Preview -->
-                            <div class="mb-3 sm:mb-8 max-w-2xl opacity-0 translate-y-8 transition-all duration-700 delay-500"
+                            <div class="mb-2 sm:mb-8 max-w-2xl opacity-0 translate-y-8 transition-all duration-700 delay-500"
                                 data-hero-animate>
                                 <div
                                     class="p-3 sm:p-6 rounded-lg sm:rounded-lg shadow-2xl text-sm sm:text-lg leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-3 backdrop-blur-lg bg-white/60 text-gray-800 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-100 dark:border-white/10">

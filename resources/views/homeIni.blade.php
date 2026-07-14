@@ -26,7 +26,7 @@
 
             <!-- Contenido Hero -->
             <div class="flex-1 text-center md:text-left">
-                <h1 class="text-4xl font-bold mb-3">Bienvenidos a la Escuela</h1>
+                <h1 class="text-4xl font-bold mb-2">Bienvenidos a la Escuela</h1>
                 <p class="mb-6">Somos una institución educativa líder enfocada en proveer la mejor educación.</p>
                 <a href="#" class="bg-blue-500 rounded-full py-3 px-6 text-white hover:bg-blue-600">Más
                     Información</a>
@@ -45,9 +45,9 @@
     <section id="about" class="bg-gray-100 py-12">
         <div class="container mx-auto px-4">
 
-            <h2 class="text-lg font-semibold mb-3">Acerca de Nosotros</h2>
+            <h2 class="text-lg font-semibold mb-2">Acerca de Nosotros</h2>
 
-            <p class="mb-3">Somos una escuela con más de 50 años de experiencia...</p>
+            <p class="mb-2">Somos una escuela con más de 50 años de experiencia...</p>
 
             <div class="md:flex">
 
@@ -130,17 +130,17 @@
             <h2 class="text-lg font-semibold text-center mb-8">Contacto</h2>
 
             <form>
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="block font-semibold mb-2" for="name">Nombre</label>
                     <input class="border p-2 w-full" type="text" id="name">
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="block font-semibold mb-2" for="email">Email</label>
                     <input class="border p-2 w-full" type="email" id="email">
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-2">
                     <label class="block font-semibold mb-2" for="message">Mensaje</label>
                     <textarea class="border p-2 w-full" id="message"></textarea>
                 </div>

@@ -1,6 +1,6 @@
 <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="flex items-center space-x-3 mb-3">
+    <div class="flex items-center space-x-3 mb-2">
         <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
             <x-icon name="document-text" class="w-8 h-8 text-emerald-400" />
         </div>
@@ -12,13 +12,13 @@
     <!-- Content -->
     <div class="flex-1 flex flex-col">
 
-        <div class="flex justify-center mb-3">
+        <div class="flex justify-center mb-2">
             <div class="grid place-items-center h-20 w-20 bg-emerald-900/30 rounded-full border border-emerald-500/30">
                 <x-icon name="document-text" class="w-10 h-10 text-emerald-400" />
             </div>
         </div>
 
-        <div class="text-center mb-3 pb-4 border-b border-emerald-500/30">
+        <div class="text-center mb-2 pb-4 border-b border-emerald-500/30">
             <div class="text-xs text-emerald-400 font-bold tracking-wider uppercase mb-1">Titular</div>
             <div class="text-sm font-semibold text-gray-200">Asociación de terciarios capuchinos de Venezuela C.A</div>
         </div>

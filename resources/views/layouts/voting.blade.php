@@ -194,7 +194,7 @@
 
                     <!-- Separador -->
                     <div class="border-t border-gray-200 pt-4 pb-3">
-                        <div class="flex items-center px-4 mb-3">
+                        <div class="flex items-center px-4 mb-2">
                             <div class="text-sm text-gray-500">
                                 <div class="flex items-center mb-1">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
