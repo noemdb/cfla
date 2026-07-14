@@ -44,7 +44,7 @@
                 <strong>{{ $selectedPensum->asignatura->full_name ?? 'esta área' }}</strong>.
                 Tus respuestas han sido registradas y serán utilizadas para mejorar las estrategias de aprendizaje.
             </p>
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-wrap gap-3">
                 <button wire:click="openAnsweredQuestionsModal"
                     class="text-gray-400 hover:text-white underline transition-colors duration-200">
                     Ver Respuestas Detalladas
@@ -53,7 +53,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <button wire:click="backToDashboard"
                 class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors duration-200">
                 Volver al Dashboard

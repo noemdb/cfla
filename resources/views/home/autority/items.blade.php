@@ -1,5 +1,5 @@
 
-<div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 text-uppercase" style="text-transform: uppercase;">
+<div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3 text-uppercase" style="text-transform: uppercase;">
     
     <div class="bg-green-200 rounded h-full flex flex-col justify-end">
         <div class="w-full">

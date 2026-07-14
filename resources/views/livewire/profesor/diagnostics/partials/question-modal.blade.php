@@ -178,7 +178,7 @@
 
                 @elseif($wizardStep === 3)
                     {{-- Step 3: Configuración y Preview --}}
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Orden</label>
                             <input type="number" wire:model="orden" min="1"

@@ -6,7 +6,7 @@
     <div class="fade-in max-w-5xl mx-auto">
         <!-- Header -->
         <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <a href="{{ route('admin.voting.dashboard') }}"
                     class="p-2 text-gray-400 hover:text-emerald-400 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 transition-all duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +143,7 @@
                 </div>
 
                 <!-- Quick Stats -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div class="diagnostic-card bg-blue-500/5 border border-blue-500/10 p-5 rounded-lg text-center">
                         <p class="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mb-1">Opciones</p>
                         <p class="text-lg font-black text-white">{{ $poll->options->count() }}</p>

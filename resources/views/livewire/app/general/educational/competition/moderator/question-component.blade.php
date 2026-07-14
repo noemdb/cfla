@@ -49,13 +49,13 @@
     </div>
 
     {{-- Filtros: Categoría + Ponderación --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="space-y-4 relative group">
             <x-select placeholder="Seleccione Categoría" wire:model.live="category" :options="$list_category"
                 class="bg-gray-900 border-emerald-500/20 text-white focus:border-emerald-500 focus:ring-emerald-500" />
 
             {{-- Controles de filtro por estado --}}
-            <div class="flex flex-wrap items-center gap-4 pt-1">
+            <div class="flex flex-wrap items-center gap-3 pt-1">
 
                 {{-- Toggle: Sin Responder --}}
                 <label for="filter-unanswered" class="group flex items-center gap-2.5 cursor-pointer select-none">

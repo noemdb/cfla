@@ -171,7 +171,7 @@
                     $disabled = !$canDelete;
                 @endphp
                 <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 hover:border-white/10 transition-all">
-                    <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-start justify-between gap-3">
                         <div class="flex-1 min-w-0">
                             {{-- Header: category + time/weight --}}
                             <div class="flex items-center gap-2 mb-2 flex-wrap">

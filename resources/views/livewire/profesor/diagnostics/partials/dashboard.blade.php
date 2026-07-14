@@ -1,7 +1,7 @@
 {{-- Dashboard Tab --}}
 <div class="space-y-6">
     {{-- KPI Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Preguntas</span>
@@ -95,7 +95,7 @@
     </div>
 
     {{-- Recent Activity --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         {{-- Recent Questions --}}
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <div class="flex items-center justify-between mb-3">

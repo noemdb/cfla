@@ -6,7 +6,7 @@
 
     <div class="fade-in">
         <!-- Header Section -->
-        <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
                 <h1 class="text-lg font-extrabold text-white mb-2">Panel de Votaciones</h1>
                 <p class="text-emerald-400 font-medium">Gestiona tus encuestas y monitorea resultados en tiempo real.</p>
@@ -121,7 +121,7 @@
                                             </span>
                                         </div>
 
-                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                                             <div class="flex items-center text-gray-400">
                                                 <svg class="w-4 h-4 mr-2 text-emerald-500" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +249,7 @@
 
                                 @if ($poll->enable)
                                     <div
-                                        class="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        class="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center">

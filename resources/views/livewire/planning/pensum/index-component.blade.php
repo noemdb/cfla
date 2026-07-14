@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Pensums</h1>
             <p class="text-emerald-400 font-medium">Pivote central del sistema: vincula planes de estudio, grados y asignaturas.</p>
@@ -265,7 +265,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este pensum?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el pensum. Solo se puede eliminar si no tiene cargas académicas asociadas.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="close" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -285,7 +285,7 @@
             </button>
 
             {{-- Fila 1: Plan Estudio + Estado --}}
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Plan de Estudio</span>
                     <p class="text-sm text-white font-bold mt-1">{{ $previewPensum->pestudio?->full_name ?? '—' }}</p>
@@ -306,7 +306,7 @@
             </div>
 
             {{-- Fila 2: Grado + Asignatura --}}
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPensum->grado?->full_name ?? '—' }}</p>
@@ -318,7 +318,7 @@
             </div>
 
             {{-- Fila 3: Componentes + Diagnóstico + Cargas --}}
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Componentes Form.</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPensum->status_component === 'true' ? 'Sí' : 'No' }}</p>
@@ -452,7 +452,7 @@
                     </svg>
                     Vinculación Académica
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio *</label>
                         <select wire:model.live="form.pestudio_id"
@@ -503,7 +503,7 @@
                     </svg>
                     Configuración
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Componentes de Formación</label>
                         <select wire:model="form.status_component"

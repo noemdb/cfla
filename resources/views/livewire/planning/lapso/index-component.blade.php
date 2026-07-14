@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Lapsos Académicos</h1>
             <p class="text-emerald-400 font-medium">Gestión de períodos académicos (trimestres) del año escolar.</p>
@@ -169,7 +169,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este lapso?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el lapso. Solo se puede eliminar si no tiene cargas académicas ni profesores guía asociados.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -216,7 +216,7 @@
                     </svg>
                     Datos del Lapso
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nombre *</label>
                         <input type="text" wire:model="name" placeholder="Ej: Primer Lapso"
@@ -255,7 +255,7 @@
                     </svg>
                     Fechas
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Inicio *</label>
                         <input type="date" wire:model="finicial"
@@ -289,7 +289,7 @@
                     </svg>
                     Censo Escolar
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Fecha Inicio Censo</label>
                         <input type="date" wire:model="date_start_census"
@@ -322,7 +322,7 @@
                     </svg>
                     Pre-Cierre
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Fecha Pre-Cierre</label>
                         <input type="date" wire:model="date_preclosing"
@@ -455,7 +455,7 @@
                 @if($previewLapso->date_start_census || $previewLapso->date_end_census)
                     <div class="bg-white/5 rounded-lg p-5">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-4">Censo Escolar</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Fecha Inicio</dt>
                                 <dd class="text-sm text-gray-300 mt-0.5">{{ $previewLapso->date_start_census ? $previewLapso->date_start_census->format('d/m/Y') : '—' }}</dd>
@@ -480,7 +480,7 @@
                 @if($previewLapso->date_preclosing)
                     <div class="bg-white/5 rounded-lg p-5">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-4">Pre-Cierre</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <dt class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Fecha Pre-Cierre</dt>
                                 <dd class="text-sm text-gray-300 mt-0.5">{{ $previewLapso->date_preclosing ? $previewLapso->date_preclosing->format('d/m/Y') : '—' }}</dd>

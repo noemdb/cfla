@@ -1,4 +1,4 @@
-<div class="flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4 mt-0 sm:mt-4">
+<div class="flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-3 mt-0 sm:mt-4">
 
     <div
         class="flex items-center space-x-4 text-xs md:text-sm text-gray-300 font-mono bg-black/40 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full backdrop-blur-md border border-white/10">

@@ -75,7 +75,7 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <a href="{{ $participationUrl }}" target="_blank"
                                 class="col-span-1 sm:col-span-2 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@
 
                     <!-- Footer Info -->
                     <div class="bg-gray-900/50 px-8 py-6 border-t border-white/5">
-                        <div class="flex items-start gap-4">
+                        <div class="flex items-start gap-3">
                             <div
                                 class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor"
@@ -201,7 +201,7 @@
                                 <h3 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] text-center">
                                     Selecciona una Opción</h3>
 
-                                <div class="grid grid-cols-1 gap-4">
+                                <div class="grid grid-cols-1 gap-3">
                                     @foreach ($poll->options as $option)
                                         <button wire:click="selectOption({{ $option->id }})"
                                             class="w-full text-left p-6 rounded-lg border transition-all duration-500 group relative overflow-hidden {{ $selectedOption === $option->id ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}">

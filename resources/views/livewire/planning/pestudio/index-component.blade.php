@@ -2,7 +2,7 @@
     modeForm: @entangle('modeForm'),
 }">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Planes de Estudio</h1>
             <p class="text-emerald-400 font-medium">Gestión de los planes de estudio del sistema académico.</p>
@@ -201,7 +201,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este plan de estudio?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el plan de estudio. Solo se puede eliminar si no tiene grados asociados.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -219,7 +219,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</span>
                     <p class="text-sm text-white font-bold mt-1">{{ $previewPestudio->code }} @if($previewPestudio->code_oficial)<span class="text-gray-400 font-normal ml-2">({{ $previewPestudio->code_oficial }})</span>@endif</p>
@@ -250,7 +250,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Descripción</span>
                 <p class="text-sm text-gray-300 mt-1">{{ $previewPestudio->description ?? '—' }}</p>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Responsable</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPestudio->manager?->username ?? '—' }}</p>
@@ -260,7 +260,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPestudio->grados_count }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Orden</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPestudio->order }}</p>
@@ -275,7 +275,7 @@
                 </div>
             </div>
             @if($previewPestudio->description_aux || $previewPestudio->mention || $previewPestudio->title)
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 @if($previewPestudio->description_aux)
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Desc. Auxiliar</span>
@@ -334,7 +334,7 @@
                     </svg>
                     Información General
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Programa Educativo *</label>
                         <select wire:model="peducativo_id"
@@ -450,7 +450,7 @@
                     </svg>
                     Configuración
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Escala de Evaluación *</label>
                         <select wire:model="scale"
@@ -511,7 +511,7 @@
                     </svg>
                     Fechas de Cierre
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Remisión Resumen</label>
                         <input type="date" wire:model="remision_resumen_final"

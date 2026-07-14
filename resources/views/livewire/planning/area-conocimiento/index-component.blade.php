@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Áreas de Conocimiento</h1>
             <p class="text-emerald-400 font-medium">Catálogo de áreas de conocimiento y asignaturas adscritas.</p>
@@ -81,7 +81,7 @@
     </div>
 
     <!-- Grid Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         @forelse($area_conocimientos as $area)
             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group flex flex-col">
 
@@ -218,7 +218,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta área de conocimiento?</h3>
             <p class="text-sm text-gray-400 mb-6">Solo se puede eliminar si no tiene asignaturas adscritas.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="$wire.confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -255,7 +255,7 @@
                     </svg>
                     Identificación
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan Educativo</label>
                         <select wire:model="peducativo_id"
@@ -304,7 +304,7 @@
                     </svg>
                     Códigos
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Código *</label>
                         <input type="text" wire:model="code" placeholder="Ej: LEN" maxlength="20" style="text-transform:uppercase"
@@ -346,7 +346,7 @@
                     </svg>
                     Descripción
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Descripción</label>
                         <textarea wire:model="description" rows="3" placeholder="Descripción del área de conocimiento"

@@ -1,7 +1,7 @@
 {{-- Sessions Tab --}}
 <div class="space-y-4">
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiantes</span>

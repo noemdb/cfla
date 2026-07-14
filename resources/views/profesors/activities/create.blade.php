@@ -23,7 +23,7 @@
 <div class="fade-in">
 
     {{-- Header --}}
-    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-1">Registrar Actividades</h1>
             <p class="text-sm text-emerald-400 font-medium">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }} — {{ $pevaluacion->pensum?->grado?->name ?? '—' }} {{ $pevaluacion->seccion?->name ?? '—' }}</p>

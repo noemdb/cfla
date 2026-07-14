@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Programas Educativos</h1>
             <p class="text-emerald-400 font-medium">Gestión de los programas educativos del sistema académico.</p>
@@ -167,7 +167,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este programa educativo?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el programa educativo. Solo se puede eliminar si no tiene planes de estudio asociados.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -185,7 +185,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</span>
                     <p class="text-sm text-white font-bold mt-1">{{ $previewPeducativo->name }}</p>
@@ -212,7 +212,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Descripción</span>
                 <p class="text-sm text-gray-300 mt-1">{{ $previewPeducativo->description ?? '—' }}</p>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Orden</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPeducativo->order }}</p>
@@ -226,7 +226,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPeducativo->show_quantitative_indicators === 'true' ? 'Sí' : 'No' }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Responsable</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPeducativo->manager?->username ?? '—' }}</p>
@@ -278,7 +278,7 @@
                     </svg>
                     Información General
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Periodo Escolar *</label>
                         <select wire:model="pescolar_id"
@@ -332,7 +332,7 @@
                     </svg>
                     Equipo Directivo
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Responsable</label>
                         <select wire:model="manager_id"
@@ -374,7 +374,7 @@
                     </svg>
                     Indicadores
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <label class="flex items-center gap-2 cursor-pointer group p-3 bg-white/5 rounded-lg border border-white/5">
                         <input type="checkbox" wire:model="show_quantitative_indicators" value="true"
                             {{ in_array($show_quantitative_indicators, [true, 'true', 1, '1'], true) ? 'checked' : '' }}

@@ -62,7 +62,7 @@
                 </div>
 
                 <!-- Botones de acción -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <a href="{{ route('poll.participation.show', ['uuid' => $session->uuid]) }}"
                         class="bg-gradient-to-r from-emerald-600 via-green-700 to-emerald-600 hover:from-emerald-500 hover:via-green-600 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-xl hover:shadow-2xl text-center flex items-center justify-center space-x-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

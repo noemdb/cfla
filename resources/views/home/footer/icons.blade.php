@@ -1,5 +1,5 @@
 {{-- <div class="flex justify-center"> --}}
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
     <div
         class="border border-emerald-500/30 rounded-lg p-2 mx-1 hover:bg-emerald-900/50 hover:border-emerald-500 shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 group">

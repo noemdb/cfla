@@ -129,7 +129,7 @@
                             </div>
                             <!-- Estadísticas -->
                             <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-lg p-4 mb-4">
-                                <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="grid grid-cols-2 gap-3 text-center">
                                     <div>
                                         <p class="text-lg font-bold text-white">{{ $poll->votes_count ?? 0 }}</p>
                                         <p class="text-green-200 text-xs">Votos</p>

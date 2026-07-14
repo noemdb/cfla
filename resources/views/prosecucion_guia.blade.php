@@ -463,7 +463,7 @@
                 <p class="text-green-100 text-lg mb-8">
                     Sigue los pasos de esta guía y completa la confirmación de prosecución de tus estudiantes
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('prosecucion') }}"
                        class="bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105">
                         Iniciar Proceso

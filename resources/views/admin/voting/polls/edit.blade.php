@@ -7,7 +7,7 @@
         <!-- Header -->
         <div class="bg-white shadow-sm border-b">
             <div class="container mx-auto px-4 py-6">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <a href="{{ route('admin.voting.dashboard') }}" class="text-gray-600 hover:text-gray-900">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -175,7 +175,7 @@
                     @if ($poll->votes_count > 0)
                         <div class="bg-white rounded-lg shadow p-6">
                             <h2 class="text-lg font-semibold text-gray-900 mb-4">Estadísticas Actuales</h2>
-                            <div class="grid md:grid-cols-3 gap-4">
+                            <div class="grid md:grid-cols-3 gap-3">
                                 <div class="text-center p-4 bg-blue-50 rounded-lg">
                                     <div class="text-lg font-bold text-blue-600">{{ $poll->votes_count }}</div>
                                     <div class="text-sm text-blue-800">Votos Totales</div>
@@ -195,7 +195,7 @@
                     @endif
 
                     <!-- Botones -->
-                    <div class="flex gap-4">
+                    <div class="flex gap-3">
                         <button type="submit"
                             class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                             Actualizar Encuesta

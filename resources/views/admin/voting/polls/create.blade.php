@@ -5,8 +5,8 @@
 @section('content')
     <div class="fade-in max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div class="flex items-center gap-4">
+        <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center gap-3">
                 <a href="{{ route('admin.voting.dashboard') }}"
                     class="p-2 text-gray-400 hover:text-emerald-400 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 transition-all duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <div class="flex flex-col sm:flex-row gap-3 pt-4">
                 <button type="submit"
                     class="flex-1 px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-sm">
                     Crear Encuesta

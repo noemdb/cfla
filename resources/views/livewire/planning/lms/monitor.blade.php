@@ -357,7 +357,7 @@
                                class="w-full bg-slate-900/50 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                         @error('scheduleUnpublishAt') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <div class="flex gap-4">
+                    <div class="flex gap-3">
                         <label class="flex items-center gap-2 text-sm text-slate-300">
                             <input type="checkbox" wire:model="scheduleAllowComments"
                                    class="rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500/50">
@@ -432,7 +432,7 @@
                             } }}
                         </span>
                     </div>
-                    <div class="flex gap-4">
+                    <div class="flex gap-3">
                         <label class="flex items-center gap-2 text-sm text-slate-300">
                             <input type="checkbox" wire:model="settingsAllowComments"
                                    class="rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500/50">

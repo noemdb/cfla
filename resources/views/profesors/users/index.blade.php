@@ -6,7 +6,7 @@
 <div class="fade-in">
 
     {{-- Header --}}
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Mi Perfil</h1>
             <p class="text-emerald-400 font-medium">Información personal del profesor</p>
@@ -23,7 +23,7 @@
     @if(isset($profesor) && $profesor)
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         {{-- Profile header --}}
-        <div class="px-6 py-5 border-b border-white/5 flex items-center gap-4">
+        <div class="px-6 py-5 border-b border-white/5 flex items-center gap-3">
             <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center">
                 <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -37,7 +37,7 @@
 
         {{-- Fields grid --}}
         <div class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 @php
                     $fields = [
                         'Nombre Completo'  => ['value' => $profesor->full_name, 'color' => 'emerald'],

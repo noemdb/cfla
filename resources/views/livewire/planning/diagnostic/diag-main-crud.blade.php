@@ -22,7 +22,7 @@
             @foreach($diagMains as $diag)
                 <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg transition-all duration-300 hover:border-emerald-500/20"
                      wire:key="diag-{{ $diag->id }}">
-                    <div class="p-4 flex flex-col md:flex-row md:items-center gap-4">
+                    <div class="p-4 flex flex-col md:flex-row md:items-center gap-3">
                         {{-- Left: status + info --}}
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
@@ -166,7 +166,7 @@
                         </div>
 
                         {{-- 3-column row --}}
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {{-- Lapso --}}
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Lapso Académico</label>
@@ -208,7 +208,7 @@
                         </div>
 
                         {{-- Token + Active --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Token de Acceso</label>
                                 <input type="text" wire:model="token"
@@ -290,7 +290,7 @@
                     <div class="px-6 py-5 space-y-6">
 
                         {{-- Key info grid --}}
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {{-- Lapso --}}
                             <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5">
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Lapso Académico</p>

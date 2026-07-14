@@ -1303,7 +1303,7 @@
                          wire:key="swiper-{{ $listPreviewData['activity_id'] }}">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -1335,8 +1335,8 @@
                                         <div class="h-[3px] w-24 rounded-full bg-amber-400 mb-5"></div>
 
                                         {{-- Logo + institución en formato letterhead --}}
-                                        <div class="flex items-start justify-between gap-4">
-                                            <div class="flex items-center gap-3 md:gap-4">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex items-center gap-3 md:gap-3">
                                                 <img src="{{ asset('image/avatar/uecfla.jpg') }}"
                                                      alt=""
                                                      class="w-10 h-10 md:w-14 md:h-14 object-contain rounded-full ring-1 ring-stone-200/80 shrink-0">
@@ -1435,7 +1435,7 @@
                                     {{-- ═══════ PIE INFORMATIVO (bottom) ═══════ --}}
                                     <div class="shrink-0">
                                         <div class="border-t border-stone-200 pt-4">
-                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                                                 {{-- Col 1: Datos del curso --}}
                                                 <div>
                                                     <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-1">Curso</p>
@@ -2982,7 +2982,7 @@
                                             </div>
 
                                             {{-- Header --}}
-                                            <div class="flex items-start justify-between gap-4">
+                                            <div class="flex items-start justify-between gap-3">
                                                 <div class="flex items-start gap-3">
                                                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                                         <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3800,7 +3800,7 @@
                         <div class="relative w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden">
                             {{-- Header --}}
                             <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
-                                <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

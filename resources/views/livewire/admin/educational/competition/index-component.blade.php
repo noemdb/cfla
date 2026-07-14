@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header Section -->
-    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Competiciones Académicas</h1>
             <p class="text-emerald-400 font-medium">Gestión y control de retos académicos y debates entre grados.</p>
@@ -139,7 +139,7 @@
 
     <!-- Create Modal -->
     {{-- <x-modal-card title="Nueva Competición Académica" blur wire:model.defer="showCreateModal" max-width="lg">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="col-span-2">
                 <x-input label="Nombre de la Competición" placeholder="Ej: Challenge de Matemáticas 2024" wire:model.defer="name" />
             </div>

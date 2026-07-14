@@ -9,14 +9,14 @@
 
         <div class="w-full max-full space-y-4">
             <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 1 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">1</span>
                     <span class="text-lg">Instrucciones</span>
                 </div>
             </div>
             <div class="rounded-lg {{ $currentStep == 2 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 2 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         2
@@ -26,7 +26,7 @@
             </div>
 
             <div class="rounded-lg {{ $currentStep == 2 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4 cursor-pointer" wire:click="restart">
+                <div class="flex items-center gap-3 cursor-pointer" wire:click="restart">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
                         <x-icon name="arrow-path" class="w-5 h-5" />
                     </span>

@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Secciones</h1>
             <p class="text-emerald-400 font-medium">Gestión de secciones (aulas) por grado académico.</p>
@@ -186,7 +186,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta sección?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará la sección. Solo se puede eliminar si no tiene inscripciones ni profesores guía asociados.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -204,7 +204,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sección</span>
                     <p class="text-lg text-white font-bold mt-1">{{ $previewSeccion->name }}</p>
@@ -223,7 +223,7 @@
                     </p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewSeccion->grado?->full_name ?? '—' }}</p>
@@ -233,7 +233,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewSeccion->grado?->pestudio?->code ?? '—' }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Capacidad</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewSeccion->amount_student ?? '—' }}</p>
@@ -247,7 +247,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewSeccion->profesor_guias_count }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Contabiliza Inscripción</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewSeccion->status_inscription_affects === 'true' ? 'Sí' : 'No' }}</p>
@@ -307,7 +307,7 @@
                     </svg>
                     Datos de la Sección
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Grado *</label>
                         <select wire:model="grado_id"
@@ -369,7 +369,7 @@
                     </svg>
                     Observaciones
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Observaciones</label>
                         <input type="text" wire:model="observation" placeholder="Observaciones adicionales"

@@ -129,7 +129,7 @@
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-2">Selección del Área de Formación</h3>
                             <p class="text-gray-300 mb-4">En el dashboard verás todas las áreas disponibles con su progreso actual. Selecciona el área que deseas evaluar.</p>
-                            <div class="grid md:grid-cols-2 gap-4">
+                            <div class="grid md:grid-cols-2 gap-3">
                                 <div class="bg-gray-700 p-4 rounded-lg">
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="text-white font-medium">Progreso Visual</span>

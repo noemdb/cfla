@@ -1,6 +1,6 @@
 @props(['stats'])
 
-<div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
     <!-- Indicador 1: Visitas Totales -->
     <x-card class="bg-white hover:shadow-md transition-shadow">
         <div class="flex items-center">

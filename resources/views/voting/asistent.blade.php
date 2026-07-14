@@ -18,7 +18,7 @@
                     </div>
 
                     <div class="mt-4 lg:mt-0 lg:ml-8">
-                        <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="grid grid-cols-2 gap-3 text-center">
                             <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg px-4 py-3">
                                 <div class="text-lg font-bold text-white">{{ $polls->count() }}</div>
                                 <div class="text-green-100 text-sm">Encuestas Activas</div>

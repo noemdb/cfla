@@ -15,7 +15,7 @@
         <div class="w-full max-full space-y-4">
             {{-- Paso 1 --}}
             <div class="rounded-lg {{ $currentStep == 1 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 1 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">1</span>
                     <span class="text-lg">Consulta de Cédula</span>
@@ -24,7 +24,7 @@
 
             {{-- Paso 2 --}}
             <div class="rounded-lg {{ $currentStep == 2 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 2 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         2
@@ -43,7 +43,7 @@
 
             {{-- Paso 3 --}}
             <div class="rounded-lg {{ $currentStep == 3 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 3 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         3
@@ -54,7 +54,7 @@
 
             {{-- Paso 4 --}}
             <div class="rounded-lg {{ $currentStep == 4 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 4 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         4
@@ -65,7 +65,7 @@
 
             {{-- Paso 5 --}}
             <div class="rounded-lg {{ $currentStep == 5 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 5 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         5
@@ -76,7 +76,7 @@
 
             {{-- Código de Vestimenta --}}
             <div class="rounded-lg bg-white/5 p-4 backdrop-blur-sm hover:bg-white/10 transition">
-                <div class="flex items-center gap-4 cursor-pointer" wire:click="openDressCode">
+                <div class="flex items-center gap-3 cursor-pointer" wire:click="openDressCode">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
                         <x-icon name="information-circle" class="w-5 h-5" />
                     </span>
@@ -87,7 +87,7 @@
             {{-- Botón Reset --}}
             <div
                 class="rounded-lg {{ $currentStep == 5 ? 'bg-white/10' : 'bg-white/5' }} p-4 backdrop-blur-sm hover:bg-white/10 transition">
-                <div class="flex items-center gap-4 cursor-pointer" wire:click="restart">
+                <div class="flex items-center gap-3 cursor-pointer" wire:click="restart">
                     <span
                         class="flex h-8 w-8 items-center justify-center rounded-full {{ $currentStep == 5 ? 'bg-white text-black' : 'bg-white/20 text-white' }}">
                         <x-icon name="arrow-path" class="w-5 h-5" />

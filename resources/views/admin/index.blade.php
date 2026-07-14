@@ -419,7 +419,7 @@
         <!-- Extra Modules / Links -->
         <div class="mt-12 pt-8 border-t border-white/5">
             <h2 class="text-lg font-bold text-white mb-6">Herramientas del Sistema</h2>
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-wrap gap-3">
                 <a href="{{ url('/') }}"
                     class="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-5 py-2.5 rounded-lg border border-white/5 transition-all duration-300 text-sm font-medium flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

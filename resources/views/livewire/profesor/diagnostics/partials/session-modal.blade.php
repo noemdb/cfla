@@ -23,7 +23,7 @@
 
             <div class="px-6 py-5 space-y-6">
                 {{-- Info Grid --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Grado</span>
                         <span class="text-xs font-medium text-gray-200">{{ $selectedSession->estudiant?->grado?->name ?? '—' }}</span>
@@ -63,7 +63,7 @@
                             $unansweredQ = max(0, ($selectedSession->diagMain?->questions->count() ?? $totalQ) - $totalQ);
                             $pct = $totalQ > 0 ? round(($correctQ / $totalQ) * 100) : 0;
                         @endphp
-                        <div class="grid grid-cols-3 gap-4 mb-3">
+                        <div class="grid grid-cols-3 gap-3 mb-3">
                             <div class="text-center">
                                 <span class="block text-lg font-bold text-emerald-400">{{ $correctQ }}</span>
                                 <span class="text-[10px] text-gray-500">Correctas</span>

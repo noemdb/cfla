@@ -12,7 +12,7 @@
                         </div>
                         
                         {{-- ID + Texto de la pregunta --}}
-                        <div class="flex items-start gap-4">
+                        <div class="flex items-start gap-3">
                             <span
                                 class="text-xs bg-emerald-200 text-emerald-900 px-2 py-1 rounded-full font-bold border border-emerald-300">
                                 #{{ $question->id }}

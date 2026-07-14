@@ -42,7 +42,7 @@
     @error('questionForm.observation') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-3">
     {{-- Time --}}
     <div>
         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Tiempo (segundos)</label>

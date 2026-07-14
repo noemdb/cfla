@@ -37,7 +37,7 @@
                     </svg>
                     Índice de Contenidos
                 </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="space-y-2">
                         <a href="#que-es-asistente"
                             class="block text-green-400 hover:text-green-300 transition-colors duration-200">
@@ -358,7 +358,7 @@
                                 <p class="text-gray-300 mb-4">
                                     El asistente te presenta las encuestas una por una, mostrando:
                                 </p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     <div class="bg-gray-600/50 rounded-lg p-3">
                                         <h4 class="font-semibold text-white mb-2">📊 Información de la Encuesta</h4>
                                         <ul class="text-gray-300 text-sm space-y-1">
@@ -441,7 +441,7 @@
                                 <p class="text-gray-300 mb-4">
                                     El asistente ofrece múltiples opciones de navegación:
                                 </p>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     <div class="bg-gray-600/50 rounded-lg p-3 text-center">
                                         <div class="text-lg mb-2">⬅️</div>
                                         <h4 class="font-semibold text-white mb-1">Anterior</h4>
@@ -552,7 +552,7 @@
                             </svg>
                             Flujo de Navegación Completo
                         </h3>
-                        <div class="flex flex-wrap items-center justify-center gap-4 mb-4">
+                        <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
                             <div class="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
                                 1. Inicialización
                             </div>
@@ -651,7 +651,7 @@
                             </svg>
                             Mensajes Contextuales
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="bg-gray-700/50 rounded-lg p-4">
                                 <h4 class="font-semibold text-white mb-2">📊 Encuestas Restantes</h4>
                                 <div class="bg-blue-900/30 border border-blue-700 rounded p-2 text-blue-300 text-sm">
@@ -681,7 +681,7 @@
                         <p class="text-gray-300 mb-4">
                             El alert muestra estadísticas actualizadas de tu progreso:
                         </p>
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-3 gap-3">
                             <div class="text-center bg-gray-700/50 rounded-lg p-3">
                                 <div class="text-lg font-bold text-green-400">5</div>
                                 <div class="text-xs text-gray-400">Completadas</div>
@@ -766,7 +766,7 @@
                             Al completar todas las encuestas, el asistente muestra un resumen completo con todos tus códigos
                             QR:
                         </p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
                                 <div class="text-lg mb-2">📊</div>
                                 <h4 class="font-semibold text-white mb-1">Estadísticas</h4>
@@ -806,7 +806,7 @@
                             Desde el resumen final, puedes hacer clic en "Ver detalles de participación" para abrir un modal
                             completo con:
                         </p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <h4 class="font-semibold text-white mb-2">📋 Información Detallada:</h4>
                                 <ul class="space-y-1 text-gray-300 text-sm">
@@ -908,7 +908,7 @@
                             </svg>
                             Privacidad y Anonimato
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
                                 <div class="text-lg mb-2">🔒</div>
                                 <h4 class="font-semibold text-white mb-2">Datos Anónimos</h4>
@@ -944,7 +944,7 @@
                             </svg>
                             Recomendaciones de Seguridad
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <h4 class="font-semibold text-white mb-2">🔒 Para Mayor Privacidad:</h4>
                                 <ul class="space-y-1 text-gray-300 text-sm">

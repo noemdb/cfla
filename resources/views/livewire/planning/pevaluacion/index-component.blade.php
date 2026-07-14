@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Carga Académica</h1>
             <p class="text-emerald-400 font-medium">Asignación de profesores a áreas de formación, secciones y lapsos.</p>
@@ -239,7 +239,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar esta asignación?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará la asignación de carga académica. Solo se puede eliminar si no tiene actividades registradas.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -258,7 +258,7 @@
                 </svg>
             </button>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</span>
                     <p class="text-sm text-white font-bold mt-1">{{ $previewPevaluacion->profesor?->full_name ?? '—' }}</p>
@@ -275,7 +275,7 @@
                     </p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPevaluacion->pensum?->asignatura?->full_name ?? '—' }}</p>
@@ -285,7 +285,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPevaluacion->pensum?->pestudio?->full_name ?? '—' }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sección</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPevaluacion->seccion?->full_name ?? '—' }}</p>
@@ -299,7 +299,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPevaluacion->nota_type ?? '—' }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Actividades</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewPevaluacion->activities_count }}</p>
@@ -361,7 +361,7 @@
                     </svg>
                     Vinculación Académica
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio *</label>
                         <select wire:model.live="form.pestudio_id"
@@ -388,7 +388,7 @@
                         @error('form.grado_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Sección *</label>
                         <select wire:model="form.seccion_id"
@@ -428,7 +428,7 @@
                     </svg>
                     Docente y Configuración
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Profesor *</label>
                         <select wire:model="form.profesor_id"
@@ -452,7 +452,7 @@
                         @error('form.lapso_id') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Tipo de Nota</label>
                         <select wire:model="form.nota_type"
@@ -495,7 +495,7 @@
                     </svg>
                     Configuración
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="flex items-center gap-2 cursor-pointer group">
                             <input type="checkbox" wire:model="form.status_official" value="1"
@@ -531,7 +531,7 @@
                     </svg>
                     Descripción
                 </h3>
-                <div class="grid grid-cols-1 gap-4">
+                <div class="grid grid-cols-1 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Objetivo</label>
                         <input type="text" wire:model="form.objetivo" placeholder="Objetivo general de la asignación"

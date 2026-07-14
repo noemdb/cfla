@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="bg-gray-950/40 border border-emerald-500/10 rounded-lg p-3 text-center">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Ponderación</div>
                     <div class="text-lg font-black text-emerald-400">{{ $question->weighting }} <span
@@ -108,7 +108,7 @@
             <div class="h-px bg-gradient-to-r from-emerald-500/20 to-transparent flex-1"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             @forelse ($options as $item)
                 @php
                     $isCorrect = $item->status_option_correct && $question->status_over_time;
@@ -144,7 +144,7 @@
                         </div>
                     @endif
 
-                    <div class="flex items-start gap-4">
+                    <div class="flex items-start gap-3">
                         <div class="shrink-0">
                             @php $color = $colors[$loop->index]; @endphp
                             <div

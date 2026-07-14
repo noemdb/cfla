@@ -7,7 +7,7 @@
         @if (!empty($grado->name))
             <div class="font-bold text-lg text-gray-800 mb-4">{{ $grado->name }}</div>
             @php $seccions = $grado->activeSeccions() @endphp
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 @forelse ($seccions as $item)
                     <div
                         class="flex flex-col items-center justify-center p-6 text-center bg-white border border-emerald-200 rounded-lg hover:border-emerald-400 transition-all duration-300 shadow-sm">

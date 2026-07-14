@@ -6,7 +6,7 @@
         </h3>
     @endslot
 
-    <div class="grid md:grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-2 gap-3">
         <div>@include('home.graphs.charts')</div>
         <div>@include('home.graphs.charts')</div>
     </div>

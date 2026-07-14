@@ -54,7 +54,7 @@
     <section id="faq" class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="container mx-auto">
             <h2 class="text-lg font-bold text-center mb-8">Preguntas Frecuentes</h2>
-            <div x-data="{ open: null }" class="grid gap-4">
+            <div x-data="{ open: null }" class="grid gap-3">
                 @foreach ($faqs as $index => $faq)
                 <div>
                     <button 

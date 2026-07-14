@@ -21,7 +21,7 @@
                     @endif
 
                     {{-- Grid de opciones: se expande al espacio restante --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-lg bg-white shadow-sm flex-1 content-stretch overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border border-emerald-100 rounded-lg bg-white shadow-sm flex-1 content-stretch overflow-hidden">
                         @forelse ($options as $item)
                             @php
                                 $wrong = $item->status_wrong_answer && $question->status_over_time;
@@ -51,7 +51,7 @@
                                 @endif
 
                                 {{-- Contenido centrado --}}
-                                <div class="flex flex-col items-center justify-center flex-1 w-full gap-4">
+                                <div class="flex flex-col items-center justify-center flex-1 w-full gap-3">
                                     
                                     {{-- Círculo con literal --}}
                                     <div class="rounded-full flex justify-center items-center transition-all duration-300

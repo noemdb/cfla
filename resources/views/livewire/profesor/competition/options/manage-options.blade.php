@@ -133,7 +133,7 @@
                             </div>
 
                             {{-- Flags --}}
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-3">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" wire:model="optionForm.status_option_correct" value="1"
                                         class="rounded border-white/10 bg-gray-800/50 text-emerald-500 focus:ring-emerald-500/20">

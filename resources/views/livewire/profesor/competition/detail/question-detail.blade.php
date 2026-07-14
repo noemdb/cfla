@@ -67,7 +67,7 @@
                     </div>
 
                     {{-- Status & Meta row --}}
-                    <div class="flex items-center gap-4 flex-wrap text-[11px] text-gray-500">
+                    <div class="flex items-center gap-3 flex-wrap text-[11px] text-gray-500">
                         <span class="flex items-center gap-1.5">
                             Estado:
                             @if($detailQuestion->status_active)

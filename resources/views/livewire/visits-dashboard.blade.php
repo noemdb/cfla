@@ -28,7 +28,7 @@
     </x-card>
 
     <!-- Estadísticas -->
-    <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-3">
         <x-card class="hover:shadow-md transition-shadow dark:bg-secondary-800/50 dark:border-secondary-700">
             <div class="flex items-center">
                 <x-icon name="users" class="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />
@@ -67,7 +67,7 @@
     <x-card padding="none" class="overflow-hidden dark:bg-secondary-800/50 dark:border-secondary-700">
         <!-- Encabezados -->
         <div
-            class="hidden sm:grid grid-cols-12 gap-4 p-4 font-medium text-gray-500 bg-gray-50 border-b border-gray-200 dark:bg-secondary-800 dark:text-secondary-400 dark:border-secondary-700">
+            class="hidden sm:grid grid-cols-12 gap-3 p-4 font-medium text-gray-500 bg-gray-50 border-b border-gray-200 dark:bg-secondary-800 dark:text-secondary-400 dark:border-secondary-700">
             <div class="col-span-3 cursor-pointer select-none" wire:click="sortBy('created_at')">
                 <div class="flex items-center">
                     <span>Fecha</span>
@@ -93,7 +93,7 @@
             @forelse($visits as $visit)
                 <div class="p-4 hover:bg-gray-50 dark:hover:bg-secondary-800/30 transition-colors"
                     wire:key="visit-{{ $visit->id }}">
-                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
                         <!-- Fecha -->
                         <div class="sm:col-span-3 flex justify-between items-center sm:block">
                             <span

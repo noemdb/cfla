@@ -77,7 +77,7 @@
                         Otros
                         canales de comunicación:</div>
 
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-3">
                         <div class="flex items-start text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                 class="w-5 h-5 mr-3 mt-1 text-emerald-600 dark:text-emerald-400 flex-shrink-0">

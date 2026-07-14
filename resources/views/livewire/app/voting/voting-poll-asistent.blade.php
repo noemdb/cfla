@@ -31,7 +31,7 @@
                 </div>
 
                 <div
-                    class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-amber-500/10 pt-6">
+                    class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-amber-500/10 pt-6">
                     @if ($fingerprintAttempts > 0)
                         <div
                             class="px-4 py-1.5 bg-amber-500/5 rounded-full border border-amber-500/10 text-[10px] font-black text-amber-500 uppercase tracking-widest">
@@ -98,7 +98,7 @@
                             <h2 class="text-lg font-black text-white leading-tight tracking-tight uppercase">
                                 {{ $currentPoll['title'] }}</h2>
                             <div
-                                class="flex items-center gap-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                                class="flex items-center gap-3 text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                 <span class="flex items-center gap-1.5">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -126,7 +126,7 @@
 
                 @if ($isExpired)
                     <div class="bg-red-500/10 border-y border-red-500/20 px-10 py-6">
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0 border border-red-500/20">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
@@ -268,7 +268,7 @@
                             Anterior
                         </button>
 
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-3">
                             @if ($isExpired)
                                 <button wire:click="skipExpiredPoll"
                                     class="px-6 py-3 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-xl shadow-red-500/10">
@@ -293,7 +293,7 @@
         @endif
 
         @if (!$hasVoted && !$isLoadingFingerprint && $currentPoll && !$isExpired)
-            <div class="mt-8 p-5 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-4">
+            <div class="mt-8 p-5 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-3">
                 <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -307,7 +307,7 @@
                 </p>
             </div>
         @elseif($isExpired && $currentPoll)
-            <div class="mt-8 p-5 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-4">
+            <div class="mt-8 p-5 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3">
                 <div class="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -498,7 +498,7 @@
                                     <div class="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-1000"
                                         style="width: {{ $voteAlertData['progressPercentage'] ?? 0 }}%"></div>
                                 </div>
-                                <div class="grid grid-cols-3 gap-4">
+                                <div class="grid grid-cols-3 gap-3">
                                     <div class="text-center">
                                         <div class="text-lg font-black text-emerald-500">
                                             {{ $voteAlertData['completedPolls'] ?? 0 }}</div>
@@ -523,7 +523,7 @@
                             <!-- Status Message -->
                             @if (isset($voteAlertData['isLastPoll']) && $voteAlertData['isLastPoll'])
                                 <div
-                                    class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-6 flex items-center gap-4">
+                                    class="bg-purple-500/10 border border-purple-500/20 rounded-lg p-6 flex items-center gap-3">
                                     <div
                                         class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor"
@@ -540,7 +540,7 @@
                                 </div>
                             @else
                                 <div
-                                    class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-6 flex items-center gap-4">
+                                    class="bg-blue-500/5 border border-blue-500/10 rounded-lg p-6 flex items-center gap-3">
                                     <div
                                         class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor"
@@ -561,7 +561,7 @@
 
                     <!-- Footer -->
                     <div class="bg-white/[0.02] px-10 py-10 border-t border-white/5">
-                        <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
                             @if (isset($voteAlertData['isLastPoll']) && $voteAlertData['isLastPoll'])
                                 <button wire:click="continueToNextPoll"
                                     class="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-all shadow-2xl shadow-purple-500/20">

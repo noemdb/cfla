@@ -1,6 +1,6 @@
 <div class="fade-in" x-data="{ formOpen: @entangle('modeForm'), deleteId: @entangle('confirmDeleteId') }">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-1">Gestión de Usuarios</h1>
             <p class="text-emerald-400 font-medium text-sm">Administra las cuentas, roles y accesos del sistema.</p>
@@ -16,7 +16,7 @@
 
     <!-- Filters -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Buscar</label>
                 <div class="relative">
@@ -221,7 +221,7 @@
                     {{-- Sección: Cuenta --}}
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400/60 mb-3">Datos de la Cuenta</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombre de Usuario *</label>
                                 <input type="text" wire:model="username"
@@ -279,7 +279,7 @@
                     {{-- Sección: Perfil --}}
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400/60 mb-3">Datos del Perfil (opcional)</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombres</label>
                                 <input type="text" wire:model="firstname"

@@ -2,7 +2,7 @@
     {{-- Loading overlay --}}
     <div wire:loading
          class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-        <div class="bg-gray-900/90 border border-white/10 rounded-lg px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
+        <div class="bg-gray-900/90 border border-white/10 rounded-lg px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-3">
             {{-- Animated spinner --}}
             <div class="relative w-14 h-14">
                 <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Indicadores de Planificación</h1>
             <p class="text-cyan-400 font-medium">Dashboard institucional con KPIs por programa educativo y período académico.</p>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- Global KPI Boxes -->
-    <div class="grid grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-3 gap-3 mb-8">
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
             label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
@@ -160,7 +160,7 @@
                                 <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
                                 <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-2 gap-3">
                                 <x-indicator-box
                                     icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                     label="Actividades Registradas"
@@ -323,7 +323,7 @@
                         @endphp
                         <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
                             @if($indicators && $indicators->total_activities > 0)
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                                     <x-indicator-box
                                         icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                         label="Total de actividades planificadas"
@@ -398,7 +398,7 @@
                         $diagStudents = $tab4DiagData->sum('students_evaluated');
                     @endphp
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <x-indicator-box
                             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>'
                             label="Total Sesiones" value="{{ number_format($diagTotalSessions) }}" color="cyan" />
@@ -416,8 +416,8 @@
                     {{-- Question-level indicators --}}
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Resumen de Preguntas</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
                                     <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
@@ -426,7 +426,7 @@
                                     <p class="text-lg font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
                                 </div>
                             </div>
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
                                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
@@ -435,7 +435,7 @@
                                     <p class="text-lg font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
                                 </div>
                             </div>
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
+                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
                                     <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                                 </div>

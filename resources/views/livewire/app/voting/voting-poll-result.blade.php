@@ -15,7 +15,7 @@
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-emerald-500/10 transition-all">
             </div>
-            <div class="flex items-center gap-4 relative">
+            <div class="flex items-center gap-3 relative">
                 <div
                     class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
                     <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-blue-500/10 transition-all">
             </div>
-            <div class="flex items-center gap-4 relative">
+            <div class="flex items-center gap-3 relative">
                 <div
                     class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
                     <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-purple-500/10 transition-all">
             </div>
-            <div class="flex items-center gap-4 relative">
+            <div class="flex items-center gap-3 relative">
                 <div
                     class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center border border-purple-500/20">
                     <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

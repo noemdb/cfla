@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Grados</h1>
             <p class="text-emerald-400 font-medium">Gestión de grados o años académicos por plan de estudio.</p>
@@ -184,7 +184,7 @@
             </svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este grado?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el grado. Solo se puede eliminar si no tiene secciones asociadas.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -202,7 +202,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</span>
                     <p class="text-sm text-white font-bold font-mono mt-1">{{ $previewGrado->code }}</p>
@@ -216,7 +216,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</span>
                 <p class="text-sm text-white mt-1">{{ $previewGrado->name }}</p>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Plan de Estudio</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewGrado->pestudio?->full_name ?? '—' }}</p>
@@ -235,7 +235,7 @@
                     </p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">H. Sociales</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewGrado->hour_social ?? '—' }}</p>
@@ -293,7 +293,7 @@
                     </svg>
                     Datos del Grado
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio *</label>
                         <select wire:model="pestudio_id"
@@ -345,7 +345,7 @@
                     </svg>
                     Configuración
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Horas Sociales Requeridas</label>
                         <input type="number" wire:model="hour_social" min="0" max="255"

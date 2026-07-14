@@ -801,7 +801,7 @@
                     <p class="text-gray-700 mb-2">
                         <strong>Se incluye:</strong>
                     </p>
-                    <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                    <div class="flex flex-wrap justify-center gap-3 text-sm text-gray-600">
                         <span>✓ Capacitación inicial</span>
                         <span>✓ Migración de datos</span>
                         <span>✓ Configuración personalizada</span>

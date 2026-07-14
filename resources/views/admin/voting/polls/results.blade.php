@@ -110,7 +110,7 @@
                                                 {{ $poll->enable ? 'Activa' : 'Finalizada' }}
                                             </span>
                                         </div>
-                                        <div class="flex items-center gap-4 text-sm text-gray-600">
+                                        <div class="flex items-center gap-3 text-sm text-gray-600">
                                             <span class="flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">

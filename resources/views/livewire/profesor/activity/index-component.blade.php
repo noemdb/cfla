@@ -14,7 +14,7 @@
 
         {{-- Alert: Observación Coord.Eval. --}}
         <div class="border-b border-white/5 px-6 py-4 bg-amber-500/5">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-2">
                         <div class="w-7 h-7 bg-amber-500/10 rounded-lg flex items-center justify-center">
@@ -172,7 +172,7 @@
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }}">
 
                         {{-- Activity Header --}}
-                        <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-start justify-between gap-3">
                             <div class="flex-1 min-w-0">
                                 {{-- Status badge --}}
                                 <div class="flex items-center gap-2 mb-2">
@@ -860,7 +860,7 @@
                     <div class="overflow-y-auto overscroll-contain" style="max-height: calc(100vh - 220px);">
                         <div class="p-6">
                             @if(!empty($s2526Activities))
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                     @foreach($s2526Activities as $i => $act)
                                         <div class="bg-gray-800/30 border border-white/5 rounded-lg hover:border-violet-500/30 transition-all duration-200 flex flex-col"
                                             x-data="{ openMenu: false }"

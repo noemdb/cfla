@@ -1,6 +1,6 @@
 <div class="fade-in">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Profesores</h1>
             <p class="text-emerald-400 font-medium">Gestión de profesores del módulo de planificación académica.</p>
@@ -216,7 +216,7 @@
             <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
             <h3 class="text-lg font-bold text-white mb-2">¿Eliminar este profesor?</h3>
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el profesor del sistema. Solo se puede eliminar si no tiene cargas académicas asociadas.</p>
-            <div class="flex justify-center gap-4">
+            <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
             </div>
@@ -232,7 +232,7 @@
                 title="Cerrar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <div class="flex items-center gap-4 mb-4">
+            <div class="flex items-center gap-3 mb-4">
                 <div class="w-14 h-14 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-lg font-bold">
                     {{ strtoupper(substr($previewProfesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($previewProfesor->lastname ?? '', 0, 1)) }}
                 </div>
@@ -241,7 +241,7 @@
                     <p class="text-sm text-gray-400 font-mono">{{ $previewProfesor->ci_profesor }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Tipo Facilitador</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewProfesor->ti_teacher ?? '—' }}</p>
@@ -251,7 +251,7 @@
                     <p class="text-sm text-gray-300 mt-1">{{ $previewProfesor->gender === 'M' ? 'Masculino' : 'Femenino' }}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-3 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Carga Académica</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewProfesor->pevaluacions_count }}</p>
@@ -266,7 +266,7 @@
                 </div>
             </div>
             @if($previewProfesor->email || $previewProfesor->cellphone)
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Email</span>
                     <p class="text-sm text-gray-300 mt-1">{{ $previewProfesor->email ?? '—' }}</p>
@@ -329,7 +329,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                     Datos Personales
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Cédula de Identidad *</label>
                         <input type="text" wire:model="ci_profesor" placeholder="V-12345678"
@@ -348,7 +348,7 @@
                         @error('ti_teacher') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nombres *</label>
                         <input type="text" wire:model="name" placeholder="Nombres"
@@ -362,7 +362,7 @@
                         @error('lastname') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Género *</label>
                         <select wire:model="gender"
@@ -389,7 +389,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     Información de Contacto
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Correo Electrónico *</label>
                         <input type="email" wire:model="email" placeholder="correo@ejemplo.com"
@@ -403,7 +403,7 @@
                         @error('gsemail') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Teléfono</label>
                         <input type="text" wire:model="phone" placeholder="0212-5551234"
@@ -439,7 +439,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     Cuenta de Usuario y Rol
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nombre de Usuario *</label>
                         <div class="flex gap-2">
@@ -461,7 +461,7 @@
                         @error('user_password') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Fecha Inicial del Rol</label>
                         <input type="date" wire:model="rol_finicial"

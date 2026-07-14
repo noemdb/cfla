@@ -1,5 +1,5 @@
 <div class="fade-in">
-    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Gestión Operativa de la ejecución de los Diagnósticos</h1>
             <p class="text-emerald-400 font-medium">Gestiona la activación de áreas de formación para la aplicación del
@@ -31,7 +31,7 @@
             <div @click="open = !open"
                 class="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors group">
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/30 transition-all duration-300"
                         :class="open ? 'scale-110 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : ''">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

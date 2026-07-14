@@ -54,7 +54,7 @@
     </div>
 
     {{-- Question Type Distribution --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Distribución por Tipo de Pregunta</h4>
             @php
@@ -111,7 +111,7 @@
     </div>
 
     {{-- Insights Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div class="bg-gradient-to-br from-emerald-500/5 to-emerald-500/0 border border-emerald-500/10 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-2">
                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

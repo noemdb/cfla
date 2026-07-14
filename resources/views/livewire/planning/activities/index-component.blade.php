@@ -5,7 +5,7 @@
     commentStatus: @entangle('status')
 }">
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Plan de Actividades</h1>
             <p class="text-emerald-400 font-medium">Revisión y control de calidad pedagógica de los planes de evaluación.</p>
@@ -131,7 +131,7 @@
 
         <div class="bg-{{ $c }}-500/10 border border-{{ $c }}-500/20 p-5 rounded-lg mb-8">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-{{ $c }}-500/20 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-{{ $c }}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -183,7 +183,7 @@
                     <!-- Header Row -->
                     <div @click="open = !open"
                         class="flex items-center justify-between p-5 cursor-pointer hover:bg-white/[0.02] transition-colors group">
-                        <div class="flex items-center gap-4 min-w-0">
+                        <div class="flex items-center gap-3 min-w-0">
                             <div class="w-11 h-11 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -202,7 +202,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 flex-shrink-0">
+                        <div class="flex items-center gap-3 flex-shrink-0">
                             <!-- Activity count -->
                             <div class="flex items-center gap-2">
                                 @if($item->activities_count > 0)
@@ -307,7 +307,7 @@
                                 @foreach($item->activities as $i => $act)
                                     <div x-show="activeTab === {{ $i }}" x-cloak x-transition:enter.duration.200ms class="mt-4">
                                         <div class="bg-white/[0.03] p-4 rounded-lg border border-white/5">
-                                            <div class="flex items-start justify-between gap-4">
+                                            <div class="flex items-start justify-between gap-3">
                                                 <div class="flex-1 min-w-0">
                                                     <!-- Fechas -->
                                                     <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
@@ -621,7 +621,7 @@
                 </div>
 
                 {{-- Grid: Achievements + ODS --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {{-- Achievements --}}
                     <div class="bg-white/5 p-4 rounded-lg border border-white/5">
                         <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-1.5">Indicadores de Logro</div>

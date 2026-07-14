@@ -15,7 +15,7 @@
 
     {{-- ── Encabezado de la lección ── --}}
     <div class="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-6 sm:p-8">
-        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div class="space-y-3 min-w-0">
                 <div class="flex items-center gap-2">
                     <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
