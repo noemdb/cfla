@@ -23,13 +23,10 @@
 /* ── Gaps ───────────────────────────────────────────── */
 .gap-8 { gap: 1.5rem; }                          /* was 2rem    → -25% */
 .gap-6 { gap: 1.25rem; }                         /* was 1.5rem  → -17% */
-.gap-4 { gap: 0.875rem; }                        /* was 1rem    → -12.5% */
 
 /* ── Margins ────────────────────────────────────────── */
 .mb-8 { margin-bottom: 1.5rem; }                 /* was 2rem    → -25% */
 .mb-6 { margin-bottom: 1.25rem; }                /* was 1.5rem  → -17% */
-.mb-4 { margin-bottom: 0.875rem; }               /* was 1rem    → -12.5% */
-.mb-3 { margin-bottom: 0.625rem; }               /* was 0.75rem → -17% */
 
 .mt-6 { margin-top: 1.25rem; }                   /* was 1.5rem  → -17% */
 .mt-4 { margin-top: 0.75rem; }                   /* was 1rem    → -25% */
@@ -38,7 +35,3 @@
 .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }  /* was 1.5rem → -17% */
 .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }  /* was 1rem   → -25% */
 .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }   /* was 0.75rem → -33% */
-
-/* ── Table/cell vertical padding ────────────────────── */
-.py-4 { padding-top: 0.75rem; padding-bottom: 0.75rem; }   /* was 1rem  → -25% */
-.py-3 { padding-top: 0.5rem; padding-bottom: 0.5rem; }     /* was 0.75rem → -33% */
