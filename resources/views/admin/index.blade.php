@@ -6,7 +6,7 @@
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
-            <h1 class="text-xl font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
             <p class="text-emerald-400 font-medium">Bienvenido de nuevo al ecosistema administrativo de SAEFL.</p>
         </div>
 
@@ -14,24 +14,24 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
                 <p class="text-emerald-300 text-sm font-medium mb-1">Sesión Activa</p>
-                <p class="text-white text-xl font-bold">{{ now()->format('H:i A') }}</p>
+                <p class="text-white text-lg font-bold">{{ now()->format('H:i A') }}</p>
             </div>
             <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
                 <p class="text-blue-300 text-sm font-medium mb-1">Estado del Sistema</p>
-                <p class="text-white text-xl font-bold flex items-center">
+                <p class="text-white text-lg font-bold flex items-center">
                     <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                     Operacional
                 </p>
             </div>
             <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
                 <p class="text-purple-300 text-sm font-medium mb-1">Nivel de Acceso</p>
-                <p class="text-white text-xl font-bold">
+                <p class="text-white text-lg font-bold">
                     {{ Auth::user()->role_label }}
                 </p>
             </div>
         </div>
 
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center">
+        <h2 class="text-lg font-bold text-white mb-6 flex items-center">
             <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
@@ -329,7 +329,7 @@
         </div>
 
         @if (Auth::user()->is_admin)
-            <h2 class="text-xl font-bold text-white mb-6 mt-12 flex items-center">
+            <h2 class="text-lg font-bold text-white mb-6 mt-12 flex items-center">
                 <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
@@ -418,7 +418,7 @@
 
         <!-- Extra Modules / Links -->
         <div class="mt-12 pt-8 border-t border-white/5">
-            <h2 class="text-xl font-bold text-white mb-6">Herramientas del Sistema</h2>
+            <h2 class="text-lg font-bold text-white mb-6">Herramientas del Sistema</h2>
             <div class="flex flex-wrap gap-4">
                 <a href="{{ url('/') }}"
                     class="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-5 py-2.5 rounded-xl border border-white/5 transition-all duration-300 text-sm font-medium flex items-center">

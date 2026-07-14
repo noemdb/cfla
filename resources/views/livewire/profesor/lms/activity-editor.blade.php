@@ -11,7 +11,7 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-xl font-semibold text-white">
+                <h1 class="text-lg font-semibold text-white">
                     {{ $activity->topic ?? 'Actividad sin título' }}
                 </h1>
                 <p class="text-sm text-slate-400 mt-1">

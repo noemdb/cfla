@@ -24,7 +24,7 @@
 
     <div id="header"> @yield('header') </div>
     
-    <div class="text-xl text-green-950 font-bold text-center py-2 my-2">
+    <div class="text-lg text-green-950 font-bold text-center py-2 my-2">
         Asistente
     </div>
 

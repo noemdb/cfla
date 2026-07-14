@@ -47,7 +47,7 @@
             </div>
         @endif
     </div>
-    <p class="text-xl font-bold text-white mb-1">{{ $value }}</p>
+    <p class="text-lg font-bold text-white mb-1">{{ $value }}</p>
     <p class="text-[11px] font-medium {{ $c['text'] }} uppercase tracking-wider">{{ $label }}</p>
     @if($subtext)
         <p class="text-[10px] text-gray-500 mt-1">{{ $subtext }}</p>

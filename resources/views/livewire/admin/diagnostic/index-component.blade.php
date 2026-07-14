@@ -1,7 +1,7 @@
 <div class="fade-in">
     <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Gestión Operativa de la ejecución de los Diagnósticos</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Gestión Operativa de la ejecución de los Diagnósticos</h1>
             <p class="text-emerald-400 font-medium">Gestiona la activación de áreas de formación para la aplicación del
                 diagnóstico académico.
             </p>
@@ -41,7 +41,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-xl font-black text-white group-hover:text-emerald-50 transition-colors">
+                        <h2 class="text-lg font-black text-white group-hover:text-emerald-50 transition-colors">
                             {{ $pestudio->name }}</h2>
                         <div class="flex items-center gap-2">
                             <span
@@ -78,7 +78,7 @@
                             <div class="flex flex-col items-end">
                                 <span
                                     class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest leading-none mb-1">Activos</span>
-                                <span class="text-xl font-black text-white leading-none">{{ $activeCount }}</span>
+                                <span class="text-lg font-black text-white leading-none">{{ $activeCount }}</span>
                             </div>
                             <div
                                 class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.4)]">

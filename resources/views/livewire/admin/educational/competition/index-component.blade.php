@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Competiciones Académicas</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Competiciones Académicas</h1>
             <p class="text-emerald-400 font-medium">Gestión y control de retos académicos y debates entre grados.</p>
         </div>
         <div class="flex items-center gap-3">
@@ -51,7 +51,7 @@
                     </div>
                 </div>
 
-                <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
+                <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
                     {{ $competition->name }}</h3>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-2">
                     {{ $competition->description ?? 'Sin descripción proporcionada.' }}

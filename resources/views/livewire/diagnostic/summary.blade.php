@@ -2,28 +2,28 @@
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-xl font-bold text-center mb-2">Diagnóstico Completado</h1>
+            <h1 class="text-lg font-bold text-center mb-2">Diagnóstico Completado</h1>
             <p class="text-gray-400 text-center">{{ $selectedPensum->asignatura->full_name ?? 'Área Académica' }}</p>
         </div>
 
         <!-- Summary Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-xl font-bold text-green-400 mb-2">
+                <div class="text-lg font-bold text-green-400 mb-2">
                     {{ $sessionStats['total_answers'] ?? 0 }}
                 </div>
                 <div class="text-gray-400">Preguntas Respondidas</div>
             </div>
 
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-xl font-bold text-blue-400 mb-2">
+                <div class="text-lg font-bold text-blue-400 mb-2">
                     {{ number_format($sessionStats['average_progress'] ?? 0, 1) }}%
                 </div>
                 <div class="text-gray-400">Progreso Promedio</div>
             </div>
 
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-xl font-bold text-purple-400 mb-2">
+                <div class="text-lg font-bold text-purple-400 mb-2">
                     {{ $sessionStats['completed_sessions'] ?? 0 }}
                 </div>
                 <div class="text-gray-400">Sesiones Completadas</div>
@@ -37,7 +37,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <h2 class="text-xl font-semibold text-green-400">¡Felicitaciones!</h2>
+                <h2 class="text-lg font-semibold text-green-400">¡Felicitaciones!</h2>
             </div>
             <p class="text-gray-300 mb-4">
                 Has completado exitosamente el diagnóstico para
@@ -72,7 +72,7 @@
             <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between p-6 border-b border-gray-700">
-                    <h3 class="text-xl font-semibold">Respuestas Detalladas</h3>
+                    <h3 class="text-lg font-semibold">Respuestas Detalladas</h3>
                     <button wire:click="closeAnsweredQuestionsModal"
                         class="text-gray-400 hover:text-white transition-colors duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

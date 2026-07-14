@@ -9,7 +9,7 @@
                 </div>
                 <div class="bg-green-800 rounded text-white">
                     <p class="dark:text-neutral-400">FRAY</p>
-                    <h5 class="text-xl font-bold leading-tight">EZEQUIEL JOSÉ SIERRA RODRIGUEZ</h5>
+                    <h5 class="text-lg font-bold leading-tight">EZEQUIEL JOSÉ SIERRA RODRIGUEZ</h5>
                     <p class="text-green-200 dark:text-neutral-400 font-light">DIRECTOR GENERAL Y ADMINISTRATIVO</p>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                 </div>
                 <div class="bg-primary-800 rounded text-white">
                     <p class="dark:text-neutral-400">DRA.</p>
-                    <h5 class="text-xl font-bold leading-tight">ESCARLETH MARGARITA LOPEZ DE ANTOLINI</h5>
+                    <h5 class="text-lg font-bold leading-tight">ESCARLETH MARGARITA LOPEZ DE ANTOLINI</h5>
                     <p class="text-primary-200 dark:text-neutral-400 font-light">DIRECTORA</p>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="bg-indigo-800 rounded text-white">
                     <p class="dark:text-neutral-400">.</p>
-                    <h5 class="text-xl font-bold leading-tight">YANIRA LEDEZMA VALLES</h5>
+                    <h5 class="text-lg font-bold leading-tight">YANIRA LEDEZMA VALLES</h5>
                     <p class="text-indigo-200 dark:text-neutral-400 font-light">ADMINISTRADORA ADJUNTA</p>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
                             <p class="dark:text-neutral-400">PROF.</p>
-                            <h5 class="text-xl font-bold leading-tight">LIDOSKA BEATRIZ VELIZ DUDAMELL</h5>
+                            <h5 class="text-lg font-bold leading-tight">LIDOSKA BEATRIZ VELIZ DUDAMELL</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADORA DE REGISTRO Y CONTROL DE ESTUDIO</p>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
                             <p class="dark:text-neutral-400">MSc.</p>
-                            <h5 class="text-xl font-bold leading-tight">Roxangel Rodríguez Peña</h5>
+                            <h5 class="text-lg font-bold leading-tight">Roxangel Rodríguez Peña</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADORA DE EVALUACIÓN</p>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
                             <p class="dark:text-neutral-400">MSc.</p>
-                            <h5 class="text-xl font-bold leading-tight">MARIELA TAMAYO DE PARRA</h5>
+                            <h5 class="text-lg font-bold leading-tight">MARIELA TAMAYO DE PARRA</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADORA DE EDUCACIÓN PRIMARIA</p>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
                             <p class="dark:text-neutral-400">DRA.</p>
-                            <h5 class="text-xl font-bold leading-tight">RINNA CHACON COLMENAREZ</h5>
+                            <h5 class="text-lg font-bold leading-tight">RINNA CHACON COLMENAREZ</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADORA DE BIENESTAR ESTUDIANTIL</p>
                         </div>
                     </div>
@@ -134,7 +134,7 @@
                     <div id="h2" class="flex-end">
                         <div class="bg-info-800 rounded text-white">
                             <p class="dark:text-neutral-400">LCDO.</p>
-                            <h5 class="text-xl font-bold leading-tight">JOSÉ DE LA CRUZ RIVERO</h5>
+                            <h5 class="text-lg font-bold leading-tight">JOSÉ DE LA CRUZ RIVERO</h5>
                             <p class="text-info-200 dark:text-neutral-400 font-light">COORDINADOR DE PASTORAL</p>
                         </div>
                     </div>

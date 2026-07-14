@@ -4,7 +4,7 @@
         <div class="m-2 w-full">
         
             <div class="my-2 py-2 bg-white text-gray-900 border-t-4 border-purple-800">
-                <h4 class="text-xl font-bold dark:text-white">Resultados</h4>
+                <h4 class="text-lg font-bold dark:text-white">Resultados</h4>
         
                 <div class="font-bold p-2">{{$grado->name}}</div>
         

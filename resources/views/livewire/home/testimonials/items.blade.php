@@ -3,7 +3,7 @@
     <div class="mb-6 flex justify-center">
         @include('svg.person-fill',['w'=>'64','h'=>'64'])
     </div>
-    <h5 class="mb-4 text-xl font-semibold">Maria Smantha</h5>
+    <h5 class="mb-4 text-lg font-semibold">Maria Smantha</h5>
     <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
         Lcda. Administración
     </h6>
@@ -50,7 +50,7 @@
     <div class="mb-6 flex justify-center">
         @include('svg.person',['w'=>'64','h'=>'64'])
     </div>
-    <h5 class="mb-4 text-xl font-semibold">Lisa Rocca</h5>
+    <h5 class="mb-4 text-lg font-semibold">Lisa Rocca</h5>
     <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
         Diseñadora
     </h6>
@@ -86,7 +86,7 @@
         <div class="mb-6 flex justify-center">
             @include('svg.person-fill',['w'=>'64','h'=>'64'])
         </div>
-        <h5 class="mb-4 text-xl font-semibold">Marlene Oropeza</h5>
+        <h5 class="mb-4 text-lg font-semibold">Marlene Oropeza</h5>
         <h6 class="mb-4 font-semibold text-primary dark:text-primary-400">
             Abogada
         </h6>

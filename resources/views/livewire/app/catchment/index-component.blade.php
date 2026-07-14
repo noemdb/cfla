@@ -3,7 +3,7 @@
     <x-card class="p-2">
 
         <x-slot name="header">
-            <h3 class=" text-indigo-950 bg-indigo-100 rounded-t-xl p-2 text-lg md:text-xl font-bold dark:text-neutral-200">
+            <h3 class=" text-indigo-950 bg-indigo-100 rounded-t-xl p-2 text-lg md:text-lg font-bold dark:text-neutral-200">
                 <div class="h-full flex items-center gap-2">
                     <x-icon name="bars-3" class="flex-none w-8 h-8" />
                     <div class="flex-initial">Proceso Matriculación Escolar 2024 2025</div>
@@ -21,7 +21,7 @@
                     </a>
                 </div>
                 <div class="text-center dark:text-neutral-200">
-                    <div class="text-lg md:text-xl text-gray-900">Censo Escolar</div>
+                    <div class="text-lg md:text-lg text-gray-900">Censo Escolar</div>
                     <div class="text-md text-gray-600">Asistente</div>
                     <div class="text-sm text-gray-400">Registra tu interes por pertenecer a nuestra institución educativa.</div>
                 </div>

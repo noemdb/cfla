@@ -14,7 +14,7 @@
         </div>
         <div>
             <p class="text-sm font-medium text-gray-500">{{ $label }}</p>
-            <p class="text-xl font-semibold text-gray-900">{{ $value }}</p>
+            <p class="text-lg font-semibold text-gray-900">{{ $value }}</p>
             @if($description)
                 <p class="mt-1 text-xs text-gray-400">{{ $description }}</p>
             @endif

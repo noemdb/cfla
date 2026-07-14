@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="p-6">
-                        <h5 class="mb-3 text-xl font-bold text-violet-800">Kurios</h5>
+                        <h5 class="mb-3 text-lg font-bold text-violet-800">Kurios</h5>
                         {{-- <p class="mb-4 text-neutral-500 dark:text-neutral-300">
                             <small>Published <u>13.01.2022</u> by
                                 <a href="#!">Anna Maria Doe</a></small>

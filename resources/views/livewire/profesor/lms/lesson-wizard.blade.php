@@ -5,7 +5,7 @@
         <div wire:key="mode-list">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-bold text-white">Nueva Lección</h1>
+                <h1 class="text-lg font-bold text-white">Nueva Lección</h1>
                 <p class="text-sm text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
             </div>
             <a href="{{ route('app.profesors.lms.editor', 0) }}"
@@ -649,7 +649,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $exportPreviewData['subject'] }}
                                     </p>
-                                    <h1 class="text-xl font-bold text-slate-900">{{ $exportPreviewData['title'] }}</h1>
+                                    <h1 class="text-lg font-bold text-slate-900">{{ $exportPreviewData['title'] }}</h1>
                                     @if($exportPreviewData['description'])
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $exportPreviewData['description'] }}</p>
                                     @endif
@@ -1056,7 +1056,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $importPreviewData['subject'] }}
                                     </p>
-                                    <h1 class="text-xl font-bold text-slate-900">{{ $importPreviewData['title'] }}</h1>
+                                    <h1 class="text-lg font-bold text-slate-900">{{ $importPreviewData['title'] }}</h1>
                                     @if($importPreviewData['description'])
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $importPreviewData['description'] }}</p>
                                     @endif
@@ -1383,7 +1383,7 @@
                                         </div>
 
                                         {{-- Título principal --}}
-                                        <h1 class="text-xl md:text-xl font-bold text-stone-900 leading-tight text-center w-full">
+                                        <h1 class="text-lg md:text-lg font-bold text-stone-900 leading-tight text-center w-full">
                                             {{ $listPreviewData['title'] }}
                                         </h1>
 
@@ -3584,7 +3584,7 @@
                                     <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">
                                         {{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura' }}
                                     </p>
-                                    <h2 class="text-xl font-bold text-white">{{ $lessonTitle ?: 'Título de la lección' }}</h2>
+                                    <h2 class="text-lg font-bold text-white">{{ $lessonTitle ?: 'Título de la lección' }}</h2>
                                     @if($lessonDescription)
                                         <p class="text-sm text-slate-400 mt-1">{{ $lessonDescription }}</p>
                                     @endif
@@ -3827,7 +3827,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura' }}
                                     </p>
-                                    <h1 class="text-xl font-bold text-slate-900">{{ $lessonTitle ?: 'Título de la lección' }}</h1>
+                                    <h1 class="text-lg font-bold text-slate-900">{{ $lessonTitle ?: 'Título de la lección' }}</h1>
                                     @if($lessonDescription)
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $lessonDescription }}</p>
                                     @endif

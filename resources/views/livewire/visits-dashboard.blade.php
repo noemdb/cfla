@@ -34,7 +34,7 @@
                 <x-icon name="users" class="w-8 h-8 mr-3 text-primary-600 dark:text-primary-400" />
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 dark:text-secondary-400">Total Visitas</h3>
-                    <p class="text-xl font-semibold text-gray-900 dark:text-secondary-100">
+                    <p class="text-lg font-semibold text-gray-900 dark:text-secondary-100">
                         {{ number_format($stats['total']) }}</p>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                 <x-icon name="finger-print" class="w-8 h-8 mr-3 text-emerald-600 dark:text-emerald-400" />
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 dark:text-secondary-400">Visitantes Únicos</h3>
-                    <p class="text-xl font-semibold text-gray-900 dark:text-secondary-100">
+                    <p class="text-lg font-semibold text-gray-900 dark:text-secondary-100">
                         {{ number_format($stats['unique']) }}</p>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 <x-icon name="device-phone-mobile" class="w-8 h-8 mr-3 text-purple-600 dark:text-purple-400" />
                 <div>
                     <h3 class="text-sm font-medium text-gray-500 dark:text-secondary-400">Visitas Móviles</h3>
-                    <p class="text-xl font-semibold text-gray-900 dark:text-secondary-100">
+                    <p class="text-lg font-semibold text-gray-900 dark:text-secondary-100">
                         {{ number_format($stats['mobile']) }}</p>
                 </div>
             </div>

@@ -15,7 +15,7 @@
                         </svg>
                     </a>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-900">Editar Encuesta</h1>
+                        <h1 class="text-lg font-bold text-gray-900">Editar Encuesta</h1>
                         <p class="text-gray-600 mt-1">Modifica los datos de la encuesta</p>
                     </div>
                 </div>
@@ -177,15 +177,15 @@
                             <h2 class="text-lg font-semibold text-gray-900 mb-4">Estadísticas Actuales</h2>
                             <div class="grid md:grid-cols-3 gap-4">
                                 <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                    <div class="text-xl font-bold text-blue-600">{{ $poll->votes_count }}</div>
+                                    <div class="text-lg font-bold text-blue-600">{{ $poll->votes_count }}</div>
                                     <div class="text-sm text-blue-800">Votos Totales</div>
                                 </div>
                                 <div class="text-center p-4 bg-green-50 rounded-lg">
-                                    <div class="text-xl font-bold text-green-600">{{ $poll->options->count() }}</div>
+                                    <div class="text-lg font-bold text-green-600">{{ $poll->options->count() }}</div>
                                     <div class="text-sm text-green-800">Opciones</div>
                                 </div>
                                 <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                    <div class="text-xl font-bold text-purple-600">
+                                    <div class="text-lg font-bold text-purple-600">
                                         {{ $poll->votes_count > 0 ? round($poll->votes_count / $poll->options->count(), 1) : 0 }}
                                     </div>
                                     <div class="text-sm text-purple-800">Promedio por Opción</div>

@@ -26,7 +26,7 @@
     {{-- Header --}}
     <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-0.5">Plan de Actividades</h1>
+            <h1 class="text-lg font-extrabold text-white mb-0.5">Plan de Actividades</h1>
             <p class="text-xs text-emerald-400 font-medium">'Áreas de formación [Carga Académica] y actividades de planificación</p>
         </div>
         {{-- @include('profesors.activities.menus.index') --}}

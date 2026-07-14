@@ -6,7 +6,7 @@
                 
                 {{-- Columna Izquierda: Etiqueta "Opciones" --}}
                 <div class="col-span-1 flex items-center justify-center">
-                    <div class="rotate-[-90deg] whitespace-nowrap text-xl font-bold text-emerald-700 uppercase tracking-wider">
+                    <div class="rotate-[-90deg] whitespace-nowrap text-lg font-bold text-emerald-700 uppercase tracking-wider">
                         Opciones
                     </div>
                 </div>
@@ -71,7 +71,7 @@
 
                                     {{-- Texto de la opción --}}
                                     <div class="w-full px-2 z-10">
-                                        <div class="text-center transition-all duration-300 text-xl leading-tight
+                                        <div class="text-center transition-all duration-300 text-lg leading-tight
                                             {{ $status_noanswer
                                                 ? 'text-gray-400 font-light line-through decoration-gray-400'
                                                 : ($status_answer

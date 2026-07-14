@@ -33,7 +33,7 @@
                                         </path>
                                     </svg>
                                 </div>
-                                <span class="text-xl font-bold text-gray-900">VotingSystem</span>
+                                <span class="text-lg font-bold text-gray-900">VotingSystem</span>
                             </a>
                         </div>
 

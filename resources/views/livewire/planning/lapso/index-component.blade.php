@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Lapsos Académicos</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Lapsos Académicos</h1>
             <p class="text-emerald-400 font-medium">Gestión de períodos académicos (trimestres) del año escolar.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -358,7 +358,7 @@
                 </button>
                 {{-- Header con badges --}}
                 <div class="flex items-center gap-3 flex-wrap">
-                    <span class="text-xl font-bold text-white">{{ $previewLapso->name }}</span>
+                    <span class="text-lg font-bold text-white">{{ $previewLapso->name }}</span>
                     @if($previewLapso->is_current)
                         <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full">
                             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>

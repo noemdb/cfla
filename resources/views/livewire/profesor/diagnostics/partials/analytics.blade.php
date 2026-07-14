@@ -141,7 +141,7 @@
                 </svg>
                 <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Total estudiantes evaluados</span>
             </div>
-            <p class="text-xl font-bold text-white">{{ $analytics['total_students_evaluated'] ?? 0 }}</p>
+            <p class="text-lg font-bold text-white">{{ $analytics['total_students_evaluated'] ?? 0 }}</p>
             <p class="text-[10px] text-gray-500 mt-1">de {{ $stats['total_students'] ?? 0 }} estudiantes</p>
         </div>
     </div>

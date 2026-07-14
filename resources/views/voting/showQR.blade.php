@@ -17,7 +17,7 @@
                         </path>
                     </svg>
                 </div>
-                <h1 class="text-xl md:text-xl font-bold mb-2 text-white">¡Participación Confirmada!</h1>
+                <h1 class="text-lg md:text-lg font-bold mb-2 text-white">¡Participación Confirmada!</h1>
                 <p class="text-emerald-200">Tu código QR de participación está listo</p>
             </div>
 

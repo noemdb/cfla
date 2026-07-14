@@ -6,7 +6,7 @@
             <div class="flex items-center">
                 <!-- Hamburger menu button -->
                 <button
-                    class="text-green-200 border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-white dark:hover:text-white dark:focus:text-white md:hidden"
+                    class="text-green-200 border-0 bg-transparent px-2 text-lg leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-white dark:hover:text-white dark:focus:text-white md:hidden"
                     type="button" data-te-collapse-init data-te-target="#navbarSupportedContentY"
                     aria-controls="navbarSupportedContentY" aria-expanded="false" aria-label="Toggle navigation">
                     <!-- Hamburger menu icon -->

@@ -8,7 +8,7 @@
     {{-- Header --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Mi Perfil</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Mi Perfil</h1>
             <p class="text-emerald-400 font-medium">Información personal del profesor</p>
         </div>
         <a href="{{ route('app.profesors.home') }}"
@@ -30,7 +30,7 @@
                 </svg>
             </div>
             <div>
-                <h2 class="text-xl font-bold text-white">{{ $profesor->full_name }}</h2>
+                <h2 class="text-lg font-bold text-white">{{ $profesor->full_name }}</h2>
                 <p class="text-sm text-gray-400">{{ $profesor->email ?? 'Sin correo registrado' }}</p>
             </div>
         </div>

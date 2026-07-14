@@ -1,14 +1,14 @@
 <x-card>
     
     @slot('header')
-        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             Experiencias
         </h3>
     @endslot
 
     <div class="mx-auto text-center md:max-w-xl lg:max-w-3xl">
         
-        <h3 class="mb-6 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class="mb-6 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             Testimonios
         </h3>
         <p class="mb-6 pb-2 md:mb-12 md:pb-0">
@@ -23,7 +23,7 @@
             <div class="mb-6 flex justify-center">
                 <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(1).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
             </div>
-            <h5 class="mb-4 text-xl font-semibold">Maria Smantha</h5>
+            <h5 class="mb-4 text-lg font-semibold">Maria Smantha</h5>
             <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
                 Lcda. Administración
             </h6>
@@ -85,7 +85,7 @@
             <div class="mb-6 flex justify-center">
                 <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(2).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
             </div>
-            <h5 class="mb-4 text-xl font-semibold">Lisa Rocca</h5>
+            <h5 class="mb-4 text-lg font-semibold">Lisa Rocca</h5>
             <h6 class="mb-4 font-semibold text-primary dark:text-primary-500">
                 Diseñadora
             </h6>
@@ -140,7 +140,7 @@
                 <div class="mb-6 flex justify-center">
                     <img data-te-lazy-src="https://tecdn.b-cdn.net/img/Photos/Avatars/img%20(4).jpg" data-te-lazy-load-init class="w-32 rounded-full shadow-lg dark:shadow-black/30" />
                 </div>
-                <h5 class="mb-4 text-xl font-semibold">Marlene Oropeza</h5>
+                <h5 class="mb-4 text-lg font-semibold">Marlene Oropeza</h5>
                 <h6 class="mb-4 font-semibold text-primary dark:text-primary-400">
                     Abogada
                 </h6>

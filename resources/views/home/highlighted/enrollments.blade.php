@@ -2,7 +2,7 @@
     <x-card class="p-4">
 
         <x-slot name="header">
-            <h3 class=" text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+            <h3 class=" text-green-950 bg-green-100 mt-2 p-2 text-lg font-bold dark:text-neutral-200">
                 <div class="h-full flex items-center">
                     <x-icon name="document-text" class="flex-none w-10 h-10" />
                     <div class="flex-initial">Sólicitud actualización de matrícula.</div>

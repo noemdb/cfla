@@ -2,7 +2,7 @@
 
     <div class=" my-2 ml-2 bg-green-100 p-2 rounded-sm flex justify-between items-center">
         <div class="text-green-600 font-bold">
-            <span class="text-xl font-bold">Estudiante habilitado para la solitud de matrícula.</span> <br> <span class="text-xs text-gray-400 text-left">Nombre: {{$census->fullname ?? null}}</span>         
+            <span class="text-lg font-bold">Estudiante habilitado para la solitud de matrícula.</span> <br> <span class="text-xs text-gray-400 text-left">Nombre: {{$census->fullname ?? null}}</span>         
         </div>
         <div><x-mini-badge icon="check" positive class="w-8 h-8"/></div>  
     </div> 

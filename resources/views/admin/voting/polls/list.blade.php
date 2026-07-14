@@ -6,7 +6,7 @@
     <div class="bg-white shadow-sm border-b">
         <div class="container mx-auto px-4 py-6">
             <div class="text-center">
-                <h1 class="text-xl font-bold text-gray-900">Encuestas Activas</h1>
+                <h1 class="text-lg font-bold text-gray-900">Encuestas Activas</h1>
                 <p class="text-gray-600 mt-2">Participa en las votaciones disponibles</p>
             </div>
         </div>
@@ -18,7 +18,7 @@
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                 </svg>
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">No hay encuestas activas</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">No hay encuestas activas</h2>
                 <p class="text-gray-600 mb-4">No hay encuestas disponibles para votar en este momento.</p>
                 <a href="{{ url('/') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                     Volver al inicio

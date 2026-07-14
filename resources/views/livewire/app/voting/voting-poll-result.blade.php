@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Votos</p>
-                    <p class="text-xl font-black text-white leading-none">{{ number_format($totalVotes) }}</p>
+                    <p class="text-lg font-black text-white leading-none">{{ number_format($totalVotes) }}</p>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Opciones</p>
-                    <p class="text-xl font-black text-white leading-none">{{ count($results) }}</p>
+                    <p class="text-lg font-black text-white leading-none">{{ count($results) }}</p>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                             </div>
 
                             <div class="space-y-1">
-                                <h3 class="text-xl font-bold text-white tracking-tight">{{ $result['label'] }}</h3>
+                                <h3 class="text-lg font-bold text-white tracking-tight">{{ $result['label'] }}</h3>
                                 <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">
                                     {{ number_format($result['votes']) }} de {{ number_format($totalVotes) }} votos
                                 </p>
@@ -166,7 +166,7 @@
                     </path>
                 </svg>
             </div>
-            <h3 class="text-xl font-black text-white uppercase tracking-tight mb-2">Esperando Participación</h3>
+            <h3 class="text-lg font-black text-white uppercase tracking-tight mb-2">Esperando Participación</h3>
             <p class="text-gray-500 font-medium max-w-xs mx-auto text-sm leading-relaxed">
                 Los resultados aparecerán aquí automáticamente en tiempo real cuando se registren los primeros votos.
             </p>

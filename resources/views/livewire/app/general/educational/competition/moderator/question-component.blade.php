@@ -8,7 +8,7 @@
                 </svg>
             </div>
             <div>
-                <h5 class="text-xl font-bold text-white uppercase tracking-tight">
+                <h5 class="text-lg font-bold text-white uppercase tracking-tight">
                     {{ $debate->name }}
                 </h5>
                 <p class="text-[10px] text-emerald-500 font-black tracking-widest uppercase">Gestión de Interrogantes

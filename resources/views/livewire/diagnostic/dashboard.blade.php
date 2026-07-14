@@ -45,19 +45,19 @@
     @if (!empty($sessionStats))
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <div class="bg-gradient-to-r from-green-800 to-green-600 p-6 rounded-lg">
-                <div class="text-xl font-bold">{{ $sessionStats['total_sessions'] }}</div>
+                <div class="text-lg font-bold">{{ $sessionStats['total_sessions'] }}</div>
                 <div class="text-green-200">Sesiones Totales</div>
             </div>
             <div class="bg-gradient-to-r from-blue-800 to-blue-600 p-6 rounded-lg">
-                <div class="text-xl font-bold">{{ $sessionStats['completed_sessions'] }}</div>
+                <div class="text-lg font-bold">{{ $sessionStats['completed_sessions'] }}</div>
                 <div class="text-blue-200">Completadas</div>
             </div>
             <div class="bg-gradient-to-r from-purple-800 to-purple-600 p-6 rounded-lg">
-                <div class="text-xl font-bold">{{ $sessionStats['total_answers'] }}</div>
+                <div class="text-lg font-bold">{{ $sessionStats['total_answers'] }}</div>
                 <div class="text-purple-200">Respuestas</div>
             </div>
             <div class="bg-gradient-to-r from-yellow-800 to-yellow-600 p-6 rounded-lg">
-                <div class="text-xl font-bold">{{ round($sessionStats['average_progress']) }}%</div>
+                <div class="text-lg font-bold">{{ round($sessionStats['average_progress']) }}%</div>
                 <div class="text-yellow-200">Progreso Promedio</div>
             </div>
         </div>
@@ -77,7 +77,7 @@
                     <div class="flex-1">
                         <!-- Added completion icon for completed areas -->
                         <div class="flex items-center mb-2">
-                            <h3 class="text-xl font-semibold text-white">
+                            <h3 class="text-lg font-semibold text-white">
                                 {{ $pensum['name'] }}
                             </h3>
                             @if ($pensum['is_completed'])
@@ -206,7 +206,7 @@
             <div class="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" wire:click.stop>
                 <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-white">
+                    <h2 class="text-lg font-bold text-white">
                         Respuestas - {{ $selectedPensum->asignatura->full_name ?? 'Área' }}
                     </h2>
                     <button wire:click="closeAnsweredQuestionsModal" class="text-gray-400 hover:text-white">
@@ -291,7 +291,7 @@
                                 @elseif($item['question']->tipo_pregunta === 'scale')
                                     <!-- Scale answer -->
                                     <div class="flex items-center space-x-2">
-                                        <span class="text-xl font-bold text-green-400">{{ $item['answer'] }}</span>
+                                        <span class="text-lg font-bold text-green-400">{{ $item['answer'] }}</span>
                                         <span class="text-gray-400">/ 10</span>
                                         <div class="flex-1 bg-gray-600 rounded-full h-2 ml-4">
                                             <div class="bg-green-500 h-2 rounded-full"

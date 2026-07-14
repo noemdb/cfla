@@ -60,19 +60,19 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Ponderación</div>
-                    <div class="text-xl font-black text-emerald-400">{{ $question->weighting }} <span
+                    <div class="text-lg font-black text-emerald-400">{{ $question->weighting }} <span
                             class="text-[10px] opacity-50">PTS</span></div>
                 </div>
                 <div class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Tiempo Límite</div>
-                    <div class="text-xl font-black text-emerald-400">{{ $question->time }} <span
+                    <div class="text-lg font-black text-emerald-400">{{ $question->time }} <span
                             class="text-[10px] opacity-50">SEG</span></div>
                 </div>
                 <div
                     class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center relative overflow-hidden group">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Tiempo Transcurrido
                     </div>
-                    <div class="text-xl font-black text-white group-hover:text-emerald-400 transition-colors">
+                    <div class="text-lg font-black text-white group-hover:text-emerald-400 transition-colors">
                         {{ $question->time_elapsed ?? '0' }} <span class="text-[10px] opacity-50">SEG</span></div>
                     @if ($question->status_active)
                         <div class="absolute bottom-0 left-0 h-0.5 bg-emerald-500 animate-pulse w-full"></div>

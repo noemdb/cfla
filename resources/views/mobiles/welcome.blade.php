@@ -5,7 +5,7 @@
     <!-- Hero Section -->
     <div class="fade-in text-center px-6">
         <h1 class="text-4xl font-bold md:text-6xl">¡Bienvenido a Innovative App!</h1>
-        <p class="mt-4 text-lg md:text-xl">
+        <p class="mt-4 text-lg md:text-lg">
             La plataforma diseñada para transformar la forma en que interactúas con la tecnología.
         </p>
     </div>
@@ -13,19 +13,19 @@
     <!-- Features Section -->
     <div class="fade-in mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 px-6 max-w-4xl">
         <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center shadow-lg">
-            <h3 class="text-xl font-semibold">Innovación</h3>
+            <h3 class="text-lg font-semibold">Innovación</h3>
             <p class="mt-2 text-sm">
                 Tecnología de punta al alcance de tus manos.
             </p>
         </div>
         <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center shadow-lg">
-            <h3 class="text-xl font-semibold">Accesibilidad</h3>
+            <h3 class="text-lg font-semibold">Accesibilidad</h3>
             <p class="mt-2 text-sm">
                 Diseñado pensando en la experiencia móvil.
             </p>
         </div>
         <div class="bg-white bg-opacity-10 rounded-lg p-6 text-center shadow-lg">
-            <h3 class="text-xl font-semibold">Seguridad</h3>
+            <h3 class="text-lg font-semibold">Seguridad</h3>
             <p class="mt-2 text-sm">
                 Protegemos tus datos con tecnología avanzada.
             </p>

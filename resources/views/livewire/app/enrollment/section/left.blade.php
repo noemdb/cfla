@@ -2,7 +2,7 @@
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">U.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-1">
-            <h1 class="text-xl font-semibold">Solicitud de Matrícula - Asistente</h1>
+            <h1 class="text-lg font-semibold">Solicitud de Matrícula - Asistente</h1>
         </div>
         <div class="text-lg">Actualización de datos para el año escolar.</div>
         <div class="mb-8 font-semibold">Proceso administrativo de inscripción.</div>

@@ -16,7 +16,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h4 class="text-xl font-bold text-white uppercase tracking-tight">Gestión de Respuestas</h4>
+                        <h4 class="text-lg font-bold text-white uppercase tracking-tight">Gestión de Respuestas</h4>
                         <p class="text-[10px] text-emerald-500 font-black tracking-widest uppercase">Cronómetro en Tiempo Real</p>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
 
                 <div class="flex-1 text-center md:text-start">
                     <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Registro de Puntuación</p>
-                    <h4 class="text-xl font-bold text-gray-300">Haz clic en la sección ganadora:</h4>
+                    <h4 class="text-lg font-bold text-gray-300">Haz clic en la sección ganadora:</h4>
                 </div>
 
                 <div class="flex flex-wrap justify-center md:justify-end gap-2">

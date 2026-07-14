@@ -31,11 +31,11 @@
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
-            <h1 class="text-xl font-extrabold text-white mb-2">Planificación Académica</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Planificación Académica</h1>
             <p class="text-emerald-400 font-medium">Gestión y organización de actividades académicas institucionales.</p>
         </div>
 
-        <h2 class="text-xl font-bold text-white mb-6 flex items-center">
+        <h2 class="text-lg font-bold text-white mb-6 flex items-center">
             <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">

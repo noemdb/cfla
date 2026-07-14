@@ -21,7 +21,7 @@
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <!-- Removed status spans from h2 title -->
-                        <h2 class="text-xl font-semibold text-white">
+                        <h2 class="text-lg font-semibold text-white">
                             {{ $selectedPensum->asignatura->full_name ?? 'Diagnóstico' }}
                         </h2>
                         <!-- Fixed question count display logic to show correct counts -->
@@ -85,7 +85,7 @@
                             {{ $currentQuestionIndex + 1 }}
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-medium text-white mb-2">
+                            <h3 class="text-lg font-medium text-white mb-2">
                                 {{ $currentQuestion->pregunta }}
                             </h3>
 
@@ -249,7 +249,7 @@
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                         </path>
                     </svg>
-                    <h3 class="text-xl font-medium text-white mb-2">
+                    <h3 class="text-lg font-medium text-white mb-2">
                         No hay preguntas pendientes
                     </h3>
                     <p class="text-gray-400 mb-6">
@@ -270,7 +270,7 @@
             <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between p-6 border-b border-gray-700">
-                    <h3 class="text-xl font-semibold">Respuestas Detalladas</h3>
+                    <h3 class="text-lg font-semibold">Respuestas Detalladas</h3>
                     <button wire:click="closeAnsweredQuestionsModal"
                         class="text-gray-400 hover:text-white transition-colors duration-200">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

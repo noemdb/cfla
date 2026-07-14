@@ -11,7 +11,7 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-xl font-bold text-white">{{ number_format($stats['total_questions']) }}</p>
+            <p class="text-lg font-bold text-white">{{ number_format($stats['total_questions']) }}</p>
         </div>
 
         <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
@@ -23,7 +23,7 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-xl font-bold text-white">{{ number_format($stats['total_sessions']) }}</p>
+            <p class="text-lg font-bold text-white">{{ number_format($stats['total_sessions']) }}</p>
         </div>
 
         <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
@@ -35,7 +35,7 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-xl font-bold text-white">{{ number_format($stats['completed_sessions']) }}</p>
+            <p class="text-lg font-bold text-white">{{ number_format($stats['completed_sessions']) }}</p>
             @if($stats['total_sessions'] > 0)
                 <div class="mt-1">
                     <div class="w-full bg-gray-700/50 rounded-full h-1.5">
@@ -55,7 +55,7 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-xl font-bold text-white">{{ $stats['student_accuracy'] }}%</p>
+            <p class="text-lg font-bold text-white">{{ $stats['student_accuracy'] }}%</p>
             <span class="text-[10px] text-gray-500">{{ $stats['correct_answers'] }}/{{ $stats['total_answered'] }} respuestas correctas</span>
         </div>
     </div>

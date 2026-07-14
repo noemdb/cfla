@@ -71,7 +71,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-xl font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
+                    <h2 class="text-lg font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
                     <p class="text-gray-300 text-lg max-w-3xl mx-auto">
                         Es una herramienta diseñada para evaluar tus conocimientos actuales en diferentes áreas de formación, 
                         permitiendo identificar fortalezas y oportunidades de mejora en tu proceso de aprendizaje.
@@ -85,7 +85,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Evaluación Personalizada</h3>
+                        <h3 class="text-lg font-semibold text-white mb-2">Evaluación Personalizada</h3>
                         <p class="text-gray-300">Preguntas adaptadas a tu nivel y área de estudio específica.</p>
                     </div>
 
@@ -95,7 +95,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white mb-2">Resultados Inmediatos</h3>
+                        <h3 class="text-lg font-semibold text-white mb-2">Resultados Inmediatos</h3>
                         <p class="text-gray-300">Obtén retroalimentación instantánea sobre tu desempeño.</p>
                     </div>
                 </div>
@@ -104,13 +104,13 @@
         @elseif($activeTab === 'process')
             <!-- Process Tab -->
             <div class="space-y-8">
-                <h2 class="text-xl font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
+                <h2 class="text-lg font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
                 
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">1</div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-white mb-2">Identificación del Estudiante</h3>
+                            <h3 class="text-lg font-semibold text-white mb-2">Identificación del Estudiante</h3>
                             <p class="text-gray-300 mb-4">Ingresa tu cédula de identidad para acceder al sistema. El sistema verificará tu información y te dará la bienvenida.</p>
                             <div class="bg-gray-700 p-4 rounded-lg">
                                 <div class="flex items-center text-yellow-400 mb-2">
@@ -127,7 +127,7 @@
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">2</div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-white mb-2">Selección del Área de Formación</h3>
+                            <h3 class="text-lg font-semibold text-white mb-2">Selección del Área de Formación</h3>
                             <p class="text-gray-300 mb-4">En el dashboard verás todas las áreas disponibles con su progreso actual. Selecciona el área que deseas evaluar.</p>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div class="bg-gray-700 p-4 rounded-lg">
@@ -162,7 +162,7 @@
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">3</div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-white mb-2">Responder las Preguntas</h3>
+                            <h3 class="text-lg font-semibold text-white mb-2">Responder las Preguntas</h3>
                             <p class="text-gray-300 mb-4">El sistema te presentará preguntas de forma aleatoria. Responde con honestidad y según tu conocimiento actual.</p>
                             <div class="bg-gray-700 p-4 rounded-lg">
                                 <div class="flex items-center text-blue-400 mb-2">
@@ -183,7 +183,7 @@
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">4</div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-white mb-2">Revisar Resultados</h3>
+                            <h3 class="text-lg font-semibold text-white mb-2">Revisar Resultados</h3>
                             <p class="text-gray-300 mb-4">Una vez completado el diagnóstico, podrás revisar todas tus respuestas y obtener un resumen de tu desempeño.</p>
                         </div>
                     </div>
@@ -193,7 +193,7 @@
         @elseif($activeTab === 'questions')
             <!-- Questions Tab -->
             <div class="space-y-8">
-                <h2 class="text-xl font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
+                <h2 class="text-lg font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
                 
                 <div class="grid gap-8">
                     <!-- Multiple Choice -->
@@ -204,7 +204,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Selección Múltiple</h3>
+                            <h3 class="text-lg font-semibold text-white">Selección Múltiple</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Preguntas con varias opciones donde debes seleccionar la respuesta que mejor refleje tu conocimiento o experiencia.</p>
                         
@@ -240,7 +240,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Escala Numérica</h3>
+                            <h3 class="text-lg font-semibold text-white">Escala Numérica</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Evalúa tu nivel de conocimiento o confianza en una escala del 1 al 10.</p>
                         
@@ -248,7 +248,7 @@
                             <h4 class="text-white font-medium mb-3">Ejemplo:</h4>
                             <p class="text-gray-300 mb-4">En una escala del 1 al 10, ¿qué tan confiado te sientes resolviendo problemas de algoritmos?</p>
                             <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-xl font-bold text-purple-400">7</span>
+                                <span class="text-lg font-bold text-purple-400">7</span>
                                 <span class="text-gray-400">/ 10</span>
                                 <div class="flex-1 bg-gray-600 rounded-full h-3 ml-4">
                                     <div class="bg-purple-500 h-3 rounded-full" style="width: 70%"></div>
@@ -269,7 +269,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Respuesta Abierta</h3>
+                            <h3 class="text-lg font-semibold text-white">Respuesta Abierta</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Preguntas que requieren una respuesta escrita donde puedes expresar tu conocimiento con tus propias palabras.</p>
                         
@@ -289,7 +289,7 @@
         @elseif($activeTab === 'tips')
             <!-- Tips Tab -->
             <div class="space-y-8">
-                <h2 class="text-xl font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
+                <h2 class="text-lg font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-xl border border-yellow-700/50">
@@ -299,7 +299,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Gestión del Tiempo</h3>
+                            <h3 class="text-lg font-semibold text-white">Gestión del Tiempo</h3>
                         </div>
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
@@ -324,7 +324,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Honestidad en las Respuestas</h3>
+                            <h3 class="text-lg font-semibold text-white">Honestidad en las Respuestas</h3>
                         </div>
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
@@ -349,7 +349,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Ambiente de Estudio</h3>
+                            <h3 class="text-lg font-semibold text-white">Ambiente de Estudio</h3>
                         </div>
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
@@ -374,7 +374,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-semibold text-white">Después del Diagnóstico</h3>
+                            <h3 class="text-lg font-semibold text-white">Después del Diagnóstico</h3>
                         </div>
                         <ul class="text-gray-300 space-y-2">
                             <li class="flex items-start">
@@ -402,7 +402,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-white mb-2">Importante Recordar</h3>
+                            <h3 class="text-lg font-semibold text-white mb-2">Importante Recordar</h3>
                             <p class="text-gray-300">
                                 Este diagnóstico es una herramienta de evaluación diseñada para ayudarnos a identificar tus fortalezas y áreas de oportunidad. 
                                 Los resultados no son una calificación, sino una guía para tu proceso de aprendizaje continuo.

@@ -24,7 +24,7 @@
                 </div>
                 <div class="p-6 relative">
                     <h3
-                        class="text-xl font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        class="text-lg font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         Primer Año</h3>
                     <p
                         class="text-gray-600 dark:text-gray-400 text-sm group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
@@ -52,7 +52,7 @@
                 </div>
                 <div class="p-6 relative">
                     <h3
-                        class="text-xl font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        class="text-lg font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         Segundo y Tercer Año</h3>
                     <p
                         class="text-gray-600 dark:text-gray-400 text-sm group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
@@ -80,7 +80,7 @@
                 </div>
                 <div class="p-6 relative">
                     <h3
-                        class="text-xl font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        class="text-lg font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         Cuarto Año</h3>
                     <p
                         class="text-gray-600 dark:text-gray-400 text-sm group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
@@ -108,7 +108,7 @@
                 </div>
                 <div class="p-6 relative">
                     <h3
-                        class="text-xl font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        class="text-lg font-bold text-emerald-800 dark:text-emerald-100 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         Quinto Año</h3>
                     <p
                         class="text-gray-600 dark:text-gray-400 text-sm group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">
@@ -127,7 +127,7 @@
     <div class="relative max-w-4xl max-h-full">
         <!-- Botón de cerrar -->
         <button onclick="closeModal()"
-            class="absolute -top-10 right-0 text-white text-xl font-bold hover:text-gray-300 focus:outline-none">
+            class="absolute -top-10 right-0 text-white text-lg font-bold hover:text-gray-300 focus:outline-none">
             &times;
         </button>
         <!-- Imagen en grande -->

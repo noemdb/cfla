@@ -1,5 +1,5 @@
 <h5
-    class="text-lg md:text-xl lg:text-xl flex items-center text-emerald-800 dark:text-emerald-100 font-bold mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors duration-300">
+    class="text-lg md:text-lg lg:text-lg flex items-center text-emerald-800 dark:text-emerald-100 font-bold mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors duration-300">
     <span class="text-xs text-gray-500 dark:text-gray-500 font-mono pr-2 opacity-50">{{ $item->id ?? null }}. </span>
     {{-- <x-icon name="{{ $category->iconClass ?? null }}" class="w-6 h-6 mr-1" /> --}} {{ $item->title ?? null }}
 </h5>

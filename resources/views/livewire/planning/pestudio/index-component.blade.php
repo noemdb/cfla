@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Planes de Estudio</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Planes de Estudio</h1>
             <p class="text-emerald-400 font-medium">Gestión de los planes de estudio del sistema académico.</p>
         </div>
         <div class="flex items-center gap-2">

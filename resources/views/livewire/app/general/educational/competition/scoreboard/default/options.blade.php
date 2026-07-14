@@ -2,7 +2,7 @@
     
 
     <span class="font-light">Pregunta activa:</span>  
-    <div class="text-xl ms-3">
+    <div class="text-lg ms-3">
         <span class="font-bolt">{{$question->text}}</span>
     </div>
     <div>

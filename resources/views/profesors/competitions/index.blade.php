@@ -12,7 +12,7 @@
                 </svg>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-white">Competencias Académicas</h1>
+                <h1 class="text-lg font-bold text-white">Competencias Académicas</h1>
                 <p class="text-sm text-gray-500">Gestión de bancos de preguntas para debates educativos</p>
             </div>
             <div class="ml-auto text-right">

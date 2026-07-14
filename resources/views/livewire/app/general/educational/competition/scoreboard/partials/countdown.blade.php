@@ -4,7 +4,7 @@
             @if ($question)
                 <div>
                     <div class="text-gray-800">
-                        <div class="font-bold text-xl mb-2 text-emerald-800 uppercase tracking-widest">
+                        <div class="font-bold text-lg mb-2 text-emerald-800 uppercase tracking-widest">
                             Cronómetro
                         </div>
                         <div wire:key="score-timer-{{ $question->id ?? 'none' }}" x-data="{

@@ -1,7 +1,7 @@
 <x-card title="CONTACTO">
 
     @slot('header')
-        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             CONTÁCTANOS
         </h3>
     @endslot
@@ -13,7 +13,7 @@
             <section id="contact" class="bg-gray-100 py-12">
                 <div class="container mx-auto px-4">
 
-                    <h2 class="text-xl font-semibold text-center mb-8">Comunícate</h2>
+                    <h2 class="text-lg font-semibold text-center mb-8">Comunícate</h2>
 
                     <form>
                         <div class="mb-4">
@@ -46,7 +46,7 @@
 
             <x-card title="Localízanos">
                 @slot('header')
-                    <h3 class="text-xl font-semibold text-center mb-8">
+                    <h3 class="text-lg font-semibold text-center mb-8">
                         Localízanos
                     </h3>
                 @endslot

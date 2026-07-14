@@ -4,7 +4,7 @@
             class="w-32 h-32 border-4 border-emerald-500 rounded-full bg-emerald-900/30 mb-6 flex justify-center items-center backdrop-blur-sm">
             <img class="w-20 h-20 object-contain" src="{{ asset('image/highlighted/matricula.png') }}" alt="Matrícula" />
         </div>
-        <h2 class="text-xl font-bold text-emerald-400">Actualización de Datos</h2>
+        <h2 class="text-lg font-bold text-emerald-400">Actualización de Datos</h2>
         <p class="text-gray-400 mt-2">Proceso de solicitud de matrícula 2025-2026</p>
     </div>
 

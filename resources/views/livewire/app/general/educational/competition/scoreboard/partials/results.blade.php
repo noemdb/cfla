@@ -2,10 +2,10 @@
 
     <div class="py-4 bg-emerald-100 border border-emerald-200 rounded-2xl shadow-sm">
 
-        <h4 class="text-xl font-bold text-emerald-800 uppercase tracking-widest mb-4">Puntuación</h4>
+        <h4 class="text-lg font-bold text-emerald-800 uppercase tracking-widest mb-4">Puntuación</h4>
 
         @if (!empty($grado->name))
-            <div class="font-bold text-xl text-gray-800 mb-4">{{ $grado->name }}</div>
+            <div class="font-bold text-lg text-gray-800 mb-4">{{ $grado->name }}</div>
             @php $seccions = $grado->activeSeccions() @endphp
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @forelse ($seccions as $item)

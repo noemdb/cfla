@@ -4,7 +4,7 @@
         {{-- <x-icon name="ban" class="w-20 h-20" /> --}}
     </div>
     <a href="#">
-        <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 dark:text-white">No hay competiciones activas</h5>
+        <h5 class="mb-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">No hay competiciones activas</h5>
     </a>
     <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">Mantente atento a nuestras redes sociales.</p>
     

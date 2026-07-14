@@ -24,7 +24,7 @@
 <div class="fade-in">
     <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-1">Evaluación Diagnóstica</h1>
+            <h1 class="text-lg font-extrabold text-white mb-1">Evaluación Diagnóstica</h1>
             <p class="text-sm text-purple-400 font-medium">Gestión de diagnósticos, preguntas y sesiones de estudiantes</p>
         </div>
     </div>

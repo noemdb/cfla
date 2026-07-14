@@ -23,7 +23,7 @@
                 <div class="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-xl font-bold text-white">📊 Detalles de Participación</h2>
+                            <h2 class="text-lg font-bold text-white">📊 Detalles de Participación</h2>
                             <p class="text-green-100 mt-1">Información completa de tu voto registrado</p>
                         </div>
                         <button wire:click="closeParticipationModal"
@@ -40,7 +40,7 @@
                 <div class="px-8 py-6">
                     <!-- Título de la encuesta -->
                     <div class="mb-6">
-                        <h3 class="text-xl font-bold text-white mb-2">{{ $selectedParticipation->poll->title }}</h3>
+                        <h3 class="text-lg font-bold text-white mb-2">{{ $selectedParticipation->poll->title }}</h3>
                         @if ($selectedParticipation->poll->description)
                             <p class="text-gray-400">{{ $selectedParticipation->poll->description }}</p>
                         @endif

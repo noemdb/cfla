@@ -8,7 +8,7 @@
         <!-- Header Section -->
         <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-xl font-extrabold text-white mb-2">Panel de Votaciones</h1>
+                <h1 class="text-lg font-extrabold text-white mb-2">Panel de Votaciones</h1>
                 <p class="text-emerald-400 font-medium">Gestiona tus encuestas y monitorea resultados en tiempo real.</p>
             </div>
             <a href="{{ route('admin.voting.polls.create') }}"
@@ -33,7 +33,7 @@
                         </path>
                     </svg>
                 </div>
-                <p class="text-white text-xl font-bold">{{ $stats['total_polls'] }}</p>
+                <p class="text-white text-lg font-bold">{{ $stats['total_polls'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
@@ -48,7 +48,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-white text-xl font-bold">{{ $stats['active_polls'] }}</p>
+                <p class="text-white text-lg font-bold">{{ $stats['active_polls'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
@@ -60,7 +60,7 @@
                         </path>
                     </svg>
                 </div>
-                <p class="text-white text-xl font-bold">{{ $stats['total_votes'] }}</p>
+                <p class="text-white text-lg font-bold">{{ $stats['total_votes'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
@@ -71,12 +71,12 @@
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <p class="text-white text-xl font-bold">{{ $stats['finished_polls'] }}</p>
+                <p class="text-white text-lg font-bold">{{ $stats['finished_polls'] }}</p>
             </div>
         </div>
 
         <div class="space-y-6">
-            <h2 class="text-xl font-bold text-white mb-6 flex items-center">
+            <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                 <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
@@ -95,7 +95,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">No hay encuestas registradas</h3>
+                    <h3 class="text-lg font-bold text-white mb-2">No hay encuestas registradas</h3>
                     <p class="text-gray-400 mb-8 max-w-sm mx-auto">Crea tu primera encuesta para comenzar a recolectar
                         opiniones.</p>
                     <a href="{{ route('admin.voting.polls.create') }}"
@@ -113,7 +113,7 @@
                                     <div class="flex-1">
                                         <div class="flex flex-wrap items-center gap-3 mb-4">
                                             <h3
-                                                class="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
+                                                class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors">
                                                 {{ $poll->title }}</h3>
                                             <span
                                                 class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full {{ $poll->enable ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-gray-500/10 text-gray-400 border border-gray-500/20' }}">

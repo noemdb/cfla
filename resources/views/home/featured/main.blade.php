@@ -1,7 +1,7 @@
 <x-card>
     
     @slot('header')
-        <h3 class="flex items-center gap-2 bg-green-100 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class="flex items-center gap-2 bg-green-100 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             <x-icon name="home" class="w-12 h-12" /> Instituion
         </h3>
     @endslot

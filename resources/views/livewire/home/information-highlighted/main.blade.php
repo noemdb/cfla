@@ -41,7 +41,7 @@
                         <i class="bx bx-image-alt text-5xl"></i>
                     </div>
                     <h3
-                        class="text-xl font-bold text-gray-900 dark:text-white mb-2 underline decoration-emerald-500 underline-offset-4">
+                        class="text-lg font-bold text-gray-900 dark:text-white mb-2 underline decoration-emerald-500 underline-offset-4">
                         Comunicados Próximamente</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs">En este espacio compartiremos la
                         información más relevante para nuestra comunidad.</p>
@@ -67,7 +67,7 @@
             <div class="space-y-2">
                 <h6 class="text-emerald-600 dark:text-emerald-400 font-bold tracking-widest text-sm uppercase">Comunidad
                     Amigoniana</h6>
-                <h2 class="text-xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                <h2 class="text-lg sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight">
                     PAZ Y <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">BIEN</span>
                 </h2>

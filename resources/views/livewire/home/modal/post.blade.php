@@ -8,7 +8,7 @@
                 <div class="p-6 md:p-8">
                     <!-- Header Info -->
                     <div class="mb-6 bg-emerald-900/20 border border-emerald-500/20 rounded-lg p-4">
-                        <h3 class="text-xl md:text-xl font-bold text-emerald-100 mb-2">
+                        <h3 class="text-lg md:text-lg font-bold text-emerald-100 mb-2">
                             {{ $post->description ?? null }}
                         </h3>
                         <div class="flex items-center text-xs text-emerald-400 font-mono">

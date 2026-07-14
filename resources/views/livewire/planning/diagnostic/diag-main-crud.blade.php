@@ -280,7 +280,7 @@
                                 {{ $detailItem->active ? 'Activo' : 'Inactivo' }}
                             </span>
                         </div>
-                        <h3 class="text-xl font-bold text-white">{{ $detailItem->name }}</h3>
+                        <h3 class="text-lg font-bold text-white">{{ $detailItem->name }}</h3>
                         @if($detailItem->description)
                             <p class="text-sm text-gray-400 mt-1">{{ $detailItem->description }}</p>
                         @endif
@@ -330,13 +330,13 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 {{-- Total questions --}}
                                 <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
-                                    <p class="text-xl font-extrabold text-cyan-400">{{ $detailItem->questions_count ?? 0 }}</p>
+                                    <p class="text-lg font-extrabold text-cyan-400">{{ $detailItem->questions_count ?? 0 }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preguntas</p>
                                 </div>
 
                                 {{-- Total sessions --}}
                                 <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
-                                    <p class="text-xl font-extrabold text-emerald-400">{{ $detailItem->sessions_count ?? 0 }}</p>
+                                    <p class="text-lg font-extrabold text-emerald-400">{{ $detailItem->sessions_count ?? 0 }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Sesiones</p>
                                 </div>
 
@@ -348,7 +348,7 @@
                                         : 0;
                                 @endphp
                                 <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
-                                    <p class="text-xl font-extrabold text-amber-400">{{ $completedSessions }}</p>
+                                    <p class="text-lg font-extrabold text-amber-400">{{ $completedSessions }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Completadas</p>
                                 </div>
 
@@ -360,7 +360,7 @@
                                         : 0;
                                 @endphp
                                 <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
-                                    <p class="text-xl font-extrabold text-purple-400">{{ $studentsEvaluated }}</p>
+                                    <p class="text-lg font-extrabold text-purple-400">{{ $studentsEvaluated }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Estudiantes</p>
                                 </div>
                             </div>

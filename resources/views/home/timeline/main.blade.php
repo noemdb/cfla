@@ -1,7 +1,7 @@
 <x-card>
     
     @slot('header')
-        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+        <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
             Línea de Tiempo
         </h3>
     @endslot
@@ -16,7 +16,7 @@
                 </p>
             </div>
             <div class="mb-6 ml-4 mt-2">
-                <h4 class="mb-1.5 text-xl font-semibold">Title of section 1</h4>
+                <h4 class="mb-1.5 text-lg font-semibold">Title of section 1</h4>
                 <p class="mb-3 text-neutral-500 dark:text-neutral-300">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
                     scelerisque diam non nisi semper, et elementum lorem ornare.
@@ -35,7 +35,7 @@
                 </p>
             </div>
             <div class="mb-6 ml-4 mt-2">
-                <h4 class="mb-1.5 text-xl font-semibold">Title of section 2</h4>
+                <h4 class="mb-1.5 text-lg font-semibold">Title of section 2</h4>
                 <p class="mb-3 text-neutral-500 dark:text-neutral-300">
                     Libero expedita explicabo eius fugiat quia aspernatur autem
                     laudantium error architecto recusandae natus sapiente sit nam
@@ -53,7 +53,7 @@
                 </p>
             </div>
             <div class="ml-4 mt-2 pb-5">
-                <h4 class="mb-1.5 text-xl font-semibold">Title of section 3</h4>
+                <h4 class="mb-1.5 text-lg font-semibold">Title of section 3</h4>
                 <p class="mb-3 text-neutral-500 dark:text-neutral-300">
                     Voluptatibus temporibus esse illum eum aspernatur, fugiat suscipit
                     natus! Eum corporis illum nihil officiis tempore. Excepturi illo

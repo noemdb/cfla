@@ -17,7 +17,7 @@
                                 class="text-xs bg-emerald-200 text-emerald-900 px-2 py-1 rounded-full font-bold border border-emerald-300">
                                 #{{ $question->id }}
                             </span>
-                            <h5 class="text-xl font-bold text-gray-900 leading-tight flex-1">
+                            <h5 class="text-lg font-bold text-gray-900 leading-tight flex-1">
                                 {!! $question->text !!}
                             </h5>
                         </div>

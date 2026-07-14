@@ -1,5 +1,5 @@
 <div class="max-w-sm mx-auto">
-    <h2 class="mb-2 text-xl font-bold text-white">Consultar</h2>
+    <h2 class="mb-2 text-lg font-bold text-white">Consultar</h2>
 
     <div class="grid md:grid-cols-1">
         @if ($is_regular)

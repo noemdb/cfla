@@ -106,7 +106,7 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <h1 class="text-xl font-bold text-shadow">Módulo de Votaciones Avanzado</h1>
+                        <h1 class="text-lg font-bold text-shadow">Módulo de Votaciones Avanzado</h1>
                         <p class="text-blue-100 text-sm">Propuesta</p>
                     </div>
                 </div>

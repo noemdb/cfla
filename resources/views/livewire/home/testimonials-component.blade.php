@@ -2,14 +2,14 @@
     <x-card>
     
         @slot('header')
-            <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+            <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
                 Experiencias
             </h3>
         @endslot
     
         <div class="mx-auto text-center md:max-w-xl lg:max-w-3xl">
             
-            <h3 class="mb-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
+            <h3 class="mb-2 text-lg font-bold text-neutral-800 dark:text-neutral-200">
                 Testimonios
             </h3>
             <p class="mb-2 pb-2 md:mb-12 md:pb-0">
@@ -26,7 +26,7 @@
                 <div class="mb-6 flex justify-center">
                     @include('svg.person-fill',['w'=>'64','h'=>'64'])
                 </div>
-                <h5 class="mb-4 text-xl font-semibold">{{$item->full_name}}</h5>
+                <h5 class="mb-4 text-lg font-semibold">{{$item->full_name}}</h5>
                 {{-- <h6 class="mb-4 font-semibold text-primary dark:text-primary-500"> --}}
                     {{-- Lcda. Administración --}}
                 {{-- </h6> --}}

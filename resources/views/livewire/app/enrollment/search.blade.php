@@ -4,7 +4,7 @@
             class="w-20 h-20 bg-emerald-900/40 rounded-2xl flex items-center justify-center mb-4 border border-emerald-500/30">
             <x-icon name="identification" class="w-12 h-12 text-emerald-400" />
         </div>
-        <h2 class="text-xl font-bold">Identificación</h2>
+        <h2 class="text-lg font-bold">Identificación</h2>
         <p class="text-gray-400 text-sm">Ingrese los datos para continuar</p>
     </div>
 
@@ -33,7 +33,7 @@
                 class="bg-emerald-900/20 border border-emerald-500/30 p-6 rounded-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
                 <div class="flex items-center gap-4 mb-4">
                     <div
-                        class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl uppercase">
+                        class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
                         {{ substr($representant->name, 0, 1) }}
                     </div>
                     <div>

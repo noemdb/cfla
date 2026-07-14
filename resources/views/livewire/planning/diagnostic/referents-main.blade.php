@@ -13,7 +13,7 @@
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-1">Instrumentos referentes normativo para la planificación y el diagnóstico.</h1>
+            <h1 class="text-lg font-extrabold text-white mb-1">Instrumentos referentes normativo para la planificación y el diagnóstico.</h1>
             <p class="text-emerald-400 font-medium">Gestión de referentes curriculares, competencias e indicadores de logro</p>
         </div>
         <div class="flex items-center gap-2">

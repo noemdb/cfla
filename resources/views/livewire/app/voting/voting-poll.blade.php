@@ -27,7 +27,7 @@
                     <!-- Poll Info Header -->
                     <div
                         class="bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent px-8 py-8 border-b border-white/5">
-                        <h2 class="text-xl font-bold text-white mb-2 leading-tight">{{ $poll->title }}</h2>
+                        <h2 class="text-lg font-bold text-white mb-2 leading-tight">{{ $poll->title }}</h2>
                         <div class="flex items-center text-xs font-bold text-emerald-400/80 uppercase tracking-widest">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -49,7 +49,7 @@
                         </div>
 
                         <div class="space-y-2">
-                            <h3 class="text-xl font-bold text-white">Código QR de Participación</h3>
+                            <h3 class="text-lg font-bold text-white">Código QR de Participación</h3>
                             <p class="text-sm text-gray-500 font-medium max-w-xs mx-auto">
                                 Escanea este código para acceder a los resultados en tiempo real y detalles de tu voto.
                             </p>
@@ -182,7 +182,7 @@
                                 </div>
 
                                 <div class="space-y-2">
-                                    <h3 class="text-xl font-black text-white uppercase tracking-tight">
+                                    <h3 class="text-lg font-black text-white uppercase tracking-tight">
                                         {{ $errorState === 'poll_not_found' ? 'No Encontrada' : ($errorState === 'poll_inactive' ? 'Inactiva' : ($errorState === 'poll_expired' ? 'Expirada' : 'Ya Participaste')) }}
                                     </h3>
                                     <p class="text-gray-500 font-medium">

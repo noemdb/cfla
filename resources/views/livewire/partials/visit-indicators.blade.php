@@ -9,7 +9,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Visitas Totales</p>
-                <p class="text-xl font-semibold">{{ number_format($stats['total']) }}</p>
+                <p class="text-lg font-semibold">{{ number_format($stats['total']) }}</p>
                 <p class="text-xs text-gray-400">Periodo actual</p>
             </div>
         </div>
@@ -23,7 +23,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Tasa Crecimiento</p>
-                <p class="text-xl font-semibold flex items-center">
+                <p class="text-lg font-semibold flex items-center">
                     {{ $stats['growth_rate'] > 0 ? '+' : '' }}{{ number_format($stats['growth_rate'], 1) }}%
                     @if ($stats['growth_rate'] > 0)
                         <x-icon name="arrow-up" class="w-4 h-4 ml-1 text-emerald-600" />
@@ -44,7 +44,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Móviles</p>
-                <p class="text-xl font-semibold">{{ number_format($stats['mobile_percentage'], 1) }}%</p>
+                <p class="text-lg font-semibold">{{ number_format($stats['mobile_percentage'], 1) }}%</p>
                 <p class="text-xs text-gray-400">{{ $stats['mobile'] }} de {{ $stats['total'] }}</p>
             </div>
         </div>
@@ -58,7 +58,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Recurrentes</p>
-                <p class="text-xl font-semibold">{{ number_format($stats['returning_percentage'], 1) }}%</p>
+                <p class="text-lg font-semibold">{{ number_format($stats['returning_percentage'], 1) }}%</p>
                 <p class="text-xs text-gray-400">{{ $stats['returning'] }} usuarios</p>
             </div>
         </div>

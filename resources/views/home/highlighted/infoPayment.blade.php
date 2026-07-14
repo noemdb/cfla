@@ -4,7 +4,7 @@
         <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
             <x-icon name="document-text" class="w-8 h-8 text-emerald-400" />
         </div>
-        <h3 class="text-lg md:text-xl font-bold text-emerald-100 uppercase tracking-wide">
+        <h3 class="text-lg md:text-lg font-bold text-emerald-100 uppercase tracking-wide">
             Canales de Pago
         </h3>
     </div>

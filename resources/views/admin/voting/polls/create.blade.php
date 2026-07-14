@@ -15,7 +15,7 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-xl font-extrabold text-white mb-1">Nueva Encuesta</h1>
+                    <h1 class="text-lg font-extrabold text-white mb-1">Nueva Encuesta</h1>
                     <p class="text-emerald-400 font-medium">Configura una nueva votación paso a paso.</p>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                     class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                 </div>
 
-                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
                     <span
                         class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 text-sm font-bold">01</span>
                     Información General
@@ -78,7 +78,7 @@
                     class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-500">
                 </div>
 
-                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
                     <span
                         class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-400 text-sm font-bold">02</span>
                     Opciones de Votación

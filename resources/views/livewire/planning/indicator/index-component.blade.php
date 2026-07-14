@@ -16,7 +16,7 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-xl font-extrabold text-white mb-2">Indicadores de Planificación</h1>
+            <h1 class="text-lg font-extrabold text-white mb-2">Indicadores de Planificación</h1>
             <p class="text-cyan-400 font-medium">Dashboard institucional con KPIs por programa educativo y período académico.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -423,7 +423,7 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Preguntas Cargadas</p>
-                                    <p class="text-xl font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
+                                    <p class="text-lg font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
                                 </div>
                             </div>
                             <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
@@ -432,7 +432,7 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con Opciones de Respuesta</p>
-                                    <p class="text-xl font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
+                                    <p class="text-lg font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
                                 </div>
                             </div>
                             <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
@@ -441,7 +441,7 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Cobertura Pensum</p>
-                                    <p class="text-xl font-bold text-white">{{ $diagPensumCoveragePct }}%</p>
+                                    <p class="text-lg font-bold text-white">{{ $diagPensumCoveragePct }}%</p>
                                 </div>
                             </div>
                         </div>

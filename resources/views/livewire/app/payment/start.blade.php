@@ -4,7 +4,7 @@
         <div class="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
             <x-icon name="document-text" class="w-8 h-8 text-emerald-400" />
         </div>
-        <h3 class="text-lg md:text-xl font-bold text-gray-900 dark:text-emerald-100 uppercase tracking-wide">
+        <h3 class="text-lg md:text-lg font-bold text-gray-900 dark:text-emerald-100 uppercase tracking-wide">
             Reporta tus pagos aquí
         </h3>
     </div>
@@ -23,7 +23,7 @@
             </div>
 
             <div class="text-center py-4">
-                <div class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-1">Reporte de pago</div>
+                <div class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Reporte de pago</div>
                 <div class="text-sm text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold mb-2">
                     Asistente</div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">Reporta tus transferencias, pago móvil y/o

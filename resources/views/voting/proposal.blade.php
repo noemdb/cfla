@@ -15,7 +15,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-6"> <strong>SAEFL</strong> Módulo de Votaciones de Nueva Generación</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6"> <strong>SAEFL</strong> Módulo de Votaciones de Nueva Generación</h3>
                         <p class="text-lg text-gray-700 leading-relaxed mb-6">
                             Se presenta una solución integral de votación digital que combina <strong>seguridad
                                 avanzada</strong>,
@@ -27,19 +27,19 @@
 
                         <div class="grid grid-cols-2 gap-6">
                             <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                <div class="text-xl font-bold text-blue-600">99.9%</div>
+                                <div class="text-lg font-bold text-blue-600">99.9%</div>
                                 <div class="text-sm text-blue-800">Disponibilidad</div>
                             </div>
                             <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <div class="text-xl font-bold text-green-600">100%</div>
+                                <div class="text-lg font-bold text-green-600">100%</div>
                                 <div class="text-sm text-green-800">Seguridad</div>
                             </div>
                             <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                <div class="text-xl font-bold text-purple-600">24/7</div>
+                                <div class="text-lg font-bold text-purple-600">24/7</div>
                                 <div class="text-sm text-purple-800">Soporte</div>
                             </div>
                             <div class="text-center p-4 bg-orange-50 rounded-lg">
-                                <div class="text-xl font-bold text-orange-600">∞</div>
+                                <div class="text-lg font-bold text-orange-600">∞</div>
                                 <div class="text-sm text-orange-800">Escalabilidad</div>
                             </div>
                         </div>
@@ -47,7 +47,7 @@
 
                     <div class="relative">
                         <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl p-8 text-white">
-                            <h4 class="text-xl font-semibold mb-4">Beneficios Clave</h4>
+                            <h4 class="text-lg font-semibold mb-4">Beneficios Clave</h4>
                             <ul class="space-y-3">
                                 <li class="flex items-center">
                                     <svg class="w-5 h-5 mr-3 text-blue-200" fill="none" stroke="currentColor"
@@ -100,7 +100,7 @@
         <section class="mb-16 print-break">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Funcionalidades Principales</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Cada componente ha sido diseñado pensando en la experiencia del usuario y la seguridad integral
                 </p>
                 <div class="w-24 h-1 gradient-secondary mx-auto rounded-full mt-6"></div>
@@ -118,7 +118,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">Asistente Inteligente</h3>
+                            <h3 class="text-lg font-bold text-gray-900">Asistente Inteligente</h3>
                             <p class="text-blue-600 font-medium">Guía Automática de Participación</p>
                         </div>
                     </div>
@@ -182,7 +182,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">Seguridad Avanzada</h3>
+                            <h3 class="text-lg font-bold text-gray-900">Seguridad Avanzada</h3>
                             <p class="text-green-600 font-medium">Identificación Sin Compromiso</p>
                         </div>
                     </div>
@@ -246,7 +246,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">Comprobantes QR</h3>
+                            <h3 class="text-lg font-bold text-gray-900">Comprobantes QR</h3>
                             <p class="text-purple-600 font-medium">Transparencia Total</p>
                         </div>
                     </div>
@@ -307,7 +307,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-900">Interfaz Intuitiva</h3>
+                            <h3 class="text-lg font-bold text-gray-900">Interfaz Intuitiva</h3>
                             <p class="text-orange-600 font-medium">Experiencia de Usuario Superior</p>
                         </div>
                     </div>
@@ -364,7 +364,7 @@
             <div class="bg-gray-900 text-white rounded-2xl p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold mb-4">Arquitectura Técnica</h2>
-                    <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    <p class="text-lg text-gray-300 max-w-3xl mx-auto">
                         Construido sobre tecnologías modernas y escalables para garantizar rendimiento y confiabilidad
                     </p>
                     <div class="w-24 h-1 bg-white mx-auto rounded-full mt-6"></div>
@@ -379,7 +379,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Backend Robusto</h3>
+                        <h3 class="text-lg font-bold mb-3">Backend Robusto</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Laravel 10+ Framework</li>
                             <li>• Base de datos MySQL/PostgreSQL</li>
@@ -397,7 +397,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Frontend Moderno</h3>
+                        <h3 class="text-lg font-bold mb-3">Frontend Moderno</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Livewire para interactividad</li>
                             <li>• Tailwind CSS responsive</li>
@@ -415,7 +415,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Seguridad Integral</h3>
+                        <h3 class="text-lg font-bold mb-3">Seguridad Integral</h3>
                         <ul class="text-gray-300 space-y-2 text-sm">
                             <li>• Encriptación HTTPS/TLS</li>
                             <li>• Validación CSRF</li>
@@ -428,7 +428,7 @@
 
                 <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6">
-                        <h3 class="text-xl font-bold mb-4">Escalabilidad</h3>
+                        <h3 class="text-lg font-bold mb-4">Escalabilidad</h3>
                         <p class="text-blue-100 mb-4">
                             Arquitectura diseñada para crecer, desde 100 hasta 1000+ usuarios
                             simultáneos.
@@ -443,7 +443,7 @@
                     </div>
 
                     <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6">
-                        <h3 class="text-xl font-bold mb-4">Monitoreo</h3>
+                        <h3 class="text-lg font-bold mb-4">Monitoreo</h3>
                         <p class="text-green-100 mb-4">
                             Supervisión 24/7 con alertas proactivas y métricas detalladas de rendimiento y uso.
                         </p>
@@ -464,7 +464,7 @@
         <section class="mb-16">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Casos de Uso Ideales</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Nuestro sistema se adapta perfectamente a diversos escenarios organizacionales
                 </p>
                 <div class="w-24 h-1 gradient-primary mx-auto rounded-full mt-6"></div>
@@ -479,7 +479,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Empresas Corporativas</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Empresas Corporativas</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de junta directiva, decisiones estratégicas, encuestas de satisfacción laboral
                     </p>
@@ -493,7 +493,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Instituciones Educativas</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Instituciones Educativas</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones estudiantiles, evaluaciones docentes, decisiones académicas participativas
                     </p>
@@ -507,7 +507,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Organizaciones Civiles</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Organizaciones Civiles</h3>
                     <p class="text-gray-600 text-sm">
                         Consultas ciudadanas, elecciones de representantes, decisiones comunitarias
                     </p>
@@ -521,7 +521,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Asociaciones Profesionales</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Asociaciones Profesionales</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de colegios profesionales, decisiones gremiales, encuestas sectoriales
                     </p>
@@ -535,7 +535,7 @@
                             </path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">ONGs y Fundaciones</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">ONGs y Fundaciones</h3>
                     <p class="text-gray-600 text-sm">
                         Elecciones de patronatos, decisiones de financiamiento, consultas a beneficiarios
                     </p>
@@ -548,7 +548,7 @@
                                 d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Eventos y Conferencias</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Eventos y Conferencias</h3>
                     <p class="text-gray-600 text-sm">
                         Votaciones en tiempo real, encuestas de audiencia, selección de ponencias
                     </p>
@@ -560,7 +560,7 @@
         <section class="mb-16 print-break">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Implementación</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                     Soluciones flexibles adaptadas a las necesidades y presupuesto de su organización
                 </p>
                 <div class="w-24 h-1 gradient-secondary mx-auto rounded-full mt-6"></div>
@@ -570,7 +570,7 @@
                 <!-- Paquete Básico -->
                 <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Básico</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Básico</h3>
                         <p class="text-gray-600">Ideal para organizaciones pequeñas</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-blue-600">$200</span>
@@ -645,7 +645,7 @@
                     </div>
 
                     <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Paquete Profesional</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Paquete Profesional</h3>
                         <p class="text-gray-600">Para organizaciones medianas</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-green-600">$5,500</span>
@@ -721,7 +721,7 @@
                 <!-- Paquete Enterprise -->
                 <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
                         <p class="text-gray-600">Para grandes organizaciones</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-purple-600">$12,000</span>
@@ -816,7 +816,7 @@
             <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Cronograma de Implementación</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                         Proceso estructurado y eficiente para poner en marcha su sistema de votaciones
                     </p>
                     <div class="w-24 h-1 gradient-accent mx-auto rounded-full mt-6"></div>
@@ -825,7 +825,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white rounded-xl p-6 shadow-lg">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                            <span class="text-xl font-bold text-blue-600">1</span>
+                            <span class="text-lg font-bold text-blue-600">1</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Análisis y Diseño</h3>
                         <p class="text-gray-600 text-sm mb-3">Semana 1-2</p>
@@ -838,7 +838,7 @@
 
                     <div class="bg-white rounded-xl p-6 shadow-lg">
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <span class="text-xl font-bold text-green-600">2</span>
+                            <span class="text-lg font-bold text-green-600">2</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Desarrollo</h3>
                         <p class="text-gray-600 text-sm mb-3">Semana 3-6</p>
@@ -851,7 +851,7 @@
 
                     <div class="bg-white rounded-xl p-6 shadow-lg">
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                            <span class="text-xl font-bold text-purple-600">3</span>
+                            <span class="text-lg font-bold text-purple-600">3</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Pruebas</h3>
                         <p class="text-gray-600 text-sm mb-3">Semana 7-8</p>
@@ -864,7 +864,7 @@
 
                     <div class="bg-white rounded-xl p-6 shadow-lg">
                         <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                            <span class="text-xl font-bold text-orange-600">4</span>
+                            <span class="text-lg font-bold text-orange-600">4</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Lanzamiento</h3>
                         <p class="text-gray-600 text-sm mb-3">Semana 9</p>
@@ -894,7 +894,7 @@
             <div class="bg-white rounded-2xl shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Garantías y Soporte</h2>
-                    <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                         Su tranquilidad es nuestra prioridad. Ofrecemos garantías sólidas y soporte continuo
                     </p>
                     <div class="w-24 h-1 gradient-primary mx-auto rounded-full mt-6"></div>
@@ -902,7 +902,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-6">Garantías Incluidas</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-6">Garantías Incluidas</h3>
                         <div class="space-y-6">
                             <div class="flex items-start">
                                 <div
@@ -963,7 +963,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-6">Niveles de Soporte</h3>
+                        <h3 class="text-lg font-bold text-gray-900 mb-6">Niveles de Soporte</h3>
                         <div class="space-y-4">
                             <div class="bg-gray-50 rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">
@@ -1015,7 +1015,7 @@
         <section class="mb-16">
             <div class="gradient-primary rounded-2xl p-8 lg:p-12 text-white text-center">
                 <h2 class="text-4xl font-bold mb-4">¿Listo para Revolucionar sus Votaciones?</h2>
-                <p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+                <p class="text-lg text-blue-100 mb-8 max-w-3xl mx-auto">
                     Únase a las organizaciones que ya confían en nuestro sistema para sus procesos de votación más
                     importantes.
                     {{-- Solicite una demostración personalizada hoy mismo. --}}

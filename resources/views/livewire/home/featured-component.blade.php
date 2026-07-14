@@ -24,7 +24,7 @@
                             @endif
                         </div>
                         <h3
-                            class="ml-4 text-xl font-bold text-emerald-800 dark:text-emerald-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                            class="ml-4 text-lg font-bold text-emerald-800 dark:text-emerald-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
                             {{ $category->name }}</h3>
                     </div>
 

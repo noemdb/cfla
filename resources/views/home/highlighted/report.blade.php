@@ -1,7 +1,7 @@
 <x-card class="bg-gray-200 rounded shadow m-2 h-full">
 
     @slot('header')
-    <h3 class="text-green-950 bg-green-100 mt-2 p-2 text-xl font-bold dark:text-neutral-200">
+    <h3 class="text-green-950 bg-green-100 mt-2 p-2 text-lg font-bold dark:text-neutral-200">
         <div class="h-full flex items-center">
             <x-icon name="bars-3" class="flex-none w-10 h-10" />
             <div class="flex-initial">Reporte de pago...</div>                    
@@ -21,7 +21,7 @@
                 </a>                
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-xl text-gray-900">Reporte de pago </div>
+                <div class="text-lg text-gray-900">Reporte de pago </div>
                 <div class="text-md text-gray-600">Asistente</div>
                 <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div>
             </div>

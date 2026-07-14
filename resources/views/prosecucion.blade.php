@@ -25,12 +25,12 @@
 
 
                     <!-- Títulos -->
-                    <h1 class="text-xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
+                    <h1 class="text-lg md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
                         Prosecución Estudiantil
                     </h1>
 
                     <!--
-                    <p class="text-green-200 text-lg md:text-xl">
+                    <p class="text-green-200 text-lg md:text-lg">
                         Período Escolar 2024 - 2025
                     </p>
                     -->

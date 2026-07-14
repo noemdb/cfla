@@ -15,7 +15,7 @@
                     </svg>
                     Certificado de Participación
                 </div>
-                <h1 class="text-xl font-bold text-white mb-2">{{ $poll->title }}</h1>
+                <h1 class="text-lg font-bold text-white mb-2">{{ $poll->title }}</h1>
                 <p class="text-gray-300">Detalles de tu participación y resultados actuales</p>
             </div>
 
@@ -35,7 +35,7 @@
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h2 class="text-xl font-bold text-white mb-2">Certificado de Participación</h2>
+                            <h2 class="text-lg font-bold text-white mb-2">Certificado de Participación</h2>
                             <p class="text-emerald-200">Sistema de Votación Digital</p>
                         </div>
 
@@ -47,7 +47,7 @@
                                     encuesta:
                                 </p>
                                 <h3
-                                    class="text-xl font-bold text-white mb-6 px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+                                    class="text-lg font-bold text-white mb-6 px-4 py-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
                                     "{{ $poll->title }}"
                                 </h3>
                             </div>
@@ -174,7 +174,7 @@
                             <div class="mt-6 pt-4 border-t border-gray-600">
                                 <div class="text-center">
                                     <p class="text-gray-400 text-sm">Total de participantes</p>
-                                    <p class="text-xl font-bold text-white">{{ $totalVotes }}</p>
+                                    <p class="text-lg font-bold text-white">{{ $totalVotes }}</p>
                                 </div>
                             </div>
                         </div>

@@ -5,7 +5,7 @@
         <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">
             {{ $activity->pevaluacion->pensum->asignatura->name ?? 'Asignatura' }}
         </p>
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">
             {{ $activity->topic ?? 'Actividad' }}
         </h1>
         @if($activity->description)

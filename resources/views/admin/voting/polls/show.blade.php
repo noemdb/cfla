@@ -15,7 +15,7 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-xl font-extrabold text-white mb-1">Detalles de la Encuesta</h1>
+                    <h1 class="text-lg font-extrabold text-white mb-1">Detalles de la Encuesta</h1>
                     <p class="text-emerald-400 font-medium">Información técnica y seguimiento de participación.</p>
                 </div>
             </div>
@@ -74,7 +74,7 @@
                             <div class="flex items-center gap-2">
                                 <span
                                     class="w-2 h-2 rounded-full {{ $poll->enable ? 'bg-emerald-500 animate-pulse' : 'bg-gray-500' }}"></span>
-                                <h3 class="text-xl font-black text-white uppercase">
+                                <h3 class="text-lg font-black text-white uppercase">
                                     {{ $poll->enable ? 'En Curso' : 'Inactiva' }}</h3>
                             </div>
                         </div>
@@ -146,11 +146,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="diagnostic-card bg-blue-500/5 border border-blue-500/10 p-5 rounded-2xl text-center">
                         <p class="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mb-1">Opciones</p>
-                        <p class="text-xl font-black text-white">{{ $poll->options->count() }}</p>
+                        <p class="text-lg font-black text-white">{{ $poll->options->count() }}</p>
                     </div>
                     <div class="diagnostic-card bg-purple-500/5 border border-purple-500/10 p-5 rounded-2xl text-center">
                         <p class="text-[10px] font-bold text-purple-400/60 uppercase tracking-widest mb-1">Sesiones</p>
-                        <p class="text-xl font-black text-white">{{ $poll->sessions->count() }}</p>
+                        <p class="text-lg font-black text-white">{{ $poll->sessions->count() }}</p>
                     </div>
                 </div>
             </div>
@@ -195,12 +195,12 @@
 
                     <div class="flex items-center justify-between mb-8">
                         <div>
-                            <h2 class="text-xl font-bold text-white mb-1">{{ $poll->title }}</h2>
+                            <h2 class="text-lg font-bold text-white mb-1">{{ $poll->title }}</h2>
                             <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Resultados en Tiempo Real
                             </p>
                         </div>
                         <div class="text-right">
-                            <p class="text-xl font-black text-emerald-400">{{ $poll->votes_count }}</p>
+                            <p class="text-lg font-black text-emerald-400">{{ $poll->votes_count }}</p>
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Votos Totales</p>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                                                 {{ $option->votes_count }} Votos registrados</p>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-xl font-black text-emerald-400">{{ $percentage }}%</p>
+                                            <p class="text-lg font-black text-emerald-400">{{ $percentage }}%</p>
                                         </div>
                                     </div>
                                     <div

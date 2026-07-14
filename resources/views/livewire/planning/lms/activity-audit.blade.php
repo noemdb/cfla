@@ -6,7 +6,7 @@
            class="text-xs text-emerald-400 hover:text-emerald-300 mb-2 inline-block">
             ← Volver al monitor
         </a>
-        <h1 class="text-xl font-bold text-white">Auditoría de Actividad</h1>
+        <h1 class="text-lg font-bold text-white">Auditoría de Actividad</h1>
         <p class="text-sm text-slate-400 mt-1">
             {{ $activity->topic ?? 'Actividad sin título' }}
             · {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '' }}
@@ -17,7 +17,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         @foreach(['VIEW' => 'Visitas', 'RESOURCE_DOWNLOAD' => 'Descargas', 'PUBLISH' => 'Publicaciones', 'EDIT' => 'Ediciones'] as $event => $label)
             <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 text-center">
-                <p class="text-xl font-bold text-white">{{ $eventCounts[$event] ?? 0 }}</p>
+                <p class="text-lg font-bold text-white">{{ $eventCounts[$event] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">{{ $label }}</p>
             </div>
         @endforeach

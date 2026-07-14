@@ -20,7 +20,7 @@
 
                 <!-- Título y mensaje -->
                 <div class="text-center mt-6">
-                    <h2 class="text-xl font-bold text-white mb-2">¡Transacción exitosa!</h2>
+                    <h2 class="text-lg font-bold text-white mb-2">¡Transacción exitosa!</h2>
                     <p class="text-sm text-gray-300 leading-relaxed">
                         Tu transacción se completó correctamente. Gracias por confiar en nuestro servicio.
                     </p>

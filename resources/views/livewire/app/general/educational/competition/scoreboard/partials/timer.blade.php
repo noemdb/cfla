@@ -4,7 +4,7 @@
     @if (! $question->status_over_time)
 
         <div>
-            <div class=" font-bold text-xl mb-2 border-t-2 border-gray-200">Cronómetro <span class="text-sm font-bold text-gray-400">[Seg.]</span></div>
+            <div class=" font-bold text-lg mb-2 border-t-2 border-gray-200">Cronómetro <span class="text-sm font-bold text-gray-400">[Seg.]</span></div>
 
             <div x-data="{ 
                 seconds: $wire.entangle('timeRemaining'),
