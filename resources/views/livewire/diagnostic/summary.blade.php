@@ -2,28 +2,28 @@
     <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-center mb-2">Diagnóstico Completado</h1>
+            <h1 class="text-2xl font-bold text-center mb-2">Diagnóstico Completado</h1>
             <p class="text-gray-400 text-center">{{ $selectedPensum->asignatura->full_name ?? 'Área Académica' }}</p>
         </div>
 
         <!-- Summary Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-3xl font-bold text-green-400 mb-2">
+                <div class="text-2xl font-bold text-green-400 mb-2">
                     {{ $sessionStats['total_answers'] ?? 0 }}
                 </div>
                 <div class="text-gray-400">Preguntas Respondidas</div>
             </div>
 
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-3xl font-bold text-blue-400 mb-2">
+                <div class="text-2xl font-bold text-blue-400 mb-2">
                     {{ number_format($sessionStats['average_progress'] ?? 0, 1) }}%
                 </div>
                 <div class="text-gray-400">Progreso Promedio</div>
             </div>
 
             <div class="bg-gray-800 rounded-lg p-6 text-center">
-                <div class="text-3xl font-bold text-purple-400 mb-2">
+                <div class="text-2xl font-bold text-purple-400 mb-2">
                     {{ $sessionStats['completed_sessions'] ?? 0 }}
                 </div>
                 <div class="text-gray-400">Sesiones Completadas</div>

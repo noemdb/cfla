@@ -1383,7 +1383,7 @@
                                         </div>
 
                                         {{-- Título principal --}}
-                                        <h1 class="text-2xl md:text-3xl font-bold text-stone-900 leading-tight text-center w-full">
+                                        <h1 class="text-2xl md:text-2xl font-bold text-stone-900 leading-tight text-center w-full">
                                             {{ $listPreviewData['title'] }}
                                         </h1>
 

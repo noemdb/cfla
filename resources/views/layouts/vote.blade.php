@@ -33,7 +33,7 @@
         <div class="container-fluid mx-auto px-4 py-2">
             <div class="flex items-center justify-center">
                 <div
-                    class="text-lg text-center md:text-3xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">
+                    class="text-lg text-center md:text-2xl font-bold text-white mb-2 drop-shadow-2xl uppercase border-b-2 border-green-900 py-2">
                     U.E. Colegio Fray Luis Amigó</div>
                 <div class="flex items-center space-x-3">
                     <!-- Logo -->

@@ -15,7 +15,7 @@
                     </svg>
                     Certificado de Participación
                 </div>
-                <h1 class="text-3xl font-bold text-white mb-2">{{ $poll->title }}</h1>
+                <h1 class="text-2xl font-bold text-white mb-2">{{ $poll->title }}</h1>
                 <p class="text-gray-300">Detalles de tu participación y resultados actuales</p>
             </div>
 

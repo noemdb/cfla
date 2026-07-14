@@ -1,6 +1,6 @@
 <div>
     <h5
-        class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight shadow-md drop-shadow-lg">
+        class="text-2xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight shadow-md drop-shadow-lg">
         {{ $item->title ?? null }}
     </h5>
     <div

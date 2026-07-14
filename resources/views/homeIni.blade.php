@@ -45,7 +45,7 @@
     <section id="about" class="bg-gray-100 py-12">
         <div class="container mx-auto px-4">
 
-            <h2 class="text-3xl font-semibold mb-4">Acerca de Nosotros</h2>
+            <h2 class="text-2xl font-semibold mb-4">Acerca de Nosotros</h2>
 
             <p class="mb-4">Somos una escuela con más de 50 años de experiencia...</p>
 
@@ -53,13 +53,13 @@
 
                 <!-- Años de experiencia -->
                 <div class="flex-1 mb-8 text-center md:text-left md:mr-8">
-                    <h3 class="text-3xl font-semibold mb-2">+50</h3>
+                    <h3 class="text-2xl font-semibold mb-2">+50</h3>
                     <p class="text-gray-500">Años de experiencia</p>
                 </div>
 
                 <!-- Certificaciones -->
                 <div class="flex-1 mb-8 text-center md:text-left">
-                    <h3 class="text-3xl font-semibold mb-2">5+</h3>
+                    <h3 class="text-2xl font-semibold mb-2">5+</h3>
                     <p class="text-gray-500">Certificaciones</p>
                 </div>
 
@@ -76,7 +76,7 @@
     <section id="programs" class="py-12 bg-white">
         <div class="container mx-auto px-4">
 
-            <h2 class="text-3xl font-semibold text-center mb-8">Nuestros Programas</h2>
+            <h2 class="text-2xl font-semibold text-center mb-8">Nuestros Programas</h2>
 
             <!-- Programas -->
             <div class="flex flex-wrap -mx-4">
@@ -127,7 +127,7 @@
     <section id="contact" class="bg-gray-100 py-12">
         <div class="container mx-auto px-4">
 
-            <h2 class="text-3xl font-semibold text-center mb-8">Contacto</h2>
+            <h2 class="text-2xl font-semibold text-center mb-8">Contacto</h2>
 
             <form>
                 <div class="mb-4">

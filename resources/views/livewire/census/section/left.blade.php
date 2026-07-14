@@ -2,7 +2,7 @@
     <div class="flex h-full flex-col items-center justify-center px-4 text-center text-white">
         <h2 class="mb-2 text-4xl font-extrabold uppercase mt-4">U.E. Colegio Fray Luis Amigó</h2>
         <div class="mb-1">
-            <h1 class="text-3xl font-semibold">Censo Escolar 26-27
+            <h1 class="text-2xl font-semibold">Censo Escolar 26-27
                 <br>Asistente
             </h1>
         </div>

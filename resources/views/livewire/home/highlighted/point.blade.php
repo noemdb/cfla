@@ -21,7 +21,7 @@
                 </a>
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-3xl text-gray-900 dark:text-neutral-200">TPV Botón de Pago CFLA</div>
+                <div class="text-2xl text-gray-900 dark:text-neutral-200">TPV Botón de Pago CFLA</div>
                 <div class="text-md text-red-600 font-bold dark:text-neutral-200">PAGO DIRECTO</div>
                 <div class="text-md text-gray-600 dark:text-neutral-200">Asistente</div>
                 <div class="text-sm text-gray-900 dark:text-neutral-200">Verificación, concialición y registro automático.</div>

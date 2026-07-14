@@ -19,7 +19,7 @@
 
     <section id="features" class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="container mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-8">Características</h2>
+            <h2 class="text-2xl font-bold mb-8">Características</h2>
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="p-6 bg-white dark:bg-gray-800 rounded shadow hover:shadow-lg">
                     <h3 class="font-bold text-xl mb-2">Aprendizaje Personalizado</h3>
@@ -39,7 +39,7 @@
 
     <section id="testimonials" class="py-16 bg-gray-100 dark:bg-gray-800">
         <div class="container mx-auto text-center">
-            <h2 class="text-3xl font-bold mb-8">Testimonios</h2>
+            <h2 class="text-2xl font-bold mb-8">Testimonios</h2>
             <div class="grid md:grid-cols-3 gap-8">
                 @foreach ($testimonials as $testimonial)
                 <div class="p-6 bg-white dark:bg-gray-700 rounded shadow hover:shadow-lg">
@@ -53,7 +53,7 @@
 
     <section id="faq" class="py-16 bg-gray-50 dark:bg-gray-900">
         <div class="container mx-auto">
-            <h2 class="text-3xl font-bold text-center mb-8">Preguntas Frecuentes</h2>
+            <h2 class="text-2xl font-bold text-center mb-8">Preguntas Frecuentes</h2>
             <div x-data="{ open: null }" class="grid gap-4">
                 @foreach ($faqs as $index => $faq)
                 <div>
@@ -73,7 +73,7 @@
 
     <section class="bg-gradient-to-br from-purple-600 to-blue-400 text-white py-20 text-center">
         <div class="container mx-auto">
-            <h2 class="text-3xl font-bold mb-4">Únete a StudyAI</h2>
+            <h2 class="text-2xl font-bold mb-4">Únete a StudyAI</h2>
             <p class="mb-6">Transforma tu experiencia de aprendizaje con herramientas inteligentes y tecnología avanzada.</p>
             <button 
                 onclick="loginWithGoogle()" 

@@ -18,7 +18,7 @@
         <div class="relative z-10">
             <div class="text-2xl font-bold">
                 <h5
-                    class="text-lg md:text-xl lg:text-2xl xl:text-3xl flex items-center text-{{ $category->color_class ?? null }}-600">
+                    class="text-lg md:text-xl lg:text-2xl xl:text-2xl flex items-center text-{{ $category->color_class ?? null }}-600">
                     <x-icon name="{{ $category->iconClass ?? null }}" class="w-12 h-12 mr-1" /> {{ $post->title ?? null }}
                 </h5>
             </div>

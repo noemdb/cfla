@@ -34,7 +34,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-emerald-400 font-medium">Encuestas Activas</p>
-                            <p class="text-3xl font-bold text-white">{{ $activePolls }}</p>
+                            <p class="text-2xl font-bold text-white">{{ $activePolls }}</p>
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-blue-400 font-medium">Total Votos</p>
-                            <p class="text-3xl font-bold text-white">{{ number_format($totalVotes) }}</p>
+                            <p class="text-2xl font-bold text-white">{{ number_format($totalVotes) }}</p>
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-teal-400 font-medium">Con Tiempo Límite</p>
-                            <p class="text-3xl font-bold text-white">{{ $pollsWithTimeLimit }}</p>
+                            <p class="text-2xl font-bold text-white">{{ $pollsWithTimeLimit }}</p>
                         </div>
                     </div>
                 </div>

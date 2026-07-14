@@ -155,7 +155,7 @@
                             <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Resultado
                                 Registrado</p>
                             @php $seccion_name = ($answer->seccion) ? $answer->seccion->name : 'N/A';@endphp
-                            <h4 class="text-3xl font-black text-white uppercase">Sección {{ $seccion_name }}</h4>
+                            <h4 class="text-2xl font-black text-white uppercase">Sección {{ $seccion_name }}</h4>
                         @else
                             <p class="text-xs font-bold text-orange-400 uppercase tracking-widest mb-1">Tiempo Agotado
                             </p>

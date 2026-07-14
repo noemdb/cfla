@@ -6,7 +6,7 @@
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
-            <h1 class="text-3xl font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
+            <h1 class="text-2xl font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
             <p class="text-emerald-400 font-medium">Bienvenido de nuevo al ecosistema administrativo de SAEFL.</p>
         </div>
 

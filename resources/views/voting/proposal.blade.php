@@ -27,19 +27,19 @@
 
                         <div class="grid grid-cols-2 gap-6">
                             <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                <div class="text-3xl font-bold text-blue-600">99.9%</div>
+                                <div class="text-2xl font-bold text-blue-600">99.9%</div>
                                 <div class="text-sm text-blue-800">Disponibilidad</div>
                             </div>
                             <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <div class="text-3xl font-bold text-green-600">100%</div>
+                                <div class="text-2xl font-bold text-green-600">100%</div>
                                 <div class="text-sm text-green-800">Seguridad</div>
                             </div>
                             <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                <div class="text-3xl font-bold text-purple-600">24/7</div>
+                                <div class="text-2xl font-bold text-purple-600">24/7</div>
                                 <div class="text-sm text-purple-800">Soporte</div>
                             </div>
                             <div class="text-center p-4 bg-orange-50 rounded-lg">
-                                <div class="text-3xl font-bold text-orange-600">∞</div>
+                                <div class="text-2xl font-bold text-orange-600">∞</div>
                                 <div class="text-sm text-orange-800">Escalabilidad</div>
                             </div>
                         </div>

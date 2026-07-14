@@ -71,7 +71,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-3xl font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
+                    <h2 class="text-2xl font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
                     <p class="text-gray-300 text-lg max-w-3xl mx-auto">
                         Es una herramienta diseñada para evaluar tus conocimientos actuales en diferentes áreas de formación, 
                         permitiendo identificar fortalezas y oportunidades de mejora en tu proceso de aprendizaje.
@@ -104,7 +104,7 @@
         @elseif($activeTab === 'process')
             <!-- Process Tab -->
             <div class="space-y-8">
-                <h2 class="text-3xl font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
+                <h2 class="text-2xl font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
                 
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
@@ -193,7 +193,7 @@
         @elseif($activeTab === 'questions')
             <!-- Questions Tab -->
             <div class="space-y-8">
-                <h2 class="text-3xl font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
+                <h2 class="text-2xl font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
                 
                 <div class="grid gap-8">
                     <!-- Multiple Choice -->
@@ -289,7 +289,7 @@
         @elseif($activeTab === 'tips')
             <!-- Tips Tab -->
             <div class="space-y-8">
-                <h2 class="text-3xl font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
+                <h2 class="text-2xl font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-xl border border-yellow-700/50">

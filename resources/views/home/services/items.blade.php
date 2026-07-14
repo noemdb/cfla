@@ -1,6 +1,6 @@
 <section class="text-neutral-700 dark:text-neutral-300">
     <div class="mx-auto text-center">
-        <h3 class="mb-6 text-3xl font-bold">Planes</h3>
+        <h3 class="mb-6 text-2xl font-bold">Planes</h3>
         <p class="mb-6 pb-2 md:mb-12 md:pb-0">
             Nuestra Institución es un UE CFLA privado de San Felipe, Yaracuy, Venezuela, está comprometida con
             la educación integral de sus estudiantes.

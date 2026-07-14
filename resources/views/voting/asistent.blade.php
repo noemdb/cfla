@@ -9,7 +9,7 @@
             <div class="sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
-                        <h1 class="text-3xl font-bold text-white mb-2">
+                        <h1 class="text-2xl font-bold text-white mb-2">
                             Asistente de Participación
                         </h1>
                         <p class="text-gray-300 text-lg">

@@ -8,7 +8,7 @@
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
             </div>
-            <h2 class="text-3xl font-bold text-white mb-2">
+            <h2 class="text-2xl font-bold text-white mb-2">
                 Identificación de Estudiante.
             </h2>
             <p class="text-gray-400">

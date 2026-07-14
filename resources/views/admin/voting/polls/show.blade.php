@@ -15,7 +15,7 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-3xl font-extrabold text-white mb-1">Detalles de la Encuesta</h1>
+                    <h1 class="text-2xl font-extrabold text-white mb-1">Detalles de la Encuesta</h1>
                     <p class="text-emerald-400 font-medium">Información técnica y seguimiento de participación.</p>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                             </p>
                         </div>
                         <div class="text-right">
-                            <p class="text-3xl font-black text-emerald-400">{{ $poll->votes_count }}</p>
+                            <p class="text-2xl font-black text-emerald-400">{{ $poll->votes_count }}</p>
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Votos Totales</p>
                         </div>
                     </div>

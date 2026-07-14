@@ -463,7 +463,7 @@
                                     d="M5 13l4 4L19 7"></path>
                             </svg>
                         </div>
-                        <h3 class="text-3xl font-black text-white tracking-tight uppercase">Voto Confirmado</h3>
+                        <h3 class="text-2xl font-black text-white tracking-tight uppercase">Voto Confirmado</h3>
                         <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mt-2">Protocolo
                             de Participación Exitoso</p>
                     </div>

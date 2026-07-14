@@ -31,7 +31,7 @@
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
-            <h1 class="text-3xl font-extrabold text-white mb-2">Planificación Académica</h1>
+            <h1 class="text-2xl font-extrabold text-white mb-2">Planificación Académica</h1>
             <p class="text-emerald-400 font-medium">Gestión y organización de actividades académicas institucionales.</p>
         </div>
 

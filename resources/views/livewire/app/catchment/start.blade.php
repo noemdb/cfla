@@ -19,7 +19,7 @@
                 </a>
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-3xl text-gray-900">Censo Escolar</div>
+                <div class="text-2xl text-gray-900">Censo Escolar</div>
                 <div class="text-md text-gray-600">Asistente</div>
                 <div class="text-sm text-gray-400">Registra tu interes por pertenecer a nuestra institución educativa.</div>
             </div>

@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Total Votos</p>
-                    <p class="text-3xl font-black text-white leading-none">{{ number_format($totalVotes) }}</p>
+                    <p class="text-2xl font-black text-white leading-none">{{ number_format($totalVotes) }}</p>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Opciones</p>
-                    <p class="text-3xl font-black text-white leading-none">{{ count($results) }}</p>
+                    <p class="text-2xl font-black text-white leading-none">{{ count($results) }}</p>
                 </div>
             </div>
         </div>
