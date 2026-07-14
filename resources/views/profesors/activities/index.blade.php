@@ -51,76 +51,8 @@
             </div>
         </div>
 
-        {{-- Lapso Tabs --}}
-        @if(isset($lapsos) && $lapsos->isNotEmpty())
-        <div class="border-b border-white/5">
-            <nav class="flex overflow-x-auto">
-                @foreach($lapsos as $index => $lapsoItem)
-                    @php
-                        $tabLapsoId = $lapsoItem->id;
-                        $isActive = ($lapso_id ?? '') == $tabLapsoId;
-                        $url = route('app.profesors.activities.index', array_merge(request()->query(), ['lapso_id' => $tabLapsoId]));
-                    @endphp
-                    <a href="{{ $url }}"
-                        class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
-                        {{ $isActive ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
-                        <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        {{ $lapsoItem->name }}
-                        <span class="block text-[8px] font-normal text-gray-500 normal-case">{{ $lapsoItem->code }}</span>
-                    </a>
-                @endforeach
-            </nav>
-        </div>
-        @endif
-
-        {{-- Body --}}
-        <div class="p-4">
-
-            {{-- Search Filters --}}
-            @include('profesors.activities.partials.search', ['route' => 'app.profesors.activities.index'])
-
-            {{-- Subtitle + View Toggle --}}
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-[11px] text-gray-400 font-medium">
-                    <span class="text-emerald-400">Listado</span> de Áreas de Formación
-                </p>
-                <div x-data="{ mode: localStorage.getItem('pevaluacions-view-mode') || 'grid' }" x-init="$watch('mode', val => { localStorage.setItem('pevaluacions-view-mode', val); window.dispatchEvent(new CustomEvent('pevaluacions-view-mode-changed', { detail: { mode: val } })) })">
-                    {{-- Grid button --}}
-                    <button @click="mode = 'grid'"
-                        :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold"
-                        title="Vista en tarjetas">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                        </svg>
-                        <span class="hidden sm:inline">Grid</span>
-                    </button>
-                    {{-- Table button --}}
-                    <button @click="mode = 'table'"
-                        :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold"
-                        title="Vista en tabla">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                        </svg>
-                        <span class="hidden sm:inline">Tabla</span>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Card Grid --}}
-            @include('profesors.activities.table.index')
-
-            {{-- Pagination --}}
-            @if(method_exists($pevaluacions, 'links'))
-                <div class="mt-3 pt-3 border-t border-white/5">
-                    {{ $pevaluacions->appends(request()->query())->links('vendor.pagination.custom-tailwind') }}
-                </div>
-            @endif
-
-        </div>
+        {{-- Livewire: PevaluacionList (lapso tabs + listing reactivos) --}}
+        @livewire('profesor.activity.pevaluacion-list', ['lapsoId' => $lapso_id ?? null])
     </div>
 
 </div>
