@@ -244,7 +244,7 @@
                                 </button>
 
                                 {{-- Auditar --}}
-                                <a href="{{ route('planning.lms.activity.audit', $pub->activity) }}"
+                                <a href="{{ route('app.planning.lms.activity.audit', $pub->activity) }}"
                                    class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-400/40 transition-all"
                                    title="Auditar">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,7 +483,7 @@
                         Vista previa de lección
                     </h3>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('planning.lms.preview', $previewActivityId) }}"
+                        <a href="{{ route('app.planning.lms.preview', $previewActivityId) }}"
                            target="_blank"
                            class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-400 hover:text-white border border-slate-600/50 transition-colors inline-flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -501,7 +501,7 @@
                 </div>
                 {{-- Iframe — ocupa todo el espacio restante --}}
                 <div class="flex-1 bg-white">
-                    <iframe src="{{ route('planning.lms.preview', $previewActivityId) }}"
+                    <iframe src="{{ route('app.planning.lms.preview', $previewActivityId) }}"
                             class="w-full h-full border-0"
                             title="Vista previa de lección"></iframe>
                 </div>

@@ -70,7 +70,7 @@
 
             {{-- Card: Referentes Curriculares (Instrumento Diagnóstico) --}}
             <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
-                <a href="{{ route('planning.diagnostico.referents.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.diagnostico.referents.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -85,7 +85,7 @@
                     <h3 class="text-lg font-bold text-white mb-2">Referentes Curriculares</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Catálogo de referentes normativos, competencias e indicadores de logro para el diagnóstico educativo.</p>
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.diagnostico.referents.index') }}"
+                        <a href="{{ route('app.planning.diagnostico.referents.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
@@ -98,7 +98,7 @@
 
             {{-- Card: Volver a Planificación --}}
             <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
-                <a href="{{ route('planning.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -113,7 +113,7 @@
                     <h3 class="text-lg font-bold text-white mb-2">Planificación</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Volver al panel principal de planificación académica.</p>
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.index') }}"
+                        <a href="{{ route('app.planning.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -126,7 +126,7 @@
 
             {{-- Card: Competiciones --}}
             <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
-                <a href="{{ route('planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
@@ -141,7 +141,7 @@
                     <h3 class="text-lg font-bold text-white mb-2">Competiciones</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de retos educativos, debates y control de puntajes.</p>
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.educational.competition.index') }}"
+                        <a href="{{ route('app.planning.educational.competition.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>

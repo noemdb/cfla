@@ -2,7 +2,7 @@
 
     {{-- Header --}}
     <div>
-        <a href="{{ route('planning.lms.monitor') }}"
+        <a href="{{ route('app.planning.lms.monitor') }}"
            class="text-xs text-emerald-400 hover:text-emerald-300 mb-2 inline-block">
             ← Volver al monitor
         </a>

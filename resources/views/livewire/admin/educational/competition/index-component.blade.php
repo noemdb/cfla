@@ -9,7 +9,7 @@
             {{-- <x-button wire:click="$set('showCreateModal', true)" label="Nueva Competición" icon="plus" emerald rounded="xl"
                 class="shadow-xl shadow-emerald-500/20 px-5 py-2.5 transition-all duration-300 hover:scale-105" /> --}}
 
-            <a href="{{ route('planning.index') }}"
+            <a href="{{ route('app.planning.index') }}"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

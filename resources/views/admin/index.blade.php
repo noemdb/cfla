@@ -209,7 +209,7 @@
                 <!-- Módulo de Planificación -->
                 <div
                     class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
-                    <a href="{{ route('planning.index') }}" class="absolute inset-0 z-0"></a>
+                    <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +231,7 @@
                         <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión y organización de competiciones académicas y diagnóstico institucional.</p>
 
                         <div class="mt-auto flex justify-end pointer-events-auto">
-                            <a href="{{ route('planning.index') }}"
+                            <a href="{{ route('app.planning.index') }}"
                                 class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

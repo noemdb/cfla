@@ -141,101 +141,105 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 });
 
 // ===================================================
-// MÓDULO DE PLANIFICACIÓN
+// MÓDULOS /app (Planificación, Profesor, etc.)
 // ===================================================
-Route::prefix('planning')->name('planning.')->middleware(['auth', 'isPlanner'])->group(function () {
-    Route::get('/', [PlanningController::class, 'index'])->name('index');
+Route::prefix('app')->name('app.')->group(function () {
 
-    // Módulo de Indicadores de Planificación
-    Route::prefix('indicators')->name('indicators.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Indicator\IndexComponent::class)->name('index');
-    });
+    // ───────────────────────────────────────────────
+    // MÓDULO DE PLANIFICACIÓN
+    // ───────────────────────────────────────────────
+    Route::prefix('planning')->middleware(['auth', 'isPlanner'])->name('planning.')->group(function () {
+        Route::get('/', [PlanningController::class, 'index'])->name('index');
 
-    // Módulo de Diagnóstico
-    Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
-        Route::get('/', function () {
-            return view('planning.diagnostic.index');
-        })->name('index');
-        Route::get('/referents', \App\Livewire\Planning\Diagnostic\ReferentsMain::class)->name('referents.index');
-    });
+        // Módulo de Indicadores de Planificación
+        Route::prefix('indicators')->name('indicators.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Indicator\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Competiciones Académicas
-    Route::prefix('educational')->name('educational.')->group(function () {
-        Route::get('/competition', CompetitionIndex::class)->name('competition.index');
-        Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
-    });
+        // Módulo de Diagnóstico
+        Route::prefix('diagnostico')->name('diagnostico.')->group(function () {
+            Route::get('/', function () {
+                return view('planning.diagnostic.index');
+            })->name('index');
+            Route::get('/referents', \App\Livewire\Planning\Diagnostic\ReferentsMain::class)->name('referents.index');
+        });
 
-    // Módulo de Carga Académica (Pevaluacions)
-    Route::prefix('pevaluacions')->name('pevaluacions.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Pevaluacion\IndexComponent::class)->name('index');
-    });
+        // Módulo de Competiciones Académicas
+        Route::prefix('educational')->name('educational.')->group(function () {
+            Route::get('/competition', CompetitionIndex::class)->name('competition.index');
+            Route::get('/competition/{token}/answers', [CompetitionController::class, 'answers'])->name('competition.answers');
+        });
 
-    // Módulo de Actividades de Planificación
-    Route::prefix('activities')->name('activities.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Activities\IndexComponent::class)->name('index');
-        // Rutas PDF (redirigen al módulo profesor)
-        Route::get('/format/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.format', $pevaluacion))->name('format');
-        Route::get('/resume/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.resume', $pevaluacion))->name('resume');
-    });
+        // Módulo de Carga Académica (Pevaluacions)
+        Route::prefix('pevaluacions')->name('pevaluacions.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Pevaluacion\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Planes de Estudio
-    Route::prefix('pestudios')->name('pestudios.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Pestudio\IndexComponent::class)->name('index');
-    });
+        // Módulo de Actividades de Planificación
+        Route::prefix('activities')->name('activities.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Activities\IndexComponent::class)->name('index');
+            // Rutas PDF (redirigen al módulo profesor)
+            Route::get('/format/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.format', $pevaluacion))->name('format');
+            Route::get('/resume/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.resume', $pevaluacion))->name('resume');
+        });
 
-    // Módulo de Áreas de Conocimiento
-    Route::prefix('area-conocimientos')->name('area-conocimientos.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\AreaConocimiento\IndexComponent::class)->name('index');
-    });
+        // Módulo de Planes de Estudio
+        Route::prefix('pestudios')->name('pestudios.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Pestudio\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Programas Educativos
-    Route::prefix('peducativos')->name('peducativos.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Peducativo\IndexComponent::class)->name('index');
-    });
+        // Módulo de Áreas de Conocimiento
+        Route::prefix('area-conocimientos')->name('area-conocimientos.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\AreaConocimiento\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Asignaturas
-    Route::prefix('asignaturas')->name('asignaturas.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Asignatura\IndexComponent::class)->name('index');
-    });
+        // Módulo de Programas Educativos
+        Route::prefix('peducativos')->name('peducativos.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Peducativo\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Grados
-    Route::prefix('grados')->name('grados.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Grado\IndexComponent::class)->name('index');
-    });
+        // Módulo de Asignaturas
+        Route::prefix('asignaturas')->name('asignaturas.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Asignatura\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Secciones
-    Route::prefix('secciones')->name('secciones.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Seccion\IndexComponent::class)->name('index');
-    });
+        // Módulo de Grados
+        Route::prefix('grados')->name('grados.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Grado\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Lapsos
-    Route::prefix('lapsos')->name('lapsos.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Lapso\IndexComponent::class)->name('index');
-    });
+        // Módulo de Secciones
+        Route::prefix('secciones')->name('secciones.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Seccion\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Pensums (Pivote central: Pestudio × Grado × Asignatura)
-    Route::prefix('pensums')->name('pensums.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Pensum\IndexComponent::class)->name('index');
-    });
+        // Módulo de Lapsos
+        Route::prefix('lapsos')->name('lapsos.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Lapso\IndexComponent::class)->name('index');
+        });
 
-    // Módulo de Profesores
-    Route::prefix('profesors')->name('profesors.')->group(function () {
-        Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');
-    });
+        // Módulo de Pensums (Pivote central: Pestudio × Grado × Asignatura)
+        Route::prefix('pensums')->name('pensums.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Pensum\IndexComponent::class)->name('index');
+        });
 
-    // ─── LMS: Monitor y Auditoría para Coordinadores ──────────────
-    Route::prefix('lms')->name('lms.')->group(function () {
-        Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
-        Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
-        Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
-    });
-});
+        // Módulo de Profesores
+        Route::prefix('profesors')->name('profesors.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');
+        });
 
-// ===================================================
-// MÓDULO DE PROFESOR (Dashboard)
-// ===================================================
-Route::prefix('app')->name('app.')->middleware(['auth', 'isProfesor'])->group(function () {
-    Route::prefix('profesors')->name('profesors.')->group(function () {
+        // ─── LMS: Monitor y Auditoría para Coordinadores ──────────────
+        Route::prefix('lms')->name('lms.')->group(function () {
+            Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
+            Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
+            Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
+        });
+    });  // ← cierra el grupo planning
+
+    // ───────────────────────────────────────────────
+    // MÓDULO DE PROFESOR (Dashboard)
+    // ───────────────────────────────────────────────
+    Route::prefix('profesors')->middleware(['auth', 'isProfesor'])->name('profesors.')->group(function () {
         Route::get('/home', [\App\Http\Controllers\Profesor\HomeController::class, 'home'])->name('home');
         Route::get('/users', [\App\Http\Controllers\Profesor\HomeController::class, 'users'])->name('users.index');
 

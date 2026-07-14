@@ -6,7 +6,7 @@
             <p class="text-emerald-400 font-medium">Gestión de períodos académicos (trimestres) del año escolar.</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('planning.index') }}"
+            <a href="{{ route('app.planning.index') }}"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -178,6 +178,15 @@
 
     <!-- ===== MODAL: Formulario Crear/Editar ===== -->
     <x-modal-card title="{{ $isEditing ? 'Editar Lapso' : 'Nuevo Lapso' }}" blur="lg" wire:model="modeForm" max-width="4xl" persistent>
+        <x-slot name="action">
+            <button type="button" x-on:click="close"
+                class="cursor-pointer p-1 rounded-full focus:outline-none focus:outline-hidden focus:ring-2 focus:ring-secondary-200 text-secondary-300 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                tabindex="-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </x-slot>
         <div class="space-y-6">
 
             {{-- Errores globales de validación --}}
@@ -330,7 +339,7 @@
 
         <x-slot name="footer">
             <div class="flex justify-end gap-x-4">
-                <x-button flat label="Cancelar" x-on:click="modeForm = false" />
+                <x-button flat label="Cancelar" x-on:click="close" />
                 <x-button primary label="{{ $isEditing ? 'Actualizar Lapso' : 'Guardar Lapso' }}" wire:click="save" spinner="save" />
             </div>
         </x-slot>

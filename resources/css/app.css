@@ -29,6 +29,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './condensed.css';
+
 /* Estilos personalizados para el sistema de votación */
 .voting-card {
     @apply bg-white rounded-lg shadow-md border border-gray-200 p-6 transition-all duration-200;

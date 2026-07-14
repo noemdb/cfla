@@ -50,7 +50,7 @@
             <!-- Indicadores de Planificación -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-cyan-500/20 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/5">
-                <a href="{{ route('planning.indicators.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.indicators.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Dashboard institucional con KPIs: inscritos, evaluaciones, actividades y profesores, segmentado por plan de estudio y lapso.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.indicators.index') }}"
+                        <a href="{{ route('app.planning.indicators.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
@@ -82,7 +82,7 @@
             <!-- Competiciones Académicas -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
-                <a href="{{ route('planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@
                         puntajes en vivo.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.educational.competition.index') }}"
+                        <a href="{{ route('app.planning.educational.competition.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -121,7 +121,7 @@
             <!-- Diagnóstico -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
-                <a href="{{ route('planning.diagnostico.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.diagnostico.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +143,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Planificación y activación de áreas de formación para la aplicación del diagnóstico académico.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.diagnostico.index') }}"
+                        <a href="{{ route('app.planning.diagnostico.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -159,7 +159,7 @@
             <!-- Actividades de Planificación -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
-                <a href="{{ route('planning.activities.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.activities.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Revisión y control de calidad pedagógica de los planes de evaluación por actividad.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.activities.index') }}"
+                        <a href="{{ route('app.planning.activities.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -197,7 +197,7 @@
             <!-- Programas Educativos -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-orange-500/30">
-                <a href="{{ route('planning.peducativos.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.peducativos.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +219,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de los programas educativos (Inicial, Primaria, Media General) con su equipo directivo y configuración.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.peducativos.index') }}"
+                        <a href="{{ route('app.planning.peducativos.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-xl border border-orange-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -235,7 +235,7 @@
             <!-- Planes de Estudio -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
-                <a href="{{ route('planning.pestudios.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.pestudios.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +257,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de los programas educativos y su configuración académica, fechas de cierre y promoción.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.pestudios.index') }}"
+                        <a href="{{ route('app.planning.pestudios.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -273,7 +273,7 @@
             <!-- Asignaturas -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-pink-500/30">
-                <a href="{{ route('planning.asignaturas.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.asignaturas.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +295,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Catálogo de asignaturas del pensum académico con sus horas, créditos, prelaciones y configuración.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.asignaturas.index') }}"
+                        <a href="{{ route('app.planning.asignaturas.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 rounded-xl border border-pink-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -311,7 +311,7 @@
             <!-- Grados -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
-                <a href="{{ route('planning.grados.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.grados.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +333,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Administración de grados y años académicos con configuración de horas sociales y secciones.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.grados.index') }}"
+                        <a href="{{ route('app.planning.grados.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -349,7 +349,7 @@
             <!-- Secciones -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-lime-500/30">
-                <a href="{{ route('planning.secciones.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.secciones.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-lime-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,7 +371,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de secciones (aulas) por grado académico con capacidad, inscripciones y control de estado.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.secciones.index') }}"
+                        <a href="{{ route('app.planning.secciones.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-lime-500/10 hover:bg-lime-500/20 text-lime-400 rounded-xl border border-lime-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -387,7 +387,7 @@
             <!-- Lapsos -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-indigo-500/30">
-                <a href="{{ route('planning.lapsos.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.lapsos.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,7 +409,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Períodos académicos del año escolar con fechas de inicio, fin, censo y configuración de pre-cierre.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.lapsos.index') }}"
+                        <a href="{{ route('app.planning.lapsos.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl border border-indigo-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -425,7 +425,7 @@
             <!-- Pensums -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-rose-500/30">
-                <a href="{{ route('planning.pensums.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.pensums.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,7 +443,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Pivote central del sistema: vincula planes de estudio, grados y asignaturas para definir el pensum académico.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.pensums.index') }}"
+                        <a href="{{ route('app.planning.pensums.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
@@ -457,7 +457,7 @@
             <!-- Carga Académica -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-teal-500/30">
-                <a href="{{ route('planning.pevaluacions.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.pevaluacions.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,7 +475,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Asignación de profesores a áreas de formación por sección y lapso. Control de planes de evaluación.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.pevaluacions.index') }}"
+                        <a href="{{ route('app.planning.pevaluacions.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 rounded-xl border border-teal-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
@@ -489,7 +489,7 @@
             <!-- Profesores -->
             <div
                 class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-violet-500/30">
-                <a href="{{ route('planning.profesors.index') }}" class="absolute inset-0 z-0"></a>
+                <a href="{{ route('app.planning.profesors.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -507,7 +507,7 @@
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de profesores con creación automática de usuario, perfil y rol. Asignación de cargas académicas por lapso.</p>
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
-                        <a href="{{ route('planning.profesors.index') }}"
+                        <a href="{{ route('app.planning.profesors.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 rounded-xl border border-violet-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
