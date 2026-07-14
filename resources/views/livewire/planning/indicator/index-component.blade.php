@@ -50,69 +50,53 @@
             label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="amber" />
     </div>
 
-    <!-- Filters: Lapso + Peducativo + Pestudio + Profesor -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-lg mb-2">
-        {{-- Lapso selector --}}
-        <div class="flex flex-wrap gap-1 mb-2 pb-2 border-b border-white/5">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 w-full mb-1">Período:</span>
+    <!-- Lapso NavTabs + Filters -->
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden mb-4">
+        {{-- Lapso navtabs (replica el patrón de profesors/activities) --}}
+        <nav class="flex overflow-x-auto border-b border-white/5">
             @foreach($lapsos as $lapso)
                 <button wire:click="$set('selectedLapsoId', {{ $lapso->id }})"
-                    class="flex-1 min-w-0 px-2 py-1.5 rounded-lg text-xs font-bold text-center transition-all duration-200 {{ $selectedLapsoId == $lapso->id ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10' }}">
-                    <span>{{ $lapso->name }}</span>
-                    <span class="text-[9px] text-gray-500 ml-1">{{ $lapso->finicial?->format('d/m') }} – {{ $lapso->ffinal?->format('d/m') }}</span>
+                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap {{ $selectedLapsoId == $lapso->id ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    {{ $lapso->name }}
+                    <span class="block text-[8px] font-normal text-gray-500 normal-case">{{ $lapso->finicial?->format('d/m') }} – {{ $lapso->ffinal?->format('d/m') }}</span>
                 </button>
             @endforeach
-        </div>
+        </nav>
 
-        {{-- 3 filter dropdowns --}}
-        <div class="flex flex-wrap items-center gap-2">
-            {{-- Peducativo filter --}}
-            <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Educativo:</span>
-                <select wire:model.live="selectedPeducativoId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($peducativos as $ped)
-                        <option value="{{ $ped->id }}">{{ $ped->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Pestudio filter --}}
-            <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">P.Estudio:</span>
-                <select wire:model.live="selectedPestudioId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($pestudios as $pest)
-                        <option value="{{ $pest->id }}">{{ $pest->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Grado filter --}}
-            <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Grado:</span>
-                <select wire:model.live="selectedGradoId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($gradosOptions as $grd)
-                        <option value="{{ $grd->id }}">{{ $grd->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Profesor filter --}}
-            <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Profesor:</span>
-                <select wire:model.live="selectedProfesorId"
-                    class="bg-gray-800 text-gray-200 text-xs rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($profesoresOptions as $prof)
-                        <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+        {{-- Filters compactos en una fila --}}
+        <div class="px-3 py-2 flex flex-wrap items-center gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mr-0.5">Filtros:</span>
+            <select wire:model.live="selectedPeducativoId"
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[120px] appearance-none cursor-pointer">
+                <option value="">P.Educativo: Todos</option>
+                @foreach($peducativos as $ped)
+                    <option value="{{ $ped->id }}">{{ $ped->name }}</option>
+                @endforeach
+            </select>
+            <select wire:model.live="selectedPestudioId"
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[120px] appearance-none cursor-pointer">
+                <option value="">P.Estudio: Todos</option>
+                @foreach($pestudios as $pest)
+                    <option value="{{ $pest->id }}">{{ $pest->name }}</option>
+                @endforeach
+            </select>
+            <select wire:model.live="selectedGradoId"
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[90px] appearance-none cursor-pointer">
+                <option value="">Grado: Todos</option>
+                @foreach($gradosOptions as $grd)
+                    <option value="{{ $grd->id }}">{{ $grd->name }}</option>
+                @endforeach
+            </select>
+            <select wire:model.live="selectedProfesorId"
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none min-w-[130px] appearance-none cursor-pointer">
+                <option value="">Profesor: Todos</option>
+                @foreach($profesoresOptions as $prof)
+                    <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
+                @endforeach
+            </select>
         </div>
     </div>
 
