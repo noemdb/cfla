@@ -2603,30 +2603,40 @@
                                 </div>
 
                                 {{-- Action Buttons --}}
+                                @php $blockCount = count($wizardSections[$currentSlideIndex]['contents'] ?? []); @endphp
                                 <div class="px-4 py-2 border-t border-slate-700/30 bg-slate-900/30">
                                     <div class="flex flex-wrap items-center gap-2">
+                                        @if($blockCount >= 2)
+                                            <span class="text-[10px] text-slate-500 italic px-1 mr-1">Máx. 2 bloques</span>
+                                        @endif
                                         <button wire:click="generateSlideText"
                                                 @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideText"
+                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]
+                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                             Generar Texto
                                         </button>
                                         <button wire:click="generateSlideImage"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideImage"
+                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 active:scale-[0.97]">
+                                                       text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 active:scale-[0.97]
+                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
                                             Generar Imagen
                                         </button>
                                         <button wire:click="generateSectionIllustration"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSectionIllustration"
+                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 active:scale-[0.97]">
+                                                       text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 active:scale-[0.97]
+                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>
                                             Generar Ilustración
                                         </button>
@@ -2634,19 +2644,13 @@
                                                 @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideDiagram"
+                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
+                                                       text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]
+                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                                             Generar Diagrama
                                         </button>
-
-                                        {{-- Vista estudiante --}}
-                                        {{-- <button wire:click="$toggle('showStudentPreview')"
-                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
-                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            Vista estudiante
-                                        </button> --}}
 
                                         <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
 
@@ -3612,14 +3616,14 @@ Cómo...?"
             </div>
 
             {{-- Botón flotante: abrir preview full-screen --}}
-            <button wire:click="$set('showFullPreview', true)"
+            {{-- <button wire:click="$set('showFullPreview', true)"
                     class="hidden lg:flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400 transition-all bg-slate-800/90 border border-slate-700 rounded-l-xl pl-3 pr-2.5 py-2 fixed right-0 top-1/2 -translate-y-1/2 z-40 cursor-pointer"
                     title="Vista previa">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                 </svg>
                 <span>Previa</span>
-            </button>
+            </button> --}}
 
             {{-- ═══════════ MODAL VISTA PREVIA (full-screen) ═══════════ --}}
             @if($showFullPreview)
@@ -3908,25 +3912,17 @@ Cómo...?"
                     <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
                         <div class="relative w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden">
                             {{-- Header --}}
-                            <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-base font-bold uppercase tracking-wider">Vista del Estudiante</h2>
-                                        <p class="text-xs text-emerald-100/80">Así verán los estudiantes la lección</p>
-                                    </div>
-                                </div>
-                                <button wire:click="$toggle('showStudentPreview')"
-                                        class="p-2 hover:bg-white/10 rounded-lg transition-all">
+                            <div class="flex items-center gap-3 px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
+                                <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
-                                </button>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold uppercase tracking-wider">Vista del Estudiante</h2>
+                                    <p class="text-xs text-emerald-100/80">Así verán los estudiantes la lección</p>
+                                </div>
                             </div>
 
                             {{-- Body --}}

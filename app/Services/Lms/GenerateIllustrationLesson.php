@@ -226,8 +226,10 @@ PROMPT;
             $rawSvg = preg_replace('/\n?```\s*$/s', '', $rawSvg);
             $rawSvg = trim($rawSvg);
 
-            // Validar que comience con <svg
-            if (!preg_match('/^<svg[\s>]/i', $rawSvg)) {
+            // Extraer bloque <svg>...</svg> de la respuesta (puede venir con texto introductorio)
+            if (preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
+                $rawSvg = $svgMatch[0];
+            } else {
                 return [
                     'success' => false,
                     'svg'     => null,

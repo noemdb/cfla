@@ -894,6 +894,10 @@ PROMPT;
         if (!isset($this->wizardSections[$sectionIndex])) {
             return;
         }
+        if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
+            $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+            return;
+        }
 
         $this->generatingSection = $sectionIndex;
         $this->generationError = null;
@@ -1034,6 +1038,10 @@ PROMPT;
         if (!isset($this->wizardSections[$sectionIndex])) {
             return;
         }
+        if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
+            $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+            return;
+        }
 
         $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
         $sectionBody = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
@@ -1155,6 +1163,10 @@ PROMPT;
         if (!isset($this->wizardSections[$sectionIndex])) {
             return;
         }
+        if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
+            $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+            return;
+        }
 
         $sectionTitle = $this->wizardSections[$sectionIndex]['title'] ?? 'Sección';
 
@@ -1235,6 +1247,10 @@ PROMPT;
     {
         $sectionIndex = $this->currentSlideIndex;
         if (!isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+        if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
+            $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
             return;
         }
 
