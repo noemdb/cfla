@@ -86,5 +86,8 @@
 
     </div>
 
+    {{-- Modal de Competencias --}}
+    @livewire('profesor.activity.competencias-dialog')
+
 </div>
 @endsection
