@@ -3,7 +3,7 @@
 
     <div class="grid md:grid-cols-1">
         @if ($is_regular)
-            <div class="p-4 mb-4 text-sm text-red-100 bg-red-900 border border-red-700 rounded-xl shadow-lg animate-pulse"
+            <div class="p-4 mb-4 text-sm text-red-100 bg-red-900 border border-red-700 rounded-lg shadow-lg animate-pulse"
                 role="alert">
                 <div class="flex items-center mb-2">
                     <x-icon name="exclamation-circle" class="w-5 h-5 mr-2 text-red-200" />

@@ -22,7 +22,7 @@
 
             <!-- Estadísticas generales -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
                         class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-4 border-b border-emerald-800/50">
                         <div class="flex items-center">
@@ -43,7 +43,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
                         class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-4 border-b border-blue-800/50">
                         <div class="flex items-center">
@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
                         class="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 px-6 py-4 border-b border-teal-800/50">
                         <div class="flex items-center">
@@ -119,7 +119,7 @@
                     {{-- @if ($loop->first) <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"> @endif --}}
 
                     <div
-                        class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden h-fit">
+                        class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden h-fit">
                         <!-- Header de la encuesta -->
                         <div
                             class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-4 border-b border-emerald-800/50">
@@ -169,7 +169,7 @@
                 @empty
                     <!-- Estado sin encuestas -->
                     <div class="text-center py-16">
-                        <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 p-12">
+                        <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 p-12">
                             <svg class="w-20 h-20 text-gray-400 mx-auto mb-6" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -189,7 +189,7 @@
             <div class="flex justify-center space-x-4 mt-12">
 
                 <button onclick="window.location.reload()"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">

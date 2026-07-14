@@ -2,7 +2,7 @@
     {{-- Loading overlay --}}
     <div wire:loading.flex wire:target="openImportModal,loadImportPreview,importData,createReferent,createCompetency,createIndicator,saveReferent,saveCompetency,saveIndicator,confirmDeleteReferent,confirmDeleteCompetency,confirmDeleteIndicator,deleteReferent,deleteCompetency,deleteIndicator,toggleReferentActive"
          class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm items-center justify-center">
-        <div class="flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-900 border border-white/10">
+        <div class="flex items-center gap-3 px-6 py-3 rounded-lg bg-gray-900 border border-white/10">
             <svg class="w-5 h-5 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
@@ -18,7 +18,7 @@
         </div>
         <div class="flex items-center gap-2">
             <button wire:click="{{ $viewMode === 'referents' ? 'createReferent' : ($viewMode === 'competencies' ? 'createCompetency' : 'createIndicator') }}"
-                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -73,7 +73,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar referentes..."
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                 @if($search)
                     <button wire:click="$set('search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +84,7 @@
             </div>
 
             <select wire:model.live="filterPestudioId"
-                class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
+                class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
                 <option value="">Todos los planes</option>
                 @foreach($referentPestudios as $pestudio)
                     <option value="{{ $pestudio->id }}">{{ $pestudio->name }}</option>
@@ -92,7 +92,7 @@
             </select>
 
             <select wire:model.live="filterGradoId"
-                class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
+                class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
                 <option value="">Todos los grados</option>
                 @if($filterPestudioId && $filterPestudioGrados)
                     @foreach($filterPestudioGrados as $grado)
@@ -106,14 +106,14 @@
             </select>
 
             <select wire:model.live="filterActive"
-                class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
+                class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
                 <option value="">Todos los estados</option>
                 <option value="1">Activos</option>
                 <option value="0">Inactivos</option>
             </select>
 
             <button wire:click="resetFilters"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -234,11 +234,11 @@
                                     @endif
                                 </p>
                                 @if($search || $filterActive)
-                                    <button wire:click="resetFilters" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                    <button wire:click="resetFilters" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                                         Limpiar filtros
                                     </button>
                                 @else
-                                    <button wire:click="createReferent" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+                                    <button wire:click="createReferent" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
                                         + Crear primer referente
                                     </button>
                                 @endif
@@ -260,7 +260,7 @@
         <div class="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-white/5">
             <div class="relative">
                 <select wire:model.live="compFilterPestudioId"
-                    class="bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
+                    class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
                     <option value="">Todos los planes</option>
                     @foreach($referentPestudios as $pestudio)
                         <option value="{{ $pestudio->id }}">{{ $pestudio->name }}</option>
@@ -269,7 +269,7 @@
             </div>
             <div class="relative">
                 <select wire:model.live="compFilterGradoId"
-                    class="bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
+                    class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
                     <option value="">Todos los grados</option>
                     @if($compFilterPestudioId && $compFilterPestudioGrados->isNotEmpty())
                         @foreach($compFilterPestudioGrados as $grado)
@@ -284,7 +284,7 @@
             </div>
             <div class="relative">
                 <select wire:model.live="compFilterPensumId"
-                    class="bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[200px]">
+                    class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200 appearance-none cursor-pointer min-w-[200px]">
                     <option value="">Todas las áreas</option>
                     @foreach($compPensums as $pensum)
                         <option value="{{ $pensum->id }}">{{ $pensum->asignatura_name ?? $pensum->fullname }}</option>
@@ -292,7 +292,7 @@
                 </select>
             </div>
             <button wire:click="resetFilters"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -463,7 +463,7 @@
     @if($showModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showModal', false)"></div>
-            <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white">
                         @if($viewMode === 'referents')
@@ -488,7 +488,7 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Plan de Estudio</label>
                             <select wire:model="form.pestudio_id"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                                 <option value="">Seleccione plan de estudio</option>
                                 @foreach($referentPestudios as $pestudio)
                                     <option value="{{ $pestudio->id }}">{{ $pestudio->name }}</option>
@@ -499,27 +499,27 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Nombre</label>
                             <input type="text" wire:model="form.name" placeholder="Ej: Reforma Educativa 2017"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
                             @error('form.name') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Código</label>
                                 <input type="text" wire:model="form.code" placeholder="Ej: RES-2017-01"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
                                 @error('form.code') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Versión</label>
                                 <input type="text" wire:model="form.version" placeholder="Ej: 1.0"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
                                 @error('form.version') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Descripción</label>
                             <textarea wire:model="form.description" rows="2" placeholder="Descripción del referente..."
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
                         </div>
                         <div class="flex items-center gap-2">
                             <input type="checkbox" wire:model="form.active" id="form_active"
@@ -532,7 +532,7 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Área de Formación</label>
                             <select wire:model="form.pensum_id"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
                                 <option value="">Seleccione área (opcional)</option>
                                 @foreach($pensums as $pensum)
                                     <option value="{{ $pensum->id }}">{{ $pensum->asignatura_name ?? $pensum->fullname }}</option>
@@ -543,13 +543,13 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Nombre</label>
                             <input type="text" wire:model="form.name" placeholder="Nombre de la competencia"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
                             @error('form.name') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Descripción</label>
                             <textarea wire:model="form.description" rows="2" placeholder="Descripción de la competencia..."
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
                         </div>
 
                     @else
@@ -557,19 +557,19 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Código</label>
                             <input type="text" wire:model="form.code" placeholder="Ej: IND-001"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200">
                             @error('form.code') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Descripción</label>
                             <textarea wire:model="form.description" rows="2" placeholder="Descripción del indicador de logro..."
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 transition-all duration-200 resize-none"></textarea>
                             @error('form.description') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Nivel Esperado</label>
                             <select wire:model="form.expected_level"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 transition-all duration-200">
                                 <option value="">Seleccione nivel</option>
                                 @foreach($expectedLevels as $val => $level)
                                     <option value="{{ $val }}">{{ $level['label'] }}</option>
@@ -582,14 +582,14 @@
 
                 <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex items-center justify-between">
                     <button wire:click="$set('showModal', false)"
-                        class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 transition-all duration-200">
+                        class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 transition-all duration-200">
                         Cancelar
                     </button>
                     @php
                         $saveMethod = $viewMode === 'indicators' ? 'Indicator' : ($viewMode === 'competencies' ? 'Competency' : 'Referent');
                     @endphp
                     <button wire:click="save{{ $saveMethod }}" wire:loading.attr="disabled"
-                        class="px-6 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50">
+                        class="px-6 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50">
                         <span wire:loading.remove wire:target="save{{ $saveMethod }}">Guardar</span>
                         <span wire:loading wire:target="save{{ $saveMethod }}">Guardando...</span>
                     </button>
@@ -602,7 +602,7 @@
     @if($detailModal && $detailItem)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeDetailModal"></div>
-            <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 {{-- Header --}}
                 <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -631,8 +631,8 @@
                         {{-- Referent detail --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <div class="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-br from-emerald-500/5 to-emerald-500/[0.02] border border-emerald-500/10">
-                                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                                <div class="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-br from-emerald-500/5 to-emerald-500/[0.02] border border-emerald-500/10">
+                                    <div class="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                         </svg>
@@ -646,14 +646,14 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Estudio</label>
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
                                     {{ $detailItem->pestudio?->name ?? '—' }}
                                 </span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Competencias Asociadas</label>
                                 <span class="inline-flex items-center gap-1.5 text-sm font-bold text-white">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -663,7 +663,7 @@
                                 </span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Indicadores de Logro</label>
                                 <span class="inline-flex items-center gap-1.5 text-sm font-bold text-white">
                                     <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -673,7 +673,7 @@
                                 </span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Estado</label>
                                 @if($detailItem->active)
                                     <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400">
@@ -688,20 +688,20 @@
                                 @endif
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">ID Registro</label>
                                 <span class="text-xs text-gray-300 font-mono">#{{ $detailItem->id }}</span>
                             </div>
 
                             @if($detailItem->description)
-                                <div class="md:col-span-2 p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                                <div class="md:col-span-2 p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Descripción</label>
                                     <p class="text-xs text-gray-300 leading-relaxed">{{ $detailItem->description }}</p>
                                 </div>
                             @endif
 
                             @if($detailItem->version)
-                                <div class="md:col-span-2 p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                                <div class="md:col-span-2 p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Versión</label>
                                     <p class="text-xs text-gray-300">{{ $detailItem->version }}</p>
                                 </div>
@@ -712,8 +712,8 @@
                         {{-- Competency detail --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <div class="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-br from-amber-500/5 to-amber-500/[0.02] border border-amber-500/10">
-                                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                                <div class="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-br from-amber-500/5 to-amber-500/[0.02] border border-amber-500/10">
+                                    <div class="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
                                         <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                         </svg>
@@ -727,17 +727,17 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Área de Formación</label>
                                 <span class="text-xs text-gray-300">{{ $detailItem->pensum?->asignatura_name ?? $detailItem->pensum?->fullname ?? '—' }}</span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Grado</label>
                                 <span class="text-xs text-gray-300">{{ $detailItem->pensum?->grado?->name ?? '—' }}</span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Indicadores Asociados</label>
                                 <span class="inline-flex items-center gap-1.5 text-sm font-bold text-white">
                                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -747,13 +747,13 @@
                                 </span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">ID Registro</label>
                                 <span class="text-xs text-gray-300 font-mono">#{{ $detailItem->id }}</span>
                             </div>
 
                             @if($detailItem->description)
-                                <div class="md:col-span-2 p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                                <div class="md:col-span-2 p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Descripción</label>
                                     <p class="text-xs text-gray-300 leading-relaxed">{{ $detailItem->description }}</p>
                                 </div>
@@ -764,8 +764,8 @@
                         {{-- Indicator detail --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <div class="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-br from-blue-500/5 to-blue-500/[0.02] border border-blue-500/10">
-                                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                                <div class="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-br from-blue-500/5 to-blue-500/[0.02] border border-blue-500/10">
+                                    <div class="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                                         <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                         </svg>
@@ -780,7 +780,7 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Nivel Esperado</label>
                                 @php $level = $expectedLevels[$detailItem->expected_level] ?? ['label' => 'No definido', 'color' => 'default']; @endphp
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold
@@ -792,7 +792,7 @@
                                 </span>
                             </div>
 
-                            <div class="p-4 rounded-xl bg-gray-800/30 border border-white/5">
+                            <div class="p-4 rounded-lg bg-gray-800/30 border border-white/5">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">ID Registro</label>
                                 <span class="text-xs text-gray-300 font-mono">#{{ $detailItem->id }}</span>
                             </div>
@@ -803,7 +803,7 @@
                 {{-- Footer --}}
                 <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
                     <button wire:click="closeDetailModal"
-                        class="px-5 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                        class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar
                     </button>
                 </div>
@@ -821,7 +821,7 @@
          class="fixed inset-0 z-[10000] flex items-center justify-center p-4"
          style="display: none;">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showImportModal = false"></div>
-        <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
                 <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                     <div class="flex items-center gap-3">
@@ -854,7 +854,7 @@
                         {{-- File upload dropzone --}}
                         <div
                             @click="$refs.fileInput.click()"
-                            class="relative group cursor-pointer rounded-xl border-2 border-dashed border-white/10 hover:border-emerald-500/40 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-200 px-4 py-6">
+                            class="relative group cursor-pointer rounded-lg border-2 border-dashed border-white/10 hover:border-emerald-500/40 bg-gray-800/30 hover:bg-gray-800/50 transition-all duration-200 px-4 py-6">
                             <input type="file" wire:model="importJsonFile" accept=".json"
                                 x-ref="fileInput"
                                 class="hidden">
@@ -913,7 +913,7 @@
                             @foreach($importReferents as $referent)
                                 @php $isSelected = (int) $importReferentId === (int) $referent->id; @endphp
                                 <button type="button" wire:click="$set('importReferentId', '{{ $referent->id }}')"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-left transition-all duration-200
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg border text-left transition-all duration-200
                                         {{ $isSelected
                                             ? 'border-emerald-500/50 bg-emerald-500/10 ring-1 ring-emerald-500/20'
                                             : 'border-white/5 bg-gray-800/30 hover:border-white/10 hover:bg-gray-800/50' }}">
@@ -949,7 +949,7 @@
                             Los datos se importarán según el <code class="text-gray-400 bg-gray-800/50 px-1.5 py-0.5 rounded">area_formacion.pensumId</code> del JSON
                         </p>
                         <button wire:click="loadImportPreview" wire:loading.attr="disabled"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-50"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200 disabled:opacity-50"
                             {{ !$importJsonFile || !$importReferentId ? 'disabled' : '' }}>
                             <span wire:loading.remove wire:target="loadImportPreview">
                                 <svg class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -967,7 +967,7 @@
                             $statusType = explode(':', $importStatus, 2)[0] ?? '';
                             $statusMsg = explode(':', $importStatus, 2)[1] ?? $importStatus;
                         @endphp
-                        <div class="px-4 py-3 rounded-xl text-xs font-medium
+                        <div class="px-4 py-3 rounded-lg text-xs font-medium
                             {{ $statusType === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
                             {{ $statusType === 'warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
                             {{ $statusType === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
@@ -986,7 +986,7 @@
                                     </span>
                                 </h4>
                                 <button wire:click="importData" wire:loading.attr="disabled"
-                                    class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50">
+                                    class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50">
                                     <span wire:loading.remove wire:target="importData">
                                         <svg class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
@@ -998,7 +998,7 @@
                             </div>
 
                             {{-- Loading overlay for import --}}
-                            <div wire:loading.flex wire:target="importData" class="items-center gap-2 px-4 py-3 rounded-xl bg-gray-800/50 border border-white/5">
+                            <div wire:loading.flex wire:target="importData" class="items-center gap-2 px-4 py-3 rounded-lg bg-gray-800/50 border border-white/5">
                                 <svg class="w-4 h-4 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
@@ -1008,7 +1008,7 @@
                             {{-- Competencies preview --}}
                             <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
                                 @foreach($importPreview['competencias'] as $comp)
-                                    <div class="px-4 py-3 rounded-xl bg-gray-800/30 border border-white/5">
+                                    <div class="px-4 py-3 rounded-lg bg-gray-800/30 border border-white/5">
                                         <div class="flex items-start gap-3">
                                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold shrink-0">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1035,7 +1035,7 @@
                 {{-- Footer --}}
                 <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
                     <button @click="showImportModal = false"
-                        class="px-5 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                        class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar
                     </button>
                 </div>

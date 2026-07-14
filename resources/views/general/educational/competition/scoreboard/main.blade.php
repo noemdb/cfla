@@ -4,7 +4,7 @@
             @if ($competition)
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     <div
-                        class="diagnostic-card border border-emerald-500/10 rounded-xl p-6 shadow-2xl backdrop-blur-md">
+                        class="diagnostic-card border border-emerald-500/10 rounded-lg p-6 shadow-2xl backdrop-blur-md">
                         <div
                             class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
                             Información de la Competición</div>
@@ -12,7 +12,7 @@
                             :id="$competition->id" />
                     </div>
                     <div
-                        class="diagnostic-card border border-emerald-500/10 rounded-xl p-6 shadow-2xl backdrop-blur-md">
+                        class="diagnostic-card border border-emerald-500/10 rounded-lg p-6 shadow-2xl backdrop-blur-md">
                         <div
                             class="mb-4 text-emerald-400 text-xs font-bold uppercase tracking-widest border-b border-emerald-500/20 pb-2">
                             Estado del Debate</div>

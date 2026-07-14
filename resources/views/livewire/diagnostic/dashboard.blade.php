@@ -69,7 +69,7 @@
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($pensums as $pensum)
-            <div class="diagnostic-card rounded-xl p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
+            <div class="diagnostic-card rounded-lg p-6 border @if ($pensum['is_completed']) border-green-500 bg-gradient-to-br from-gray-800 to-green-900/20 @else border-gray-700 @endif hover:border-green-500 cursor-pointer"
                 wire:click="startDiagnostic({{ $pensum['id'] }})">
 
                 <!-- Progress Ring -->

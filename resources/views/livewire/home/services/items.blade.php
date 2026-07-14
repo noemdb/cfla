@@ -12,7 +12,7 @@
         <!--First Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
+                class="h-full block rounded-lg bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
                 <div
                     class="h-28 bg-gradient-to-br from-emerald-100 to-green-200 dark:from-emerald-800 dark:to-green-900">
                 </div>
@@ -57,7 +57,7 @@
         <!--Second Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col transform md:-translate-y-4">
+                class="h-full block rounded-lg bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col transform md:-translate-y-4">
                 <!-- Highlighted header -->
                 <div
                     class="h-28 bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-600 dark:to-green-700 overflow-hidden">
@@ -104,7 +104,7 @@
         <!--Third Plan-->
         <div class="h-full">
             <div
-                class="h-full block rounded-xl bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
+                class="h-full block rounded-lg bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-300 shadow-xl overflow-hidden flex flex-col">
                 <div class="h-28 bg-gradient-to-br from-gray-200 to-emerald-200 dark:from-gray-800 dark:to-emerald-900">
                 </div>
                 <div

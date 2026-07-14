@@ -1,7 +1,7 @@
 {{-- Analytics Tab --}}
 <div class="space-y-6">
     {{-- Performance by Pensum --}}
-    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Rendimiento por Área de Formación</h4>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
@@ -55,7 +55,7 @@
 
     {{-- Question Type Distribution --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Distribución por Tipo de Pregunta</h4>
             @php
                 $typeStats = $analytics['by_question_type'] ?? [];
@@ -82,7 +82,7 @@
             </div>
         </div>
 
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Distribución por Dificultad</h4>
             @php
                 $diffStats = $analytics['by_difficulty'] ?? [];
@@ -112,7 +112,7 @@
 
     {{-- Insights Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gradient-to-br from-emerald-500/5 to-emerald-500/0 border border-emerald-500/10 rounded-xl p-5">
+        <div class="bg-gradient-to-br from-emerald-500/5 to-emerald-500/0 border border-emerald-500/10 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-2">
                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -123,7 +123,7 @@
             <p class="text-[10px] text-gray-500 mt-1">Mayor precisión en respuestas</p>
         </div>
 
-        <div class="bg-gradient-to-br from-red-500/5 to-red-500/0 border border-red-500/10 rounded-xl p-5">
+        <div class="bg-gradient-to-br from-red-500/5 to-red-500/0 border border-red-500/10 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-2">
                 <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
@@ -134,7 +134,7 @@
             <p class="text-[10px] text-gray-500 mt-1">Menor precisión en respuestas</p>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-500/5 to-purple-500/0 border border-purple-500/10 rounded-xl p-5">
+        <div class="bg-gradient-to-br from-purple-500/5 to-purple-500/0 border border-purple-500/10 rounded-lg p-5">
             <div class="flex items-center gap-2 mb-2">
                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -148,7 +148,7 @@
 
     {{-- Detailed Performance by Area --}}
     @if(!empty($analytics['detailed_pensum']))
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Desglose por Área</h4>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">

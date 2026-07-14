@@ -7,7 +7,7 @@
             </p>
         </div>
         <a href="{{ route('app.planning.index') }}"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
                 </path>
@@ -15,7 +15,7 @@
             Planificación
         </a>
         <a href="{{ route('admin.index') }}"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
                 </path>
@@ -25,14 +25,14 @@
     </div>
 
     @foreach ($pestudios as $pestudio)
-        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
+        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
             wire:key="pestudio-{{ $pestudio->id }}" x-data="{ open: false }">
 
             <div @click="open = !open"
                 class="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors group">
 
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-all duration-300"
+                    <div class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center group-hover:bg-emerald-500/30 transition-all duration-300"
                         :class="open ? 'scale-110 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : ''">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -74,7 +74,7 @@
 
                     @if ($activeCount > 0)
                         <div
-                            class="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl backdrop-blur-sm">
+                            class="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg backdrop-blur-sm">
                             <div class="flex flex-col items-end">
                                 <span
                                     class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest leading-none mb-1">Activos</span>
@@ -91,7 +91,7 @@
                         </div>
                     @endif
 
-                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 transition-transform duration-500"
+                    <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/5 transition-transform duration-500"
                         :class="open ? 'rotate-180 bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-gray-500'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7">
@@ -115,7 +115,7 @@
                                 $gradeActiveCount = $pensums->where('status_active_diagnostic', true)->count();
                             @endphp
 
-                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
+                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
                                 wire:key="grado-{{ $pestudio->id }}-{{ $grado->id }}">
                                 <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
                                     <h3 class="font-bold text-emerald-100">{{ $grado->name }}</h3>
@@ -149,7 +149,7 @@
                                     <div class="text-[10px] text-gray-500 py-1 font-medium italic" title="">Áreas
                                         de Formación con Asignación de Carga Académica</div>
                                     @forelse($pensums as $pensum)
-                                        <div class="flex items-center justify-between group/item p-1 rounded-xl transition-all duration-300 {{ $pensum->status_active_diagnostic ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-transparent border border-transparent' }}"
+                                        <div class="flex items-center justify-between group/item p-1 rounded-lg transition-all duration-300 {{ $pensum->status_active_diagnostic ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-transparent border border-transparent' }}"
                                             wire:key="pensum-{{ $pensum->id }}">
                                             <div class="flex flex-col">
                                                 <div class="flex items-center gap-1 py-0 px-2">

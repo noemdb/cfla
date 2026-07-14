@@ -2,7 +2,7 @@
     @if ($post)
         <div class="h-full flex flex-col justify-center max-w-5xl mx-auto">
             <div
-                class="bg-gray-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-xl shadow-2xl overflow-hidden relative">
+                class="bg-gray-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-lg shadow-2xl overflow-hidden relative">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-green-600"></div>
 
                 <div class="p-6 md:p-8">
@@ -37,7 +37,7 @@
                     <!-- Image -->
                     @if ($post->saefl_image_url)
                         <div class="mt-8 flex justify-center">
-                            <x-card class="bg-gray-800/50 border border-emerald-500/20 p-2 rounded-xl">
+                            <x-card class="bg-gray-800/50 border border-emerald-500/20 p-2 rounded-lg">
                                 <img src="{{ asset($post->saefl_image_url) }}"
                                     class="block w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
                                     alt="Post Image" />

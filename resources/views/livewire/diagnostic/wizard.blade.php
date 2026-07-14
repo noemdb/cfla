@@ -4,7 +4,7 @@
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
             <div
-                class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+                class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-8 mb-8 shadow-2xl relative overflow-hidden">
                 <!-- Shine effect -->
                 <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
                 <!-- Added status indicator to top right of container -->
@@ -75,7 +75,7 @@
             <div class="max-w-4xl mx-auto">
                 <!-- Pregunta -->
                 <div
-                    class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+                    class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-8 mb-8 shadow-2xl relative overflow-hidden">
                     <!-- Shine effect -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none">
                     </div>
@@ -242,7 +242,7 @@
         @else
             <!-- Updated empty state message to be more accurate -->
             <div class="max-w-4xl mx-auto text-center">
-                <div class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-xl p-8 shadow-2xl">
+                <div class="bg-gray-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-8 shadow-2xl">
                     <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

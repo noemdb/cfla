@@ -1,7 +1,7 @@
 <div class="space-y-6">
 
     <div
-        class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden shadow-2xl">
+        class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden shadow-2xl">
 
         <div
             class="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-900 dark:to-gray-900 p-6 border-b border-emerald-200 dark:border-emerald-500/30">
@@ -71,7 +71,7 @@
                 </section>
 
                 <div
-                    class="mt-12 p-6 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-emerald-200 dark:border-emerald-500/20">
+                    class="mt-12 p-6 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-emerald-200 dark:border-emerald-500/20">
                     <div
                         class="mb-4 text-lg font-bold text-emerald-800 dark:text-emerald-100 border-b border-emerald-200 dark:border-emerald-500/20 pb-2">
                         Otros

@@ -7,21 +7,21 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Planificación
             </a>
             <button type="button" wire:click="create"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Nueva Área
             </button>
             <button wire:click="$refresh"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -31,17 +31,17 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl mb-8">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="Nombre, código..."
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
             </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Estudio</label>
                 <select wire:model.live="filter_pestudio"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($pestudios as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -51,7 +51,7 @@
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Programa Educativo</label>
                 <select wire:model.live="filter_peducativo"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($peducativos as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -61,7 +61,7 @@
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Ver</label>
                 <select wire:model.live="paginate"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="12">12</option>
                     <option value="24">24</option>
                     <option value="48">48</option>
@@ -70,7 +70,7 @@
             </div>
             <div class="flex items-end">
                 <button wire:click="$refresh"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -83,7 +83,7 @@
     <!-- Grid Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         @forelse($area_conocimientos as $area)
-            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group flex flex-col">
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group flex flex-col">
 
                 {{-- Card Header — plan badge + delete --}}
                 <div class="flex items-start justify-between px-4 pt-3.5 pb-2 border-b border-white/5">
@@ -170,7 +170,7 @@
                 <div class="px-4 pb-3.5 pt-2.5 border-t border-white/5 flex items-center gap-1.5">
                     <button type="button" wire:click="openCampoManager({{ $area->id }})"
                         title="Gestionar Asignaturas Adscritas"
-                        class="inline-flex items-center justify-center flex-1 gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
+                        class="inline-flex items-center justify-center flex-1 gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
@@ -178,14 +178,14 @@
                     </button>
                     <button type="button" wire:click="edit({{ $area->id }})"
                         title="Editar Área"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </button>
                     <button type="button" wire:click="confirmDelete({{ $area->id }})"
                         title="Eliminar Área"
-                        class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -230,7 +230,7 @@
         <div class="space-y-6">
 
             @if($errors->any())
-                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                     <div class="flex items-start gap-3">
                         <svg class="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -259,7 +259,7 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan Educativo</label>
                         <select wire:model="peducativo_id"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">—</option>
                             @foreach($peducativos as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -269,7 +269,7 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Plan de Estudio *</label>
                         <select wire:model="pestudio_id"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">Seleccione...</option>
                             @foreach($pestudios as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -280,13 +280,13 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nombre *</label>
                         <input type="text" wire:model="name" placeholder="Nombre del área de conocimiento"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
                         @error('name') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Jefe del Área</label>
                         <select wire:model="leader_id"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="">—</option>
                             @foreach($usuarios as $id => $username)
                                 <option value="{{ $id }}">{{ $username }}</option>
@@ -308,19 +308,19 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Código *</label>
                         <input type="text" wire:model="code" placeholder="Ej: LEN" maxlength="20" style="text-transform:uppercase"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
                         @error('code') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Abreviación *</label>
                         <input type="text" wire:model="code_sm" placeholder="Ej: LEN" maxlength="10" style="text-transform:uppercase"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
                         @error('code_sm') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Orden</label>
                         <select wire:model="order"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             @for($i = 1; $i <= 30; $i++)
                                 <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
@@ -330,7 +330,7 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Índice Académico</label>
                         <select wire:model="enable_academic_index"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                             <option value="true">Sí</option>
                             <option value="false">No</option>
                         </select>
@@ -350,12 +350,12 @@
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Descripción</label>
                         <textarea wire:model="description" rows="3" placeholder="Descripción del área de conocimiento"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600 resize-none"></textarea>
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600 resize-none"></textarea>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Observaciones</label>
                         <textarea wire:model="observations" rows="3" placeholder="Observaciones adicionales"
-                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600 resize-none"></textarea>
+                            class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600 resize-none"></textarea>
                     </div>
                 </div>
             </div>
@@ -388,7 +388,7 @@
              @@click="$wire.closeCampoManager()"></div>
         {{-- Panel --}}
         <div class="flex min-h-full items-start justify-center p-2 sm:p-4 pt-8">
-            <div class="relative w-full max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl"
+            <div class="relative w-full max-w-[95vw] bg-gray-900 border border-white/10 rounded-lg shadow-2xl"
                  x-show="show"
                  x-transition:enter="ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"
@@ -411,7 +411,7 @@
                 <div class="p-6 space-y-6">
 
                     {{-- Formulario rápido --}}
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div class="bg-white/5 border border-white/10 rounded-lg p-4">
                         <h4 class="text-xs font-bold text-emerald-400 mb-3 flex items-center gap-2">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -422,7 +422,7 @@
                             <div class="md:col-span-1">
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Asignatura *</label>
                                 <select wire:model="campo_asignatura_id"
-                                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                                     <option value="">Seleccione...</option>
                                     @foreach($asignaturasList as $id => $name)
                                         <option value="{{ $id }}">{{ $name }}</option>
@@ -433,11 +433,11 @@
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Observaciones</label>
                                 <input type="text" wire:model="campo_observations" placeholder="Opcional"
-                                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+                                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
                             </div>
                             <div class="flex gap-2">
                                 <button type="button" wire:click="saveCampo" wire:loading.attr="disabled"
-                                    class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
+                                    class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
                                     </svg>
@@ -445,7 +445,7 @@
                                 </button>
                                 @if($campoEditingId)
                                     <button type="button" wire:click="resetCampoForm"
-                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+                                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
@@ -456,7 +456,7 @@
                     </div>
 
                     {{-- Tabla de adscripciones --}}
-                    <div class="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
+                    <div class="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden">
                         <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
                             <table class="w-full text-sm">
                                 <thead class="sticky top-0 bg-gray-900 z-10">
@@ -518,7 +518,7 @@
 
                     {{-- Delete campo confirmation --}}
                     @if($confirmDeleteCampoId)
-                        <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center justify-between">
+                        <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>

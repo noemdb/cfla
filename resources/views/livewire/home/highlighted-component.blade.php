@@ -9,14 +9,14 @@
 
         <!-- Census Column -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-lg p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
             @include('livewire.home.highlighted.census')
 
             @if ($showVideo)
                 <!-- Pantalla de Video -->
                 <div class="fixed inset-0 p-4 flex items-center justify-center bg-black/95 z-50 backdrop-blur-md">
                     <div class="relative w-full max-w-4xl mx-auto">
-                        <video id="introVideo" class="w-full rounded-xl shadow-2xl border border-emerald-500/30" autoplay
+                        <video id="introVideo" class="w-full rounded-lg shadow-2xl border border-emerald-500/30" autoplay
                             muted controls>
                             <source src="{{ asset('videos/census/newCatch.mp4') }}" type="video/mp4">
                             Tu navegador no soporta videos.
@@ -38,19 +38,19 @@
 
         <!-- Payment Column -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-lg p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
             <livewire:app.payment.index-component />
         </div>
 
         <!-- Info Payment Column -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-lg p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
             @include('home.highlighted.infoPayment')
         </div>
 
         <!-- Point Column -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-lg p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
             @include('home.highlighted.suspended.point')
         </div>
 

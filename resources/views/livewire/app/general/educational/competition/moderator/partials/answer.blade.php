@@ -1,7 +1,7 @@
 <div class="space-y-6" id="{{ $question->id }}">
     @if ($question->status_active)
         @if (!$question->status_over_time)
-            <div class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40">
+            <div class="diagnostic-card border border-emerald-500/20 rounded-lg p-6 bg-gray-950/40">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -24,7 +24,7 @@
                         }
                     }">
                         <button @click="toggle()" 
-                            class="p-2 transition-all rounded-xl flex items-center gap-2 border transition-all duration-300"
+                            class="p-2 transition-all rounded-lg flex items-center gap-2 border transition-all duration-300"
                             :class="playing ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'"
                             title="Reproducir música de competición">
                             <template x-if="!playing">
@@ -91,7 +91,7 @@
                     }
                 }" x-init="init()">
                     <div
-                        class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-xl py-6 px-10 min-w-[200px]">
+                        class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-lg py-6 px-10 min-w-[200px]">
                         <div wire:key="mod-timer-{{ $question->id ?? 'none' }}" class="text-5xl font-black text-white tabular-nums tracking-tighter">
                             <span x-text="fmt(s)"></span>
                         </div>
@@ -104,7 +104,7 @@
                     <div class="flex gap-3 w-full md:w-auto">
                         {{-- Pausar: visible cuando Alpine tiene active=true --}}
                         <button x-show="active" @click="active = false; clearInterval(iv); $wire.pause(s)"
-                            class="flex-1 md:flex-none px-8 py-4 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-xl font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-4 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -114,7 +114,7 @@
                         </button>
                         {{-- Iniciar / Continuar: visible cuando Alpine tiene active=false --}}
                         <button x-show="!active" wire:click="start"
-                            class="flex-1 md:flex-none px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-4 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
@@ -123,7 +123,7 @@
                             <span x-text="started ? 'Continuar' : 'Iniciar'"></span>
                         </button>
                         <button wire:click="finished"
-                            class="flex-1 md:flex-none px-8 py-4 bg-red-500/20 border border-red-500/30 text-red-400 rounded-xl font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-4 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"
@@ -136,7 +136,7 @@
             </div>
         @else
             <div
-                class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40 relative overflow-hidden">
+                class="diagnostic-card border border-emerald-500/20 rounded-lg p-6 bg-gray-950/40 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                     <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -146,7 +146,7 @@
 
                 <div class="flex flex-col md:flex-row items-center gap-6">
                     <div
-                        class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-3 px-6 rounded-xl font-black uppercase tracking-[0.2em] text-lg shadow-inner">
+                        class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-3 px-6 rounded-lg font-black uppercase tracking-[0.2em] text-lg shadow-inner">
                         {{ $grado->name ?? 'Sin Grado' }}
                     </div>
 
@@ -175,7 +175,7 @@
                                 </div>
                                 <button
                                     wire:click="setPoin({{ $answer->id }}, {{ $score ? 0 : $question->weighting }})"
-                                    class="p-4 rounded-xl transition-all duration-300 border {{ $score ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' }}">
+                                    class="p-4 rounded-lg transition-all duration-300 border {{ $score ? 'bg-orange-500/20 border-orange-500/30 text-orange-400' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' }}">
                                     @if ($score)
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -214,7 +214,7 @@
             </div>
         @endif
     @else
-        <div class="py-10 text-center opacity-30 border border-dashed border-emerald-500/10 rounded-xl">
+        <div class="py-10 text-center opacity-30 border border-dashed border-emerald-500/10 rounded-lg">
             <p class="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Módulo de Respuesta Inactivo</p>
         </div>
     @endif

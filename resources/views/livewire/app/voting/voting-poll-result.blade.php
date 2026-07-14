@@ -11,13 +11,13 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Total Votes -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-xl p-6 border border-white/5 relative overflow-hidden group">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-lg p-6 border border-white/5 relative overflow-hidden group">
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-emerald-500/10 transition-all">
             </div>
             <div class="flex items-center gap-4 relative">
                 <div
-                    class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
+                    class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
                     <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -32,13 +32,13 @@
 
         <!-- Options Count -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-xl p-6 border border-white/5 relative overflow-hidden group">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-lg p-6 border border-white/5 relative overflow-hidden group">
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-blue-500/10 transition-all">
             </div>
             <div class="flex items-center gap-4 relative">
                 <div
-                    class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
+                    class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
                     <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
@@ -54,13 +54,13 @@
 
         <!-- Last Updated -->
         <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-xl p-6 border border-white/5 relative overflow-hidden group">
+            class="diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-lg p-6 border border-white/5 relative overflow-hidden group">
             <div
                 class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-2xl -mr-12 -mt-12 group-hover:bg-purple-500/10 transition-all">
             </div>
             <div class="flex items-center gap-4 relative">
                 <div
-                    class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center border border-purple-500/20">
+                    class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center border border-purple-500/20">
                     <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -103,7 +103,7 @@
                         <div class="flex items-center gap-5">
                             <!-- Rank Number -->
                             <div
-                                class="flex items-center justify-center w-10 h-10 bg-gradient-to-br {{ $index === 0 ? 'from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-500/20' : 'from-gray-700 to-gray-800' }} rounded-xl text-white font-black text-sm">
+                                class="flex items-center justify-center w-10 h-10 bg-gradient-to-br {{ $index === 0 ? 'from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-500/20' : 'from-gray-700 to-gray-800' }} rounded-lg text-white font-black text-sm">
                                 @if ($index === 0 && $result['votes'] > 0)
                                     <svg class="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
                                         <path
@@ -159,7 +159,7 @@
         <div
             class="text-center py-20 diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 border-dashed">
             <div
-                class="w-20 h-20 bg-emerald-500/5 rounded-xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/10">
+                class="w-20 h-20 bg-emerald-500/5 rounded-lg flex items-center justify-center mx-auto mb-6 border border-emerald-500/10">
                 <svg class="w-10 h-10 text-emerald-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">

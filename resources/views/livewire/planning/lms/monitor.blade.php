@@ -12,38 +12,38 @@
 
     {{-- Stats cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3">
+        <div class="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3">
             <p class="text-lg font-bold text-white">{{ $stats['total'] }}</p>
             <p class="text-xs text-slate-400">Total lecciones</p>
         </div>
-        <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
+        <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-emerald-400">{{ $stats['published'] }}</p>
             <p class="text-xs text-emerald-400/70">Publicadas</p>
         </div>
-        <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3">
+        <div class="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-amber-400">{{ $stats['scheduled'] }}</p>
             <p class="text-xs text-amber-400/70">Programadas</p>
         </div>
-        <div class="bg-slate-500/5 border border-slate-500/20 rounded-xl p-3">
+        <div class="bg-slate-500/5 border border-slate-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-slate-400">{{ $stats['draft'] }}</p>
             <p class="text-xs text-slate-400/70">Borradores</p>
         </div>
-        <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
+        <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-red-400">{{ $stats['archived'] }}</p>
             <p class="text-xs text-red-400/70">Archivadas</p>
         </div>
-        <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
+        <div class="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-blue-400">{{ $stats['withContent'] }}</p>
             <p class="text-xs text-blue-400/70">Con contenido</p>
         </div>
-        <div class="bg-purple-500/5 border border-purple-500/20 rounded-xl p-3">
+        <div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3">
             <p class="text-lg font-bold text-purple-400">{{ $stats['totalActivities'] }}</p>
             <p class="text-xs text-purple-400/70">Total actividades</p>
         </div>
     </div>
 
     {{-- Filtros --}}
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 space-y-3">
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Estado</label>
@@ -128,7 +128,7 @@
 
     {{-- Bulk action bar --}}
     @if(count($selectedIds) > 0)
-        <div class="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+        <div class="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
             <span class="text-sm text-emerald-300 font-medium">{{ count($selectedIds) }} seleccionado(s)</span>
             <div class="flex items-center gap-2 ml-auto">
                 <button wire:click="bulkPublish"
@@ -155,7 +155,7 @@
     @endif
 
     {{-- Tabla de publicaciones --}}
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-slate-700/30">
                 <tr>
@@ -328,7 +328,7 @@
     {{-- ============================================================ --}}
     @if($showScheduleModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                 {{-- Header --}}
                 <div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -397,7 +397,7 @@
     {{-- ============================================================ --}}
     @if($showSettingsModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                 {{-- Header --}}
                 <div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -472,7 +472,7 @@
     {{-- ============================================================ --}}
     @if($showPreviewModal && $previewActivityId)
         <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center py-6 px-4" wire:click.self="closePreview">
-            <div class="w-full max-w-6xl h-full flex flex-col bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-700/50" wire:click.stop>
+            <div class="w-full max-w-6xl h-full flex flex-col bg-slate-900 rounded-lg overflow-hidden shadow-2xl border border-slate-700/50" wire:click.stop>
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 shrink-0">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">

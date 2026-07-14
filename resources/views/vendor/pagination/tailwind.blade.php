@@ -3,21 +3,21 @@
         {{-- Mobile --}}
         <div class="flex justify-between flex-1 sm:hidden">
             @if ($paginator->onFirstPage())
-                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-700 cursor-default leading-5 rounded-xl">
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-700 cursor-default leading-5 rounded-lg">
                     Anterior
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-bold text-gray-300 bg-gray-800 border border-gray-700 leading-5 rounded-xl hover:text-white hover:bg-gray-700 hover:border-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200">
+                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-bold text-gray-300 bg-gray-800 border border-gray-700 leading-5 rounded-lg hover:text-white hover:bg-gray-700 hover:border-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200">
                     Anterior
                 </a>
             @endif
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-bold text-gray-300 bg-gray-800 border border-gray-700 leading-5 rounded-xl hover:text-white hover:bg-gray-700 hover:border-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200">
+                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-bold text-gray-300 bg-gray-800 border border-gray-700 leading-5 rounded-lg hover:text-white hover:bg-gray-700 hover:border-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-200">
                     Siguiente
                 </a>
             @else
-                <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-700 cursor-default leading-5 rounded-xl">
+                <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-500 bg-gray-800 border border-gray-700 cursor-default leading-5 rounded-lg">
                     Siguiente
                 </span>
             @endif
@@ -42,7 +42,7 @@
             </div>
 
             <div>
-                <span class="relative z-0 inline-flex rounded-xl overflow-hidden border border-gray-700/50 divide-x divide-gray-700/50">
+                <span class="relative z-0 inline-flex rounded-lg overflow-hidden border border-gray-700/50 divide-x divide-gray-700/50">
                     {{-- Anterior --}}
                     @if ($paginator->onFirstPage())
                         <span aria-disabled="true" aria-label="Anterior">

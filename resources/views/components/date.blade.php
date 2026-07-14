@@ -9,7 +9,7 @@
     <div class="relative group">
         <input type="date"
             {{ $attributes->merge([
-                'class' => 'block w-full text-sm text-gray-200 bg-slate-900 border border-slate-700 rounded-xl p-2.5 
+                'class' => 'block w-full text-sm text-gray-200 bg-slate-900 border border-slate-700 rounded-lg p-2.5 
                                         focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all 
                                         cursor-pointer shadow-sm appearance-none',
             ]) }}

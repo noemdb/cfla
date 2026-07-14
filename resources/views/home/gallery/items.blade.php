@@ -1,5 +1,5 @@
 <div
-    class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4 md:p-6 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500">
+    class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg p-4 md:p-6 shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500">
     <div id="carouselExampleGallery" class="relative group" data-te-carousel-init data-te-ride="carousel">
 
         <!-- Indicators -->
@@ -32,15 +32,15 @@
         </div>
 
         <!--Carousel items-->
-        <div class="relative w-full overflow-hidden after:clear-both after:block after:content-[''] rounded-xl">
+        <div class="relative w-full overflow-hidden after:clear-both after:block after:content-[''] rounded-lg">
             @for ($i = 1; $i <= 8; $i++)
                 <div class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
                     @if ($i == 1) data-te-carousel-active @endif data-te-carousel-item
                     style="backface-visibility: hidden">
-                    <div class="relative overflow-hidden bg-cover bg-no-repeat rounded-xl group/item"
+                    <div class="relative overflow-hidden bg-cover bg-no-repeat rounded-lg group/item"
                         style="background-position: 50%">
                         <img data-te-lazy-src="{{ asset('image/gallery/' . $i . '.jpg') }}" data-te-lazy-load-init
-                            class="block w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-500/20 shadow-lg transform group-hover/item:scale-105 transition-transform duration-700 ease-out" />
+                            class="block w-full rounded-lg border-2 border-emerald-200 dark:border-emerald-500/20 shadow-lg transform group-hover/item:scale-105 transition-transform duration-700 ease-out" />
                         <div
                             class="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60">
                         </div>

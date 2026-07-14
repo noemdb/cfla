@@ -16,7 +16,7 @@
         </div>
 
         {{-- Filtros --}}
-        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                 <div>
                     <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">Lapso</label>
@@ -78,7 +78,7 @@
                     $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
                 @endphp
                 <div wire:key="activity-card-{{ $item->id }}"
-                     class="relative bg-slate-800/40 border border-slate-700/60 rounded-xl overflow-hidden mt-2
+                     class="relative bg-slate-800/40 border border-slate-700/60 rounded-lg overflow-hidden mt-2
                             transition-all duration-200 group
                             hover:bg-slate-800/60 hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/10
                             {{ $hasLmsContent ? 'ring-1 ring-emerald-500/15' : '' }}">
@@ -270,7 +270,7 @@
 
                 {{-- Modal panel --}}
                 <div class="relative min-h-screen flex items-center justify-center p-4">
-                    <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -372,15 +372,15 @@
                                         @if($detailActivity->hasTeachingStructure())
                                             @php $sections = $detailActivity->getTeachingSections(); @endphp
                                             <div x-show="!showFullTeaching" x-transition:enter.duration.200ms class="space-y-3">
-                                                <div class="p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                                                <div class="p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
                                                     <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-1">INICIO</div>
                                                     <p class="text-sm text-gray-200">{{ $sections['INICIO'] ?? '' }}</p>
                                                 </div>
-                                                <div class="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                                                <div class="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
                                                     <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-1">DESARROLLO</div>
                                                     <p class="text-sm text-gray-200">{{ $sections['DESARROLLO'] ?? '' }}</p>
                                                 </div>
-                                                <div class="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl">
+                                                <div class="p-3 bg-amber-500/5 border border-amber-500/10 rounded-lg">
                                                     <div class="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-1">CIERRE</div>
                                                     <p class="text-sm text-gray-200">{{ $sections['CIERRE'] ?? '' }}</p>
                                                 </div>
@@ -412,7 +412,7 @@
 
                             {{-- Comentario J.Área --}}
                             @if($detailActivity->comments)
-                            <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                            <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
                                 <div class="flex items-center gap-2 mb-2">
                                     <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
@@ -465,7 +465,7 @@
                         {{-- Footer --}}
                         <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex justify-end">
                             <button wire:click="closeDetails"
-                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
@@ -482,7 +482,7 @@
             <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="export-modal">
                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExportModal"></div>
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
@@ -557,14 +557,14 @@
                                     </label>
 
                                     @if($exportTargetSectionId && empty($exportAvailableActivities))
-                                        <div class="text-center py-10 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                                        <div class="text-center py-10 bg-slate-800/30 rounded-lg border border-dashed border-slate-700">
                                             <svg class="w-10 h-10 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                             </svg>
                                             <p class="text-sm text-slate-500">No hay actividades disponibles en esta sección</p>
                                         </div>
                                     @elseif(!$exportTargetSectionId)
-                                        <div class="text-center py-10 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                                        <div class="text-center py-10 bg-slate-800/30 rounded-lg border border-dashed border-slate-700">
                                             <svg class="w-10 h-10 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -576,7 +576,7 @@
                                             @foreach($exportAvailableActivities as $act)
                                                 @php $selected = $exportTargetActivityId === $act['id']; @endphp
                                                 <button wire:click="$set('exportTargetActivityId', {{ $act['id'] }})"
-                                                        class="w-full text-left p-4 rounded-xl border transition-all duration-200
+                                                        class="w-full text-left p-4 rounded-lg border transition-all duration-200
                                                                {{ $selected
                                                                    ? 'bg-emerald-500/10 border-emerald-500/40 ring-1 ring-emerald-500/30'
                                                                    : 'bg-slate-800/50 border-slate-700/60 hover:border-slate-600 hover:bg-slate-800' }}">
@@ -729,7 +729,7 @@
                                         </h3>
                                         <div class="space-y-3">
                                             @foreach($exportPreviewData['html_embeds'] as $embed)
-                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl">
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg">
                                                     @if(!empty($embed['title']))
                                                         <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                     @endif
@@ -813,7 +813,7 @@
                                 </div>
 
                                 {{-- Resumen origen --}}
-                                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+                                <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-2">
                                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Origen</h4>
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs text-slate-300 font-medium">{{ $exportPreviewData['title'] ?? '—' }}</span>
@@ -831,7 +831,7 @@
 
                                 {{-- Resumen destino --}}
                                 @php $selectedAct = collect($exportAvailableActivities)->firstWhere('id', $exportTargetActivityId); @endphp
-                                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+                                <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-2">
                                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Destino</h4>
                                     <div class="flex items-center gap-2 text-xs">
                                         <span class="text-emerald-400 font-medium">
@@ -890,7 +890,7 @@
             <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="import-modal">
                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeImportModal"></div>
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
@@ -965,14 +965,14 @@
                                     </label>
 
                                     @if($importSourceSectionId && empty($importAvailableActivities))
-                                        <div class="text-center py-10 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                                        <div class="text-center py-10 bg-slate-800/30 rounded-lg border border-dashed border-slate-700">
                                             <svg class="w-10 h-10 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                             </svg>
                                             <p class="text-sm text-slate-500">No hay actividades disponibles en esta sección</p>
                                         </div>
                                     @elseif(!$importSourceSectionId)
-                                        <div class="text-center py-10 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                                        <div class="text-center py-10 bg-slate-800/30 rounded-lg border border-dashed border-slate-700">
                                             <svg class="w-10 h-10 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -984,7 +984,7 @@
                                             @foreach($importAvailableActivities as $act)
                                                 @php $selected = $importSourceActivityId === $act['id']; @endphp
                                                 <button wire:click="$set('importSourceActivityId', {{ $act['id'] }})"
-                                                        class="w-full text-left p-4 rounded-xl border transition-all duration-200
+                                                        class="w-full text-left p-4 rounded-lg border transition-all duration-200
                                                                {{ $selected
                                                                    ? 'bg-blue-500/10 border-blue-500/40 ring-1 ring-blue-500/30'
                                                                    : 'bg-slate-800/50 border-slate-700/60 hover:border-slate-600 hover:bg-slate-800' }}">
@@ -1136,7 +1136,7 @@
                                         </h3>
                                         <div class="space-y-3">
                                             @foreach($importPreviewData['html_embeds'] as $embed)
-                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl">
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg">
                                                     @if(!empty($embed['title']))
                                                         <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                     @endif
@@ -1221,7 +1221,7 @@
                                 </div>
 
                                 {{-- Resumen origen --}}
-                                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+                                <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-2">
                                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Origen</h4>
                                     <div class="flex items-center gap-2 text-xs">
                                         <span class="text-blue-400 font-medium">
@@ -1255,7 +1255,7 @@
                                 </div>
 
                                 {{-- Resumen destino --}}
-                                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-2">
+                                <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-2">
                                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Destino (lección actual)</h4>
                                     <p class="text-xs text-slate-300">El contenido importado se agregará al contenido LMS existente de esta actividad.</p>
                                 </div>
@@ -1299,7 +1299,7 @@
                 <div class="relative min-h-screen flex flex-col items-center p-4 pt-10"
                      x-data="lessonPreviewSwiper">
                     {{-- Card: header + Swiper (flex-1 = ocupa todo el espacio disponible) --}}
-                    <div class="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0"
+                    <div class="w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0"
                          wire:key="swiper-{{ $listPreviewData['activity_id'] }}">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
@@ -1493,7 +1493,7 @@
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $mermaidCode }}"
                                                  data-mermaid-delay
-                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">
+                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200">
                                                 <div x-ref="target" class="w-full"></div>
                                             </div>
                                         @else
@@ -1509,7 +1509,7 @@
                                     @if($sectionEmbeds->count() > 0)
                                         <div class="space-y-2 pt-2">
                                             @foreach($sectionEmbeds as $embed)
-                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
                                                     @if(!empty($embed['title']))
                                                         <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                     @endif
@@ -1539,7 +1539,7 @@
                                         <div class="border-t border-slate-200 pt-3 mt-2 space-y-2">
                                             @foreach($secResources as $res)
                                                 @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
-                                                    <div class="rounded-xl overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                                    <div class="rounded-lg overflow-hidden border border-slate-200 bg-white resource-image-wrap">
                                                         <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
                                                              onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
                                                              class="w-full h-auto max-h-80 object-contain bg-slate-50">
@@ -1623,7 +1623,7 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         @foreach($unlinkedResources as $res)
                                             @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
-                                                <div class="rounded-xl overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                                <div class="rounded-lg overflow-hidden border border-slate-200 bg-white resource-image-wrap">
                                                     <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
                                                          onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
                                                          class="w-full h-48 object-cover">
@@ -1704,7 +1704,7 @@
                                         </h3>
                                         <div class="space-y-3">
                                             @foreach($unlinkedEmbeds as $embed)
-                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
                                                     @if(!empty($embed['title']))
                                                         <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                     @endif
@@ -1886,7 +1886,7 @@
                 </div><!-- /card (header + Swiper) -->
 
                     {{-- Footer: Navegación (fuera del card, al fondo del viewport con mt-auto) --}}
-                    <div class="w-full max-w-7xl mt-auto px-8 py-4 bg-white border-t border-slate-200 rounded-xl shadow-lg flex items-center justify-between">
+                    <div class="w-full max-w-7xl mt-auto px-8 py-4 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <button x-on:click="prev()"
                                     class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
@@ -1959,7 +1959,7 @@
                      x-data="{ openCompetencias: false, openIndicadores: false }">
 
                     {{-- Competencias (acordeón, cerrado por defecto) --}}
-                    <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden">
+                    <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
                         {{-- Header clickeable --}}
                         <button @click="openCompetencias = !openCompetencias"
                                 class="w-full flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors text-left">
@@ -2027,7 +2027,7 @@
 
                     {{-- Actividad de referencia --}}
                     @if($act)
-                        <div class="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                        <div class="bg-slate-800/30 border border-slate-700/30 rounded-lg p-4">
                             <div class="flex items-center gap-2 mb-2">
                                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -2069,12 +2069,12 @@
                     </p>
 
                     @if($generationType === 'step1')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 text-left space-y-3 min-h-[80px]">
+                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left space-y-3 min-h-[80px]">
                             <h2 class="text-base font-bold text-white">{{ $lessonTitle }}</h2>
                             <p class="text-sm text-slate-300 leading-relaxed">{{ $lessonDescription }}</p>
                         </div>
                     @elseif($generationType === 'section')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 text-left">
+                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left">
                             <p class="text-sm text-slate-300 leading-relaxed">
                                 {{ \Illuminate\Support\Str::limit(
                                     ($wizardSections[array_key_last($wizardSections)]['contents'][0]['body'] ?? ''),
@@ -2083,7 +2083,7 @@
                             </p>
                         </div>
                     @elseif($generationType === 'step2')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 text-left max-h-80 overflow-y-auto space-y-3">
+                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left max-h-80 overflow-y-auto space-y-3">
                             @foreach($wizardSections as $section)
                                 <div class="flex items-start gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0"></span>
@@ -2145,7 +2145,7 @@
 
         {{-- Mensaje de guardado exitoso --}}
         @if($saved)
-            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
+            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 text-center">
                 <svg class="w-12 h-12 text-emerald-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -2195,7 +2195,7 @@
 
                     {{-- STEP 1: Información de la Lección --}}
                     @if($currentStep === 1)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-5 space-y-4">
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-5 space-y-4">
                             <div class="flex items-center gap-2 pb-3 border-b border-slate-700">
                                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">1</span>
                                 <h2 class="text-sm font-bold text-white uppercase tracking-wider">Información de la Lección</h2>
@@ -2326,7 +2326,7 @@
 
                     {{-- STEP 2: Editor de Diapositivas (Slide Editor) --}}
                     @if($currentStep === 2)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden"
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
                              x-data="{
                                 showSlideList: false,
                                 editSlideTitle: false,
@@ -2535,7 +2535,7 @@
                                                             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"
                                                                  @click="previewIndex = null"></div>
                                                             {{-- Modal card --}}
-                                                            <div class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                                                            <div class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden">
                                                                 {{-- Header --}}
                                                                 <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
                                                                     <div class="flex items-center gap-2">
@@ -2570,7 +2570,7 @@
 
                                         {{-- PREVIEW TAB: HTML Rendered --}}
                                         <div x-show="editorTab === 'preview'" x-cloak x-transition:enter.duration.150ms>
-                                            <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 min-h-[200px] overflow-x-auto shadow-sm">
+                                            <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-6 min-h-[200px] overflow-x-auto shadow-sm">
                                                 @php $previewContent = trim($this->slidePreviewContent()); @endphp
                                                 @if(!empty($previewContent))
                                                     <div class="slide-preview-wrapper" style="color: #1e293b; line-height: 1.7;">
@@ -2710,7 +2710,7 @@
 
                     {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
                     @if($currentStep === 3)
-                        <div class="w-full bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden"
+                        <div class="w-full bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
                              x-data="{ activeTab: 'resources' }">
                             {{-- Header --}}
                             <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-800/40 border-b border-slate-700/30">
@@ -2965,7 +2965,7 @@
                                         </button>
 
                                         <div x-show="showPrompt" x-cloak x-transition:enter.duration.200ms
-                                             class="mt-3 p-4 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900 border border-amber-500/20 rounded-xl space-y-3">
+                                             class="mt-3 p-4 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900 border border-amber-500/20 rounded-lg space-y-3">
                                             {{-- Selector de sección --}}
                                             <div class="flex items-center gap-3">
                                                 <div class="flex items-center gap-2 text-[11px] text-slate-400 shrink-0">
@@ -3006,7 +3006,7 @@
 
                                             {{-- Prompt text --}}
                                             <div class="relative" x-data="{}">
-                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-xl p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $step3ImagePrompt }}</pre>
+                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-lg p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $step3ImagePrompt }}</pre>
                                                 <button @click="
                                                     const btn = $event.currentTarget;
                                                     navigator.clipboard.writeText(btn.parentElement.querySelector('pre')?.textContent || '');
@@ -3307,7 +3307,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="existing-embed-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExistingEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
                                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3333,7 +3333,7 @@
                                         @if($isMermaid)
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $previewContent }}"
-                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto">
+                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto">
                                                 <div x-ref="target" class="w-full"></div>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-3 text-center">Diagrama Mermaid renderizado en vivo</p>
@@ -3358,7 +3358,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="embed-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
                                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3383,7 +3383,7 @@
                                         @if($isMermaid)
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $embedHtml }}"
-                                                 class="w-full bg-white rounded-xl p-4 overflow-x-auto">
+                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto">
                                                 <div x-ref="target" class="w-full"></div>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-3 text-center">Diagrama Mermaid renderizado en vivo</p>
@@ -3413,7 +3413,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="resource-image-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeResourcePreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+                                <div class="relative bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden"
                                      x-data="{ imgWidth: 0, imgHeight: 0 }">
                                     {{-- Header --}}
                                     <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700">
@@ -3456,7 +3456,7 @@
 
                     {{-- STEP 4: Publicar --}}
                     @if($currentStep === 4)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-5 space-y-4">
+                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-5 space-y-4">
                             <div class="flex items-center gap-2 pb-3 border-b border-slate-700">
                                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">4</span>
                                 <h2 class="text-sm font-bold text-white uppercase tracking-wider">Publicar Lección</h2>
@@ -3485,7 +3485,7 @@
                             </div>
 
                             <button wire:click="$toggle('showStudentPreview')"
-                                    class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-xl transition-all duration-200 flex items-center justify-center gap-2 border border-slate-600/50">
+                                    class="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-slate-600/50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -3495,7 +3495,7 @@
 
                             <button wire:click="confirmPublish"
                                     wire:loading.attr="disabled"
-                                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2">
+                                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
                                 <svg wire:loading wire:target="confirmPublish" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
@@ -3525,7 +3525,7 @@
                          wire:click="$set('showFullPreview', false)"></div>
 
                     <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                        <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
 
                             {{-- Header --}}
                             <div class="flex items-center justify-between px-6 py-4 bg-slate-700/50 border-b border-slate-700">
@@ -3628,7 +3628,7 @@
                                                 @endphp
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $mermaidCode }}"
-                                                     class="w-full bg-slate-800 rounded-xl p-4 overflow-x-auto border border-slate-700/50">
+                                                     class="w-full bg-slate-800 rounded-lg p-4 overflow-x-auto border border-slate-700/50">
                                                     <div x-ref="target" class="w-full"></div>
                                                 </div>
                                             @else
@@ -3774,7 +3774,7 @@
                                         $hasContent = !empty(array_filter($section['contents'] ?? [], fn($c) => !empty($c['body'])));
                                     @endphp
                                     <button @click="mobileTocOpen = false; document.querySelector('[x-data=\'tocNavigation()\']')?.__x.$data.scrollTo({{ $sIdx }})"
-                                            class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all text-sm hover:bg-slate-700/50">
+                                            class="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all text-sm hover:bg-slate-700/50">
                                         <span class="flex items-center justify-center w-6 h-6 rounded {{ $hasContent ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/60 text-slate-500' }} text-xs font-mono shrink-0">
                                             {{ $sIdx + 1 }}
                                         </span>
@@ -3797,7 +3797,7 @@
 
                     {{-- Modal panel 7xl --}}
                     <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                        <div class="relative w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden">
                             {{-- Header --}}
                             <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
                                 <div class="flex items-center gap-4">
@@ -3863,7 +3863,7 @@
                                                 @endphp
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $mermaidCode }}"
-                                                     class="w-full bg-white rounded-xl p-4 border border-slate-200">
+                                                     class="w-full bg-white rounded-lg p-4 border border-slate-200">
                                                     <div x-ref="target" class="w-full"></div>
                                                 </div>
                                             @else
@@ -3879,7 +3879,7 @@
                                         @if($sectionEmbeds->count() > 0)
                                             <div class="space-y-2 pt-2">
                                                 @foreach($sectionEmbeds as $embed)
-                                                    <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                    <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
                                                         @if(!empty($embed['title']))
                                                             <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                         @endif
@@ -4023,7 +4023,7 @@
                                         </h3>
                                         <div class="space-y-3">
                                             @foreach($unlinkedEmbeds as $embed)
-                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-xl html-embed-item">
+                                                <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
                                                     @if(!empty($embed['title']))
                                                         <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                                     @endif
@@ -4069,7 +4069,7 @@
                 <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="publish-confirm-modal">
                     <div class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
                     <div class="relative min-h-screen flex items-center justify-center p-4">
-                        <div class="relative w-full max-w-md bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-md bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
                             <div class="p-6 space-y-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
@@ -4373,7 +4373,7 @@
             svgEl.style.userSelect = 'none';
             svgEl.style.pointerEvents = 'all';
 
-            // El contenedor padre es el div de la plantilla (w-full bg-* rounded-xl p-4 overflow-x-auto)
+            // El contenedor padre es el div de la plantilla (w-full bg-* rounded-lg p-4 overflow-x-auto)
             const container = svgEl.parentNode;
             container.style.position = 'relative';
             container.style.overflow = 'hidden';

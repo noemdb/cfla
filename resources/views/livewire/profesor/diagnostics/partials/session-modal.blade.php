@@ -2,11 +2,11 @@
 @if($SessionModalReport && $selectedSession)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showSessionModal', false)"></div>
-        <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
             <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
                         <span class="text-sm font-bold text-purple-400">{{ strtoupper(substr($selectedSession->estudiant?->full_name ?? '?', 0, 2)) }}</span>
                     </div>
                     <div>
@@ -24,19 +24,19 @@
             <div class="px-6 py-5 space-y-6">
                 {{-- Info Grid --}}
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-3">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Grado</span>
                         <span class="text-xs font-medium text-gray-200">{{ $selectedSession->estudiant?->grado?->name ?? '—' }}</span>
                     </div>
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-3">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Diagnóstico</span>
                         <span class="text-xs font-medium text-gray-200">{{ $selectedSession->diagMain?->name ?? '—' }}</span>
                     </div>
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-3">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Inicio</span>
                         <span class="text-xs font-medium text-gray-200">{{ $selectedSession->iniciado_at ? \Carbon\Carbon::parse($selectedSession->iniciado_at)->format('d/m/Y H:i:s') : '—' }}</span>
                     </div>
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-3">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-3">
                         <span class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Estado</span>
                         @if($selectedSession->completado_at)
                             <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
@@ -54,7 +54,7 @@
 
                 {{-- Progress Bar --}}
                 @if($selectedSession->completado_at)
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                         <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-3">Progreso de Respuestas</h4>
                         @php
                             $totalQ = $selectedSession->answers->count();
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                 @else
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-6 text-center">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-6 text-center">
                         <svg class="w-10 h-10 text-amber-400/50 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>

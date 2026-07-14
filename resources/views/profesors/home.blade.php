@@ -68,7 +68,7 @@
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('app.profesors.users.index') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-emerald-300 rounded-xl border border-white/5 transition-all duration-300 text-xs font-bold">
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-emerald-300 rounded-lg border border-white/5 transition-all duration-300 text-xs font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
@@ -84,7 +84,7 @@
          MAIN DASHBOARD — Lapso tabs with KPI boxes
          ═══════════════════════════════════════════════════════════════════ --}}
     @if(isset($indicadores) && $indicadores->isNotEmpty())
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden"
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden"
          x-data="{ activeTab: {{ $lapsos->first()->id === ($lapso_active->id ?? $lapsos->first()->id) ? 1 : 1 }} }">
 
         {{-- Tab Navigation (Alpine.js, border-b-2 pattern like Planning) --}}
@@ -204,9 +204,9 @@
                                 color="amber"
                                 subtext="Sesiones activas pendientes"
                             />
-                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl transition-all duration-300 hover:border-indigo-500/30">
+                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg transition-all duration-300 hover:border-indigo-500/30">
                                 <div class="flex items-start justify-between mb-3">
-                                    <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400">
+                                    <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                                         </svg>
@@ -261,7 +261,7 @@
     </div>
     @else
     {{-- Empty State (Planning pattern) --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-12 text-center">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-12 text-center">
         <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
         </svg>

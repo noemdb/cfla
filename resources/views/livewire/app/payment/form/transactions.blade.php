@@ -89,11 +89,11 @@
         <input wire:model.live="{{ $model }}" accept=".jpg,.jpeg,.png,.gif,.webp,.svg"
             class="block w-full text-sm text-slate-400
             file:mr-4 file:py-2.5 file:px-5
-            file:rounded-xl file:border-0
+            file:rounded-lg file:border-0
             file:text-xs file:font-bold file:uppercase
             file:bg-emerald-600 file:text-white
             hover:file:bg-emerald-500
-            dark:bg-slate-900/50 dark:border-slate-800 rounded-xl border border-dashed border-slate-700 p-3 transition-all cursor-pointer shadow-inner"
+            dark:bg-slate-900/50 dark:border-slate-800 rounded-lg border border-dashed border-slate-700 p-3 transition-all cursor-pointer shadow-inner"
             type="file" id="formFile" />
     </div>
     @error('image')

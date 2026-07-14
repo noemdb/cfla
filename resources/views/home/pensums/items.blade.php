@@ -6,7 +6,7 @@
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Card 1: Primer Año -->
-            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
+            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
                 onclick="openModal('{{ asset('image/pensums/1.jpg') }}', 'Primer Año - Educación Media General en Ciencia y Tecnología')">
                 <div class="relative overflow-hidden h-48">
                     <img src="{{ asset('image/pensums/1.jpg') }}"
@@ -35,7 +35,7 @@
             </div>
 
             <!-- Card 2: Segundo y Tercer Año -->
-            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
+            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
                 onclick="openModal('{{ asset('image/pensums/2.jpg') }}', 'Segundo y Tercer Año - Educación Media General en Ciencia y Tecnología')">
                 <div class="relative overflow-hidden h-48">
                     <img src="{{ asset('image/pensums/2.jpg') }}"
@@ -63,7 +63,7 @@
             </div>
 
             <!-- Card 3: Cuarto Año -->
-            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
+            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
                 onclick="openModal('{{ asset('image/pensums/3.jpg') }}', 'Cuarto Año - Educación Media General')">
                 <div class="relative overflow-hidden h-48">
                     <img src="{{ asset('image/pensums/3.jpg') }}" alt="Cuarto año - Educación Media General"
@@ -91,7 +91,7 @@
             </div>
 
             <!-- Card 4: Quinto Año -->
-            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
+            <div class="diagnostic-card bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden hover:border-emerald-500/80 transition-all duration-500 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/20 cursor-pointer"
                 onclick="openModal('{{ asset('image/pensums/4.jpg') }}', 'Quinto Año - Educación Media General')">
                 <div class="relative overflow-hidden h-48">
                     <img src="{{ asset('image/pensums/4.jpg') }}" alt="Quinto año - Educación Media General"

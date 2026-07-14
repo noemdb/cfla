@@ -1,4 +1,4 @@
-<div class="max-w-sm mx-auto p-6 bg-emerald-100 border border-emerald-200 rounded-xl shadow-sm text-center">
+<div class="max-w-sm mx-auto p-6 bg-emerald-100 border border-emerald-200 rounded-lg shadow-sm text-center">
     {{-- Icono de estado/inactivo --}}
     <div class="flex justify-center mb-4">
         <div class="h-16 w-16 rounded-full bg-emerald-200 border-2 border-emerald-300 flex items-center justify-center">

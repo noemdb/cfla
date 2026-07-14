@@ -4,7 +4,7 @@
     @forelse ($peducativos as $peducativo)
 
         {{-- Tarjeta con estado Alpine independiente (para colapsar una sin afectar a las demás) --}}
-        <div x-data="{ showGrades: true }" class="border border-emerald-200 rounded-xl shadow-sm bg-emerald-100 overflow-hidden">
+        <div x-data="{ showGrades: true }" class="border border-emerald-200 rounded-lg shadow-sm bg-emerald-100 overflow-hidden">
 
             {{-- Cabecera Clickeable (Botón de colapsado) --}}
             <div @click="showGrades = !showGrades" 
@@ -63,7 +63,7 @@
         </div>
 
     @empty
-        <div class="text-gray-500 text-sm italic text-center py-3 bg-emerald-50/60 rounded-xl border border-emerald-100">
+        <div class="text-gray-500 text-sm italic text-center py-3 bg-emerald-50/60 rounded-lg border border-emerald-100">
             No hay planes de estudio
         </div>
     @endforelse

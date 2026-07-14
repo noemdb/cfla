@@ -2,7 +2,7 @@
 <div class="space-y-6">
     {{-- KPI Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Preguntas</span>
                 <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
@@ -14,7 +14,7 @@
             <p class="text-lg font-bold text-white">{{ number_format($stats['total_questions']) }}</p>
         </div>
 
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total Sesiones</span>
                 <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
@@ -26,7 +26,7 @@
             <p class="text-lg font-bold text-white">{{ number_format($stats['total_sessions']) }}</p>
         </div>
 
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Completadas</span>
                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -46,7 +46,7 @@
             @endif
         </div>
 
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Precisión</span>
                 <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -61,7 +61,7 @@
     </div>
 
     {{-- Progress Overview --}}
-    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Progreso General</h4>
         <div class="space-y-3">
             <div>
@@ -97,7 +97,7 @@
     {{-- Recent Activity --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {{-- Recent Questions --}}
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Preguntas Recientes</h4>
                 <button wire:click="setActiveTab('questions')" class="text-[10px] text-purple-400 hover:text-purple-300 font-medium">Ver todas →</button>
@@ -117,7 +117,7 @@
         </div>
 
         {{-- Recent Sessions --}}
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Sesiones Recientes</h4>
                 <button wire:click="setActiveTab('sessions')" class="text-[10px] text-purple-400 hover:text-purple-300 font-medium">Ver todas →</button>

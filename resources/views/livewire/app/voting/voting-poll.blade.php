@@ -6,7 +6,7 @@
                 <!-- Confirmation Header -->
                 <div class="text-center">
                     <div
-                        class="inline-flex items-center px-4 py-2 bg-emerald-500/10 backdrop-blur-xl rounded-xl text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 mb-6">
+                        class="inline-flex items-center px-4 py-2 bg-emerald-500/10 backdrop-blur-xl rounded-lg text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 mb-6">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -43,7 +43,7 @@
                             <div
                                 class="absolute -inset-4 bg-emerald-500/20 blur-xl opacity-0 group-hover/qr:opacity-100 transition-opacity duration-500">
                             </div>
-                            <div class="relative bg-white rounded-xl p-6 shadow-2xl">
+                            <div class="relative bg-white rounded-lg p-6 shadow-2xl">
                                 {!! $qrCodeSvg !!}
                             </div>
                         </div>
@@ -56,15 +56,15 @@
                         </div>
 
                         <!-- URL Box -->
-                        <div class="bg-white/5 border border-white/5 rounded-xl p-5 space-y-3">
+                        <div class="bg-white/5 border border-white/5 rounded-lg p-5 space-y-3">
                             <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Enlace Directo</p>
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="flex-1 bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-emerald-400 font-mono text-xs truncate">
+                                    class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-4 py-3 text-emerald-400 font-mono text-xs truncate">
                                     {{ $participationUrl }}
                                 </div>
                                 <button wire:click="copyParticipationUrl"
-                                    class="p-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white rounded-xl border border-emerald-500/20 transition-all">
+                                    class="p-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white rounded-lg border border-emerald-500/20 transition-all">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
@@ -77,7 +77,7 @@
                         <!-- Action Buttons -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <a href="{{ $participationUrl }}" target="_blank"
-                                class="col-span-1 sm:col-span-2 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
+                                class="col-span-1 sm:col-span-2 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -87,12 +87,12 @@
                             </a>
 
                             <button onclick="shareParticipation('{{ $participationUrl }}', '{{ $poll->title }}')"
-                                class="py-4 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-xl border border-white/5 transition-all text-center">
+                                class="py-4 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
                                 COMPARTIR
                             </button>
 
                             <button onclick="window.print()"
-                                class="py-4 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-xl border border-white/5 transition-all text-center">
+                                class="py-4 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
                                 IMPRIMIR
                             </button>
                         </div>
@@ -130,7 +130,7 @@
                     <!-- Poll Header -->
                     <div class="text-center space-y-6">
                         <div
-                            class="inline-flex items-center px-4 py-2 bg-emerald-500/10 backdrop-blur-xl rounded-xl text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                            class="inline-flex items-center px-4 py-2 bg-emerald-500/10 backdrop-blur-xl rounded-lg text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
                             <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
                             Encuesta Activa
                         </div>
@@ -142,7 +142,7 @@
 
                         @if ($timeRemaining)
                             <div
-                                class="inline-flex items-center px-3 py-1 bg-amber-500/10 text-amber-500 rounded-xl text-[10px] font-bold border border-amber-500/20 uppercase tracking-widest">
+                                class="inline-flex items-center px-3 py-1 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-widest">
                                 <svg class="w-3.4 h-3.4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -159,7 +159,7 @@
                             <!-- Error States -->
                             <div class="p-16 text-center space-y-8">
                                 <div
-                                    class="w-20 h-20 bg-red-500/10 rounded-xl flex items-center justify-center mx-auto text-red-500 uppercase">
+                                    class="w-20 h-20 bg-red-500/10 rounded-lg flex items-center justify-center mx-auto text-red-500 uppercase">
                                     @if ($errorState === 'poll_not_found' || $errorState === 'poll_expired')
                                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -191,7 +191,7 @@
                                 </div>
 
                                 <button wire:click="refreshPoll"
-                                    class="px-10 py-4 bg-white/5 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-xl border border-white/5 transition-all">
+                                    class="px-10 py-4 bg-white/5 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all">
                                     ACTUALIZAR ESTADO
                                 </button>
                             </div>
@@ -204,7 +204,7 @@
                                 <div class="grid grid-cols-1 gap-4">
                                     @foreach ($poll->options as $option)
                                         <button wire:click="selectOption({{ $option->id }})"
-                                            class="w-full text-left p-6 rounded-xl border transition-all duration-500 group relative overflow-hidden {{ $selectedOption === $option->id ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}">
+                                            class="w-full text-left p-6 rounded-lg border transition-all duration-500 group relative overflow-hidden {{ $selectedOption === $option->id ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}">
                                             @if ($selectedOption === $option->id)
                                                 <div
                                                     class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-2xl -mr-12 -mt-12">
@@ -233,13 +233,13 @@
 
                                 @error('selectedOption')
                                     <div
-                                        class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-[10px] font-bold uppercase tracking-widest text-center animate-shake">
+                                        class="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-[10px] font-bold uppercase tracking-widest text-center animate-shake">
                                         {{ $message }}
                                     </div>
                                 @enderror
 
                                 <button wire:click="vote" wire:loading.attr="disabled"
-                                    class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:opacity-50 text-white font-black uppercase tracking-[0.2em] text-xs rounded-xl transition-all shadow-2xl shadow-emerald-500/20 relative group overflow-hidden">
+                                    class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:opacity-50 text-white font-black uppercase tracking-[0.2em] text-xs rounded-lg transition-all shadow-2xl shadow-emerald-500/20 relative group overflow-hidden">
                                     <div class="relative z-10 flex items-center justify-center gap-3">
                                         <span wire:loading.remove>REGISTRAR MI VOTO</span>
                                         <div wire:loading class="flex items-center gap-2">

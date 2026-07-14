@@ -1,6 +1,6 @@
 <div class="m-1 w-full">
 
-    <div class="m-2 w-full diagnostic-card rounded-xl p-6 shadow-2xl border border-emerald-500/20">
+    <div class="m-2 w-full diagnostic-card rounded-lg p-6 shadow-2xl border border-emerald-500/20">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-emerald-500/20 rounded-lg">

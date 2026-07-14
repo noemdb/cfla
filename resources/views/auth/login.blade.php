@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex items-center justify-center min-h-[calc(100vh-200px)] px-4">
     <div class="w-full max-w-md">
-        <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/20 rounded-xl shadow-2xl overflow-hidden p-8 fade-in">
+        <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/20 rounded-lg shadow-2xl overflow-hidden p-8 fade-in">
             <div class="mb-8 text-center text-white">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 rounded-full mb-4 border border-emerald-500/20">
                     <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
                 @csrf
 
                 @if ($errors->any())
-                    <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-xl text-sm animate-pulse text-center">
+                    <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg text-sm animate-pulse text-center">
                         @foreach ($errors->all() as $error)
                             <p>{{ $error }}</p>
                         @endforeach
@@ -37,7 +37,7 @@
                             </svg>
                         </div>
                         <input type="text" id="username" name="username" value="{{ old('username') }}" required autofocus
-                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
+                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
                             placeholder="Tu nombre de usuario">
                     </div>
                 </div>
@@ -51,12 +51,12 @@
                             </svg>
                         </div>
                         <input type="password" id="password" name="password" required
-                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
+                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
                             placeholder="••••••••">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-4 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-4 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
                     <span>Entrar</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

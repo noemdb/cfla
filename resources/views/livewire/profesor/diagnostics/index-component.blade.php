@@ -1,7 +1,7 @@
 <div>
     {{-- Loading Overlay --}}
     <div wire:loading.flex class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center">
-        <div class="flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-900 border border-white/10">
+        <div class="flex items-center gap-3 px-6 py-3 rounded-lg bg-gray-900 border border-white/10">
             <svg class="w-5 h-5 animate-spin text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
@@ -10,7 +10,7 @@
     </div>
 
     {{-- Main card --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         {{-- Header: Área de Formación Selector --}}
         <div class="border-b border-white/5 px-6 py-4">
             <div class="flex flex-wrap items-center justify-between gap-4">
@@ -24,7 +24,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación:</span>
                         <select wire:model.live="selectedPensumId"
-                            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 min-w-[200px]">
+                            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 min-w-[200px]">
                             <option value="">Todas las áreas</option>
                             @foreach($profesor->pensums as $pensum)
                                 <option value="{{ $pensum->id }}">{{ $pensum->full_name ?? $pensum->asignatura_name }}</option>
@@ -44,7 +44,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
                     <select wire:model.live="filterDiagMainId"
-                        class="bg-gray-800/50 border border-white/10 rounded-xl pl-8 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
+                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-8 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[180px]">
                         <option value="">Todos los Diagnósticos</option>
                         @foreach($diagMains as $main)
                             <option value="{{ $main->id }}">{{ $main->name }}</option>
@@ -62,7 +62,7 @@
                 {{-- Grado filter --}}
                 <div class="relative">
                     <select wire:model.live="filterGradoId"
-                        class="bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
+                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]">
                         <option value="">Todos los grados</option>
                         @foreach($list_grados as $grado)
                             <option value="{{ $grado->id }}">{{ $grado->name }}</option>
@@ -80,7 +80,7 @@
                 {{-- Sección filter --}}
                 <div class="relative">
                     <select wire:model.live="filterSeccionId"
-                        class="bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]"
+                        class="bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 appearance-none cursor-pointer min-w-[150px]"
                         {{ empty($list_secciones) ? 'disabled' : '' }}>
                         <option value="">Todas las secciones</option>
                         @if(!empty($list_secciones))

@@ -1,7 +1,7 @@
 <div class="space-y-6 text-white antialiased">
     <div class="flex flex-col items-center">
         <div
-            class="w-20 h-20 bg-emerald-900/40 rounded-xl flex items-center justify-center mb-4 border border-emerald-500/30">
+            class="w-20 h-20 bg-emerald-900/40 rounded-lg flex items-center justify-center mb-4 border border-emerald-500/30">
             <x-icon name="identification" class="w-12 h-12 text-emerald-400" />
         </div>
         <h2 class="text-lg font-bold">Identificación</h2>
@@ -15,10 +15,10 @@
             <div class="flex gap-2">
                 <div class="flex-1">
                     <x-input placeholder="Solo números" wire:model="ci"
-                        class="bg-white/5 border-white/10 text-white placeholder-gray-500 rounded-xl focus:ring-emerald-500 focus:border-emerald-500" />
+                        class="bg-white/5 border-white/10 text-white placeholder-gray-500 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
                 </div>
                 <x-button icon="magnifying-glass" wire:click="search"
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl aspect-square p-3 border-none shadow-lg shadow-emerald-900/20 transition-all active:scale-95" />
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg aspect-square p-3 border-none shadow-lg shadow-emerald-900/20 transition-all active:scale-95" />
             </div>
             @error('ci')
                 <span class="text-xs text-red-400 ml-1">{{ $message }}</span>
@@ -30,7 +30,7 @@
 
         @if ($representant)
             <div
-                class="bg-emerald-900/20 border border-emerald-500/30 p-6 rounded-xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+                class="bg-emerald-900/20 border border-emerald-500/30 p-6 rounded-lg transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
                 <div class="flex items-center gap-4 mb-4">
                     <div
                         class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
@@ -43,7 +43,7 @@
                 </div>
 
                 <x-button label="Continuar al Sistema" wire:click="goToSaefl" primary
-                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-xl font-bold shadow-lg" />
+                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-lg font-bold shadow-lg" />
             </div>
         @else
             <div class="bg-white/2 border-l-4 border-emerald-600 p-4 rounded-r-xl">

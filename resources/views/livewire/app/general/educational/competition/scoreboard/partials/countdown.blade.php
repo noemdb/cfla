@@ -1,4 +1,4 @@
-<div class="border border-emerald-200 rounded-xl p-4 mt-2 bg-emerald-100 shadow-sm">
+<div class="border border-emerald-200 rounded-lg p-4 mt-2 bg-emerald-100 shadow-sm">
     <div class="flex justify-center m-2 w-full">
         <div class="text-center w-full">
             @if ($question)

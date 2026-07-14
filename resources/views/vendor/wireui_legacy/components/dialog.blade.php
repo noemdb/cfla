@@ -28,7 +28,7 @@
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-on:mouseenter="pauseTimeout"
         x-on:mouseleave="resumeTimeout">
-        <div class="relative shadow-md bg-white dark:bg-secondary-800 rounded-xl space-y-4 p-4"
+        <div class="relative shadow-md bg-white dark:bg-secondary-800 rounded-lg space-y-4 p-4"
             :class="{
                 'sm:p-5 sm:pt-7': style === 'center',
                 'sm:p-0 sm:pt-1': style === 'inline',

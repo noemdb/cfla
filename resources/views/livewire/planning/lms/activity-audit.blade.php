@@ -16,7 +16,7 @@
     {{-- Stats --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         @foreach(['VIEW' => 'Visitas', 'RESOURCE_DOWNLOAD' => 'Descargas', 'PUBLISH' => 'Publicaciones', 'EDIT' => 'Ediciones'] as $event => $label)
-            <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 text-center">
+            <div class="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 text-center">
                 <p class="text-lg font-bold text-white">{{ $eventCounts[$event] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">{{ $label }}</p>
             </div>
@@ -51,7 +51,7 @@
     </div>
 
     {{-- Tabla de logs --}}
-    <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden">
+    <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-slate-700/30">
                 <tr>

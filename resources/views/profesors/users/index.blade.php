@@ -12,7 +12,7 @@
             <p class="text-emerald-400 font-medium">Información personal del profesor</p>
         </div>
         <a href="{{ route('app.profesors.home') }}"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -21,7 +21,7 @@
     </div>
 
     @if(isset($profesor) && $profesor)
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         {{-- Profile header --}}
         <div class="px-6 py-5 border-b border-white/5 flex items-center gap-4">
             <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -52,14 +52,14 @@
                 @endphp
 
                 @foreach($fields as $label => $data)
-                <div class="bg-white/5 rounded-xl px-4 py-3 border border-white/5">
+                <div class="bg-white/5 rounded-lg px-4 py-3 border border-white/5">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $label }}</p>
                     <p class="text-sm font-medium text-white">{{ $data['value'] }}</p>
                 </div>
                 @endforeach
 
                 {{-- Estado --}}
-                <div class="bg-white/5 rounded-xl px-4 py-3 border border-white/5">
+                <div class="bg-white/5 rounded-lg px-4 py-3 border border-white/5">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Estado</p>
                     @php $isActive = $profesor->status_active === 'true'; @endphp
                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider {{ $isActive ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10' }} px-2.5 py-1 rounded-full">
@@ -72,7 +72,7 @@
     </div>
     @else
     {{-- Empty State --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-12 text-center">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-12 text-center">
         <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
         </svg>

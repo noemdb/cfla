@@ -6,7 +6,7 @@
             <p class="text-emerald-400 font-medium text-sm">Administra las cuentas, roles y accesos del sistema.</p>
         </div>
         <button wire:click="create"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-xl border border-emerald-500/30 transition-all duration-300 text-sm font-bold uppercase tracking-widest group">
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg border border-emerald-500/30 transition-all duration-300 text-sm font-bold uppercase tracking-widest group">
             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-4 mb-6">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Buscar</label>
@@ -24,13 +24,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Usuario, email, cédula..."
-                        class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Filtrar por Rol</label>
                 <select wire:model.live="filter_role"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors">
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors">
                     @foreach($roleOptions as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
@@ -38,7 +38,7 @@
             </div>
             <div class="flex items-end">
                 <button wire:click="$set('search', ''); $set('filter_role', '')"
-                    class="px-4 py-2.5 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all duration-300">
+                    class="px-4 py-2.5 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-300">
                     Limpiar filtros
                 </button>
             </div>
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
@@ -197,7 +197,7 @@
         @click.self="formOpen = false">
 
         <div @click.away="formOpen = false"
-            class="w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
+            class="w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 overflow-hidden">
 
             <!-- Modal header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
@@ -225,13 +225,13 @@
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombre de Usuario *</label>
                                 <input type="text" wire:model="username"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                                 @error('username') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Correo Electrónico *</label>
                                 <input type="email" wire:model="email"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                                 @error('email') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                             </div>
                             <div>
@@ -239,13 +239,13 @@
                                     Contraseña {{ $isEditing ? '(dejar vacío para mantener)' : '*' }}
                                 </label>
                                 <input type="password" wire:model="password" autocomplete="new-password"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                                 @error('password') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Estado</label>
                                 <select wire:model="is_active"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors">
                                     <option value="1">Activo</option>
                                     <option value="0">Inactivo</option>
                                 </select>
@@ -257,19 +257,19 @@
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400/60 mb-3">Roles y Permisos</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-xl cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_admin" class="rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500/30">
                                 <span class="text-sm text-gray-300">Administrador</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-xl cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_planner" class="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500/30">
                                 <span class="text-sm text-gray-300">Planificación</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-xl cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_profesor" class="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500/30">
                                 <span class="text-sm text-gray-300">Profesor</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-xl cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_diagnostic" class="rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500/30">
                                 <span class="text-sm text-gray-300">Diagnóstico</span>
                             </label>
@@ -283,17 +283,17 @@
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Nombres</label>
                                 <input type="text" wire:model="firstname"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Apellidos</label>
                                 <input type="text" wire:model="lastname"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Cédula / Documento</label>
                                 <input type="text" wire:model="card_number"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-colors">
                             </div>
                         </div>
                     </div>
@@ -303,11 +303,11 @@
                 <!-- Modal footer -->
                 <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/5">
                     <button type="button" wire:click="$set('modeForm', false)"
-                        class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all duration-300">
+                        class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-300">
                         Cancelar
                     </button>
                     <button type="submit"
-                        class="px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-emerald-500/20 hover:bg-emerald-500/30 rounded-xl border border-emerald-500/30 transition-all duration-300">
+                        class="px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg border border-emerald-500/30 transition-all duration-300">
                         <span wire:loading.remove wire:target="save">{{ $isEditing ? 'Actualizar' : 'Crear Usuario' }}</span>
                         <span wire:loading wire:target="save" class="flex items-center gap-2">
                             <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -333,7 +333,7 @@
         class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         @click.self="deleteId = null">
 
-        <div class="w-full max-w-md bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-6 text-center">
+        <div class="w-full max-w-md bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 p-6 text-center">
             <div class="w-16 h-16 mx-auto mb-4 bg-red-500/10 rounded-full flex items-center justify-center">
                 <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -343,11 +343,11 @@
             <p class="text-sm text-gray-400 mb-6">Esta acción eliminará el usuario del sistema. No se podrá deshacer.</p>
             <div class="flex items-center justify-center gap-3">
                 <button wire:click="cancelDelete"
-                    class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all duration-300">
+                    class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-300">
                     Cancelar
                 </button>
                 <button wire:click="destroy"
-                    class="px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-red-500/20 hover:bg-red-500/30 rounded-xl border border-red-500/30 transition-all duration-300">
+                    class="px-5 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/30 transition-all duration-300">
                     <span wire:loading.remove wire:target="destroy">Eliminar</span>
                     <span wire:loading wire:target="destroy">Eliminando...</span>
                 </button>

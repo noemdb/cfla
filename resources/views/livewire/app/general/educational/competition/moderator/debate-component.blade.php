@@ -5,14 +5,14 @@
         <div class="md:flex my-2 gap-4">
             <ul class="flex-column space-y-3 text-sm font-medium md:me-4 mb-4 md:mb-0 min-w-[250px]">
                 <li
-                    class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 px-4 rounded-xl font-black uppercase tracking-widest text-center shadow-lg backdrop-blur-md">
+                    class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 px-4 rounded-lg font-black uppercase tracking-widest text-center shadow-lg backdrop-blur-md">
                     {{ $grado->name ?? 'Grado no seleccionado' }}
                 </li>
                 @foreach ($debates as $item)
                     <li class="group">
                         <div class="flex items-center gap-2">
                             <button type="button" wire:click="active({{ $item->id }})"
-                                class="grow flex items-center justify-between px-4 py-4 rounded-xl border transition-all duration-300
+                                class="grow flex items-center justify-between px-4 py-4 rounded-lg border transition-all duration-300
                                 {{ $item->id == $active_id
                                     ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-500/20 shadow-lg'
                                     : 'bg-gray-800/40 border-emerald-500/10 text-gray-300 hover:border-emerald-500/40 hover:bg-gray-800/60' }}">
@@ -32,7 +32,7 @@
                             </button>
 
                             <button type="button" wire:click="activeOnline({{ $item->id }})"
-                                class="shrink-0 p-4 rounded-xl transition-all duration-300 border
+                                class="shrink-0 p-4 rounded-lg transition-all duration-300 border
                                 {{ $item->status_active ? 'bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/40' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/40' }}"
                                 title="{{ $item->status_active ? 'Desactivar' : 'Activar' }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
             </ul>
 
             <div
-                class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 w-full shadow-2xl backdrop-blur-xl">
+                class="diagnostic-card border border-emerald-500/20 rounded-lg p-6 w-full shadow-2xl backdrop-blur-xl">
                 @if ($active_id)
                     @php $key = "competition-moderator-question-component-".$active_id; @endphp
                     <livewire:app.general.educational.competition.moderator.question-component :debate_id="$active_id" />

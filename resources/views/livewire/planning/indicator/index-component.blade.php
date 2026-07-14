@@ -2,7 +2,7 @@
     {{-- Loading overlay --}}
     <div wire:loading
          class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-        <div class="bg-gray-900/90 border border-white/10 rounded-xl px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
+        <div class="bg-gray-900/90 border border-white/10 rounded-lg px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
             {{-- Animated spinner --}}
             <div class="relative w-14 h-14">
                 <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
@@ -21,14 +21,14 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 Planificación
             </a>
             <button wire:click="$refresh"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -51,7 +51,7 @@
     </div>
 
     <!-- Filters: Lapso + Peducativo + Pestudio + Profesor -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-xl mb-4">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 rounded-lg mb-4">
         {{-- Lapso selector --}}
         <div class="flex flex-wrap gap-1 mb-2 pb-2 border-b border-white/5">
             <span class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 w-full mb-1">Período:</span>
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Main Tabs -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
         <div class="border-b border-white/5">
             <nav class="flex overflow-x-auto">
                 <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
@@ -273,14 +273,14 @@
                                     </table>
                                 </div>
                             @else
-                                <div class="bg-white/5 rounded-xl p-6 text-center">
+                                <div class="bg-white/5 rounded-lg p-6 text-center">
                                     <p class="text-gray-500 text-sm">No hay profesores con carga académica en este programa educativo.</p>
                                 </div>
                             @endif
                         </div>
                     @endforeach
                 @else
-                    <div class="bg-white/5 rounded-xl p-6 text-center">
+                    <div class="bg-white/5 rounded-lg p-6 text-center">
                         <p class="text-gray-500 text-sm">No hay datos de profesores para el período seleccionado.</p>
                     </div>
                 @endif
@@ -367,7 +367,7 @@
                                     />
                                 </div>
                             @else
-                                <div class="bg-white/5 rounded-xl p-6 text-center">
+                                <div class="bg-white/5 rounded-lg p-6 text-center">
                                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                                     <p class="text-gray-500 text-sm mb-1">Sin actividades registradas</p>
                                     <p class="text-gray-600 text-xs">No hay actividades planificadas para este período en {{ $peducativo->name }}.</p>
@@ -376,7 +376,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="bg-white/5 rounded-xl p-6 text-center">
+                    <div class="bg-white/5 rounded-lg p-6 text-center">
                         <p class="text-gray-500 text-sm">No hay datos de actividades para el período seleccionado.</p>
                     </div>
                 @endif
@@ -414,7 +414,7 @@
                     </div>
 
                     {{-- Question-level indicators --}}
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                         <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Resumen de Preguntas</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-4">
@@ -448,7 +448,7 @@
                     </div>
 
                     {{-- Completion progress bar --}}
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
                             <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
@@ -460,7 +460,7 @@
                     </div>
 
                     {{-- Per-diagnostic breakdown table --}}
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl overflow-hidden">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
                         <div class="px-5 py-4 border-b border-white/5">
                             <h4 class="text-xs font-bold text-white uppercase tracking-wider">Desempeño por Diagnóstico</h4>
                         </div>

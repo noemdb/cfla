@@ -2,7 +2,7 @@
 @if($showQuestionModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeQuestionModal"></div>
-        <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
             <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                 <div>
@@ -50,7 +50,7 @@
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Área de Formación</label>
                         <select wire:model="pensum_id"
-                            class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
+                            class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
                             <option value="">Seleccione un área</option>
                             @foreach($profesor->pensums as $pensum)
                                 <option value="{{ $pensum->id }}">{{ $pensum->asignatura_name ?? $pensum->full_name }}</option>
@@ -62,7 +62,7 @@
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Diagnóstico</label>
                         <select wire:model="diag_main_id"
-                            class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
+                            class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
                             <option value="">Seleccione diagnóstico</option>
                             @foreach($diagMains as $diag)
                                 <option value="{{ $diag->id }}">{{ $diag->name }}</option>
@@ -74,7 +74,7 @@
                         <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tipo de Pregunta</label>
                         <div class="grid grid-cols-3 gap-3">
                             <button wire:click="$set('tipo_pregunta', 'multiple')"
-                                class="relative p-4 rounded-xl border-2 transition-all duration-200 text-center
+                                class="relative p-4 rounded-lg border-2 transition-all duration-200 text-center
                                 {{ $tipo_pregunta === 'multiple' ? 'border-purple-500/50 bg-purple-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <svg class="w-6 h-6 mx-auto mb-1.5 {{ $tipo_pregunta === 'multiple' ? 'text-purple-400' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
@@ -83,7 +83,7 @@
                                 <span class="text-[9px] text-gray-500">Selección única</span>
                             </button>
                             <button wire:click="$set('tipo_pregunta', 'open')"
-                                class="relative p-4 rounded-xl border-2 transition-all duration-200 text-center
+                                class="relative p-4 rounded-lg border-2 transition-all duration-200 text-center
                                 {{ $tipo_pregunta === 'open' ? 'border-amber-500/50 bg-amber-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <svg class="w-6 h-6 mx-auto mb-1.5 {{ $tipo_pregunta === 'open' ? 'text-amber-400' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -92,7 +92,7 @@
                                 <span class="text-[9px] text-gray-500">Respuesta libre</span>
                             </button>
                             <button wire:click="$set('tipo_pregunta', 'scale')"
-                                class="relative p-4 rounded-xl border-2 transition-all duration-200 text-center
+                                class="relative p-4 rounded-lg border-2 transition-all duration-200 text-center
                                 {{ $tipo_pregunta === 'scale' ? 'border-green-500/50 bg-green-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <svg class="w-6 h-6 mx-auto mb-1.5 {{ $tipo_pregunta === 'scale' ? 'text-green-400' : 'text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -109,7 +109,7 @@
                     <div>
                         <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Pregunta</label>
                         <textarea wire:model="pregunta" rows="3"
-                            class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
+                            class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
                             placeholder="Escriba el enunciado de la pregunta..."></textarea>
                         @error('pregunta') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -130,7 +130,7 @@
                                             @endif
                                         </button>
                                         <input type="text" wire:model="options.{{ $index }}.opcion"
-                                            class="flex-1 bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200"
+                                            class="flex-1 bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200"
                                             placeholder="Opción {{ chr(65 + $index) }}">
                                         <button wire:click="removeOption({{ $index }})" class="text-gray-500 hover:text-red-400 transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Respuesta Esperada (opcional)</label>
                             <textarea wire:model="expected_answer" rows="3"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200 resize-none"
                                 placeholder="Indique la respuesta esperada o criterios de evaluación..."></textarea>
                         </div>
                     @elseif($tipo_pregunta === 'scale')
@@ -165,12 +165,12 @@
                                 <div>
                                     <label class="block text-[10px] text-gray-500 mb-1">Valor mínimo</label>
                                     <input type="number" wire:model="min_value" min="0" max="10"
-                                        class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+                                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] text-gray-500 mb-1">Valor máximo</label>
                                     <input type="number" wire:model="max_value" min="1" max="10"
-                                        class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+                                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
                                 </div>
                             </div>
                         </div>
@@ -182,13 +182,13 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Orden</label>
                             <input type="number" wire:model="orden" min="1"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
                             @error('orden') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Ponderación</label>
                             <input type="number" wire:model="weighing" min="1" max="100"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
                             @error('weighing') <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -197,17 +197,17 @@
                         <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Dificultad</label>
                         <div class="flex gap-3">
                             <button wire:click="$set('difficulty', 'easy')"
-                                class="flex-1 p-3 rounded-xl border-2 text-center transition-all duration-200
+                                class="flex-1 p-3 rounded-lg border-2 text-center transition-all duration-200
                                 {{ $difficulty === 'easy' ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <span class="block text-xs font-bold {{ $difficulty === 'easy' ? 'text-emerald-400' : 'text-gray-400' }}">Fácil</span>
                             </button>
                             <button wire:click="$set('difficulty', 'medium')"
-                                class="flex-1 p-3 rounded-xl border-2 text-center transition-all duration-200
+                                class="flex-1 p-3 rounded-lg border-2 text-center transition-all duration-200
                                 {{ $difficulty === 'medium' ? 'border-amber-500/50 bg-amber-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <span class="block text-xs font-bold {{ $difficulty === 'medium' ? 'text-amber-400' : 'text-gray-400' }}">Media</span>
                             </button>
                             <button wire:click="$set('difficulty', 'hard')"
-                                class="flex-1 p-3 rounded-xl border-2 text-center transition-all duration-200
+                                class="flex-1 p-3 rounded-lg border-2 text-center transition-all duration-200
                                 {{ $difficulty === 'hard' ? 'border-red-500/50 bg-red-500/10' : 'border-white/5 bg-gray-800/30 hover:border-white/10' }}">
                                 <span class="block text-xs font-bold {{ $difficulty === 'hard' ? 'text-red-400' : 'text-gray-400' }}">Difícil</span>
                             </button>
@@ -223,7 +223,7 @@
 
                     {{-- Preview --}}
                     @if($pregunta)
-                        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+                        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
                             <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Vista previa</h4>
                             <p class="text-sm text-gray-200 mb-3">{{ $pregunta }}</p>
                             @if($tipo_pregunta === 'multiple')
@@ -242,7 +242,7 @@
                                 </div>
                             @elseif($tipo_pregunta === 'open')
                                 <textarea disabled rows="2"
-                                    class="w-full bg-gray-800/30 border border-white/5 rounded-xl px-3 py-2 text-xs text-gray-500"
+                                    class="w-full bg-gray-800/30 border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-500"
                                     placeholder="Respuesta libre..."></textarea>
                             @elseif($tipo_pregunta === 'scale')
                                 <div class="flex items-center gap-2">
@@ -261,24 +261,24 @@
             {{-- Footer --}}
             <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex items-center justify-between">
                 <button wire:click="closeQuestionModal"
-                    class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                    class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                     Cancelar
                 </button>
                 <div class="flex items-center gap-2">
                     @if($wizardStep > 1)
                         <button wire:click="prevStep"
-                            class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                            class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                             Anterior
                         </button>
                     @endif
                     @if($wizardStep < 3)
                         <button wire:click="nextStep"
-                            class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
+                            class="px-4 py-2 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
                             Siguiente
                         </button>
                     @else
                         <button wire:click="saveQuestion" wire:loading.attr="disabled"
-                            class="px-6 py-2 rounded-xl text-xs font-bold bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200 disabled:opacity-50">
+                            class="px-6 py-2 rounded-lg text-xs font-bold bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200 disabled:opacity-50">
                             <span wire:loading.remove wire:target="saveQuestion">Guardar Pregunta</span>
                             <span wire:loading wire:target="saveQuestion">Guardando...</span>
                         </button>

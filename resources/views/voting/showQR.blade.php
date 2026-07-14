@@ -5,7 +5,7 @@
 @section('content')
     <div class="container mx-auto px-4 max-w-2xl">
         <div
-            class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden glow-green-strong">
+            class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden glow-green-strong">
             <!-- Header -->
             <div
                 class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-8 text-center text-white shadow-2xl border-b border-emerald-800/50">
@@ -24,7 +24,7 @@
             <div class="p-6 space-y-6">
                 <!-- Información de la encuesta -->
                 <div
-                    class="bg-gradient-to-r from-gray-800/50 to-emerald-900/20 rounded-xl p-4 border border-gray-600/50 shadow-lg backdrop-blur-sm">
+                    class="bg-gradient-to-r from-gray-800/50 to-emerald-900/20 rounded-lg p-4 border border-gray-600/50 shadow-lg backdrop-blur-sm">
                     <h3 class="font-semibold text-white mb-2">{{ $poll->title }}</h3>
                     <div class="text-sm text-gray-300 space-y-1">
                         <p><span class="text-emerald-400">Tu voto:</span> {{ $vote->option->label }}</p>
@@ -35,7 +35,7 @@
 
                 <!-- Código QR -->
                 <div class="text-center">
-                    <div class="bg-white rounded-xl p-6 inline-block shadow-lg border border-gray-300">
+                    <div class="bg-white rounded-lg p-6 inline-block shadow-lg border border-gray-300">
                         {!! $qrCode !!}
                     </div>
                     <p class="text-gray-300 text-sm mt-3">Escanea este código para ver los detalles de tu participación</p>
@@ -43,7 +43,7 @@
 
                 <!-- Enlace directo -->
                 <div
-                    class="bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+                    class="bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600/50 rounded-lg p-4 shadow-lg backdrop-blur-sm">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 mr-3">
                             <p class="text-white font-medium mb-1">Enlace directo:</p>
@@ -64,7 +64,7 @@
                 <!-- Botones de acción -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <a href="{{ route('poll.participation.show', ['uuid' => $session->uuid]) }}"
-                        class="bg-gradient-to-r from-emerald-600 via-green-700 to-emerald-600 hover:from-emerald-500 hover:via-green-600 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-xl hover:shadow-2xl text-center flex items-center justify-center space-x-2">
+                        class="bg-gradient-to-r from-emerald-600 via-green-700 to-emerald-600 hover:from-emerald-500 hover:via-green-600 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-xl hover:shadow-2xl text-center flex items-center justify-center space-x-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -74,7 +74,7 @@
                     </a>
 
                     <button onclick="window.print()"
-                        class="bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 hover:from-gray-500 hover:via-gray-600 hover:to-gray-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-500/50 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-2">
+                        class="bg-gradient-to-r from-gray-600 via-gray-700 to-gray-600 hover:from-gray-500 hover:via-gray-600 hover:to-gray-500 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-500/50 shadow-xl hover:shadow-2xl flex items-center justify-center space-x-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
@@ -86,7 +86,7 @@
 
                 <!-- Información adicional -->
                 <div
-                    class="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-700/50 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+                    class="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-700/50 rounded-lg p-4 shadow-lg backdrop-blur-sm">
                     <div class="flex items-start space-x-3">
                         <svg class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">

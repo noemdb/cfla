@@ -7,7 +7,7 @@
 
         <!-- Executive Summary -->
         <section class="mb-16">
-            <div class="bg-white rounded-xl shadow-corporate p-8 lg:p-12">
+            <div class="bg-white rounded-lg shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-8">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Resumen</h2>
                     <div class="w-24 h-1 gradient-primary mx-auto rounded-full"></div>
@@ -46,7 +46,7 @@
                     </div>
 
                     <div class="relative">
-                        <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-xl p-8 text-white">
+                        <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-lg p-8 text-white">
                             <h4 class="text-lg font-semibold mb-4">Beneficios Clave</h4>
                             <ul class="space-y-3">
                                 <li class="flex items-center">
@@ -108,9 +108,9 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Asistente Inteligente -->
-                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-lg shadow-corporate p-8">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 gradient-primary rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-16 h-16 gradient-primary rounded-lg flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
@@ -172,9 +172,9 @@
                 </div>
 
                 <!-- Seguridad Avanzada -->
-                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-lg shadow-corporate p-8">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 gradient-secondary rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-16 h-16 gradient-secondary rounded-lg flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
@@ -236,9 +236,9 @@
                 </div>
 
                 <!-- Comprobantes QR -->
-                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-lg shadow-corporate p-8">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 gradient-accent rounded-xl flex items-center justify-center mr-4">
+                        <div class="w-16 h-16 gradient-accent rounded-lg flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
@@ -297,10 +297,10 @@
                 </div>
 
                 <!-- Interfaz Intuitiva -->
-                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-lg shadow-corporate p-8">
                     <div class="flex items-center mb-6">
                         <div
-                            class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
+                            class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
@@ -361,7 +361,7 @@
 
         <!-- Arquitectura Técnica -->
         <section class="mb-16 print-break">
-            <div class="bg-gray-900 text-white rounded-xl p-8 lg:p-12">
+            <div class="bg-gray-900 text-white rounded-lg p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold mb-4">Arquitectura Técnica</h2>
                     <p class="text-lg text-gray-300 max-w-3xl mx-auto">
@@ -371,7 +371,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="bg-gray-800 rounded-lg p-6">
                         <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -389,7 +389,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="bg-gray-800 rounded-lg p-6">
                         <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -407,7 +407,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="bg-gray-800 rounded-lg p-6">
                         <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -427,7 +427,7 @@
                 </div>
 
                 <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6">
                         <h3 class="text-lg font-bold mb-4">Escalabilidad</h3>
                         <p class="text-blue-100 mb-4">
                             Arquitectura diseñada para crecer, desde 100 hasta 1000+ usuarios
@@ -442,7 +442,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6">
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-6">
                         <h3 class="text-lg font-bold mb-4">Monitoreo</h3>
                         <p class="text-green-100 mb-4">
                             Supervisión 24/7 con alertas proactivas y métricas detalladas de rendimiento y uso.
@@ -471,7 +471,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -485,7 +485,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -499,7 +499,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -513,7 +513,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -527,7 +527,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -541,7 +541,7 @@
                     </p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-corporate p-6 text-center">
+                <div class="bg-white rounded-lg shadow-corporate p-6 text-center">
                     <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -568,7 +568,7 @@
 
             <div class="grid grid-cols-1 gap-8">  {{-- lg:grid-cols-3  --}}
                 <!-- Paquete Básico -->
-                <div class="bg-white rounded-xl shadow-corporate p-8 relative">
+                <div class="bg-white rounded-lg shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Básico</h3>
                         <p class="text-gray-600">Ideal para organizaciones pequeñas</p>
@@ -638,7 +638,7 @@
 
                 {{--
                 <!-- Paquete Profesional -->
-                <div class="bg-white rounded-xl shadow-corporate p-8 relative border-2 border-green-500">
+                <div class="bg-white rounded-lg shadow-corporate p-8 relative border-2 border-green-500">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span
                             class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold">Recomendado</span>
@@ -719,7 +719,7 @@
                 </div>
 
                 <!-- Paquete Enterprise -->
-                <div class="bg-white rounded-xl shadow-corporate p-8 relative">
+                <div class="bg-white rounded-lg shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
                         <p class="text-gray-600">Para grandes organizaciones</p>
@@ -797,7 +797,7 @@
             </div>
 
             <div class="mt-12 text-center">
-                <div class="bg-gray-100 rounded-xl p-6 inline-block">
+                <div class="bg-gray-100 rounded-lg p-6 inline-block">
                     <p class="text-gray-700 mb-2">
                         <strong>Se incluye:</strong>
                     </p>
@@ -813,7 +813,7 @@
 
         <!-- Cronograma de Implementación -->
         {{-- <section class="mb-16">
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 lg:p-12">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Cronograma de Implementación</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -823,7 +823,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                             <span class="text-lg font-bold text-blue-600">1</span>
                         </div>
@@ -836,7 +836,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
                             <span class="text-lg font-bold text-green-600">2</span>
                         </div>
@@ -849,7 +849,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
                         <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
                             <span class="text-lg font-bold text-purple-600">3</span>
                         </div>
@@ -862,7 +862,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                    <div class="bg-white rounded-lg p-6 shadow-lg">
                         <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
                             <span class="text-lg font-bold text-orange-600">4</span>
                         </div>
@@ -891,7 +891,7 @@
 
         <!-- Garantías y Soporte -->
         <section class="mb-16">
-            <div class="bg-white rounded-xl shadow-corporate p-8 lg:p-12">
+            <div class="bg-white rounded-lg shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Garantías y Soporte</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -1013,7 +1013,7 @@
 
         <!-- Call to Action -->
         <section class="mb-16">
-            <div class="gradient-primary rounded-xl p-8 lg:p-12 text-white text-center">
+            <div class="gradient-primary rounded-lg p-8 lg:p-12 text-white text-center">
                 <h2 class="text-4xl font-bold mb-4">¿Listo para Revolucionar sus Votaciones?</h2>
                 <p class="text-lg text-blue-100 mb-8 max-w-3xl mx-auto">
                     Únase a las organizaciones que ya confían en nuestro sistema para sus procesos de votación más

@@ -1,7 +1,7 @@
 <div>
     {{-- Botón Listado (siempre visible, mismo estilo que el menú) --}}
     <button wire:click="open"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-gray-200 rounded-xl border border-white/5 transition-all duration-200 text-[11px] font-bold cursor-pointer">
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-gray-200 rounded-lg border border-white/5 transition-all duration-200 text-[11px] font-bold cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
         </svg>
@@ -15,7 +15,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="close"></div>
 
             <div class="relative min-h-screen flex items-start justify-center p-4 pt-8 pb-24">
-                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden"
                      @click.away="$wire.close()">
 
                     {{-- ─── HEADER ─── --}}
@@ -49,7 +49,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar por tema, enseñanza, asignatura…"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                             @if($search)
                                 <button wire:click="$set('search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
 
                         {{-- Lapso filter --}}
                         <select wire:model.live="lapso_id"
-                            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                             <option value="">Todos los momentos</option>
                             @foreach($lapsos as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -252,7 +252,7 @@
                         @else
                             {{-- Empty state --}}
                             <div class="text-center py-16">
-                                <div class="w-14 h-14 bg-gray-800/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <div class="w-14 h-14 bg-gray-800/50 rounded-lg flex items-center justify-center mx-auto mb-4">
                                     <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                                     </svg>

@@ -5,7 +5,7 @@
                 $isSelected = $selectedPensumId == $pensum->id;
                 $questionCount = $this->getQuestionCount($pensum->id);
             @endphp
-            <div class="rounded-xl border transition-all duration-200 {{ $isSelected ? 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20' : 'bg-gray-800/30 border-white/5 hover:bg-gray-800/50 hover:border-white/10' }}">
+            <div class="rounded-lg border transition-all duration-200 {{ $isSelected ? 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20' : 'bg-gray-800/30 border-white/5 hover:bg-gray-800/50 hover:border-white/10' }}">
                 <div class="p-3">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1 min-w-0">

@@ -28,7 +28,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @forelse ($peducativos as $peducativo)
                             <div
-                                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/10 rounded-xl p-5 hover:border-emerald-500/40 transition-all duration-300">
+                                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/10 rounded-lg p-5 hover:border-emerald-500/40 transition-all duration-300">
                                 <div class="flex items-center space-x-3 mb-4 border-b border-emerald-500/10 pb-3">
                                     <div class="bg-emerald-500/10 p-2 rounded-lg">
                                         <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor"
@@ -58,7 +58,7 @@
                             </div>
                         @empty
                             <div
-                                class="col-span-full py-8 bg-gray-900/40 rounded-xl border border-dashed border-gray-700">
+                                class="col-span-full py-8 bg-gray-900/40 rounded-lg border border-dashed border-gray-700">
                                 <p class="text-gray-500">No hay Planes de Estudios activos</p>
                             </div>
                         @endforelse

@@ -10,7 +10,7 @@
         </button>
 
         <div x-show="open" x-collapse class="mt-6">
-            <div class="diagnostic-card rounded-xl p-8 border border-emerald-500/20 shadow-2xl backdrop-blur-xl">
+            <div class="diagnostic-card rounded-lg p-8 border border-emerald-500/20 shadow-2xl backdrop-blur-xl">
                 <div class="flex items-center justify-center space-x-3 mb-8">
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
                     <h4 class="text-lg font-extrabold text-white tracking-tight uppercase">Dashboard de Resultados</h4>
@@ -20,7 +20,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @forelse ($seccions as $item)
                         <div
-                            class="bg-gray-900/40 border border-emerald-500/20 rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:bg-gray-900/60 group">
+                            class="bg-gray-900/40 border border-emerald-500/20 rounded-lg p-6 transition-all duration-300 hover:scale-[1.02] hover:bg-gray-900/60 group">
                             <div class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">Sección</div>
                             <h4
                                 class="text-4xl font-black text-white mb-4 group-hover:text-emerald-300 transition-colors">

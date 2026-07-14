@@ -2,7 +2,7 @@
 <div class="space-y-4">
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiantes</span>
                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,7 +11,7 @@
             </div>
             <p class="text-lg font-bold text-white">{{ $stats['total_students'] ?? 0 }}</p>
         </div>
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con sesión</span>
                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
             </div>
             <p class="text-lg font-bold text-white">{{ $stats['students_with_sessions'] ?? 0 }}</p>
         </div>
-        <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4">
+        <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-1">
                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sin sesión</span>
                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,17 +38,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input type="text" wire:model.live.debounce.300ms="searchSessions" placeholder="Buscar estudiante..."
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all duration-200">
         </div>
 
         <input type="date" wire:model.live="filterDateFrom"
-            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
 
         <input type="date" wire:model.live="filterDateTo"
-            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
 
         <button wire:click="resetSessionFilters"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>

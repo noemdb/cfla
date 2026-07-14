@@ -39,7 +39,7 @@
                     <!-- Logo -->
                     <div class="mb-2">
                         <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
-                            class="w-32 max-w-full sm:w-18 md:w-24 h-auto rounded-xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105 object-contain">
+                            class="w-32 max-w-full sm:w-18 md:w-24 h-auto rounded-lg shadow-2xl p-2 transition-transform duration-300 hover:scale-105 object-contain">
                     </div>
 
                     <div>

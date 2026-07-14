@@ -27,7 +27,7 @@
             </div>
         </div>
         <button onclick="Livewire.dispatch('closeQuestions')"
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -56,7 +56,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -93,14 +93,14 @@
                     {{-- Footer --}}
                     <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="backToIndex"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             Cancelar
                         </button>
                         <button wire:click="save"
-                            class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>

@@ -6,7 +6,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="close"></div>
 
             <div class="relative min-h-screen flex items-start justify-center p-4 pt-8 pb-24">
-                <div class="relative w-[95vw] max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                <div class="relative w-[95vw] max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden"
                      @click.away="$wire.close()">
 
                     {{-- ─── HEADER ─── --}}
@@ -133,7 +133,7 @@
                             @endif
 
                             {{-- Competency Card --}}
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl mb-4 last:mb-0 overflow-hidden">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg mb-4 last:mb-0 overflow-hidden">
                                 <div class="px-4 py-3 border-b border-white/5">
                                     <div class="flex items-start gap-3">
                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold shrink-0 mt-0.5">

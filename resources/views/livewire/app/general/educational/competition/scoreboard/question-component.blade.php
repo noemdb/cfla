@@ -1,9 +1,9 @@
 <div>
-    <div class="mt-4 p-4 w-full border border-emerald-200 bg-emerald-100 rounded-xl shadow-sm">
+    <div class="mt-4 p-4 w-full border border-emerald-200 bg-emerald-100 rounded-lg shadow-sm">
         
         @if ($question)
             {{-- Contenedor interno con fondo blanco para generar profundidad y contraste --}}
-            <div class="border border-emerald-200/60 rounded-xl p-6 bg-white shadow-sm">
+            <div class="border border-emerald-200/60 rounded-lg p-6 bg-white shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex-1">
                         {{-- Label: Pregunta Activa --}}
@@ -37,7 +37,7 @@
             </div>
         @else
             {{-- Estado: sin pregunta activa --}}
-            <div class="text-center py-8 text-gray-500 italic bg-emerald-50/60 rounded-xl border border-emerald-200">
+            <div class="text-center py-8 text-gray-500 italic bg-emerald-50/60 rounded-lg border border-emerald-200">
                 Espere a que se establezca la pregunta activa
             </div>
         @endif

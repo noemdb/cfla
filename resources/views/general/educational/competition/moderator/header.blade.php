@@ -5,7 +5,7 @@
             <div class="flex items-center space-x-6">
                 <div class="flex-shrink-0">
                     <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ config('app.name') }} Logo"
-                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-lg shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
 
                 <div class="flex flex-col">
@@ -25,7 +25,7 @@
 
                 <div class="flex-shrink-0">
                     <img src="{{ asset('image/brand/512.png') }}" alt="{{ config('app.name') }} Logo"
-                        class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
+                        class="w-12 h-12 md:w-16 md:h-16 rounded-lg shadow-lg transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
             </div>
         </div>

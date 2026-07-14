@@ -82,7 +82,7 @@
                             </div>
 
                             {{-- Pregunta y opciones --}}
-                            <div class="border-t-2 border-emerald-600/40 mt-2 rounded-xl p-4 bg-white shadow-sm">
+                            <div class="border-t-2 border-emerald-600/40 mt-2 rounded-lg p-4 bg-white shadow-sm">
                                 <livewire:app.general.educational.competition.scoreboard.question-component
                                     :id="$competition->id" />
                                 <livewire:app.general.educational.competition.scoreboard.option-component

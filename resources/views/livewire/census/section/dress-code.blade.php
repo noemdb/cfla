@@ -3,7 +3,7 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
     wire:click.self="closeDressCode">
 
-    <div class="relative w-full max-w-lg rounded-xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
+    <div class="relative w-full max-w-lg rounded-lg bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
 
         {{-- Header --}}
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -21,7 +21,7 @@
 
             {{-- Aviso principal --}}
             <div
-                class="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3">
+                class="flex items-center gap-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3">
                 <x-icon name="exclamation-triangle" class="w-6 h-6 shrink-0 text-red-600 dark:text-red-400" />
                 <p class="font-bold uppercase tracking-wide text-red-700 dark:text-red-400 text-sm">
                     Debe presentarse de manera sobria
@@ -30,7 +30,7 @@
 
             {{-- Lista de prohibiciones --}}
             <div
-                class="rounded-xl border border-red-100 dark:border-red-900 bg-gray-50 dark:bg-gray-800/50 p-4">
+                class="rounded-lg border border-red-100 dark:border-red-900 bg-gray-50 dark:bg-gray-800/50 p-4">
                 <h4
                     class="mb-3 flex items-center gap-2 font-bold text-red-700 dark:text-red-400 uppercase text-sm tracking-wide">
                     <x-icon name="x-circle" class="w-5 h-5 shrink-0" />

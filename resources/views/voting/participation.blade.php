@@ -23,7 +23,7 @@
                 <!-- Certificado de participación -->
                 <div class="lg:col-span-2">
                     <div
-                        class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden print-section">
+                        class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden print-section">
                         <!-- Header del certificado -->
                         <div
                             class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-8 py-6 text-center border-b border-emerald-800/50">
@@ -55,7 +55,7 @@
                             <!-- Detalles de participación -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 <div
-                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-xl p-4 border border-gray-600/50">
+                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-lg p-4 border border-gray-600/50">
                                     <div class="flex items-center mb-2">
                                         <svg class="w-5 h-5 text-emerald-400 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
                                 </div>
 
                                 <div
-                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-xl p-4 border border-gray-600/50">
+                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-lg p-4 border border-gray-600/50">
                                     <div class="flex items-center mb-2">
                                         <svg class="w-5 h-5 text-emerald-400 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -84,7 +84,7 @@
                                 </div>
 
                                 <div
-                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-xl p-4 border border-gray-600/50">
+                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-lg p-4 border border-gray-600/50">
                                     <div class="flex items-center mb-2">
                                         <svg class="w-5 h-5 text-emerald-400 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -99,7 +99,7 @@
                                 </div>
 
                                 <div
-                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-xl p-4 border border-gray-600/50">
+                                    class="bg-gradient-to-r from-gray-700/50 to-emerald-900/20 rounded-lg p-4 border border-gray-600/50">
                                     <div class="flex items-center mb-2">
                                         <svg class="w-5 h-5 text-emerald-400 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -127,7 +127,7 @@
                 <!-- Resultados en tiempo real -->
                 <div class="lg:col-span-1">
                     <div
-                        class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
+                        class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                         <div
                             class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-4 border-b border-blue-800/50">
                             <h3 class="text-lg font-bold text-white flex items-center">
@@ -183,7 +183,7 @@
                     <!-- Acciones -->
                     <div class="mt-6 space-y-3">
                         <button onclick="shareResults()"
-                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-lg">
+                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-blue-500/50 shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z">
@@ -193,7 +193,7 @@
                         </button>
 
                         <button onclick="printCertificate()"
-                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-500/50 shadow-lg">
+                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-500/50 shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
@@ -203,7 +203,7 @@
                         </button>
 
                         <button onclick="refreshResults()"
-                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                            class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">

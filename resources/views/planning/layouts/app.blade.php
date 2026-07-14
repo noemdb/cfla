@@ -77,7 +77,7 @@
                             x-transition:leave="transition ease-in duration-100"
                             x-transition:leave-start="opacity-100 translate-y-0"
                             x-transition:leave-end="opacity-0 translate-y-1"
-                            class="absolute left-0 mt-1 w-[650px] bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-4 z-50 grid grid-cols-2 gap-x-2 gap-y-0">
+                            class="absolute left-0 mt-1 w-[650px] bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 p-4 z-50 grid grid-cols-2 gap-x-2 gap-y-0">
 
                             {{-- Columna 1: Evaluación --}}
                             <div class="space-y-0.5">
@@ -190,7 +190,7 @@
                             </button>
                             <div x-show="open" x-cloak
                                 @click.outside="open = false"
-                                class="absolute left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 py-1.5 z-50">
+                                class="absolute left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 py-1.5 z-50">
                                 <a href="{{ route('app.profesors.home') }}"
                                     class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-emerald-300 hover:bg-white/5 transition-colors {{ request()->routeIs('app.profesors.home') ? 'text-emerald-400 bg-emerald-500/5' : '' }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +231,7 @@
                             </button>
                             <div x-show="open" x-cloak
                                 @click.outside="open = false"
-                                class="absolute left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 py-1.5 z-50">
+                                class="absolute left-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 py-1.5 z-50">
                                 <a href="{{ route('admin.index') }}"
                                     class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-emerald-300 hover:bg-white/5 transition-colors {{ request()->routeIs('admin.index') ? 'text-emerald-400 bg-emerald-500/5' : '' }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,14 +268,14 @@
                     {{-- Dropdown: Ir a --}}
                     {{-- <div x-data="{ open: false }" class="relative">
                         <button @click="open = !open" @click.outside="open = false"
-                            class="p-2 text-gray-400 hover:text-emerald-300 bg-white/5 hover:bg-emerald-500/20 rounded-xl border border-white/5 transition-all duration-300 group">
+                            class="p-2 text-gray-400 hover:text-emerald-300 bg-white/5 hover:bg-emerald-500/20 rounded-lg border border-white/5 transition-all duration-300 group">
                             <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
                         </button>
                         <div x-show="open" x-cloak
                             @click.outside="open = false"
-                            class="absolute right-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 py-1.5 z-50">
+                            class="absolute right-0 mt-1 w-48 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 py-1.5 z-50">
                             @if(Auth::user()->is_admin)
                                 <a href="{{ route('admin.index') }}"
                                     class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-emerald-300 hover:bg-white/5 transition-colors">
@@ -314,7 +314,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
-                                class="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-emerald-500/20 rounded-xl border border-white/5 transition-all duration-300 group">
+                                class="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-emerald-500/20 rounded-lg border border-white/5 transition-all duration-300 group">
                                 <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                 </svg>

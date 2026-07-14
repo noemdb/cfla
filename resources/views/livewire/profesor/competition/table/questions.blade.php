@@ -7,7 +7,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar pregunta..."
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
             @if($search)
                 <button wire:click="$set('search', '')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +20,7 @@
         {{-- Category --}}
         <div class="relative w-full lg:w-56">
             <select wire:model.live="selectedCategory"
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
                 <option value="">Todas las categorías</option>
                 @foreach($categoriesWithCounts as $cat)
                     <option value="{{ $cat['key'] }}">{{ $cat['key'] }} ({{ $cat['count'] }})</option>
@@ -36,7 +36,7 @@
         {{-- Debate filter --}}
         <div class="relative w-full lg:w-52">
             <select wire:model.live="filterDebate"
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
                 <option value="">Todos los debates</option>
                 @foreach($debates as $debate)
                     <option value="{{ $debate->id }}">{{ $debate->name }}</option>
@@ -52,7 +52,7 @@
         {{-- Status filter --}}
         <div class="relative w-full lg:w-40">
             <select wire:model.live="filterStatus"
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
                 <option value="">Todos</option>
                 <option value="active">Activos</option>
                 <option value="inactive">Inactivos</option>
@@ -67,7 +67,7 @@
         {{-- Per page --}}
         <div class="relative w-20 shrink-0">
             <select wire:model.live="paginate"
-                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>
@@ -83,7 +83,7 @@
 
         {{-- New question button --}}
         <button wire:click="setCreate"
-            class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+            class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -156,7 +156,7 @@
             @if($search || $selectedCategory || $filterDebate || $filterStatus)
                 <p class="text-xs text-gray-600 mt-1">No se encontraron preguntas con los filtros aplicados.</p>
                 <button wire:click="$set('search', ''); $set('selectedCategory', ''); $set('filterDebate', ''); $set('filterStatus', '')"
-                    class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                    class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                     Limpiar filtros
                 </button>
             @else
@@ -170,7 +170,7 @@
                     $canDelete = $item->user_id === auth()->id();
                     $disabled = !$canDelete;
                 @endphp
-                <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+                <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 hover:border-white/10 transition-all">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex-1 min-w-0">
                             {{-- Header: category + time/weight --}}

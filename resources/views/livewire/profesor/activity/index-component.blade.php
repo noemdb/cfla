@@ -10,7 +10,7 @@
     </div>
 
     {{-- Main card --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
 
         {{-- Alert: Observación Coord.Eval. --}}
         <div class="border-b border-white/5 px-6 py-4 bg-amber-500/5">
@@ -109,7 +109,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                         <input type="text" wire:model.live.debounce.300ms="search" placeholder="Buscar..."
-                            class="w-44 bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                            class="w-44 bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                         @if($search)
                             <button wire:click="$set('search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +122,7 @@
                     {{-- Per page --}}
                     <div class="relative w-16">
                         <select wire:model.live="paginate"
-                            class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-2 pr-7 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
+                            class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-2 pr-7 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 appearance-none cursor-pointer">
                             <option value="5">5</option>
                             <option value="10">10</option>
                             <option value="25">25</option>
@@ -137,7 +137,7 @@
                     {{-- Clone selector (only if activities empty) --}}
                     @if($activities->isEmpty())
                         <select wire:model="seccion_id"
-                            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50">
+                            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50">
                             <option value="">Seleccione sección</option>
                             @foreach($list_seccions as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -145,7 +145,7 @@
                         </select>
                         <button wire:click="clone"
                             {{ $enable_edit ? '' : 'disabled' }}
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 {{ $enable_edit ? 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }}">
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 {{ $enable_edit ? 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }}">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
@@ -156,7 +156,7 @@
                     {{-- New Activity --}}
                     <button wire:click="setCreate"
                         {{ $enable_edit ? '' : 'disabled' }}
-                        class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 {{ $enable_edit ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }}">
+                        class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 {{ $enable_edit ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }}">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
@@ -169,7 +169,7 @@
             <div class="space-y-4">
                 @forelse($activities as $item)
                     @php $achievements = $item->achievements; @endphp
-                    <div class="bg-gray-800/30 border border-white/5 rounded-xl p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }}">
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }}">
 
                         {{-- Activity Header --}}
                         <div class="flex items-start justify-between gap-4">
@@ -361,7 +361,7 @@
                         @if($search)
                             <p class="text-xs text-gray-600 mt-1">No hay resultados para "<span class="text-emerald-400 font-medium">{{ $search }}</span>".</p>
                             <button wire:click="$set('search', '')"
-                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                                 Limpiar búsqueda
                             </button>
                         @else
@@ -388,7 +388,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -493,15 +493,15 @@
                                     @if($detailActivity->hasTeachingStructure())
                                         @php $sections = $detailActivity->getTeachingSections(); @endphp
                                         <div x-show="showTeaching" x-cloak x-transition:enter.duration.200ms class="space-y-3">
-                                            <div class="p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                                            <div class="p-3 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
                                                 <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-1">INICIO</div>
                                                 <p class="text-sm text-gray-200">{{ $sections['INICIO'] ?? '' }}</p>
                                             </div>
-                                            <div class="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                                            <div class="p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
                                                 <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-1">DESARROLLO</div>
                                                 <p class="text-sm text-gray-200">{{ $sections['DESARROLLO'] ?? '' }}</p>
                                             </div>
-                                            <div class="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl">
+                                            <div class="p-3 bg-amber-500/5 border border-amber-500/10 rounded-lg">
                                                 <div class="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-1">CIERRE</div>
                                                 <p class="text-sm text-gray-200">{{ $sections['CIERRE'] ?? '' }}</p>
                                             </div>
@@ -527,7 +527,7 @@
 
                         {{-- Comentario J.Área --}}
                         @if($detailActivity->comments)
-                        <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                        <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
                             <div class="flex items-center gap-2 mb-2">
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
@@ -580,7 +580,7 @@
                     {{-- Footer --}}
                     <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex justify-end">
                         <button wire:click="closeDetailModal"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -600,7 +600,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -634,14 +634,14 @@
                     {{-- Footer --}}
                     <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="close"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             Cancelar
                         </button>
                         <button wire:click="save"
-                            class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -661,7 +661,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -699,7 +699,7 @@
                                     {{ $list_comment['name'] ?? 'Nombre del indicador' }}
                                 </label>
                                 <input type="text" wire:model="achievementForm.name"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
                                     placeholder="{{ $list_comment['name'] ?? 'Ej: Identifica los elementos...' }}">
                                 @error('achievementForm.name')
                                     <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span>
@@ -726,7 +726,7 @@
                                         {{ $list_comment['weighting'] ?? 'Ponderación' }}
                                     </label>
                                     <select wire:model="achievementForm.weighting"
-                                        class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
                                         <option value="">Seleccione ponderación</option>
                                         @for($i = 1; $i <= 20; $i++)
                                             <option value="{{ $i }}">{{ $i }}</option>
@@ -743,14 +743,14 @@
                     {{-- Footer --}}
                     <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="close"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                             Cancelar
                         </button>
                         <button wire:click="saveAchievement"
-                            class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -770,7 +770,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526Modal"></div>
 
             <div class="relative min-h-screen flex items-start justify-center p-4 pt-8 pb-24">
-                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
+                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
 
                     {{-- Header --}}
                     <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
@@ -803,7 +803,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                             <input type="text" wire:model.live.debounce.300ms="s2526Search" placeholder="Buscar en actividades anteriores…"
-                                class="w-full bg-gray-800/50 border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
+                                class="w-full bg-gray-800/50 border border-white/10 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-300 placeholder-gray-600 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
                             @if($s2526Search)
                                 <button wire:click="$set('s2526Search', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -815,7 +815,7 @@
 
                         {{-- Lapso filter --}}
                         <select wire:model.live="s2526Lapso"
-                            class="bg-gray-800/50 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-gray-300 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
+                            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all duration-200">
                             <option value="">Todos los lapsos</option>
                             @foreach($s2526Lapsos as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -862,7 +862,7 @@
                             @if(!empty($s2526Activities))
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @foreach($s2526Activities as $i => $act)
-                                        <div class="bg-gray-800/30 border border-white/5 rounded-xl hover:border-violet-500/30 transition-all duration-200 flex flex-col"
+                                        <div class="bg-gray-800/30 border border-white/5 rounded-lg hover:border-violet-500/30 transition-all duration-200 flex flex-col"
                                             x-data="{ openMenu: false }"
                                             @click.away="openMenu = false">
 
@@ -889,7 +889,7 @@
                                                         </svg>
                                                     </button>
                                                     <div x-show="openMenu" x-cloak
-                                                        class="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10">
+                                                        class="absolute right-0 top-full mt-1 w-48 bg-gray-800 border border-white/10 rounded-lg shadow-xl overflow-hidden z-10">
                                                         <div class="py-1">
                                                             <button wire:click="s2526ViewDetail({{ $i }})"
                                                                 class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-gray-300 hover:bg-white/5 transition-all"
@@ -957,7 +957,7 @@
                                 </div>
                             @else
                                 <div class="text-center py-16">
-                                    <div class="w-14 h-14 bg-gray-800/50 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                    <div class="w-14 h-14 bg-gray-800/50 rounded-lg flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                                         </svg>
@@ -1026,7 +1026,7 @@
                         @endif
 
                         <button wire:click="closeS2526Modal"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             Cerrar
                         </button>
                     </div>
@@ -1042,7 +1042,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526DetailModal"></div>
 
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -1163,7 +1163,7 @@
 
                         {{-- Comentario J.Área --}}
                         @if(!empty($sAct['comments']))
-                        <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-xl">
+                        <div class="p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-lg">
                             <div class="flex items-center gap-2 mb-2">
                                 <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
@@ -1187,7 +1187,7 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach($s2526DetailAchievements as $ach)
-                                    <div class="flex items-center gap-2 p-3 rounded-xl bg-gray-800/50 border border-white/5">
+                                    <div class="flex items-center gap-2 p-3 rounded-lg bg-gray-800/50 border border-white/5">
                                         <div class="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
                                             <span class="text-[10px] font-bold text-amber-400">{{ $loop->iteration }}</span>
                                         </div>
@@ -1213,7 +1213,7 @@
                     <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         {{-- Left: Copy button --}}
                         <button wire:click="s2526CopyFromDetail"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/20 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
@@ -1222,7 +1222,7 @@
 
                         {{-- Right: Close button --}}
                         <button wire:click="closeS2526DetailModal"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>

@@ -21,7 +21,7 @@
                     @endif
 
                     {{-- Grid de opciones: se expande al espacio restante --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-xl bg-white shadow-sm flex-1 content-stretch overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-lg bg-white shadow-sm flex-1 content-stretch overflow-hidden">
                         @forelse ($options as $item)
                             @php
                                 $wrong = $item->status_wrong_answer && $question->status_over_time;
@@ -30,7 +30,7 @@
                             @endphp
 
                             {{-- Tarjeta de Opción: ocupa espacio uniforme --}}
-                            <div class="h-full flex flex-col items-center justify-center px-4 py-6 text-center rounded-xl border transition-all duration-300 ease-in-out relative
+                            <div class="h-full flex flex-col items-center justify-center px-4 py-6 text-center rounded-lg border transition-all duration-300 ease-in-out relative
                                 {{ $status_answer
                                     ? 'bg-emerald-100 border-emerald-400 shadow-md ring-1 ring-emerald-200'
                                     : ($wrong
@@ -89,7 +89,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="col-span-2 flex items-center justify-center py-8 text-gray-600 italic bg-emerald-50/30 rounded-xl border border-emerald-100 h-full">
+                            <div class="col-span-2 flex items-center justify-center py-8 text-gray-600 italic bg-emerald-50/30 rounded-lg border border-emerald-100 h-full">
                                 Espere a que se establezca la pregunta activa
                             </div>
                         @endforelse
@@ -113,7 +113,7 @@
                 </div>
             </div>
         @else
-            <div class="flex items-center justify-center py-6 text-gray-600 italic bg-emerald-50 rounded-xl border border-emerald-200 h-full">
+            <div class="flex items-center justify-center py-6 text-gray-600 italic bg-emerald-50 rounded-lg border border-emerald-200 h-full">
                 Espere... No hay una pregunta activa
             </div>
         @endif

@@ -61,7 +61,7 @@
 
             <!-- Paso 1 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -107,7 +107,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-gray-900 rounded-xl p-6 border border-green-600">
+                            <div class="bg-gray-900 rounded-lg p-6 border border-green-600">
                                 <h5 class="text-lg font-semibold text-white mb-4">Ejemplo de entrada:</h5>
                                 <div class="space-y-3">
                                     <div class="bg-gray-800 rounded-lg p-4 border-2 border-green-500">
@@ -134,7 +134,7 @@
 
             <!-- Paso 2 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -205,11 +205,11 @@
                                 </div>
                             </div>
 
-                            <div class="bg-gray-900 rounded-xl p-6 border border-blue-600">
+                            <div class="bg-gray-900 rounded-lg p-6 border border-blue-600">
                                 <h5 class="text-lg font-semibold text-white mb-4">Ejemplo de selección:</h5>
                                 <div class="space-y-3">
                                     <!-- Estudiante 1 -->
-                                    <div class="border-2 border-green-600 rounded-xl p-4 bg-green-900/20">
+                                    <div class="border-2 border-green-600 rounded-lg p-4 bg-green-900/20">
                                         <label class="flex items-center cursor-pointer">
                                             <input type="checkbox" checked disabled class="w-5 h-5 text-green-600 rounded mr-4">
                                             <div class="flex-1">
@@ -225,7 +225,7 @@
                                     </div>
 
                                     <!-- Estudiante 2 -->
-                                    <div class="border-2 border-gray-600 rounded-xl p-4 hover:border-green-600 transition-colors">
+                                    <div class="border-2 border-gray-600 rounded-lg p-4 hover:border-green-600 transition-colors">
                                         <label class="flex items-center cursor-pointer">
                                             <input type="checkbox" class="w-5 h-5 text-green-600 rounded mr-4">
                                             <div class="flex-1">
@@ -252,7 +252,7 @@
 
             <!-- Paso 3 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -309,7 +309,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-gray-900 rounded-xl p-6 border border-purple-600">
+                            <div class="bg-gray-900 rounded-lg p-6 border border-purple-600">
                                 <h5 class="text-lg font-semibold text-white mb-4">Pantalla de confirmación:</h5>
 
                                 <!-- Simulación de pantalla final -->
@@ -389,7 +389,7 @@
 
             <div class="space-y-6">
                 <!-- FAQ 1 -->
-                <div class="bg-gray-800 rounded-xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg border border-green-700 overflow-hidden">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-white mb-2 flex items-center">
                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +405,7 @@
                 </div>
 
                 <!-- FAQ 2 -->
-                <div class="bg-gray-800 rounded-xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg border border-green-700 overflow-hidden">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-white mb-2 flex items-center">
                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -421,7 +421,7 @@
                 </div>
 
                 <!-- FAQ 3 -->
-                <div class="bg-gray-800 rounded-xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg border border-green-700 overflow-hidden">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-white mb-2 flex items-center">
                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +437,7 @@
                 </div>
 
                 <!-- FAQ 4 -->
-                <div class="bg-gray-800 rounded-xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-lg border border-green-700 overflow-hidden">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold text-white mb-2 flex items-center">
                             <svg class="w-5 h-5 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -458,7 +458,7 @@
     <!-- CTA Section -->
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-4xl text-center">
-            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-8 shadow-2xl">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-8 shadow-2xl">
                 <h2 class="text-lg font-bold text-white mb-4">¿Listo para confirmar?</h2>
                 <p class="text-green-100 text-lg mb-8">
                     Sigue los pasos de esta guía y completa la confirmación de prosecución de tus estudiantes

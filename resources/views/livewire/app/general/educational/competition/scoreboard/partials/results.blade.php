@@ -1,6 +1,6 @@
 <div class="mt-1 w-full border-t-2 border-emerald-300">
 
-    <div class="py-4 bg-emerald-100 border border-emerald-200 rounded-xl shadow-sm">
+    <div class="py-4 bg-emerald-100 border border-emerald-200 rounded-lg shadow-sm">
 
         <h4 class="text-lg font-bold text-emerald-800 uppercase tracking-widest mb-4">Puntuación</h4>
 
@@ -10,7 +10,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @forelse ($seccions as $item)
                     <div
-                        class="flex flex-col items-center justify-center p-6 text-center bg-white border border-emerald-200 rounded-xl hover:border-emerald-400 transition-all duration-300 shadow-sm">
+                        class="flex flex-col items-center justify-center p-6 text-center bg-white border border-emerald-200 rounded-lg hover:border-emerald-400 transition-all duration-300 shadow-sm">
                         <h4 class="mb-2 text-lg font-bold tracking-tight text-emerald-800 uppercase">
                             Sección {{ $item->name }}
                         </h4>

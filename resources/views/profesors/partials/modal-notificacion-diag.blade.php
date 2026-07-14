@@ -1,5 +1,5 @@
 <div id="diagnosticModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm fade-in" data-backdrop="static" role="dialog" aria-modal="true">
-    <div class="bg-gray-900/90 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="bg-gray-900/90 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
         {{-- Header --}}
         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
             <div class="flex items-center space-x-3">
@@ -24,7 +24,7 @@
         <div class="px-6 py-5 space-y-5">
 
             {{-- Info Message --}}
-            <div class="flex items-start space-x-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-4">
+            <div class="flex items-start space-x-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-4">
                 <svg class="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -40,7 +40,7 @@
             @if(isset($ultimoReporte) && $ultimoReporte)
                 <div>
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Último Informe</p>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
+                    <div class="bg-white/5 border border-white/10 rounded-lg p-4 space-y-2">
                         <div class="flex justify-between">
                             <span class="text-sm text-gray-400">Diagnóstico:</span>
                             <span class="text-sm text-white font-medium">{{ $ultimoReporte->diagMain?->name ?? 'N/A' }}</span>
@@ -127,11 +127,11 @@
             </button>
             <div class="flex items-center space-x-3">
                 <button type="button" onclick="cerrarModal()"
-                    class="px-4 py-2 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl transition-colors">
+                    class="px-4 py-2 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
                     Cerrar
                 </button>
                 <a href="#"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-sm font-bold">
                     Ir a Informes
                 </a>
             </div>

@@ -12,7 +12,7 @@
     <!-- Content -->
     <div class="flex-1 flex flex-col">
         <div
-            class="relative overflow-hidden rounded-xl mb-4 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm border border-emerald-500/20 shadow-lg">
+            class="relative overflow-hidden rounded-lg mb-4 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm border border-emerald-500/20 shadow-lg">
             <div class="flex justify-center p-6 border-b border-emerald-500/10">
                 <img class="w-24 h-24 filter drop-shadow-[0_0_10px_rgba(16,185,129,0.3)] transform group-hover:scale-110 transition-transform duration-500"
                     src="{{ asset('image/logo/report-payment.png') }}" alt="" />
@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-xl mb-6 backdrop-blur-sm">
+        <div class="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-lg mb-6 backdrop-blur-sm">
             <div class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                 <span class="text-emerald-600 dark:text-emerald-400 font-bold block mb-1">Un proceso sencillo y
                     rápido:</span>

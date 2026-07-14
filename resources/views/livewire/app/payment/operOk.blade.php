@@ -2,7 +2,7 @@
     <div class="relative">
         <!-- Background Effects -->
         <div
-            class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-gray-900/50 rounded-xl pointer-events-none">
+            class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-gray-900/50 rounded-lg pointer-events-none">
         </div>
 
         <x-card class="border border-emerald-500/30 bg-gray-900/90 backdrop-blur-xl shadow-2xl relative overflow-hidden">
@@ -58,7 +58,7 @@
                 <!-- Botón de acción -->
                 <div class="mt-8">
                     <button wire:click="close()"
-                        class="w-full px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                        class="w-full px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-gray-900">
                         Cerrar Ventana
                     </button>
                 </div>

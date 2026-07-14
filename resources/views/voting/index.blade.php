@@ -22,7 +22,7 @@
 
             <!-- Estadísticas generales -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-emerald-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg p-6 border border-emerald-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-emerald-500/50">
@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg p-6 border border-blue-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-indigo-600/30 rounded-full flex items-center justify-center border border-blue-500/50">
@@ -56,7 +56,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-teal-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg p-6 border border-teal-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-teal-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-teal-500/50">
@@ -91,7 +91,7 @@
             <div class="grid {{ $gridClass }} gap-8">
                 @forelse($polls as $poll)
                     <div
-                        class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-xl shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
+                        class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-lg shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
                         <!-- Header de la tarjeta -->
                         <div
                             class="bg-gradient-to-r from-green-500/30 to-green-600/30 backdrop-blur-sm px-6 py-4 border-b border-green-500/30">
@@ -128,7 +128,7 @@
                                 </div>
                             </div>
                             <!-- Estadísticas -->
-                            <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-xl p-4 mb-4">
+                            <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-lg p-4 mb-4">
                                 <div class="grid grid-cols-2 gap-4 text-center">
                                     <div>
                                         <p class="text-lg font-bold text-white">{{ $poll->votes_count ?? 0 }}</p>
@@ -193,7 +193,7 @@
                                 @endphp
                                 @if ($canVote)
                                     <a href="{{ route('poll.voting.show', $poll->access_token) }}"
-                                        class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-lg">
+                                        class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-lg">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -203,7 +203,7 @@
                                     </a>
                                 @else
                                     <button disabled
-                                        class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 font-medium rounded-xl cursor-not-allowed opacity-50">
+                                        class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 font-medium rounded-lg cursor-not-allowed opacity-50">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -213,7 +213,7 @@
                                     </button>
                                 @endif
                                 <a href="{{ route('poll.voting.result', $poll->access_token) }}"
-                                    class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                                    class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -228,7 +228,7 @@
                     <!-- Estado sin encuestas -->
                     <div class="col-span-full">
                         <div class="text-center py-16">
-                            <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-12 border border-gray-700">
+                            <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg p-12 border border-gray-700">
                                 <svg class="w-20 h-20 text-gray-400 mx-auto mb-6" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,7 +238,7 @@
                                 <h3 class="text-lg font-bold text-white mb-4">No hay encuestas disponibles</h3>
                                 <p class="text-gray-300 mb-6">Actualmente no hay encuestas activas para participar.</p>
                                 <button onclick="window.location.reload()"
-                                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -262,7 +262,7 @@
             <!-- Botones de navegación -->
             <div class="flex justify-center space-x-4 my-4">
                 <button onclick="window.location.reload()"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">

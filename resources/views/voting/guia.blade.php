@@ -8,7 +8,7 @@
 
             <!-- Header Principal -->
             <div class="text-center mb-12">
-                <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl">
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl">
                     <div class="text-6xl mb-4">🤖</div>
                     <h1 class="text-4xl font-bold text-white mb-4">
                         Guía del Asistente de Participación
@@ -28,7 +28,7 @@
             </div>
 
             <!-- Índice de Contenidos -->
-            <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-6 shadow-2xl mb-8">
+            <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-6 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-4 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -78,7 +78,7 @@
 
             <!-- Sección 1: ¿Qué es el Asistente? -->
             <div id="que-es-asistente"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">1</span>
@@ -86,7 +86,7 @@
                 </h2>
                 <div class="space-y-6 text-gray-300">
                     <div
-                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-xl p-6 border border-green-700/30">
+                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
                         <h3 class="text-lg font-semibold text-white mb-3">🤖 Asistente Inteligente de Votación</h3>
                         <p class="leading-relaxed">
                             El Asistente de Participación es un sistema inteligente que te guía paso a paso a través de
@@ -98,7 +98,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-blue-700/20 rounded-xl p-6 border border-blue-700/30">
+                        <div class="bg-blue-700/20 rounded-lg p-6 border border-blue-700/30">
                             <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
@@ -131,7 +131,7 @@
                             </ul>
                         </div>
 
-                        <div class="bg-purple-700/20 rounded-xl p-6 border border-purple-700/30">
+                        <div class="bg-purple-700/20 rounded-lg p-6 border border-purple-700/30">
                             <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
@@ -165,7 +165,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-yellow-700/20 border border-yellow-700/30 rounded-xl p-6">
+                    <div class="bg-yellow-700/20 border border-yellow-700/30 rounded-lg p-6">
                         <div class="flex items-start">
                             <svg class="w-6 h-6 mr-3 text-yellow-400 flex-shrink-0 mt-1" fill="currentColor"
                                 viewBox="0 0 20 20">
@@ -190,14 +190,14 @@
 
             <!-- Sección 2: Cómo Acceder -->
             <div id="como-acceder"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">2</span>
                     Cómo Acceder al Asistente
                 </h2>
                 <div class="space-y-6">
-                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-xl p-6 border border-blue-700/30">
+                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -217,7 +217,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-700/50 rounded-xl p-6">
+                        <div class="bg-gray-700/50 rounded-lg p-6">
                             <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -234,7 +234,7 @@
                             </ul>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6">
+                        <div class="bg-gray-700/50 rounded-lg p-6">
                             <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -253,7 +253,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-green-700/20 border border-green-700/30 rounded-xl p-6">
+                    <div class="bg-green-700/20 border border-green-700/30 rounded-lg p-6">
                         <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
                             <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -264,7 +264,7 @@
                         </h4>
                         <div class="text-center">
                             <a href="{{ route('voting.asistent') }}"
-                                class="inline-flex items-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                                class="inline-flex items-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -279,7 +279,7 @@
 
             <!-- Sección 3: Proceso de Participación -->
             <div id="proceso-participacion"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">3</span>
@@ -294,7 +294,7 @@
                             1</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Inicialización del Sistema</h3>
-                            <div class="bg-gray-700/50 rounded-xl p-4 mb-4">
+                            <div class="bg-gray-700/50 rounded-lg p-4 mb-4">
                                 <p class="text-gray-300 mb-3">
                                     Al acceder al asistente, el sistema automáticamente:
                                 </p>
@@ -354,7 +354,7 @@
                             2</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Navegación por las Encuestas</h3>
-                            <div class="bg-gray-700/50 rounded-xl p-4">
+                            <div class="bg-gray-700/50 rounded-lg p-4">
                                 <p class="text-gray-300 mb-4">
                                     El asistente te presenta las encuestas una por una, mostrando:
                                 </p>
@@ -387,7 +387,7 @@
                             3</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Selección y Confirmación de Voto</h3>
-                            <div class="bg-gray-700/50 rounded-xl p-4">
+                            <div class="bg-gray-700/50 rounded-lg p-4">
                                 <div class="space-y-4">
                                     <div>
                                         <h4 class="font-semibold text-white mb-2">🎯 Proceso de Selección</h4>
@@ -437,7 +437,7 @@
                             4</div>
                         <div class="flex-1">
                             <h3 class="text-lg font-semibold text-white mb-3">Navegación entre Encuestas</h3>
-                            <div class="bg-gray-700/50 rounded-xl p-4">
+                            <div class="bg-gray-700/50 rounded-lg p-4">
                                 <p class="text-gray-300 mb-4">
                                     El asistente ofrece múltiples opciones de navegación:
                                 </p>
@@ -466,7 +466,7 @@
 
             <!-- Sección 4: Navegación del Asistente -->
             <div id="navegacion-asistente"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">4</span>
@@ -474,7 +474,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div
-                        class="bg-gradient-to-r from-indigo-700/20 to-indigo-800/20 rounded-xl p-6 border border-indigo-700/30">
+                        class="bg-gradient-to-r from-indigo-700/20 to-indigo-800/20 rounded-lg p-6 border border-indigo-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -543,7 +543,7 @@
                     </div>
 
                     <div
-                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-xl p-6 border border-green-700/30">
+                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -591,7 +591,7 @@
 
             <!-- Sección 5: Confirmación y Alertas -->
             <div id="confirmacion-voto"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">5</span>
@@ -599,7 +599,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div
-                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-xl p-6 border border-green-700/30">
+                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -642,7 +642,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-xl p-6 border border-blue-700/30">
+                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -668,7 +668,7 @@
                     </div>
 
                     <div
-                        class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-xl p-6 border border-purple-700/30">
+                        class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-lg p-6 border border-purple-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-purple-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -701,7 +701,7 @@
 
             <!-- Sección 6: Comprobantes QR -->
             <div id="comprobantes-qr"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">6</span>
@@ -709,7 +709,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div
-                        class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-xl p-6 border border-purple-700/30">
+                        class="bg-gradient-to-r from-purple-700/20 to-purple-800/20 rounded-lg p-6 border border-purple-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -753,7 +753,7 @@
                     </div>
 
                     <div
-                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-xl p-6 border border-green-700/30">
+                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -790,7 +790,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-xl p-6 border border-blue-700/30">
+                    <div class="bg-gradient-to-r from-blue-700/20 to-blue-800/20 rounded-lg p-6 border border-blue-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-blue-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -834,14 +834,14 @@
 
             <!-- Sección 7: Seguridad -->
             <div id="seguridad-privacidad"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">7</span>
                     Seguridad y Privacidad
                 </h2>
                 <div class="space-y-6">
-                    <div class="bg-gradient-to-r from-red-700/20 to-red-800/20 rounded-xl p-6 border border-red-700/30">
+                    <div class="bg-gradient-to-r from-red-700/20 to-red-800/20 rounded-lg p-6 border border-red-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -899,7 +899,7 @@
                     </div>
 
                     <div
-                        class="bg-gradient-to-r from-yellow-700/20 to-yellow-800/20 rounded-xl p-6 border border-yellow-700/30">
+                        class="bg-gradient-to-r from-yellow-700/20 to-yellow-800/20 rounded-lg p-6 border border-yellow-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
@@ -934,7 +934,7 @@
                     </div>
 
                     <div
-                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-xl p-6 border border-green-700/30">
+                        class="bg-gradient-to-r from-green-700/20 to-green-800/20 rounded-lg p-6 border border-green-700/30">
                         <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-green-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -970,7 +970,7 @@
 
             <!-- Sección 8: FAQ -->
             <div id="faq"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">8</span>
@@ -978,7 +978,7 @@
                 </h2>
                 <div class="space-y-6">
                     <div class="space-y-4">
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Cómo accedo a las encuestas si no tengo tokens individuales?
@@ -991,7 +991,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Qué pasa si el sistema no puede generar mi identificación de dispositivo?
@@ -1004,7 +1004,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Puedo votar en las encuestas en cualquier orden?
@@ -1016,7 +1016,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Qué información muestra el alert después de votar?
@@ -1029,7 +1029,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Puedo recuperar mis códigos QR si cierro el navegador?
@@ -1042,7 +1042,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿El asistente funciona en dispositivos móviles?
@@ -1055,7 +1055,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Qué pasa si hay nuevas encuestas después de completar el asistente?
@@ -1067,7 +1067,7 @@
                             </p>
                         </div>
 
-                        <div class="bg-gray-700/50 rounded-xl p-6 border border-gray-600">
+                        <div class="bg-gray-700/50 rounded-lg p-6 border border-gray-600">
                             <h3 class="text-lg font-semibold text-white mb-3 flex items-center">
                                 <span class="text-green-400 mr-2">Q:</span>
                                 ¿Es seguro usar el asistente en redes públicas?
@@ -1085,7 +1085,7 @@
             <!-- Botones de navegación finales -->
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
                 <a href="{{ route('voting.asistent') }}"
-                    class="inline-flex items-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    class="inline-flex items-center px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1093,7 +1093,7 @@
                     Acceder al Asistente de Participación
                 </a>
                 {{-- <a href="{{ route('voting.index') }}"
-                    class="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    class="inline-flex items-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">

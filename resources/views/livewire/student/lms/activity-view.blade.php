@@ -35,13 +35,13 @@
                     @break
                 @case('VIDEO')
                     @if($content->media?->isLocal())
-                        <video controls class="w-full rounded-xl" preload="metadata">
+                        <video controls class="w-full rounded-lg" preload="metadata">
                             <source src="{{ $content->media->public_url }}" type="{{ $content->media->mime_type }}">
                         </video>
                     @elseif($content->media?->provider === 'YOUTUBE')
                         @php preg_match('/[?&]v=([^&]+)/', $content->media->external_url ?? '', $m); $vid = $m[1] ?? ''; @endphp
                         @if($vid)
-                        <div class="aspect-video rounded-xl overflow-hidden">
+                        <div class="aspect-video rounded-lg overflow-hidden">
                             <iframe src="https://www.youtube.com/embed/{{ $vid }}"
                                     class="w-full h-full" allowfullscreen loading="lazy"></iframe>
                         </div>
@@ -50,16 +50,16 @@
                     @break
                 @case('IMAGE')
                     <img src="{{ $content->media?->public_url }}"
-                         alt="{{ $content->title }}" class="rounded-xl max-w-full"/>
+                         alt="{{ $content->title }}" class="rounded-lg max-w-full"/>
                     @break
                 @case('EMBED')
-                    <div class="aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                         {!! $content->body !!}
                     </div>
                     @break
                 @case('FILE_PREVIEW')
                     @if($content->media)
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden" style="height: 600px;">
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style="height: 600px;">
                         <iframe src="{{ $content->media->public_url }}" class="w-full h-full" loading="lazy"></iframe>
                     </div>
                     @endif
@@ -86,7 +86,7 @@
 
     {{-- Recursos descargables --}}
     @if($resources->count())
-    <section class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+    <section class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
         <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
             Recursos
         </h2>
@@ -150,7 +150,7 @@
     @if($htmlEmbeds->count())
         <div class="space-y-4 html-embeds-container">
         @foreach($htmlEmbeds as $embed)
-            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-xl p-4 html-embed-item">
+            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 html-embed-item">
                 @if($embed->title)
                     <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ $embed->title }}</h3>
                 @endif

@@ -11,8 +11,8 @@
 
     <!-- Content -->
     <div class="flex-1 flex flex-col">
-        <div class="relative overflow-hidden rounded-xl mb-4 group">
-            <div class="flex justify-center bg-gray-800/50 p-6 rounded-xl border border-emerald-500/20">
+        <div class="relative overflow-hidden rounded-lg mb-4 group">
+            <div class="flex justify-center bg-gray-800/50 p-6 rounded-lg border border-emerald-500/20">
                 <div
                     class="grid place-items-center h-24 w-24 bg-emerald-900/30 rounded-full border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                     <x-icon name="document-chart-bar" class="w-12 h-12 text-emerald-400" />

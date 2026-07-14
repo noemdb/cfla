@@ -20,7 +20,7 @@
     @if($diagMains->isNotEmpty())
         <div class="space-y-3">
             @foreach($diagMains as $diag)
-                <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl transition-all duration-300 hover:border-emerald-500/20"
+                <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg transition-all duration-300 hover:border-emerald-500/20"
                      wire:key="diag-{{ $diag->id }}">
                     <div class="p-4 flex flex-col md:flex-row md:items-center gap-4">
                         {{-- Left: status + info --}}
@@ -95,14 +95,14 @@
         </div>
     @else
         {{-- Empty state --}}
-        <div class="bg-gray-900/30 backdrop-blur-md border border-dashed border-white/5 rounded-xl p-10 text-center">
+        <div class="bg-gray-900/30 backdrop-blur-md border border-dashed border-white/5 rounded-lg p-10 text-center">
             <svg class="w-14 h-14 text-gray-700 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
             <p class="text-gray-500 font-medium mb-1">Sin diagnósticos</p>
             <p class="text-gray-600 text-sm mb-4">Crea un nuevo diagnóstico para comenzar a configurar el diagnóstico académico.</p>
             <button wire:click="create"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-200 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-200 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -123,7 +123,7 @@
                      wire:click="closeDialog"></div>
 
                 {{-- Dialog panel --}}
-                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden"
                      wire:key="diag-dialog-panel"
                      @click.away="$wire.closeDialog()">
 
@@ -262,7 +262,7 @@
                      wire:click="closeDetail"></div>
 
                 {{-- Detail panel --}}
-                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Close button --}}
                     <button type="button" wire:click="closeDetail"
@@ -292,7 +292,7 @@
                         {{-- Key info grid --}}
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {{-- Lapso --}}
-                            <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5">
+                            <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5">
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Lapso Académico</p>
                                 <p class="text-sm text-white font-medium">
                                     {{ $detailItem->lapso?->name ?? '—' }}
@@ -300,7 +300,7 @@
                             </div>
 
                             {{-- Plan de Estudio --}}
-                            <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5">
+                            <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5">
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Plan de Estudio</p>
                                 <p class="text-sm text-white font-medium">
                                     {{ $detailItem->pestudio ? "{$detailItem->pestudio->code} — {$detailItem->pestudio->name}" : '—' }}
@@ -308,7 +308,7 @@
                             </div>
 
                             {{-- Referente --}}
-                            <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5">
+                            <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5">
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Referente Curricular</p>
                                 <p class="text-sm text-white font-medium">
                                     {{ $detailItem->referent ? "{$detailItem->referent->code} — {$detailItem->referent->name}" : '—' }}
@@ -318,7 +318,7 @@
 
                         {{-- Token --}}
                         @if($detailItem->token)
-                            <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5">
+                            <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5">
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Token de Acceso</p>
                                 <code class="text-sm text-emerald-400 font-mono bg-gray-900/60 px-2 py-1 rounded">{{ $detailItem->token }}</code>
                             </div>
@@ -329,13 +329,13 @@
                             <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Estadísticas</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 {{-- Total questions --}}
-                                <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
+                                <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5 text-center">
                                     <p class="text-lg font-extrabold text-cyan-400">{{ $detailItem->questions_count ?? 0 }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Preguntas</p>
                                 </div>
 
                                 {{-- Total sessions --}}
-                                <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
+                                <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5 text-center">
                                     <p class="text-lg font-extrabold text-emerald-400">{{ $detailItem->sessions_count ?? 0 }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Sesiones</p>
                                 </div>
@@ -347,7 +347,7 @@
                                             ->whereNotNull('completado_at')->count()
                                         : 0;
                                 @endphp
-                                <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
+                                <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5 text-center">
                                     <p class="text-lg font-extrabold text-amber-400">{{ $completedSessions }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Completadas</p>
                                 </div>
@@ -359,7 +359,7 @@
                                             ->distinct('estudiant_id')->count('estudiant_id')
                                         : 0;
                                 @endphp
-                                <div class="bg-gray-800/40 rounded-xl p-4 border border-white/5 text-center">
+                                <div class="bg-gray-800/40 rounded-lg p-4 border border-white/5 text-center">
                                     <p class="text-lg font-extrabold text-purple-400">{{ $studentsEvaluated }}</p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mt-1">Estudiantes</p>
                                 </div>

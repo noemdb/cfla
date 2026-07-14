@@ -16,23 +16,23 @@ $scrollIntoViewJsSnippet = ($scrollTo !== false)
             {{-- Mobile --}}
             <div class="flex justify-between flex-1 sm:hidden">
                 @if ($paginator->onFirstPage())
-                    <span class="relative inline-flex items-center px-4 py-2 text-xs font-bold text-gray-600 bg-gray-800/50 border border-white/5 cursor-default rounded-xl leading-5 select-none">
+                    <span class="relative inline-flex items-center px-4 py-2 text-xs font-bold text-gray-600 bg-gray-800/50 border border-white/5 cursor-default rounded-lg leading-5 select-none">
                         ← Anterior
                     </span>
                 @else
                     <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}.before"
-                        class="relative inline-flex items-center px-4 py-2 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-xl leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
+                        class="relative inline-flex items-center px-4 py-2 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-lg leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
                         ← Anterior
                     </button>
                 @endif
 
                 @if ($paginator->hasMorePages())
                     <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" x-on:click="{{ $scrollIntoViewJsSnippet }}" wire:loading.attr="disabled" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}.before"
-                        class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-xl leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
+                        class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-lg leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
                         Siguiente →
                     </button>
                 @else
-                    <span class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-600 bg-gray-800/50 border border-white/5 cursor-default rounded-xl leading-5 select-none">
+                    <span class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-600 bg-gray-800/50 border border-white/5 cursor-default rounded-lg leading-5 select-none">
                         Siguiente →
                     </span>
                 @endif

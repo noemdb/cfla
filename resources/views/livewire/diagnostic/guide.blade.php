@@ -15,7 +15,7 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="bg-gray-800 rounded-xl p-2 mb-8">
+    <div class="bg-gray-800 rounded-lg p-2 mb-8">
         <div class="flex flex-wrap gap-2">
             <button 
                 wire:click="$set('activeTab', 'overview')"
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="bg-gray-800 rounded-xl p-8">
+    <div class="bg-gray-800 rounded-lg p-8">
         @if($activeTab === 'overview')
             <!-- Overview Tab -->
             <div class="space-y-8">
@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="grid md:grid-cols-3 gap-6">
-                    <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-xl border border-blue-700/50">
+                    <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-lg border border-blue-700/50">
                         <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
@@ -89,7 +89,7 @@
                         <p class="text-gray-300">Preguntas adaptadas a tu nivel y área de estudio específica.</p>
                     </div>
 
-                    <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-xl border border-purple-700/50">
+                    <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-lg border border-purple-700/50">
                         <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -197,7 +197,7 @@
                 
                 <div class="grid gap-8">
                     <!-- Multiple Choice -->
-                    <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-6 rounded-xl border border-blue-700/50">
+                    <div class="bg-gradient-to-r from-blue-900/30 to-blue-800/20 p-6 rounded-lg border border-blue-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@
                     </div>
 
                     <!-- Scale Questions -->
-                    <div class="bg-gradient-to-r from-purple-900/30 to-purple-800/20 p-6 rounded-xl border border-purple-700/50">
+                    <div class="bg-gradient-to-r from-purple-900/30 to-purple-800/20 p-6 rounded-lg border border-purple-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@
                     </div>
 
                     <!-- Open Text -->
-                    <div class="bg-gradient-to-r from-green-900/30 to-green-800/20 p-6 rounded-xl border border-green-700/50">
+                    <div class="bg-gradient-to-r from-green-900/30 to-green-800/20 p-6 rounded-lg border border-green-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,7 +292,7 @@
                 <h2 class="text-lg font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
                 
                 <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-xl border border-yellow-700/50">
+                    <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-lg border border-yellow-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-xl border border-blue-700/50">
+                    <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/30 p-6 rounded-lg border border-blue-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,7 +342,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-gradient-to-br from-green-900/50 to-green-800/30 p-6 rounded-xl border border-green-700/50">
+                    <div class="bg-gradient-to-br from-green-900/50 to-green-800/30 p-6 rounded-lg border border-green-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,7 +367,7 @@
                         </ul>
                     </div>
 
-                    <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-xl border border-purple-700/50">
+                    <div class="bg-gradient-to-br from-purple-900/50 to-purple-800/30 p-6 rounded-lg border border-purple-700/50">
                         <div class="flex items-center mb-4">
                             <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,7 +394,7 @@
                 </div>
 
                 <!-- Important Notice -->
-                <div class="bg-gradient-to-r from-red-900/50 to-red-800/30 p-6 rounded-xl border border-red-700/50">
+                <div class="bg-gradient-to-r from-red-900/50 to-red-800/30 p-6 rounded-lg border border-red-700/50">
                     <div class="flex items-start">
                         <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

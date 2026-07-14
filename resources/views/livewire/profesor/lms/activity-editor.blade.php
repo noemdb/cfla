@@ -45,7 +45,7 @@
         </h2>
 
         @foreach($sections as $section)
-        <div class="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden"
+        <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
              wire:key="section-{{ $section['id'] }}">
             <div class="flex items-center justify-between px-4 py-3 bg-slate-700/30">
                 <span class="font-medium text-slate-200">{{ $section['title'] }}</span>
@@ -146,7 +146,7 @@
     </section>
 
     {{-- Recursos descargables --}}
-    <section class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 space-y-3">
+    <section class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-3">
         <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-slate-400 uppercase tracking-wider">
                 Recursos descargables
@@ -191,7 +191,7 @@
     </section>
 
     {{-- Enlaces externos --}}
-    <section class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 space-y-3">
+    <section class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-3">
         <div class="flex items-center justify-between">
             <h2 class="text-sm font-medium text-slate-400 uppercase tracking-wider">
                 Enlaces externos
@@ -245,7 +245,7 @@
     </section>
 
     {{-- Publicación --}}
-    <section class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 space-y-3">
+    <section class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-3">
         <h2 class="text-sm font-medium text-slate-400 uppercase tracking-wider">Publicación</h2>
         <div class="flex items-center gap-3">
             <label class="text-sm text-slate-300">Publicar el:</label>

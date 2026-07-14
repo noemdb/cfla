@@ -12,18 +12,18 @@
 
         <!-- Quick Stats / Overview (Mockup for now) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl">
+            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-lg">
                 <p class="text-emerald-300 text-sm font-medium mb-1">Sesión Activa</p>
                 <p class="text-white text-lg font-bold">{{ now()->format('H:i A') }}</p>
             </div>
-            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-xl">
+            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-lg">
                 <p class="text-blue-300 text-sm font-medium mb-1">Estado del Sistema</p>
                 <p class="text-white text-lg font-bold flex items-center">
                     <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                     Operacional
                 </p>
             </div>
-            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-xl">
+            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-lg">
                 <p class="text-purple-300 text-sm font-medium mb-1">Nivel de Acceso</p>
                 <p class="text-white text-lg font-bold">
                     {{ Auth::user()->role_label }}
@@ -45,7 +45,7 @@
 
             <!-- Módulo de Competiciones Académicas -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('admin.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -70,7 +70,7 @@
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
                         <a href="{{ route('admin.educational.competition.index') }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z">
@@ -84,7 +84,7 @@
 
             <!-- Módulo de Diagnóstico -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('diagnostico') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -96,7 +96,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2">
@@ -111,7 +111,7 @@
                     @if (Auth::user()->isAdminOrDiagnostic())
                         <div class="mt-auto flex justify-end pointer-events-auto">
                             <a href="{{ route('admin.diagnostico.index') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -129,7 +129,7 @@
 
             <!-- Módulo de Censo -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                 <a href="{{ route('census') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -141,7 +141,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -154,7 +154,7 @@
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
                         <a href="#"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
@@ -168,7 +168,7 @@
 
             <!-- Módulo de Matrícula -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-purple-500/30">
                 <a href="{{ route('enrollment') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -180,7 +180,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2M8 7H6">
@@ -193,7 +193,7 @@
 
                     <div class="mt-auto flex justify-end pointer-events-auto">
                         <a href="#"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2">
@@ -208,7 +208,7 @@
             @if (Auth::user()->isAdminOrDiagnostic())
                 <!-- Módulo de Planificación -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -220,7 +220,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -232,7 +232,7 @@
 
                         <div class="mt-auto flex justify-end pointer-events-auto">
                             <a href="{{ route('app.planning.index') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z">
@@ -248,7 +248,7 @@
             @if (Auth::user()->is_admin || Auth::user()->is_diagnostic)
                 <!-- Módulo de Votaciones -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-amber-500/30">
                     <a href="{{ route('admin.voting.dashboard') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -260,7 +260,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -275,7 +275,7 @@
 
                         <div class="mt-auto flex justify-end pointer-events-auto">
                             <a href="{{ route('admin.voting.dashboard') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -290,7 +290,7 @@
 
                 <!-- Módulo de Usuarios -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                     <a href="{{ route('admin.users.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -302,7 +302,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -314,7 +314,7 @@
 
                         <div class="mt-auto flex justify-end pointer-events-auto">
                             <a href="{{ route('admin.users.index') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z">
@@ -340,7 +340,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Database Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,7 +351,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full">
                         <div
-                            class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
@@ -364,7 +364,7 @@
 
                         <div class="mt-auto flex justify-end">
                             <a href="{{ route('admin.database.backup') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -377,7 +377,7 @@
 
                 <!-- Reverb / Pulse Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,7 +388,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full">
                         <div
-                            class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 10V3L4 14h7v7l9-11h-7z">
@@ -400,7 +400,7 @@
 
                         <div class="mt-auto flex justify-end">
                             <a href="{{ url('/pulse') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -421,7 +421,7 @@
             <h2 class="text-lg font-bold text-white mb-6">Herramientas del Sistema</h2>
             <div class="flex flex-wrap gap-4">
                 <a href="{{ url('/') }}"
-                    class="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-5 py-2.5 rounded-xl border border-white/5 transition-all duration-300 text-sm font-medium flex items-center">
+                    class="bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-5 py-2.5 rounded-lg border border-white/5 transition-all duration-300 text-sm font-medium flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
@@ -431,7 +431,7 @@
                 </a>
                 @if (Auth::user()->is_admin)
                     <a href="{{ url('admin/logs') }}"
-                        class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-5 py-2.5 rounded-xl border border-red-500/20 transition-all duration-300 text-sm font-medium flex items-center">
+                        class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-5 py-2.5 rounded-lg border border-red-500/20 transition-all duration-300 text-sm font-medium flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">

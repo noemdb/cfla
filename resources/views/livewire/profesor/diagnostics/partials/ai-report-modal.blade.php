@@ -2,11 +2,11 @@
 @if($SessionModalReport && $selectedReport)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('SessionModalReport', false)"></div>
-        <div class="relative bg-gray-900 border border-white/10 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
             <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
                         <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
@@ -25,7 +25,7 @@
 
             <div class="px-6 py-5 space-y-6">
                 {{-- Report Status --}}
-                <div class="flex items-center justify-between bg-gray-800/30 border border-white/5 rounded-xl p-4">
+                <div class="flex items-center justify-between bg-gray-800/30 border border-white/5 rounded-lg p-4">
                     <div class="flex items-center gap-3">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold
                             {{ $selectedReport->status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : ($selectedReport->status === 'processing' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20') }}">
@@ -39,7 +39,7 @@
                     <div class="flex items-center gap-2">
                         @if($selectedReport->status === 'completed')
                             <button wire:click="regenerateReport({{ $selectedReport->id }})"
-                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
@@ -58,7 +58,7 @@
                     @if($report)
                         {{-- 1. Identificación --}}
                         @if(!empty($report['identification']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"></path>
@@ -78,7 +78,7 @@
 
                         {{-- 2. Contextualización --}}
                         @if(!empty($report['contextualizacion']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -93,7 +93,7 @@
 
                         {{-- 3. Resultados Globales --}}
                         @if(!empty($report['resultados_globales']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -117,7 +117,7 @@
 
                         {{-- 4. Resultados por Área --}}
                         @if(!empty($report['resultados_por_area']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -147,7 +147,7 @@
 
                         {{-- 5. Contraste entre Áreas --}}
                         @if(!empty($report['contraste_areas']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
@@ -160,7 +160,7 @@
 
                         {{-- 6. Perfil del Estudiante --}}
                         @if(!empty($report['perfil_estudiante']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -174,7 +174,7 @@
 
                         {{-- 7. Recomendaciones --}}
                         @if(!empty($report['recomendaciones']))
-                            <div class="bg-gray-800/30 border border-white/5 rounded-xl p-5">
+                            <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
                                 <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
@@ -210,7 +210,7 @@
                         <p class="text-sm text-gray-300 font-medium">Generando reporte con IA...</p>
                         <p class="text-xs text-gray-500 mt-1">Esto puede tomar unos segundos.</p>
                         <button wire:click="checkReportStatus({{ $selectedReport->id }})"
-                            class="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                            class="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
@@ -225,7 +225,7 @@
                         <p class="text-sm text-gray-300 font-medium">Error al generar el reporte</p>
                         <p class="text-xs text-gray-500 mt-1">Intente generar el reporte nuevamente.</p>
                         <button wire:click="regenerateReport({{ $selectedReport->id }})"
-                            class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                            class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
@@ -236,7 +236,7 @@
                     <div class="text-center py-8 text-gray-500">
                         <p class="text-sm">No hay reporte disponible para este estudiante.</p>
                         <button wire:click="generateReport({{ $selectedReport->id }})"
-                            class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
+                            class="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
@@ -249,7 +249,7 @@
             {{-- Footer --}}
             <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-4 flex justify-end">
                 <button wire:click="$set('SessionModalReport', false)"
-                    class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
+                    class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                     Cerrar
                 </button>
             </div>

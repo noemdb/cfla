@@ -10,7 +10,7 @@
                 class="shadow-xl shadow-emerald-500/20 px-5 py-2.5 transition-all duration-300 hover:scale-105" /> --}}
 
             <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -18,7 +18,7 @@
                 Planificación
             </a>
             <a href="{{ route('admin.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl border border-white/5 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -32,10 +32,10 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($competitions as $competition)
             <div
-                class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 group">
+                class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-500/30 group">
                 <div class="flex items-start justify-between mb-6">
                     <div
-                        class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
@@ -79,7 +79,7 @@
                 <div class="grid grid-cols-4 gap-2">
                     <a href="{{ route('general.educational.competition.moderator', $competition->token) }}"
                         target="_blank"
-                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-emerald-500/10 rounded-xl border border-white/5 hover:border-emerald-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-emerald-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -91,7 +91,7 @@
 
                     <a href="{{ route('general.educational.competition.scoreboard', $competition->token) }}"
                         target="_blank"
-                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-purple-500/10 rounded-xl border border-white/5 hover:border-purple-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-purple-500/10 rounded-lg border border-white/5 hover:border-purple-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-purple-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -103,7 +103,7 @@
 
                     <a href="{{ route('admin.educational.competition.answers', $competition->token) }}"
                         target="_blank"
-                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-blue-500/10 rounded-xl border border-white/5 hover:border-blue-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-blue-500/10 rounded-lg border border-white/5 hover:border-blue-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-blue-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
@@ -112,7 +112,7 @@
                     </a>
 
                     <button type="button" wire:click="confirmReset({{ $competition->id }})"
-                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-amber-500/10 rounded-xl border border-white/5 hover:border-amber-500/20 transition-all duration-300 group/link">
+                        class="flex flex-col items-center justify-center text-center gap-2 p-3 bg-white/5 hover:bg-amber-500/10 rounded-lg border border-white/5 hover:border-amber-500/20 transition-all duration-300 group/link">
                         <svg class="w-5 h-5 text-amber-400 group-hover/link:scale-110 transition-transform"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -124,7 +124,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-full py-20 bg-gray-900/20 border border-white/5 rounded-xl text-center">
+            <div class="col-span-full py-20 bg-gray-900/20 border border-white/5 rounded-lg text-center">
                 <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

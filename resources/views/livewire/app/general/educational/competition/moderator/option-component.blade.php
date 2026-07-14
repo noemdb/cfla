@@ -1,6 +1,6 @@
 <div class="space-y-6">
     @if ($question)
-        <div class="diagnostic-card border {{ $question->status_answer ? 'border-orange-500/30' : 'border-emerald-500/10' }} rounded-xl p-6 bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
+        <div class="diagnostic-card border {{ $question->status_answer ? 'border-orange-500/30' : 'border-emerald-500/10' }} rounded-lg p-6 bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
             @if ($question->status_answer)
                 <div class="absolute top-0 left-0 w-1 h-full bg-orange-500/50"></div>
             @endif
@@ -58,18 +58,18 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center">
+                <div class="bg-gray-950/40 border border-emerald-500/10 rounded-lg p-3 text-center">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Ponderación</div>
                     <div class="text-lg font-black text-emerald-400">{{ $question->weighting }} <span
                             class="text-[10px] opacity-50">PTS</span></div>
                 </div>
-                <div class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center">
+                <div class="bg-gray-950/40 border border-emerald-500/10 rounded-lg p-3 text-center">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Tiempo Límite</div>
                     <div class="text-lg font-black text-emerald-400">{{ $question->time }} <span
                             class="text-[10px] opacity-50">SEG</span></div>
                 </div>
                 <div
-                    class="bg-gray-950/40 border border-emerald-500/10 rounded-xl p-3 text-center relative overflow-hidden group">
+                    class="bg-gray-950/40 border border-emerald-500/10 rounded-lg p-3 text-center relative overflow-hidden group">
                     <div class="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Tiempo Transcurrido
                     </div>
                     <div class="text-lg font-black text-white group-hover:text-emerald-400 transition-colors">
@@ -88,7 +88,7 @@
                         wire:click.prevent="nullifyQuestion"
                         wire:confirm="¿Anular Puntuación? Esta acción no se puede revertir. Se resetearán los puntos otorgados y la interrogante pasará a estado de revisión de los moderadores."
                         title="{{ $question->status_under_review ? 'Esta respuesta ya fue anulada' : 'Anular Respuesta' }}"
-                        class="flex items-center gap-2.5 px-5 py-2.5 bg-red-500/10 text-red-500 rounded-xl transition-all duration-300 border border-red-500/30 group 
+                        class="flex items-center gap-2.5 px-5 py-2.5 bg-red-500/10 text-red-500 rounded-lg transition-all duration-300 border border-red-500/30 group 
                                {{ $question->status_under_review 
                                   ? 'opacity-40 cursor-not-allowed grayscale' 
                                   : 'hover:bg-red-500 hover:text-white shadow-lg shadow-red-500/20' }}">
@@ -115,7 +115,7 @@
                     $isWrong = $item->status_wrong_answer && $question->status_over_time;
                 @endphp
                 <div
-                    class="relative diagnostic-card rounded-xl p-5 border transition-all duration-300
+                    class="relative diagnostic-card rounded-lg p-5 border transition-all duration-300
                     {{ $isCorrect
                         ? 'bg-emerald-600/20 border-emerald-400 shadow-emerald-500/20 shadow-lg'
                         : ($isWrong
@@ -167,7 +167,7 @@
                 </div>
             @empty
                 <div
-                    class="col-span-2 py-10 text-center text-gray-600 italic border border-dashed border-emerald-500/10 rounded-xl">
+                    class="col-span-2 py-10 text-center text-gray-600 italic border border-dashed border-emerald-500/10 rounded-lg">
                     No se han definido opciones para esta pregunta.
                 </div>
             @endforelse

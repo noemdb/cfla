@@ -6,7 +6,7 @@
         @php $category_image_url = $item->category_image_url; @endphp
 
         <div
-            class="group diagnostic-card relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-xl overflow-hidden hover:border-emerald-500/60 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1">
+            class="group diagnostic-card relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm border border-emerald-200 dark:border-emerald-500/30 rounded-lg overflow-hidden hover:border-emerald-500/60 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1">
 
             <div class="flex flex-col md:flex-row">
 

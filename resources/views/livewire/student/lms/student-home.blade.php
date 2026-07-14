@@ -15,7 +15,7 @@
         <input wire:model.live="search" type="search"
                placeholder="Buscar por asignatura, profesor o tema…"
                class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
-                      rounded-xl px-4 py-2.5 pl-10 text-sm text-gray-900 dark:text-gray-100
+                      rounded-lg px-4 py-2.5 pl-10 text-sm text-gray-900 dark:text-gray-100
                       placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/50
                       focus:border-emerald-500 outline-none transition-all"/>
         <svg class="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@
     {{-- Lista de unidades --}}
     @forelse($pevaluacions as $pe)
         <section wire:key="pe-{{ $pe->id }}"
-                 class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                 class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
 
             <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700/50">
                 <div class="flex items-start justify-between">

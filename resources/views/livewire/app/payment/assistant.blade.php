@@ -1,7 +1,7 @@
 <x-modal-card blur="md" title="Reportes de pago" wire:model="modalAssistent" align="center">
 
     <div
-        class="my-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex justify-between items-center shadow-sm">
+        class="my-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex justify-between items-center shadow-sm">
         <div class="space-y-1">
             <span class="text-lg font-bold text-emerald-500">Representante encontrado</span>
             <div class="text-sm text-gray-400">

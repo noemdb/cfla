@@ -4,7 +4,7 @@
 
     {{-- Modal panel --}}
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
+        <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
             {{-- Header --}}
             <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -42,7 +42,7 @@
                     @php $optionsList = \App\Models\app\Educational\DebateOption::where('question_id', $optionQuestionId)->orderBy('created_at')->get(); @endphp
 
                     @if($optionsList->isEmpty())
-                        <div class="text-center py-8 bg-gray-800/20 border border-dashed border-white/5 rounded-xl">
+                        <div class="text-center py-8 bg-gray-800/20 border border-dashed border-white/5 rounded-lg">
                             <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
@@ -52,7 +52,7 @@
                     @else
                         <div class="space-y-2">
                             @foreach($optionsList as $option)
-                                <div class="flex items-start gap-3 bg-gray-800/30 border border-white/5 rounded-xl p-3 {{ $option->status_option_correct ? 'ring-1 ring-emerald-500/30 border-emerald-500/30' : '' }} {{ $option->status_wrong_answer ? 'ring-1 ring-red-500/30 border-red-500/30' : '' }}">
+                                <div class="flex items-start gap-3 bg-gray-800/30 border border-white/5 rounded-lg p-3 {{ $option->status_option_correct ? 'ring-1 ring-emerald-500/30 border-emerald-500/30' : '' }} {{ $option->status_wrong_answer ? 'ring-1 ring-red-500/30 border-red-500/30' : '' }}">
                                     {{-- Badge/Icon --}}
                                     <div class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0
                                         {{ $option->status_option_correct ? 'bg-emerald-500/20 text-emerald-400' : ($option->status_wrong_answer ? 'bg-red-500/20 text-red-400' : 'bg-gray-700/50 text-gray-400') }}">
@@ -118,7 +118,7 @@
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Texto de la opción</label>
                                 <textarea wire:model="optionForm.text" rows="2"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-violet-500/50 resize-y"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-violet-500/50 resize-y"
                                     placeholder="Escriba la opción aquí..."></textarea>
                                 @error('optionForm.text') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                             </div>
@@ -127,7 +127,7 @@
                             <div>
                                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Observación (opcional)</label>
                                 <textarea wire:model="optionForm.observation" rows="1"
-                                    class="w-full bg-gray-800/50 border border-white/10 rounded-xl px-3 py-2 text-xs text-gray-300 focus:border-violet-500/50 resize-y"
+                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-violet-500/50 resize-y"
                                     placeholder="Observación adicional..."></textarea>
                                 @error('optionForm.observation') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                             </div>
@@ -150,12 +150,12 @@
                             <div class="flex items-center gap-2 pt-1">
                                 @if($editOptionId)
                                     <button wire:click="setCreateOption"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                                         Cancelar edición
                                     </button>
                                 @endif
                                 <button wire:click="saveOption"
-                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[11px] font-bold bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200">
+                                    class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
@@ -171,7 +171,7 @@
             {{-- Footer --}}
             <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-end">
                 <button wire:click="closeOptions"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

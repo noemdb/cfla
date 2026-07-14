@@ -17,7 +17,7 @@
         </div>
 
         <!-- Formulario -->
-        <div class="rounded-xl p-8 shadow-2xl border border-gray-700">
+        <div class="rounded-lg p-8 shadow-2xl border border-gray-700">
             <form wire:submit.prevent="verifyStudent" class="space-y-6">
                 <!-- Campo de cédula -->
                 <div>

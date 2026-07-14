@@ -12,7 +12,7 @@
     <!-- Content -->
     <div class="flex-1 flex flex-col justify-center">
         <div
-            class="bg-yellow-900/20 border border-yellow-500/30 text-yellow-200 px-4 py-6 rounded-xl relative shadow-inner shadow-yellow-900/10">
+            class="bg-yellow-900/20 border border-yellow-500/30 text-yellow-200 px-4 py-6 rounded-lg relative shadow-inner shadow-yellow-900/10">
             <div class="flex items-start space-x-3">
                 <div class="text-lg mt-1">⚠️</div>
                 <div>

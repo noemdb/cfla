@@ -1,4 +1,4 @@
-<div class="bg-gray-900 border border-green-800 rounded-xl shadow-2xl p-6">
+<div class="bg-gray-900 border border-green-800 rounded-lg shadow-2xl p-6">
     @if($step == 1)
         <!-- Paso 1: Solicitar CI del Representante -->
         <div class="text-center">
@@ -81,7 +81,7 @@
                             $isConfirmed = in_array($estudiant['id'], $confirmedEstudiants);
                         @endphp
 
-                        <div class="border-2 rounded-xl p-4 transition-all duration-200 {{ $isConfirmed ? 'bg-gradient-to-r from-green-900/40 to-green-800/40 border-green-600' : 'border-gray-700 hover:border-green-700 bg-gray-800/50' }}">
+                        <div class="border-2 rounded-lg p-4 transition-all duration-200 {{ $isConfirmed ? 'bg-gradient-to-r from-green-900/40 to-green-800/40 border-green-600' : 'border-gray-700 hover:border-green-700 bg-gray-800/50' }}">
                             <label class="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
@@ -183,7 +183,7 @@
                 </p>
             </div>
 
-            <div class="bg-gradient-to-r from-green-900/40 to-green-800/40 rounded-xl p-6 mb-6 border border-green-700">
+            <div class="bg-gradient-to-r from-green-900/40 to-green-800/40 rounded-lg p-6 mb-6 border border-green-700">
                 <h3 class="text-lg font-semibold text-white mb-4 flex items-center justify-center">
                     <x-icon name="users" class="w-5 h-5 mr-2 text-green-300" />
                     Estudiantes Confirmados para Prosecución
@@ -221,7 +221,7 @@
                     Código QR para Descarga de Planilla
                 </h3>
                 <div class="flex justify-center mb-4">
-                    <div class="bg-white p-6 rounded-xl shadow-2xl border-4 border-green-600">
+                    <div class="bg-white p-6 rounded-lg shadow-2xl border-4 border-green-600">
                         @if($qrCode)
                             <img src="{{ $qrCode }}" alt="Código QR" class="w-48 h-48">
                         @endif
@@ -237,7 +237,7 @@
                 <a
                     href="{{ $downloadUrl }}"
                     target="_blank"
-                    class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-xl shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
+                    class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
                 >
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -247,7 +247,7 @@
 
                 <button
                     wire:click="resetWizard"
-                    class="inline-flex items-center px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-xl shadow-lg transition-colors duration-200 border border-gray-600"
+                    class="inline-flex items-center px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-lg shadow-lg transition-colors duration-200 border border-gray-600"
                 >
                     <x-icon name="arrow-path" class="w-5 h-5 mr-2" />
                     Nueva Consulta
