@@ -53,7 +53,7 @@
             </ul>
 
             <div
-                class="diagnostic-card border border-emerald-500/20 rounded-2xl p-6 w-full shadow-2xl backdrop-blur-xl">
+                class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 w-full shadow-2xl backdrop-blur-xl">
                 @if ($active_id)
                     @php $key = "competition-moderator-question-component-".$active_id; @endphp
                     <livewire:app.general.educational.competition.moderator.question-component :debate_id="$active_id" />

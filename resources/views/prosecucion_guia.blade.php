@@ -61,7 +61,7 @@
 
             <!-- Paso 1 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-2xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -134,7 +134,7 @@
 
             <!-- Paso 2 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-2xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -252,7 +252,7 @@
 
             <!-- Paso 3 -->
             <div class="mb-16">
-                <div class="bg-gray-800 rounded-2xl shadow-2xl border border-green-700 overflow-hidden">
+                <div class="bg-gray-800 rounded-xl shadow-2xl border border-green-700 overflow-hidden">
                     <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
@@ -458,7 +458,7 @@
     <!-- CTA Section -->
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-4xl text-center">
-            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 shadow-2xl">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-8 shadow-2xl">
                 <h2 class="text-lg font-bold text-white mb-4">¿Listo para confirmar?</h2>
                 <p class="text-green-100 text-lg mb-8">
                     Sigue los pasos de esta guía y completa la confirmación de prosecución de tus estudiantes

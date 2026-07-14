@@ -92,12 +92,12 @@
         <div class="col-span-12 lg:col-span-7">
             @if ($active_id)
                 @php $key = "competition-moderator-option-component-".$active_id; @endphp
-                <div class="bg-gray-900/20 rounded-2xl p-6 border border-emerald-500/10">
+                <div class="bg-gray-900/20 rounded-xl p-6 border border-emerald-500/10">
                     <livewire:app.general.educational.competition.moderator.option-component :question_id="$active_id" />
                 </div>
             @else
                 <div
-                    class="h-full flex flex-col items-center justify-center py-20 bg-gray-900/20 rounded-2xl border border-dashed border-emerald-500/10 opacity-50">
+                    class="h-full flex flex-col items-center justify-center py-20 bg-gray-900/20 rounded-xl border border-dashed border-emerald-500/10 opacity-50">
                     <svg class="w-16 h-16 text-emerald-500/20 mb-4" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

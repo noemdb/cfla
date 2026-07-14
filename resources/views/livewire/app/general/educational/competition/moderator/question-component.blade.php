@@ -138,7 +138,7 @@
         @if ($questions->isNotEmpty())
             @include('livewire.app.general.educational.competition.moderator.partials.questions')
         @else
-            <div class="text-center py-12 bg-gray-900/40 rounded-2xl border border-dashed border-emerald-500/20">
+            <div class="text-center py-12 bg-gray-900/40 rounded-xl border border-dashed border-emerald-500/20">
                 <svg class="w-12 h-12 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

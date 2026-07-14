@@ -10,7 +10,7 @@
     </div>
 
     {{-- Main card --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
         <div class="p-6">
             {{-- Title --}}
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">

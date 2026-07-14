@@ -7,7 +7,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-2 items-center">
                 <div class="text-center">
                     <div
-                        class="inline-flex justify-center items-center p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-3 shadow-lg shadow-emerald-500/5">
+                        class="inline-flex justify-center items-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 mb-3 shadow-lg shadow-emerald-500/5">
                         <x-icon name="clipboard-document-check" class="w-10 h-10 text-emerald-500" />
                     </div>
                     <h3 class="text-lg font-bold text-white tracking-tight">Asistente de Registro</h3>

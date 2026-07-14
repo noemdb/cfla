@@ -45,7 +45,7 @@
                             <div class="mb-4 sm:mb-8 max-w-2xl opacity-0 translate-y-8 transition-all duration-700 delay-500"
                                 data-hero-animate>
                                 <div
-                                    class="p-3 sm:p-6 rounded-xl sm:rounded-2xl shadow-2xl text-sm sm:text-lg leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-3 backdrop-blur-lg bg-white/60 text-gray-800 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-100 dark:border-white/10">
+                                    class="p-3 sm:p-6 rounded-xl sm:rounded-xl shadow-2xl text-sm sm:text-lg leading-snug sm:leading-relaxed line-clamp-2 sm:line-clamp-3 backdrop-blur-lg bg-white/60 text-gray-800 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-100 dark:border-white/10">
                                     {!! strip_tags($item->body) !!}
                                 </div>
                             </div>

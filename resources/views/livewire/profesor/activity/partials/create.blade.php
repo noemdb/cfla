@@ -2,7 +2,7 @@
     <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="close"></div>
 
     <div class="relative min-h-screen flex items-start justify-center pt-8 pb-12">
-        <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden" @click.away="close">
+        <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden" @click.away="close">
 
             {{-- Header --}}
             <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">

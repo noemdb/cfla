@@ -7,7 +7,7 @@
 
         <!-- Executive Summary -->
         <section class="mb-16">
-            <div class="bg-white rounded-2xl shadow-corporate p-8 lg:p-12">
+            <div class="bg-white rounded-xl shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-8">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Resumen</h2>
                     <div class="w-24 h-1 gradient-primary mx-auto rounded-full"></div>
@@ -46,7 +46,7 @@
                     </div>
 
                     <div class="relative">
-                        <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl p-8 text-white">
+                        <div class="bg-gradient-to-r from-green-500 to-green-700 rounded-xl p-8 text-white">
                             <h4 class="text-lg font-semibold mb-4">Beneficios Clave</h4>
                             <ul class="space-y-3">
                                 <li class="flex items-center">
@@ -108,7 +108,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Asistente Inteligente -->
-                <div class="feature-card bg-white rounded-2xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
                     <div class="flex items-center mb-6">
                         <div class="w-16 h-16 gradient-primary rounded-xl flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@
                 </div>
 
                 <!-- Seguridad Avanzada -->
-                <div class="feature-card bg-white rounded-2xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
                     <div class="flex items-center mb-6">
                         <div class="w-16 h-16 gradient-secondary rounded-xl flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +236,7 @@
                 </div>
 
                 <!-- Comprobantes QR -->
-                <div class="feature-card bg-white rounded-2xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
                     <div class="flex items-center mb-6">
                         <div class="w-16 h-16 gradient-accent rounded-xl flex items-center justify-center mr-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,7 +297,7 @@
                 </div>
 
                 <!-- Interfaz Intuitiva -->
-                <div class="feature-card bg-white rounded-2xl shadow-corporate p-8">
+                <div class="feature-card bg-white rounded-xl shadow-corporate p-8">
                     <div class="flex items-center mb-6">
                         <div
                             class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
@@ -361,7 +361,7 @@
 
         <!-- Arquitectura Técnica -->
         <section class="mb-16 print-break">
-            <div class="bg-gray-900 text-white rounded-2xl p-8 lg:p-12">
+            <div class="bg-gray-900 text-white rounded-xl p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold mb-4">Arquitectura Técnica</h2>
                     <p class="text-lg text-gray-300 max-w-3xl mx-auto">
@@ -568,7 +568,7 @@
 
             <div class="grid grid-cols-1 gap-8">  {{-- lg:grid-cols-3  --}}
                 <!-- Paquete Básico -->
-                <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
+                <div class="bg-white rounded-xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Básico</h3>
                         <p class="text-gray-600">Ideal para organizaciones pequeñas</p>
@@ -638,7 +638,7 @@
 
                 {{--
                 <!-- Paquete Profesional -->
-                <div class="bg-white rounded-2xl shadow-corporate p-8 relative border-2 border-green-500">
+                <div class="bg-white rounded-xl shadow-corporate p-8 relative border-2 border-green-500">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span
                             class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold">Recomendado</span>
@@ -719,7 +719,7 @@
                 </div>
 
                 <!-- Paquete Enterprise -->
-                <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
+                <div class="bg-white rounded-xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
                         <p class="text-gray-600">Para grandes organizaciones</p>
@@ -813,7 +813,7 @@
 
         <!-- Cronograma de Implementación -->
         {{-- <section class="mb-16">
-            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 lg:p-12">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Cronograma de Implementación</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -891,7 +891,7 @@
 
         <!-- Garantías y Soporte -->
         <section class="mb-16">
-            <div class="bg-white rounded-2xl shadow-corporate p-8 lg:p-12">
+            <div class="bg-white rounded-xl shadow-corporate p-8 lg:p-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-bold text-gray-900 mb-4">Garantías y Soporte</h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -1013,7 +1013,7 @@
 
         <!-- Call to Action -->
         <section class="mb-16">
-            <div class="gradient-primary rounded-2xl p-8 lg:p-12 text-white text-center">
+            <div class="gradient-primary rounded-xl p-8 lg:p-12 text-white text-center">
                 <h2 class="text-4xl font-bold mb-4">¿Listo para Revolucionar sus Votaciones?</h2>
                 <p class="text-lg text-blue-100 mb-8 max-w-3xl mx-auto">
                     Únase a las organizaciones que ya confían en nuestro sistema para sus procesos de votación más

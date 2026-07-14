@@ -12,18 +12,18 @@
 
         <!-- Quick Stats / Overview (Mockup for now) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl">
                 <p class="text-emerald-300 text-sm font-medium mb-1">Sesión Activa</p>
                 <p class="text-white text-lg font-bold">{{ now()->format('H:i A') }}</p>
             </div>
-            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-xl">
                 <p class="text-blue-300 text-sm font-medium mb-1">Estado del Sistema</p>
                 <p class="text-white text-lg font-bold flex items-center">
                     <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                     Operacional
                 </p>
             </div>
-            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-xl">
                 <p class="text-purple-300 text-sm font-medium mb-1">Nivel de Acceso</p>
                 <p class="text-white text-lg font-bold">
                     {{ Auth::user()->role_label }}
@@ -45,7 +45,7 @@
 
             <!-- Módulo de Competiciones Académicas -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('admin.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -84,7 +84,7 @@
 
             <!-- Módulo de Diagnóstico -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('diagnostico') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -96,7 +96,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2">
@@ -129,7 +129,7 @@
 
             <!-- Módulo de Censo -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                 <a href="{{ route('census') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -141,7 +141,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -168,7 +168,7 @@
 
             <!-- Módulo de Matrícula -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
                 <a href="{{ route('enrollment') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -180,7 +180,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col h-full pointer-events-none">
                     <div
-                        class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                        class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                         <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2h-2M8 7H6">
@@ -208,7 +208,7 @@
             @if (Auth::user()->isAdminOrDiagnostic())
                 <!-- Módulo de Planificación -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -220,7 +220,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
@@ -248,7 +248,7 @@
             @if (Auth::user()->is_admin || Auth::user()->is_diagnostic)
                 <!-- Módulo de Votaciones -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
                     <a href="{{ route('admin.voting.dashboard') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -260,7 +260,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -290,7 +290,7 @@
 
                 <!-- Módulo de Usuarios -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                     <a href="{{ route('admin.users.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -302,7 +302,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full pointer-events-none">
                         <div
-                            class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -340,7 +340,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Database Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,7 +351,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full">
                         <div
-                            class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
@@ -377,7 +377,7 @@
 
                 <!-- Reverb / Pulse Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,7 +388,7 @@
                     </div>
                     <div class="relative z-10 flex flex-col h-full">
                         <div
-                            class="w-12 h-12 bg-cyan-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                             <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 10V3L4 14h7v7l9-11h-7z">

@@ -1,7 +1,7 @@
 <div class="space-y-6" id="{{ $question->id }}">
     @if ($timeRemaining > 0)
         {{-- Card de Gestión de Respuestas con Estilo Premium --}}
-        <div class="diagnostic-card border border-emerald-500/20 rounded-2xl p-6 bg-gray-950/40 relative overflow-hidden backdrop-blur-md">
+        <div class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40 relative overflow-hidden backdrop-blur-md">
             <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                 <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -24,7 +24,7 @@
 
             <div class="flex flex-col md:flex-row items-center gap-6">
                 {{-- Contenedor del Timer Alpine.js --}}
-                <div class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-2xl py-6 px-10 min-w-[200px]">
+                <div class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-xl py-6 px-10 min-w-[200px]">
                     <div wire:key="ans-timer-{{ $question->id }}" class="text-5xl font-black text-white tabular-nums tracking-tighter"
                         x-data="{
                             s: @js($timeRemaining ?? 0),
@@ -103,7 +103,7 @@
             </div>
         </div>
     @else
-        <div class="diagnostic-card border border-emerald-500/20 rounded-2xl p-6 bg-gray-950/40 relative overflow-hidden backdrop-blur-md">
+        <div class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40 relative overflow-hidden backdrop-blur-md">
             <div class="flex flex-col md:flex-row items-center gap-6">
                 <div class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-3 px-6 rounded-xl font-black uppercase tracking-[0.2em] text-lg shadow-inner">
                     {{ $grado->name ?? 'Sin Grado' }}

@@ -270,7 +270,7 @@
 
                 {{-- Modal panel --}}
                 <div class="relative min-h-screen flex items-center justify-center p-4">
-                    <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -482,7 +482,7 @@
             <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="export-modal">
                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExportModal"></div>
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
@@ -890,7 +890,7 @@
             <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="import-modal">
                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeImportModal"></div>
                 <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
                             <div class="flex items-center gap-3">
@@ -1299,7 +1299,7 @@
                 <div class="relative min-h-screen flex flex-col items-center p-4 pt-10"
                      x-data="lessonPreviewSwiper">
                     {{-- Card: header + Swiper (flex-1 = ocupa todo el espacio disponible) --}}
-                    <div class="w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0"
+                    <div class="w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0"
                          wire:key="swiper-{{ $listPreviewData['activity_id'] }}">
                         {{-- Header --}}
                         <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
@@ -2535,7 +2535,7 @@
                                                             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"
                                                                  @click="previewIndex = null"></div>
                                                             {{-- Modal card --}}
-                                                            <div class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                                                            <div class="relative w-full max-w-3xl max-h-[85vh] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
                                                                 {{-- Header --}}
                                                                 <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
                                                                     <div class="flex items-center gap-2">
@@ -3307,7 +3307,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="existing-embed-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeExistingEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
                                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3358,7 +3358,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="embed-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeEmbedPreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                                <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
                                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3413,7 +3413,7 @@
                         <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="resource-image-preview-modal">
                             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeResourcePreview"></div>
                             <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="relative bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
+                                <div class="relative bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
                                      x-data="{ imgWidth: 0, imgHeight: 0 }">
                                     {{-- Header --}}
                                     <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-700">
@@ -3525,7 +3525,7 @@
                          wire:click="$set('showFullPreview', false)"></div>
 
                     <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                        <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-5xl bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
 
                             {{-- Header --}}
                             <div class="flex items-center justify-between px-6 py-4 bg-slate-700/50 border-b border-slate-700">
@@ -3797,7 +3797,7 @@
 
                     {{-- Modal panel 7xl --}}
                     <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
-                        <div class="relative w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-7xl bg-white rounded-xl shadow-2xl overflow-hidden">
                             {{-- Header --}}
                             <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
                                 <div class="flex items-center gap-4">
@@ -4069,7 +4069,7 @@
                 <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="publish-confirm-modal">
                     <div class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
                     <div class="relative min-h-screen flex items-center justify-center p-4">
-                        <div class="relative w-full max-w-md bg-gray-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+                        <div class="relative w-full max-w-md bg-gray-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
                             <div class="p-6 space-y-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">

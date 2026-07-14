@@ -12,7 +12,7 @@
                 <p class="text-emerald-400 font-medium">Gestiona tus encuestas y monitorea resultados en tiempo real.</p>
             </div>
             <a href="{{ route('admin.voting.polls.create') }}"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-500/20 font-bold group">
+                class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/20 font-bold group">
                 <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
@@ -24,7 +24,7 @@
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-xl">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-emerald-300 text-sm font-medium">Total Encuestas</p>
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
                 <p class="text-white text-lg font-bold">{{ $stats['total_polls'] }}</p>
             </div>
 
-            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-xl">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-blue-300 text-sm font-medium">Activas</p>
                     <div class="flex items-center">
@@ -51,7 +51,7 @@
                 <p class="text-white text-lg font-bold">{{ $stats['active_polls'] }}</p>
             </div>
 
-            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-xl">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-purple-300 text-sm font-medium">Total Votos</p>
                     <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@
                 <p class="text-white text-lg font-bold">{{ $stats['total_votes'] }}</p>
             </div>
 
-            <div class="diagnostic-card bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-amber-500/10 border border-amber-500/20 p-6 rounded-xl">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-amber-300 text-sm font-medium">Inactivas</p>
                     <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +87,7 @@
 
             @if ($polls->isEmpty())
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-12 text-center rounded-2xl">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-12 text-center rounded-xl">
                     <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,7 +107,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     @foreach ($polls as $poll)
                         <div
-                            class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+                            class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
                             <div class="p-6 md:p-8">
                                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <div class="flex-1">
@@ -283,7 +283,7 @@
                 </div>
             @endif
 
-            <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
+            <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl">
                 <h3 class="text-lg font-bold text-white mb-6 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

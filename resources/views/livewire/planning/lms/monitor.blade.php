@@ -328,7 +328,7 @@
     {{-- ============================================================ --}}
     @if($showScheduleModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                 {{-- Header --}}
                 <div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -397,7 +397,7 @@
     {{-- ============================================================ --}}
     @if($showSettingsModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
                 {{-- Header --}}
                 <div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -472,7 +472,7 @@
     {{-- ============================================================ --}}
     @if($showPreviewModal && $previewActivityId)
         <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center py-6 px-4" wire:click.self="closePreview">
-            <div class="w-full max-w-6xl h-full flex flex-col bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50" wire:click.stop>
+            <div class="w-full max-w-6xl h-full flex flex-col bg-slate-900 rounded-xl overflow-hidden shadow-2xl border border-slate-700/50" wire:click.stop>
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 shrink-0">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">

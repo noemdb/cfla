@@ -45,7 +45,7 @@
              x-transition:leave-start="opacity-100 translate-x-0"
              x-transition:leave-end="opacity-0 -translate-x-4"
              class="lg:col-span-1">
-            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-5 sticky top-24">
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-5 sticky top-24">
                 {{-- Toggle button inside sidebar --}}
                 <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">

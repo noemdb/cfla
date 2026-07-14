@@ -10,7 +10,7 @@
     </div>
 
     {{-- Main card --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
 
         {{-- Alert: Observación Coord.Eval. --}}
         <div class="border-b border-white/5 px-6 py-4 bg-amber-500/5">
@@ -388,7 +388,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -600,7 +600,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -661,7 +661,7 @@
 
             {{-- Modal panel --}}
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">
@@ -770,7 +770,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526Modal"></div>
 
             <div class="relative min-h-screen flex items-start justify-center p-4 pt-8 pb-24">
-                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
+                <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
 
                     {{-- Header --}}
                     <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
@@ -957,7 +957,7 @@
                                 </div>
                             @else
                                 <div class="text-center py-16">
-                                    <div class="w-14 h-14 bg-gray-800/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                    <div class="w-14 h-14 bg-gray-800/50 rounded-xl flex items-center justify-center mx-auto mb-4">
                                         <svg class="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                                         </svg>
@@ -1042,7 +1042,7 @@
             <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeS2526DetailModal"></div>
 
             <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
                     <div class="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-gray-800/50">

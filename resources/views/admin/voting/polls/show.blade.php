@@ -63,7 +63,7 @@
             <div class="space-y-8">
                 <!-- Status Card -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl relative overflow-hidden group">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl relative overflow-hidden group">
                     <div
                         class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                     </div>
@@ -88,7 +88,7 @@
 
                     @if ($poll->enable && $poll->time_remaining)
                         <div
-                            class="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-2xl flex items-center gap-3">
+                            class="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-xl flex items-center gap-3">
                             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- Technical Details -->
-                <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
+                <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-xl">
                     <h3
                         class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 py-2 px-3 bg-white/5 rounded-lg border border-white/5 inline-block">
                         Ficha Técnica</h3>
@@ -144,11 +144,11 @@
 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="diagnostic-card bg-blue-500/5 border border-blue-500/10 p-5 rounded-2xl text-center">
+                    <div class="diagnostic-card bg-blue-500/5 border border-blue-500/10 p-5 rounded-xl text-center">
                         <p class="text-[10px] font-bold text-blue-400/60 uppercase tracking-widest mb-1">Opciones</p>
                         <p class="text-lg font-black text-white">{{ $poll->options->count() }}</p>
                     </div>
-                    <div class="diagnostic-card bg-purple-500/5 border border-purple-500/10 p-5 rounded-2xl text-center">
+                    <div class="diagnostic-card bg-purple-500/5 border border-purple-500/10 p-5 rounded-xl text-center">
                         <p class="text-[10px] font-bold text-purple-400/60 uppercase tracking-widest mb-1">Sesiones</p>
                         <p class="text-lg font-black text-white">{{ $poll->sessions->count() }}</p>
                     </div>
@@ -160,7 +160,7 @@
                 <!-- Share Link Box -->
                 @if ($poll->enable)
                     <div
-                        class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-8 rounded-2xl relative overflow-hidden group">
+                        class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-8 rounded-xl relative overflow-hidden group">
                         <div
                             class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                         </div>
@@ -175,11 +175,11 @@
                         </h3>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <div
-                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-2xl px-5 py-4 text-emerald-400 font-mono text-xs truncate">
+                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-xl px-5 py-4 text-emerald-400 font-mono text-xs truncate">
                                 {{ url('/poll/voting/' . $poll->access_token) }}
                             </div>
                             <button onclick="copyToClipboard('{{ url('/poll/voting/' . $poll->access_token) }}')"
-                                class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
+                                class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
                                 COPIAR ENLACE
                             </button>
                         </div>
@@ -188,7 +188,7 @@
 
                 <!-- Results Section -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-xl relative overflow-hidden group">
                     <div
                         class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-500">
                     </div>
@@ -262,7 +262,7 @@
                                 onsubmit="return confirmReset()">
                                 @csrf
                                 <button type="submit"
-                                    class="px-8 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl border border-red-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+                                    class="px-8 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl border border-red-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -277,7 +277,7 @@
 
                 <!-- Session History -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
                     <div class="p-8 border-b border-white/5 flex items-center justify-between">
                         <h3 class="text-lg font-bold text-white flex items-center gap-3">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -8,7 +8,7 @@
 
             <!-- Header Principal -->
             <div class="text-center mb-12">
-                <div class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl">
+                <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl">
                     <div class="text-6xl mb-4">🤖</div>
                     <h1 class="text-4xl font-bold text-white mb-4">
                         Guía del Asistente de Participación
@@ -28,7 +28,7 @@
             </div>
 
             <!-- Índice de Contenidos -->
-            <div class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-6 shadow-2xl mb-8">
+            <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-6 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-4 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -78,7 +78,7 @@
 
             <!-- Sección 1: ¿Qué es el Asistente? -->
             <div id="que-es-asistente"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">1</span>
@@ -190,7 +190,7 @@
 
             <!-- Sección 2: Cómo Acceder -->
             <div id="como-acceder"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">2</span>
@@ -279,7 +279,7 @@
 
             <!-- Sección 3: Proceso de Participación -->
             <div id="proceso-participacion"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">3</span>
@@ -466,7 +466,7 @@
 
             <!-- Sección 4: Navegación del Asistente -->
             <div id="navegacion-asistente"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">4</span>
@@ -591,7 +591,7 @@
 
             <!-- Sección 5: Confirmación y Alertas -->
             <div id="confirmacion-voto"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">5</span>
@@ -701,7 +701,7 @@
 
             <!-- Sección 6: Comprobantes QR -->
             <div id="comprobantes-qr"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">6</span>
@@ -834,7 +834,7 @@
 
             <!-- Sección 7: Seguridad -->
             <div id="seguridad-privacidad"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">7</span>
@@ -970,7 +970,7 @@
 
             <!-- Sección 8: FAQ -->
             <div id="faq"
-                class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
+                class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700 p-8 shadow-2xl mb-8">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">8</span>

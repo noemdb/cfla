@@ -6,7 +6,7 @@
         Secciones como Tutor
     </h2>
 
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
         <div class="p-5">
             @if($seccionesGuia->isNotEmpty())
                 <div class="overflow-x-auto">

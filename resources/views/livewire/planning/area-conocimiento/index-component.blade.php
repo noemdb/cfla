@@ -31,7 +31,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl mb-8">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
@@ -83,7 +83,7 @@
     <!-- Grid Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         @forelse($area_conocimientos as $area)
-            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group flex flex-col">
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group flex flex-col">
 
                 {{-- Card Header — plan badge + delete --}}
                 <div class="flex items-start justify-between px-4 pt-3.5 pb-2 border-b border-white/5">
@@ -388,7 +388,7 @@
              @@click="$wire.closeCampoManager()"></div>
         {{-- Panel --}}
         <div class="flex min-h-full items-start justify-center p-2 sm:p-4 pt-8">
-            <div class="relative w-full max-w-[95vw] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl"
+            <div class="relative w-full max-w-[95vw] bg-gray-900 border border-white/10 rounded-xl shadow-2xl"
                  x-show="show"
                  x-transition:enter="ease-out duration-300"
                  x-transition:enter-start="opacity-0 scale-95"

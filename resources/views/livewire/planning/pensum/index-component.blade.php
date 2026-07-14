@@ -31,7 +31,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl mb-8">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
@@ -71,7 +71,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -275,7 +275,7 @@
     <!-- ===== MODAL: Vista Previa ===== -->
     <x-modal title="Detalles del Pensum" blur="lg" wire:model="previewMode" width="max-w-[90vw]">
         @if($previewPensum)
-        <div class="relative bg-gray-900 rounded-2xl border border-white/10 p-6 space-y-6">
+        <div class="relative bg-gray-900 rounded-xl border border-white/10 p-6 space-y-6">
             <button type="button" wire:click="closePreview"
                 class="absolute top-6 right-6 p-1.5 bg-white/10 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-all duration-200 z-10"
                 title="Cerrar">

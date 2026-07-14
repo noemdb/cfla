@@ -21,7 +21,7 @@
     </div>
 
     @if(isset($profesor) && $profesor)
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden">
         {{-- Profile header --}}
         <div class="px-6 py-5 border-b border-white/5 flex items-center gap-4">
             <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -72,7 +72,7 @@
     </div>
     @else
     {{-- Empty State --}}
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl p-12 text-center">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-12 text-center">
         <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
         </svg>

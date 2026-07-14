@@ -1,5 +1,5 @@
 <div>
-    <div class="mt-4 p-4 w-full border border-emerald-200 bg-emerald-100 rounded-2xl shadow-sm">
+    <div class="mt-4 p-4 w-full border border-emerald-200 bg-emerald-100 rounded-xl shadow-sm">
         
         @if ($question)
             {{-- Contenedor interno con fondo blanco para generar profundidad y contraste --}}

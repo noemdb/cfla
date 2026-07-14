@@ -14,7 +14,7 @@
     </div>
 
     {{-- ── Encabezado de la lección ── --}}
-    <div class="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 sm:p-8">
+    <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 sm:p-8">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="space-y-3 min-w-0">
                 <div class="flex items-center gap-2">
@@ -94,7 +94,7 @@
 
     {{-- ── Secciones del contenido ── --}}
     @forelse($sections as $section)
-        <section class="bg-white rounded-2xl shadow-lg shadow-black/5 overflow-hidden border border-slate-200/80">
+        <section class="bg-white rounded-xl shadow-lg shadow-black/5 overflow-hidden border border-slate-200/80">
             {{-- Encabezado de sección con barra superior esmeralda --}}
             <div class="relative px-6 py-5 border-b border-slate-100">
                 <span class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
@@ -132,7 +132,7 @@
         </section>
     @empty
         {{-- Empty state mejorado --}}
-        <div class="text-center py-20 bg-white/5 rounded-2xl border border-dashed border-white/10">
+        <div class="text-center py-20 bg-white/5 rounded-xl border border-dashed border-white/10">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800/50 mb-4">
                 <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
@@ -147,7 +147,7 @@
 
     {{-- ── Recursos descargables ── --}}
     @if($resources->isNotEmpty())
-        <div class="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-6">
+        <div class="rounded-xl border border-blue-500/10 bg-blue-500/5 p-6">
             <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -183,7 +183,7 @@
 
     {{-- ── Enlaces de interés ── --}}
     @if($links->isNotEmpty())
-        <div class="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-6">
+        <div class="rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-6">
             <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>

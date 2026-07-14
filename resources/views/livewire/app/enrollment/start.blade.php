@@ -8,7 +8,7 @@
         <p class="text-gray-400 mt-2">Proceso de solicitud de matrícula 2025-2026</p>
     </div>
 
-    <div class="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md text-left">
+    <div class="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-md text-left">
         <p class="text-sm leading-relaxed text-gray-300">
             <span class="font-bold text-emerald-400 block mb-2">Instrucciones:</span>
             Para iniciar el proceso de actualización de matrícula, asegúrese de tener a mano la cédula de identidad del

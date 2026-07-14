@@ -1,6 +1,6 @@
 <div class="mt-1 w-full border-t-2 border-emerald-300">
 
-    <div class="py-4 bg-emerald-100 border border-emerald-200 rounded-2xl shadow-sm">
+    <div class="py-4 bg-emerald-100 border border-emerald-200 rounded-xl shadow-sm">
 
         <h4 class="text-lg font-bold text-emerald-800 uppercase tracking-widest mb-4">Puntuación</h4>
 

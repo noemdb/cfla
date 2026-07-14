@@ -1,7 +1,7 @@
 <div class="space-y-6" id="{{ $question->id }}">
     @if ($question->status_active)
         @if (!$question->status_over_time)
-            <div class="diagnostic-card border border-emerald-500/20 rounded-2xl p-6 bg-gray-950/40">
+            <div class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
@@ -91,7 +91,7 @@
                     }
                 }" x-init="init()">
                     <div
-                        class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-2xl py-6 px-10 min-w-[200px]">
+                        class="grow flex items-center justify-center bg-gray-900/60 border border-emerald-500/10 rounded-xl py-6 px-10 min-w-[200px]">
                         <div wire:key="mod-timer-{{ $question->id ?? 'none' }}" class="text-5xl font-black text-white tabular-nums tracking-tighter">
                             <span x-text="fmt(s)"></span>
                         </div>
@@ -136,7 +136,7 @@
             </div>
         @else
             <div
-                class="diagnostic-card border border-emerald-500/20 rounded-2xl p-6 bg-gray-950/40 relative overflow-hidden">
+                class="diagnostic-card border border-emerald-500/20 rounded-xl p-6 bg-gray-950/40 relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                     <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -214,7 +214,7 @@
             </div>
         @endif
     @else
-        <div class="py-10 text-center opacity-30 border border-dashed border-emerald-500/10 rounded-2xl">
+        <div class="py-10 text-center opacity-30 border border-dashed border-emerald-500/10 rounded-xl">
             <p class="text-xs font-bold uppercase tracking-[0.3em] text-emerald-500">Módulo de Respuesta Inactivo</p>
         </div>
     @endif

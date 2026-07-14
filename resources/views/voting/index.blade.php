@@ -22,7 +22,7 @@
 
             <!-- Estadísticas generales -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-emerald-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-emerald-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-emerald-500/50">
@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-indigo-600/30 rounded-full flex items-center justify-center border border-blue-500/50">
@@ -56,7 +56,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-teal-500/30">
+                <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 border border-teal-500/30">
                     <div class="flex items-center">
                         <div
                             class="w-12 h-12 bg-gradient-to-br from-teal-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-teal-500/50">
@@ -91,7 +91,7 @@
             <div class="grid {{ $gridClass }} gap-8">
                 @forelse($polls as $poll)
                     <div
-                        class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
+                        class="bg-gradient-to-br from-green-600/20 to-green-700/20 backdrop-blur-sm rounded-xl shadow-2xl border border-green-500/30 overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-3xl">
                         <!-- Header de la tarjeta -->
                         <div
                             class="bg-gradient-to-r from-green-500/30 to-green-600/30 backdrop-blur-sm px-6 py-4 border-b border-green-500/30">
@@ -228,7 +228,7 @@
                     <!-- Estado sin encuestas -->
                     <div class="col-span-full">
                         <div class="text-center py-16">
-                            <div class="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-12 border border-gray-700">
+                            <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-12 border border-gray-700">
                                 <svg class="w-20 h-20 text-gray-400 mx-auto mb-6" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

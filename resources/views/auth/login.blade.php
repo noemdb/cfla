@@ -5,7 +5,7 @@
 @section('content')
 <div class="flex items-center justify-center min-h-[calc(100vh-200px)] px-4">
     <div class="w-full max-w-md">
-        <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/20 rounded-2xl shadow-2xl overflow-hidden p-8 fade-in">
+        <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-emerald-500/20 rounded-xl shadow-2xl overflow-hidden p-8 fade-in">
             <div class="mb-8 text-center text-white">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-500/10 rounded-full mb-4 border border-emerald-500/20">
                     <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

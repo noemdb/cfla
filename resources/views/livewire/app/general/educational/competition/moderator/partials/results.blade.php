@@ -10,7 +10,7 @@
         </button>
 
         <div x-show="open" x-collapse class="mt-6">
-            <div class="diagnostic-card rounded-2xl p-8 border border-emerald-500/20 shadow-2xl backdrop-blur-xl">
+            <div class="diagnostic-card rounded-xl p-8 border border-emerald-500/20 shadow-2xl backdrop-blur-xl">
                 <div class="flex items-center justify-center space-x-3 mb-8">
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
                     <h4 class="text-lg font-extrabold text-white tracking-tight uppercase">Dashboard de Resultados</h4>

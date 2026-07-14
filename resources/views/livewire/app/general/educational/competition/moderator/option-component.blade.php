@@ -1,6 +1,6 @@
 <div class="space-y-6">
     @if ($question)
-        <div class="diagnostic-card border {{ $question->status_answer ? 'border-orange-500/30' : 'border-emerald-500/10' }} rounded-2xl p-6 bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
+        <div class="diagnostic-card border {{ $question->status_answer ? 'border-orange-500/30' : 'border-emerald-500/10' }} rounded-xl p-6 bg-gray-900/40 backdrop-blur-md relative overflow-hidden">
             @if ($question->status_answer)
                 <div class="absolute top-0 left-0 w-1 h-full bg-orange-500/50"></div>
             @endif
@@ -115,7 +115,7 @@
                     $isWrong = $item->status_wrong_answer && $question->status_over_time;
                 @endphp
                 <div
-                    class="relative diagnostic-card rounded-2xl p-5 border transition-all duration-300
+                    class="relative diagnostic-card rounded-xl p-5 border transition-all duration-300
                     {{ $isCorrect
                         ? 'bg-emerald-600/20 border-emerald-400 shadow-emerald-500/20 shadow-lg'
                         : ($isWrong

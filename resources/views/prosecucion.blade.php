@@ -41,7 +41,7 @@
                         <img
                             src="{{ asset('image/brand/512.png') }}"
                             alt="{{ config('app.name') }} Logo"
-                            class="w-24 h-24 md:w-32 md:h-32 rounded-2xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105"
+                            class="w-24 h-24 md:w-32 md:h-32 rounded-xl shadow-2xl p-2 transition-transform duration-300 hover:scale-105"
                         >
                     </div>
 

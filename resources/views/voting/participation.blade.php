@@ -23,7 +23,7 @@
                 <!-- Certificado de participación -->
                 <div class="lg:col-span-2">
                     <div
-                        class="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden print-section">
+                        class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden print-section">
                         <!-- Header del certificado -->
                         <div
                             class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-8 py-6 text-center border-b border-emerald-800/50">
@@ -127,7 +127,7 @@
                 <!-- Resultados en tiempo real -->
                 <div class="lg:col-span-1">
                     <div
-                        class="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden">
+                        class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden">
                         <div
                             class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-4 border-b border-blue-800/50">
                             <h3 class="text-lg font-bold text-white flex items-center">

@@ -5,7 +5,7 @@
 @section('content')
     <div class="container mx-auto px-4 max-w-2xl">
         <div
-            class="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden glow-green-strong">
+            class="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700 overflow-hidden glow-green-strong">
             <!-- Header -->
             <div
                 class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-8 text-center text-white shadow-2xl border-b border-emerald-800/50">

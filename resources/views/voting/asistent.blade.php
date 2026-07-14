@@ -54,7 +54,7 @@
             @else
                 <!-- Estado vacío -->
                 <div class="text-center py-16">
-                    <div class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-2xl p-12">
+                    <div class="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl p-12">
                         <div
                             class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center">
                             <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

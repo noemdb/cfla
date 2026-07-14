@@ -2,7 +2,7 @@
     {{-- Loading overlay --}}
     <div wire:loading
          class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-all duration-300">
-        <div class="bg-gray-900/90 border border-white/10 rounded-2xl px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
+        <div class="bg-gray-900/90 border border-white/10 rounded-xl px-10 py-8 shadow-2xl shadow-cyan-500/5 flex flex-col items-center gap-4">
             {{-- Animated spinner --}}
             <div class="relative w-14 h-14">
                 <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Main Tabs -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
         <div class="border-b border-white/5">
             <nav class="flex overflow-x-auto">
                 <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"

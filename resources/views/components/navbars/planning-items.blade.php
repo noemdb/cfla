@@ -18,7 +18,7 @@
             x-transition:leave="transition ease-in duration-100"
             x-transition:leave-start="opacity-100 translate-y-0"
             x-transition:leave-end="opacity-0 translate-y-1"
-            class="absolute left-0 mt-1 w-[650px] bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 p-4 z-50 grid grid-cols-2 gap-x-2 gap-y-0">
+            class="absolute left-0 mt-1 w-[650px] bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-4 z-50 grid grid-cols-2 gap-x-2 gap-y-0">
 
             {{-- Columna 1: Evaluación --}}
             <div class="space-y-0.5">

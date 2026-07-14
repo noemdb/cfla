@@ -21,7 +21,7 @@
                     @endif
 
                     {{-- Grid de opciones: se expande al espacio restante --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-2xl bg-white shadow-sm flex-1 content-stretch overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-emerald-100 rounded-xl bg-white shadow-sm flex-1 content-stretch overflow-hidden">
                         @forelse ($options as $item)
                             @php
                                 $wrong = $item->status_wrong_answer && $question->status_over_time;

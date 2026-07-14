@@ -25,14 +25,14 @@
     </div>
 
     @foreach ($pestudios as $pestudio)
-        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
+        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
             wire:key="pestudio-{{ $pestudio->id }}" x-data="{ open: false }">
 
             <div @click="open = !open"
                 class="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors group">
 
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-all duration-300"
+                    <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-all duration-300"
                         :class="open ? 'scale-110 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : ''">
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -74,7 +74,7 @@
 
                     @if ($activeCount > 0)
                         <div
-                            class="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-sm">
+                            class="flex items-center gap-3 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl backdrop-blur-sm">
                             <div class="flex flex-col items-end">
                                 <span
                                     class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest leading-none mb-1">Activos</span>
@@ -115,7 +115,7 @@
                                 $gradeActiveCount = $pensums->where('status_active_diagnostic', true)->count();
                             @endphp
 
-                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
+                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-xl overflow-hidden transition-all duration-300 hover:border-emerald-500/20"
                                 wire:key="grado-{{ $pestudio->id }}-{{ $grado->id }}">
                                 <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
                                     <h3 class="font-bold text-emerald-100">{{ $grado->name }}</h3>

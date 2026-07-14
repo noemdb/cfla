@@ -123,7 +123,7 @@
                      wire:click="closeDialog"></div>
 
                 {{-- Dialog panel --}}
-                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
                      wire:key="diag-dialog-panel"
                      @click.away="$wire.closeDialog()">
 
@@ -262,7 +262,7 @@
                      wire:click="closeDetail"></div>
 
                 {{-- Detail panel --}}
-                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="relative w-full max-w-3xl mx-4 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden">
 
                     {{-- Close button --}}
                     <button type="button" wire:click="closeDetail"

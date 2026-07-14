@@ -29,7 +29,7 @@
             </p>
         </div>
         <div>
-            <nav class="isolate inline-flex -space-x-px rounded-2xl shadow-2xl bg-gray-900 p-1 border border-white/5" aria-label="Pagination">
+            <nav class="isolate inline-flex -space-x-px rounded-xl shadow-2xl bg-gray-900 p-1 border border-white/5" aria-label="Pagination">
                 {{-- Previous Page Link --}}
                 @if ($paginator->onFirstPage())
                     <span class="relative inline-flex items-center rounded-xl px-2 py-2 text-gray-600 cursor-not-allowed">
