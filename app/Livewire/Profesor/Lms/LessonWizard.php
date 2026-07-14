@@ -66,6 +66,9 @@ class LessonWizard extends Component
     public string $contentTitle = '';
     public string $contentBody = '';
 
+    // ─── Wizard: Preguntas de repaso (markdown) ─────────────────
+    public string $reviewQuestions = '';
+
     // ─── Wizard: Panel de recursos por sección (paso 2) ─────────
     public ?int $resourcePanelSection = null;
 
@@ -85,6 +88,9 @@ class LessonWizard extends Component
 
     // ─── Wizard: Vista previa profesor (full-screen dialog) ──
     public bool $showFullPreview = false;
+
+    // ─── Review Questions preview ────────────────────────────
+    public bool $showReviewPreview = false;
 
     // ─── Export/Import ─────────────────────────────────────────
     public bool $showExportModal = false;
@@ -249,6 +255,20 @@ class LessonWizard extends Component
             }
         }
 
+        // ─── Extraer preguntas de repaso de las secciones ─────
+        $this->reviewQuestions = '';
+        foreach ($this->wizardSections as $sKey => $section) {
+            if (($section['title'] ?? '') === 'Preguntas de Repaso') {
+                $reviewBody = $section['contents'][0]['body'] ?? '';
+                if (!empty($reviewBody)) {
+                    $this->reviewQuestions = $this->sanitizeText($reviewBody);
+                }
+                unset($this->wizardSections[$sKey]);
+                break;
+            }
+        }
+        $this->wizardSections = array_values($this->wizardSections);
+
         $this->wizardResources = $activity->lmsResources()
             ->where('is_visible', true)
             ->with('media')
@@ -336,6 +356,7 @@ class LessonWizard extends Component
         $this->generationError = null;
         $this->lessonTitle = '';
         $this->lessonDescription = '';
+        $this->reviewQuestions = '';
         $this->publishAt = null;
         $this->allowDownloads = true;
         // Resetear filtros del listado para mostrar actividades limpias
@@ -569,6 +590,8 @@ class LessonWizard extends Component
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Dado contexto actividad, genera titulo y descripcion leccion LMS.
 
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada oración debe aportar valor y mantener un estilo literario impecable.
+
 Formato respuesta (SOLO 2 lineas, separadas por "||"):
 Linea 1 → Titulo (max 120 chars, claro, atractivo, acorde al grado)
 Linea 2 → Descripcion (2-3 oraciones, max 300 chars, resumir proposito y aprendizaje)
@@ -598,7 +621,7 @@ PROMPT;
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 256, 'timeout' => 120],
+                ['max_tokens' => 8192, 'timeout' => 120],
             );
 
             if (!$result['success']) {
@@ -674,6 +697,46 @@ PROMPT;
         $this->wizardSections = array_values($this->wizardSections);
     }
 
+    /**
+     * Muestra diálogo de confirmación para limpiar todas las secciones.
+     */
+    public function confirmResetWizardSections(): void
+    {
+        $count = count($this->wizardSections);
+        if ($count === 0) {
+            $this->notification()->info('Sin secciones', 'No hay diapositivas que limpiar.');
+            return;
+        }
+
+        $this->dialog()->confirm([
+            'title'       => 'Limpiar todas las diapositivas',
+            'description' => "¿Eliminar las {$count} diapositivas de la estructura actual? Se borrarán títulos, contenidos y bloques. Esta acción no se puede deshacer.",
+            'icon'        => 'error',
+            'accept'      => [
+                'label'  => 'Limpiar todo',
+                'method' => 'resetWizardSections',
+                'color'  => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+            ],
+        ]);
+    }
+
+    public function resetWizardSections(): void
+    {
+        $this->wizardSections = [];
+        $this->reviewQuestions = '';
+        $this->currentSlideIndex = 0;
+        $this->generatingSection = null;
+        $this->generationError = null;
+
+        $this->notification()->success(
+            'Secciones limpiadas',
+            'La estructura de diapositivas se ha reiniciado correctamente.'
+        );
+    }
+
     public function addWizardContent(int $sectionIndex): void
     {
         $this->validate(['contentBody' => 'required|string|min:1']);
@@ -745,6 +808,9 @@ PROMPT;
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Genera contenido pedagogico para seccion de leccion LMS.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada oración debe aportar valor y mantener un estilo literario impecable. El contenido debe redactarse como si formara parte de un libro de texto de alta calidad editorial.
+
 Formato: solo texto (150-400 palabras), parrafos estructurados, viñetas si aplica.
 NO incluyas titulos, metadatos ni explicaciones. Lenguaje acorde al grado.
 PROMPT;
@@ -858,6 +924,8 @@ PROMPT;
 
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Genera contenido pedagógico extenso en formato Markdown.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada sección debe redactarse con el rigor y la elegancia de un libro de texto de alta calidad editorial.
 
 EXTENSIÓN OBLIGATORIA: Mínimo 500 caracteres.
 Si generas menos de 500 caracteres tu respuesta será rechazada.
@@ -978,68 +1046,50 @@ PROMPT;
         $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
 
-        // ─── Estrategia 1: napkin.ai ─────────────────────────────────
-        $napkinPrompt = <<<PROMPT
-Genera un diagrama visual sobre el tema: "{$sectionTitle}".
+        // ─── OpenRouter: IA genera SVG ──────────────────────────────
+        $svgHtml = null;
+
+        $systemPrompt = <<<'PROMPT'
+Eres un diseñador de diagramas educativos. Genera únicamente código SVG válido y auto-contenido.
+
+REGLAS DE DISEÑO ESTRICTAS:
+- Fondo GENERAL del SVG: blanco (#ffffff) o gris muy claro (#f8f9fa). NUNCA uses fondos oscuros.
+- Cajas/nodos: fondos de colores pastel suaves (#e3f2fd, #fce4ec, #e8f5e9, #fff3e0, #f3e5f5, #e0f7fa, #f1f8e9, #fbe9e7). NUNCA fondos saturados ni oscuros.
+- Texto: color oscuro (#333333 o #1a1a1a) sobre fondos claros. NUNCA texto blanco sobre fondo claro.
+- Bordes: suaves (#cccccc o #bbbbbb), con border-radius de 8px en cajas.
+- Espaciado generoso entre elementos (mínimo 20px). NADA solapado.
+- Tipografía: sans-serif (Arial, Helvetica), tamaños legibles (14px+ texto normal, 16px+ títulos).
+- Layout: limpio, bien alineado, con jerarquía visual clara. Usa diseño de arriba a abajo o izquierda a derecha.
+- NO uses gradientes, sombras excesivas, ni efectos 3D.
+- NO incluyas explicaciones, markdown ni texto fuera del código SVG.
+- Responde SOLO <svg>...</svg>.
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+Genera un diagrama SVG educativo claro y bien estructurado sobre: "{$sectionTitle}".
 
 Contexto pedagógico:
 - Grado: {$gradeName}
 - Asignatura: {$subjectName}
 - Contenido de la sección: {$sectionPreview}
 
-El diagrama debe representar visualmente los conceptos clave de forma clara y pedagógica,
-apropiado para estudiantes del grado indicado.
-PROMPT;
+REQUISITOS VISUALES:
+1. Fondo blanco (#ffffff) o gris muy clarito (#f8f9fa).
+2. Cajas con fondos pastel suaves, bordes redondeados (rx="8"), texto oscuro legible.
+3. Espaciado amplio entre elementos — NADA DEBE SOLAPARSE.
+4. viewBox proporcional y bien dimensionado para que nada se corte.
+5. Jerarquía visual clara: título principal grande, sub-elementos más pequeños.
+6. Flechas o líneas de conexión simples y claras entre conceptos.
+7. Sin JS, sin CSS externo, sin CDNs. Todo inline en el SVG.
 
-        $svgHtml = null;
+Responde SOLO el código SVG. Sin markdown, sin explicaciones.
+PROMPT;
 
         try {
-            /** @var NapkinAiService $napkin */
-            $napkin = app(NapkinAiService::class);
-            $napkinResult = $napkin->generateDiagram($napkinPrompt, [
-                'style'     => 'educational_diagram',
-                'resolution' => '1024x1024',
-            ]);
-
-            if ($napkinResult['success'] && ($napkinResult['svg_html'] || $napkinResult['image_url'])) {
-                $svgHtml = $napkin->buildEmbedHtml(
-                    $napkinResult['svg_html'],
-                    $napkinResult['image_url'],
-                    'Diagrama: ' . $sectionTitle
-                );
-            }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('generateSlideImage: napkin.ai falló', [
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        // ─── Estrategia 2: IA (OpenRouter → Nvidia) genera SVG ──────
-        if (empty($svgHtml)) {
-            $aiPrompt = <<<PROMPT
-Eres un diseñador de diagramas educativos. Genera únicamente código SVG válido para un diagrama
-pedagógico sobre: "{$sectionTitle}".
-
-Contexto:
-- Grado: {$gradeName}
-- Asignatura: {$subjectName}
-- Contenido: {$sectionPreview}
-
-REQUISITOS DEL SVG:
-- Debe ser un diagrama visual atractivo (colores, formas, conexiones, etiquetas).
-- Usa <svg> con viewBox, xmlns="http://www.w3.org/2000/svg".
-- friendly colors, readable fonts (sans-serif), tamaño proporcionado.
-- Sin JS, sin CSS externo, sin CDNs. Todo inline en el SVG.
-- Sin etiquetas HTML envolventes. Solo <svg>...</svg>.
-- El SVG debe autocentrarse y escalar bien (usa viewBox).
-
-Responde SOLO el código SVG, sin markdown, sin explicaciones.
-PROMPT;
-
             $aiResult = $this->askWithCompaction(
-                'Eres un diseñador de diagramas educativos. Genera únicamente SVG válido y auto-contenido.',
-                $aiPrompt,
-                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 120]
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 300]
             );
 
             if ($aiResult['success'] && $aiResult['content']) {
@@ -1051,11 +1101,19 @@ PROMPT;
 
                 // Validar que comience con <svg
                 if (preg_match('/^<svg[\s>]/i', $rawSvg)) {
-                    $svgHtml = app(NapkinAiService::class)->buildEmbedHtml(
-                        $rawSvg, null, 'Diagrama: ' . $sectionTitle
-                    );
+                    $title = e('Diagrama: ' . $sectionTitle);
+                    $svgHtml = '<figure class="my-6">' . "\n"
+                        . '  <figcaption class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">'
+                        . $title . '</figcaption>' . "\n"
+                        . '  <div class="flex justify-center bg-gray-50 dark:bg-gray-800 rounded-xl p-4">'
+                        . "\n    " . $rawSvg . "\n  </div>\n"
+                        . '</figure>';
                 }
             }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('generateSlideImage: OpenRouter falló', [
+                'error' => $e->getMessage(),
+            ]);
         }
 
         // ─── Insertar el SVG en la sección ──────────────────────────
@@ -1076,7 +1134,7 @@ PROMPT;
             return;
         }
 
-        // ─── Error: ninguna estrategia funcionó ──────────────────────
+        // ─── Error ──────────────────────────────────────────────────
         $this->notification()->error(
             'Error al generar diagrama',
             'No se pudo generar el diagrama SVG. Intenta de nuevo o usa el editor HTML.'
@@ -1227,6 +1285,7 @@ CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - En pantallas grandes el diagrama debe ocupar el ancho disponible sin estirarse desproporcionadamente.
 - NO uses max-w-2xl ni max-w-4xl que limiten el ancho del diagrama en monitores grandes.
 - Prefiere graph LR (horizontal) o graph TB (vertical) seg├║n el contenido, con nodos de texto razonables.
+8. **NO incluyas explicaciones, introducciones, descripciones ni texto fuera del código HTML o Mermaid. Responde ÚNICAMENTE el código. Si es Mermaid, responde solo el código Mermaid. Si es HTML, responde solo el HTML desde `<div class="w-full...">`.**
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -1244,13 +1303,14 @@ PROMPT;
 Genera el c├│digo HTML del diagrama Mermaid para esta diapositiva.
 Recuerda: el diagrama debe ser RESPONSIVE, visible correctamente desde
 pantallas de celular hasta monitores anchos (condici├│n no negociable).
+**IMPORTANTE:*** Responde ÚNICAMENTE el código. Sin textos, explicaciones, introducciones ni despedidas. Solo el código.
 PROMPT;
 
         try {
             $result = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 2048, 'temperature' => 0.7, 'timeout' => 120],
+                ['max_tokens' => 4096, 'temperature' => 0.7, 'timeout' => 300],
                 3500
             );
 
@@ -1261,25 +1321,58 @@ PROMPT;
                 return;
             }
 
-            $html = trim($result['content'] ?? '');
-            $html = preg_replace('/^```(?:html)?\s*\n?/i', '', $html);
-            $html = preg_replace('/\n?```\s*$/s', '', $html);
-            $html = trim($html);
+            $raw = trim($result['content'] ?? '');
 
-            // Limpiar scripts CDN y wrappers de documento completo que la IA pueda incluir
-            $html = preg_replace('/<script\b[^>]*src=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*><\/script>\s*/i', '', $html);
-            $html = preg_replace('/<script\b[^>]*src=["\'][^"\']*mermaid[^"\']*["\'][^>]*><\/script>\s*/i', '', $html);
-            $html = preg_replace('/<script>mermaid\.initialize\(.*?<\/script>\s*/is', '', $html);
-            $html = preg_replace('/<\/?(?:html|head|body)[^>]*>\s*/i', '', $html);
-            $html = preg_replace('/<meta[^>]*>\s*/i', '', $html);
-            $html = preg_replace('/<link\b[^>]*href=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*>\s*/i', '', $html);
-            $html = trim($html);
+            // ─── Estrategia 1: extraer código dentro de ``` ``` ───
+            $code = $raw;
+            if (preg_match('/```(?:html|mermaid)?\s*\n?(.*?)```/s', $raw, $m)) {
+                $code = trim($m[1]);
+            } else {
+                // ─── Estrategia 2: sin fences — extraer código Mermaid desde su keyword ───
+                $mermaidKeywords = 'flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline';
+                if (preg_match('/\b(' . $mermaidKeywords . ')\s+(LR|TD|BT|RL)?/s', $raw, $kwMatch, PREG_OFFSET_CAPTURE)) {
+                    $startPos = $kwMatch[0][1];
+                    // Código desde el keyword hasta el final
+                    $rawCode = substr($raw, $startPos);
+                    // Si hay ``` al final, limpiarlo
+                    $rawCode = preg_replace('/```\s*$/s', '', $rawCode);
+                    $code = trim($rawCode);
+                }
+            }
 
-            if (empty($html)) {
-                $this->generationError = 'La IA no gener├│ c├│digo HTML.';
+            // Limpiar scripts y wrappers de documento completo
+            $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
+            $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*mermaid[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
+            $code = preg_replace('/<script>mermaid\.initialize\(.*?<\/script>\s*/is', '', $code);
+            $code = preg_replace('/<\/?(?:html|head|body)[^>]*>\s*/i', '', $code);
+            $code = preg_replace('/<meta[^>]*>\s*/i', '', $code);
+            $code = preg_replace('/<link\b[^>]*href=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*>\s*/i', '', $code);
+            $code = trim($code);
+
+            // ─── Limpiar trailing HTML tags (sobras de wrappers que la IA incluya) ───
+            $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
+            $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
+            $code = trim($code);
+
+            if (empty($code)) {
+                $this->generationError = 'La IA no generó código de diagrama.';
                 $this->generatingSection = null;
-                $this->notification()->error('Respuesta vac├¡a', 'La IA no gener├│ ning├║n c├│digo HTML.');
+                $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código de diagrama.');
                 return;
+            }
+
+            // ─── Si es Mermaid puro (sin HTML), envolverlo ───
+            $isMermaidRaw = !str_contains($code, '<div') && !str_contains($code, '<span')
+                && preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', $code);
+
+            if ($isMermaidRaw) {
+                $code = '<div class="w-full bg-white rounded-xl shadow-sm border border-gray-200">'
+                    . '<div class="p-3 sm:p-4 overflow-x-auto">'
+                    . '<div class="mermaid">' . "\n"
+                    . $code . "\n"
+                    . '</div>'
+                    . '</div>'
+                    . '</div>';
             }
 
             // Agregar como bloque de contenido HTML
@@ -1287,14 +1380,14 @@ PROMPT;
                 'id'         => 'temp_' . uniqid(),
                 'type'       => 'HTML',
                 'title'      => 'Diagrama: ' . $sectionTitle,
-                'body'       => $html,
+                'body'       => $code,
                 'is_visible' => true,
                 'media'      => null,
             ];
 
             $this->notification()->success(
                 'Diagrama generado',
-                "El diagrama Mermaid para \"{$sectionTitle}\" se gener├│ correctamente."
+                "El diagrama Mermaid para \"{$sectionTitle}\" se generó correctamente."
             );
         } catch (\Throwable $e) {
             $this->generationError = $e->getMessage();
@@ -1414,6 +1507,8 @@ PROMPT;
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Genera contenido pedagógico para una lección LMS.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada sección debe redactarse con el rigor y la elegancia de un libro de texto de alta calidad editorial.
 
 Debes generar EXACTAMENTE el formato que se indica. NO expliques lo que vas a hacer, NO describas las reglas, NO incluyas meta-comentarios. Solamente escribe el contenido directamente.
 
@@ -1923,7 +2018,9 @@ Tu tarea es generar código HTML autónomo para un diagrama Mermaid enmarcado en
 7. **Sin scripts externos** — no incluyas CDN de mermaid ni de tailwind. Solo el HTML del card con el div.mermaid. Los scripts se cargan globalmente en la página.
 8. **Salida limpia** — NO incluyas ```html ni markdown. Responde SOLO HTML puro desde <div class="w-full...">. No generes solo el código mermaid suelto; el código mermaid SIEMPRE debe ir dentro de <div class="mermaid">...</div>, y este a su vez dentro del card contenedor.
 
-**Ejemplo de salida correcta:**
+9. **NO incluyas explicaciones, introducciones, descripciones ni texto fuera del código HTML. Responde ÚNICAMENTE el código HTML desde <div class="w-full...">.**
+	
+	**Ejemplo de salida correcta:**
 <div class="w-full bg-white rounded-xl shadow-sm border border-gray-200">
   <div class="p-3 sm:p-4 overflow-x-auto">
     <div class="mermaid">
@@ -2001,12 +2098,13 @@ PROMPT;
                 return;
             }
 
-            $html = trim($result['content'] ?? '');
+            $raw = trim($result['content'] ?? '');
 
-            // Limpiar posibles wrappers de markdown
-            $html = preg_replace('/^```(?:html)?\s*\n?/i', '', $html);
-            $html = preg_replace('/\n?```\s*$/s', '', $html);
-            $html = trim($html);
+            // Extraer código dentro de ``` ``` (si la IA añade explicación antes/después)
+            $html = $raw;
+            if (preg_match('/```(?:html|mermaid)?\s*\n?(.*?)```/s', $raw, $m)) {
+                $html = trim($m[1]);
+            }
 
             if (empty($html)) {
                 $this->generationError = 'La IA no generó contenido HTML.';
@@ -2046,6 +2144,99 @@ PROMPT;
             $this->generatingEmbedCard = false;
             $this->notification()->error('Error inesperado', $e->getMessage());
         }
+    }
+
+    // ─── Wizard: Paso 2 — Generar preguntas de repaso ──────────
+
+    public function generateReviewQuestions(): void
+    {
+        if (empty($this->lessonTitle)) {
+            $this->notification()->error('Sin título', 'Primero escribe un título para la lección en el paso 1.');
+            return;
+        }
+
+        // Construir contexto a partir de las secciones existentes
+        $sectionsSummary = '';
+        foreach ($this->wizardSections as $sec) {
+            $title = $sec['title'] ?? '';
+            $bodyPreview = '';
+            if (!empty($sec['contents'])) {
+                $bodyPreview = strip_tags($sec['contents'][0]['body'] ?? '');
+                $bodyPreview = mb_substr($bodyPreview, 0, 300);
+            }
+            if (!empty($title) || !empty($bodyPreview)) {
+                $sectionsSummary .= "- {$title}: {$bodyPreview}\n";
+            }
+        }
+        if (empty($sectionsSummary)) {
+            $sectionsSummary = '(No hay secciones generadas aún)';
+        }
+
+        $gradeName = $this->selectedActivity?->pevaluacion?->seccion?->grado?->name ?? '—';
+        $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName = $this->selectedActivity?->pevaluacion?->seccion?->name ?? '—';
+
+        $systemPrompt = <<<'PROMPT'
+Eres docente venezolano. Genera preguntas de repaso en formato Markdown para una lección escolar.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller.
+
+Formato obligatorio:
+## Preguntas de Repaso
+
+1. **Pregunta 1** — texto de la pregunta en negrita seguido de la respuesta explicativa en párrafo.
+2. **Pregunta 2** — mismo formato.
+3. **Pregunta 3** — mismo formato.
+
+### Sección de Desarrollo
+4. **Pregunta 4** — texto de la pregunta...
+5. **Pregunta 5** — ...
+
+### Verdadero o Falso (opcional)
+- **Afirmación 1** → Verdadero. Explicación breve.
+- **Afirmación 2** → Falso. Explicación breve.
+
+Reglas:
+- Mínimo 8 preguntas variadas (abiertas, desarrollo, V/F).
+- Usa ## para título principal, ### para sub-secciones, **negritas** para destacar.
+- Incluye respuestas breves después de cada pregunta.
+- NO incluyas ```markdown, NO expliques lo que generas, NO añadas meta-comentarios.
+- Responde SOLO con el contenido Markdown.
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto
+
+**Curso:** {$this->lessonTitle} · {$gradeName} · {$subjectName} · Sec. {$sectionName}
+
+**Secciones de la lección:**
+{$sectionsSummary}
+
+Genera las preguntas de repaso en Markdown siguiendo el formato indicado. Mínimo 8 preguntas variadas con sus respuestas.
+PROMPT;
+
+        $result = $this->askWithCompaction(
+            $systemPrompt,
+            $userPrompt,
+            ['max_tokens' => 4096, 'timeout' => 180],
+        );
+
+        if (!$result['success']) {
+            $this->notification()->error('Error al generar preguntas', $result['error'] ?? 'Error desconocido');
+            return;
+        }
+
+        $this->reviewQuestions = $this->sanitizeText($result['content'] ?? '');
+
+        if (empty($this->reviewQuestions)) {
+            $this->notification()->error('Respuesta vacía', 'La IA no generó preguntas de repaso.');
+            return;
+        }
+
+        $this->notification()->success(
+            'Preguntas generadas',
+            'Las preguntas de repaso se generaron correctamente en formato Markdown.'
+        );
     }
 
     // ─── Wizard: Paso 2 — Guardado incremental ────────────────
@@ -2092,10 +2283,54 @@ PROMPT;
             }
         }
 
+        // ─── Guardar preguntas de repaso como sección final ────
+        $this->saveReviewQuestionsSection($activityId);
+
         $this->notification()->success(
             'Guardado',
             count($this->wizardSections) . ' secciones y sus bloques guardados correctamente'
         );
+    }
+
+    // ─── Guarda o elimina la sección de preguntas de repaso ──────
+
+    private function saveReviewQuestionsSection(int $activityId): void
+    {
+        $reviewTitle = 'Preguntas de Repaso';
+
+        if (!empty($this->reviewQuestions)) {
+            // Buscar sección existente de repaso
+            $existingSection = LmsActivitySection::where('activity_id', $activityId)
+                ->where('title', $reviewTitle)
+                ->first();
+
+            if ($existingSection) {
+                LmsActivityContent::where('section_id', $existingSection->id)->delete();
+                $section = $existingSection;
+            } else {
+                $maxSort = LmsActivitySection::where('activity_id', $activityId)->max('sort_order') ?? 0;
+                $section = LmsActivitySection::create([
+                    'activity_id' => $activityId,
+                    'title'       => $reviewTitle,
+                    'sort_order'  => $maxSort + 1,
+                    'is_visible'  => true,
+                ]);
+            }
+
+            LmsActivityContent::create([
+                'section_id' => $section->id,
+                'type'       => 'TEXT',
+                'title'      => null,
+                'body'       => $this->sanitizeText($this->reviewQuestions),
+                'sort_order' => 1,
+                'is_visible' => true,
+            ]);
+        } else {
+            // Sin contenido: eliminar sección existente si la hay
+            LmsActivitySection::where('activity_id', $activityId)
+                ->where('title', $reviewTitle)
+                ->delete();
+        }
     }
 
     // ─── Wizard: Paso 4 — Guardar y Publicar ───────────────────
@@ -2337,7 +2572,10 @@ PROMPT;
             ->whereNotIn('id', $visibleEmbedIds)
             ->update(['is_visible' => false]);
 
-        // 6. Publicar
+        // 6. Guardar preguntas de repaso
+        $this->saveReviewQuestionsSection($activityId);
+
+        // 7. Publicar
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
@@ -2934,11 +3172,13 @@ PROMPT;
                 || str_contains($errorMsg, '28') || str_contains($errorMsg, '52')
                 || str_contains($errorMsg, 'cURL error')
                 || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')
-                || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')) {
+                || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')
+                || str_contains($errorMsg, 'excedió el límite de tokens') || str_contains($errorMsg, 'sin contenido') || str_contains($errorMsg, 'content_filter') || str_contains($errorMsg, 'finalizó sin contenido')) {
                 $reason = str_contains($errorMsg, '429') ? 'límite de requests'
                     : (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') ? 'error del modelo'
                     : (str_contains($errorMsg, '52') || str_contains($errorMsg, 'Empty reply') ? 'servidor cerró conexión'
-                    : 'timeout de conexión'));
+                    : (str_contains($errorMsg, 'excedió el límite') ? 'el modelo excede el límite de tokens'
+                    : 'timeout de conexión')));
                 $this->notification()->info(
                     'Usando NVIDIA (fallback)',
                     "OpenRouter alcanzó el {$reason}. Usando modelo NVIDIA como alternativa."
@@ -3238,9 +3478,18 @@ PROMPT;
         $rendered = $blocks->map(function (string $body, int $idx): string {
             $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
 
+            // Fallback: si no tiene class="mermaid" pero arranca con keyword Mermaid
+            if (!$isMermaid) {
+                $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($body)) === 1;
+            }
+
             if ($isMermaid) {
                 preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m);
                 $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                // Si no hay extracción (fallback sin wrapper), usar el body completo
+                if (empty($mermaidCode)) {
+                    $mermaidCode = trim(strip_tags($body));
+                }
 
                 return '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
                     . "\n"

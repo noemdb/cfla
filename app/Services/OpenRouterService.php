@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Log;
 
 class OpenRouterService
 {
@@ -35,8 +36,44 @@ class OpenRouterService
 
             $data = $response->json();
 
-            if (!isset($data['choices'][0]['message']['content'])) {
-                return $this->errorResult('Respuesta inesperada de la API: sin contenido en choices[0].');
+            $content = $data['choices'][0]['message']['content'] ?? null;
+
+            // GPT-5 y modelos nuevos pueden devolver content en formatos alternativos
+            if ($content === null && !isset($data['choices'][0]['message']['refusal'])) {
+                // Revisar si el content está como array multimodal
+                $msgContent = $data['choices'][0]['message']['content'] ?? [];
+                if (is_array($msgContent)) {
+                    $textParts = array_filter($msgContent, fn($c) => ($c['type'] ?? '') === 'text');
+                    if (!empty($textParts)) {
+                        $content = implode("\n", array_column($textParts, 'text'));
+                    }
+                }
+            }
+
+            if ($content === null || (is_string($content) && trim($content) === '')) {
+                Log::warning('OpenRouter: respuesta sin contenido', [
+                    'model' => $overrides['model'] ?? config('openrouter.model'),
+                    'finish_reason' => $data['choices'][0]['finish_reason'] ?? 'unknown',
+                    'content_null' => array_key_exists('content', $data['choices'][0]['message'] ?? []) ? ($data['choices'][0]['message']['content'] === null ? 'yes_null' : 'yes_empty') : 'missing_key',
+                    'has_refusal' => isset($data['choices'][0]['message']['refusal']) ? 'yes' : 'no',
+                    'message_keys' => $data['choices'][0]['message'] ?? 'no_message',
+                    'choice_keys' => array_keys($data['choices'][0] ?? []),
+                ]);
+
+                $refusal = $data['choices'][0]['message']['refusal'] ?? null;
+                if ($refusal) {
+                    return $this->errorResult('El modelo rechazó la solicitud: ' . $refusal);
+                }
+
+                $finishReason = $data['choices'][0]['finish_reason'] ?? 'unknown';
+                $errorDetail = match ($finishReason) {
+                    'length' => 'La respuesta excedió el límite de tokens.',
+                    'content_filter' => 'La respuesta fue filtrada por el sistema de seguridad.',
+                    'stop' => 'El modelo finalizó sin contenido.',
+                    default => "sin contenido en choices[0] (finish_reason: {$finishReason})",
+                };
+
+                return $this->errorResult('Respuesta inesperada de la API: ' . $errorDetail);
             }
 
             return [
@@ -91,8 +128,44 @@ class OpenRouterService
 
             $data = $response->json();
 
-            if (!isset($data['choices'][0]['message']['content'])) {
-                return $this->errorResult('Respuesta inesperada de la API: sin contenido en choices[0].');
+            $content = $data['choices'][0]['message']['content'] ?? null;
+
+            // GPT-5 y modelos nuevos pueden devolver content en formatos alternativos
+            if ($content === null && !isset($data['choices'][0]['message']['refusal'])) {
+                // Revisar si el content está como array multimodal
+                $msgContent = $data['choices'][0]['message']['content'] ?? [];
+                if (is_array($msgContent)) {
+                    $textParts = array_filter($msgContent, fn($c) => ($c['type'] ?? '') === 'text');
+                    if (!empty($textParts)) {
+                        $content = implode("\n", array_column($textParts, 'text'));
+                    }
+                }
+            }
+
+            if ($content === null || (is_string($content) && trim($content) === '')) {
+                Log::warning('OpenRouter: respuesta sin contenido', [
+                    'model' => $overrides['model'] ?? config('openrouter.model'),
+                    'finish_reason' => $data['choices'][0]['finish_reason'] ?? 'unknown',
+                    'content_null' => array_key_exists('content', $data['choices'][0]['message'] ?? []) ? ($data['choices'][0]['message']['content'] === null ? 'yes_null' : 'yes_empty') : 'missing_key',
+                    'has_refusal' => isset($data['choices'][0]['message']['refusal']) ? 'yes' : 'no',
+                    'message_keys' => $data['choices'][0]['message'] ?? 'no_message',
+                    'choice_keys' => array_keys($data['choices'][0] ?? []),
+                ]);
+
+                $refusal = $data['choices'][0]['message']['refusal'] ?? null;
+                if ($refusal) {
+                    return $this->errorResult('El modelo rechazó la solicitud: ' . $refusal);
+                }
+
+                $finishReason = $data['choices'][0]['finish_reason'] ?? 'unknown';
+                $errorDetail = match ($finishReason) {
+                    'length' => 'La respuesta excedió el límite de tokens.',
+                    'content_filter' => 'La respuesta fue filtrada por el sistema de seguridad.',
+                    'stop' => 'El modelo finalizó sin contenido.',
+                    default => "sin contenido en choices[0] (finish_reason: {$finishReason})",
+                };
+
+                return $this->errorResult('Respuesta inesperada de la API: ' . $errorDetail);
             }
 
             return [
@@ -138,7 +211,8 @@ class OpenRouterService
                 ['role' => 'system', 'content' => $systemPrompt],
                 ['role' => 'user',   'content' => $message],
             ],
-            'max_tokens'  => $overrides['max_tokens'] ?? (int) config('openrouter.max_tokens', 2048),
+            'max_tokens'           => $overrides['max_tokens'] ?? (int) config('openrouter.max_tokens', 2048),
+            'max_completion_tokens' => $overrides['max_tokens'] ?? (int) config('openrouter.max_tokens', 2048),
             'temperature' => $overrides['temperature'] ?? (float) config('openrouter.temperature', 0.7),
         ];
     }

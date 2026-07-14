@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -33,6 +34,10 @@ class IndexComponent extends Component
     public $showDetailModal = false;
     public $detailActivity;
     public $showAchievementModal = false;
+
+    // Clone preview
+    public $showCloneDetailModal = false;
+    public $clonePreview = [];
 
     // S2526: Actividades de periodo anterior
     public $showS2526Modal = false;
@@ -97,6 +102,7 @@ class IndexComponent extends Component
         // Descartar la sección actual de la lista de clonación
         $this->list_seccions = Seccion::where('grado_id', $grado?->id)
             ->where('id', '<>', $this->pevaluacion->seccion_id)
+            ->where('status_active', 'true')
             ->pluck('name', 'id');
 
         // Listas para filtros
@@ -312,11 +318,33 @@ class IndexComponent extends Component
 
     public function emptyActivities()
     {
-        $deletedRows = Activity::where('pevaluacion_id', $this->pevaluacion_id)->delete();
-        if ($deletedRows > 0) {
+        $activities = Activity::where('pevaluacion_id', $this->pevaluacion_id)->get();
+
+        if ($activities->isEmpty()) {
+            $this->notification()->error(
+                '¡Ocurrieron errores!',
+                'NO se encontraron actividades para eliminar'
+            );
+            return;
+        }
+
+        $count = 0;
+        foreach ($activities as $activity) {
+            $activity->achievements()->delete();
+            $activity->lmsLogs()?->delete();
+            $activity->lmsPublication()?->delete();
+            $activity->lmsSections()?->delete();
+            $activity->lmsResources()?->delete();
+            $activity->lmsLinks()?->delete();
+            $activity->lmsHtmlEmbeds()?->delete();
+            $activity->delete();
+            $count++;
+        }
+
+        if ($count > 0) {
             $this->notification()->success(
                 '¡Excelente, buen trabajo!',
-                'Los registros fueron eliminados exitosamente'
+                "{$count} actividades eliminadas exitosamente"
             );
         } else {
             $this->notification()->error(
@@ -327,6 +355,76 @@ class IndexComponent extends Component
     }
 
     // ─── CLONACIÓN ─────────────────────────────────────────
+
+    public function previewClone()
+    {
+        $pevaluacion = Pevaluacion::findOrFail($this->pevaluacion_id);
+        $seccion = Seccion::find($this->seccion_id);
+
+        if (!$seccion) {
+            $this->notification()->error(
+                '¡Ocurrieron errores!',
+                'Seleccione una sección para previsualizar'
+            );
+            return;
+        }
+
+        $target = Pevaluacion::query()
+            ->where('profesor_id', $pevaluacion->profesor_id)
+            ->where('lapso_id', $pevaluacion->lapso_id)
+            ->where('pensum_id', $pevaluacion->pensum_id)
+            ->where('seccion_id', $seccion->id);
+
+        $target = ($pevaluacion->grupo_estable_id)
+            ? $target->where('grupo_estable_id', $pevaluacion->grupo_estable_id)
+            : $target;
+
+        $target = $target->with('activities.achievements')->first();
+
+        if (!$target) {
+            $this->notification()->error(
+                '¡Ocurrieron errores!',
+                'No se encontró carga académica para la sección seleccionada'
+            );
+            return;
+        }
+
+        $this->clonePreview = [
+            'seccion_name' => $seccion->name,
+            'grado_name' => $target->grado?->name ?? '—',
+            'asignatura_name' => $target->pensum?->asignatura?->name ?? '—',
+            'lapso_name' => $target->lapso?->name ?? '—',
+            'total_activities' => $target->activities->count(),
+            'total_achievements' => $target->activities->sum(fn($a) => $a->achievements->count()),
+            'activities' => $target->activities->map(fn($a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'finicial' => $a->finicial,
+                'ffinal' => $a->ffinal,
+                'topic' => $a->topic,
+                'thematic' => $a->thematic,
+                'description' => $a->description,
+                'teaching' => Str::limit($a->teaching, 80),
+                'learning' => Str::limit($a->learning, 80),
+                'observations' => Str::limit($a->observations, 80),
+                'references' => Str::limit($a->references, 60),
+                'status' => $a->status,
+                'achievements_count' => $a->achievements->count(),
+                'achievements' => $a->achievements->map(fn($ach) => [
+                    'id' => $ach->id,
+                    'name' => $ach->name,
+                ])->toArray(),
+            ])->toArray(),
+        ];
+
+        $this->showCloneDetailModal = true;
+    }
+
+    public function closeCloneDetailModal()
+    {
+        $this->showCloneDetailModal = false;
+        $this->clonePreview = [];
+    }
 
     public function clone()
     {

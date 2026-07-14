@@ -1478,6 +1478,9 @@
                                         @php
                                             $rawBody = $content['body'] ?? '';
                                             $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                            if (!$isMermaid) {
+                                                $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
+                                            }
                                         @endphp
                                         @if(($content['title'] ?? null))
                                             <div class="flex items-start gap-2 mb-2">
@@ -1489,6 +1492,9 @@
                                             @php
                                                 preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
                                                 $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                if (empty($mermaidCode)) {
+                                                    $mermaidCode = trim(strip_tags($rawBody));
+                                                }
                                             @endphp
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $mermaidCode }}"
@@ -1933,7 +1939,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions"
              class="fixed inset-0 z-[9999] items-center justify-center bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay">
             <div class="max-w-4xl py-8 mx-auto px-6 space-y-5">
@@ -2190,8 +2196,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
                 {{-- ═══ COLUMNA IZQUIERDA: FORMULARIO (3/5) ═══ --}}
-                <div class="lg:col-span-5"
-                     class="space-y-4 transition-all duration-300 min-w-0">
+                <div class="lg:col-span-5 space-y-4 transition-all duration-300 min-w-0">
 
                     {{-- STEP 1: Información de la Lección --}}
                     @if($currentStep === 1)
@@ -2626,25 +2631,13 @@
                                             Generar Ilustración
                                         </button>
                                         <button wire:click="generateSlideDiagram"
+                                                @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideDiagram"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                                             Generar Diagrama
-                                        </button>
-
-                                        <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
-
-                                        {{-- Guardar secciones y bloques --}}
-                                        <button wire:click="saveStep2"
-                                                wire:loading.attr="disabled"
-                                                wire:target="saveStep2"
-                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 active:scale-[0.97]">
-                                            <svg wire:loading wire:target="saveStep2" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                            <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                                            Guardar
                                         </button>
 
                                         {{-- Vista estudiante --}}
@@ -2663,6 +2656,15 @@
                                                        text-red-400/70 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             Eliminar
+                                        </button>
+
+                                        <span class="w-px h-5 bg-red-900/50 mx-1"></span>
+
+                                        <button wire:click="confirmResetWizardSections"
+                                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all
+                                                       text-red-400/50 hover:text-red-300 hover:bg-red-500/15 border border-red-900/30 hover:border-red-500/30">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3 3m0 0l3-3m-3 3V8"/></svg>
+                                            Limpiar todo
                                         </button>
                                     </div>
                                 </div>
@@ -2705,10 +2707,111 @@
                                     + Diapositiva
                                 </button>
                             </div>
+
+                            {{-- ===== PREGUNTAS DE REPASO (Markdown) ===== --}}
+                            <div class="border-t border-slate-700/30 bg-slate-800/20"
+                                 x-data="{ repasoOpen: @json(!empty($reviewQuestions)) }">
+                                <button @click="repasoOpen = !repasoOpen"
+                                        class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-700/20 transition-colors">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span class="font-bold">Preguntas de Repaso</span>
+                                        <span class="text-[10px] text-slate-600 font-mono">Markdown</span>
+                                        @if(!empty($reviewQuestions))
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60"></span>
+                                        @endif
+                                    </div>
+                                    <svg class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                         :class="repasoOpen ? 'rotate-180' : ''"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                <div x-show="repasoOpen" x-cloak x-transition:enter.duration.150ms class="px-4 pb-3 space-y-2">
+                                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                                        Escribe preguntas de repaso en formato Markdown. Puedes usar <code class="text-emerald-400/80">##</code> títulos,
+                                        <code class="text-emerald-400/80">**negritas**</code>, listas, tablas y más.
+                                    </p>
+                                    <textarea wire:model="reviewQuestions"
+                                              rows="8"
+                                              class="w-full bg-slate-950/80 border border-slate-700/50 rounded-lg px-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
+                                              placeholder="## Preguntas de Repaso
+
+1. Cuál es...?
+2. Explica...
+
+### Sección 2
+Cómo...?"
+                                              spellcheck="false"></textarea>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] text-slate-600">{{ strlen($reviewQuestions) }} caracteres</span>
+                                        <div class="flex items-center gap-2">
+                                            <button wire:click="generateReviewQuestions"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                Generar con IA
+                                            </button>
+                                            @if(!empty($reviewQuestions))
+                                                <button wire:click="$set('showReviewPreview', true)"
+                                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    Vista previa
+                                                </button>
+                                            @endif
+                                            <button wire:click="$set('reviewQuestions', '')"
+                                                    wire:confirm="Limpiar las preguntas de repaso?"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                Limpiar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ═══ MODAL: Vista Previa de Preguntas de Repaso ═══ --}}
+                            @if($showReviewPreview && !empty($reviewQuestions))
+                                <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="review-preview-modal">
+                                    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showReviewPreview', false)"></div>
+                                    <div class="relative min-h-screen flex items-center justify-center p-4">
+                                        <div class="relative w-full max-w-3xl bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-hidden">
+                                            {{-- Header --}}
+                                            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-slate-800/90">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <h3 class="text-sm font-bold text-white">Vista Previa — Preguntas de Repaso</h3>
+                                                </div>
+                                                <button wire:click="$set('showReviewPreview', false)" class="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6L18 18"/></svg>
+                                                </button>
+                                            </div>
+                                            {{-- Body: Markdown rendered --}}
+                                            <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                                                <div class="prose prose-sm prose-invert max-w-none
+                                                            prose-headings:text-white prose-headings:font-bold
+                                                            prose-h2:text-lg prose-h2:border-b prose-h2:border-slate-700 prose-h2:pb-2 prose-h2:mb-4
+                                                            prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
+                                                            prose-p:text-slate-300 prose-p:leading-relaxed
+                                                            prose-strong:text-emerald-300
+                                                            prose-ul:text-slate-300 prose-ol:text-slate-300
+                                                            prose-li:marker:text-emerald-500
+                                                            prose-code:text-cyan-300 prose-code:bg-slate-700/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px]
+                                                            prose-hr:border-slate-700">
+                                                    {!! Str::markdown($reviewQuestions) !!}
+                                                </div>
+                                            </div>
+                                            {{-- Footer --}}
+                                            <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-slate-700 bg-slate-800/60">
+                                                <button wire:click="$set('showReviewPreview', false)"
+                                                        class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                                                    Cerrar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     @endif
 
-                    {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
+                                        {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
                     @if($currentStep === 3)
                         <div class="w-full bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
                              x-data="{ activeTab: 'resources' }">
@@ -3617,6 +3720,9 @@
                                             @php
                                                 $rawBody = $content['body'] ?? '';
                                                 $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                                if (!$isMermaid) {
+                                                    $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
+                                                }
                                             @endphp
                                             @if($content['title'])
                                                 <h4 class="text-sm font-semibold text-slate-300">{{ $content['title'] }}</h4>
@@ -3625,6 +3731,9 @@
                                                 @php
                                                     preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
                                                     $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                    if (empty($mermaidCode)) {
+                                                        $mermaidCode = trim(strip_tags($rawBody));
+                                                    }
                                                 @endphp
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $mermaidCode }}"
@@ -3849,6 +3958,9 @@
                                             @php
                                                 $rawBody = $content['body'] ?? '';
                                                 $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                                if (!$isMermaid) {
+                                                    $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
+                                                }
                                             @endphp
                                             @if($content['title'])
                                                 <div class="flex items-start gap-2 mb-2">
@@ -3860,6 +3972,9 @@
                                                 @php
                                                     preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
                                                     $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                    if (empty($mermaidCode)) {
+                                                        $mermaidCode = trim(strip_tags($rawBody));
+                                                    }
                                                 @endphp
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $mermaidCode }}"
@@ -4100,6 +4215,30 @@
                     </div>
                 </div>
             @endif
+
+            {{-- ═══ BOTÓN FLOTANTE GUARDAR ═══ --}}
+            <div class="fixed bottom-6 right-6 z-50">
+                <button wire:click="saveStep2"
+                        wire:loading.attr="disabled"
+                        wire:target="saveStep2"
+                        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                               shadow-lg shadow-blue-500/20
+                               text-white bg-gradient-to-br from-blue-500 to-blue-600
+                               hover:from-blue-400 hover:to-blue-500
+                               active:scale-[0.95] active:shadow-blue-500/30
+                               disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
+                               border border-blue-400/30">
+                    <svg wire:loading wire:target="saveStep2" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                    </svg>
+                    <span wire:loading.remove wire:target="saveStep2">Guardar lección</span>
+                    <span wire:loading wire:target="saveStep2">Guardando...</span>
+                </button>
+            </div>
+
         @endif
     </div>
 </div>
@@ -4107,10 +4246,9 @@
 
 </div>
 
-{{-- ═══ Mermaid.js via icehouse-ventures/laravel-mermaid ═══ --}}
+{{-- ═══ Mermaid.js — bundled via Vite (resources/js/app.js) ═══ --}}
 @assets
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js" defer></script>
-    <style>
+<style>
         .student-preview-modal:fullscreen {
             background: #f1f5f9;
             overflow-y: auto;
@@ -4350,10 +4488,12 @@
             try {
                 const id = 'mermaid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
                 const { svg } = await mermaid.render(id, code);
-                this.$refs.target.innerHTML = svg;
-                this.$nextTick(() => this.setupUI());
+                if (this.$refs.target) {
+                    this.$refs.target.innerHTML = svg;
+                    this.$nextTick(() => this.setupUI());
+                }
             } catch (e) {
-                // Silently handle render errors
+                console.warn('[MERMAID] Render error:', e.message || e);
             }
         },
 

@@ -7,6 +7,10 @@ import "flowbite";
 import Chart from 'chart.js/auto';
 window.Chart = Chart;
 
+// Make Mermaid available globally for Livewire/Alpine components (diagrams in lesson wizard)
+import mermaid from 'mermaid';
+window.mermaid = mermaid;
+
 // Initialization for ES Users (Chart from tw-elements is same library, aliased to avoid name collision)
 import {
     Tooltip,
