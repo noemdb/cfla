@@ -6,7 +6,7 @@
                 <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center shadow-xl border-2 border-green-600">
                     <x-icon name="identification" class="w-10 h-10 text-green-100" />
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-2">
+                <h2 class="text-xl font-bold text-white mb-2">
                     Identificación del Representante
                 </h2>
                 <p class="text-gray-300">
@@ -52,7 +52,7 @@
                         <x-icon name="users" class="w-6 h-6 text-green-100" />
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-white">
+                        <h2 class="text-xl font-bold text-white">
                             Confirmación de Prosecución
                         </h2>
                         <p class="text-gray-300">
@@ -175,7 +175,7 @@
                 <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center shadow-xl animate-pulse border-2 border-green-500">
                     <x-icon name="check-circle" class="w-10 h-10 text-green-100" />
                 </div>
-                <h2 class="text-2xl font-bold text-white mb-2">
+                <h2 class="text-xl font-bold text-white mb-2">
                     ¡Prosecución Confirmada!
                 </h2>
                 <p class="text-gray-300">

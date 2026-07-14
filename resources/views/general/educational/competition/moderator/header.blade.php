@@ -9,7 +9,7 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <h1 class="text-lg md:text-2xl font-bold text-white uppercase">CFLA - Moderador</h1>
+                    <h1 class="text-lg md:text-xl font-bold text-white uppercase">CFLA - Moderador</h1>
                     <p class="sm:block text-sm text-emerald-300 font-bold"><strong>Competiciones Estudiantiles.</strong>
                         Preguntas y respuestas</p>
                 </div>

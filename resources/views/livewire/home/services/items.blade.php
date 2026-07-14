@@ -21,7 +21,7 @@
                     <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                    <h4 class="mb-4 text-xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
                         Inicial</h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
@@ -70,7 +70,7 @@
                     <x-icon name="bookmark" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-200" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
+                    <h4 class="mb-4 text-xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Educación
                         Primaria</h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">
@@ -112,7 +112,7 @@
                     <x-icon name="cog" class="p-2 h-16 w-16 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div class="p-6 flex-1 flex flex-col">
-                    <h4 class="mb-4 text-2xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Media General
+                    <h4 class="mb-4 text-xl font-bold text-emerald-800 dark:text-emerald-100 text-center">Media General
                     </h4>
                     <hr class="border-emerald-500/30" />
                     <p class="mt-4 flex-1 text-sm text-gray-600 dark:text-gray-400">

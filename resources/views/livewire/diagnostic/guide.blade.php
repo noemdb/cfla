@@ -71,7 +71,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
-                    <h2 class="text-2xl font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
+                    <h2 class="text-xl font-bold text-white mb-4">¿Qué es el Diagnóstico Educativo?</h2>
                     <p class="text-gray-300 text-lg max-w-3xl mx-auto">
                         Es una herramienta diseñada para evaluar tus conocimientos actuales en diferentes áreas de formación, 
                         permitiendo identificar fortalezas y oportunidades de mejora en tu proceso de aprendizaje.
@@ -104,7 +104,7 @@
         @elseif($activeTab === 'process')
             <!-- Process Tab -->
             <div class="space-y-8">
-                <h2 class="text-2xl font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
+                <h2 class="text-xl font-bold text-white text-center mb-8">Proceso Paso a Paso</h2>
                 
                 <div class="space-y-6">
                     <div class="flex items-start space-x-4">
@@ -193,7 +193,7 @@
         @elseif($activeTab === 'questions')
             <!-- Questions Tab -->
             <div class="space-y-8">
-                <h2 class="text-2xl font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
+                <h2 class="text-xl font-bold text-white text-center mb-8">Tipos de Preguntas</h2>
                 
                 <div class="grid gap-8">
                     <!-- Multiple Choice -->
@@ -204,7 +204,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-2xl font-semibold text-white">Selección Múltiple</h3>
+                            <h3 class="text-xl font-semibold text-white">Selección Múltiple</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Preguntas con varias opciones donde debes seleccionar la respuesta que mejor refleje tu conocimiento o experiencia.</p>
                         
@@ -240,7 +240,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2 2z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-2xl font-semibold text-white">Escala Numérica</h3>
+                            <h3 class="text-xl font-semibold text-white">Escala Numérica</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Evalúa tu nivel de conocimiento o confianza en una escala del 1 al 10.</p>
                         
@@ -248,7 +248,7 @@
                             <h4 class="text-white font-medium mb-3">Ejemplo:</h4>
                             <p class="text-gray-300 mb-4">En una escala del 1 al 10, ¿qué tan confiado te sientes resolviendo problemas de algoritmos?</p>
                             <div class="flex items-center space-x-2 mb-2">
-                                <span class="text-2xl font-bold text-purple-400">7</span>
+                                <span class="text-xl font-bold text-purple-400">7</span>
                                 <span class="text-gray-400">/ 10</span>
                                 <div class="flex-1 bg-gray-600 rounded-full h-3 ml-4">
                                     <div class="bg-purple-500 h-3 rounded-full" style="width: 70%"></div>
@@ -269,7 +269,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-2xl font-semibold text-white">Respuesta Abierta</h3>
+                            <h3 class="text-xl font-semibold text-white">Respuesta Abierta</h3>
                         </div>
                         <p class="text-gray-300 mb-4">Preguntas que requieren una respuesta escrita donde puedes expresar tu conocimiento con tus propias palabras.</p>
                         
@@ -289,7 +289,7 @@
         @elseif($activeTab === 'tips')
             <!-- Tips Tab -->
             <div class="space-y-8">
-                <h2 class="text-2xl font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
+                <h2 class="text-xl font-bold text-white text-center mb-8">Consejos y Recomendaciones</h2>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-gradient-to-br from-yellow-900/50 to-yellow-800/30 p-6 rounded-xl border border-yellow-700/50">

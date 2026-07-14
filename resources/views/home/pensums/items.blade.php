@@ -127,7 +127,7 @@
     <div class="relative max-w-4xl max-h-full">
         <!-- Botón de cerrar -->
         <button onclick="closeModal()"
-            class="absolute -top-10 right-0 text-white text-2xl font-bold hover:text-gray-300 focus:outline-none">
+            class="absolute -top-10 right-0 text-white text-xl font-bold hover:text-gray-300 focus:outline-none">
             &times;
         </button>
         <!-- Imagen en grande -->

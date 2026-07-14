@@ -25,7 +25,7 @@
                     </div>
 
                     {{-- Nombre de la competición --}}
-                    <h5 class="text-2xl font-black tracking-tight text-gray-900 uppercase">
+                    <h5 class="text-xl font-black tracking-tight text-gray-900 uppercase">
                         {{ $competition->name }}
                     </h5>
 

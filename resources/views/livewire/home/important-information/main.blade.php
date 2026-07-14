@@ -67,7 +67,7 @@
             <div class="space-y-2">
                 <h6 class="text-emerald-600 dark:text-emerald-400 font-bold tracking-widest text-sm uppercase">Comunidad
                     Amigoniana</h6>
-                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                <h2 class="text-xl sm:text-4xl lg:text-5xl font-black text-gray-900 dark:text-white leading-tight">
                     PAZ Y <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">BIEN</span>
                 </h2>

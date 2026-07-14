@@ -61,7 +61,7 @@
          ═══════════════════════════════════════════════════════════════════ --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-extrabold text-white mb-2">
+            <h1 class="text-xl font-extrabold text-white mb-2">
                 Bienvenido, {{ $profesor->full_name ?? Auth::user()->username }}
             </h1>
             <p class="text-emerald-400 font-medium">Panel de rendimiento académico</p>
@@ -212,7 +212,7 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <p class="text-2xl font-bold text-white mb-1">{{ $diagProgress }}%</p>
+                                <p class="text-xl font-bold text-white mb-1">{{ $diagProgress }}%</p>
                                 <p class="text-[11px] font-medium text-indigo-400 uppercase tracking-wider">Progreso</p>
                                 <div class="progress-bar-sm mt-2">
                                     <div class="progress-bar-sm-fill {{ $diagProgress >= 80 ? 'bg-emerald-400' : ($diagProgress >= 50 ? 'bg-amber-400' : 'bg-indigo-400') }}"

@@ -15,7 +15,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div>
-                        <h3 class="text-2xl font-semibold text-gray-900 mb-6"> <strong>SAEFL</strong> Módulo de Votaciones de Nueva Generación</h3>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-6"> <strong>SAEFL</strong> Módulo de Votaciones de Nueva Generación</h3>
                         <p class="text-lg text-gray-700 leading-relaxed mb-6">
                             Se presenta una solución integral de votación digital que combina <strong>seguridad
                                 avanzada</strong>,
@@ -27,19 +27,19 @@
 
                         <div class="grid grid-cols-2 gap-6">
                             <div class="text-center p-4 bg-blue-50 rounded-lg">
-                                <div class="text-2xl font-bold text-blue-600">99.9%</div>
+                                <div class="text-xl font-bold text-blue-600">99.9%</div>
                                 <div class="text-sm text-blue-800">Disponibilidad</div>
                             </div>
                             <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <div class="text-2xl font-bold text-green-600">100%</div>
+                                <div class="text-xl font-bold text-green-600">100%</div>
                                 <div class="text-sm text-green-800">Seguridad</div>
                             </div>
                             <div class="text-center p-4 bg-purple-50 rounded-lg">
-                                <div class="text-2xl font-bold text-purple-600">24/7</div>
+                                <div class="text-xl font-bold text-purple-600">24/7</div>
                                 <div class="text-sm text-purple-800">Soporte</div>
                             </div>
                             <div class="text-center p-4 bg-orange-50 rounded-lg">
-                                <div class="text-2xl font-bold text-orange-600">∞</div>
+                                <div class="text-xl font-bold text-orange-600">∞</div>
                                 <div class="text-sm text-orange-800">Escalabilidad</div>
                             </div>
                         </div>
@@ -118,7 +118,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Asistente Inteligente</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Asistente Inteligente</h3>
                             <p class="text-blue-600 font-medium">Guía Automática de Participación</p>
                         </div>
                     </div>
@@ -182,7 +182,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Seguridad Avanzada</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Seguridad Avanzada</h3>
                             <p class="text-green-600 font-medium">Identificación Sin Compromiso</p>
                         </div>
                     </div>
@@ -246,7 +246,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Comprobantes QR</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Comprobantes QR</h3>
                             <p class="text-purple-600 font-medium">Transparencia Total</p>
                         </div>
                     </div>
@@ -307,7 +307,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">Interfaz Intuitiva</h3>
+                            <h3 class="text-xl font-bold text-gray-900">Interfaz Intuitiva</h3>
                             <p class="text-orange-600 font-medium">Experiencia de Usuario Superior</p>
                         </div>
                     </div>
@@ -570,7 +570,7 @@
                 <!-- Paquete Básico -->
                 <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Básico</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Básico</h3>
                         <p class="text-gray-600">Ideal para organizaciones pequeñas</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-blue-600">$200</span>
@@ -645,7 +645,7 @@
                     </div>
 
                     <div class="text-center mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Paquete Profesional</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Paquete Profesional</h3>
                         <p class="text-gray-600">Para organizaciones medianas</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-green-600">$5,500</span>
@@ -721,7 +721,7 @@
                 <!-- Paquete Enterprise -->
                 <div class="bg-white rounded-2xl shadow-corporate p-8 relative">
                     <div class="text-center mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Paquete Enterprise</h3>
                         <p class="text-gray-600">Para grandes organizaciones</p>
                         <div class="mt-4">
                             <span class="text-4xl font-bold text-purple-600">$12,000</span>
@@ -902,7 +902,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Garantías Incluidas</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-6">Garantías Incluidas</h3>
                         <div class="space-y-6">
                             <div class="flex items-start">
                                 <div
@@ -963,7 +963,7 @@
                     </div>
 
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Niveles de Soporte</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-6">Niveles de Soporte</h3>
                         <div class="space-y-4">
                             <div class="bg-gray-50 rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-2">

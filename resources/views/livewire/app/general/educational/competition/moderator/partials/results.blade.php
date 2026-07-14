@@ -13,7 +13,7 @@
             <div class="diagnostic-card rounded-2xl p-8 border border-emerald-500/20 shadow-2xl backdrop-blur-xl">
                 <div class="flex items-center justify-center space-x-3 mb-8">
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
-                    <h4 class="text-2xl font-extrabold text-white tracking-tight uppercase">Dashboard de Resultados</h4>
+                    <h4 class="text-xl font-extrabold text-white tracking-tight uppercase">Dashboard de Resultados</h4>
                     <div class="h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent flex-1"></div>
                 </div>
 
@@ -28,7 +28,7 @@
                             </h4>
                             <div class="flex items-end justify-between">
                                 <span class="text-gray-400 text-sm font-medium">Puntaje Acumulado:</span>
-                                <span class="text-2xl font-bold text-emerald-400">
+                                <span class="text-xl font-bold text-emerald-400">
                                     {{ $competition->getTotalScoreForSection($item->id) }}<span
                                         class="text-xs ml-1 text-emerald-600">PTS</span>
                                 </span>

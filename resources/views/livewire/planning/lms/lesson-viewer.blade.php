@@ -19,7 +19,7 @@
             <div class="space-y-3 min-w-0">
                 <div class="flex items-center gap-2">
                     <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
-                    <h1 class="text-xl sm:text-2xl font-bold text-white leading-tight">Vista de Lección</h1>
+                    <h1 class="text-xl sm:text-xl font-bold text-white leading-tight">Vista de Lección</h1>
                 </div>
                 <p class="text-sm text-slate-400 leading-relaxed">
                     {{ $activity->topic ?? 'Actividad sin título' }}

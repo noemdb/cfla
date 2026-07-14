@@ -8,7 +8,7 @@
         <div class="bg-white shadow-sm border-b">
             <div class="container mx-auto px-4 py-6">
                 <div class="text-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Resultados de Votación</h1>
+                    <h1 class="text-xl font-bold text-gray-900">Resultados de Votación</h1>
                     <p class="text-gray-600 mt-2">Visualiza los resultados de todas las encuestas</p>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Total Encuestas</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $polls->count() }}</p>
+                            <p class="text-xl font-bold text-gray-900">{{ $polls->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Total Votos</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $polls->sum('votes_count') }}</p>
+                            <p class="text-xl font-bold text-gray-900">{{ $polls->sum('votes_count') }}</p>
                         </div>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Activas</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $polls->where('enable', true)->count() }}</p>
+                            <p class="text-xl font-bold text-gray-900">{{ $polls->where('enable', true)->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-600">Promedio Votos</p>
-                            <p class="text-2xl font-bold text-gray-900">
+                            <p class="text-xl font-bold text-gray-900">
                                 {{ $polls->count() > 0 ? round($polls->sum('votes_count') / $polls->count()) : 0 }}
                             </p>
                         </div>

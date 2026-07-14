@@ -17,7 +17,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         @foreach(['VIEW' => 'Visitas', 'RESOURCE_DOWNLOAD' => 'Descargas', 'PUBLISH' => 'Publicaciones', 'EDIT' => 'Ediciones'] as $event => $label)
             <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3 text-center">
-                <p class="text-2xl font-bold text-white">{{ $eventCounts[$event] ?? 0 }}</p>
+                <p class="text-xl font-bold text-white">{{ $eventCounts[$event] ?? 0 }}</p>
                 <p class="text-xs text-slate-400">{{ $label }}</p>
             </div>
         @endforeach

@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-extrabold text-white mb-2">Plan de Actividades</h1>
+            <h1 class="text-xl font-extrabold text-white mb-2">Plan de Actividades</h1>
             <p class="text-emerald-400 font-medium">Revisión y control de calidad pedagógica de los planes de evaluación.</p>
         </div>
         <div class="flex items-center gap-2">
@@ -144,7 +144,7 @@
                 </div>
                 <div class="flex items-center gap-3 px-4 py-2 bg-{{ $c }}-500/10 border border-{{ $c }}-500/20 rounded-xl">
                     <span class="text-{{ $c }}-400 text-xs font-bold uppercase">{{ $level === 'success' ? 'Buen desempeño' : ($level === 'warning' ? 'Moderado' : 'Atención') }}</span>
-                    <span class="text-white text-2xl font-black">{{ $pct }}%</span>
+                    <span class="text-white text-xl font-black">{{ $pct }}%</span>
                 </div>
             </div>
             <p class="text-gray-500 text-xs mt-3">{{ $message }}</p>

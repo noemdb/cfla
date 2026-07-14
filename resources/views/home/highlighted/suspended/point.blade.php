@@ -14,7 +14,7 @@
         <div
             class="bg-yellow-900/20 border border-yellow-500/30 text-yellow-200 px-4 py-6 rounded-xl relative shadow-inner shadow-yellow-900/10">
             <div class="flex items-start space-x-3">
-                <div class="text-2xl mt-1">⚠️</div>
+                <div class="text-xl mt-1">⚠️</div>
                 <div>
                     <strong class="font-bold text-yellow-400 block mb-2">¡Importante!</strong>
                     <span class="block text-sm mb-2 leading-relaxed">El servicio de <strong

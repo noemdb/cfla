@@ -25,7 +25,7 @@
 
 
                     <!-- Títulos -->
-                    <h1 class="text-2xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
+                    <h1 class="text-xl md:text-5xl font-bold text-green-200 mb-2 drop-shadow-2xl">
                         Prosecución Estudiantil
                     </h1>
 

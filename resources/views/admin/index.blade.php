@@ -6,7 +6,7 @@
     <div class="fade-in">
         <!-- Welcome Section -->
         <div class="mb-10">
-            <h1 class="text-2xl font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
+            <h1 class="text-xl font-extrabold text-white mb-2">Hola, {{ Auth::user()->username }}</h1>
             <p class="text-emerald-400 font-medium">Bienvenido de nuevo al ecosistema administrativo de SAEFL.</p>
         </div>
 
@@ -14,18 +14,18 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl">
                 <p class="text-emerald-300 text-sm font-medium mb-1">Sesión Activa</p>
-                <p class="text-white text-2xl font-bold">{{ now()->format('H:i A') }}</p>
+                <p class="text-white text-xl font-bold">{{ now()->format('H:i A') }}</p>
             </div>
             <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
                 <p class="text-blue-300 text-sm font-medium mb-1">Estado del Sistema</p>
-                <p class="text-white text-2xl font-bold flex items-center">
+                <p class="text-white text-xl font-bold flex items-center">
                     <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
                     Operacional
                 </p>
             </div>
             <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
                 <p class="text-purple-300 text-sm font-medium mb-1">Nivel de Acceso</p>
-                <p class="text-white text-2xl font-bold">
+                <p class="text-white text-xl font-bold">
                     {{ Auth::user()->role_label }}
                 </p>
             </div>

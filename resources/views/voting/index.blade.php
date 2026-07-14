@@ -34,7 +34,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-emerald-400 font-medium">Encuestas Activas</p>
-                            <p class="text-2xl font-bold text-white">{{ $activePolls }}</p>
+                            <p class="text-xl font-bold text-white">{{ $activePolls }}</p>
                         </div>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-blue-400 font-medium">Total Votos</p>
-                            <p class="text-2xl font-bold text-white">{{ number_format($totalVotes) }}</p>
+                            <p class="text-xl font-bold text-white">{{ number_format($totalVotes) }}</p>
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-teal-400 font-medium">Con Tiempo Límite</p>
-                            <p class="text-2xl font-bold text-white">{{ $pollsWithTimeLimit }}</p>
+                            <p class="text-xl font-bold text-white">{{ $pollsWithTimeLimit }}</p>
                         </div>
                     </div>
                 </div>
@@ -131,11 +131,11 @@
                             <div class="bg-gradient-to-r from-gray-50/5 to-green-50/5 rounded-xl p-4 mb-4">
                                 <div class="grid grid-cols-2 gap-4 text-center">
                                     <div>
-                                        <p class="text-2xl font-bold text-white">{{ $poll->votes_count ?? 0 }}</p>
+                                        <p class="text-xl font-bold text-white">{{ $poll->votes_count ?? 0 }}</p>
                                         <p class="text-green-200 text-xs">Votos</p>
                                     </div>
                                     <div>
-                                        <p class="text-2xl font-bold text-white">{{ $poll->options->count() }}</p>
+                                        <p class="text-xl font-bold text-white">{{ $poll->options->count() }}</p>
                                         <p class="text-green-200 text-xs">Opciones</p>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@
                                         d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
                                     </path>
                                 </svg>
-                                <h3 class="text-2xl font-bold text-white mb-4">No hay encuestas disponibles</h3>
+                                <h3 class="text-xl font-bold text-white mb-4">No hay encuestas disponibles</h3>
                                 <p class="text-gray-300 mb-6">Actualmente no hay encuestas activas para participar.</p>
                                 <button onclick="window.location.reload()"
                                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">

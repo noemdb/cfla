@@ -3,7 +3,7 @@
     <x-card>
 
         <x-slot name="title">
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {{$competition->name}}
             </h5>
         </x-slot>

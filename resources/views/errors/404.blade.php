@@ -11,7 +11,7 @@
         <div class="mb-6">
             <h1 class="font-bold text-gray-800 text-8xl">404</h1>
         </div>
-        <h2 class="mb-3 text-2xl font-semibold text-gray-700">Página no encontrada</h2>
+        <h2 class="mb-3 text-xl font-semibold text-gray-700">Página no encontrada</h2>
         <p class="mb-8 text-gray-500">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
         <a href="{{ url('/') }}" class="inline-block px-6 py-3 text-white transition-colors duration-200 bg-gray-800 rounded-md hover:bg-gray-700">
             Volver al inicio

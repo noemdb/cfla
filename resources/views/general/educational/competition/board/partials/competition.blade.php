@@ -8,7 +8,7 @@
             </svg>
         </div>
 
-        <h5 class="mb-4 text-2xl font-black text-white tracking-tight uppercase">
+        <h5 class="mb-4 text-xl font-black text-white tracking-tight uppercase">
             {{ $competition->name }}
         </h5>
 

@@ -2,7 +2,7 @@
 
     <x-card class="border border-gray-400 rounded shadow" id="{{$question->id}}">
 
-        <div class="text-2xl font-bold">Gestión de Respuestas</div>
+        <div class="text-xl font-bold">Gestión de Respuestas</div>
 
         @if (! $question->status_over_time)
 
@@ -12,7 +12,7 @@
                 </div>
                 <div class="col-span-2">
                     <div class="text-sm font-normal border rounded border-gray-600 p-2">
-                        <div class="text-2xl font-extrabold" x-data="{
+                        <div class="text-xl font-extrabold" x-data="{
                             s: @js($timeRemaining ?? 0),
                             running: @js($timerActive ?? false),
                             iv: null,

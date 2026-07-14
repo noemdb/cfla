@@ -55,7 +55,7 @@
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-12">
-                <h2 class="text-2xl font-bold text-white mb-4">Proceso Paso a Paso</h2>
+                <h2 class="text-xl font-bold text-white mb-4">Proceso Paso a Paso</h2>
                 <p class="text-green-200 text-lg">Sigue estos pasos para completar la confirmación exitosamente</p>
             </div>
 
@@ -65,10 +65,10 @@
                     <div class="bg-gradient-to-r from-green-600 to-green-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
-                                <span class="text-2xl font-bold text-green-600">1</span>
+                                <span class="text-xl font-bold text-green-600">1</span>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-white">Identificación del Representante</h3>
+                                <h3 class="text-xl font-bold text-white">Identificación del Representante</h3>
                                 <p class="text-green-100">Ingresa tu cédula de identidad para acceder al sistema</p>
                             </div>
                         </div>
@@ -138,10 +138,10 @@
                     <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
-                                <span class="text-2xl font-bold text-blue-600">2</span>
+                                <span class="text-xl font-bold text-blue-600">2</span>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-white">Selección de Estudiantes</h3>
+                                <h3 class="text-xl font-bold text-white">Selección de Estudiantes</h3>
                                 <p class="text-blue-100">Marca los estudiantes que continuarán en la institución</p>
                             </div>
                         </div>
@@ -256,10 +256,10 @@
                     <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
                         <div class="flex items-center">
                             <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-4">
-                                <span class="text-2xl font-bold text-purple-600">3</span>
+                                <span class="text-xl font-bold text-purple-600">3</span>
                             </div>
                             <div>
-                                <h3 class="text-2xl font-bold text-white">Confirmación y Descarga</h3>
+                                <h3 class="text-xl font-bold text-white">Confirmación y Descarga</h3>
                                 <p class="text-purple-100">Obtén tu planilla oficial de confirmación</p>
                             </div>
                         </div>
@@ -383,7 +383,7 @@
     <section class="py-16 px-4 bg-gray-800/50">
         <div class="container mx-auto max-w-4xl">
             <div class="text-center mb-12">
-                <h2 class="text-2xl font-bold text-white mb-4">Preguntas Frecuentes</h2>
+                <h2 class="text-xl font-bold text-white mb-4">Preguntas Frecuentes</h2>
                 <p class="text-green-200">Resuelve tus dudas sobre el proceso de confirmación</p>
             </div>
 
@@ -459,7 +459,7 @@
     <section class="py-16 px-4">
         <div class="container mx-auto max-w-4xl text-center">
             <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 shadow-2xl">
-                <h2 class="text-2xl font-bold text-white mb-4">¿Listo para confirmar?</h2>
+                <h2 class="text-xl font-bold text-white mb-4">¿Listo para confirmar?</h2>
                 <p class="text-green-100 text-lg mb-8">
                     Sigue los pasos de esta guía y completa la confirmación de prosecución de tus estudiantes
                 </p>

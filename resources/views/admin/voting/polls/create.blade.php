@@ -15,7 +15,7 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-2xl font-extrabold text-white mb-1">Nueva Encuesta</h1>
+                    <h1 class="text-xl font-extrabold text-white mb-1">Nueva Encuesta</h1>
                     <p class="text-emerald-400 font-medium">Configura una nueva votación paso a paso.</p>
                 </div>
             </div>

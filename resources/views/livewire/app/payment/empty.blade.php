@@ -13,7 +13,7 @@
             <p class="text-sm text-gray-400 mt-2">No se encontró ningún registro asociado a la CI ingresada:</p>
         </div>
         <div
-            class="flex justify-center text-2xl font-mono font-bold text-emerald-400 my-6 tracking-wider bg-gray-800 rounded-lg py-2 border border-dashed border-gray-700">
+            class="flex justify-center text-xl font-mono font-bold text-emerald-400 my-6 tracking-wider bg-gray-800 rounded-lg py-2 border border-dashed border-gray-700">
             {{ $ci ?? '---' }}</div>
         <div class="mt-4">
             <button type="button" wire:click="$set('modalEmpty', false)"

@@ -649,7 +649,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $exportPreviewData['subject'] }}
                                     </p>
-                                    <h1 class="text-2xl font-bold text-slate-900">{{ $exportPreviewData['title'] }}</h1>
+                                    <h1 class="text-xl font-bold text-slate-900">{{ $exportPreviewData['title'] }}</h1>
                                     @if($exportPreviewData['description'])
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $exportPreviewData['description'] }}</p>
                                     @endif
@@ -1056,7 +1056,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $importPreviewData['subject'] }}
                                     </p>
-                                    <h1 class="text-2xl font-bold text-slate-900">{{ $importPreviewData['title'] }}</h1>
+                                    <h1 class="text-xl font-bold text-slate-900">{{ $importPreviewData['title'] }}</h1>
                                     @if($importPreviewData['description'])
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $importPreviewData['description'] }}</p>
                                     @endif
@@ -1383,7 +1383,7 @@
                                         </div>
 
                                         {{-- Título principal --}}
-                                        <h1 class="text-2xl md:text-2xl font-bold text-stone-900 leading-tight text-center w-full">
+                                        <h1 class="text-xl md:text-xl font-bold text-stone-900 leading-tight text-center w-full">
                                             {{ $listPreviewData['title'] }}
                                         </h1>
 
@@ -3827,7 +3827,7 @@
                                     <p class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
                                         {{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura' }}
                                     </p>
-                                    <h1 class="text-2xl font-bold text-slate-900">{{ $lessonTitle ?: 'Título de la lección' }}</h1>
+                                    <h1 class="text-xl font-bold text-slate-900">{{ $lessonTitle ?: 'Título de la lección' }}</h1>
                                     @if($lessonDescription)
                                         <p class="text-sm text-slate-600 mt-2 leading-relaxed">{{ $lessonDescription }}</p>
                                     @endif

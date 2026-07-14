@@ -37,7 +37,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-emerald-400 font-medium">Encuestas Activas</p>
-                                <p class="text-2xl font-bold text-white">{{ $polls->count() }}</p>
+                                <p class="text-xl font-bold text-white">{{ $polls->count() }}</p>
                             </div>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-blue-400 font-medium">Total Votos</p>
-                                <p class="text-2xl font-bold text-white">
+                                <p class="text-xl font-bold text-white">
                                     {{ $polls->sum(function ($poll) {
                                         return \App\Models\app\Voting\VotingVote::whereHas('option', function ($query) use ($poll) {
                                             $query->where('poll_id', $poll->id);
@@ -83,7 +83,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-teal-400 font-medium">Total Opciones</p>
-                                <p class="text-2xl font-bold text-white">
+                                <p class="text-xl font-bold text-white">
                                     {{ $polls->sum(function ($poll) {return $poll->options->count();}) }}</p>
                             </div>
                         </div>
@@ -176,7 +176,7 @@
                                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                                 </path>
                             </svg>
-                            <h3 class="text-2xl font-bold text-white mb-4">No hay encuestas activas</h3>
+                            <h3 class="text-xl font-bold text-white mb-4">No hay encuestas activas</h3>
                             <p class="text-gray-300 mb-6">Actualmente no hay encuestas disponibles para mostrar resultados.
                             </p>
                         </div>

@@ -1,7 +1,7 @@
 <div class="space-y-6">
 
     <div class="text-center mb-8">
-        <h2 class="text-2xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">Descubre Nuestro Pensum Académico
+        <h2 class="text-xl md:text-xl font-bold text-gray-900 dark:text-white mb-2">Descubre Nuestro Pensum Académico
         </h2>
         <h3 class="text-lg md:text-xl text-emerald-700 dark:text-emerald-300 font-semibold mb-2">Formación Integral para
             el Futuro</h3>

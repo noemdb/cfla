@@ -95,7 +95,7 @@
                                 <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
                                 ENCUESTA ACTIVA
                             </div>
-                            <h2 class="text-2xl font-black text-white leading-tight tracking-tight uppercase">
+                            <h2 class="text-xl font-black text-white leading-tight tracking-tight uppercase">
                                 {{ $currentPoll['title'] }}</h2>
                             <div
                                 class="flex items-center gap-4 text-[10px] font-black text-gray-500 uppercase tracking-widest">
@@ -247,7 +247,7 @@
                                 </svg>
                             </div>
                             <div class="space-y-2">
-                                <h3 class="text-2xl font-black text-white uppercase tracking-tight">Sesión Finalizada
+                                <h3 class="text-xl font-black text-white uppercase tracking-tight">Sesión Finalizada
                                 </h3>
                                 <p class="text-gray-500 font-medium max-w-xs mx-auto text-sm leading-relaxed">Esta
                                     encuesta ya no acepta participaciones. Por favor, continúa a la siguiente.</p>
@@ -463,7 +463,7 @@
                                     d="M5 13l4 4L19 7"></path>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-black text-white tracking-tight uppercase">Voto Confirmado</h3>
+                        <h3 class="text-xl font-black text-white tracking-tight uppercase">Voto Confirmado</h3>
                         <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-[0.2em] mt-2">Protocolo
                             de Participación Exitoso</p>
                     </div>

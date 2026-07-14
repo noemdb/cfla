@@ -10,7 +10,7 @@
                         class="w-12 h-12 md:w-16 md:h-16 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 object-contain">
                 </div>
                 <div class="flex flex-col">
-                    <h1 class="text-lg md:text-2xl font-bold text-gray-900 uppercase">
+                    <h1 class="text-lg md:text-xl font-bold text-gray-900 uppercase">
                         CFLA - Pizarra
                     </h1>
                     <p class="sm:block text-sm text-emerald-700 font-bold">

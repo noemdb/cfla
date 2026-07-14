@@ -20,7 +20,7 @@
                     </div>
 
                     {{-- Nombre del debate --}}
-                    <h5 class="text-2xl font-black tracking-tight text-gray-900 uppercase">
+                    <h5 class="text-xl font-black tracking-tight text-gray-900 uppercase">
                         {{ $debate->name }}
                     </h5>
 

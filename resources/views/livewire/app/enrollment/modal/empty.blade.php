@@ -2,6 +2,6 @@
 
     <div class="text-center">No se encontró nigún registro asociado a la CI ingresada: </div>
 
-    <div class="flex justify-center text-2xl font-extralight my-4">{{$ci ?? null}}</div>
+    <div class="flex justify-center text-xl font-extralight my-4">{{$ci ?? null}}</div>
 
 </x-modal-card>

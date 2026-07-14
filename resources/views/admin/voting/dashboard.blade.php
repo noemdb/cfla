@@ -8,7 +8,7 @@
         <!-- Header Section -->
         <div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-white mb-2">Panel de Votaciones</h1>
+                <h1 class="text-xl font-extrabold text-white mb-2">Panel de Votaciones</h1>
                 <p class="text-emerald-400 font-medium">Gestiona tus encuestas y monitorea resultados en tiempo real.</p>
             </div>
             <a href="{{ route('admin.voting.polls.create') }}"
@@ -33,7 +33,7 @@
                         </path>
                     </svg>
                 </div>
-                <p class="text-white text-2xl font-bold">{{ $stats['total_polls'] }}</p>
+                <p class="text-white text-xl font-bold">{{ $stats['total_polls'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-blue-500/10 border border-blue-500/20 p-6 rounded-2xl">
@@ -48,7 +48,7 @@
                         </svg>
                     </div>
                 </div>
-                <p class="text-white text-2xl font-bold">{{ $stats['active_polls'] }}</p>
+                <p class="text-white text-xl font-bold">{{ $stats['active_polls'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-purple-500/10 border border-purple-500/20 p-6 rounded-2xl">
@@ -60,7 +60,7 @@
                         </path>
                     </svg>
                 </div>
-                <p class="text-white text-2xl font-bold">{{ $stats['total_votes'] }}</p>
+                <p class="text-white text-xl font-bold">{{ $stats['total_votes'] }}</p>
             </div>
 
             <div class="diagnostic-card bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl">
@@ -71,7 +71,7 @@
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <p class="text-white text-2xl font-bold">{{ $stats['finished_polls'] }}</p>
+                <p class="text-white text-xl font-bold">{{ $stats['finished_polls'] }}</p>
             </div>
         </div>
 

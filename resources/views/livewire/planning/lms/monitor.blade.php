@@ -13,31 +13,31 @@
     {{-- Stats cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl p-3">
-            <p class="text-2xl font-bold text-white">{{ $stats['total'] }}</p>
+            <p class="text-xl font-bold text-white">{{ $stats['total'] }}</p>
             <p class="text-xs text-slate-400">Total lecciones</p>
         </div>
         <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-emerald-400">{{ $stats['published'] }}</p>
+            <p class="text-xl font-bold text-emerald-400">{{ $stats['published'] }}</p>
             <p class="text-xs text-emerald-400/70">Publicadas</p>
         </div>
         <div class="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-amber-400">{{ $stats['scheduled'] }}</p>
+            <p class="text-xl font-bold text-amber-400">{{ $stats['scheduled'] }}</p>
             <p class="text-xs text-amber-400/70">Programadas</p>
         </div>
         <div class="bg-slate-500/5 border border-slate-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-slate-400">{{ $stats['draft'] }}</p>
+            <p class="text-xl font-bold text-slate-400">{{ $stats['draft'] }}</p>
             <p class="text-xs text-slate-400/70">Borradores</p>
         </div>
         <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-red-400">{{ $stats['archived'] }}</p>
+            <p class="text-xl font-bold text-red-400">{{ $stats['archived'] }}</p>
             <p class="text-xs text-red-400/70">Archivadas</p>
         </div>
         <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-blue-400">{{ $stats['withContent'] }}</p>
+            <p class="text-xl font-bold text-blue-400">{{ $stats['withContent'] }}</p>
             <p class="text-xs text-blue-400/70">Con contenido</p>
         </div>
         <div class="bg-purple-500/5 border border-purple-500/20 rounded-xl p-3">
-            <p class="text-2xl font-bold text-purple-400">{{ $stats['totalActivities'] }}</p>
+            <p class="text-xl font-bold text-purple-400">{{ $stats['totalActivities'] }}</p>
             <p class="text-xs text-purple-400/70">Total actividades</p>
         </div>
     </div>

@@ -29,7 +29,7 @@
 
             <!-- Índice de Contenidos -->
             <div class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-6 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-4 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
@@ -79,7 +79,7 @@
             <!-- Sección 1: ¿Qué es el Asistente? -->
             <div id="que-es-asistente"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">1</span>
                     ¿Qué es el Asistente de Participación?
@@ -191,7 +191,7 @@
             <!-- Sección 2: Cómo Acceder -->
             <div id="como-acceder"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">2</span>
                     Cómo Acceder al Asistente
@@ -280,7 +280,7 @@
             <!-- Sección 3: Proceso de Participación -->
             <div id="proceso-participacion"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">3</span>
                     Proceso de Participación Paso a Paso
@@ -443,17 +443,17 @@
                                 </p>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div class="bg-gray-600/50 rounded-lg p-3 text-center">
-                                        <div class="text-2xl mb-2">⬅️</div>
+                                        <div class="text-xl mb-2">⬅️</div>
                                         <h4 class="font-semibold text-white mb-1">Anterior</h4>
                                         <p class="text-gray-300 text-xs">Volver a la encuesta previa</p>
                                     </div>
                                     <div class="bg-gray-600/50 rounded-lg p-3 text-center">
-                                        <div class="text-2xl mb-2">⏭️</div>
+                                        <div class="text-xl mb-2">⏭️</div>
                                         <h4 class="font-semibold text-white mb-1">Omitir</h4>
                                         <p class="text-gray-300 text-xs">Saltar encuesta sin votar</p>
                                     </div>
                                     <div class="bg-gray-600/50 rounded-lg p-3 text-center">
-                                        <div class="text-2xl mb-2">➡️</div>
+                                        <div class="text-xl mb-2">➡️</div>
                                         <h4 class="font-semibold text-white mb-1">Siguiente</h4>
                                         <p class="text-gray-300 text-xs">Avanzar a la próxima encuesta</p>
                                     </div>
@@ -467,7 +467,7 @@
             <!-- Sección 4: Navegación del Asistente -->
             <div id="navegacion-asistente"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">4</span>
                     Navegación del Asistente
@@ -592,7 +592,7 @@
             <!-- Sección 5: Confirmación y Alertas -->
             <div id="confirmacion-voto"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">5</span>
                     Confirmación y Alertas de Voto
@@ -683,15 +683,15 @@
                         </p>
                         <div class="grid grid-cols-3 gap-4">
                             <div class="text-center bg-gray-700/50 rounded-lg p-3">
-                                <div class="text-2xl font-bold text-green-400">5</div>
+                                <div class="text-xl font-bold text-green-400">5</div>
                                 <div class="text-xs text-gray-400">Completadas</div>
                             </div>
                             <div class="text-center bg-gray-700/50 rounded-lg p-3">
-                                <div class="text-2xl font-bold text-blue-400">2</div>
+                                <div class="text-xl font-bold text-blue-400">2</div>
                                 <div class="text-xs text-gray-400">Restantes</div>
                             </div>
                             <div class="text-center bg-gray-700/50 rounded-lg p-3">
-                                <div class="text-2xl font-bold text-purple-400">7</div>
+                                <div class="text-xl font-bold text-purple-400">7</div>
                                 <div class="text-xs text-gray-400">Total</div>
                             </div>
                         </div>
@@ -702,7 +702,7 @@
             <!-- Sección 6: Comprobantes QR -->
             <div id="comprobantes-qr"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">6</span>
                     Comprobantes QR y Participación
@@ -768,22 +768,22 @@
                         </p>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">📊</div>
+                                <div class="text-xl mb-2">📊</div>
                                 <h4 class="font-semibold text-white mb-1">Estadísticas</h4>
                                 <p class="text-gray-300 text-xs">Total de participaciones</p>
                             </div>
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">🗳️</div>
+                                <div class="text-xl mb-2">🗳️</div>
                                 <h4 class="font-semibold text-white mb-1">Votos</h4>
                                 <p class="text-gray-300 text-xs">Opciones seleccionadas</p>
                             </div>
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">📱</div>
+                                <div class="text-xl mb-2">📱</div>
                                 <h4 class="font-semibold text-white mb-1">QR Codes</h4>
                                 <p class="text-gray-300 text-xs">Comprobantes generados</p>
                             </div>
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">🔍</div>
+                                <div class="text-xl mb-2">🔍</div>
                                 <h4 class="font-semibold text-white mb-1">Detalles</h4>
                                 <p class="text-gray-300 text-xs">Modal de participación</p>
                             </div>
@@ -835,7 +835,7 @@
             <!-- Sección 7: Seguridad -->
             <div id="seguridad-privacidad"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">7</span>
                     Seguridad y Privacidad
@@ -910,21 +910,21 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">🔒</div>
+                                <div class="text-xl mb-2">🔒</div>
                                 <h4 class="font-semibold text-white mb-2">Datos Anónimos</h4>
                                 <p class="text-gray-300 text-xs">
                                     No se almacena información personal identificable
                                 </p>
                             </div>
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">🛡️</div>
+                                <div class="text-xl mb-2">🛡️</div>
                                 <h4 class="font-semibold text-white mb-2">Sin Tracking</h4>
                                 <p class="text-gray-300 text-xs">
                                     No se utilizan cookies de seguimiento
                                 </p>
                             </div>
                             <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                                <div class="text-2xl mb-2">🔐</div>
+                                <div class="text-xl mb-2">🔐</div>
                                 <h4 class="font-semibold text-white mb-2">Datos Seguros</h4>
                                 <p class="text-gray-300 text-xs">
                                     Almacenamiento encriptado y seguro
@@ -971,7 +971,7 @@
             <!-- Sección 8: FAQ -->
             <div id="faq"
                 class="bg-gray-800/90 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 shadow-2xl mb-8">
-                <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <h2 class="text-xl font-bold text-white mb-6 flex items-center">
                     <span
                         class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold mr-3">8</span>
                     Preguntas Frecuentes (FAQ)

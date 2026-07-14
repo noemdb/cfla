@@ -1,6 +1,6 @@
 <section class="text-neutral-700 dark:text-neutral-300">
     <div class="mx-auto text-center">
-        <h3 class="mb-6 text-2xl font-bold">Planes</h3>
+        <h3 class="mb-6 text-xl font-bold">Planes</h3>
         <p class="mb-6 pb-2 md:mb-12 md:pb-0">
             Nuestra Institución es un UE CFLA privado de San Felipe, Yaracuy, Venezuela, está comprometida con
             la educación integral de sus estudiantes.
@@ -24,7 +24,7 @@
 
                 </div>
                 <div class="p-6">
-                    <h4 class="mb-4 text-2xl font-semibold">Educación Primaria</h4>
+                    <h4 class="mb-4 text-xl font-semibold">Educación Primaria</h4>
                     <hr />
                     <p class="mt-4">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
@@ -38,7 +38,7 @@
                     </p>
                     <hr class="my-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
                     <div class="flex justify-center items-center gap-2">
-                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$75 " />
+                        <x-avatar size="w-20 h-20 text-xl" class="bg-green-600 " label="$75 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
                     </div>
 
@@ -77,7 +77,7 @@
 
                 </div>
                 <div class="p-6">
-                    <h4 class="mb-4 text-2xl font-semibold">Media General Ciencia y Tenología</h4>
+                    <h4 class="mb-4 text-xl font-semibold">Media General Ciencia y Tenología</h4>
                     <hr />
                     <p class="mt-4">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="inline-block h-7 w-7 pr-2"
@@ -92,7 +92,7 @@
                     </p>
                     <hr class="my-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
                     <div class="flex justify-center items-center gap-2">
-                        <x-avatar size="w-20 h-20 text-2xl" class="bg-green-600 " label="$75 " />
+                        <x-avatar size="w-20 h-20 text-xl" class="bg-green-600 " label="$75 " />
                         <div class="text-xs text-gray-400 font-bold dark:text-neutral-100">/ Mensuales</div>
                     </div>
                 </div>

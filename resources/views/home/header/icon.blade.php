@@ -1,5 +1,5 @@
 <a href="#" class=" text-white">
-    <div class="flex text-xl lg:text-2xl font-bold">
+    <div class="flex text-xl lg:text-xl font-bold">
         <img src="{{asset('image/logo/cecfla.gif')}}" class="h-12 w-12 rounded-full shadow-lg">
         {{-- <x-avatar xl src="{{asset('image/logo/cecfla.gif')}}" class="h-12 w-12"/> --}}
         {{-- <img src="{{asset('image/brand/96.png')}}" class="h-12 px-2"> --}}

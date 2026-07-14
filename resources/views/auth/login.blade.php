@@ -12,7 +12,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-extrabold mb-2">Planificación Docente</h2>
+                <h2 class="text-xl font-extrabold mb-2">Planificación Docente</h2>
                 <h2 class="text-xl font-extrabold mb-2">Acceso al Sistema</h2>
                 <p class="text-emerald-400">Ingresa tus credenciales para continuar</p>
             </div>

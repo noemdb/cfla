@@ -2,14 +2,14 @@
     <x-card>
     
         @slot('header')
-            <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-2xl font-bold text-neutral-800 dark:text-neutral-200">
+            <h3 class=" bg-green-100 mb-4 mt-6 p-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
                 Experiencias
             </h3>
         @endslot
     
         <div class="mx-auto text-center md:max-w-xl lg:max-w-3xl">
             
-            <h3 class="mb-2 text-2xl font-bold text-neutral-800 dark:text-neutral-200">
+            <h3 class="mb-2 text-xl font-bold text-neutral-800 dark:text-neutral-200">
                 Testimonios
             </h3>
             <p class="mb-2 pb-2 md:mb-12 md:pb-0">

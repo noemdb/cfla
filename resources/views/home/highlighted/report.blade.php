@@ -21,7 +21,7 @@
                 </a>                
             </div>
             <div class="text-center  dark:text-neutral-200">
-                <div class="text-2xl text-gray-900">Reporte de pago </div>
+                <div class="text-xl text-gray-900">Reporte de pago </div>
                 <div class="text-md text-gray-600">Asistente</div>
                 <div class="text-sm text-gray-400">Reporta tus transferencias, pago movìl y/o depósitos siguiendo este asistente.</div>
             </div>

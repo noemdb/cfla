@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-extrabold text-white mb-1">Gestión de Usuarios</h1>
+            <h1 class="text-xl font-extrabold text-white mb-1">Gestión de Usuarios</h1>
             <p class="text-emerald-400 font-medium text-sm">Administra las cuentas, roles y accesos del sistema.</p>
         </div>
         <button wire:click="create"

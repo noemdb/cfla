@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">
         No hay competiciones activas
     </h5>
     <p class="font-normal text-gray-700">

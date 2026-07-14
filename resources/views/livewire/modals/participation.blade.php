@@ -23,7 +23,7 @@
                 <div class="bg-gradient-to-r from-green-600 to-green-700 px-8 py-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold text-white">📊 Detalles de Participación</h2>
+                            <h2 class="text-xl font-bold text-white">📊 Detalles de Participación</h2>
                             <p class="text-green-100 mt-1">Información completa de tu voto registrado</p>
                         </div>
                         <button wire:click="closeParticipationModal"

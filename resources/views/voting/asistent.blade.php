@@ -9,7 +9,7 @@
             <div class="sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
-                        <h1 class="text-2xl font-bold text-white mb-2">
+                        <h1 class="text-xl font-bold text-white mb-2">
                             Asistente de Participación
                         </h1>
                         <p class="text-gray-300 text-lg">
@@ -20,11 +20,11 @@
                     <div class="mt-4 lg:mt-0 lg:ml-8">
                         <div class="grid grid-cols-2 gap-4 text-center">
                             <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg px-4 py-3">
-                                <div class="text-2xl font-bold text-white">{{ $polls->count() }}</div>
+                                <div class="text-xl font-bold text-white">{{ $polls->count() }}</div>
                                 <div class="text-green-100 text-sm">Encuestas Activas</div>
                             </div>
                             <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-4 py-3">
-                                <div class="text-2xl font-bold text-white" id="total-options">
+                                <div class="text-xl font-bold text-white" id="total-options">
                                     {{ $polls->sum(fn($poll) => $poll->options->count()) }}</div>
                                 <div class="text-blue-100 text-sm">Opciones Totales</div>
                             </div>
@@ -63,7 +63,7 @@
                                 </path>
                             </svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-white mb-4">No hay encuestas activas</h3>
+                        <h3 class="text-xl font-bold text-white mb-4">No hay encuestas activas</h3>
                         <p class="text-gray-400 text-lg mb-8">
                             Actualmente no hay encuestas disponibles para participar.
                         </p>
