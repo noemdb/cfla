@@ -1,5 +1,5 @@
 <header class="bg-white/90 backdrop-blur-sm border-b border-emerald-200 sticky top-0 z-10 shadow-md">
-    <div class="container-fluid mx-auto px-4 py-3">
+    <div class="container-fluid mx-auto px-4 py-2">
         <div class="flex items-center justify-between">
 
             {{-- Logo y título principal --}}

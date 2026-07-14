@@ -120,7 +120,7 @@
                             <div class="h-0 flex-1 flex" :class="{
                                 'border-b border-secondary-200 dark:border-secondary-700': notification.reject
                             }">
-                                <button class="w-full rounded-none rounded-tr-lg px-4 py-3 flex items-center
+                                <button class="w-full rounded-none rounded-tr-lg px-4 py-2 flex items-center
                                                justify-center text-sm font-medium focus:outline-none"
                                         :class="{
                                         'text-primary-600 hover:text-primary-500 hover:bg-secondary-50 dark:hover:bg-secondary-700': !Boolean(notification.accept.style),
@@ -135,7 +135,7 @@
 
                         <template x-if="notification.reject">
                             <div class="h-0 flex-1 flex">
-                                <button class="w-full rounded-none rounded-br-lg px-4 py-3 flex items-center
+                                <button class="w-full rounded-none rounded-br-lg px-4 py-2 flex items-center
                                                 justify-center text-sm font-medium focus:outline-none"
                                         :class="{
                                         'text-secondary-700 hover:text-secondary-500 dark:text-secondary-600 hover:bg-secondary-50 dark:hover:bg-secondary-700': !Boolean(notification.reject.style),

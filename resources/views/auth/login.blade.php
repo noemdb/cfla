@@ -37,7 +37,7 @@
                             </svg>
                         </div>
                         <input type="text" id="username" name="username" value="{{ old('username') }}" required autofocus
-                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
+                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-2 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
                             placeholder="Tu nombre de usuario">
                     </div>
                 </div>
@@ -51,12 +51,12 @@
                             </svg>
                         </div>
                         <input type="password" id="password" name="password" required
-                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
+                            class="w-full bg-gray-800/50 border border-emerald-800/30 text-white pl-10 pr-4 py-2 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 placeholder-gray-500 shadow-inner"
                             placeholder="••••••••">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-3 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full btn-diagnostic text-white font-bold py-2 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
                     <span>Entrar</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

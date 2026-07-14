@@ -37,7 +37,7 @@
 
     <!-- Navbar -->
     <header class="bg-gray-900/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3">
+        <div class="container mx-auto px-4 py-2">
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center space-x-4">

@@ -76,7 +76,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="text-left px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 #
                                 @if($sortField === 'id')
@@ -84,7 +84,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('pestudio_id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 Plan Estudio
                                 @if($sortField === 'pestudio_id')
@@ -92,7 +92,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('grado_id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 Grado
                                 @if($sortField === 'grado_id')
@@ -100,7 +100,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('asignatura_id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 Asignatura
                                 @if($sortField === 'asignatura_id')
@@ -108,7 +108,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
                             <button wire:click="sortBy('status_component')" class="inline-flex items-center gap-1 hover:text-white transition-colors">
                                 Comp.
                                 @if($sortField === 'status_component')
@@ -116,7 +116,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
                             <button wire:click="sortBy('status_active')" class="inline-flex items-center gap-1 hover:text-white transition-colors">
                                 Activo
                                 @if($sortField === 'status_active')
@@ -124,7 +124,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
                             <button wire:click="sortBy('diag_competencies_count')" class="inline-flex items-center gap-1 hover:text-white transition-colors">
                                 Comp. x Ref.
                                 @if($sortField === 'diag_competencies_count')
@@ -132,7 +132,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">
                             <button wire:click="sortBy('pevaluacions_count')" class="inline-flex items-center gap-1 hover:text-white transition-colors">
                                 Cargas
                                 @if($sortField === 'pevaluacions_count')
@@ -140,24 +140,24 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-right px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
+                        <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($pensums as $pensum)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $pensum->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $pensum->id }}</td>
+                            <td class="px-4 py-2">
                                 <span class="text-sm font-bold text-white">{{ $pensum->pestudio?->code ?? '—' }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <span class="text-sm text-gray-200 font-medium">{{ $pensum->grado?->name ?? '—' }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <span class="text-sm text-gray-200">{{ $pensum->asignatura?->name ?? '—' }}</span>
                                 <span class="block text-[10px] text-gray-500 mt-0.5 font-mono">{{ $pensum->asignatura?->code ?? '' }}</span>
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 @if($pensum->status_component === 'true')
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[10px] font-bold rounded-md border border-purple-500/20">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -167,7 +167,7 @@
                                     <span class="text-gray-500 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 @if($pensum->status_active)
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -181,7 +181,7 @@
                                 @endif
                             </td>
                             {{-- Competencias agrupadas por referente normativo --}}
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 @php
                                     $groups = $pensum->diagCompetencies
                                         ->groupBy(fn($c) => $c->referent?->code ?? 'N/A')
@@ -201,12 +201,12 @@
                                     <span class="text-gray-500 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 <span class="inline-flex items-center justify-center min-w-[2rem] h-7 rounded-lg bg-white/5 text-gray-300 text-sm font-bold px-2">
                                     {{ $pensum->pevaluacions_count }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $pensum->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
@@ -251,7 +251,7 @@
         </div>
 
         @if($pensums->hasPages())
-            <div class="px-5 py-3 border-t border-white/5">
+            <div class="px-5 py-2 border-t border-white/5">
                 {{ $pensums->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif

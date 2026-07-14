@@ -59,7 +59,7 @@
                 <div class="relative w-full max-w-2xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="backToIndex"
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

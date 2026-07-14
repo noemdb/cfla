@@ -62,7 +62,7 @@
                             </div>
 
                             <button wire:click="save()"
-                                class="w-full md:w-auto px-8 py-3 text-white bg-gradient-to-r from-emerald-600 to-green-600 rounded-full hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg hover:shadow-emerald-500/30 font-bold transform hover:-translate-y-1">
+                                class="w-full md:w-auto px-8 py-2 text-white bg-gradient-to-r from-emerald-600 to-green-600 rounded-full hover:from-emerald-500 hover:to-green-500 transition-all shadow-lg hover:shadow-emerald-500/30 font-bold transform hover:-translate-y-1">
                                 Enviar Mensaje
                             </button>
                         </div>

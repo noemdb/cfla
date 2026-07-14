@@ -12,7 +12,7 @@
                 <p class="text-emerald-400 font-medium">Gestiona tus encuestas y monitorea resultados en tiempo real.</p>
             </div>
             <a href="{{ route('admin.voting.polls.create') }}"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/20 font-bold group">
+                class="inline-flex items-center gap-2 px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-lg shadow-emerald-500/20 font-bold group">
                 <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
@@ -99,7 +99,7 @@
                     <p class="text-gray-400 mb-8 max-w-sm mx-auto">Crea tu primera encuesta para comenzar a recolectar
                         opiniones.</p>
                     <a href="{{ route('admin.voting.polls.create') }}"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-xs">
+                        class="inline-flex items-center gap-2 px-6 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-xs">
                         Crear Mi Primera Encuesta
                     </a>
                 </div>

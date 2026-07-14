@@ -5,7 +5,7 @@
             @forelse ($debates as $item)
     
                 <li>
-                    <button type="button" wire:click="active({{$item->id}})" class="inline-flex items-center px-4 py-3 text-white {{ ($item->id==$active_id) ? 'bg-blue-400 dark:bg-blue-400' : 'bg-blue-700 dark:bg-blue-600'}}  rounded-lg active w-full " aria-current="page">
+                    <button type="button" wire:click="active({{$item->id}})" class="inline-flex items-center px-4 py-2 text-white {{ ($item->id==$active_id) ? 'bg-blue-400 dark:bg-blue-400' : 'bg-blue-700 dark:bg-blue-600'}}  rounded-lg active w-full " aria-current="page">
                         <div class="block text-start">
                             <div class="block">{{$item->name}}</div>
                             <div class="text-xs text-gray-800 font-light">{{$item->full_grado}}</div>

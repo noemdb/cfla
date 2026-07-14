@@ -76,45 +76,45 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="text-left px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">#</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Abrev.</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Est.</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">H.Social</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Secciones</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
-                        <th class="text-right px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
+                        <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">#</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Abrev.</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Est.</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">H.Social</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Secciones</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                        <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($grados as $grado)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $grado->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $grado->id }}</td>
+                            <td class="px-4 py-2">
                                 <span class="text-sm font-bold text-white font-mono">{{ $grado->code }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <span class="text-xs font-mono bg-white/5 text-gray-300 px-2 py-0.5 rounded-md">{{ $grado->code_sm }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <span class="text-sm text-gray-200 font-medium">{{ $grado->name }}</span>
                                 @if($grado->description)
                                     <span class="block text-[10px] text-gray-500 mt-0.5">{{ \Illuminate\Support\Str::limit($grado->description, 40) }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell">
+                            <td class="px-4 py-2 text-sm text-gray-400 hidden md:table-cell">
                                 {{ $grado->pestudio?->code ?? '—' }}
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 <span class="text-sm text-gray-300">{{ $grado->hour_social ?? '—' }}</span>
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-gray-300 text-sm font-bold">
                                     {{ $grado->seccions_count }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-2 text-center">
                                 @if($grado->status_active === 'true')
                                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -127,7 +127,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $grado->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"

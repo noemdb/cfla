@@ -19,7 +19,7 @@
                      @click.away="$wire.close()">
 
                     {{-- ─── HEADER ─── --}}
-                    <div class="px-6 py-3 border-b border-white/5 flex items-center justify-between bg-emerald-500/5 shrink-0">
+                    <div class="px-6 py-2 border-b border-white/5 flex items-center justify-between bg-emerald-500/5 shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
                                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@
                     </div>
 
                     {{-- ─── FILTERS BAR ─── --}}
-                    <div class="px-6 py-3 border-b border-white/5 flex flex-wrap items-center gap-3 bg-gray-800/20 shrink-0">
+                    <div class="px-6 py-2 border-b border-white/5 flex flex-wrap items-center gap-3 bg-gray-800/20 shrink-0">
                         {{-- Search --}}
                         <div class="relative flex-1 min-w-[200px]">
                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,8 +128,8 @@
                                 {{-- Table Header --}}
                                 <thead class="sticky top-0 z-10">
                                     <tr class="bg-gray-800/60 border-b border-white/5">
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-10">#</th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('asignaturas.name')">
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-10">#</th>
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('asignaturas.name')">
                                             <span class="inline-flex items-center gap-1">
                                                 Asignatura / Grado / Sección
                                                 @if($sortField === 'asignaturas.name')
@@ -139,8 +139,8 @@
                                                 @endif
                                             </span>
                                         </th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Momento</th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.finicial')">
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Momento</th>
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.finicial')">
                                             <span class="inline-flex items-center gap-1">
                                                 Fechas
                                                 @if($sortField === 'activities.finicial')
@@ -150,7 +150,7 @@
                                                 @endif
                                             </span>
                                         </th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.topic')">
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.topic')">
                                             <span class="inline-flex items-center gap-1">
                                                 Tema Generador
                                                 @if($sortField === 'activities.topic')
@@ -160,9 +160,9 @@
                                                 @endif
                                             </span>
                                         </th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Enseñanza</th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden xl:table-cell">Act. Evaluativa</th>
-                                        <th class="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.status')">
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Enseñanza</th>
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden xl:table-cell">Act. Evaluativa</th>
+                                        <th class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24 cursor-pointer hover:text-gray-300 transition-colors" wire:click="sortBy('activities.status')">
                                             <span class="inline-flex items-center gap-1">
                                                 Estado
                                                 @if($sortField === 'activities.status')
@@ -271,7 +271,7 @@
 
                     {{-- ─── PAGINATION ─── --}}
                     @if($total > $perPage)
-                        <div class="px-6 py-3 border-t border-white/5 flex items-center justify-between bg-gray-800/30 shrink-0">
+                        <div class="px-6 py-2 border-t border-white/5 flex items-center justify-between bg-gray-800/30 shrink-0">
                             <span class="text-[11px] text-gray-500">
                                 Mostrando <span class="text-gray-300 font-medium">{{ $from }}</span>
                                 – <span class="text-gray-300 font-medium">{{ $to }}</span>

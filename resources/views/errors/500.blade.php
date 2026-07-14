@@ -13,7 +13,7 @@
         </div>
         <h4 class="mb-2 text-lg font-semibold text-gray-700">Error del servidor</h4>
         <p class="mb-8 text-gray-500">Lo sentimos, presentamos un error interno en nuestro servidor. Nuestro equipo técnico ha sido notificado. Le invitamos a que lo intente mas tarde</p>
-        <a href="{{ url('/') }}" class="inline-block px-6 py-3 text-white transition-colors duration-200 bg-gray-800 rounded-md hover:bg-gray-700">
+        <a href="{{ url('/') }}" class="inline-block px-6 py-2 text-white transition-colors duration-200 bg-gray-800 rounded-md hover:bg-gray-700">
             Volver al inicio
         </a>
     </div>

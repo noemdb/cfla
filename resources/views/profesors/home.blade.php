@@ -97,7 +97,7 @@
                         :class="activeTab === {{ $tabNum }}
                             ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
                             : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                        class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                        class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
                     >
                         <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

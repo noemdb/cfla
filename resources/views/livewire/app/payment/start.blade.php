@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <div class="text-center py-3">
+            <div class="text-center py-2">
                 <div class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">Reporte de pago</div>
                 <div class="text-sm text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-bold mb-2">
                     Asistente</div>
@@ -44,7 +44,7 @@
 
         <div class="mt-auto">
             <x-button label="Comenzar" wire:click="setStart" positive
-                class="w-full bg-emerald-600 hover:bg-emerald-500 border-none shadow-lg shadow-emerald-500/20 py-3" />
+                class="w-full bg-emerald-600 hover:bg-emerald-500 border-none shadow-lg shadow-emerald-500/20 py-2" />
         </div>
     </div>
 </div>

@@ -28,7 +28,7 @@
             <div class="flex-1 text-center md:text-left">
                 <h1 class="text-4xl font-bold mb-2">Bienvenidos a la Escuela</h1>
                 <p class="mb-6">Somos una institución educativa líder enfocada en proveer la mejor educación.</p>
-                <a href="#" class="bg-blue-500 rounded-full py-3 px-6 text-white hover:bg-blue-600">Más
+                <a href="#" class="bg-blue-500 rounded-full py-2 px-6 text-white hover:bg-blue-600">Más
                     Información</a>
             </div>
 
@@ -114,7 +114,7 @@
             </div>
 
             <div class="text-center">
-                <a href="#" class="bg-blue-500 text-white rounded-full py-3 px-6 hover:bg-blue-600">
+                <a href="#" class="bg-blue-500 text-white rounded-full py-2 px-6 hover:bg-blue-600">
                     Ver Todos los Programas
                 </a>
             </div>
@@ -145,7 +145,7 @@
                     <textarea class="border p-2 w-full" id="message"></textarea>
                 </div>
 
-                <button class="bg-blue-500 text-white rounded-full py-3 px-6 hover:bg-blue-600">
+                <button class="bg-blue-500 text-white rounded-full py-2 px-6 hover:bg-blue-600">
                     Enviar
                 </button>
 

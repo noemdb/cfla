@@ -121,22 +121,22 @@
         <div class="border-b border-white/5">
             <nav class="flex overflow-x-auto">
                 <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Indicadores Principales
                 </button>
                 <button @click="activeTab = 2" :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path></svg>
                     Profesores
                 </button>
                 <button @click="activeTab = 3" :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     Actividades
                 </button>
                 <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     Diagnóstico
                 </button>
@@ -224,21 +224,21 @@
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="border-b border-white/5">
-                                                <th class="text-left px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas">IEE</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas para el corte de notas">IEE-CN</th>
-                                                <th class="text-center px-3 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Índice Relativo de Rendimiento en Evaluación">IRE</th>
+                                                <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas">IEE</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas para el corte de notas">IEE-CN</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Índice Relativo de Rendimiento en Evaluación">IRE</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
                                             @foreach($profesors as $teacher)
                                                 <tr class="hover:bg-white/[0.02] transition-colors">
-                                                    <td class="px-3 py-3">
+                                                    <td class="px-3 py-2">
                                                         <span class="text-sm text-white font-medium">{{ $teacher->full_name }}</span>
                                                         <span class="block text-[10px] text-gray-500">{{ $teacher->ci_profesor }}</span>
                                                     </td>
-                                                    <td class="px-3 py-3 text-center">
+                                                    <td class="px-3 py-2 text-center">
                                                         <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
                                                             {{ $teacher->activities_count }}
                                                             @if($teacher->activities_count > 0)
@@ -246,7 +246,7 @@
                                                             @endif
                                                         </span>
                                                     </td>
-                                                    <td class="px-3 py-3 text-center">
+                                                    <td class="px-3 py-2 text-center">
                                                         <div class="flex items-center justify-center gap-2">
                                                             <div class="w-16 bg-white/5 rounded-full h-1.5">
                                                                 <div class="h-1.5 rounded-full {{ ($teacher->iee ?? 0) >= 70 ? 'bg-emerald-500' : (($teacher->iee ?? 0) >= 40 ? 'bg-amber-500' : 'bg-red-500') }}"
@@ -257,12 +257,12 @@
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td class="px-3 py-3 text-center">
+                                                    <td class="px-3 py-2 text-center">
                                                         <span class="text-xs font-mono {{ ($teacher->iee_cn ?? 0) >= 70 ? 'text-emerald-400' : (($teacher->iee_cn ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
                                                             {{ $teacher->iee_cn }}%
                                                         </span>
                                                     </td>
-                                                    <td class="px-3 py-3 text-center">
+                                                    <td class="px-3 py-2 text-center">
                                                         <span class="text-xs font-mono {{ ($teacher->ire ?? 0) >= 100 ? 'text-emerald-400' : (($teacher->ire ?? 0) >= 70 ? 'text-amber-400' : 'text-red-400') }}">
                                                             {{ $teacher->ire }}%
                                                         </span>
@@ -461,7 +461,7 @@
 
                     {{-- Per-diagnostic breakdown table --}}
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
-                        <div class="px-5 py-3 border-b border-white/5">
+                        <div class="px-5 py-2 border-b border-white/5">
                             <h4 class="text-xs font-bold text-white uppercase tracking-wider">Desempeño por Diagnóstico</h4>
                         </div>
                         @if($tab4DiagData->isNotEmpty())
@@ -469,32 +469,32 @@
                                 <table class="w-full text-left">
                                     <thead>
                                         <tr class="border-b border-white/5">
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Sesiones</th>
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Completadas</th>
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Estudiantes</th>
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
-                                            <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Progreso</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Sesiones</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Completadas</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Estudiantes</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
+                                            <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Progreso</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-white/5">
                                         @foreach($tab4DiagData as $item)
                                             @php $pct = $item->total_sessions > 0 ? round(($item->completed_sessions / $item->total_sessions) * 100) : 0; @endphp
                                             <tr class="hover:bg-white/[0.02] transition-colors">
-                                                <td class="py-3 px-4">
+                                                <td class="py-2 px-4">
                                                     <span class="text-xs font-medium text-white">{{ $item->diag_main->name }}</span>
                                                 </td>
-                                                <td class="py-3 px-4 text-center text-xs text-gray-400">{{ number_format($item->total_sessions) }}</td>
-                                                <td class="py-3 px-4 text-center">
+                                                <td class="py-2 px-4 text-center text-xs text-gray-400">{{ number_format($item->total_sessions) }}</td>
+                                                <td class="py-2 px-4 text-center">
                                                     <span class="text-xs font-medium text-emerald-400">{{ number_format($item->completed_sessions) }}</span>
                                                 </td>
-                                                <td class="py-3 px-4 text-center text-xs text-gray-400">{{ number_format($item->students_evaluated) }}</td>
-                                                <td class="py-3 px-4 text-center">
+                                                <td class="py-2 px-4 text-center text-xs text-gray-400">{{ number_format($item->students_evaluated) }}</td>
+                                                <td class="py-2 px-4 text-center">
                                                     <span class="text-xs font-medium {{ ($item->avg_precision ?? 0) >= 70 ? 'text-emerald-400' : (($item->avg_precision ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
                                                         {{ $item->avg_precision }}%
                                                     </span>
                                                 </td>
-                                                <td class="py-3 px-4 text-right">
+                                                <td class="py-2 px-4 text-right">
                                                     <div class="flex items-center justify-end gap-2">
                                                         <div class="w-20 bg-gray-700/50 rounded-full h-1.5">
                                                             <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $pct }}%"></div>

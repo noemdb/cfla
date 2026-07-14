@@ -1,7 +1,7 @@
 <div id="diagnosticModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm fade-in" data-backdrop="static" role="dialog" aria-modal="true">
     <div class="bg-gray-900/90 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-3 border-b border-white/5">
+        <div class="flex items-center justify-between px-6 py-2 border-b border-white/5">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-emerald-500/10 rounded-lg">
                     <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@
         </div>
 
         {{-- Footer --}}
-        <div class="flex items-center justify-between px-6 py-3 border-t border-white/5 bg-gray-900/50 rounded-b-2xl">
+        <div class="flex items-center justify-between px-6 py-2 border-t border-white/5 bg-gray-900/50 rounded-b-2xl">
             <button type="button" onclick="noMostrarMas()"
                 class="text-sm text-gray-500 hover:text-gray-300 transition-colors">
                 No mostrar más

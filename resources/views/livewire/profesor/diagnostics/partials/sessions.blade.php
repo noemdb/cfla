@@ -61,19 +61,19 @@
         <table class="w-full text-left">
             <thead>
                 <tr class="border-b border-white/5">
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiante</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Inicio</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Aciertos</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estudiante</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Diagnóstico</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Inicio</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Aciertos</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($sessions as $session)
                     <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
                                     <span class="text-[10px] font-bold text-purple-400">{{ strtoupper(substr($session->estudiant?->full_name ?? '?', 0, 2)) }}</span>
@@ -84,16 +84,16 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="text-xs text-gray-400">{{ $session->estudiant?->grado?->name ?? '—' }}</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="text-xs text-gray-400">{{ $session->diagMain?->name ?? '—' }}</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="text-xs text-gray-400">{{ $session->iniciado_at ? \Carbon\Carbon::parse($session->iniciado_at)->format('d/m/Y H:i') : '—' }}</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             @if($session->completado_at)
                                 <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -106,7 +106,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             @if($session->completado_at && $session->answers_count > 0)
                                 @php
                                     $correct = $session->answers->where('is_correct', 1)->count();
@@ -120,7 +120,7 @@
                                 <span class="text-xs text-gray-600">—</span>
                             @endif
                         </td>
-                        <td class="py-3 px-4 text-right">
+                        <td class="py-2 px-4 text-right">
                             <div class="inline-flex items-center gap-1">
                                 <button wire:click="viewSession({{ $session->id }})"
                                     title="Ver detalles"

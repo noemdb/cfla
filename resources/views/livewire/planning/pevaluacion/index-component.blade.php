@@ -116,7 +116,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="text-left px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('pevaluacions.id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 #
                                 @if($sortField === 'pevaluacions.id')
@@ -126,7 +126,7 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('profesor_id')" class="flex items-center gap-1 hover:text-white transition-colors">
                                 Profesor
                                 @if($sortField === 'profesor_id')
@@ -136,19 +136,19 @@
                                 @endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Est.</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área / Grado / Sección</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Momento</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Act.</th>
-                        <th class="text-right px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Est.</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área / Grado / Sección</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Momento</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Act.</th>
+                        <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($pevaluacions as $pevaluacion)
                         @php $lapsoClosed = $pevaluacion->is_lapso_closed; @endphp
                         <tr class="hover:bg-white/[0.02] transition-colors group {{ $lapsoClosed ? 'opacity-60' : '' }}">
-                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $pevaluacion->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $pevaluacion->id }}</td>
+                            <td class="px-4 py-2">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0">
                                         {{ strtoupper(substr($pevaluacion->profesor?->name ?? '?', 0, 1)) }}{{ strtoupper(substr($pevaluacion->profesor?->lastname ?? '', 0, 1)) }}
@@ -156,29 +156,29 @@
                                     <span class="text-sm text-white font-medium">{{ $pevaluacion->profesor?->full_name ?? '—' }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 hidden md:table-cell">
+                            <td class="px-4 py-2 hidden md:table-cell">
                                 <span class="inline-flex items-center px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold rounded-md border border-cyan-500/20">
                                     {{ $pevaluacion->pensum?->pestudio?->code ?? '—' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <span class="text-sm text-gray-200">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</span>
                                 <span class="block text-[10px] text-gray-500 mt-0.5">
                                     {{ $pevaluacion->seccion?->grado?->name ?? '?' }} - Secc. {{ $pevaluacion->seccion?->name ?? '?' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 hidden lg:table-cell">
+                            <td class="px-4 py-2 hidden lg:table-cell">
                                 <span class="text-sm text-gray-300">{{ $pevaluacion->lapso?->name ?? '—' }}</span>
                                 @if($lapsoClosed)
                                     <br><span class="text-[10px] text-red-400 font-medium">Cerrado</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-2 text-center">
                                 <span class="inline-flex items-center justify-center min-w-[2rem] h-7 rounded-lg bg-white/5 text-gray-300 text-sm font-bold px-2">
                                     {{ $pevaluacion->activities_count }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
@@ -225,7 +225,7 @@
         </div>
 
         @if($pevaluacions->hasPages())
-            <div class="px-5 py-3 border-t border-white/5">
+            <div class="px-5 py-2 border-t border-white/5">
                 {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif

@@ -1,4 +1,4 @@
-<div class="container-fluid mx-auto px-4 sm:px-6 lg:px-8 py-3">
+<div class="container-fluid mx-auto px-4 sm:px-6 lg:px-8 py-2">
     <div
         class="relative w-full overflow-hidden rounded-lg shadow-2xl border border-emerald-100/50 dark:border-emerald-900/20 bg-white dark:bg-gray-900/40 group">
 

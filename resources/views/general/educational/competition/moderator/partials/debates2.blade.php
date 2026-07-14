@@ -7,7 +7,7 @@
             </button> --}}
 
             <li>
-                <a href="#" class="inline-flex items-center px-4 py-3 text-white bg-blue-700 rounded-lg active w-full dark:bg-blue-600" aria-current="page">
+                <a href="#" class="inline-flex items-center px-4 py-2 text-white bg-blue-700 rounded-lg active w-full dark:bg-blue-600" aria-current="page">
                     {{$item->name}}
                 </a>
             </li>

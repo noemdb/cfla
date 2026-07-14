@@ -52,7 +52,7 @@
     </header>
 
     <!-- Contenido principal -->
-    <main class="flex-1 py-3">
+    <main class="flex-1 py-2">
         @yield('content')
     </main>
 

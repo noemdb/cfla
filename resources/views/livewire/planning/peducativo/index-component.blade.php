@@ -65,37 +65,37 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="text-left px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">#</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Periodo</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Responsable</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Planes</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
-                        <th class="text-right px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
+                        <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">#</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Periodo</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Responsable</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Planes</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                        <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($peducativos as $peducativo)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $peducativo->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $peducativo->id }}</td>
+                            <td class="px-4 py-2">
                                 <span class="text-sm font-bold text-white">{{ $peducativo->name }}</span>
                                 @if($peducativo->description)
                                     <span class="block text-[10px] text-gray-500 mt-0.5">{{ \Illuminate\Support\Str::limit($peducativo->description, 60) }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell">
+                            <td class="px-4 py-2 text-sm text-gray-400 hidden md:table-cell">
                                 {{ $peducativo->pescolar?->name ?? '—' }}
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-400 hidden lg:table-cell">
+                            <td class="px-4 py-2 text-sm text-gray-400 hidden lg:table-cell">
                                 {{ $peducativo->manager?->username ?? '—' }}
                             </td>
-                            <td class="px-4 py-3 text-center hidden lg:table-cell">
+                            <td class="px-4 py-2 text-center hidden lg:table-cell">
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-gray-300 text-sm font-bold">
                                     {{ $peducativo->pestudios_count }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-2 text-center">
                                 @if($peducativo->status_active === 'true' || $peducativo->status_active == 1)
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -108,7 +108,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $peducativo->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
@@ -153,7 +153,7 @@
         </div>
 
         @if($peducativos->hasPages())
-            <div class="px-5 py-3 border-t border-white/5">
+            <div class="px-5 py-2 border-t border-white/5">
                 {{ $peducativos->links() }}
             </div>
         @endif

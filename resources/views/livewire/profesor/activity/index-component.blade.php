@@ -13,7 +13,7 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
 
         {{-- Alert: Observación Coord.Eval. --}}
-        <div class="border-b border-white/5 px-6 py-3 bg-amber-500/5">
+        <div class="border-b border-white/5 px-6 py-2 bg-amber-500/5">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
                     <div class="flex items-center gap-2 mb-2">
@@ -391,7 +391,7 @@
                 <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -578,7 +578,7 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex justify-end">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex justify-end">
                         <button wire:click="closeDetailModal"
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -603,7 +603,7 @@
                 <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -632,7 +632,7 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="close"
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -664,7 +664,7 @@
                 <div class="relative w-full max-w-lg bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -741,7 +741,7 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         <button wire:click="close"
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -773,7 +773,7 @@
                 <div class="relative w-[95vw] max-w-[95vw] bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden" @click.away="closeS2526Modal">
 
                     {{-- Header --}}
-                    <div class="px-6 py-3 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
+                    <div class="px-6 py-2 border-b border-white/5 flex items-center justify-between bg-violet-500/5 shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-violet-500/10 rounded-lg flex items-center justify-center">
                                 <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -796,7 +796,7 @@
                     </div>
 
                     {{-- Filters bar --}}
-                    <div class="px-6 py-3 border-b border-white/5 flex items-center gap-3 bg-gray-800/20 shrink-0">
+                    <div class="px-6 py-2 border-b border-white/5 flex items-center gap-3 bg-gray-800/20 shrink-0">
                         {{-- Search --}}
                         <div class="relative flex-1">
                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -914,7 +914,7 @@
                                             </div>
 
                                             {{-- Card body --}}
-                                            <div class="px-4 py-3 flex-1 space-y-1.5 text-sm text-gray-300">
+                                            <div class="px-4 py-2 flex-1 space-y-1.5 text-sm text-gray-300">
                                                 <div class="flex items-center gap-2 text-[11px] text-gray-500 font-mono mb-1">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -972,7 +972,7 @@
                     </div>
 
                     {{-- Pagination + Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between shrink-0">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex items-center justify-between shrink-0">
                         {{-- Pagination --}}
                         @if($s2526LastPage > 1)
                             <div class="flex items-center gap-1">
@@ -1045,7 +1045,7 @@
                 <div class="relative w-full max-w-4xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
 
                     {{-- Header --}}
-                    <div class="flex items-center justify-between px-6 py-3 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
                                 <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1210,7 +1210,7 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
+                    <div class="px-6 py-2 border-t border-white/5 bg-gray-800/30 flex items-center justify-between">
                         {{-- Left: Copy button --}}
                         <button wire:click="s2526CopyFromDetail"
                             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/20 transition-all duration-200">

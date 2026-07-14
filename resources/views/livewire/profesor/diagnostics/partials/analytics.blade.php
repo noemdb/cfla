@@ -7,31 +7,31 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Sesiones</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Completadas</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Progreso</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Sesiones</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Completadas</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Precisión</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Progreso</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($analytics['by_pensum'] ?? [] as $item)
                         <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-300">{{ $item['name'] ?? '—' }}</span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs text-gray-400">{{ $item['total_sessions'] ?? 0 }}</span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs text-emerald-400">{{ $item['completed_sessions'] ?? 0 }}</span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs font-medium {{ ($item['accuracy'] ?? 0) >= 70 ? 'text-emerald-400' : (($item['accuracy'] ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
                                     {{ number_format($item['accuracy'] ?? 0, 1) }}%
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-2 px-4 text-right">
                                 @php $pct = $item['total_sessions'] > 0 ? round(($item['completed_sessions'] / $item['total_sessions']) * 100) : 0; @endphp
                                 <div class="flex items-center justify-end gap-2">
                                     <div class="w-20 bg-gray-700/50 rounded-full h-1.5">

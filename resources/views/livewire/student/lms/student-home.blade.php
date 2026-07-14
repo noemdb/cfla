@@ -29,7 +29,7 @@
         <section wire:key="pe-{{ $pe->id }}"
                  class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
 
-            <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700/50">
+            <div class="px-5 py-2 border-b border-gray-100 dark:border-gray-700/50">
                 <div class="flex items-start justify-between">
                     <div>
                         <p class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
@@ -55,7 +55,7 @@
             <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                 @foreach($pe->activities as $activity)
                     <a href="{{ route('student.lms.activity', $activity) }}"
-                       class="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50
+                       class="flex items-center justify-between px-5 py-2.5 hover:bg-gray-50
                               dark:hover:bg-gray-700/30 transition-colors group">
                         <div class="flex items-center gap-3 min-w-0">
                             @php $pub = $activity->lmsPublication; @endphp

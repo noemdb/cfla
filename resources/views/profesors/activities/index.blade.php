@@ -39,7 +39,7 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
 
         {{-- Header --}}
-        <div class="border-b border-white/5 px-5 py-3">
+        <div class="border-b border-white/5 px-5 py-2">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider">
                     <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,7 +62,7 @@
                         $url = route('app.profesors.activities.index', array_merge(request()->query(), ['lapso_id' => $tabLapsoId]));
                     @endphp
                     <a href="{{ $url }}"
-                        class="flex-1 px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
+                        class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
                         {{ $isActive ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
                         <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

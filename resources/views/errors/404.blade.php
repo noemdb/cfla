@@ -13,7 +13,7 @@
         </div>
         <h2 class="mb-2 text-lg font-semibold text-gray-700">Página no encontrada</h2>
         <p class="mb-8 text-gray-500">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
-        <a href="{{ url('/') }}" class="inline-block px-6 py-3 text-white transition-colors duration-200 bg-gray-800 rounded-md hover:bg-gray-700">
+        <a href="{{ url('/') }}" class="inline-block px-6 py-2 text-white transition-colors duration-200 bg-gray-800 rounded-md hover:bg-gray-700">
             Volver al inicio
         </a>
     </div>

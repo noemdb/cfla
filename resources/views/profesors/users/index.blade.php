@@ -52,14 +52,14 @@
                 @endphp
 
                 @foreach($fields as $label => $data)
-                <div class="bg-white/5 rounded-lg px-4 py-3 border border-white/5">
+                <div class="bg-white/5 rounded-lg px-4 py-2 border border-white/5">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{{ $label }}</p>
                     <p class="text-sm font-medium text-white">{{ $data['value'] }}</p>
                 </div>
                 @endforeach
 
                 {{-- Estado --}}
-                <div class="bg-white/5 rounded-lg px-4 py-3 border border-white/5">
+                <div class="bg-white/5 rounded-lg px-4 py-2 border border-white/5">
                     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Estado</p>
                     @php $isActive = $profesor->status_active === 'true'; @endphp
                     <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider {{ $isActive ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10' }} px-2.5 py-1 rounded-full">

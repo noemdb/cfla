@@ -115,7 +115,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <div class="text-gray-400 text-center py-3 bg-gray-600/30 rounded-lg">
+                                    <div class="text-gray-400 text-center py-2 bg-gray-600/30 rounded-lg">
                                         <svg class="w-8 h-8 mx-auto mb-2 opacity-50" fill="none"
                                             stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -386,7 +386,7 @@
                 </div>
 
                 <!-- Footer del Modal -->
-                <div class="bg-gray-700/30 px-8 py-3 border-t border-gray-600">
+                <div class="bg-gray-700/30 px-8 py-2 border-t border-gray-600">
                     <div
                         class="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0 sm:space-x-4">
                         <div class="text-sm text-gray-400">

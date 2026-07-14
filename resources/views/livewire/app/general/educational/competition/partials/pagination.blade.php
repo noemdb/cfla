@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between px-4 py-3 sm:px-6">
+<div class="flex items-center justify-between px-4 py-2 sm:px-6">
     <div class="flex flex-1 justify-between sm:hidden">
         @if ($paginator->onFirstPage())
             <span class="relative inline-flex items-center rounded-lg border border-white/5 bg-gray-900 px-4 py-2 text-sm font-medium text-gray-500 cursor-default uppercase tracking-widest transition-all">

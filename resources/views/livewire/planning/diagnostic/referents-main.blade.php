@@ -2,7 +2,7 @@
     {{-- Loading overlay --}}
     <div wire:loading.flex wire:target="openImportModal,loadImportPreview,importData,createReferent,createCompetency,createIndicator,saveReferent,saveCompetency,saveIndicator,confirmDeleteReferent,confirmDeleteCompetency,confirmDeleteIndicator,deleteReferent,deleteCompetency,deleteIndicator,toggleReferentActive"
          class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm items-center justify-center">
-        <div class="flex items-center gap-3 px-6 py-3 rounded-lg bg-gray-900 border border-white/10">
+        <div class="flex items-center gap-3 px-6 py-2 rounded-lg bg-gray-900 border border-white/10">
             <svg class="w-5 h-5 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
@@ -126,40 +126,40 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Versión</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Plan de Estudio</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Comp.</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Ind.</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Versión</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Plan de Estudio</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Comp.</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Ind.</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $referent)
                         <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-300 font-medium">{{ $referent->name }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <code class="text-[11px] bg-gray-800/50 text-gray-400 px-1.5 py-0.5 rounded">{{ $referent->code ?? '—' }}</code>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-400">{{ $referent->version ?? '—' }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
                                     {{ $referent->pestudio?->name ?? '—' }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs text-gray-400">{{ $referent->competencies_count }}</span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs text-gray-400">{{ $referent->total_indicators_count ?? 0 }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 @if($referent->active)
                                     <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -172,7 +172,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-2 px-4 text-right">
                                 <div class="inline-flex items-center gap-1">
                                     <button wire:click="openDetailModal({{ $referent->id }})"
                                         title="Ver detalles"
@@ -304,29 +304,29 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Competencia</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Indicadores</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Competencia</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área de Formación</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-center">Indicadores</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $competency)
                         <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-300 font-medium">{{ $competency->name }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-400">{{ $competency->pensum?->asignatura_name ?? $competency->pensum?->fullname ?? '—' }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-400">{{ $competency->pensum?->grado?->name ?? '—' }}</span>
                             </td>
-                            <td class="py-3 px-4 text-center">
+                            <td class="py-2 px-4 text-center">
                                 <span class="text-xs text-gray-400">{{ $competency->indicators_count }}</span>
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-2 px-4 text-right">
                                 <div class="inline-flex items-center gap-1">
                                     <button wire:click="openDetailModal({{ $competency->id }})"
                                         title="Ver detalles"
@@ -386,22 +386,22 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Descripción</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nivel Esperado</th>
-                        <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Código</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Descripción</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Nivel Esperado</th>
+                        <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $indicator)
                         <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <code class="text-[11px] bg-gray-800/50 text-gray-400 px-1.5 py-0.5 rounded">{{ $indicator->code ?? '—' }}</code>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 <span class="text-xs text-gray-300">{{ $indicator->description }}</span>
                             </td>
-                            <td class="py-3 px-4">
+                            <td class="py-2 px-4">
                                 @php $level = $expectedLevels[$indicator->expected_level] ?? ['label' => 'No definido', 'color' => 'default']; @endphp
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold
                                     {{ $level['color'] === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
@@ -411,7 +411,7 @@
                                     {{ $level['label'] }}
                                 </span>
                             </td>
-                            <td class="py-3 px-4 text-right">
+                            <td class="py-2 px-4 text-right">
                                 <div class="inline-flex items-center gap-1">
                                     <button wire:click="openDetailModal({{ $indicator->id }})"
                                         title="Ver detalles"
@@ -464,7 +464,7 @@
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showModal', false)"></div>
             <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white">
                         @if($viewMode === 'referents')
                             {{ $editingId ? 'Editar Referente' : 'Nuevo Referente' }}
@@ -580,7 +580,7 @@
                     @endif
                 </div>
 
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex items-center justify-between">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-2 flex items-center justify-between">
                     <button wire:click="$set('showModal', false)"
                         class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-400 hover:text-white border border-white/5 transition-all duration-200">
                         Cancelar
@@ -604,7 +604,7 @@
             <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeDetailModal"></div>
             <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 {{-- Header --}}
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -801,7 +801,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex justify-end">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-2 flex justify-end">
                     <button wire:click="closeDetailModal"
                         class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar
@@ -823,7 +823,7 @@
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showImportModal = false"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
-                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
+                <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
                             <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -967,7 +967,7 @@
                             $statusType = explode(':', $importStatus, 2)[0] ?? '';
                             $statusMsg = explode(':', $importStatus, 2)[1] ?? $importStatus;
                         @endphp
-                        <div class="px-4 py-3 rounded-lg text-xs font-medium
+                        <div class="px-4 py-2 rounded-lg text-xs font-medium
                             {{ $statusType === 'ok' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : '' }}
                             {{ $statusType === 'warning' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : '' }}
                             {{ $statusType === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : '' }}">
@@ -998,7 +998,7 @@
                             </div>
 
                             {{-- Loading overlay for import --}}
-                            <div wire:loading.flex wire:target="importData" class="items-center gap-2 px-4 py-3 rounded-lg bg-gray-800/50 border border-white/5">
+                            <div wire:loading.flex wire:target="importData" class="items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 border border-white/5">
                                 <svg class="w-4 h-4 animate-spin text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                 </svg>
@@ -1008,7 +1008,7 @@
                             {{-- Competencies preview --}}
                             <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
                                 @foreach($importPreview['competencias'] as $comp)
-                                    <div class="px-4 py-3 rounded-lg bg-gray-800/30 border border-white/5">
+                                    <div class="px-4 py-2 rounded-lg bg-gray-800/30 border border-white/5">
                                         <div class="flex items-start gap-3">
                                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold shrink-0">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1033,7 +1033,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-3 flex justify-end">
+                <div class="sticky bottom-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/5 px-6 py-2 flex justify-end">
                     <button @click="showImportModal = false"
                         class="px-5 py-2 rounded-lg text-xs font-bold bg-gray-800/50 text-gray-300 hover:text-white border border-white/5 hover:border-white/10 transition-all duration-200">
                         Cerrar

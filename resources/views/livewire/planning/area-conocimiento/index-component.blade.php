@@ -110,7 +110,7 @@
                 </div>
 
                 {{-- Card Body — details --}}
-                <div class="px-4 py-3 space-y-1.5 flex-1">
+                <div class="px-4 py-2 space-y-1.5 flex-1">
                     {{-- Código --}}
                     <div class="flex items-center gap-2 text-[11px]">
                         <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +397,7 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95">
                 {{-- Header --}}
-                <div class="flex items-center justify-between px-6 py-3 border-b border-white/10">
+                <div class="flex items-center justify-between px-6 py-2 border-b border-white/10">
                     <h2 class="text-lg font-bold text-white">Asignaturas Adscritas — {{ $campoAreaName }}</h2>
                     <button type="button" @@click="$wire.closeCampoManager()"
                             class="p-1.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
@@ -461,27 +461,27 @@
                             <table class="w-full text-sm">
                                 <thead class="sticky top-0 bg-gray-900 z-10">
                                     <tr class="border-b border-white/5">
-                                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
-                                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
-                                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">Código</th>
-                                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Observaciones</th>
-                                        <th class="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24">Acción</th>
+                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-12">#</th>
+                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Asignatura</th>
+                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden sm:table-cell">Código</th>
+                                        <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Observaciones</th>
+                                        <th class="text-right px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 w-24">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-white/5">
                                     @forelse($this->campo_conocimientos as $campo)
                                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                                            <td class="px-4 py-3 text-xs text-gray-500 font-mono">{{ $loop->iteration }}</td>
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-2 text-xs text-gray-500 font-mono">{{ $loop->iteration }}</td>
+                                            <td class="px-4 py-2">
                                                 <span class="text-sm text-gray-200 font-medium">{{ $campo->asignatura?->full_name ?? '—' }}</span>
                                             </td>
-                                            <td class="px-4 py-3 hidden sm:table-cell">
+                                            <td class="px-4 py-2 hidden sm:table-cell">
                                                 <span class="text-xs font-mono bg-white/5 text-gray-400 px-1.5 py-0.5 rounded-md">{{ $campo->asignatura?->code ?? '—' }}</span>
                                             </td>
-                                            <td class="px-4 py-3 hidden md:table-cell">
+                                            <td class="px-4 py-2 hidden md:table-cell">
                                                 <span class="text-xs text-gray-500">{{ $campo->observations ? \Illuminate\Support\Str::limit($campo->observations, 30) : '—' }}</span>
                                             </td>
-                                            <td class="px-4 py-3 text-right">
+                                            <td class="px-4 py-2 text-right">
                                                 <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button wire:click="editCampo({{ $campo->id }})"
                                                         class="p-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-200"
@@ -534,7 +534,7 @@
 
                 </div>
                 {{-- Footer --}}
-                <div class="flex justify-end px-6 py-3 border-t border-white/10">
+                <div class="flex justify-end px-6 py-2 border-t border-white/10">
                     <x-button flat label="Cerrar" wire:click="closeCampoManager" />
                 </div>
             </div>

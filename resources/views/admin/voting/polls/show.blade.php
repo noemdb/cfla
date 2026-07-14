@@ -88,7 +88,7 @@
 
                     @if ($poll->enable && $poll->time_remaining)
                         <div
-                            class="bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 rounded-lg flex items-center gap-3">
+                            class="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-lg flex items-center gap-3">
                             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -123,19 +123,19 @@
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-center py-3 border-t border-white/5">
+                        <div class="flex justify-between items-center py-2 border-t border-white/5">
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Duración</p>
                             <p class="text-sm font-bold text-white">{{ $poll->time_active }} min</p>
                         </div>
 
                         @if ($poll->date)
-                            <div class="flex justify-between items-center py-3 border-t border-white/5">
+                            <div class="flex justify-between items-center py-2 border-t border-white/5">
                                 <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Inicio</p>
                                 <p class="text-sm font-bold text-white">{{ $poll->date->format('d/m/Y H:i') }}</p>
                             </div>
                         @endif
 
-                        <div class="flex justify-between items-center py-3 border-t border-white/5">
+                        <div class="flex justify-between items-center py-2 border-t border-white/5">
                             <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Creación</p>
                             <p class="text-sm font-bold text-white">{{ $poll->created_at->format('d/m/Y') }}</p>
                         </div>
@@ -175,11 +175,11 @@
                         </h3>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <div
-                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-5 py-3 text-emerald-400 font-mono text-xs truncate">
+                                class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-5 py-2 text-emerald-400 font-mono text-xs truncate">
                                 {{ url('/poll/voting/' . $poll->access_token) }}
                             </div>
                             <button onclick="copyToClipboard('{{ url('/poll/voting/' . $poll->access_token) }}')"
-                                class="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
+                                class="px-8 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-[10px]">
                                 COPIAR ENLACE
                             </button>
                         </div>
@@ -262,7 +262,7 @@
                                 onsubmit="return confirmReset()">
                                 @csrf
                                 <button type="submit"
-                                    class="px-8 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg border border-red-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+                                    class="px-8 py-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg border border-red-500/20 transition-all duration-300 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">

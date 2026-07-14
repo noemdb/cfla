@@ -34,7 +34,7 @@
 
     <!-- Call to Action -->
     <div class="fade-in mt-12 text-center">
-        <a href="{{ route('login') }}" class="inline-block px-6 py-3 text-lg font-medium bg-white text-blue-800 rounded-lg shadow-lg hover:bg-blue-100 transition">
+        <a href="{{ route('login') }}" class="inline-block px-6 py-2 text-lg font-medium bg-white text-blue-800 rounded-lg shadow-lg hover:bg-blue-100 transition">
             Comienza ahora
         </a>
     </div>

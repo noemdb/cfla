@@ -84,28 +84,28 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
-                        <th class="text-left px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('profesors.id')" class="flex items-center gap-1 hover:text-white transition-colors">N°
                                 @if($sortField === 'profesors.id')<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path></svg>@endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
                             <button wire:click="sortBy('profesors.lastname')" class="flex items-center gap-1 hover:text-white transition-colors">Nombre
                                 @if($sortField === 'profesors.lastname')<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"></path></svg>@endif
                             </button>
                         </th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Educ.</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">C.Académica</th>
-                        <th class="text-center px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">P.Activid.</th>
-                        <th class="text-left px-4 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Usuario</th>
-                        <th class="text-right px-5 py-3.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden md:table-cell">Plan Educ.</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">C.Académica</th>
+                        <th class="text-center px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">P.Activid.</th>
+                        <th class="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hidden lg:table-cell">Usuario</th>
+                        <th class="text-right px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($profesors as $profesor)
                         <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-5 py-3 text-sm text-gray-400 font-mono">{{ $profesor->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $profesor->id }}</td>
+                            <td class="px-4 py-2">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-xs font-bold shrink-0">
                                         {{ strtoupper(substr($profesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($profesor->lastname ?? '', 0, 1)) }}
@@ -116,7 +116,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 hidden md:table-cell">
+                            <td class="px-4 py-2 hidden md:table-cell">
                                 @php
                                     $pevaluacionPestudios = $profesor->pevaluacions
                                         ->groupBy(fn($p) => $p->pensum?->pestudio?->id)
@@ -134,7 +134,7 @@
                                     <span class="text-gray-600 text-[10px]">—</span>
                                 @endforelse
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2">
                                 <div class="flex items-center justify-center gap-1">
                                     @foreach($lapsos as $lapso)
                                         @php
@@ -149,7 +149,7 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-4 py-3 hidden lg:table-cell">
+                            <td class="px-4 py-2 hidden lg:table-cell">
                                 <div class="flex items-center justify-center gap-1">
                                     @foreach($lapsos as $lapso)
                                         @php
@@ -165,14 +165,14 @@
                                     @endforeach
                                 </div>
                             </td>
-                            <td class="px-4 py-3 hidden lg:table-cell">
+                            <td class="px-4 py-2 hidden lg:table-cell">
                                 @if($profesor->user)
                                     <span class="text-sm text-gray-300 font-mono">{{ $profesor->user->username }}</span>
                                 @else
                                     <span class="text-gray-600 text-[10px]">—</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" wire:click="showPreview({{ $profesor->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"

@@ -7,7 +7,7 @@
     @forelse ($estudiants as $estudiant)
         <div>{{$estudiant->name ?? null}} {{$estudiant->name ?? null}} {{$estudiant->full_inscripcion ?? null}}</div>
     @empty
-        <div class="w-full border-b-2 border-neutral-100 border-opacity-100 py-3 dark:border-opacity-50"> No hay estudiantes </div>
+        <div class="w-full border-b-2 border-neutral-100 border-opacity-100 py-2 dark:border-opacity-50"> No hay estudiantes </div>
     @endforelse
 
 

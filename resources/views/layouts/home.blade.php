@@ -109,7 +109,7 @@
     <!-- Header -->
     <header
         class="bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-emerald-800/30 sticky top-0 z-10 shadow-lg transition-colors duration-300">
-        <div class="container-fluid mx-auto px-4 py-3">
+        <div class="container-fluid mx-auto px-4 py-2">
             <div class="flex items-center justify-between">
                 <!-- Logo y título principal -->
                 <div class="flex items-center space-x-6">

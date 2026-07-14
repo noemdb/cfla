@@ -65,35 +65,35 @@
         <table class="w-full text-left">
             <thead>
                 <tr class="border-b border-white/5">
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Pregunta</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Tipo</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Dificultad</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
-                    <th class="py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Pregunta</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Tipo</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Área</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Dificultad</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">Estado</th>
+                    <th class="py-2 px-4 text-[10px] font-bold uppercase tracking-widest text-gray-500 text-right">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($questions as $question)
                     <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <p class="text-xs text-gray-300 max-w-[300px] truncate" title="{{ $question->pregunta }}">{{ $question->pregunta }}</p>
                             <span class="text-[10px] text-gray-600">{{ $question->created_at->format('d/m/Y') }}</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold {{ $question->tipo_pregunta === 'multiple' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : ($question->tipo_pregunta === 'open' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20') }}">
                                 {{ $question->tipo_pregunta === 'multiple' ? 'Múltiple' : ($question->tipo_pregunta === 'open' ? 'Abierta' : 'Escala') }}
                             </span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="text-xs text-gray-400">{{ $question->asignatura_name ?? '—' }}</span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             <span class="text-xs {{ $question->difficulty === 'easy' ? 'text-emerald-400' : ($question->difficulty === 'medium' ? 'text-amber-400' : 'text-red-400') }}">
                                 {{ $question->difficulty === 'easy' ? 'Fácil' : ($question->difficulty === 'medium' ? 'Media' : 'Difícil') }}
                             </span>
                         </td>
-                        <td class="py-3 px-4">
+                        <td class="py-2 px-4">
                             @if($question->activo)
                                 <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -106,7 +106,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="py-3 px-4 text-right">
+                        <td class="py-2 px-4 text-right">
                             <div class="inline-flex items-center gap-1">
                                 <button wire:click="openQuestionModal({{ $question->id }})"
                                     title="Editar pregunta"

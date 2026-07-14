@@ -10,7 +10,7 @@
 
 <body class="antialiased bg-gray-50 text-gray-900">
     <header class="bg-white shadow-md fixed w-full z-50">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
             <a href="/" class="text-lg font-bold">StudyAI</a>
             <nav>
                 <a href="#features" class="text-gray-700 px-4 hover:underline">Características</a>

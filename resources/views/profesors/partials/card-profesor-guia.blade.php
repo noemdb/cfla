@@ -13,10 +13,10 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-white/5">
-                                <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
-                                <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Sección</th>
-                                <th class="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Informes de Diagnóstico</th>
-                                <th class="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acción</th>
+                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</th>
+                                <th class="text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Sección</th>
+                                <th class="text-center px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Informes de Diagnóstico</th>
+                                <th class="text-right px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Acción</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
@@ -30,13 +30,13 @@
                                     }
                                 @endphp
                                 <tr class="hover:bg-white/[0.02] transition-colors group">
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2">
                                         <span class="text-sm text-white font-medium">{{ $gradoName }}</span>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-2">
                                         <span class="text-sm text-gray-300">Sección {{ $seccionName }}</span>
                                     </td>
-                                    <td class="px-4 py-3 text-center">
+                                    <td class="px-4 py-2 text-center">
                                         @if($reportesCount > 0)
                                             <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
@@ -46,7 +46,7 @@
                                             <span class="text-xs text-gray-500">Sin informes</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-right">
+                                    <td class="px-4 py-2 text-right">
                                         @if($reportesCount > 0)
                                             <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <a href="#"
@@ -79,7 +79,7 @@
 
         {{-- Footer link to reports (only if reports exist) --}}
         @if(isset($tieneReportesDiagnosticos) && $tieneReportesDiagnosticos)
-        <div class="border-t border-white/5 px-5 py-3 flex justify-end">
+        <div class="border-t border-white/5 px-5 py-2 flex justify-end">
             <a href="#"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                 <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

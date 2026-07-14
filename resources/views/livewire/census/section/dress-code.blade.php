@@ -6,7 +6,7 @@
     <div class="relative w-full max-w-lg rounded-lg bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
 
         {{-- Header --}}
-        <div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between px-6 py-2 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide">
                 Código de Vestimenta
             </h3>
@@ -21,7 +21,7 @@
 
             {{-- Aviso principal --}}
             <div
-                class="flex items-center gap-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-3">
+                class="flex items-center gap-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 px-4 py-2">
                 <x-icon name="exclamation-triangle" class="w-6 h-6 shrink-0 text-red-600 dark:text-red-400" />
                 <p class="font-bold uppercase tracking-wide text-red-700 dark:text-red-400 text-sm">
                     Debe presentarse de manera sobria
@@ -68,7 +68,7 @@
         </div>
 
         {{-- Footer --}}
-        <div class="flex justify-end px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex justify-end px-6 py-2 border-t border-gray-200 dark:border-gray-700">
             <x-button primary label="Entendido" wire:click="closeDressCode" />
         </div>
     </div>

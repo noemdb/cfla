@@ -154,7 +154,7 @@
                 <!-- Navegación -->
                 <div class="flex justify-between items-center">
                     <button wire:click="previousQuestion" @if ($currentQuestionIndex === 0 || $isProcessing) disabled @endif
-                        class="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200">
+                        class="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                         @if ($isProcessing)
                             <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
                                 fill="none" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@
                     @if ($isReviewMode || $showAnsweredQuestions)
                         @if ($currentQuestionIndex < count($questions) - 1)
                             <button wire:click="nextQuestion"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200">
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                                 <span>Siguiente</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -194,7 +194,7 @@
                             </button>
                         @else
                             <button wire:click="backToDashboard"
-                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200">
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                                 <span>{{ $isReviewMode ? 'Finalizar Revisión' : 'Volver al Dashboard' }}</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -204,7 +204,7 @@
                         @endif
                     @else
                         <button wire:click="nextQuestion" @if (!$this->canProceed) disabled @endif
-                            class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200">
+                            class="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-200">
                             <span>
                                 @if ($currentQuestionIndex === count($questions) - 1)
                                     @if ($isProcessing)
@@ -256,7 +256,7 @@
                         Has completado todas las preguntas disponibles en esta área.
                     </p>
                     <button wire:click="backToDashboard"
-                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
                         Volver al Dashboard
                     </button>
                 </div>

@@ -11,7 +11,7 @@
             <p class="text-lg mb-6">Transforma tu forma de estudiar con tecnología de vanguardia.</p>
             <button 
                 onclick="loginWithGoogle()" 
-                class="bg-white text-blue-600 px-6 py-3 rounded shadow hover:bg-gray-200">
+                class="bg-white text-blue-600 px-6 py-2 rounded shadow hover:bg-gray-200">
                 Comienza Ahora
             </button>
         </div>
@@ -77,7 +77,7 @@
             <p class="mb-6">Transforma tu experiencia de aprendizaje con herramientas inteligentes y tecnología avanzada.</p>
             <button 
                 onclick="loginWithGoogle()" 
-                class="bg-white text-blue-600 px-6 py-3 rounded shadow hover:bg-gray-200">
+                class="bg-white text-blue-600 px-6 py-2 rounded shadow hover:bg-gray-200">
                 Empieza Ahora
             </button>
         </div>

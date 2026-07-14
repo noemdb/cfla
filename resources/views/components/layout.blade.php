@@ -46,7 +46,7 @@
         <!-- Footer -->
         <footer class="bg-white shadow-inner">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="py-3 text-center text-gray-500 text-sm">
+                <div class="py-2 text-center text-gray-500 text-sm">
                     © {{ date('Y') }} {{ config('app.name', 'Innovative App') }}. All rights reserved.
                 </div>
             </div>

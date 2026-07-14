@@ -1,4 +1,4 @@
-<div class="px-5 py-3 border-t border-white/5">
+<div class="px-5 py-2 border-t border-white/5">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex items-center gap-3">
             {{-- Items per page --}}

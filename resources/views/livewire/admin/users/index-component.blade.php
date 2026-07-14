@@ -51,7 +51,7 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-white/5 bg-gray-800/30">
-                        <th wire:click="sortBy('id')" class="px-4 py-3 text-left cursor-pointer group">
+                        <th wire:click="sortBy('id')" class="px-4 py-2 text-left cursor-pointer group">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400 group-hover:text-emerald-400 transition-colors">
                                 ID
                                 @if($sortField === 'id')
@@ -61,7 +61,7 @@
                                 @endif
                             </span>
                         </th>
-                        <th wire:click="sortBy('username')" class="px-4 py-3 text-left cursor-pointer group">
+                        <th wire:click="sortBy('username')" class="px-4 py-2 text-left cursor-pointer group">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400 group-hover:text-emerald-400 transition-colors">
                                 Usuario
                                 @if($sortField === 'username')
@@ -71,7 +71,7 @@
                                 @endif
                             </span>
                         </th>
-                        <th wire:click="sortBy('email')" class="px-4 py-3 text-left cursor-pointer group hidden md:table-cell">
+                        <th wire:click="sortBy('email')" class="px-4 py-2 text-left cursor-pointer group hidden md:table-cell">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400 group-hover:text-emerald-400 transition-colors">
                                 Email
                                 @if($sortField === 'email')
@@ -81,13 +81,13 @@
                                 @endif
                             </span>
                         </th>
-                        <th class="px-4 py-3 text-left hidden lg:table-cell">
+                        <th class="px-4 py-2 text-left hidden lg:table-cell">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Roles</span>
                         </th>
-                        <th class="px-4 py-3 text-center">
+                        <th class="px-4 py-2 text-center">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Estado</span>
                         </th>
-                        <th class="px-4 py-3 text-right">
+                        <th class="px-4 py-2 text-right">
                             <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Acciones</span>
                         </th>
                     </tr>
@@ -95,8 +95,8 @@
                 <tbody>
                     @forelse($users as $user)
                         <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors {{ $user->id === auth()->id() ? 'bg-emerald-500/[0.03]' : '' }}">
-                            <td class="px-4 py-3 text-sm text-gray-400 font-mono">{{ $user->id }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-2 text-sm text-gray-400 font-mono">{{ $user->id }}</td>
+                            <td class="px-4 py-2">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-white/10 flex items-center justify-center text-xs font-bold text-emerald-400 uppercase shrink-0">
                                         {{ substr($user->username, 0, 2) }}
@@ -112,8 +112,8 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-400 hidden md:table-cell">{{ $user->email }}</td>
-                            <td class="px-4 py-3 hidden lg:table-cell">
+                            <td class="px-4 py-2 text-sm text-gray-400 hidden md:table-cell">{{ $user->email }}</td>
+                            <td class="px-4 py-2 hidden lg:table-cell">
                                 <div class="flex flex-wrap gap-1">
                                     @if($user->is_admin)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Admin</span>
@@ -132,7 +132,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-2 text-center">
                                 @if($user->is_active === 'enable' || $user->is_active === true)
                                     <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
                                         <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
@@ -145,7 +145,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="px-4 py-2 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button wire:click="edit({{ $user->id }})"
                                         class="p-2 text-gray-400 hover:text-emerald-300 bg-white/5 hover:bg-emerald-500/20 rounded-lg border border-white/5 transition-all duration-300 group"
@@ -180,7 +180,7 @@
             </table>
         </div>
 
-        <div class="px-4 py-3 border-t border-white/5">
+        <div class="px-4 py-2 border-t border-white/5">
             {{ $users->links() }}
         </div>
     </div>
@@ -200,7 +200,7 @@
             class="w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 overflow-hidden">
 
             <!-- Modal header -->
-            <div class="flex items-center justify-between px-6 py-3 border-b border-white/5">
+            <div class="flex items-center justify-between px-6 py-2 border-b border-white/5">
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $isEditing ? 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' : 'M12 4v16m8-8H4' }}"></path>
@@ -257,19 +257,19 @@
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400/60 mb-2">Roles y Permisos</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_admin" class="rounded bg-gray-700 border-gray-600 text-emerald-500 focus:ring-emerald-500/30">
                                 <span class="text-sm text-gray-300">Administrador</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_planner" class="rounded bg-gray-700 border-gray-600 text-cyan-500 focus:ring-cyan-500/30">
                                 <span class="text-sm text-gray-300">Planificación</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_profesor" class="rounded bg-gray-700 border-gray-600 text-blue-500 focus:ring-blue-500/30">
                                 <span class="text-sm text-gray-300">Profesor</span>
                             </label>
-                            <label class="flex items-center gap-3 px-4 py-3 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_diagnostic" class="rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500/30">
                                 <span class="text-sm text-gray-300">Diagnóstico</span>
                             </label>
@@ -301,7 +301,7 @@
                 </div>
 
                 <!-- Modal footer -->
-                <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-white/5">
+                <div class="flex items-center justify-end gap-3 px-6 py-2 border-t border-white/5">
                     <button type="button" wire:click="$set('modeForm', false)"
                         class="px-5 py-2.5 text-sm font-medium text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all duration-300">
                         Cancelar

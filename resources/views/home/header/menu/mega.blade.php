@@ -3,7 +3,7 @@
     data-te-navbar-ref>
     <div class="px-6">
         <button
-            class="border-0 bg-transparent py-3 text-lg leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
+            class="border-0 bg-transparent py-2 text-lg leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
             type="button" data-te-collapse-init data-te-target="#navbarSupportedContentX"
             aria-controls="navbarSupportedContentX" aria-expanded="false" aria-label="Toggle navigation">
             <span class="[&>svg]:w-8">

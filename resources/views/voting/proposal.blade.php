@@ -631,7 +631,7 @@
                     </ul>
 
                     <button
-                        class="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                        class="w-full bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
                         Solicitar Cotización
                     </button>
                 </div>
@@ -713,7 +713,7 @@
                     </ul>
 
                     <button
-                        class="w-full bg-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors">
+                        class="w-full bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">
                         Solicitar Cotización
                     </button>
                 </div>
@@ -789,7 +789,7 @@
                     </ul>
 
                     <button
-                        class="w-full bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-purple-700 transition-colors">
+                        class="w-full bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-purple-700 transition-colors">
                         Contactar Ventas
                     </button>
                 </div>
@@ -877,7 +877,7 @@
                 </div>
 
                 <div class="mt-8 text-center">
-                    <div class="inline-flex items-center bg-white rounded-lg px-6 py-3 shadow-lg">
+                    <div class="inline-flex items-center bg-white rounded-lg px-6 py-2 shadow-lg">
                         <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1023,11 +1023,11 @@
 
                 <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
                     {{-- <button
-                        class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-blue-50 transition-colors shadow-lg">
+                        class="bg-white text-blue-600 font-bold py-2 px-8 rounded-lg hover:bg-blue-50 transition-colors shadow-lg">
                         Solicitar Demostración
                     </button> --}}
                     <button
-                        class="border-2 border-white text-white font-bold py-3 px-8 rounded-lg hover:bg-white hover:text-blue-600 transition-colors">
+                        class="border-2 border-white text-white font-bold py-2 px-8 rounded-lg hover:bg-white hover:text-blue-600 transition-colors">
                         Descargar Propuesta PDF
                     </button>
                 </div>
@@ -1057,7 +1057,7 @@
         <div class="text-center no-print">
             <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <button data-print
-                    class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors shadow-lg">
+                    class="inline-flex items-center px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
@@ -1066,7 +1066,7 @@
                     Imprimir Propuesta
                 </button>
                 <a href="{{ route('voting.asistent') }}"
-                    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg">
+                    class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>

@@ -31,7 +31,7 @@
                             <textarea class="border p-2 w-full" id="message"></textarea>
                         </div>
 
-                        <button class="bg-blue-500 text-white rounded-full py-3 px-6 hover:bg-blue-600">
+                        <button class="bg-blue-500 text-white rounded-full py-2 px-6 hover:bg-blue-600">
                             Enviar
                         </button>
 

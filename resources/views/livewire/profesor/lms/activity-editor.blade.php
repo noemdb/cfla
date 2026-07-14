@@ -47,7 +47,7 @@
         @foreach($sections as $section)
         <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
              wire:key="section-{{ $section['id'] }}">
-            <div class="flex items-center justify-between px-4 py-3 bg-slate-700/30">
+            <div class="flex items-center justify-between px-4 py-2 bg-slate-700/30">
                 <span class="font-medium text-slate-200">{{ $section['title'] }}</span>
                 <div class="flex gap-2">
                     <button wire:click="toggleSectionVisibility({{ $section['id'] }})"
@@ -69,7 +69,7 @@
 
             <div class="divide-y divide-slate-700/50">
                 @foreach($section['contents'] as $content)
-                <div class="px-4 py-3 flex items-start gap-3"
+                <div class="px-4 py-2 flex items-start gap-3"
                      wire:key="content-{{ $content['id'] }}">
                     <span class="mt-0.5 text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 shrink-0">
                         {{ $content['type'] }}
@@ -91,7 +91,7 @@
             </div>
 
             @if($editingSectionId === $section['id'])
-            <div class="px-4 py-3 bg-slate-900/30 border-t border-slate-700"
+            <div class="px-4 py-2 bg-slate-900/30 border-t border-slate-700"
                  x-data="{ tab: 'text' }">
                 <div class="flex gap-2 mb-2">
                     <button @click="tab='text'"

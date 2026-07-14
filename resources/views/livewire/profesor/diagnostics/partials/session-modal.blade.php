@@ -4,7 +4,7 @@
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showSessionModal', false)"></div>
         <div class="relative bg-gray-900 border border-white/10 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
             {{-- Header --}}
-            <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-3 flex items-center justify-between z-10">
+            <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-white/5 px-6 py-2 flex items-center justify-between z-10">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
                         <span class="text-sm font-bold text-purple-400">{{ strtoupper(substr($selectedSession->estudiant?->full_name ?? '?', 0, 2)) }}</span>

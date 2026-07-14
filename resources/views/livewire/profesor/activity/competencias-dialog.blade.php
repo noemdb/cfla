@@ -134,7 +134,7 @@
 
                             {{-- Competency Card --}}
                             <div class="bg-gray-800/30 border border-white/5 rounded-lg mb-2 last:mb-0 overflow-hidden">
-                                <div class="px-4 py-3 border-b border-white/5">
+                                <div class="px-4 py-2 border-b border-white/5">
                                     <div class="flex items-start gap-3">
                                         <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-bold shrink-0 mt-0.5">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@
                                         @endforeach
                                     </div>
                                 @else
-                                    <div class="px-4 py-3 text-center">
+                                    <div class="px-4 py-2 text-center">
                                         <p class="text-[11px] text-gray-500">Sin indicadores registrados</p>
                                     </div>
                                 @endif

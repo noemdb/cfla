@@ -19,6 +19,6 @@
 
     <div class="pt-4">
         <x-button label="Comenzar Proceso" wire:click="setStart"
-            class="w-full py-3 rounded-lg font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white border-none shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300" />
+            class="w-full py-2 rounded-lg font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white border-none shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300" />
     </div>
 </div>

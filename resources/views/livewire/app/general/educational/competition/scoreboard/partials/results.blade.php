@@ -1,6 +1,6 @@
 <div class="mt-1 w-full border-t-2 border-emerald-300">
 
-    <div class="py-3 bg-emerald-100 border border-emerald-200 rounded-lg shadow-sm">
+    <div class="py-2 bg-emerald-100 border border-emerald-200 rounded-lg shadow-sm">
 
         <h4 class="text-lg font-bold text-emerald-800 uppercase tracking-widest mb-2">Puntuación</h4>
 
@@ -20,7 +20,7 @@
                         <span class="text-xs text-emerald-700 font-bold uppercase tracking-widest mt-1">PTS</span>
                     </div>
                 @empty
-                    <div class="col-span-2 text-gray-600 italic py-3">No hay secciones activas</div>
+                    <div class="col-span-2 text-gray-600 italic py-2">No hay secciones activas</div>
                 @endforelse
             </div>
         @else

@@ -77,7 +77,7 @@
                 <div class="flex gap-3 w-full md:w-auto">
                     @if ($timerActive)
                         <button x-on:click="pauseTimer()"
-                            class="flex-1 md:flex-none px-8 py-3 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-2 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-lg font-bold uppercase tracking-widest hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                             </svg>
@@ -85,7 +85,7 @@
                         </button>
                     @else
                         <button wire:click="start"
-                            class="flex-1 md:flex-none px-8 py-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                            class="flex-1 md:flex-none px-8 py-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
                             </svg>
@@ -93,7 +93,7 @@
                         </button>
                     @endif
                     <button wire:click="finished"
-                        class="flex-1 md:flex-none px-8 py-3 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
+                        class="flex-1 md:flex-none px-8 py-2 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg font-bold uppercase tracking-widest hover:bg-red-500/30 transition-all flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" />
                         </svg>
@@ -105,7 +105,7 @@
     @else
         <div class="diagnostic-card border border-emerald-500/20 rounded-lg p-6 bg-gray-950/40 relative overflow-hidden backdrop-blur-md">
             <div class="flex flex-col md:flex-row items-center gap-6">
-                <div class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-3 px-6 rounded-lg font-black uppercase tracking-[0.2em] text-lg shadow-inner">
+                <div class="bg-emerald-600/20 border border-emerald-400/30 text-emerald-400 py-2 px-6 rounded-lg font-black uppercase tracking-[0.2em] text-lg shadow-inner">
                     {{ $grado->name ?? 'Sin Grado' }}
                 </div>
 
@@ -117,7 +117,7 @@
                 <div class="flex flex-wrap justify-center md:justify-end gap-2">
                     @forelse ($seccions as $item)
                         <button wire:click="saveAnswerSeccion({{ $item->id }}, true)"
-                            class="px-6 py-3 bg-emerald-600 text-white rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 border border-emerald-400/30">
+                            class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/20 border border-emerald-400/30">
                             {{ $item->name }}
                         </button>
                     @empty

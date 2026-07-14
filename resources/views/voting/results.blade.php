@@ -24,7 +24,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-3 border-b border-emerald-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-2 border-b border-emerald-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-emerald-500/50">
@@ -45,7 +45,7 @@
 
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-3 border-b border-blue-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 px-6 py-2 border-b border-blue-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-blue-500/30 to-indigo-600/30 rounded-full flex items-center justify-center border border-blue-500/50">
@@ -71,7 +71,7 @@
 
                 <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden">
                     <div
-                        class="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 px-6 py-3 border-b border-teal-800/50">
+                        class="bg-gradient-to-r from-gray-900 via-teal-900 to-gray-900 px-6 py-2 border-b border-teal-800/50">
                         <div class="flex items-center">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-teal-500/30 to-green-600/30 rounded-full flex items-center justify-center border border-teal-500/50">
@@ -94,7 +94,7 @@
             <!-- Indicador de actualización en tiempo real -->
             <div class="flex items-center justify-center mb-8">
                 <div
-                    class="flex items-center space-x-2 bg-gradient-to-r from-emerald-700/50 to-green-600/50 backdrop-blur-sm rounded-full px-6 py-3 border border-emerald-600/30">
+                    class="flex items-center space-x-2 bg-gradient-to-r from-emerald-700/50 to-green-600/50 backdrop-blur-sm rounded-full px-6 py-2 border border-emerald-600/30">
                     <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
                     <span class="text-emerald-100 font-medium">Actualizando resultados cada 3 segundos</span>
                 </div>
@@ -122,7 +122,7 @@
                         class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-gray-700 overflow-hidden h-fit">
                         <!-- Header de la encuesta -->
                         <div
-                            class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-3 border-b border-emerald-800/50">
+                            class="bg-gradient-to-r from-gray-900 via-emerald-900 to-gray-900 px-6 py-2 border-b border-emerald-800/50">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 min-w-0">
                                     <h2 class="text-lg font-bold text-white mb-2 truncate" title="{{ $poll->title }}">
@@ -189,7 +189,7 @@
             <div class="flex justify-center space-x-4 mt-12">
 
                 <button onclick="window.location.reload()"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
+                    class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/50 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
@@ -222,7 +222,7 @@
 
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300 ${
+            notification.className = `fixed top-4 right-4 px-6 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300 ${
                 type === 'success' ? 'bg-green-600 text-white' :
                 type === 'error' ? 'bg-red-600 text-white' :
                 type === 'info' ? 'bg-blue-600 text-white' :

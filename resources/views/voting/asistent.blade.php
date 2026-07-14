@@ -19,11 +19,11 @@
 
                     <div class="mt-4 lg:mt-0 lg:ml-8">
                         <div class="grid grid-cols-2 gap-3 text-center">
-                            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg px-4 py-3">
+                            <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg px-4 py-2">
                                 <div class="text-lg font-bold text-white">{{ $polls->count() }}</div>
                                 <div class="text-green-100 text-sm">Encuestas Activas</div>
                             </div>
-                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-4 py-3">
+                            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg px-4 py-2">
                                 <div class="text-lg font-bold text-white" id="total-options">
                                     {{ $polls->sum(fn($poll) => $poll->options->count()) }}</div>
                                 <div class="text-blue-100 text-sm">Opciones Totales</div>
@@ -70,7 +70,7 @@
                         {{--
                         <div class="space-y-4">
                             <a href="{{ route('voting.index') }}"
-                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>

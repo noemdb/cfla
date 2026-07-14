@@ -9,7 +9,7 @@
 <body class="bg-gradient-to-br from-gray-900 via-green-900 to-slate-900 min-h-screen">
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm border-b border-green-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3">
+        <div class="container mx-auto px-4 py-2">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <img src="{{ asset('image/brand/512.png') }}" alt="Logo" class="w-12 h-12 rounded-lg">
@@ -41,7 +41,7 @@
                 <p class="text-lg text-green-200 mb-8">
                     Aprende a confirmar la continuidad de tus estudiantes en 3 simples pasos
                 </p>
-                <div class="inline-flex items-center bg-green-800/30 border border-green-600 rounded-full px-6 py-3 text-green-200">
+                <div class="inline-flex items-center bg-green-800/30 border border-green-600 rounded-full px-6 py-2 text-green-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -119,7 +119,7 @@
                                             <span class="text-white font-mono">12345678</span>
                                         </div>
                                     </div>
-                                    <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-medium">
+                                    <button class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-2 rounded-lg font-medium">
                                         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                         </svg>
@@ -465,11 +465,11 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <a href="{{ route('prosecucion') }}"
-                       class="bg-white text-green-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105">
+                       class="bg-white text-green-600 px-8 py-2 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors duration-200 transform hover:scale-105">
                         Iniciar Proceso
                     </a>
                     <button onclick="window.print()"
-                            class="bg-green-800 text-white px-8 py-3 rounded-lg font-medium text-lg hover:bg-green-900 transition-colors duration-200">
+                            class="bg-green-800 text-white px-8 py-2 rounded-lg font-medium text-lg hover:bg-green-900 transition-colors duration-200">
                         📄 Imprimir Guía
                     </button>
                 </div>

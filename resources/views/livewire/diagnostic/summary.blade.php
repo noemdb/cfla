@@ -55,12 +55,12 @@
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <button wire:click="backToDashboard"
-                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors duration-200">
+                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors duration-200">
                 Volver al Dashboard
             </button>
 
             <button wire:click="restartIdentification"
-                class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
+                class="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
                 Nuevo Diagnóstico
             </button>
         </div>

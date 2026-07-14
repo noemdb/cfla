@@ -43,7 +43,7 @@
                             Título de la Encuesta
                         </label>
                         <input type="text" id="title" name="title" value="{{ old('title') }}"
-                            class="w-full bg-gray-800/50 border border-white/10 text-white rounded-lg px-5 py-3 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all outline-none placeholder:text-gray-600 @error('title') border-red-500/50 @enderror"
+                            class="w-full bg-gray-800/50 border border-white/10 text-white rounded-lg px-5 py-2 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all outline-none placeholder:text-gray-600 @error('title') border-red-500/50 @enderror"
                             placeholder="Ej: ¿Quién debería ser el representante?" required>
                         @error('title')
                             <p class="text-xs text-red-400 font-medium ml-1">{{ $message }}</p>
@@ -57,7 +57,7 @@
                         <div class="relative">
                             <input type="number" id="time_active" name="time_active" value="{{ old('time_active', 60) }}"
                                 min="1" max="10080"
-                                class="w-full bg-gray-800/50 border border-white/10 text-white rounded-lg px-5 py-3 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all outline-none placeholder:text-gray-600 @error('time_active') border-red-500/50 @enderror"
+                                class="w-full bg-gray-800/50 border border-white/10 text-white rounded-lg px-5 py-2 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all outline-none placeholder:text-gray-600 @error('time_active') border-red-500/50 @enderror"
                                 required>
                             <div class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">MIN</div>
                         </div>
@@ -95,7 +95,7 @@
                                             {{ $i + 1 }}</div>
                                         <input type="text" name="options[{{ $i }}][label]"
                                             value="{{ old("options.{$i}.label") }}"
-                                            class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none placeholder:text-gray-700"
+                                            class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none placeholder:text-gray-700"
                                             placeholder="Introduce la opción..." required>
                                     </div>
                                 </div>
@@ -115,7 +115,7 @@
                 </div>
 
                 <button type="button" onclick="addOption()"
-                    class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg border border-white/5 border-dashed transition-all duration-300 font-bold text-sm">
+                    class="w-full flex items-center justify-center gap-2 px-6 py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg border border-white/5 border-dashed transition-all duration-300 font-bold text-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -131,11 +131,11 @@
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 pt-4">
                 <button type="submit"
-                    class="flex-1 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-sm">
+                    class="flex-1 px-8 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all duration-300 shadow-xl shadow-emerald-500/20 font-bold uppercase tracking-widest text-sm">
                     Crear Encuesta
                 </button>
                 <a href="{{ route('admin.voting.dashboard') }}"
-                    class="px-8 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg border border-white/10 transition-all duration-300 font-bold uppercase tracking-widest text-sm text-center">
+                    class="px-8 py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg border border-white/10 transition-all duration-300 font-bold uppercase tracking-widest text-sm text-center">
                     Cancelar
                 </a>
             </div>
@@ -162,7 +162,7 @@
                             <input
                                 type="text"
                                 name="options[${optionIndex}][label]"
-                                class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none placeholder:text-gray-700"
+                                class="w-full bg-white/5 border border-white/10 text-white rounded-lg pl-10 pr-5 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all outline-none placeholder:text-gray-700"
                                 placeholder="Introduce la opción..."
                                 required
                             >

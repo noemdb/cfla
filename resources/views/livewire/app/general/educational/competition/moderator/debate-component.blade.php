@@ -5,14 +5,14 @@
         <div class="md:flex my-2 gap-3">
             <ul class="flex-column space-y-3 text-sm font-medium md:me-4 mb-2 md:mb-0 min-w-[250px]">
                 <li
-                    class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-3 px-4 rounded-lg font-black uppercase tracking-widest text-center shadow-lg backdrop-blur-md">
+                    class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 py-2 px-4 rounded-lg font-black uppercase tracking-widest text-center shadow-lg backdrop-blur-md">
                     {{ $grado->name ?? 'Grado no seleccionado' }}
                 </li>
                 @foreach ($debates as $item)
                     <li class="group">
                         <div class="flex items-center gap-2">
                             <button type="button" wire:click="active({{ $item->id }})"
-                                class="grow flex items-center justify-between px-4 py-3 rounded-lg border transition-all duration-300
+                                class="grow flex items-center justify-between px-4 py-2 rounded-lg border transition-all duration-300
                                 {{ $item->id == $active_id
                                     ? 'bg-emerald-600 border-emerald-400 text-white shadow-emerald-500/20 shadow-lg'
                                     : 'bg-gray-800/40 border-emerald-500/10 text-gray-300 hover:border-emerald-500/40 hover:bg-gray-800/60' }}">

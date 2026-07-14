@@ -63,7 +63,7 @@
         </div>
 
     @empty
-        <div class="text-gray-500 text-sm italic text-center py-3 bg-emerald-50/60 rounded-lg border border-emerald-100">
+        <div class="text-gray-500 text-sm italic text-center py-2 bg-emerald-50/60 rounded-lg border border-emerald-100">
             No hay planes de estudio
         </div>
     @endforelse

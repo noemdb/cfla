@@ -60,7 +60,7 @@
                             <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Enlace Directo</p>
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-4 py-3 text-emerald-400 font-mono text-xs truncate">
+                                    class="flex-1 bg-gray-900/50 border border-white/10 rounded-lg px-4 py-2 text-emerald-400 font-mono text-xs truncate">
                                     {{ $participationUrl }}
                                 </div>
                                 <button wire:click="copyParticipationUrl"
@@ -77,7 +77,7 @@
                         <!-- Action Buttons -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <a href="{{ $participationUrl }}" target="_blank"
-                                class="col-span-1 sm:col-span-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
+                                class="col-span-1 sm:col-span-2 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] rounded-lg transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
@@ -87,12 +87,12 @@
                             </a>
 
                             <button onclick="shareParticipation('{{ $participationUrl }}', '{{ $poll->title }}')"
-                                class="py-3 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
+                                class="py-2 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
                                 COMPARTIR
                             </button>
 
                             <button onclick="window.print()"
-                                class="py-3 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
+                                class="py-2 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all text-center">
                                 IMPRIMIR
                             </button>
                         </div>
@@ -191,7 +191,7 @@
                                 </div>
 
                                 <button wire:click="refreshPoll"
-                                    class="px-10 py-3 bg-white/5 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all">
+                                    class="px-10 py-2 bg-white/5 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] rounded-lg border border-white/5 transition-all">
                                     ACTUALIZAR ESTADO
                                 </button>
                             </div>

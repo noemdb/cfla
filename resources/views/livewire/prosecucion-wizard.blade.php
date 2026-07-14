@@ -22,7 +22,7 @@
                             wire:model="ci_representant"
                             type="text"
                             placeholder="Ej: 12345678"
-                            class="w-full px-4 py-3 text-center text-lg bg-gray-800 border-2 border-green-700 rounded-lg text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200"
+                            class="w-full px-4 py-2 text-center text-lg bg-gray-800 border-2 border-green-700 rounded-lg text-white placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200"
                         />
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <x-icon name="identification" class="w-5 h-5 text-green-400" />
@@ -32,7 +32,7 @@
 
                 <button
                     type="submit"
-                    class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
+                    class="w-full inline-flex items-center justify-center px-6 py-2 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
                     wire:loading.attr="disabled"
                     wire:target="searchRepresentant"
                 >
@@ -148,7 +148,7 @@
                     <button
                         wire:click="resetWizard"
                         type="button"
-                        class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-lg shadow-lg transition-colors duration-200 border border-gray-600"
+                        class="inline-flex items-center px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-lg shadow-lg transition-colors duration-200 border border-gray-600"
                     >
                         <x-icon name="arrow-left" class="w-5 h-5 mr-2" />
                         Volver
@@ -156,7 +156,7 @@
 
                     <button
                         type="submit"
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
+                        class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
                         wire:loading.attr="disabled"
                         wire:target="confirmProsecucion"
                     >
@@ -191,7 +191,7 @@
                 <div class="space-y-2">
                     @foreach($estudiants as $estudiant)
                         @if(in_array($estudiant['id'], $selectedEstudiants))
-                            <div class="flex justify-between items-center py-3 px-4 bg-gray-800 rounded-lg border border-green-700 shadow-sm">
+                            <div class="flex justify-between items-center py-2 px-4 bg-gray-800 rounded-lg border border-green-700 shadow-sm">
                                 <span class="text-white font-medium">{{ $estudiant['lastname'] }} {{ $estudiant['name'] }}</span>
                                 <div class="text-right">
                                     @php
@@ -237,7 +237,7 @@
                 <a
                     href="{{ $downloadUrl }}"
                     target="_blank"
-                    class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
+                    class="inline-flex items-center px-8 py-2 bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-white font-medium text-lg rounded-lg shadow-xl transition-all duration-200 transform hover:scale-105 border border-green-600"
                 >
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -247,7 +247,7 @@
 
                 <button
                     wire:click="resetWizard"
-                    class="inline-flex items-center px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-lg shadow-lg transition-colors duration-200 border border-gray-600"
+                    class="inline-flex items-center px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium text-lg rounded-lg shadow-lg transition-colors duration-200 border border-gray-600"
                 >
                     <x-icon name="arrow-path" class="w-5 h-5 mr-2" />
                     Nueva Consulta

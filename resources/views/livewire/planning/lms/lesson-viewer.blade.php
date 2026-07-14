@@ -39,7 +39,7 @@
 
     {{-- ── Estado de publicación ── --}}
     @if($publication)
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 rounded-lg
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-2 rounded-lg
                     bg-slate-800/30 border border-slate-700/40">
             <div class="flex items-center gap-2">
                 <span @class([

@@ -43,7 +43,7 @@
                 </div>
 
                 <x-button label="Continuar al Sistema" wire:click="goToSaefl" primary
-                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-lg font-bold shadow-lg" />
+                    class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white border-none rounded-lg font-bold shadow-lg" />
             </div>
         @else
             <div class="bg-white/2 border-l-4 border-emerald-600 p-4 rounded-r-xl">

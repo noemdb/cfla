@@ -36,7 +36,7 @@
 </head>
 <body class="antialiased bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-50">
     <header class="bg-white dark:bg-gray-800 shadow-md fixed w-full z-50">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
             <a href="/studia" class="text-lg font-bold">StudAI</a>
             <nav>
                 <a href="#features" class="text-gray-700 dark:text-gray-300 px-4 hover:underline">Características</a>

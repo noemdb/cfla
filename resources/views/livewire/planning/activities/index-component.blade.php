@@ -160,7 +160,7 @@
                 @foreach($tabsLapsos as $index => $lapsoItem)
                     @php $isActive = $lapsoItem->id == $lapso_id; @endphp
                     <button wire:click="selectLapso({{ $lapsoItem->id }})"
-                        class="flex-1 px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
+                        class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap
                                {{ $isActive ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}"
                     >
                         <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,7 +287,7 @@
                                                 :class="activeTab === {{ $i }}
                                                     ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
                                                     : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                                                class="flex-1 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                                                class="flex-1 px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
                                                 title="{{ \Carbon\Carbon::parse($act->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($act->ffinal)->format('d/m/Y') }}{{ $qualityTitle ? ' · ' . $qualityTitle : '' }}">
                                                 <span class="flex items-center justify-center gap-1.5">
                                                     <span>Act. {{ $i + 1 }}</span>
@@ -459,7 +459,7 @@
             <div>
                 <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Observaciones</label>
                 <textarea wire:model="observations" rows="5"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
                     placeholder="Escribe las observaciones del coordinador de evaluación..."></textarea>
             </div>
         </div>
@@ -506,7 +506,7 @@
             <div>
                 <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Comentario</label>
                 <textarea wire:model="comments" rows="4"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
                     placeholder="Escribe tu comentario como jefe de área..."></textarea>
             </div>
         </div>
