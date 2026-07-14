@@ -26,7 +26,7 @@
 
             <!-- Información General -->
             <div
-                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-3xl relative overflow-hidden group">
+                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group">
                 <div
                     class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                 </div>
@@ -73,7 +73,7 @@
 
             <!-- Opciones de Votación -->
             <div
-                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-3xl relative overflow-hidden group">
+                class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group">
                 <div
                     class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-500">
                 </div>

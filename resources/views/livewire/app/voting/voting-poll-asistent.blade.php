@@ -177,7 +177,7 @@
                                 Selecciona una Opción</p>
                             @foreach ($currentPoll['options'] as $option)
                                 <button wire:click="selectOption({{ $option['id'] }})"
-                                    class="w-full p-6 text-left rounded-3xl border-2 transition-all duration-300 relative overflow-hidden group/opt {{ $selectedOption == $option['id'] ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}"
+                                    class="w-full p-6 text-left rounded-2xl border-2 transition-all duration-300 relative overflow-hidden group/opt {{ $selectedOption == $option['id'] ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}"
                                     {{ $isVoting ? 'disabled' : '' }}>
 
                                     @if ($selectedOption == $option['id'])
@@ -209,7 +209,7 @@
                         <!-- Vote Button -->
                         @if ($selectedOption)
                             <button wire:click="submitVote"
-                                class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-3xl transition-all shadow-2xl shadow-emerald-500/30 group overflow-hidden relative"
+                                class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all shadow-2xl shadow-emerald-500/30 group overflow-hidden relative"
                                 {{ $isVoting ? 'disabled' : '' }}>
                                 <div class="relative z-10 flex items-center justify-center gap-3">
                                     @if ($isVoting)
@@ -345,20 +345,20 @@
             <div class="p-10">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                     <div
-                        class="bg-blue-500/5 rounded-3xl p-8 text-center border border-blue-500/10 group hover:bg-blue-500/10 transition-all">
+                        class="bg-blue-500/5 rounded-2xl p-8 text-center border border-blue-500/10 group hover:bg-blue-500/10 transition-all">
                         <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2">Unidades</p>
                         <p class="text-4xl font-black text-white">{{ $totalPolls }}</p>
                         <p class="text-[10px] font-bold text-blue-500/40 uppercase tracking-tight mt-1">Revisadas</p>
                     </div>
                     <div
-                        class="bg-emerald-500/5 rounded-3xl p-8 text-center border border-emerald-500/10 group hover:bg-emerald-500/10 transition-all">
+                        class="bg-emerald-500/5 rounded-2xl p-8 text-center border border-emerald-500/10 group hover:bg-emerald-500/10 transition-all">
                         <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Votos</p>
                         <p class="text-4xl font-black text-white">{{ $votedCount }}</p>
                         <p class="text-[10px] font-bold text-emerald-500/40 uppercase tracking-tight mt-1">Confirmados
                         </p>
                     </div>
                     <div
-                        class="bg-purple-500/5 rounded-3xl p-8 text-center border border-purple-500/10 group hover:bg-purple-500/10 transition-all">
+                        class="bg-purple-500/5 rounded-2xl p-8 text-center border border-purple-500/10 group hover:bg-purple-500/10 transition-all">
                         <p class="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-2">Estatus</p>
                         <p class="text-4xl font-black text-white">100%</p>
                         <p class="text-[10px] font-bold text-purple-500/40 uppercase tracking-tight mt-1">Completado
@@ -372,7 +372,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                         @foreach ($completedSessions as $session)
                             <div
-                                class="diagnostic-card bg-white/5 rounded-3xl p-8 border border-white/5 hover:bg-white/[0.08] transition-all group/card">
+                                class="diagnostic-card bg-white/5 rounded-2xl p-8 border border-white/5 hover:bg-white/[0.08] transition-all group/card">
                                 <div class="flex items-start justify-between gap-6 mb-6">
                                     <div class="flex-1 space-y-3">
                                         <h4
@@ -485,7 +485,7 @@
                             </div>
 
                             <!-- Progress Hub -->
-                            <div class="diagnostic-card bg-white/5 rounded-3xl p-8 border border-white/5">
+                            <div class="diagnostic-card bg-white/5 rounded-2xl p-8 border border-white/5">
                                 <div class="flex justify-between items-center mb-6">
                                     <span
                                         class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Estatus

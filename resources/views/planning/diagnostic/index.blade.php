@@ -41,7 +41,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {{-- Card: Diagnóstico por Profesor --}}
-            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('app.profesors.diagnostics.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
             </div>
 
             {{-- Card: Referentes Curriculares (Instrumento Diagnóstico) --}}
-            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('app.planning.diagnostico.referents.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@
             </div>
 
             {{-- Card: Volver a Planificación --}}
-            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                 <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
             </div>
 
             {{-- Card: Competiciones --}}
-            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+            <div class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
                 <a href="{{ route('app.planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                     <svg class="w-20 h-20 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

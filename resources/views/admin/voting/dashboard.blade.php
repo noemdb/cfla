@@ -87,7 +87,7 @@
 
             @if ($polls->isEmpty())
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-12 text-center rounded-3xl">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-12 text-center rounded-2xl">
                     <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,7 +107,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     @foreach ($polls as $poll)
                         <div
-                            class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-3xl overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+                            class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
                             <div class="p-6 md:p-8">
                                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <div class="flex-1">
@@ -283,7 +283,7 @@
                 </div>
             @endif
 
-            <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl">
+            <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
                 <h3 class="text-lg font-bold text-white mb-6 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

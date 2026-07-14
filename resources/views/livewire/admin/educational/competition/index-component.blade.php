@@ -32,7 +32,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($competitions as $competition)
             <div
-                class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 group">
+                class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 group">
                 <div class="flex items-start justify-between mb-6">
                     <div
                         class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -124,7 +124,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-full py-20 bg-gray-900/20 border border-white/5 rounded-3xl text-center">
+            <div class="col-span-full py-20 bg-gray-900/20 border border-white/5 rounded-2xl text-center">
                 <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

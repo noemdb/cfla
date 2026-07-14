@@ -43,7 +43,7 @@
                             <div
                                 class="absolute -inset-4 bg-emerald-500/20 blur-xl opacity-0 group-hover/qr:opacity-100 transition-opacity duration-500">
                             </div>
-                            <div class="relative bg-white rounded-3xl p-6 shadow-2xl">
+                            <div class="relative bg-white rounded-2xl p-6 shadow-2xl">
                                 {!! $qrCodeSvg !!}
                             </div>
                         </div>
@@ -159,7 +159,7 @@
                             <!-- Error States -->
                             <div class="p-16 text-center space-y-8">
                                 <div
-                                    class="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto text-red-500 uppercase">
+                                    class="w-20 h-20 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto text-red-500 uppercase">
                                     @if ($errorState === 'poll_not_found' || $errorState === 'poll_expired')
                                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -204,7 +204,7 @@
                                 <div class="grid grid-cols-1 gap-4">
                                     @foreach ($poll->options as $option)
                                         <button wire:click="selectOption({{ $option->id }})"
-                                            class="w-full text-left p-6 rounded-3xl border transition-all duration-500 group relative overflow-hidden {{ $selectedOption === $option->id ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}">
+                                            class="w-full text-left p-6 rounded-2xl border transition-all duration-500 group relative overflow-hidden {{ $selectedOption === $option->id ? 'border-emerald-500 bg-emerald-500/10 ring-4 ring-emerald-500/10' : 'border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/10' }}">
                                             @if ($selectedOption === $option->id)
                                                 <div
                                                     class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-2xl -mr-12 -mt-12">
@@ -239,7 +239,7 @@
                                 @enderror
 
                                 <button wire:click="vote" wire:loading.attr="disabled"
-                                    class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:opacity-50 text-white font-black uppercase tracking-[0.2em] text-xs rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 relative group overflow-hidden">
+                                    class="w-full py-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-800 disabled:opacity-50 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all shadow-2xl shadow-emerald-500/20 relative group overflow-hidden">
                                     <div class="relative z-10 flex items-center justify-center gap-3">
                                         <span wire:loading.remove>REGISTRAR MI VOTO</span>
                                         <div wire:loading class="flex items-center gap-2">

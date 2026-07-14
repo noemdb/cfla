@@ -1,6 +1,6 @@
 <div class="space-y-6 fade-in">
     <!-- Filters Bar -->
-    <div class="bg-gray-900 p-6 rounded-3xl border border-white/10 shadow-2xl mb-8">
+    <div class="bg-gray-900 p-6 rounded-2xl border border-white/10 shadow-2xl mb-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
             <!-- Search -->
             <div class="lg:col-span-3">
@@ -73,7 +73,7 @@
     </div>
 
     @if ($questions->isEmpty())
-        <div class="py-20 bg-gray-900/20 border border-white/5 rounded-3xl text-center">
+        <div class="py-20 bg-gray-900/20 border border-white/5 rounded-2xl text-center">
             <svg class="w-16 h-16 text-gray-700 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">

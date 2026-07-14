@@ -45,7 +45,7 @@
 
             <!-- Módulo de Competiciones Académicas -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('admin.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -84,7 +84,7 @@
 
             <!-- Módulo de Diagnóstico -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('diagnostico') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -129,7 +129,7 @@
 
             <!-- Módulo de Censo -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                 <a href="{{ route('census') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -168,7 +168,7 @@
 
             <!-- Módulo de Matrícula -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
                 <a href="{{ route('enrollment') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -208,7 +208,7 @@
             @if (Auth::user()->isAdminOrDiagnostic())
                 <!-- Módulo de Planificación -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <a href="{{ route('app.planning.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -248,7 +248,7 @@
             @if (Auth::user()->is_admin || Auth::user()->is_diagnostic)
                 <!-- Módulo de Votaciones -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
                     <a href="{{ route('admin.voting.dashboard') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -290,7 +290,7 @@
 
                 <!-- Módulo de Usuarios -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                     <a href="{{ route('admin.users.index') }}" class="absolute inset-0 z-0"></a>
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -340,7 +340,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Database Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,7 +377,7 @@
 
                 <!-- Reverb / Pulse Card -->
                 <div
-                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                    class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                     <div
                         class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                         <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

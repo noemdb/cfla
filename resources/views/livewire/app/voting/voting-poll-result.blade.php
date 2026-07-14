@@ -159,7 +159,7 @@
         <div
             class="text-center py-20 diagnostic-card bg-gray-900/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 border-dashed">
             <div
-                class="w-20 h-20 bg-emerald-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/10">
+                class="w-20 h-20 bg-emerald-500/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-emerald-500/10">
                 <svg class="w-10 h-10 text-emerald-500/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">

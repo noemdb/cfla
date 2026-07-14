@@ -63,7 +63,7 @@
             <div class="space-y-8">
                 <!-- Status Card -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl relative overflow-hidden group">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl relative overflow-hidden group">
                     <div
                         class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                     </div>
@@ -100,7 +100,7 @@
                 </div>
 
                 <!-- Technical Details -->
-                <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl">
+                <div class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl">
                     <h3
                         class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 py-2 px-3 bg-white/5 rounded-lg border border-white/5 inline-block">
                         Ficha Técnica</h3>
@@ -160,7 +160,7 @@
                 <!-- Share Link Box -->
                 @if ($poll->enable)
                     <div
-                        class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-8 rounded-3xl relative overflow-hidden group">
+                        class="diagnostic-card bg-emerald-500/10 border border-emerald-500/20 p-8 rounded-2xl relative overflow-hidden group">
                         <div
                             class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500">
                         </div>
@@ -188,7 +188,7 @@
 
                 <!-- Results Section -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-3xl relative overflow-hidden group">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 p-8 rounded-2xl relative overflow-hidden group">
                     <div
                         class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-all duration-500">
                     </div>
@@ -277,7 +277,7 @@
 
                 <!-- Session History -->
                 <div
-                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-3xl overflow-hidden">
+                    class="diagnostic-card bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
                     <div class="p-8 border-b border-white/5 flex items-center justify-between">
                         <h3 class="text-lg font-bold text-white flex items-center gap-3">
                             <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

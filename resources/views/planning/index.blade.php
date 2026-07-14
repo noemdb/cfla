@@ -49,7 +49,7 @@
 
             <!-- Indicadores de Planificación -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-cyan-500/20 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/5">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-cyan-500/20 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/5">
                 <a href="{{ route('app.planning.indicators.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -81,7 +81,7 @@
 
             <!-- Competiciones Académicas -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30">
                 <a href="{{ route('app.planning.educational.competition.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -120,7 +120,7 @@
 
             <!-- Diagnóstico -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-blue-500/30">
                 <a href="{{ route('app.planning.diagnostico.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -158,7 +158,7 @@
 
             <!-- Actividades de Planificación -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-cyan-500/30">
                 <a href="{{ route('app.planning.activities.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -196,7 +196,7 @@
 
             <!-- Programas Educativos -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-orange-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-orange-500/30">
                 <a href="{{ route('app.planning.peducativos.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -234,7 +234,7 @@
 
             <!-- Planes de Estudio -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/30">
                 <a href="{{ route('app.planning.pestudios.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -272,7 +272,7 @@
 
             <!-- Asignaturas -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-pink-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-pink-500/30">
                 <a href="{{ route('app.planning.asignaturas.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -310,7 +310,7 @@
 
             <!-- Grados -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-amber-500/30">
                 <a href="{{ route('app.planning.grados.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -348,7 +348,7 @@
 
             <!-- Secciones -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-lime-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-lime-500/30">
                 <a href="{{ route('app.planning.secciones.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -386,7 +386,7 @@
 
             <!-- Lapsos -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-indigo-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-indigo-500/30">
                 <a href="{{ route('app.planning.lapsos.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -424,7 +424,7 @@
 
             <!-- Pensums -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-rose-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-rose-500/30">
                 <a href="{{ route('app.planning.pensums.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -456,7 +456,7 @@
 
             <!-- Carga Académica -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-teal-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-teal-500/30">
                 <a href="{{ route('app.planning.pevaluacions.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
@@ -488,7 +488,7 @@
 
             <!-- Profesores -->
             <div
-                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-3xl overflow-hidden transition-all duration-300 hover:border-violet-500/30">
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-2xl overflow-hidden transition-all duration-300 hover:border-violet-500/30">
                 <a href="{{ route('app.planning.profesors.index') }}" class="absolute inset-0 z-0"></a>
                 <div
                     class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">

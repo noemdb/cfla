@@ -25,7 +25,7 @@
     </div>
 
     @foreach ($pestudios as $pestudio)
-        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-3xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
+        <div class="mb-12 bg-gray-900/20 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/10"
             wire:key="pestudio-{{ $pestudio->id }}" x-data="{ open: false }">
 
             <div @click="open = !open"

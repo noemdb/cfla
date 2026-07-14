@@ -3,7 +3,7 @@
         class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center bg-white dark:bg-gray-900/40 rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-emerald-100/50 dark:border-emerald-900/20">
 
         <!-- Left Column: Image Slider -->
-        <div class="relative rounded-3xl overflow-hidden shadow-2xl h-[350px] sm:h-[450px] md:h-[550px] group border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-800/50"
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl h-[350px] sm:h-[450px] md:h-[550px] group border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-gray-800/50"
             wire:ignore>
 
             @if (count($images) > 0)
