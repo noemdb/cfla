@@ -269,7 +269,7 @@ class ReferentsMain extends Component
             ->where('referent_id', $this->selectedReferentId);
 
         if ($this->compFilterPestudioId !== '') {
-            $query->whereHas('pensum', fn ($q) => $q->whereHas('grado', fn ($g) => $g->where('pestudio_id', $this->compFilterPestudioId)));
+            $query->whereHas('pensum', fn ($q) => $q->where('pestudio_id', $this->compFilterPestudioId));
         }
 
         if ($this->compFilterGradoId !== '') {
@@ -304,9 +304,11 @@ class ReferentsMain extends Component
         $this->resetFilters();
         $this->resetPage();
 
-        // Pre-set pestudio filter based on the referent's plan de estudio
-        $this->compFilterPestudioId = $this->currentReferent->pestudio_id;
-        $this->loadCompPestudioGrados($this->compFilterPestudioId);
+        // Note: We intentionally do NOT auto-set the pestudio filter here.
+        // The referent's pestudio_id may differ from the pestudio_id of the
+        // pensums linked to its competencies (e.g., referent points to a newer
+        // plan code while competencies use pensums from the active plan).
+        // Let the user apply filters manually to avoid hiding results.
     }
 
     /**
