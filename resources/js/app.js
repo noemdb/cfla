@@ -1,17 +1,21 @@
 import "./bootstrap";
 
-// Import Flowbite
+// Import Flowbite (small, used everywhere)
 import "flowbite";
 
-// Make Chart.js available globally for Livewire/Alpine components
-import Chart from 'chart.js/auto';
-window.Chart = Chart;
+// ── Lazy loaders for heavy libraries ──────────────────────────
+// Libraries like Mermaid, Swiper, and Chart.js are dynamically imported
+// only on pages that actually need them, via these loaders.
+import { loadMermaid, loadSwiper, loadChart } from './loaders';
 
-// Make Mermaid available globally for Livewire/Alpine components (diagrams in lesson wizard)
-import mermaid from 'mermaid';
-window.mermaid = mermaid;
+window.loadMermaid = loadMermaid;
+window.loadSwiper = loadSwiper;
+window.loadChart = loadChart;
 
-// Initialization for ES Users (Chart from tw-elements is same library, aliased to avoid name collision)
+// ── Tw-elements UI kit ───────────────────────────────────────
+// Heavily used across many templates (headers, menus, footers, dropdowns, tabs, etc.)
+// Kept as a static import since it's needed on most pages and its core weight (284 kB)
+// is offset by avoiding per-page lazy-load overhead.
 import {
     Tooltip,
     Tab,
@@ -41,21 +45,6 @@ initTE({
     SmoothScroll,
     Stepper,
 });
-
-// Import Swiper and modules
-import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-
-// Expose Swiper to window for usage in templates
-window.Swiper = Swiper;
-window.SwiperNavigation = Navigation;
-window.SwiperPagination = Pagination;
-window.SwiperAutoplay = Autoplay;
-window.SwiperEffectFade = EffectFade;
 
 // Funciones globales para el sistema de votación
 window.VotingSystem = {

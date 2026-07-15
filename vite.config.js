@@ -18,23 +18,27 @@ export default defineConfig({
         },
     },
     build: {
+        // El chunk de Mermaid (3.4 MB / 943 kB gzip) se carga bajo demanda
+        // solo en páginas LMS. El límite default es 500 kB.
+        chunkSizeWarningLimit: 3500,
         rollupOptions: {
             output: {
                 manualChunks(id) {
                     if (id.includes('node_modules/tw-elements')) {
                         return 'tw-elements';
                     }
-                    if (id.includes('node_modules/chart.js')) {
-                        return 'chart';
-                    }
-                    if (id.includes('node_modules/chartjs-plugin-datalabels')) {
-                        return 'chart';
-                    }
-                    if (id.includes('node_modules/swiper')) {
-                        return 'swiper';
-                    }
                     if (id.includes('node_modules/flowbite')) {
                         return 'flowbite';
+                    }
+                    // Mermaid: todos sus diagramas y dependencias internas en un solo chunk.
+                    // Se carga bajo demanda solo en páginas LMS, así que un chunk grande
+                    // es mejor que 50+ micro-archivos con overhead de HTTP.
+                    if (id.includes('node_modules/mermaid') || id.includes('node_modules/dagre')) {
+                        return 'mermaid';
+                    }
+                    // Dependencias internas de mermaid: cytoscape, katex, etc.
+                    if (id.includes('node_modules/cytoscape') || id.includes('node_modules/katex') || id.includes('node_modules/d3-')) {
+                        return 'mermaid';
                     }
                 },
             },

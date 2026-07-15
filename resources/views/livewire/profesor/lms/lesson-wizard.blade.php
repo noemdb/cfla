@@ -4566,7 +4566,10 @@ Cómo...?"
 @script
 <script>
     // ── Inicialización única de Mermaid (previene auto-scan del DOM) ──
-    (function initMermaidOnce() {
+    (async function initMermaidOnce() {
+        if (window.loadMermaid) {
+            await window.loadMermaid();
+        }
         if (typeof mermaid !== 'undefined' && !window._mermaidInitialized) {
             mermaid.initialize({
                 startOnLoad: false,
@@ -4597,7 +4600,11 @@ Cómo...?"
         init() {
             const code = this.$el.getAttribute('data-mermaid-code') || '';
             if (typeof mermaid === 'undefined' || !window._mermaidInitialized) {
-                this.$nextTick(() => this.init());
+                if (window.loadMermaid) {
+                    window.loadMermaid().then(() => this.$nextTick(() => this.init()));
+                } else {
+                    this.$nextTick(() => this.init());
+                }
                 return;
             }
             if (this.$el.hasAttribute('data-mermaid-delay')) {
@@ -4915,10 +4922,12 @@ Cómo...?"
         _wait: null,
 
         init() {
+            // Load Swiper dynamically if needed
+            if (window.loadSwiper) window.loadSwiper();
             // Poll hasta que el DOM del modal esté listo (slides renderizadas)
             this._wait = setInterval(() => {
                 const el = this.$el.querySelector('.swiper');
-                if (el && el.querySelectorAll('.swiper-slide').length > 0) {
+                if (el && el.querySelectorAll('.swiper-slide').length > 0 && window.Swiper) {
                     clearInterval(this._wait);
                     this._wait = null;
                     this.totalSlides = el.querySelectorAll('.swiper-slide').length;

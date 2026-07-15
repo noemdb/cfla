@@ -17,7 +17,6 @@ class PevaluacionList extends Component
 {
     use WithPagination;
 
-    #[Url(as: 'lapso_id')]
     public $lapsoId = null;
 
     #[Url]
@@ -75,7 +74,7 @@ class PevaluacionList extends Component
         // ── Pevaluacions query ──
         $allowedSorts = [
             'asignaturas.name', 'grados.name', 'lapsos.name',
-            'pevaluacions.finicial', 'pevaluacions.created_at',
+            'lapsos.finicial', 'pevaluacions.created_at',
         ];
         $sort = in_array($this->sort, $allowedSorts) ? $this->sort : 'pevaluacions.created_at';
         $direction = $this->direction === 'asc' ? 'asc' : 'desc';

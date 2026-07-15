@@ -157,15 +157,24 @@
 </style>
 
 <script>
-    document.addEventListener('livewire:initialized', () => initInfoHighlightedSwiper());
-    document.addEventListener('DOMContentLoaded', () => initInfoHighlightedSwiper());
+    async function _ensureSwiper() {
+        if (window.loadSwiper) await window.loadSwiper();
+    }
+
+    document.addEventListener('livewire:initialized', async () => {
+        await _ensureSwiper();
+        initInfoHighlightedSwiper();
+    });
+    document.addEventListener('DOMContentLoaded', async () => {
+        await _ensureSwiper();
+        initInfoHighlightedSwiper();
+    });
 
     function initInfoHighlightedSwiper() {
         const swiperEl = document.querySelector('.infoHighlightedSwiper');
         if (swiperEl && !swiperEl.swiper && window.Swiper) {
             const slides = swiperEl.querySelectorAll('.swiper-slide');
             const slideCount = slides.length;
-            console.log('InfoHighlightedSwiper: Found ' + slideCount + ' slides');
 
             if (slideCount > 0) {
                 const canLoop = slideCount > 1;
@@ -196,8 +205,6 @@
                     } : false,
                 });
             }
-        } else if (!window.Swiper) {
-            console.error('InfoHighlightedSwiper: Library not found');
         }
     }
 </script>

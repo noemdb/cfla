@@ -78,14 +78,19 @@
 
 @includeWhen($modalShow, 'livewire.home.modal.post')
 
-<!-- Initialize Swiper -->
+<!-- Initialize Swiper (loaded dynamically) -->
 <script>
-    document.addEventListener('livewire:initialized', () => {
+    async function _ensureSwiper() {
+        if (window.loadSwiper) await window.loadSwiper();
+    }
+
+    document.addEventListener('livewire:initialized', async () => {
+        await _ensureSwiper();
         initHeroSwiper();
     });
 
-    // Also init on load just in case Livewire isn't the trigger
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+        await _ensureSwiper();
         initHeroSwiper();
     });
 

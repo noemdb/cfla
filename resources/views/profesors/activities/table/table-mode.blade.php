@@ -31,12 +31,12 @@
                     </a>
                 </th>
 
-                {{-- Fechas (sortable by finicial) --}}
+                {{-- Fechas (sortable by finicial de lapsos) --}}
                 <th class="px-2 py-2.5 text-left">
-                    <a href="{{ route('app.profesors.activities.index', array_merge(request()->query(), ['sort' => 'pevaluacions.finicial', 'direction' => $sort === 'pevaluacions.finicial' && $direction === 'asc' ? 'desc' : 'asc'])) }}"
+                    <a href="{{ route('app.profesors.activities.index', array_merge(request()->query(), ['sort' => 'lapsos.finicial', 'direction' => $sort === 'lapsos.finicial' && $direction === 'asc' ? 'desc' : 'asc'])) }}"
                         class="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:text-white transition-colors">
                         Fechas
-                        @if($sort === 'pevaluacions.finicial')
+                        @if($sort === 'lapsos.finicial')
                             <svg class="w-3 h-3 {{ $direction === 'asc' ? 'text-emerald-400' : 'text-emerald-400 rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                             </svg>
@@ -88,8 +88,10 @@
 
                     {{-- Asignatura --}}
                     <td class="px-2 py-2.5">
-                        <div class="flex items-center gap-2">
-                            <span class="text-white text-xs font-semibold truncate max-w-[180px]">{{ $subjectName }}</span>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-white text-xs font-semibold max-w-[180px]">
+                                {{ $subjectName }}
+                            </span>                            
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
                                 {{ $pevaluacion->lapso?->name ?? '—' }}
                             </span>

@@ -79,7 +79,7 @@
             <p class="text-[11px] text-gray-400 font-medium">
                 <span class="text-emerald-400">Listado</span> de Áreas de Formación
             </p>
-            <div x-data="{ mode: localStorage.getItem('pevaluacions-view-mode') || 'grid' }" x-init="$watch('mode', val => { localStorage.setItem('pevaluacions-view-mode', val); window.dispatchEvent(new CustomEvent('pevaluacions-view-mode-changed', { detail: { mode: val } })) })">
+            <div x-data="{ mode: localStorage.getItem('pevaluacions-view-mode') || 'table' }" x-init="$watch('mode', val => { localStorage.setItem('pevaluacions-view-mode', val); window.dispatchEvent(new CustomEvent('pevaluacions-view-mode-changed', { detail: { mode: val } })) })">
                 <button @click="mode = 'grid'"
                     :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
                     class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">

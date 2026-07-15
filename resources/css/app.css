@@ -21,6 +21,11 @@
         @apply !bg-gray-800 !border-gray-600 !text-gray-100 !placeholder-gray-400;
     }
 
+    /* Light mode counterpart for selects — anula las clases dark-mode forzadas en los templates */
+    html:not(.dark) select {
+        @apply !bg-white !border-gray-300 !text-gray-900;
+    }
+
     html.dark .text-secondary-700 {
         @apply !text-gray-200; /* Force WireUI secondary text to be light in dark mode */
     }
