@@ -37,7 +37,7 @@ class ProsecucionWizard extends Component
         $this->validate();
 
         // Buscar representante por CI
-        $this->representant = Representant::where('ci_representant', $this->ci_representant)->first();
+        $this->representant = Representant::on('s2526')->where('ci_representant', $this->ci_representant)->first();
 
         if (!$this->representant) {
             $this->notification()->error(
@@ -48,7 +48,7 @@ class ProsecucionWizard extends Component
         }
 
         // Buscar estudiantes del representante que estén inscritos y activos
-        $estudiants_collection = Estudiant::where('representant_id', $this->representant->id)
+        $estudiants_collection = Estudiant::on('s2526')->where('representant_id', $this->representant->id)
             ->where('status_active', true)
             ->whereHas('inscripcion', function($query) {
                 $query->whereHas('seccion', function($subQuery) {
@@ -113,7 +113,7 @@ class ProsecucionWizard extends Component
         $newConfirmations = array_diff($this->selectedEstudiants, $this->confirmedEstudiants);
 
         if (!empty($newConfirmations)) {
-            Estudiant::whereIn('id', $newConfirmations)
+            Estudiant::on('s2526')->whereIn('id', $newConfirmations)
                 ->update([
                     'status_prosecution' => true,
                     'date_prosecution' => now() // Agregar fecha y hora actual
