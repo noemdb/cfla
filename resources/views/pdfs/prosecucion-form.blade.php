@@ -4,376 +4,364 @@
     <meta charset="utf-8">
     <title>Planilla de Prosecución</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.3;
-            margin: 15px;
-            padding: 0;
-            color: #333;
+        @page {
+            margin: 15px 20px;
         }
 
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 9.5px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+            color: #1a1a2e;
+        }
+
+        /* ===== HEADER ===== */
         .header-table {
             width: 100%;
-            margin-bottom: 15px;
             border-collapse: collapse;
+            margin-bottom: 10px;
         }
-
         .header-table td {
             vertical-align: middle;
-            padding: 5px;
+            padding: 3px;
         }
-
         .logo {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             object-fit: contain;
         }
-
         .logo-large {
-            width: 70px;
-            height: 50px;
+            width: 52px;
+            height: 45px;
             object-fit: contain;
         }
-
         .institution-info {
             text-align: center;
             line-height: 1.2;
         }
-
         .institution-name {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 3px;
+            font-size: 13px;
+            font-weight: 700;
             text-transform: uppercase;
-        }
-
-        .institution-dept {
-            font-size: 11px;
-            font-weight: bold;
+            color: #1a3a5c;
+            letter-spacing: 0.5px;
             margin-bottom: 2px;
         }
-
-        .period {
+        .institution-sub {
             font-size: 10px;
-            font-weight: bold;
-            color: #666;
-        }
-
-        .document-title {
-            text-align: center;
-            margin: 15px 0;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-
-        .document-title h1 {
-            font-size: 12px;
-            font-weight: bold;
-            margin: 0 0 3px 0;
+            font-weight: 600;
+            color: #2c5282;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
-        .document-title p {
-            font-size: 10px;
+        /* ===== TITLE BAR ===== */
+        .title-bar {
+            text-align: center;
+            margin: 8px 0 12px 0;
+            padding: 7px 10px;
+            background: #1a3a5c;
+        }
+        .title-bar h1 {
+            font-size: 13px;
+            font-weight: 700;
             margin: 0;
-            color: #666;
+            text-transform: uppercase;
+            color: #ffffff;
+            letter-spacing: 0.8px;
+        }
+        .title-bar p {
+            font-size: 9px;
+            margin: 2px 0 0 0;
+            color: #cbd5e0;
+            letter-spacing: 0.4px;
         }
 
+        /* ===== SECTION ===== */
         .section {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-
         .section-title {
             font-size: 10px;
-            font-weight: bold;
-            background-color: #e9ecef;
-            padding: 4px 8px;
-            border-left: 3px solid #28a745;
-            margin-bottom: 8px;
+            font-weight: 700;
             text-transform: uppercase;
+            padding: 4px 8px;
+            border-left: 2.5px solid #2c5282;
+            margin-bottom: 6px;
+            color: #1a3a5c;
+            background: #f0f4f8;
         }
 
+        /* ===== INFO BOX ===== */
+        .info-box {
+            border: 1px solid #e2e8f0;
+            padding: 7px 10px;
+            background-color: #f8fafc;
+        }
         .info-grid {
-            display: table;
             width: 100%;
-            margin-bottom: 8px;
+            border-collapse: collapse;
         }
-
-        .info-row {
-            display: table-row;
+        .info-grid td {
+            padding: 2px 5px;
+            vertical-align: top;
         }
-
         .info-label {
-            display: table-cell;
-            font-weight: bold;
-            width: 120px;
-            padding: 2px 8px 2px 0;
-            vertical-align: top;
+            font-weight: 600;
+            color: #4a5568;
+            width: 100px;
+            font-size: 9px;
         }
-
         .info-value {
-            display: table-cell;
-            padding: 2px 0;
-            vertical-align: top;
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 9px;
+        }
+        .info-value.highlight {
+            background-color: #ebf4ff;
+            padding: 0 3px;
         }
 
+        /* ===== STUDENTS TABLE ===== */
         .students-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
-            font-size: 9px;
+            font-size: 8.5px;
         }
-
-        .students-table th {
-            background-color: #dfdfdf;
-            color: rgb(124, 124, 124);
-            padding: 6px 4px;
+        .students-table thead th {
+            background-color: #1a3a5c;
+            color: #ffffff;
+            padding: 5px 5px;
             text-align: left;
-            font-weight: bold;
-            border: 1px solid #ddd;
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border: 1px solid #1a3a5c;
+        }
+        .students-table tbody td {
+            padding: 4px 5px;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .students-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .status-badge {
+            background-color: #c6f6d5;
+            color: #22543d;
+            padding: 1px 5px;
+            font-weight: 700;
+            font-size: 7.5px;
+            letter-spacing: 0.5px;
         }
 
-        .students-table td {
-            padding: 4px;
-            border: 1px solid #ddd;
-            vertical-align: top;
+        /* ===== DECLARATION ===== */
+        .declaration-box {
+            border: 1px solid #e2e8f0;
+            padding: 7px 10px;
+            background-color: #f8fafc;
         }
-
-        .students-table tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        .declaration {
+        .declaration-box p {
             text-align: justify;
-            font-size: 9px;
-            line-height: 1.4;
-            margin-bottom: 12px;
-            padding: 8px;
-            background-color: #f8f9fa;
-            border-radius: 3px;
+            font-size: 8.5px;
+            line-height: 1.45;
+            margin: 3px 0;
+            color: #2d3748;
         }
 
+        /* ===== BOTTOM ===== */
         .bottom-section {
-            display: table;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 12px;
+            border-collapse: collapse;
         }
-
-        .qr-section {
-            display: table-cell;
-            width: 140px;
+        .bottom-section td {
+            vertical-align: top;
+        }
+        .qr-box {
             text-align: center;
-            vertical-align: top;
-            padding-right: 15px;
-        }
-
-        .qr-section img {
-            width: 80px;
-            height: 80px;
-        }
-
-        .qr-title {
-            font-size: 8px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .qr-description {
-            font-size: 7px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .signature-section {
-            display: table-cell;
-            vertical-align: top;
-        }
-
-        .signature-box {
-            border: 1px solid #ddd;
+            border: 1px solid #e2e8f0;
             padding: 8px;
-            text-align: center;
-            background-color: #f8f9fa;
-            border-radius: 3px;
-            height: 60px;
-            position: relative;
+            background-color: #ffffff;
+            width: 120px;
         }
-
+        .qr-box img {
+            width: 65px;
+            height: 65px;
+        }
+        .qr-title {
+            font-size: 7.5px;
+            font-weight: 700;
+            color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .signature-box {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            background-color: #f8fafc;
+            text-align: center;
+            min-height: 62px;
+        }
         .signature-line {
-            position: absolute;
-            bottom: 15px;
-            left: 10px;
-            right: 10px;
-            border-top: 1px solid #333;
-            padding-top: 3px;
-            font-size: 8px;
-            font-weight: bold;
+            border-top: 1.5px solid #4a5568;
+            padding-top: 4px;
+            margin-top: 26px;
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #1a3a5c;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
-
         .signature-name {
-            font-size: 7px;
-            color: #666;
+            font-size: 8px;
+            color: #718096;
             margin-top: 2px;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
         }
 
+        /* ===== FOOTER ===== */
         .footer {
-            margin-top: 15px;
+            margin-top: 10px;
             text-align: center;
-            font-size: 7px;
-            color: #666;
-            border-top: 1px solid #ddd;
-            padding-top: 8px;
+            font-size: 7.5px;
+            color: #a0aec0;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 6px;
         }
-
         .footer p {
-            margin: 2px 0;
-        }
-
-        .highlight {
-            background-color: #fff3cd;
-            padding: 1px 3px;
-            border-radius: 2px;
+            margin: 1px 0;
         }
 
         @media print {
-            body { margin: 10px; }
+            body { margin: 0; padding: 0; }
             .section { page-break-inside: avoid; }
-        }
-
-        .wrap-normal {
-            white-space: normal; /* Valor por defecto, el texto se ajusta */
-            word-wrap: break-word; /* Rompe palabras largas si es necesario */
-            overflow-wrap: break-word; /* Alternativa moderna a word-wrap */
-        }
-        .no-wrap {
-            white-space: nowrap; /* Impide que el texto se divida en múltiples líneas */
-            overflow: hidden; /* Oculta el contenido que excede el contenedor */
         }
     </style>
 </head>
 <body>
-    <!-- Encabezado institucional -->
+    <!-- ===== ENCABEZADO ===== -->
     <table class="header-table">
         <tr>
-            <td width="15%">
-                <img class="logo" src="{{ public_path('image/avatar/uecfla.jpg') }}" alt="Logo Institución">
+            <td width="13%" style="text-align: center;">
+                <img class="logo" src="{{ public_path('image/avatar/uecfla.jpg') }}" alt="Logo">
             </td>
-            <td width="70%">
+            <td width="74%">
                 <div class="institution-info">
                     <div class="institution-name">{{ $institution->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
-                    <div class="institution-dept">DIRECCIÓN ACADÉMICA</div>
+                    <div class="institution-sub">DIRECCIÓN ACADÉMICA</div>
                 </div>
             </td>
-            <td width="15%" style="text-align: right;">
-                <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}" alt="Logo Secundario">
+            <td width="13%" style="text-align: center;">
+                <img class="logo-large" src="{{ public_path('image/avatar/amigoniano.png') }}" alt="Logo">
             </td>
         </tr>
     </table>
 
-    <!-- Título del documento -->
-    <div class="document-title">
+    <!-- ===== TÍTULO ===== -->
+    <div class="title-bar">
         <h1>Planilla de Confirmación de Prosecución</h1>
         <p>Período Escolar 2025-2026</p>
     </div>
 
-    <!-- Datos del representante -->
+    <!-- ===== DATOS DEL REPRESENTANTE ===== -->
     <div class="section">
         <div class="section-title">Datos del Representante</div>
-        <div class="info-grid">
-            <div class="info-row">
-                <div class="info-label">Nombre:</div>
-                <div class="info-value highlight"><span class="">{{ $representant->name }}</span></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Cédula:</div>
-                <div class="info-value">{{ $representant->ci_representant }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Teléfono:</div>
-                <div class="info-value">{{ $representant->phone ?? 'No registrado' }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Fecha:</div>
-                <div class="info-value">{{ $fecha_proceso }}</div>
-            </div>
+        <div class="info-box">
+            <table class="info-grid">
+                <tr>
+                    <td class="info-label">Nombre completo:</td>
+                    <td class="info-value highlight">{{ $representant->name }}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Cédula de identidad:</td>
+                    <td class="info-value">{{ $representant->ci_representant }}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Teléfono:</td>
+                    <td class="info-value">{{ $representant->phone ?? 'No registrado' }}</td>
+                </tr>
+                <tr>
+                    <td class="info-label">Fecha de emisión:</td>
+                    <td class="info-value">{{ $fecha_proceso }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
-    <!-- Estudiantes confirmados -->
+    <!-- ===== ESTUDIANTES ===== -->
     <div class="section">
-        <div class="section-title">Estudiantes Confirmados para Prosecución</div>
+        <div class="section-title">Estudiantes Confirmados</div>
         <table class="students-table">
             <thead>
                 <tr>
-                    <th width="5%">#</th>
-                    <th width="35%">Nombre Completo</th>
-                    <th width="15%">Cédula</th>
-                    <th width="25%">Grado/Sección</th>
-                    <th width="10%">Edad</th>
+                    <th width="4%">#</th>
+                    <th width="32%">Nombre Completo</th>
+                    <th width="12%">Cédula</th>
+                    <th width="23%">Grado / Sección</th>
+                    <th width="7%">Edad</th>
                     <th width="10%">Estado</th>
-                    <th width="10%" style="white-space: nowrap;">Fecha</th>
+                    <th width="12%">Fecha</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($estudiants as $index => $estudiant)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td style="white-space: nowrap;"><strong>{{ $estudiant->fullname }}</strong></td>
+                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                    <td><strong>{{ $estudiant->fullname }}</strong></td>
                     <td>{{ $estudiant->ci_estudiant }}</td>
                     <td>{{ $estudiant->full_inscripcion ?? 'No asignado' }}</td>
-                    <td style="white-space: nowrap;">{{ $estudiant->age }} años</td>
-                    <td style="color: #28a745; font-weight: bold;">CONFIRMADO</td>
-                    <td style="white-space: nowrap;">{{ $estudiant->date_prosecution_formatted_full }}</td>
+                    <td style="text-align: center;">{{ $estudiant->age }} años</td>
+                    <td style="text-align: center;"><span class="status-badge">CONFIRMADO</span></td>
+                    <td>{{ $estudiant->date_prosecution_formatted_full }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <!-- Declaración -->
+    <!-- ===== DECLARACIÓN ===== -->
     <div class="section">
         <div class="section-title">Declaración de Compromiso</div>
-        <div class="declaration">
-            <p><strong>Yo, {{ $representant->fullname }}, portador(a) de la cédula {{ $representant->ci_representant }}</strong>,
-            en mi condición de representante legal de {{ count($estudiants) == 1 ? 'el estudiante mencionado' : 'los estudiantes mencionados' }},
-            <strong>CONFIRMO</strong> mediante la presente planilla mi decisión de que
-            {{ count($estudiants) == 1 ? 'el mismo continúe' : 'los mismos continúen' }} sus estudios en esta institución
-            educativa durante el período escolar 2025-2026.</p>
-
-            <p>Esta confirmación se realiza de manera <strong>voluntaria y consciente</strong>, comprometiéndome a cumplir
-            con el acuerdo de convivencia escolar comunitario y todas las normativas institucionales.</p>
+        <div class="declaration-box">
+            <p>
+                <strong>Yo, {{ $representant->name }},</strong> portador(a) de la cédula de identidad
+                <strong>{{ $representant->ci_representant }},</strong> en mi condición de representante legal de
+                {{ count($estudiants) == 1 ? 'el estudiante mencionado' : 'los estudiantes mencionados' }},
+                <strong>CONFIRMO</strong> mi decisión de que {{ count($estudiants) == 1 ? 'continúe' : 'continúen' }}
+                sus estudios en esta institución durante el período 2025-2026, comprometiéndome a cumplir con el
+                acuerdo de convivencia escolar y las normativas institucionales.
+            </p>
         </div>
     </div>
 
-    <!-- Sección inferior: QR y Firma -->
-    <div class="bottom-section">
-        <div class="qr-section">
-            <div class="qr-title">CÓDIGO DE VERIFICACIÓN</div>
-            <img src="{{ $qrCode }}" alt="Código QR">
-            <div class="qr-description">Escanee para verificar autenticidad</div>
-        </div>
-
-        <div class="signature-section">
-            <div class="signature-box">
-                <div style="margin-top: 10px; font-size: 8px; color: #666;">
-                    &nbsp;
+    <!-- ===== QR + FIRMA ===== -->
+    <table class="bottom-section">
+        <tr>
+            <td width="120" class="qr-box">
+                <div class="qr-title">Código de Verificación</div>
+                <img src="{{ $qrCode }}" alt="QR">
+            </td>
+            <td style="padding-left: 12px;">
+                <div class="signature-box">
+                    <div class="signature-line">
+                        FIRMA DEL REPRESENTANTE
+                        <div class="signature-name">{{ $representant->name }}</div>
+                    </div>
                 </div>
-                <div class="signature-line">
-                    FIRMA DEL REPRESENTANTE
-                    <div class="signature-name">{{ $representant->name }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </td>
+        </tr>
+    </table>
 
-    <!-- Pie de página -->
+    <!-- ===== FOOTER ===== -->
     <div class="footer">
-        <p><strong>SAEFL</strong></p>
-        <p>Documento generado automáticamente el {{ $fecha_proceso }} | Total de estudiantes: {{ count($estudiants) }}</p>
-        {{-- <p>Este documento es válido únicamente con el código QR de verificación</p> --}}
+        <p><strong>SAEFL</strong> — Documento generado el {{ $fecha_proceso }} | Total: {{ count($estudiants) }} estudiante(s)</p>
     </div>
 </body>
 </html>

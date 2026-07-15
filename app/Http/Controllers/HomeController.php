@@ -106,7 +106,9 @@ class HomeController extends Controller
     public function generateQrCodePDF($id)
     {
         $pdfUrl = route('prosecucion.download.pdf', $id);
-        return 'data:image/png;base64,' . base64_encode(QrCode::format('png')->size(200)->generate($pdfUrl));
+        return 'data:image/svg+xml;base64,' . base64_encode(
+            (string) QrCode::format('svg')->size(200)->generate($pdfUrl)
+        );
     }
 
     public function prosecucion_guia(Request $request)

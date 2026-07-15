@@ -4,10 +4,8 @@ namespace App\Livewire;
 
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Learner\Representant;
-use Carbon\Carbon;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
-use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProsecucionWizard extends Component
@@ -128,10 +126,10 @@ class ProsecucionWizard extends Component
         // Generar URL de descarga usando el ID del representante
         $this->downloadUrl = route('prosecucion.download.pdf', $this->representant->id);
 
-        // Generar QR code
+        // Generar QR code (SVG via SimpleSoftwareIO — requiere xmlwriter, disponible en php8.2+)
         try {
-            $this->qrCode = 'data:image/png;base64,' . base64_encode(
-                QrCode::format('png')->size(200)->generate($this->downloadUrl)
+            $this->qrCode = 'data:image/svg+xml;base64,' . base64_encode(
+                (string) QrCode::format('svg')->size(200)->generate($this->downloadUrl)
             );
         } catch (\Exception $e) {
             $this->notification()->warning(
