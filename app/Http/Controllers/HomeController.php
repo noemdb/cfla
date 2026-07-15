@@ -67,8 +67,8 @@ class HomeController extends Controller
     public function downloadProsecucionPDF($id)
     {
         // Buscar los estudiantes por el ID del representante
-        $representant = Representant::findOrFail($id);
-        $estudiants = Estudiant::where('representant_id', $representant->id)
+        $representant = Representant::on('s2526')->findOrFail($id);
+        $estudiants = Estudiant::on('s2526')->where('representant_id', $representant->id)
             ->where('status_prosecution', true)
             ->get();
 
