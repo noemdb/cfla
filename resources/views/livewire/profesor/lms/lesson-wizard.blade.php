@@ -1782,22 +1782,18 @@
                                                 <h4 class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Estructura de Enseñanza</h4>
                                             </div>
                                             <div class="p-3 space-y-2">
+                                                @php
+                                                    $sectionStyles = [
+                                                        'INICIO' => ['class' => 'bg-blue-50 text-blue-700 border border-blue-200', 'symbol' => '→'],
+                                                        'DESARROLLO' => ['class' => 'bg-emerald-50 text-emerald-700 border border-emerald-200', 'symbol' => '◆'],
+                                                        'CIERRE' => ['class' => 'bg-amber-50 text-amber-700 border border-amber-200', 'symbol' => '●'],
+                                                    ];
+                                                @endphp
                                                 @foreach($listPreviewData['teaching_sections'] as $ts)
+                                                    @php($ss = $sectionStyles[$ts['title']] ?? ['class' => 'bg-stone-50 text-stone-600 border border-stone-200', 'symbol' => '•'])
                                                     <div>
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
-                                                            @switch($ts['title'])
-                                                                @case('INICIO') bg-blue-50 text-blue-700 border border-blue-200 @break
-                                                                @case('DESARROLLO') bg-emerald-50 text-emerald-700 border border-emerald-200 @break
-                                                                @case('CIERRE') bg-amber-50 text-amber-700 border border-amber-200 @break
-                                                                @default bg-stone-50 text-stone-600 border border-stone-200
-                                                            @endswitch
-                                                        ">
-                                                            @switch($ts['title'])
-                                                                @case('INICIO') → @break
-                                                                @case('DESARROLLO') ◆ @break
-                                                                @case('CIERRE') ● @break
-                                                                @default •
-                                                            @endswitch
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $ss['class'] }}">
+                                                            {{ $ss['symbol'] }}
                                                             {{ $ts['title'] }}
                                                         </span>
                                                         <p class="text-xs text-stone-600 mt-1 leading-relaxed">{{ $ts['content'] }}</p>
@@ -2899,31 +2895,22 @@ Cómo...?"
                                                         'ppt','pptx' => 'powerpoint',
                                                         default => 'file'
                                                     };
+
+                                                    $iconStyles = [
+                                                        'pdf' => ['bg' => 'bg-red-500/15', 'text' => 'text-red-400'],
+                                                        'image' => ['bg' => 'bg-blue-500/15', 'text' => 'text-blue-400'],
+                                                        'video' => ['bg' => 'bg-purple-500/15', 'text' => 'text-purple-400'],
+                                                        'audio' => ['bg' => 'bg-amber-500/15', 'text' => 'text-amber-400'],
+                                                        'word' => ['bg' => 'bg-blue-600/15', 'text' => 'text-blue-400'],
+                                                        'excel' => ['bg' => 'bg-emerald-500/15', 'text' => 'text-emerald-400'],
+                                                        'powerpoint' => ['bg' => 'bg-orange-500/15', 'text' => 'text-orange-400'],
+                                                        'file' => ['bg' => 'bg-slate-600/30', 'text' => 'text-slate-400'],
+                                                    ];
+                                                    $is = $iconStyles[$icon] ?? $iconStyles['file'];
                                                 @endphp
                                                 <div class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
-                                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0
-                                                        @switch($icon)
-                                                            @case('pdf') bg-red-500/15 @break
-                                                            @case('image') bg-blue-500/15 @break
-                                                            @case('video') bg-purple-500/15 @break
-                                                            @case('audio') bg-amber-500/15 @break
-                                                            @case('word') bg-blue-600/15 @break
-                                                            @case('excel') bg-emerald-500/15 @break
-                                                            @case('powerpoint') bg-orange-500/15 @break
-                                                            @default bg-slate-600/30
-                                                        @endswitch">
-                                                        <svg class="w-4 h-4
-                                                            @switch($icon)
-                                                                @case('pdf') text-red-400 @break
-                                                                @case('image') text-blue-400 @break
-                                                                @case('video') text-purple-400 @break
-                                                                @case('audio') text-amber-400 @break
-                                                                @case('word') text-blue-400 @break
-                                                                @case('excel') text-emerald-400 @break
-                                                                @case('powerpoint') text-orange-400 @break
-                                                                @default text-slate-400
-                                                            @endswitch"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 {{ $is['bg'] }}">
+                                                        <svg class="w-4 h-4 {{ $is['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             @switch($icon)
                                                                 @case('pdf')
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
