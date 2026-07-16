@@ -15,7 +15,7 @@
     </div>
 
     <div class="bg-gray-50 dark:bg-gray-900 p-6 text-center border-t border-gray-200 dark:border-emerald-500/10">
-        <span class="text-gray-500">© 2024 Copyright:</span>
+        <span class="text-gray-500">© {{ date('Y') }} Copyright:</span>
         <a class="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors"
             href="https://github.com/noemdb">@noemdb</a>
     </div>
