@@ -103,7 +103,7 @@
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($profesors as $profesor)
-                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                        <tr class="hover:bg-white/[0.02] transition-colors group {{ $profesor->user && $profesor->user->is_active === 'disable' ? 'opacity-50' : '' }}">
                             <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $profesor->id }}</td>
                             <td class="px-4 py-2">
                                 <div class="flex items-center gap-2">
@@ -184,6 +184,20 @@
                                         title="Editar profesor">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
+                                    @if($profesor->user)
+                                        <button type="button" wire:click="confirmToggleActive({{ $profesor->id }})"
+                                            class="p-2 rounded-lg border transition-all duration-200
+                                                {{ $profesor->user->is_active === 'enable'
+                                                    ? 'bg-white/5 hover:bg-red-500/10 border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400'
+                                                    : 'bg-white/5 hover:bg-emerald-500/10 border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400' }}"
+                                            title="{{ $profesor->user->is_active === 'enable' ? 'Desactivar usuario' : 'Activar usuario' }}">
+                                            @if($profesor->user->is_active === 'enable')
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                            @endif
+                                        </button>
+                                    @endif
                                     <button type="button" wire:click="confirmDelete({{ $profesor->id }})"
                                         class="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg border border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200"
                                         title="Eliminar profesor">
@@ -219,6 +233,39 @@
             <div class="flex justify-center gap-3">
                 <x-button flat label="Cancelar" x-on:click="confirmDeleteId = null" />
                 <x-button negative label="Eliminar" wire:click="destroy" spinner="destroy" />
+            </div>
+        </div>
+    </x-modal>
+
+    <!-- ===== MODAL: Confirmar Activar/Desactivar Usuario ===== -->
+    <x-modal title="Cambiar Estado del Usuario" blur="lg" wire:model="confirmToggleActiveId" max-width="md" persistent>
+        <div class="p-6 text-center">
+            @if($toggleActiveCurrentStatus)
+                <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <h3 class="text-lg font-bold text-white mb-2">¿Desactivar usuario?</h3>
+                <p class="text-sm text-gray-400 mb-6">
+                    Se desactivará el usuario de <strong class="text-white">{{ $toggleActiveName }}</strong>.
+                    El profesor no podrá acceder al sistema hasta que sea activado nuevamente.
+                </p>
+            @else
+                <svg class="w-16 h-16 text-emerald-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-bold text-white mb-2">¿Activar usuario?</h3>
+                <p class="text-sm text-gray-400 mb-6">
+                    Se activará el usuario de <strong class="text-white">{{ $toggleActiveName }}</strong>.
+                    El profesor podrá acceder al sistema nuevamente.
+                </p>
+            @endif
+            <div class="flex justify-center gap-3">
+                <x-button flat label="Cancelar" x-on:click="close" wire:click="cancelToggleActive" />
+                @if($toggleActiveCurrentStatus)
+                    <x-button negative label="Desactivar" wire:click="toggleActive" spinner="toggleActive" />
+                @else
+                    <x-button primary label="Activar" wire:click="toggleActive" spinner="toggleActive" />
+                @endif
             </div>
         </div>
     </x-modal>

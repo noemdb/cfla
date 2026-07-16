@@ -73,6 +73,12 @@ class IndexComponent extends Component
     // Confirm delete
     public $confirmDeleteId = null;
 
+    // Toggle active
+    public $confirmToggleActiveId = null;
+    public $toggleActiveProfesorId = null;
+    public $toggleActiveName = '';
+    public $toggleActiveCurrentStatus = false;
+
     // Preview
     public $previewMode = false;
     public $previewProfesor = null;
@@ -478,6 +484,48 @@ class IndexComponent extends Component
             title: 'Profesor Eliminado',
             description: 'El profesor se eliminó correctamente.'
         );
+    }
+
+    // ─── TOGGLE ACTIVE ─────────────────────────────────────────
+
+    public function confirmToggleActive($profesorId)
+    {
+        $profesor = Profesor::with('user')->findOrFail($profesorId);
+
+        if (!$profesor->user) {
+            $this->notification()->error(
+                title: 'Sin usuario',
+                description: 'Este profesor no tiene un usuario asociado.'
+            );
+            return;
+        }
+
+        $this->toggleActiveProfesorId = $profesor->id;
+        $this->toggleActiveName = $profesor->full_name;
+        $this->toggleActiveCurrentStatus = $profesor->user->is_active === 'enable';
+        $this->confirmToggleActiveId = $profesor->user->id;
+    }
+
+    public function cancelToggleActive()
+    {
+        $this->confirmToggleActiveId = null;
+        $this->toggleActiveProfesorId = null;
+        $this->toggleActiveName = '';
+    }
+
+    public function toggleActive()
+    {
+        $user = User::findOrFail($this->confirmToggleActiveId);
+        $newStatus = $user->is_active === 'enable' ? 'disable' : 'enable';
+        $user->update(['is_active' => $newStatus]);
+
+        $label = $newStatus === 'enable' ? 'activado' : 'desactivado';
+        $this->notification()->success(
+            title: 'Usuario ' . ($newStatus === 'enable' ? 'Activado' : 'Desactivado'),
+            description: "El usuario de {$this->toggleActiveName} fue {$label} correctamente."
+        );
+
+        $this->cancelToggleActive();
     }
 
     // ─── PREVIEW ────────────────────────────────────────────────
