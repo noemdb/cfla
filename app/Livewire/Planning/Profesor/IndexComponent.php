@@ -11,6 +11,7 @@ use App\Models\sys\Rol;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -81,7 +82,7 @@ class IndexComponent extends Component
 
     // Preview
     public $previewMode = false;
-    public $previewProfesor = null;
+    public $previewProfesorId = null;
 
     protected function rules()
     {
@@ -194,6 +195,9 @@ class IndexComponent extends Component
             $query->having('activities_count', '=', 0);
         }
 
+        // Profesores sin carga académica al final (sort primario)
+        $query->orderByRaw('pevaluacions_count > 0 DESC');
+
         // Sorting
         if (in_array($this->sortField, ['profesors.id', 'profesors.name', 'profesors.lastname', 'profesors.ci_profesor', 'users.username'])) {
             $query->orderBy($this->sortField, $this->sortDirection);
@@ -207,9 +211,13 @@ class IndexComponent extends Component
 
         $profesors = $query->paginate($this->paginate);
 
-        // Load lapso data for each profesor (only for displayed page)
+        // Cargar pevaluacions en lote (1 query en vez de N)
+        $ids = $profesors->pluck('id');
+        $allPevaluacions = Pevaluacion::whereIn('profesor_id', $ids)->get();
         foreach ($profesors as $profesor) {
-            $profesor->setRelation('pevaluacions', Pevaluacion::where('profesor_id', $profesor->id)->get());
+            $profesor->setRelation('pevaluacions',
+                $allPevaluacions->where('profesor_id', $profesor->id)
+            );
         }
 
         return view('livewire.planning.profesor.index-component', [
@@ -532,22 +540,15 @@ class IndexComponent extends Component
 
     public function showPreview($id)
     {
-        $this->previewProfesor = Profesor::with(['user', 'pevaluacions.pensum.asignatura', 'pevaluacions.lapso', 'pevaluacions.seccion'])
-            ->withCount('pevaluacions')
-            ->findOrFail($id);
-
-        // Count activities
-        $this->previewProfesor->activities_count = Pevaluacion::where('profesor_id', $id)
-            ->join('activities', 'pevaluacions.id', '=', 'activities.pevaluacion_id')
-            ->count();
-
+        $this->previewProfesorId = $id;
         $this->previewMode = true;
     }
 
+    #[On('closePreviewModal')]
     public function closePreview()
     {
         $this->previewMode = false;
-        $this->previewProfesor = null;
+        $this->previewProfesorId = null;
     }
 
     // ─── HELPERS ──────────────────────────────────────────────────
