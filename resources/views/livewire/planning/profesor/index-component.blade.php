@@ -419,8 +419,8 @@
 
     <!-- ===== MODAL: Vista Previa ===== -->
     <x-modal title="Detalles del Profesor" blur="lg" wire:model="previewMode" max-width="2xl">
-        @if($previewMode && $previewProfesorId)
-            @livewire('planning.profesor.show-preview', ['profesorId' => $previewProfesorId], key($previewProfesorId))
+        @if($this->previewMode && $this->previewProfesorId)
+            @livewire('planning.profesor.show-preview', ['profesorId' => $this->previewProfesorId], key($this->previewProfesorId))
         @endif
     </x-modal>
 
