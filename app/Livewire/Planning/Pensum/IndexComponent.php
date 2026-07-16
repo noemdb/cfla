@@ -53,6 +53,11 @@ class IndexComponent extends Component
             ->get()
             ->pluck('full_name', 'id');
 
+        $this->asignaturas = Asignatura::orderBy('name')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
+
         $this->close();
     }
 
@@ -132,13 +137,8 @@ class IndexComponent extends Component
 
     public function updatedFormPestudioId($value)
     {
-        // During edit, the form values are already set — don't cascade-null them
-        if ($this->form->isEditing) {
-            return;
-        }
-
+        // Al cambiar el plan de estudio, limpiar y recargar solo los grados
         $this->form->grado_id = null;
-        $this->form->asignatura_id = null;
 
         if ($value) {
             $this->grados = Grado::where('pestudio_id', $value)
@@ -147,15 +147,8 @@ class IndexComponent extends Component
                 ->get()
                 ->pluck('full_name', 'id')
                 ->toArray();
-
-            $this->asignaturas = Asignatura::where('pestudio_id', $value)
-                ->orderBy('name')
-                ->get()
-                ->pluck('full_name', 'id')
-                ->toArray();
         } else {
             $this->grados = [];
-            $this->asignaturas = [];
         }
     }
 
@@ -165,7 +158,10 @@ class IndexComponent extends Component
     {
         $this->form->resetForm();
         $this->grados = [];
-        $this->asignaturas = [];
+        $this->asignaturas = Asignatura::orderBy('name')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
         $this->close();
         $this->modeForm = true;
     }
@@ -182,8 +178,7 @@ class IndexComponent extends Component
             ->pluck('full_name', 'id')
             ->toArray();
 
-        $this->asignaturas = Asignatura::where('pestudio_id', $this->form->pestudio_id)
-            ->orderBy('name')
+        $this->asignaturas = Asignatura::orderBy('name')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
