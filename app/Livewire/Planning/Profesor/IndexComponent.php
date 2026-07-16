@@ -222,6 +222,7 @@ class IndexComponent extends Component
 
         return view('livewire.planning.profesor.index-component', [
             'profesors' => $profesors,
+            'previewProfesorId' => $this->previewProfesorId,
         ]);
     }
 

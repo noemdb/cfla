@@ -5,6 +5,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
     </button>
 
+    @if($this->profesor)
     <div class="flex items-center gap-3 mb-2 pr-10">
         <div class="w-14 h-14 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-lg font-bold">
             {{ strtoupper(substr($this->profesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($this->profesor->lastname ?? '', 0, 1)) }}
@@ -57,4 +58,7 @@
     <div class="flex justify-end border-t border-white/5 pt-4">
         <x-button flat label="Cerrar" wire:click="close" />
     </div>
+    @else
+    <p class="text-sm text-gray-400">Selecciona un profesor para ver sus detalles.</p>
+    @endif
 </div>
