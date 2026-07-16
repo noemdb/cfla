@@ -27,8 +27,8 @@
     RewriteCond %{REQUEST_URI} (filemanagerNew|Enterprise-FM|bootstrap\.cache)\.php [NC]
     RewriteRule .* - [F,L]
     
-    # REGLA 4: Bloquear parámetros en cualquier posición
-    RewriteCond %{QUERY_STRING} .*img.* [NC]
+    # REGLA 4: Bloquear parámetro img= en cualquier posición
+    RewriteCond %{QUERY_STRING} (^|&)img=[^&]* [NC]
     RewriteCond %{QUERY_STRING} !(jpeg|jpg|png|gif|webp) [NC]
     RewriteRule .* - [F,L]
 

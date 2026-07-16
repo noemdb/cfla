@@ -67,3 +67,26 @@ export async function loadChart() {
 
     return window._chartPromise;
 }
+
+/**
+ * Dynamically import ApexCharts — ~300 kB
+ * Used in: planning/indicators, and any future chart pages.
+ *
+ * Usage in Livewire Blade templates:
+ *   if (window.loadApexCharts) { await window.loadApexCharts(); }
+ *   const chart = new window.ApexCharts(element, options);
+ *   chart.render();
+ *
+ * @returns {Promise<ApexCharts>}
+ */
+export async function loadApexCharts() {
+    if (window._apexChartsPromise) return window._apexChartsPromise;
+
+    window._apexChartsPromise = import('apexcharts/dist/apexcharts.esm.js').then((m) => {
+        const ApexCharts = m.default || m;
+        window.ApexCharts = ApexCharts;
+        return ApexCharts;
+    });
+
+    return window._apexChartsPromise;
+}

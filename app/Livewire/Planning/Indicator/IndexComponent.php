@@ -16,6 +16,7 @@ use App\Models\app\Instrument\DiagReport;
 use App\Models\app\Instrument\DiagResult;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 
 class IndexComponent extends Component
 {
@@ -57,6 +58,11 @@ class IndexComponent extends Component
     public $totalActivities = 0;
     public $totalProfesoresActivos = 0;
     public $totalDiagActive = 0;
+
+    // ─── Charts ────────────────────────────────────────────────────────
+    public $chartActivitiesByDay = [];
+    public $chartLessonsByDay = [];
+    public $chartScheduledByDay = [];
 
     public function mount()
     {
@@ -380,6 +386,165 @@ class IndexComponent extends Component
                 : 0;
         }
 
+        // ══ Chart: Activities per day ══
+        $this->loadChartActivitiesByDay();
+
+        // ══ Chart: Lessons per day ══
+        $this->loadChartLessonsByDay();
+
+        // ══ Chart: Scheduled publications per day ══
+        $this->loadChartScheduledByDay();
+    }
+
+    /**
+     * Query activities grouped by finicial date, applying all current filters.
+     * Returns array of {date: string, total: int} for the ApexCharts bar chart.
+     */
+    private function loadChartActivitiesByDay()
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartActivitiesByDay = [];
+            return;
+        }
+
+        $query = Activity::selectRaw('activities.finicial, COUNT(*) as total')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->groupBy('activities.finicial')
+            ->orderBy('activities.finicial');
+
+        // Filter by profesor
+        if ($this->selectedProfesorId) {
+            $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        }
+
+        // Filter by pestudio (and indirectly by peducativo via pestudio)
+        if ($this->selectedPestudioId) {
+            $query->where('pensums.pestudio_id', $this->selectedPestudioId);
+        } elseif ($this->selectedPeducativoId) {
+            $pestudioIds = $this->pestudios
+                ->where('peducativo_id', $this->selectedPeducativoId)
+                ->pluck('id');
+            $query->whereIn('pensums.pestudio_id', $pestudioIds);
+        }
+
+        // Filter by grado (via pevaluacion → seccion → grado)
+        if ($this->selectedGradoId) {
+            $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
+                  ->where('seccions.grado_id', $this->selectedGradoId);
+        }
+
+        $this->chartActivitiesByDay = $query->get()->map(function ($row) {
+            return [
+                'x' => $row->finicial,
+                'y' => (int) $row->total,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Query lms_activity_publications grouped by published_at/created_at date,
+     * joining through activities → pevaluacions → pensums for filters.
+     */
+    private function loadChartLessonsByDay()
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartLessonsByDay = [];
+            return;
+        }
+
+        $query = DB::query()
+            ->from('lms_activity_publications')
+            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->selectRaw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at) as pub_date, COUNT(*) as total')
+            ->groupByRaw('DATE(COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at))')
+            ->orderBy('pub_date')
+            ->whereNotNull(DB::raw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at)'));
+
+        // Apply filters
+        if ($this->selectedProfesorId) {
+            $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        }
+        if ($this->selectedPestudioId) {
+            $query->where('pensums.pestudio_id', $this->selectedPestudioId);
+        } elseif ($this->selectedPeducativoId) {
+            $pestudioIds = $this->pestudios
+                ->where('peducativo_id', $this->selectedPeducativoId)
+                ->pluck('id');
+            $query->whereIn('pensums.pestudio_id', $pestudioIds);
+        }
+        if ($this->selectedGradoId) {
+            $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
+                  ->where('seccions.grado_id', $this->selectedGradoId);
+        }
+
+        $this->chartLessonsByDay = $query->get()->map(function ($row) {
+            $date = $row->pub_date;
+            if ($date && strpos($date, ' ') !== false) {
+                $date = explode(' ', $date)[0];
+            }
+            return [
+                'x' => $date,
+                'y' => (int) $row->total,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Query lms_activity_publications grouped by publish_at (scheduled date),
+     * joining through activities → pevaluacions → pensums for filters.
+     */
+    private function loadChartScheduledByDay()
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartScheduledByDay = [];
+            return;
+        }
+
+        $query = DB::query()
+            ->from('lms_activity_publications')
+            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as pub_date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.publish_at)')
+            ->orderBy('pub_date');
+
+        // Apply filters
+        if ($this->selectedProfesorId) {
+            $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        }
+        if ($this->selectedPestudioId) {
+            $query->where('pensums.pestudio_id', $this->selectedPestudioId);
+        } elseif ($this->selectedPeducativoId) {
+            $pestudioIds = $this->pestudios
+                ->where('peducativo_id', $this->selectedPeducativoId)
+                ->pluck('id');
+            $query->whereIn('pensums.pestudio_id', $pestudioIds);
+        }
+        if ($this->selectedGradoId) {
+            $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
+                  ->where('seccions.grado_id', $this->selectedGradoId);
+        }
+
+        $this->chartScheduledByDay = $query->get()->map(function ($row) {
+            return [
+                'x' => $row->pub_date,
+                'y' => (int) $row->total,
+            ];
+        })->toArray();
     }
 
     public function render()

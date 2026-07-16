@@ -23,6 +23,7 @@
         "@ryangjchandler/alpine-clipboard": "^2.3.0",
         "@tailwindcss/typography": "^0.5.20",
         "alpinejs": "^3.13.3",
+        "apexcharts": "^5.16.0",
         "chart.js": "^3.9.1",
         "gsap": "^3.12.5",
         "mermaid": "^11.16.0",

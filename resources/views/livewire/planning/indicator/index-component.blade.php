@@ -40,7 +40,7 @@
     </div>
 
     <!-- Lapso NavTabs + Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden mb-4">
+    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden mb-4">
         {{-- Lapso navtabs (replica el patrón de profesors/activities) --}}
         <nav class="flex overflow-x-auto border-b border-white/5">
             @foreach($lapsos as $lapso)
@@ -132,7 +132,7 @@
                                 <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
                                 <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-2 gap-2">
                                 <x-indicator-box
                                     icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                     label="Actividades Registradas"
@@ -156,6 +156,66 @@
                         </div>
                     @endforelse
                 </div>
+
+                    {{-- Chart: Actividades por Día — uses filters from the top bar --}}
+                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-2">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades Registradas por Día</h3>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                {{ count($chartActivitiesByDay) }} día(s) con actividad
+                            </span>
+                        </div>
+                        <div wire:ignore>
+                            <div id="activities-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                        </div>
+                    </div>
+
+                    {{-- Chart: Lecciones Publicadas por Día — uses same filters --}}
+                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-sky-100 dark:bg-sky-500/20 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Lecciones Publicadas por Día</h3>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                {{ count($chartLessonsByDay) }} día(s) con publicación
+                            </span>
+                        </div>
+                        <div wire:ignore>
+                            <div id="lessons-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                        </div>
+                    </div>
+
+                    {{-- Chart: Publicaciones Programadas por Día (publish_at) --}}
+                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Publicaciones Programadas por Día</h3>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                {{ count($chartScheduledByDay) }} día(s) con programación
+                            </span>
+                        </div>
+                        <div wire:ignore>
+                            <div id="scheduled-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                        </div>
+                    </div>
             </div>
 
             {{-- ═══════════════════════════════════════════════════════════════════
@@ -493,3 +553,250 @@
         </div>
     </div>
 </div>
+
+@script
+<script>
+    let activitiesChart = null;
+
+    async function initActivitiesChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('activities-per-day-chart');
+        if (!el) return;
+
+        if (activitiesChart) activitiesChart.destroy();
+
+        // Use $wire.get() to get the raw value (avoid Proxy wrapping issues)
+        const rawData = await $wire.get('chartActivitiesByDay') ?? [];
+
+        activitiesChart = new window.ApexCharts(el, {
+            series: [{
+                name: 'Actividades',
+                data: rawData,
+            }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+            },
+            colors: ['#10b981'],
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 4,
+                colors: ['#10b981'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: {
+                    style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 },
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 },
+                },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: {
+                borderColor: '#37415140',
+                strokeDashArray: 4,
+            },
+            tooltip: {
+                theme: 'dark',
+                y: {
+                    formatter: function(val) {
+                        return val + ' actividad(es)';
+                    },
+                },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        activitiesChart.render();
+    }
+
+    // This script block runs after Livewire mounts — $wire is available
+    initActivitiesChart();
+    $wire.$watch('chartActivitiesByDay', () => initActivitiesChart());
+</script>
+@endscript
+
+@script
+<script>
+    let lessonsChart = null;
+
+    async function initLessonsChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('lessons-per-day-chart');
+        if (!el) return;
+
+        if (lessonsChart) lessonsChart.destroy();
+
+        const rawData = await $wire.get('chartLessonsByDay') ?? [];
+
+        lessonsChart = new window.ApexCharts(el, {
+            series: [{ name: 'Lecciones', data: rawData }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+            },
+            colors: ['#0ea5e9'],
+            stroke: { curve: 'smooth', width: 2 },
+            markers: {
+                size: 4,
+                colors: ['#0ea5e9'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: { borderColor: '#37415140', strokeDashArray: 4 },
+            tooltip: {
+                theme: 'dark',
+                y: { formatter: function(val) { return val + ' lección(es)'; } },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        lessonsChart.render();
+    }
+
+    initLessonsChart();
+    $wire.$watch('chartLessonsByDay', () => initLessonsChart());
+</script>
+@endscript
+
+@script
+<script>
+    let scheduledChart = null;
+
+    async function initScheduledChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('scheduled-per-day-chart');
+        if (!el) return;
+
+        if (scheduledChart) scheduledChart.destroy();
+
+        const rawData = await $wire.get('chartScheduledByDay') ?? [];
+
+        scheduledChart = new window.ApexCharts(el, {
+            series: [{ name: 'Programadas', data: rawData }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+            },
+            colors: ['#8b5cf6'],
+            stroke: { curve: 'smooth', width: 2 },
+            markers: {
+                size: 4,
+                colors: ['#8b5cf6'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: { borderColor: '#37415140', strokeDashArray: 4 },
+            tooltip: {
+                theme: 'dark',
+                y: { formatter: function(val) { return val + ' programación(es)'; } },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        scheduledChart.render();
+    }
+
+    initScheduledChart();
+    $wire.$watch('chartScheduledByDay', () => initScheduledChart());
+</script>
+@endscript

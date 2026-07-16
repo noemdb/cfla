@@ -6,11 +6,12 @@ import "flowbite";
 // ── Lazy loaders for heavy libraries ──────────────────────────
 // Libraries like Mermaid, Swiper, and Chart.js are dynamically imported
 // only on pages that actually need them, via these loaders.
-import { loadMermaid, loadSwiper, loadChart } from './loaders';
+import { loadMermaid, loadSwiper, loadChart, loadApexCharts } from './loaders';
 
 window.loadMermaid = loadMermaid;
 window.loadSwiper = loadSwiper;
 window.loadChart = loadChart;
+window.loadApexCharts = loadApexCharts;
 
 // ── Tw-elements UI kit ───────────────────────────────────────
 // Heavily used across many templates (headers, menus, footers, dropdowns, tabs, etc.)
