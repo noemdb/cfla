@@ -81,7 +81,7 @@
     <!-- Table -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table x-data="{ expandedRows: {} }" class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
                         <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
@@ -174,6 +174,12 @@
                             </td>
                             <td class="px-5 py-2 text-right">
                                 <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button type="button" @click="expandedRows['e{{ $profesor->id }}'] = !expandedRows['e{{ $profesor->id }}']"
+                                        class="p-2 bg-white/5 hover:bg-amber-500/10 rounded-lg border border-white/5 hover:border-amber-500/20 text-gray-400 hover:text-amber-400 transition-all duration-200"
+                                        title="Info ampliada">
+                                        <svg x-show="!expandedRows['e{{ $profesor->id }}']" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        <svg x-show="expandedRows['e{{ $profesor->id }}']" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                    </button>
                                     <button type="button" wire:click="showPreview({{ $profesor->id }})"
                                         class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
                                         title="Vista previa">
@@ -191,11 +197,7 @@
                                                     ? 'bg-white/5 hover:bg-red-500/10 border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400'
                                                     : 'bg-white/5 hover:bg-emerald-500/10 border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400' }}"
                                             title="{{ $profesor->user->is_active === 'enable' ? 'Desactivar usuario' : 'Activar usuario' }}">
-                                            @if($profesor->user->is_active === 'enable')
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                            @else
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                            @endif
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                         </button>
                                     @endif
                                     <button type="button" wire:click="confirmDelete({{ $profesor->id }})"
@@ -203,6 +205,147 @@
                                         title="Eliminar profesor">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {{-- Fila expandible con info ampliada --}}
+                        <tr x-show="expandedRows['e{{ $profesor->id }}']" x-cloak>
+                            <td colspan="7" class="px-6 py-5 bg-gray-900/60 border-b border-white/5">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {{-- Columna 1: Contacto --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                            Contacto
+                                        </h4>
+                                        <div class="space-y-2 text-xs">
+                                            @if($profesor->email)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0">Email:</span>
+                                                    <span class="text-gray-200">{{ $profesor->email }}</span>
+                                                </div>
+                                            @endif
+                                            @if($profesor->phone)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0">Teléfono:</span>
+                                                    <span class="text-gray-200">{{ $profesor->phone }}</span>
+                                                </div>
+                                            @endif
+                                            @if($profesor->cellphone)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0">Celular:</span>
+                                                    <span class="text-gray-200">{{ $profesor->cellphone }}</span>
+                                                </div>
+                                            @endif
+                                            @if($profesor->whatsapp)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0">WhatsApp:</span>
+                                                    <span class="text-gray-200">{{ $profesor->whatsapp }}</span>
+                                                </div>
+                                            @endif
+                                            @if($profesor->gsemail)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0">GSuite:</span>
+                                                    <span class="text-gray-200">{{ $profesor->gsemail }}</span>
+                                                </div>
+                                            @endif
+                                            @if($profesor->dir_address)
+                                                <div class="flex items-start gap-2">
+                                                    <span class="text-gray-500 w-20 shrink-0 mt-0.5">Dirección:</span>
+                                                    <span class="text-gray-200">{{ $profesor->dir_address }}</span>
+                                                </div>
+                                            @endif
+                                            @unless($profesor->email || $profesor->phone || $profesor->cellphone || $profesor->whatsapp || $profesor->gsemail || $profesor->dir_address)
+                                                <span class="text-gray-600 italic">Sin datos de contacto</span>
+                                            @endunless
+                                        </div>
+                                    </div>
+
+                                    {{-- Columna 2: Cuenta y Rol --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            Cuenta y Rol
+                                        </h4>
+                                        <div class="space-y-2 text-xs">
+                                            @if($profesor->user)
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-24 shrink-0">Usuario:</span>
+                                                    <span class="text-gray-200 font-mono">{{ $profesor->user->username }}</span>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-gray-500 w-24 shrink-0">Estado:</span>
+                                                    @if($profesor->user->is_active === 'enable')
+                                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-500/20">
+                                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                            Activo
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-red-500/10 text-red-400 text-[10px] font-bold rounded-md border border-red-500/20">
+                                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                            Inactivo
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-600 italic">Sin usuario asignado</span>
+                                            @endif
+                                            @if($profesor->user)
+                                                @php
+                                                    $rol = \App\Models\sys\Rol::where('user_id', $profesor->user_id)
+                                                        ->where('area', 'PROFESORADO')
+                                                        ->latest()
+                                                        ->first();
+                                                @endphp
+                                                @if($rol)
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-gray-500 w-24 shrink-0">Rol desde:</span>
+                                                        <span class="text-gray-200">{{ $rol->finicial?->format('d/m/Y') ?? '—' }}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-gray-500 w-24 shrink-0">Rol hasta:</span>
+                                                        <span class="text-gray-200">{{ $rol->ffinal?->format('d/m/Y') ?? '—' }}</span>
+                                                    </div>
+                                                @endif
+                                            @endif
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-gray-500 w-24 shrink-0">Tipo Fac.:</span>
+                                                <span class="text-gray-200">{{ $profesor->ti_teacher ?? '—' }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-gray-500 w-24 shrink-0">Género:</span>
+                                                <span class="text-gray-200">{{ $profesor->gender === 'M' ? 'Masculino' : 'Femenino' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- Columna 3: Resumen de cargas --}}
+                                    <div>
+                                        <h4 class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-3 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                            Cargas Académicas
+                                        </h4>
+                                        @php
+                                            $cargas = $profesor->pevaluacions->groupBy(fn($p) => $p->pensum?->asignatura?->name ?? '?');
+                                        @endphp
+                                        @forelse($cargas as $asignaturaName => $items)
+                                            <div class="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+                                                <span class="text-xs text-gray-200 truncate mr-2">{{ $asignaturaName }}</span>
+                                                <div class="flex items-center gap-1 shrink-0">
+                                                    @foreach($items->groupBy('lapso_id') as $lapsoId => $lapsoItems)
+                                                        @php
+                                                            $lapsoNombre = optional($lapsoItems->first()->lapso)->name ?? "L{$lapsoId}";
+                                                        @endphp
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 bg-white/5 text-gray-400 text-[9px] font-bold rounded border border-white/5">
+                                                            {{ $lapsoNombre }}:{{ $lapsoItems->count() }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <span class="text-gray-600 italic text-xs">Sin cargas académicas</span>
+                                        @endforelse
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -221,7 +364,11 @@
             </table>
         </div>
 
-        @include('components.pagination-wrapper', ['paginator' => $profesors])
+        @if($profesors->hasPages())
+            <div class="px-5 py-2 border-t border-white/5">
+                {{ $profesors->links('vendor.livewire.custom-tailwind') }}
+            </div>
+        @endif
     </div>
 
     <!-- ===== MODAL: Confirmar Eliminación ===== -->
@@ -239,7 +386,7 @@
 
     <!-- ===== MODAL: Confirmar Activar/Desactivar Usuario ===== -->
     <x-modal title="Cambiar Estado del Usuario" blur="lg" wire:model="confirmToggleActiveId" max-width="md" persistent>
-        <div class="p-6 text-center">
+        <div class="rounded-2xl border border-white/10 p-6 text-center">
             @if($toggleActiveCurrentStatus)
                 <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
@@ -273,13 +420,13 @@
     <!-- ===== MODAL: Vista Previa ===== -->
     <x-modal title="Detalles del Profesor" blur="lg" wire:model="previewMode" max-width="2xl">
         @if($previewProfesor)
-        <div class="relative p-6 space-y-6">
+        <div class="relative p-6 space-y-6 rounded-2xl border border-white/10">
             <button type="button" wire:click="closePreview"
                 class="absolute top-6 right-6 p-1.5 bg-white/10 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-all duration-200 z-10"
                 title="Cerrar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <div class="flex items-center gap-3 mb-2">
+            <div class="flex items-center gap-3 mb-2 pr-10">
                 <div class="w-14 h-14 rounded-full bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 text-lg font-bold">
                     {{ strtoupper(substr($previewProfesor->name ?? '?', 0, 1)) }}{{ strtoupper(substr($previewProfesor->lastname ?? '', 0, 1)) }}
                 </div>
