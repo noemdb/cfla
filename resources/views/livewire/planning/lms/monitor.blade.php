@@ -169,6 +169,9 @@
                     <th class="text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400">Profesor</th>
                     <th class="text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400">Estado</th>
                     <th class="text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400">Publicado</th>
+                    <th class="text-center px-2 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400" title="Secciones">Sec.</th>
+                    <th class="text-center px-2 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400" title="Recursos descargables">Rec.</th>
+                    <th class="text-center px-2 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400" title="Enlaces">Lnks</th>
                     <th class="text-center px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-400">Acciones</th>
                 </tr>
             </thead>
@@ -233,6 +236,16 @@
                             @else
                                 <span class="text-slate-600">—</span>
                             @endif
+                        </td>
+                        {{-- Conteos de contenido --}}
+                        <td class="px-2 py-2.5 text-center text-xs {{ $pub->lms_sections_count > 0 ? 'text-sky-400' : 'text-slate-600' }}">
+                            {{ $pub->lms_sections_count > 0 ? $pub->lms_sections_count : '—' }}
+                        </td>
+                        <td class="px-2 py-2.5 text-center text-xs {{ $pub->lms_resources_count > 0 ? 'text-amber-400' : 'text-slate-600' }}">
+                            {{ $pub->lms_resources_count > 0 ? $pub->lms_resources_count : '—' }}
+                        </td>
+                        <td class="px-2 py-2.5 text-center text-xs {{ $pub->lms_links_count > 0 ? 'text-cyan-400' : 'text-slate-600' }}">
+                            {{ $pub->lms_links_count > 0 ? $pub->lms_links_count : '—' }}
                         </td>
                         <td class="px-4 py-2.5">
                             <div class="flex items-center justify-center gap-1">
@@ -310,7 +323,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-4 py-8 text-center text-slate-500">
+                        <td colspan="11" class="px-4 py-8 text-center text-slate-500">
                             No hay publicaciones que coincidan con los filtros.
                         </td>
                     </tr>

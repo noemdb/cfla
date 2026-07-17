@@ -345,6 +345,10 @@ class LmsMonitor extends Component
             'pevaluacion.pensum.grado',
             'pevaluacion.seccion',
             'pevaluacion.profesor.user',
+        ])->withCount([
+            'lmsSections',
+            'lmsResources',
+            'lmsLinks',
         ])
         ->when($this->filterStatus, fn($q) => $q->whereHas('lmsPublication', fn($sq) => $sq->where('status', $this->filterStatus)))
         ->when($this->filterProfesor, fn($q) => $q->whereHas('pevaluacion', fn($sq) => $sq->where('profesor_id', $this->filterProfesor)))
