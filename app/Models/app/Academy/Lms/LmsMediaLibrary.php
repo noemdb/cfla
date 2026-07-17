@@ -51,7 +51,10 @@ class LmsMediaLibrary extends Model
         if (!$this->isLocal()) {
             return $this->external_url ?? '';
         }
-        return Storage::disk($this->disk)->url($this->path);
+        $url = Storage::disk($this->disk)->url($this->path);
+        // Normaliza dobles slashes (p. ej. si APP_URL termina en / y el
+        // config del disco agrega otra /), preservando el protocolo ://
+        return preg_replace('#(?<!:)/{2,}#', '/', $url);
     }
 
     public function getSizeForHumansAttribute(): string
