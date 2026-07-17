@@ -1754,11 +1754,16 @@ PROMPT;
     public function addWizardResource(): void
     {
         $this->validate([
-            'resourceFile' => 'required|file|max:51200',
+            'resourceFile' => 'required|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,mp4,webm,mp3,wav,ogg',
             'resourceName' => 'required|string|max:255',
         ]);
 
-        $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
+        try {
+            $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $this->notification()->error('Error al subir', $e->getMessage());
+            return;
+        }
 
         $this->wizardResources[] = [
             'id'           => 'temp_' . uniqid(),
@@ -1775,7 +1780,13 @@ PROMPT;
             ],
         ];
 
+        $addedName = $this->resourceName;
         $this->reset('resourceFile', 'resourceName', 'resourceSectionId');
+
+        $this->notification()->success(
+            'Recurso agregado',
+            "“{$addedName}” se agregó correctamente."
+        );
     }
 
     public function removeWizardResource(int $index): void

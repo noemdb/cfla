@@ -2959,7 +2959,10 @@ Cómo...?"
                                     <div class="flex gap-2 items-end">
                                         <div class="flex-1">
                                             <input wire:model="resourceName" placeholder="Nombre del recurso"
-                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
+                                            @error('resourceName')
+                                                <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                         @if(count($wizardSections) > 0)
                                             <div class="flex-none">
@@ -2974,9 +2977,9 @@ Cómo...?"
                                         @endif
                                         <div class="relative">
                                             <input wire:model="resourceFile" type="file" id="resourceFile"
-                                                   class="absolute inset-0 opacity-0 cursor-pointer"/>
+                                                   class="absolute inset-0 opacity-0 cursor-pointer @error('resourceFile') border-2 border-red-500/50 @enderror"/>
                                             <label for="resourceFile"
-                                                   class="block px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border border-slate-600/50 hover:border-slate-500/50">
+                                                   class="block px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-slate-700 hover:bg-slate-600 border-slate-600/50 hover:border-slate-500/50 @enderror text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
                                                 <span class="flex items-center gap-1.5">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
@@ -2984,6 +2987,9 @@ Cómo...?"
                                                     Adjuntar
                                                 </span>
                                             </label>
+                                            @error('resourceFile')
+                                                <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                         <button wire:click="addWizardResource"
                                                 class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
