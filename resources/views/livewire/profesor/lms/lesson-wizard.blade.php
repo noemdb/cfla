@@ -4007,20 +4007,23 @@ Cómo...?"
                                         @if(count($secResources) > 0)
                                             <div class="border-t border-slate-200 pt-3 mt-2 space-y-2">
                                                 @foreach($secResources as $res)
-                                                    <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
-                                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                    <a href="{{ $res['media']['public_url'] ?? '#' }}"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer"
+                                                       class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200 hover:bg-slate-200 transition-colors group @if($allowDownloads) cursor-pointer @else pointer-events-none opacity-70 @endif">
+                                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
                                                             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                                             </svg>
                                                         </div>
-                                                        <div class="min-w-0">
+                                                        <div class="min-w-0 flex-1">
                                                             <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
                                                             <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                                         </div>
                                                         @if($allowDownloads)
-                                                            <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
+                                                            <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0 group-hover:underline">Descargar</span>
                                                         @endif
-                                                    </div>
+                                                    </a>
                                                 @endforeach
                                             </div>
                                         @endif
@@ -4082,20 +4085,23 @@ Cómo...?"
                                         </h3>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             @foreach($unlinkedResources as $res)
-                                                <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
-                                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                <a href="{{ $res['media']['public_url'] ?? '#' }}"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200 hover:bg-slate-200 transition-colors group @if($allowDownloads) cursor-pointer @else pointer-events-none opacity-70 @endif">
+                                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-200 transition-colors">
                                                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                                         </svg>
                                                     </div>
-                                                    <div class="min-w-0">
+                                                    <div class="min-w-0 flex-1">
                                                         <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
                                                         <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                                     </div>
                                                     @if($allowDownloads)
-                                                        <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
+                                                        <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0 group-hover:underline">Descargar</span>
                                                     @endif
-                                                </div>
+                                                </a>
                                             @endforeach
                                         </div>
                                     </div>
