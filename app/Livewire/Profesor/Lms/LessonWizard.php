@@ -117,10 +117,7 @@ class LessonWizard extends Component
     public int $exportWizardStep = 1;
     public ?array $exportPreviewData = null;
 
-    // ─── Wizard: Vista previa estudiante ──────────────────────
-    public bool $showStudentPreview = false;
-
-    // ─── List mode: Vista previa estudiante desde DB ─────────
+    // ─── Vista previa estudiante (unificada) ─────────────────
     public bool $showListStudentPreview = false;
     public ?array $listPreviewData = null;
 
@@ -470,6 +467,83 @@ class LessonWizard extends Component
         if ($this->selectedActivityId) {
             $this->openListStudentPreview($this->selectedActivityId);
         }
+    }
+
+    /**
+     * Normaliza los datos del wizard (sin guardar) al formato
+     * del componente unificado de vista estudiante.
+     */
+    public function openWizardStudentPreview(): void
+    {
+        $act = $this->selectedActivity;
+
+        $sections = [];
+        foreach ($this->previewSections as $sec) {
+            $contents = [];
+            foreach ($sec['contents'] as $c) {
+                $contents[] = [
+                    'title' => $c['title'] ?? '',
+                    'body'  => $c['body'] ?? '',
+                ];
+            }
+            $sections[] = [
+                'id'       => $sec['id'],
+                'title'    => $sec['title'],
+                'contents' => $contents,
+            ];
+        }
+
+        $pe = $act?->pevaluacion;
+
+        $this->listPreviewData = [
+            'activity_id'   => $act?->id,
+            'subject'       => $pe?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title'         => $this->lessonTitle ?: $act?->topic ?? 'Lección',
+            'description'   => $this->lessonDescription ?: $act?->description ?? '',
+            'start_date'    => $act?->finicial,
+            'end_date'      => $act?->ffinal,
+            'allow_downloads'        => $this->allowDownloads,
+            'allow_comments'         => true,
+            'sections'               => $sections,
+            'resources'     => $this->wizardResources,
+            'links'         => $this->wizardLinks,
+            'html_embeds'   => collect($this->wizardHtmlEmbeds)
+                ->map(fn($e) => $this->ensureMermaidWrapper($e))
+                ->toArray(),
+            // Portada — no hay datos institucionales en wizard, se usan defaults
+            'institution'       => '',
+            'institution_rif'   => '',
+            'institution_city'  => '',
+            'periodo'           => '',
+            'plan_educativo'    => '',
+            'plan_estudio'      => '',
+            'plan_estudio_code' => '',
+            'grado'             => $pe?->pensum?->grado?->name ?? '',
+            'grado_code'        => $pe?->pensum?->grado?->code ?? '',
+            'seccion'           => $pe?->seccion?->name ?? '',
+            'seccion_desc'      => '',
+            'seccion_students'  => '',
+            'pensum'            => $pe?->pensum?->asignatura?->name ?? '',
+            'asignatura_code'   => $pe?->pensum?->asignatura?->code ?? '',
+            'asignatura_hours'  => $pe?->pensum?->asignatura?->hour_t_week ?? '',
+            'lapso'             => $pe?->lapso?->name ?? '',
+            'lapso_finicial'    => $pe?->lapso?->finicial ?? '',
+            'lapso_ffinal'      => $pe?->lapso?->ffinal ?? '',
+            // Activity extras
+            'thematic'          => $act?->thematic ?? '',
+            'references'        => $act?->references ?? '',
+            'activity_status'   => $act?->status ?? false,
+            'teaching'          => $act?->teaching ?? '',
+            'has_teaching_structure' => $act?->hasTeachingStructure() ?? false,
+            'teaching_sections' => $act?->hasTeachingStructure()
+                ? collect($act->getTeachingSections())
+                    ->map(fn($content, $title) => compact('title', 'content'))
+                    ->values()
+                    ->toArray()
+                : [],
+        ];
+
+        $this->showListStudentPreview = true;
     }
 
     // ─── List mode: Eliminar lección (todo el contenido LMS) ──
