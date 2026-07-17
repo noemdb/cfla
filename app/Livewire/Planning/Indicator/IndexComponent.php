@@ -227,7 +227,9 @@ class IndexComponent extends Component
         });
 
         $this->totalActivities = $this->peducativoMainIndicators->sum('activities_count');
-        $this->totalProfesoresActivos = Profesor::where('status_active', 'true')->count();
+        $this->totalProfesoresActivos = Profesor::where('status_active', 'true')
+            ->has('pevaluacions')
+            ->count();
 
         // ══ TAB 2: Profesores data — only selected lapso ══
         $this->tab2Data = [];
