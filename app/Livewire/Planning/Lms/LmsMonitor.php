@@ -86,7 +86,7 @@ class LmsMonitor extends Component
         }
 
         $this->seccionesFiltradas = Seccion::whereHas('pevaluacions.pensum', fn($q) => $q->where('grado_id', $value))
-            ->whereHas('pevaluacions.activities.lmsPublication')
+            ->whereHas('pevaluacions.activities')
             ->orderBy('name')
             ->get();
 
@@ -114,13 +114,12 @@ class LmsMonitor extends Component
     // ─── Stats cache ───────────────────────────────────────────
     protected function getStats(): array
     {
-        $base = LmsActivityPublication::query();
         return [
-            'total'        => (clone $base)->count(),
-            'published'    => (clone $base)->where('status', 'PUBLISHED')->count(),
-            'scheduled'    => (clone $base)->where('status', 'SCHEDULED')->count(),
-            'draft'        => (clone $base)->where('status', 'DRAFT')->count(),
-            'archived'     => (clone $base)->where('status', 'ARCHIVED')->count(),
+            'total'        => Activity::count(),
+            'published'    => Activity::whereHas('lmsPublication', fn($q) => $q->where('status', 'PUBLISHED'))->count(),
+            'scheduled'    => Activity::whereHas('lmsPublication', fn($q) => $q->where('status', 'SCHEDULED'))->count(),
+            'draft'        => Activity::whereHas('lmsPublication', fn($q) => $q->where('status', 'DRAFT'))->count(),
+            'archived'     => Activity::whereHas('lmsPublication', fn($q) => $q->where('status', 'ARCHIVED'))->count(),
             'withContent'  => Activity::whereHas('lmsSections')->count(),
             'totalActivities' => Activity::count(),
         ];
@@ -321,47 +320,48 @@ class LmsMonitor extends Component
 
     protected function getFilteredPublicationIds(): array
     {
-        return $this->buildFilteredQuery()->pluck('activity_id')->toArray();
+        return $this->buildFilteredQuery()->pluck('id')->toArray();
     }
 
     protected function buildFilteredQuery()
     {
-        return LmsActivityPublication::query()
-            ->when($this->filterStatus, fn($q) => $q->where('status', $this->filterStatus))
-            ->when($this->filterProfesor, fn($q) => $q->whereHas('activity.pevaluacion', fn($sq) => $sq->where('profesor_id', $this->filterProfesor)))
-            ->when($this->filterGrado, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('grado_id', $this->filterGrado)))
-            ->when($this->filterSeccion, fn($q) => $q->whereHas('activity.pevaluacion', fn($sq) => $sq->where('seccion_id', $this->filterSeccion)))
-            ->when($this->filterAsignatura, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('asignatura_id', $this->filterAsignatura)))
-            ->when($this->filterPestudio, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('pestudio_id', $this->filterPestudio)))
-            ->when($this->search, fn($q) => $q->whereHas('activity', fn($sq) => $sq->where('topic', 'like', '%' . $this->search . '%')));
+        return Activity::query()
+            ->when($this->filterStatus, fn($q) => $q->whereHas('lmsPublication', fn($sq) => $sq->where('status', $this->filterStatus)))
+            ->when($this->filterProfesor, fn($q) => $q->whereHas('pevaluacion', fn($sq) => $sq->where('profesor_id', $this->filterProfesor)))
+            ->when($this->filterGrado, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('grado_id', $this->filterGrado)))
+            ->when($this->filterSeccion, fn($q) => $q->whereHas('pevaluacion', fn($sq) => $sq->where('seccion_id', $this->filterSeccion)))
+            ->when($this->filterAsignatura, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('asignatura_id', $this->filterAsignatura)))
+            ->when($this->filterPestudio, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('pestudio_id', $this->filterPestudio)))
+            ->when($this->search, fn($q) => $q->where('topic', 'like', '%' . $this->search . '%'));
     }
 
     // ─── Render ────────────────────────────────────────────────
     public function render(): \Illuminate\View\View
     {
-        $query = LmsActivityPublication::with([
-            'activity.pevaluacion.pensum.asignatura',
-            'activity.pevaluacion.pensum.grado',
-            'activity.pevaluacion.seccion',
-            'activity.pevaluacion.profesor.user',
-            'publisher',
+        $query = Activity::with([
+            'lmsPublication',
+            'lmsPublication.publisher',
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.pensum.grado',
+            'pevaluacion.seccion',
+            'pevaluacion.profesor.user',
         ])
-        ->when($this->filterStatus, fn($q) => $q->where('status', $this->filterStatus))
-        ->when($this->filterProfesor, fn($q) => $q->whereHas('activity.pevaluacion', fn($sq) => $sq->where('profesor_id', $this->filterProfesor)))
-        ->when($this->filterGrado, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('grado_id', $this->filterGrado)))
-        ->when($this->filterSeccion, fn($q) => $q->whereHas('activity.pevaluacion', fn($sq) => $sq->where('seccion_id', $this->filterSeccion)))
-        ->when($this->filterAsignatura, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('asignatura_id', $this->filterAsignatura)))
-        ->when($this->filterPestudio, fn($q) => $q->whereHas('activity.pevaluacion.pensum', fn($sq) => $sq->where('pestudio_id', $this->filterPestudio)))
-        ->when($this->search, fn($q) => $q->whereHas('activity', fn($sq) => $sq->where('topic', 'like', '%' . $this->search . '%')));
+        ->when($this->filterStatus, fn($q) => $q->whereHas('lmsPublication', fn($sq) => $sq->where('status', $this->filterStatus)))
+        ->when($this->filterProfesor, fn($q) => $q->whereHas('pevaluacion', fn($sq) => $sq->where('profesor_id', $this->filterProfesor)))
+        ->when($this->filterGrado, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('grado_id', $this->filterGrado)))
+        ->when($this->filterSeccion, fn($q) => $q->whereHas('pevaluacion', fn($sq) => $sq->where('seccion_id', $this->filterSeccion)))
+        ->when($this->filterAsignatura, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('asignatura_id', $this->filterAsignatura)))
+        ->when($this->filterPestudio, fn($q) => $q->whereHas('pevaluacion.pensum', fn($sq) => $sq->where('pestudio_id', $this->filterPestudio)))
+        ->when($this->search, fn($q) => $q->where('topic', 'like', '%' . $this->search . '%'));
 
         return view('livewire.planning.lms.monitor', [
             'publications'   => $query->latest('updated_at')->paginate(20),
             'stats'          => $this->getStats(),
-            'profesores'     => Profesor::with('user')->whereHas('pevaluacions.activities.lmsPublication')->get(),
-            'grados'         => Grado::whereHas('pensums.pevaluacions.activities.lmsPublication')->get(),
+            'profesores'     => Profesor::with('user')->whereHas('pevaluacions.activities')->get(),
+            'grados'         => Grado::whereHas('pensums.pevaluacions.activities')->get(),
             'secciones'      => $this->seccionesFiltradas,
-            'asignaturas'    => Asignatura::whereHas('pensums.pevaluacions.activities.lmsPublication')->get(),
-            'pestudios'      => Pestudio::whereHas('pensums.pevaluacions.activities.lmsPublication')->get(),
+            'asignaturas'    => Asignatura::whereHas('pensums.pevaluacions.activities')->get(),
+            'pestudios'      => Pestudio::whereHas('pensums.pevaluacions.activities')->get(),
         ])->layout('planning.layouts.app');
     }
 }

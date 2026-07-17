@@ -175,23 +175,24 @@
             <tbody class="divide-y divide-slate-700/50">
                 @forelse($publications as $pub)
                     @php
-                        $profesor = $pub->activity?->pevaluacion?->profesor;
-                        $grado = $pub->activity?->pevaluacion?->pensum?->grado?->name ?? '—';
-                        $seccion = $pub->activity?->pevaluacion?->seccion?->name ?? '—';
-                        $isSelected = in_array($pub->activity_id, $selectedIds);
+                        $profesor = $pub->pevaluacion?->profesor;
+                        $grado = $pub->pevaluacion?->pensum?->grado?->name ?? '—';
+                        $seccion = $pub->pevaluacion?->seccion?->name ?? '—';
+                        $isSelected = in_array($pub->id, $selectedIds);
+                        $pubStatus = $pub->lmsPublication?->status;
                     @endphp
                     <tr class="hover:bg-slate-700/20 {{ $isSelected ? 'bg-emerald-500/5' : '' }}">
                         <td class="text-center px-2 py-2.5">
-                            <input type="checkbox" value="{{ $pub->activity_id }}"
-                                   wire:change="toggleSelect({{ $pub->activity_id }})"
+                            <input type="checkbox" value="{{ $pub->id }}"
+                                   wire:change="toggleSelect({{ $pub->id }})"
                                    {{ $isSelected ? 'checked' : '' }}
                                    class="rounded border-slate-600 bg-slate-700 text-emerald-500 focus:ring-emerald-500/50">
                         </td>
-                        <td class="px-4 py-2.5 text-slate-200 max-w-[200px] truncate" title="{{ $pub->activity->topic ?? '' }}">
-                            {{ $pub->activity->topic ?? '—' }}
+                        <td class="px-4 py-2.5 text-slate-200 max-w-[200px] truncate" title="{{ $pub->topic ?? '' }}">
+                            {{ $pub->topic ?? '—' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-400">
-                            {{ $pub->activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
+                            {{ $pub->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                         </td>
                         <td class="px-4 py-2.5 text-slate-400 text-xs">
                             {{ $grado }} {{ $seccion }}
@@ -202,30 +203,32 @@
                         <td class="px-4 py-2.5">
                             <span @class([
                                 'px-2 py-0.5 rounded text-xs font-medium',
-                                'bg-emerald-500/10 text-emerald-400' => $pub->status === 'PUBLISHED',
-                                'bg-amber-500/10 text-amber-400'     => $pub->status === 'SCHEDULED',
-                                'bg-slate-500/10 text-slate-400'     => $pub->status === 'DRAFT',
-                                'bg-red-500/10 text-red-400'         => $pub->status === 'ARCHIVED',
+                                'bg-emerald-500/10 text-emerald-400' => $pubStatus === 'PUBLISHED',
+                                'bg-amber-500/10 text-amber-400'     => $pubStatus === 'SCHEDULED',
+                                'bg-slate-500/10 text-slate-400'     => $pubStatus === 'DRAFT',
+                                'bg-red-500/10 text-red-400'         => $pubStatus === 'ARCHIVED',
+                                'bg-stone-600/20 text-stone-400'     => $pubStatus === null,
                             ])>
-                                {{ match($pub->status) {
+                                {{ match($pubStatus) {
                                     'PUBLISHED' => 'Publicado',
                                     'SCHEDULED' => 'Programado',
                                     'ARCHIVED'  => 'Archivado',
-                                    default     => 'Borrador',
+                                    'DRAFT'     => 'Borrador',
+                                    default     => 'Sin publicar',
                                 } }}
                             </span>
-                            @if($pub->status === 'SCHEDULED' && $pub->publish_at)
+                            @if($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
                                 <span class="block text-[10px] text-amber-500/70 mt-0.5">
-                                    {{ $pub->publish_at->format('d/m/Y H:i') }}
+                                    {{ $pub->lmsPublication->publish_at->format('d/m/Y H:i') }}
                                 </span>
                             @endif
                         </td>
                         <td class="px-4 py-2.5 text-slate-500 text-xs">
-                            @if($pub->published_at)
-                                {{ $pub->published_at->format('d/m/Y H:i') }}
-                            @elseif($pub->status === 'SCHEDULED' && $pub->publish_at)
+                            @if($pub->lmsPublication?->published_at)
+                                {{ $pub->lmsPublication->published_at->format('d/m/Y H:i') }}
+                            @elseif($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
                                 <span class="text-amber-500/60">Pendiente</span>
-                            @elseif($pub->status === 'DRAFT')
+                            @elseif($pubStatus === 'DRAFT')
                                 —
                             @else
                                 <span class="text-slate-600">—</span>
@@ -234,7 +237,7 @@
                         <td class="px-4 py-2.5">
                             <div class="flex items-center justify-center gap-1">
                                 {{-- Ver contenido en dialog --}}
-                                <button wire:click="openPreview({{ $pub->activity_id }})"
+                                <button wire:click="openPreview({{ $pub->id }})"
                                         class="p-1.5 rounded-lg text-slate-400 hover:text-white bg-slate-700/30 hover:bg-slate-600/50 border border-slate-600/30 hover:border-slate-500/50 transition-all"
                                         title="Vista previa de lección">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +247,7 @@
                                 </button>
 
                                 {{-- Auditar --}}
-                                <a href="{{ route('app.planning.lms.activity.audit', $pub->activity) }}"
+                                <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
                                    class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-400/40 transition-all"
                                    title="Auditar">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,8 +256,8 @@
                                 </a>
 
                                 {{-- Configuración --}}
-                                @if($pub->status !== 'DRAFT')
-                                    <button wire:click="openSettings({{ $pub->activity_id }})"
+                                @if($pub->lmsPublication && $pubStatus !== 'DRAFT')
+                                    <button wire:click="openSettings({{ $pub->id }})"
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-400/40 transition-all"
                                             title="Configurar">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,9 +267,9 @@
                                     </button>
                                 @endif
 
-                                {{-- Programar / Publicar --}}
-                                @if($pub->status === 'DRAFT' || $pub->status === 'ARCHIVED')
-                                    <button wire:click="publish({{ $pub->activity_id }})"
+                                {{-- Programar / Publicar (incluye actividades sin publicación) --}}
+                                @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                                    <button wire:click="publish({{ $pub->id }})"
                                             wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-400/40 transition-all"
                                             title="Publicar ahora">
@@ -274,7 +277,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                         </svg>
                                     </button>
-                                    <button wire:click="openSchedule({{ $pub->activity_id }})"
+                                    <button wire:click="openSchedule({{ $pub->id }})"
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-400/40 transition-all"
                                             title="Programar publicación">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,8 +285,8 @@
                                         </svg>
                                     </button>
                                 @endif
-                                @if($pub->status === 'PUBLISHED' || $pub->status === 'SCHEDULED')
-                                    <button wire:click="unpublish({{ $pub->activity_id }})"
+                                @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                    <button wire:click="unpublish({{ $pub->id }})"
                                             wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-400/40 transition-all"
                                             title="Archivar">
@@ -292,9 +295,9 @@
                                         </svg>
                                     </button>
                                 @endif
-                                @if($pub->status === 'PUBLISHED' || $pub->status === 'SCHEDULED')
-                                    <button wire:click="setDraft({{ $pub->activity_id }})"
-                                            wire:confirm="¿Revertir a borrador? La lección dejará de estar {{ $pub->status === 'SCHEDULED' ? 'programada' : 'publicada' }}."
+                                @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                    <button wire:click="setDraft({{ $pub->id }})"
+                                            wire:confirm="¿Revertir a borrador? La lección dejará de estar {{ $pubStatus === 'SCHEDULED' ? 'programada' : 'publicada' }}."
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-orange-300 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 hover:border-orange-400/40 transition-all"
                                             title="Revertir a borrador">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
