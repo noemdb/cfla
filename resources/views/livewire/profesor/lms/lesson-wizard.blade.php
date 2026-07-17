@@ -1790,7 +1790,9 @@
                                                     ];
                                                 @endphp
                                                 @foreach($listPreviewData['teaching_sections'] as $ts)
-                                                    @php($ss = $sectionStyles[$ts['title']] ?? ['class' => 'bg-stone-50 text-stone-600 border border-stone-200', 'symbol' => '•'])
+                                                    @php
+                                                        $ss = $sectionStyles[$ts['title']] ?? ['class' => 'bg-stone-50 text-stone-600 border border-stone-200', 'symbol' => '•'];
+                                                    @endphp
                                                     <div>
                                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $ss['class'] }}">
                                                             {{ $ss['symbol'] }}
