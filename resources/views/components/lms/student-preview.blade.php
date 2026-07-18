@@ -6,6 +6,39 @@
 
 @php
     $pid = $preview['activity_id'] ?? $wireKey;
+
+    // ── Procesamiento autónomo de html_embeds ─────────────────
+    // Detecta diagramas Mermaid en html_content sin depender de
+    // que el componente padre haya asignado is_mermaid.
+    $previewHtmlEmbeds = collect($preview['html_embeds'] ?? [])->map(function ($embed) {
+        if (!empty($embed['is_mermaid'])) return $embed;
+
+        $content = trim($embed['html_content'] ?? '');
+
+        // 1. ¿Empieza con palabra clave Mermaid?
+        if (preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', $content)) {
+            $embed['is_mermaid'] = true;
+            return $embed;
+        }
+
+        // 2. Formato legacy: data-mermaid-code
+        if (preg_match('/data-mermaid-code="([^"]*)"/', $content)) {
+            $embed['is_mermaid'] = true;
+            return $embed;
+        }
+
+        // 3. Formato legacy: <div class="mermaid">...</div>
+        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content, $m)) {
+            $inner = trim(strip_tags($m[1]));
+            if (preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', $inner)) {
+                $embed['is_mermaid'] = true;
+                return $embed;
+            }
+        }
+
+        $embed['is_mermaid'] = false;
+        return $embed;
+    });
 @endphp
 
 <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="student-preview-{{ $pid }}">
@@ -212,7 +245,7 @@
 
                             {{-- HTML Embeds vinculados a esta sección --}}
                             @php
-                                $sectionEmbeds = collect($preview['html_embeds'] ?? [])->where('section_id', $section['id']);
+                                $sectionEmbeds = $previewHtmlEmbeds->where('section_id', $section['id']);
                             @endphp
                             @if($sectionEmbeds->count() > 0)
                                 <div class="space-y-2 pt-2">
@@ -320,7 +353,7 @@
                     @php
                         $unlinkedResources = collect($preview['resources'] ?? [])->filter(fn($r) => empty($r['section_id']))->values()->all();
                         $unlinkedLinks = collect($preview['links'] ?? [])->filter(fn($l) => empty($l['section_id']))->values()->all();
-                        $unlinkedEmbeds = collect($preview['html_embeds'] ?? [])->filter(fn($e) => empty($e['section_id']))->values()->all();
+                        $unlinkedEmbeds = $previewHtmlEmbeds->filter(fn($e) => empty($e['section_id']))->values()->all();
                     @endphp
                     @if(count($unlinkedResources) > 0)
                         <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
@@ -439,7 +472,7 @@
                         $totalSections = count($preview['sections'] ?? []);
                         $totalBlocks = collect($preview['sections'] ?? [])->sum(fn($s) => count($s['contents'] ?? []));
                         $totalResources = count($preview['resources'] ?? []);
-                        $totalEmbeds = count($preview['html_embeds'] ?? []);
+                        $totalEmbeds = count($previewHtmlEmbeds);
                         $totalLinks = count($preview['links'] ?? []);
                     @endphp
                     <div class="swiper-slide overflow-y-auto w-full h-auto p-4 md:p-6">
@@ -616,3 +649,35 @@
         </div>
     </div>
 </div>
+
+{{-- Estilos para Mermaid fullscreen / zoom toolbar --}}
+@once
+    <style>
+        .mermaid-zoom-toolbar {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        [x-data="mermaidEmbed()"]:fullscreen {
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: auto;
+        }
+        [x-data="mermaidEmbed()"]:fullscreen .mermaid-zoom-toolbar {
+            opacity: 1 !important;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+        }
+        .dark [x-data="mermaidEmbed()"]:fullscreen {
+            background: #0f172a;
+        }
+        .zoom-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+@endonce

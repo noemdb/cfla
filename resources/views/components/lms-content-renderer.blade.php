@@ -1,6 +1,24 @@
 <div class="lms-content text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-table:border-collapse prose-table:border prose-table:border-slate-300 prose-th:bg-slate-100 prose-th:px-3 prose-th:py-2 prose-th:border prose-th:border-slate-300 prose-td:px-3 prose-td:py-1.5 prose-td:border prose-td:border-slate-300">
     @if($rendered)
-        {!! $rendered !!}
+        {{-- Balance HTML tags to prevent unbalanced content from breaking parent structure --}}
+        @php
+            $__balanced = $rendered;
+            $__open = preg_match_all('/<div\b[^>]*>/i', $__balanced);
+            $__close = preg_match_all('/<\/div>/i', $__balanced);
+            if ($__close > $__open) {
+                $__diff = $__close - $__open;
+                for ($__i = 0; $__i < $__diff; $__i++) {
+                    $__pos = strrpos($__balanced, '</div>');
+                    if ($__pos !== false) {
+                        $__balanced = substr_replace($__balanced, '', $__pos, 6);
+                    }
+                }
+            } elseif ($__open > $__close) {
+                $__diff = $__open - $__close;
+                $__balanced .= str_repeat('</div>', $__diff);
+            }
+        @endphp
+        {!! $__balanced !!}
     @else
         <p class="text-sm text-slate-400 italic">Sin contenido disponible.</p>
     @endif

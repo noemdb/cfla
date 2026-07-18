@@ -13,6 +13,12 @@ window.loadSwiper = loadSwiper;
 window.loadChart = loadChart;
 window.loadApexCharts = loadApexCharts;
 
+// ── LMS Student Preview components ───────────────────────────
+// Alpine.data definitions for <x-lms.student-preview> — loaded
+// globally so the component works from any page without manual
+// registration.  Imports mermaid and swiper lazily on demand.
+import './lms-student-preview';
+
 // ── Tw-elements UI kit ───────────────────────────────────────
 // Heavily used across many templates (headers, menus, footers, dropdowns, tabs, etc.)
 // Kept as a static import since it's needed on most pages and its core weight (284 kB)

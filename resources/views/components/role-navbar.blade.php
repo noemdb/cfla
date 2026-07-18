@@ -14,6 +14,7 @@
 
             <!-- Navigation (slot dinámico: cada rol inyecta sus items) -->
             <nav class="hidden lg:flex items-center space-x-1 mr-auto mx-2">
+                {{ $leading ?? '' }}
                 {{ $slot }}
             </nav>
 

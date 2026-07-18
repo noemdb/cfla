@@ -484,44 +484,10 @@
     @endif
 
     {{-- ============================================================ --}}
-    {{-- MODAL: Vista previa de lección (w-full dialog)              --}}
+    {{-- MODAL: Vista previa de lección (student-preview component)  --}}
     {{-- ============================================================ --}}
-    @if($showPreviewModal && $previewActivityId)
-        <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center py-6 px-4" wire:click.self="closePreview">
-            <div class="w-full max-w-6xl h-full flex flex-col bg-slate-900 rounded-lg overflow-hidden shadow-2xl border border-slate-700/50" wire:click.stop>
-                {{-- Header --}}
-                <div class="flex items-center justify-between px-6 py-2 shrink-0">
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                        Vista previa de lección
-                    </h3>
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('app.planning.lms.preview', $previewActivityId) }}"
-                           target="_blank"
-                           class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-400 hover:text-white border border-slate-600/50 transition-colors inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                            Abrir en pestaña
-                        </a>
-                        <button wire:click="closePreview"
-                                class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-white/5 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                {{-- Iframe — ocupa todo el espacio restante --}}
-                <div class="flex-1 bg-white">
-                    <iframe src="{{ route('app.planning.lms.preview', $previewActivityId) }}"
-                            class="w-full h-full border-0"
-                            title="Vista previa de lección"></iframe>
-                </div>
-            </div>
-        </div>
+    @if($showPreviewModal && $previewData)
+        <x-lms.student-preview :preview="$previewData" closeMethod="closePreview" wire:key="student-preview" />
     @endif
 </div>
+
