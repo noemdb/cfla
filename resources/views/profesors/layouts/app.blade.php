@@ -30,7 +30,7 @@
 </head>
 
 <body
-    class="bg-[#020617] text-gray-100 font-sans antialiased min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-950/30 via-gray-950 to-black selection:bg-emerald-500 selection:text-white bg-fixed flex flex-col">
+    class="bg-white text-gray-900 font-sans antialiased min-h-screen dark:bg-[#020617] dark:text-gray-100 dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-emerald-950/30 dark:via-gray-950 dark:to-black selection:bg-emerald-500 selection:text-white bg-fixed flex flex-col">
 
     <div class="relative z-[100]">
         <x-notifications />
@@ -46,6 +46,11 @@
         @include('components.navbars.profesor-items')
         @include('components.navbars.admin-items')
         @include('components.navbars.planning-items')
+        <x-slot:mobileSlot>
+            @include('components.navbars.profesor-items-mobile')
+            @include('components.navbars.admin-items-mobile')
+            @include('components.navbars.planning-items-mobile')
+        </x-slot:mobileSlot>
     </x-role-navbar>
 
     <!-- Main Content -->
@@ -55,7 +60,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900/50 backdrop-blur-md border-t border-white/5 mt-auto">
+    <footer class="bg-gray-100/80 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/50 dark:border-white/5 mt-auto">
         <div class="container mx-auto px-4 py-6">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
                 <p class="text-xs text-gray-500">

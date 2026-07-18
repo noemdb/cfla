@@ -5,8 +5,8 @@
         <div wire:key="mode-list">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-lg font-bold text-white">Nueva Lección</h1>
-                <p class="text-sm text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
+                <h1 class="text-lg font-bold text-gray-900 dark:text-white">Nueva Lección</h1>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
             </div>
             <a href="{{ route('app.profesors.lms.editor', 0) }}"
                class="text-xs text-slate-400 hover:text-emerald-400 transition-colors"
@@ -16,12 +16,12 @@
         </div>
 
         {{-- Filtros --}}
-        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+        <div class="bg-gray-100/70 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                 <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">Lapso</label>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1 block">Lapso</label>
                     <select wire:model.live="lapsoId"
-                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                         <option value="">Todos</option>
                         @foreach($listLapso as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
@@ -29,9 +29,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">P.Estudio</label>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1 block">P.Estudio</label>
                     <select wire:model.live="pestudioId"
-                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                         <option value="">Todos</option>
                         @foreach($listPestudio as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
@@ -39,9 +39,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">Grado</label>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1 block">Grado</label>
                     <select wire:model.live="gradoId"
-                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                         <option value="">Todos</option>
                         @foreach($listGrado as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
@@ -49,9 +49,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">Sección</label>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1 block">Sección</label>
                     <select wire:model.live="seccionId"
-                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                         <option value="">Todos</option>
                         @foreach($listSeccion as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
@@ -59,9 +59,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1 block">Buscar</label>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1 block">Buscar</label>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="Tema, descripción…"
-                           class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
+                           class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
                 </div>
             </div>
         </div>
@@ -78,9 +78,9 @@
                     $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
                 @endphp
                 <div wire:key="activity-card-{{ $item->id }}"
-                     class="relative bg-slate-800/40 border border-slate-700/60 rounded-lg overflow-hidden mt-2
+                     class="relative bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden mt-2
                             transition-all duration-200 group
-                            hover:bg-slate-800/60 hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/10
+                            hover:bg-gray-50 dark:hover:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/10
                             {{ $hasLmsContent ? 'ring-1 ring-emerald-500/15' : '' }}">
                     @if($hasLmsContent)
                         <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
@@ -114,15 +114,15 @@
                                     } }}
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-slate-500 bg-slate-700/40 border border-slate-600/40">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-gray-500 dark:text-slate-500 bg-gray-100 dark:bg-slate-700/40 border border-gray-200 dark:border-slate-600/40">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                     N.PUB
                                 </span>
                             @endif
                         </div>
-                        <span class="shrink-0 text-[11px] font-mono text-slate-600">
+                        <span class="shrink-0 text-[11px] font-mono text-gray-400 dark:text-slate-600">
                             {{ \Carbon\Carbon::parse($item->finicial)->format('d/m') }}
-                            <span class="text-slate-700">—</span>
+                            <span class="text-gray-300 dark:text-slate-700">—</span>
                             {{ \Carbon\Carbon::parse($item->ffinal)->format('d/m') }}
                         </span>
                     </div>
@@ -130,24 +130,24 @@
                     {{-- Body --}}
                     <div class="px-5 pb-2 space-y-3">
                         {{-- Título --}}
-                        <h3 class="text-sm font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors duration-200">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors duration-200">
                             {{ $item->topic ?? 'Actividad sin título' }}
                         </h3>
 
                         {{-- Metadata: asignatura + grado --}}
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
                             @if($item->pevaluacion?->pensum?->asignatura?->name)
-                                <span class="inline-flex items-center gap-1.5 text-slate-400">
+                                <span class="inline-flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
                                     <svg class="w-3.5 h-3.5 text-emerald-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                                     {{ $item->pevaluacion->pensum->asignatura->name }}
                                 </span>
                             @endif
                             @if($item->pevaluacion?->pensum?->grado?->name)
-                                <span class="inline-flex items-center gap-1.5 text-slate-400">
+                                <span class="inline-flex items-center gap-1.5 text-gray-500 dark:text-slate-400">
                                     <svg class="w-3.5 h-3.5 text-blue-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                     {{ $item->pevaluacion->pensum->grado->name }}
                                     @if($item->pevaluacion?->seccion?->name)
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         Sec. {{ $item->pevaluacion->seccion->name }}
                                     @endif
                                 </span>
@@ -156,7 +156,7 @@
 
                         {{-- Descripción --}}
                         @if($item->description)
-                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">{{ $item->description }}</p>
+                            <p class="text-xs text-gray-500 dark:text-slate-500 leading-relaxed line-clamp-2">{{ $item->description }}</p>
                         @endif
 
                         {{-- Indicadores LMS --}}
@@ -166,7 +166,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                     <span>{{ $sections->count() }} {{ Str::plural('sección', $sections->count()) }}</span>
                                     @if($totalContents > 0)
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ $totalContents }} {{ Str::plural('contenido', $totalContents) }}</span>
                                     @endif
                                 </span>
@@ -183,21 +183,21 @@
                                     </span>
                                 @endif
                                 @if($pub?->published_at)
-                                    <span class="ml-auto text-[10px] text-slate-600">
+                                    <span class="ml-auto text-[10px] text-gray-400 dark:text-slate-600">
                                         {{ \Carbon\Carbon::parse($pub->published_at)->format('d/m/Y') }}
                                     </span>
                                 @endif
                             @else
-                                <span class="text-[10px] text-slate-600 italic">Sin contenido LMS</span>
+                                <span class="text-[10px] text-gray-400 dark:text-slate-600 italic">Sin contenido LMS</span>
                             @endif
                         </div>
                     </div>
 
                     {{-- Acciones --}}
-                    <div class="mt-2 px-5 py-2 bg-slate-900/40 border-t border-slate-700/40 flex items-center gap-2">
+                    <div class="mt-2 px-5 py-2 bg-gray-100 dark:bg-slate-900/40 border-t border-gray-200 dark:border-slate-700/40 flex items-center gap-2">
                         <button wire:click="showDetails({{ $item->id }})"
                                 class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium
-                                       bg-slate-700/40 text-slate-300 hover:bg-slate-700/60 hover:text-white border border-slate-600/40 hover:border-slate-500/60 transition-all duration-200">
+                                       bg-gray-100 dark:bg-slate-700/40 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-600/40 hover:border-gray-300 dark:hover:border-slate-500/60 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             Detalle
                         </button>
@@ -250,7 +250,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                     <p class="text-sm font-medium text-slate-400">No hay actividades disponibles</p>
-                    <p class="text-xs text-slate-600 mt-1">Ajusta los filtros o crea una actividad primero.</p>
+                    <p class="text-xs text-gray-500 dark:text-slate-600 mt-1">Ajusta los filtros o crea una actividad primero.</p>
                 </div>
             @endforelse
         </div>
@@ -536,7 +536,7 @@
                                             Sección destino
                                         </label>
                                         <select wire:model.live="exportTargetSectionId"
-                                                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                                                class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                                             <option value="">— Seleccionar —</option>
                                             @foreach($exportAvailableSections as $secId => $secName)
                                                 <option value="{{ $secId }}">{{ $secName }}</option>
@@ -820,11 +820,11 @@
                                     </div>
                                     <div class="flex items-center gap-3 text-[11px] text-slate-400">
                                         <span>{{ count($exportPreviewData['sections'] ?? []) }} secciones</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ count($exportPreviewData['resources'] ?? []) }} recursos</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ count($exportPreviewData['html_embeds'] ?? []) }} embeds</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ count($exportPreviewData['links'] ?? []) }} enlaces</span>
                                     </div>
                                 </div>
@@ -846,9 +846,9 @@
                                     </div>
                                     <div class="flex items-center gap-3 text-[11px] text-slate-500">
                                         <span>{{ $selectedAct['asignatura'] ?? '—' }}</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ $selectedAct['grado'] ?? '—' }} {{ $selectedAct['seccion'] ?? '' }}</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span class="font-mono">{{ $selectedAct['start_date'] ?? '' }} — {{ $selectedAct['end_date'] ?? '' }}</span>
                                     </div>
                                 </div>
@@ -944,7 +944,7 @@
                                         Sección origen
                                     </label>
                                     <select wire:model.live="importSourceSectionId"
-                                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                                            class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
                                         <option value="">— Seleccionar —</option>
                                         @foreach($importAvailableSections as $secId => $secName)
                                             <option value="{{ $secId }}">{{ $secName }}</option>
@@ -1236,19 +1236,19 @@
                                     </div>
                                     <div class="flex items-center gap-3 text-[11px] text-slate-500">
                                         <span>{{ $selectedAct['asignatura'] ?? '—' }}</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span>{{ $selectedAct['grado'] ?? '—' }} {{ $selectedAct['seccion'] ?? '' }}</span>
-                                        <span class="text-slate-600">·</span>
+                                        <span class="text-gray-400 dark:text-slate-600">·</span>
                                         <span class="font-mono">{{ $selectedAct['start_date'] ?? '' }} — {{ $selectedAct['end_date'] ?? '' }}</span>
                                     </div>
                                     @if($importPreviewData)
                                         <div class="flex items-center gap-3 text-[11px] text-slate-500 pt-1 border-t border-slate-700/50 mt-2">
                                             <span>{{ count($importPreviewData['sections'] ?? []) }} secciones</span>
-                                            <span class="text-slate-600">·</span>
+                                            <span class="text-gray-400 dark:text-slate-600">·</span>
                                             <span>{{ count($importPreviewData['resources'] ?? []) }} recursos</span>
-                                            <span class="text-slate-600">·</span>
+                                            <span class="text-gray-400 dark:text-slate-600">·</span>
                                             <span>{{ count($importPreviewData['html_embeds'] ?? []) }} embeds</span>
-                                            <span class="text-slate-600">·</span>
+                                            <span class="text-gray-400 dark:text-slate-600">·</span>
                                             <span>{{ count($importPreviewData['links'] ?? []) }} enlaces</span>
                                         </div>
                                     @endif
@@ -2189,8 +2189,9 @@ Cómo...?"
 
                                         {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
                     @if($currentStep === 3)
-                        <div class="w-full bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
-                             x-data="{ activeTab: 'resources' }">
+                        <div wire:key="step3-recursos"
+                             class="w-full bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
+                             x-data="{ activeTab: 'resources', showConfirmDeleteResources: false }">
                             {{-- Header --}}
                             <div class="flex items-center gap-3 px-5 py-2.5 bg-slate-800/40 border-b border-slate-700/30">
                                 <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center shrink-0">
@@ -2202,6 +2203,13 @@ Cómo...?"
                                     <h2 class="text-sm font-bold text-white tracking-wide">Recursos y Enlaces</h2>
                                     <p class="text-[11px] text-slate-500 truncate">Material descargable, HTML embeds y enlaces de interés para la lección</p>
                                 </div>
+                                <button @click="showConfirmDeleteResources = true"
+                                        class="text-[11px] text-red-400/60 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-all inline-flex items-center gap-1.5 shrink-0 {{ count($wizardResources) === 0 && count($wizardLinks) === 0 && count($wizardHtmlEmbeds) === 0 ? 'hidden' : '' }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Eliminar todos
+                                </button>
                             </div>
 
                             {{-- Tabs de navegación (tab-fill: ancho completo) --}}
@@ -2253,7 +2261,9 @@ Cómo...?"
                                             </svg>
                                             <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Archivos descargables</h3>
                                         </div>
-                                        <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardResources) }} archivos</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardResources) }} archivos</span>
+                                        </div>
                                     </div>
 
                                     @if(count($wizardResources) > 0)
@@ -2284,39 +2294,62 @@ Cómo...?"
                                                     ];
                                                     $is = $iconStyles[$icon] ?? $iconStyles['file'];
                                                 @endphp
-                                                <div class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
-                                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 {{ $is['bg'] }}">
-                                                        <svg class="w-4 h-4 {{ $is['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            @switch($icon)
-                                                                @case('pdf')
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11v4m0 0l-2-2m2 2l2-2" opacity="0.5"/>
-                                                                    @break
-                                                                @case('image')
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                                    @break
-                                                                @case('video')
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                                                    @break
-                                                                @case('audio')
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                                                    @break
-                                                                @default
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                                            @endswitch
-                                                        </svg>
-                                                    </div>
+                                                <div wire:key="resource-{{ $res['id'] }}" class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
+                                                    @if($icon === 'image')
+                                                        <button wire:click="previewResourceImage({{ $rIdx }})"
+                                                                class="w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-slate-600/30 hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
+                                                                title="Ver previsualización">
+                                                            <img src="{{ $res['media']['public_url'] }}" alt=""
+                                                                 class="w-full h-full object-cover">
+                                                        </button>
+                                                    @else
+                                                        <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 {{ $is['bg'] }}">
+                                                            <svg class="w-4 h-4 {{ $is['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                @switch($icon)
+                                                                    @case('pdf')
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11v4m0 0l-2-2m2 2l2-2" opacity="0.5"/>
+                                                                        @break
+                                                                    @case('image')
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                                        @break
+                                                                    @case('video')
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                                                        @break
+                                                                    @case('audio')
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                                        @break
+                                                                    @default
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                                                @endswitch
+                                                            </svg>
+                                                        </div>
+                                                    @endif
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-xs font-medium text-slate-200 truncate">{{ $res['display_name'] }}</p>
-                                                        <p class="text-[10px] text-slate-500 truncate">{{ $res['media']['original_name'] ?? '' }} <span class="text-slate-600">·</span> {{ $res['media']['size_for_humans'] ?? '' }}</p>
+                                                        <p class="text-[10px] text-slate-500 truncate">{{ $res['media']['original_name'] ?? '' }} <span class="text-slate-600">·</span> {{ $res['media']['size_for_humans'] ?? '' }}
+                                                            @if($res['section_id'])
+                                                                <span class="text-slate-600">·</span>
+                                                                <span class="text-emerald-400/70">{{ collect($wizardSections)->firstWhere('id', $res['section_id'])['title'] ?? 'Sección' }}</span>
+                                                            @endif
+                                                        </p>
                                                     </div>
-                                                    <button wire:click="removeWizardResource({{ $rIdx }})"
-                                                            class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
-                                                            title="Eliminar recurso">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
+                                                    <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button wire:click="editWizardResource({{ $rIdx }})"
+                                                                class="text-slate-400/60 hover:text-sky-300 transition-all text-xs p-1 rounded hover:bg-sky-500/10"
+                                                                title="Editar recurso">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                            </svg>
+                                                        </button>
+                                                        <button wire:click="removeWizardResource({{ $rIdx }})"
+                                                                class="text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
+                                                                title="Eliminar recurso">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -2330,48 +2363,87 @@ Cómo...?"
                                     @endif
 
                                     {{-- Add resource form --}}
-                                    <div class="flex gap-2 items-end">
-                                        <div class="flex-1">
-                                            <input wire:model="resourceName" placeholder="Nombre del recurso"
-                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
-                                            @error('resourceName')
-                                                <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                        @if(count($wizardSections) > 0)
-                                            <div class="flex-none">
-                                                <select wire:model="resourceSectionId"
-                                                        class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
-                                                    <option value="">Sin sección</option>
-                                                    @foreach($wizardSections as $sec)
-                                                        <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
-                                                    @endforeach
-                                                </select>
+                                    <div class="space-y-2">
+                                        {{-- Edit mode indicator --}}
+                                        @if($editingResourceIndex !== null && isset($wizardResources[$editingResourceIndex]))
+                                            <div class="flex items-center gap-2 px-3 py-1.5 bg-sky-500/10 border border-sky-500/20 rounded-lg">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0"></span>
+                                                <span class="text-[11px] font-medium text-sky-300">
+                                                    Editando: <span class="text-sky-200">{{ $wizardResources[$editingResourceIndex]['display_name'] }}</span>
+                                                </span>
+                                                <button wire:click="cancelEditResource"
+                                                        class="ml-auto text-[10px] text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 px-2 py-0.5 rounded transition-colors">
+                                                    Cancelar
+                                                </button>
                                             </div>
                                         @endif
-                                        <div class="relative">
-                                            <input wire:model="resourceFile" type="file" id="resourceFile"
-                                                   class="absolute inset-0 opacity-0 cursor-pointer @error('resourceFile') border-2 border-red-500/50 @enderror"/>
-                                            <label for="resourceFile"
-                                                   class="block px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-slate-700 hover:bg-slate-600 border-slate-600/50 hover:border-slate-500/50 @enderror text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
-                                                <span class="flex items-center gap-1.5">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                                                    </svg>
-                                                    Adjuntar
-                                                </span>
-                                            </label>
-                                            @error('resourceFile')
-                                                <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
-                                            @enderror
+
+                                        {{-- Row 1: Name + Section --}}
+                                        <div class="flex gap-2">
+                                            <div class="flex-1">
+                                                <input wire:model="resourceName" placeholder="Nombre del recurso"
+                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
+                                                @error('resourceName')
+                                                    <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            @if(count($wizardSections) > 0)
+                                                <div class="flex-none">
+                                                    <select wire:model="resourceSectionId"
+                                                            class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                        <option value="">Sin sección</option>
+                                                        @foreach($wizardSections as $sec)
+                                                            <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
                                         </div>
-                                        <button wire:click="addWizardResource"
-                                                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                            Subir
-                                        </button>
+
+                                        {{-- Row 2: File + Upload + Preview --}}
+                                        <div x-data="{ previewUrl: window._filePreviewUrl || null, previewType: window._filePreviewType || null }"
+                                             x-on:file-preview-reset.window="previewUrl = null; previewType = null; window._filePreviewUrl = null; window._filePreviewType = null">
+                                            <div class="flex gap-2 items-start">
+                                                <div class="relative flex-none">
+                                                    <input wire:model="resourceFile" type="file" id="resourceFile"
+                                                           class="absolute inset-0 opacity-0 cursor-pointer @error('resourceFile') border-2 border-red-500/50 @enderror"
+                                                           @change="const f = $event.target.files[0]; if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = e => { window._filePreviewUrl = e.target.result; window._filePreviewType = f.type; previewUrl = e.target.result; previewType = f.type }; r.readAsDataURL(f) } else { window._filePreviewUrl = null; window._filePreviewType = null; previewUrl = null; previewType = null }"/>
+                                                    <label for="resourceFile"
+                                                           class="flex items-center gap-1.5 px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-slate-700 hover:bg-slate-600 border-slate-600/50 hover:border-slate-500/50 @enderror text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                                        </svg>
+                                                        {{ $editingResourceIndex !== null ? 'Cambiar archivo' : 'Adjuntar' }}
+                                                    </label>
+                                                    @error('resourceFile')
+                                                        <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                                <p class="flex-1 text-[10px] text-slate-500 leading-[36px]">Máx. 2 MB por archivo · 10 MB total por lección</p>
+                                                <button wire:click="addWizardResource"
+                                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 shrink-0">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                    </svg>
+                                                    {{ $editingResourceIndex !== null ? 'Actualizar' : 'Subir' }}
+                                                </button>
+                                            </div>
+                                            <template x-if="previewUrl">
+                                                <div class="mt-2 rounded-xl overflow-hidden border border-emerald-500/30 bg-slate-800/50"
+                                                     title="Vista previa del archivo seleccionado">
+                                                    <div class="relative w-full max-w-[200px] mx-auto">
+                                                        <img :src="previewUrl" alt="Preview"
+                                                             class="w-full h-auto object-contain max-h-48">
+                                                    </div>
+                                                    <div class="px-3 py-1.5 border-t border-emerald-500/20 flex items-center gap-2">
+                                                        <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                        </svg>
+                                                        <span class="text-[10px] text-slate-400">Archivo seleccionado — listo para subir</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
 
                                     {{-- ═══ IMAGE PROMPT (como en paso 2, con selector de sección) ═══ --}}
@@ -2600,28 +2672,86 @@ Cómo...?"
                                             @endif
                                         </div>
 
-                                        {{-- Refinar prompt — tipo de diagrama + instrucciones --}}
-                                        <div class="flex gap-2">
-                                            <div class="flex-none">
-                                                <select wire:model.live="embedDiagramType"
-                                                        class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-fuchsia-500 focus:outline-none transition-colors min-w-[150px]">
-                                                    <option value="">Auto (elige el mejor)</option>
-                                                    <option value="graph">graph (flowchart)</option>
-                                                    <option value="sequence">sequenceDiagram</option>
-                                                    <option value="class">classDiagram</option>
-                                                    <option value="mindmap">mindmap</option>
-                                                    <option value="pie">pie</option>
-                                                    <option value="gantt">gantt</option>
-                                                    <option value="er">erDiagram</option>
-                                                    <option value="state">stateDiagram</option>
-                                                    <option value="journey">journey</option>
-                                                    <option value="gitgraph">gitgraph</option>
-                                                    <option value="timeline">timeline</option>
-                                                </select>
+                                        <div x-data="{ showHelpModal: false }">
+                                            <div class="flex justify-end">
+                                                <button @click="showHelpModal = true"
+                                                        class="text-[11px] text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 px-2 py-1 -mb-1 rounded-lg transition-colors flex items-center gap-1">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    ¿Cómo se usa?
+                                                </button>
                                             </div>
-                                            <div class="flex-1">
-                                                <input wire:model="embedPromptRefinement" placeholder="Instrucciones adicionales para la IA (ej: 'enfócate en los pasos del proceso', 'incluye fechas específicas')"
-                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none transition-colors"/>
+
+                                            {{-- Modal de ayuda --}}
+                                            <div x-show="showHelpModal" x-cloak
+                                                 @keydown.escape.window="showHelpModal = false"
+                                                 class="fixed inset-0 z-[9999] overflow-y-auto">
+                                                <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="showHelpModal = false"></div>
+                                                <div class="relative min-h-screen flex items-center justify-center p-4">
+                                                    <div class="relative w-full max-w-2xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+                                                        {{-- Header --}}
+                                                        <div class="flex items-center justify-between px-6 py-3 border-b border-slate-700">
+                                                            <div class="flex items-center gap-2">
+                                                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                                </svg>
+                                                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Guía: HTML Embeds</h3>
+                                                            </div>
+                                                            <button @click="showHelpModal = false"
+                                                                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all">
+                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        {{-- Body del modal --}}
+                                                        <div class="p-6 space-y-4">
+                                                            <p class="text-xs text-slate-400 leading-relaxed">
+                                                                Pega código HTML (<em>iframe</em>, <em>script</em>, tablas, etc.) para enriquecer la lección con contenido interactivo externo. Los iframes se renderizan en vivo dentro de la lección.
+                                                            </p>
+
+                                                            {{-- YouTube --}}
+                                                            <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+                                                                <div class="p-3 border-b border-slate-700/50">
+                                                                    <p class="text-xs font-semibold text-emerald-400/80 mb-1">📺 YouTube — Video</p>
+                                                                    <code class="text-[11px] text-slate-400 font-mono break-all select-all">&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video explicativo" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                </div>
+                                                            </div>
+
+                                                            {{-- Google Maps + Google Drive --}}
+                                                            <div class="grid grid-cols-2 gap-3">
+                                                                <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
+                                                                    <p class="text-[11px] font-semibold text-blue-400/80 mb-1">🗺️ Google Maps — Ubicación</p>
+                                                                    <code class="text-[10px] text-slate-400 font-mono break-all select-all">&lt;iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                </div>
+                                                                <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
+                                                                    <p class="text-[11px] font-semibold text-fuchsia-400/80 mb-1">📁 Google Drive — Archivo</p>
+                                                                    <code class="text-[10px] text-slate-400 font-mono break-all select-all">&lt;iframe src="https://drive.google.com/file/d/FILE_ID/preview" width="640" height="480" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                </div>
+                                                            </div>
+
+                                                            {{-- CORS warning --}}
+                                                            <div class="flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+                                                                <svg class="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                                                </svg>
+                                                                <p class="text-[11px] text-amber-400/80 leading-relaxed">
+                                                                    Algunos servicios bloquean iframes por políticas CORS. Siempre verifica que el embed funcione antes de publicar la lección.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- Footer --}}
+                                                        <div class="flex items-center justify-end px-6 py-3 bg-slate-800/50 border-t border-slate-700">
+                                                            <button @click="showHelpModal = false"
+                                                                    class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                                                Cerrar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -2630,49 +2760,75 @@ Cómo...?"
                                                       placeholder="Pega aquí el código HTML (iframe, script, etc.)"
                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y"></textarea>
                                         </div>
-                                        <div class="flex items-center justify-between gap-2">
-                                            <div class="flex items-center gap-2">
-                                                <button wire:click="generateEmbedCard"
-                                                        wire:loading.attr="disabled"
-                                                        wire:target="generateEmbedCard"
-                                                        class="px-3 py-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:from-slate-700 disabled:to-slate-700 text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 shadow-lg shadow-fuchsia-900/30 disabled:shadow-none disabled:cursor-not-allowed">
-                                                    <svg wire:loading wire:target="generateEmbedCard" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                    </svg>
-                                                    <svg wire:loading.remove wire:target="generateEmbedCard" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
-                                                    </svg>
-                                                    <span wire:loading.remove wire:target="generateEmbedCard">✨ Generar diagrama</span>
-                                                    <span wire:loading wire:target="generateEmbedCard">Generando...</span>
-                                                </button>
-                                                @if(trim($embedHtml))
-                                                <button wire:click="previewGeneratedEmbed"
-                                                        class="px-2.5 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-600/50">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                    </svg>
-                                                    Vista previa
-                                                </button>
-                                                @endif
-                                                <span class="text-[10px] text-slate-500 italic">Genera un diagrama Mermaid con el contenido de la sección</span>
-                                            </div>
-                                            <button wire:click="addWizardHtmlEmbed"
-                                                    class="px-4 py-2 {{ $editingEmbedIndex !== null ? 'bg-amber-600 hover:bg-amber-500' : 'bg-fuchsia-600 hover:bg-fuchsia-500' }} text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
+                                        <div x-data="{ showEmbedPreview: false }">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <div class="flex items-center gap-2">
+                                                    @if(trim($embedHtml))
+                                                    <button @click="showEmbedPreview = true"
+                                                            class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-600/50">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                        </svg>
+                                                        Vista previa
+                                                    </button>
+                                                    @endif
+                                                    <button wire:click="addWizardHtmlEmbed"
+                                                            class="px-4 py-2 {{ $editingEmbedIndex !== null ? 'bg-amber-600 hover:bg-amber-500' : 'bg-fuchsia-600 hover:bg-fuchsia-500' }} text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
+                                                        @if($editingEmbedIndex !== null)
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                            Actualizar cambios
+                                                        @else
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                            Agregar Embed
+                                                        @endif
+                                                    </button>
+                                                </div>
                                                 @if($editingEmbedIndex !== null)
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                                    Actualizar cambios
-                                                @else
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                    Agregar Embed
+                                                    <button wire:click="cancelEditEmbed"
+                                                            class="px-3 py-2 text-slate-400 hover:text-white text-xs font-medium rounded-lg hover:bg-slate-700/50 transition-colors">
+                                                        Cancelar
+                                                    </button>
                                                 @endif
-                                            </button>
-                                            @if($editingEmbedIndex !== null)
-                                                <button wire:click="cancelEditEmbed"
-                                                        class="px-3 py-2 text-slate-400 hover:text-white text-xs font-medium rounded-lg hover:bg-slate-700/50 transition-colors">
-                                                    Cancelar
-                                                </button>
-                                            @endif
+                                            </div>
+
+                                            {{-- Modal vista previa del embed --}}
+                                            <div x-show="showEmbedPreview" x-cloak
+                                                 @keydown.escape.window="showEmbedPreview = false"
+                                                 class="fixed inset-0 z-[9999] overflow-y-auto">
+                                                <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="showEmbedPreview = false"></div>
+                                                <div class="relative min-h-screen flex items-center justify-center p-4">
+                                                    <div class="relative w-full max-w-4xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+                                                        <div class="flex items-center justify-between px-6 py-3 border-b border-slate-700">
+                                                            <div class="flex items-center gap-2">
+                                                                <svg class="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                </svg>
+                                                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Vista previa del Embed</h3>
+                                                                @if($embedTitle)
+                                                                    <span class="text-xs text-slate-400 font-normal">— {{ $embedTitle }}</span>
+                                                                @endif
+                                                            </div>
+                                                            <button @click="showEmbedPreview = false"
+                                                                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all">
+                                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        <div class="p-6">
+                                                            <div class="prose prose-sm max-w-none prose-invert">{!! $embedHtml !!}</div>
+                                                        </div>
+                                                        <div class="flex items-center justify-end px-6 py-3 bg-slate-800/50 border-t border-slate-700">
+                                                            <button @click="showEmbedPreview = false"
+                                                                    class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                                                Cerrar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         <p class="text-[10px] text-slate-500 leading-relaxed">
                                             El código HTML se renderizará en la vista del estudiante. Usa con precaución: iframes, tablas, formularios, etc.
@@ -2775,6 +2931,83 @@ Cómo...?"
                                 </div>
 
                             </div>{{-- /body tabs --}}
+
+                            {{-- ═══════ CONFIRM DELETE ALL RESOURCES MODAL ═══════ --}}
+                            <div x-show="showConfirmDeleteResources" x-cloak
+                                 class="fixed inset-0 z-[9999] overflow-y-auto"
+                                 wire:key="confirm-delete-all-resources">
+                                <div class="fixed inset-0 bg-black/70 backdrop-blur-sm"
+                                     @click="showConfirmDeleteResources = false"></div>
+                                <div class="relative min-h-screen flex items-center justify-center p-4">
+                                    <div class="relative w-full max-w-md bg-slate-800 border border-slate-600/50 rounded-xl shadow-2xl overflow-hidden"
+                                         @click.outside="showConfirmDeleteResources = false">
+                                        {{-- Header --}}
+                                        <div class="flex items-center gap-3 px-6 pt-6 pb-2">
+                                            <div class="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0">
+                                                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-base font-bold text-white">Eliminar todos los recursos</h3>
+                                                <p class="text-xs text-slate-400 leading-relaxed mt-0.5">
+                                                    Se eliminarán <strong class="text-slate-300">todos</strong> los archivos descargables,
+                                                    HTML embeds y enlaces externos de esta lección.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {{-- Body: summary counts --}}
+                                        <div class="px-6 py-3 space-y-1.5">
+                                            <div class="flex items-center gap-2 text-xs text-slate-400">
+                                                <svg class="w-3.5 h-3.5 text-emerald-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                <span><strong class="text-slate-300" x-text="{{ count($wizardResources) }}"></strong> archivos descargables</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-400">
+                                                <svg class="w-3.5 h-3.5 text-fuchsia-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                </svg>
+                                                <span><strong class="text-slate-300" x-text="{{ count($wizardHtmlEmbeds) }}"></strong> HTML embeds</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-400">
+                                                <svg class="w-3.5 h-3.5 text-sky-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                </svg>
+                                                <span><strong class="text-slate-300" x-text="{{ count($wizardLinks) }}"></strong> enlaces externos</span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Warning --}}
+                                        <div class="mx-6 mb-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                                            <p class="text-[11px] text-amber-300/80 leading-relaxed flex items-start gap-2">
+                                                <svg class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L4.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                                </svg>
+                                                <span>Esta acción no se puede deshacer. Los recursos eliminados se perderán permanentemente al guardar la lección.</span>
+                                            </p>
+                                        </div>
+
+                                        {{-- Footer actions --}}
+                                        <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-800/80 border-t border-slate-700/30">
+                                            <button @click="showConfirmDeleteResources = false"
+                                                    class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                                Cancelar
+                                            </button>
+                                            <button wire:click="removeAllWizardResources"
+                                                    @click="showConfirmDeleteResources = false"
+                                                    class="px-4 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all flex items-center gap-1.5">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Eliminar todo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         {{-- ═══════ MODAL PREVIEW EMBED EXISTENTE (global a los tabs) ═══════ --}}

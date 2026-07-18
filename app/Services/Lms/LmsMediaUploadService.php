@@ -24,7 +24,7 @@ class LmsMediaUploadService
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
-    protected int $maxSizeBytes = 52428800;
+    protected int $maxSizeBytes = 2097152;
 
     public function upload(UploadedFile $file, int $uploaderId): LmsMediaLibrary
     {
@@ -37,7 +37,7 @@ class LmsMediaUploadService
         abort_if(
             $file->getSize() > $this->maxSizeBytes,
             422,
-            'El archivo supera el límite de 50 MB.'
+            'El archivo supera el límite de 2 MB.'
         );
 
         $directory = 'lms/' . now()->format('Y/m');

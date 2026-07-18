@@ -297,6 +297,14 @@
                                                 </div>
                                                 <div class="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-100">
                                                     <span class="text-xs text-slate-600 truncate">{{ $res['display_name'] }}</span>
+                                                    <a href="{{ $res['media']['public_url'] }}" target="_blank"
+                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                       title="Descargar {{ $res['display_name'] }}">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        Descargar
+                                                    </a>
                                                 </div>
                                             </div>
                                         @else
@@ -310,9 +318,14 @@
                                                     <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
                                                     <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                                 </div>
-                                                @if($preview['allow_downloads'] ?? false)
-                                                    <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
-                                                @endif
+                                                <a href="{{ $res['media']['public_url'] }}" target="_blank"
+                                                   class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                   title="Descargar {{ $res['display_name'] }}">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                    </svg>
+                                                    Descargar
+                                                </a>
                                             </div>
                                         @endif
                                     @endforeach
@@ -363,6 +376,12 @@
                                 </svg>
                                 Recursos descargables
                             </h3>
+                            <div class="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 mb-2">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Los archivos de imagen (PNG, JPG, GIF) se muestran en línea. Todo el contenido permanece visible en su sección asociada, independientemente del tipo de archivo.</span>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach($unlinkedResources as $res)
                                     @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
@@ -381,9 +400,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="px-3 py-2 bg-slate-50 border-t border-slate-100">
-                                                <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
-                                            </div>
+                                            <div class="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-100">
+                                                    <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
+                                                    <a href="{{ $res['media']['public_url'] }}" target="_blank"
+                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                       title="Descargar {{ $res['display_name'] }}">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        Descargar
+                                                    </a>
+                                                </div>
                                         </div>
                                     @else
                                         <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
@@ -396,9 +423,14 @@
                                                 <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
                                                 <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                             </div>
-                                            @if($preview['allow_downloads'] ?? false)
-                                                <span class="ml-auto text-xs text-emerald-600 font-medium shrink-0">Descargar</span>
-                                            @endif
+                                            <a href="{{ $res['media']['public_url'] }}" target="_blank"
+                                               class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                               title="Descargar {{ $res['display_name'] }}">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                Descargar
+                                            </a>
                                         </div>
                                     @endif
                                 @endforeach

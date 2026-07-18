@@ -97,8 +97,8 @@ Alpine.data('lessonPreviewSwiper', () => ({
                 speed: 350,
                 autoHeight: true,
                 keyboard: { enabled: true },
-                mousewheel: { sensitivity: 1 },
-                grabCursor: true,
+                noSwiping: true,
+                allowTouchMove: false,
                 on: {
                     slideChange() {
                         self.currentSlide = this.activeIndex + 1;

@@ -22,6 +22,7 @@ use App\Services\NapkinAiService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -126,6 +127,7 @@ class LessonWizard extends Component
     public string $resourceName = '';
     public mixed $resourceSectionId = null;
     public array $wizardResources = [];
+    public ?int $editingResourceIndex = null;
 
     // ─── Wizard: Enlaces temporales ────────────────────────────
     public string $linkTitle = '';
@@ -160,7 +162,7 @@ class LessonWizard extends Component
         return [
             'newSectionTitle' => 'required|string|max:255',
             'contentBody'     => 'required|string|min:1',
-            'resourceFile'    => 'nullable|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
+            'resourceFile'    => 'nullable|file|max:2048|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
             'resourceName'    => 'required_with:resourceFile|nullable|string|max:255',
             'linkTitle'       => 'required_with:linkUrl|nullable|string|max:255',
             'linkUrl'         => 'required_with:linkTitle|nullable|url|max:1000',
@@ -1827,54 +1829,182 @@ PROMPT;
 
     public function addWizardResource(): void
     {
-        $this->validate([
-            'resourceFile' => 'required|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,mp4,webm,mp3,wav,ogg',
-            'resourceName' => 'required|string|max:255',
-        ]);
+        $isUpdate = $this->editingResourceIndex !== null;
 
         try {
-            $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            $this->notification()->error('Error al subir', $e->getMessage());
-            return;
+            $rules = [
+                'resourceName' => 'required|string|max:255',
+            ];
+            if ($isUpdate) {
+                // En edición, el archivo es opcional
+                $rules['resourceFile'] = 'nullable|file|max:2048|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,mp4,webm,mp3,wav,ogg';
+            } else {
+                $rules['resourceFile'] = 'required|file|max:2048|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,mp4,webm,mp3,wav,ogg';
+            }
+            if (count($this->wizardSections) > 0) {
+                $rules['resourceSectionId'] = 'required';
+            }
+            $this->validate($rules);
+        } catch (ValidationException $e) {
+            foreach ($e->validator->errors()->all() as $error) {
+                $this->notification()->error('Campo requerido', $error);
+            }
+            throw $e;
         }
 
-        $this->wizardResources[] = [
-            'id'           => 'temp_' . uniqid(),
-            'section_id'   => $this->resourceSectionId,
-            'media_id'     => $media->id,
-            'uploaded_by'  => auth()->id(),
-            'display_name' => $this->resourceName,
-            'description'  => '',
-            'media'        => [
+        // ─── Si hay un archivo nuevo, procesarlo ────────────────
+        $mediaData = null;
+        if ($this->resourceFile) {
+            try {
+                $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
+            } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+                $this->notification()->error('Error al subir', $e->getMessage());
+                return;
+            }
+
+            // ─── Verificar límite total de 10 MB por lección ────
+            $newFileSize = $this->resourceFile->getSize();
+            $totalBytes = $newFileSize;
+            foreach ($this->wizardResources as $idx => $res) {
+                // En actualización, excluir el recurso actual si ya tiene tamaño
+                if ($isUpdate && $idx === $this->editingResourceIndex) continue;
+                $totalBytes += $res['media']['size_bytes'] ?? 0;
+            }
+            if ($totalBytes > 10485760) { // 10 MB en bytes
+                $this->notification()->error(
+                    'Límite excedido',
+                    'El total de recursos de la lección no puede superar los 10 MB. Este archivo excede el límite disponible.'
+                );
+                return;
+            }
+
+            $mediaData = [
                 'id'              => $media->id,
                 'original_name'   => $media->original_name,
+                'mime_type'       => $media->mime_type,
+                'size_bytes'      => $media->size_bytes,
                 'size_for_humans' => $media->size_for_humans,
                 'public_url'      => $media->public_url,
-            ],
-        ];
+            ];
+        }
 
-        $addedName = $this->resourceName;
+        if ($isUpdate) {
+            // ─── Actualizar recurso existente ───────────────────
+            $existing = $this->wizardResources[$this->editingResourceIndex];
+            $existing['display_name'] = $this->resourceName;
+            $existing['section_id']   = $this->resourceSectionId;
+            if ($mediaData) {
+                $existing['media_id']  = $mediaData['id'];
+                $existing['media']     = $mediaData;
+            }
+            $this->wizardResources[$this->editingResourceIndex] = $existing;
+
+            $this->editingResourceIndex = null;
+            $this->reset('resourceFile', 'resourceName', 'resourceSectionId');
+
+            $this->notification()->success(
+                'Recurso actualizado',
+                "“{$this->resourceName}” se actualizó correctamente."
+            );
+            $this->dispatch('file-preview-reset');
+        } else {
+            // ─── Agregar nuevo recurso ──────────────────────────
+            $this->wizardResources[] = [
+                'id'           => 'temp_' . uniqid(),
+                'section_id'   => $this->resourceSectionId,
+                'media_id'     => $mediaData['id'],
+                'uploaded_by'  => auth()->id(),
+                'display_name' => $this->resourceName,
+                'description'  => '',
+                'media'        => $mediaData,
+            ];
+
+            $addedName = $this->resourceName;
+            $this->reset('resourceFile', 'resourceName', 'resourceSectionId');
+
+            $this->notification()->success(
+                'Recurso agregado',
+                "“{$addedName}” se agregó correctamente."
+            );
+            $this->dispatch('file-preview-reset');
+        }
+    }
+
+    public function editWizardResource(int $index): void
+    {
+        if (!isset($this->wizardResources[$index])) return;
+
+        $res = $this->wizardResources[$index];
+        $this->editingResourceIndex = $index;
+        $this->resourceName = $res['display_name'] ?? '';
+        $this->resourceSectionId = $res['section_id'] ?? null;
+    }
+
+    public function cancelEditResource(): void
+    {
+        $this->editingResourceIndex = null;
         $this->reset('resourceFile', 'resourceName', 'resourceSectionId');
-
-        $this->notification()->success(
-            'Recurso agregado',
-            "“{$addedName}” se agregó correctamente."
-        );
+        $this->dispatch('file-preview-reset');
     }
 
     public function removeWizardResource(int $index): void
     {
         unset($this->wizardResources[$index]);
         $this->wizardResources = array_values($this->wizardResources);
+
+        // Ajustar o cancelar edición si el recurso eliminado afecta al índice de edición
+        if ($this->editingResourceIndex !== null) {
+            if ($this->editingResourceIndex === $index) {
+                $this->cancelEditResource();
+            } elseif ($this->editingResourceIndex > $index) {
+                $this->editingResourceIndex--;
+            }
+        }
+    }
+
+    public function removeAllWizardResources(): void
+    {
+        $this->wizardResources = [];
+        $this->wizardLinks = [];
+        $this->wizardHtmlEmbeds = [];
+        $this->editingResourceIndex = null;
+        $this->editingEmbedIndex = null;
+        $this->resourceName = '';
+        $this->resourceFile = null;
+        $this->resourceSectionId = null;
+        $this->linkTitle = '';
+        $this->linkUrl = '';
+        $this->linkSectionId = null;
+        $this->linkType = 'REFERENCE';
+        $this->embedTitle = '';
+        $this->embedHtml = '';
+        $this->embedSectionId = null;
+        $this->embedDiagramType = '';
+        $this->embedPromptRefinement = '';
+        $this->dispatch('file-preview-reset');
+        $this->notification()->success(
+            title: 'Todos los recursos eliminados',
+            description: 'Material descargable, HTML embeds y enlaces se eliminarán al guardar la lección.',
+        );
     }
 
     public function addWizardLink(): void
     {
-        $this->validate([
-            'linkTitle' => 'required|string|max:255',
-            'linkUrl'   => 'required|url|max:1000',
-        ]);
+        try {
+            $rules = [
+                'linkTitle' => 'required|string|max:255',
+                'linkUrl'   => 'required|url|max:1000',
+            ];
+            if (count($this->wizardSections) > 0) {
+                $rules['linkSectionId'] = 'required';
+            }
+            $this->validate($rules);
+        } catch (ValidationException $e) {
+            foreach ($e->validator->errors()->all() as $error) {
+                $this->notification()->error('Campo requerido', $error);
+            }
+            throw $e;
+        }
 
         $this->wizardLinks[] = [
             'id'         => 'temp_' . uniqid(),
@@ -1885,8 +2015,14 @@ PROMPT;
             'sort_order' => count($this->wizardLinks) + 1,
         ];
 
+        $addedTitle = $this->linkTitle;
         $this->reset('linkTitle', 'linkUrl', 'linkSectionId');
         $this->linkType = 'REFERENCE';
+
+        $this->notification()->success(
+            'Enlace agregado',
+            "“{$addedTitle}” se agregó correctamente."
+        );
     }
 
     public function removeWizardLink(int $index): void
@@ -1899,9 +2035,20 @@ PROMPT;
 
     public function addWizardHtmlEmbed(): void
     {
-        $this->validate([
-            'embedHtml' => 'required|string|min:1',
-        ]);
+        try {
+            $rules = [
+                'embedHtml' => 'required|string|min:1',
+            ];
+            if (count($this->wizardSections) > 0) {
+                $rules['embedSectionId'] = 'required';
+            }
+            $this->validate($rules);
+        } catch (ValidationException $e) {
+            foreach ($e->validator->errors()->all() as $error) {
+                $this->notification()->error('Campo requerido', $error);
+            }
+            throw $e;
+        }
 
         $data = [
             'id'               => 'temp_' . uniqid(),
@@ -1912,8 +2059,9 @@ PROMPT;
             'is_visible'       => true,
         ];
 
-        if ($this->editingEmbedIndex !== null) {
-            // Actualizar embed existente
+        $isUpdate = $this->editingEmbedIndex !== null;
+
+        if ($isUpdate) {
             if (isset($this->wizardHtmlEmbeds[$this->editingEmbedIndex])) {
                 $data['id'] = $this->wizardHtmlEmbeds[$this->editingEmbedIndex]['id'];
                 $this->wizardHtmlEmbeds[$this->editingEmbedIndex] = $data;
@@ -1926,6 +2074,13 @@ PROMPT;
         $this->showEmbedPreview = false;
         $this->previewEmbedIndex = null;
         $this->reset('embedTitle', 'embedHtml', 'embedSectionId', 'embedDiagramType', 'embedPromptRefinement');
+
+        $this->notification()->success(
+            $isUpdate ? 'Embed actualizado' : 'Embed agregado',
+            $isUpdate
+                ? 'El código HTML se actualizó correctamente.'
+                : 'El código HTML se agregó a la lección correctamente.'
+        );
     }
 
     public function editWizardHtmlEmbed(int $index): void
@@ -2346,17 +2501,20 @@ PROMPT;
     public function saveStep2(): void
     {
         $activityId = $this->selectedActivityId;
+        $sectionIdMap = [];
 
         foreach ($this->wizardSections as $key => $sectionData) {
             $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
 
             if (str_starts_with((string)$sectionData['id'], 'temp_')) {
+                $tempId = $sectionData['id'];
                 $section = LmsActivitySection::create([
                     'activity_id' => $activityId,
                     'title'       => $sectionTitle,
                     'sort_order'  => $sectionData['sort_order'] ?? 1,
                     'is_visible'  => $sectionData['is_visible'] ?? true,
                 ]);
+                $sectionIdMap[$tempId] = $section->id;
                 // Reemplazar el id temporal con el real
                 $this->wizardSections[$key]['id'] = $section->id;
             } else {
@@ -2388,9 +2546,92 @@ PROMPT;
         // ─── Guardar preguntas de repaso como sección final ────
         $this->saveReviewQuestionsSection($activityId);
 
+        // ─── Guardar recursos ──────────────────────────────────
+        $visibleResourceIds = [];
+        foreach ($this->wizardResources as $key => $res) {
+            if (str_starts_with((string)($res['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                    ? $sectionIdMap[$res['section_id']]
+                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+
+                $newRes = LmsActivityResource::create([
+                    'activity_id'  => $activityId,
+                    'section_id'   => $resolvedSectionId,
+                    'media_id'     => $res['media_id'],
+                    'uploaded_by'  => $res['uploaded_by'] ?? auth()->id(),
+                    'display_name' => $res['display_name'],
+                    'description'  => $res['description'] ?? '',
+                    'is_visible'   => true,
+                ]);
+                $this->wizardResources[$key]['id'] = $newRes->id;
+                $visibleResourceIds[] = $newRes->id;
+            } else {
+                $visibleResourceIds[] = (int) $res['id'];
+            }
+        }
+        LmsActivityResource::where('activity_id', $activityId)
+            ->whereNotIn('id', $visibleResourceIds)
+            ->update(['is_visible' => false]);
+
+        // ─── Guardar enlaces ───────────────────────────────────
+        $visibleLinkIds = [];
+        foreach ($this->wizardLinks as $key => $link) {
+            if (str_starts_with((string)($link['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                    ? $sectionIdMap[$link['section_id']]
+                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+
+                $newLink = LmsActivityLink::create([
+                    'activity_id' => $activityId,
+                    'section_id'  => $resolvedSectionId,
+                    'added_by'    => auth()->id(),
+                    'title'       => $link['title'],
+                    'url'         => $link['url'],
+                    'link_type'   => $link['link_type'] ?? 'REFERENCE',
+                    'sort_order'  => $link['sort_order'] ?? 1,
+                    'is_visible'  => true,
+                ]);
+                $this->wizardLinks[$key]['id'] = $newLink->id;
+                $visibleLinkIds[] = $newLink->id;
+            } else {
+                $visibleLinkIds[] = (int) $link['id'];
+            }
+        }
+        LmsActivityLink::where('activity_id', $activityId)
+            ->whereNotIn('id', $visibleLinkIds)
+            ->update(['is_visible' => false]);
+
+        // ─── Guardar HTML embeds ───────────────────────────────
+        $visibleEmbedIds = [];
+        foreach ($this->wizardHtmlEmbeds as $key => $embed) {
+            if (str_starts_with((string)($embed['id'] ?? ''), 'temp_')) {
+                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                    ? $sectionIdMap[$embed['section_id']]
+                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+
+                $newEmbed = LmsHtmlEmbed::create([
+                    'activity_id'      => $activityId,
+                    'section_id'       => $resolvedSectionId,
+                    'added_by'         => auth()->id(),
+                    'title'            => $embed['title'] ?? null,
+                    'html_content'     => $embed['html_content'],
+                    'render_condition' => 'ALWAYS',
+                    'sort_order'       => $embed['sort_order'] ?? 1,
+                    'is_visible'       => true,
+                ]);
+                $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
+                $visibleEmbedIds[] = $newEmbed->id;
+            } else {
+                $visibleEmbedIds[] = (int) $embed['id'];
+            }
+        }
+        LmsHtmlEmbed::where('activity_id', $activityId)
+            ->whereNotIn('id', $visibleEmbedIds)
+            ->update(['is_visible' => false]);
+
         $this->notification()->success(
             'Guardado',
-            count($this->wizardSections) . ' secciones y sus bloques guardados correctamente'
+            count($this->wizardSections) . ' secciones, ' . count($visibleResourceIds) . ' recursos, ' . count($visibleLinkIds) . ' enlaces y ' . count($visibleEmbedIds) . ' embeds guardados correctamente'
         );
     }
 
@@ -2590,6 +2831,19 @@ PROMPT;
         LmsActivitySection::where('activity_id', $activityId)
             ->whereNotIn('id', $existingIds)
             ->delete();
+
+        // ─── Verificar límite total de 10 MB por lección ────────
+        $totalBytes = 0;
+        foreach ($this->wizardResources as $res) {
+            $totalBytes += $res['media']['size_bytes'] ?? 0;
+        }
+        if ($totalBytes > 10485760) {
+            $this->notification()->error(
+                'Límite excedido',
+                'El total de recursos de la lección supera los 10 MB. Elimine algunos recursos o reduzca su tamaño antes de publicar.'
+            );
+            return;
+        }
 
         // 3. Guardar recursos
         $visibleResourceIds = [];
