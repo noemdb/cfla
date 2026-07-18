@@ -486,7 +486,7 @@
     {{-- ============================================================ --}}
     {{-- MODAL: Vista previa de lección (student-preview component)  --}}
     {{-- ============================================================ --}}
-    @if($showPreviewModal && $previewData)
+    @if(($showPreviewModal ?? false) && ($previewData ?? null))
         <x-lms.student-preview :preview="$previewData" closeMethod="closePreview" wire:key="student-preview" />
     @endif
 </div>
