@@ -10,9 +10,11 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
+use App\Services\ActivityImprovementService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -724,6 +726,67 @@ class IndexComponent extends Component
 
         // Mostrar el formulario de creación
         $this->modeCreator = true;
+    }
+
+    // ─── AI IMPROVEMENT ─────────────────────────────────────
+
+    /**
+     * Mejora el contenido de la actividad usando IA (OpenRouter → Nvidia → Kimi).
+     *
+     * Toma como contexto el referente normativo del pensum y las actividades
+     * previas del profesor para enriquecer todos los campos pedagógicos.
+     */
+    public function improveActivity(): void
+    {
+        if (!$this->enable_edit) {
+            $this->notification()->error('Error', 'No se puede editar en este momento.');
+            return;
+        }
+
+        try {
+            // Reunir datos actuales del formulario
+            $currentData = [
+                'description'      => $this->activityForm->description ?? '',
+                'topic'            => $this->activityForm->topic ?? '',
+                'thematic'         => $this->activityForm->thematic ?? '',
+                'references'       => $this->activityForm->references ?? '',
+                'teachingStart'    => $this->activityForm->teachingStart ?? '',
+                'teachingContent'  => $this->activityForm->teachingContent ?? '',
+                'teachingEnd'      => $this->activityForm->teachingEnd ?? '',
+            ];
+
+            $service = app(ActivityImprovementService::class);
+            $result  = $service->improve(
+                currentData:       $currentData,
+                pensumId:          $this->pevaluacion->pensum_id,
+                profesorId:        $this->pevaluacion->profesor_id,
+                currentActivityId: $this->activity_id,
+            );
+
+            // Poblar el formulario con el contenido mejorado
+            $this->activityForm->description     = $result['description']     ?? $this->activityForm->description;
+            $this->activityForm->topic           = $result['topic']           ?? $this->activityForm->topic;
+            $this->activityForm->thematic        = $result['thematic']        ?? $this->activityForm->thematic;
+            $this->activityForm->references      = $result['references']      ?? $this->activityForm->references;
+            $this->activityForm->teachingStart   = $result['teachingStart']   ?? $this->activityForm->teachingStart;
+            $this->activityForm->teachingContent = $result['teachingContent'] ?? $this->activityForm->teachingContent;
+            $this->activityForm->teachingEnd     = $result['teachingEnd']     ?? $this->activityForm->teachingEnd;
+
+            $this->notification()->success(
+                '¡Contenido mejorado!',
+                'La IA ha mejorado el contenido de la actividad basándose en el referente normativo y actividades previas.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Error mejorando actividad con IA', [
+                'error'     => $e->getMessage(),
+                'activity'  => $this->activity_id,
+                'pevaluacion' => $this->pevaluacion_id,
+            ]);
+            $this->notification()->error(
+                'Error al mejorar contenido',
+                $e->getMessage()
+            );
+        }
     }
 
     public function resetModel()
