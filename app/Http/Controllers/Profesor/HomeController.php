@@ -14,6 +14,7 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Instrument\DiagSession;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -181,6 +182,52 @@ class HomeController extends Controller
                         ->where('lapso_id', $lapsoItem->id)
                 )->count();
 
+                // ── Chart: Activities by day ────────────────────────
+                $chartActivitiesByDay = Activity::selectRaw('activities.finicial, COUNT(*) as total')
+                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                    ->where('pevaluacions.profesor_id', $profesor->id)
+                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
+                    ->whereNull('pevaluacions.deleted_at')
+                    ->groupBy('activities.finicial')
+                    ->orderBy('activities.finicial')
+                    ->get()
+                    ->map(fn($row) => ['x' => $row->finicial, 'y' => (int) $row->total])
+                    ->toArray();
+
+                // ── Chart: Lessons by day ────────────────────────
+                $chartLessonsByDay = DB::table('lms_activity_publications')
+                    ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                    ->where('pevaluacions.profesor_id', $profesor->id)
+                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
+                    ->whereNull('pevaluacions.deleted_at')
+                    ->selectRaw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at) as pub_date, COUNT(*) as total')
+                    ->groupByRaw('DATE(COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at))')
+                    ->orderBy('pub_date')
+                    ->whereNotNull(DB::raw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at)'))
+                    ->get()
+                    ->map(function ($row) {
+                        $date = $row->pub_date;
+                        if ($date && strpos($date, ' ') !== false) $date = explode(' ', $date)[0];
+                        return ['x' => $date, 'y' => (int) $row->total];
+                    })
+                    ->toArray();
+
+                // ── Chart: Scheduled by day ──────────────────────
+                $chartScheduledByDay = DB::table('lms_activity_publications')
+                    ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                    ->where('pevaluacions.profesor_id', $profesor->id)
+                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
+                    ->whereNull('pevaluacions.deleted_at')
+                    ->whereNotNull('lms_activity_publications.publish_at')
+                    ->selectRaw('DATE(lms_activity_publications.publish_at) as pub_date, COUNT(*) as total')
+                    ->groupByRaw('DATE(lms_activity_publications.publish_at)')
+                    ->orderBy('pub_date')
+                    ->get()
+                    ->map(fn($row) => ['x' => $row->pub_date, 'y' => (int) $row->total])
+                    ->toArray();
+
                 $indicador = collect([
                     'id'                 => $lapsoItem->id,
                     'lapso'              => $lapsoItem,
@@ -201,6 +248,10 @@ class HomeController extends Controller
                     'lms_published'      => $lmsPublished,
                     'lms_sections'       => $lmsSections,
                     'lms_resources'      => $lmsResources,
+                    // Charts
+                    'chart_activities'   => $chartActivitiesByDay,
+                    'chart_lessons'      => $chartLessonsByDay,
+                    'chart_scheduled'    => $chartScheduledByDay,
                 ]);
 
                 $indicadores->push($indicador);

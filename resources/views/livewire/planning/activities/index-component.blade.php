@@ -519,7 +519,7 @@
     </x-modal-card>
 
     <!-- ===== MODAL: Vista Previa de Actividad ===== -->
-    <x-modal-card title="Vista Previa de la Actividad" blur="lg" wire:model="modePreview" width="max-w-[80vw]">
+    <x-modal-card title="Vista Previa de la Actividad" blur="lg" wire:model="modePreview" width="max-w-[80vw]" class="border border-white/10 rounded-xl bg-gray-900 dark:bg-gray-900">
         @if($previewActivity)
             <div class="space-y-5" x-data="{ showTeaching: false }">
 

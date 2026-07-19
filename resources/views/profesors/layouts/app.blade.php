@@ -40,7 +40,6 @@
     <!-- Navbar compartido para todos los roles -->
     <x-role-navbar subtitle="Panel del Profesor">
         <x-slot:navbarInfo>
-            <x-theme-toggle />
             @yield('navbar-info')
         </x-slot:navbarInfo>
         @include('components.navbars.profesor-items')

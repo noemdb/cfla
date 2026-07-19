@@ -132,19 +132,23 @@
                                 <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
                                 <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <x-indicator-box
-                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
-                                    label="Actividades Registradas"
-                                    value="{{ number_format($item->activities_count) }}"
-                                    color="purple"
-                                />
-                                <x-indicator-box
-                                    icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
-                                    label="Profesores con Carga"
-                                    value="{{ $item->profesores_count }}"
-                                    color="amber"
-                                />
+                            <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                <div class="col-span-2">
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+                                        label="Actividades Registradas"
+                                        value="{{ number_format($item->activities_count) }}"
+                                        color="purple"
+                                    />
+                                </div>
+                                <div class="col-span-2">
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
+                                        label="Profesores con Carga"
+                                        value="{{ $item->profesores_count }}"
+                                        color="amber"
+                                    />
+                                </div>
                             </div>
                         </div>
                         @if(!$loop->last)<hr class="border-white/5 my-6">@endif
@@ -157,63 +161,66 @@
                     @endforelse
                 </div>
 
-                    {{-- Chart: Actividades por Día — uses filters from the top bar --}}
-                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-2">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
+                    {{-- ═══ Charts Bento Grid (4-col) ═══ --}}
+                    <div class="grid grid-cols-4 gap-2 mt-2" style="grid-auto-flow: dense;">
+                        {{-- ── Actividades por Día (2×1) ── --}}
+                        <div class="col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades Registradas por Día</h3>
                                 </div>
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Actividades Registradas por Día</h3>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                    {{ count($chartActivitiesByDay) }} día(s) con actividad
+                                </span>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                {{ count($chartActivitiesByDay) }} día(s) con actividad
-                            </span>
+                            <div wire:ignore>
+                                <div id="activities-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                            </div>
                         </div>
-                        <div wire:ignore>
-                            <div id="activities-per-day-chart" class="w-full" style="min-height: 250px;"></div>
-                        </div>
-                    </div>
 
-                    {{-- Chart: Lecciones Registradas por Día — uses same filters --}}
-                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-sky-100 dark:bg-sky-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                    </svg>
+                        {{-- ── Lecciones por Día (2×1) ── --}}
+                        <div class="col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-sky-100 dark:bg-sky-500/20 rounded-lg flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Lecciones Registradas por Día</h3>
                                 </div>
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Lecciones Registradas por Día</h3>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                    {{ count($chartLessonsByDay) }} día(s) con publicación
+                                </span>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                {{ count($chartLessonsByDay) }} día(s) con publicación
-                            </span>
+                            <div wire:ignore>
+                                <div id="lessons-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                            </div>
                         </div>
-                        <div wire:ignore>
-                            <div id="lessons-per-day-chart" class="w-full" style="min-height: 250px;"></div>
-                        </div>
-                    </div>
 
-                    {{-- Chart: Publicaciones Programadas por Día (publish_at) --}}
-                    <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5 mt-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
+                        {{-- ── Publicaciones Programadas por Día (4×1) ── --}}
+                        <div class="col-span-4 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Publicaciones Programadas por Día</h3>
                                 </div>
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Publicaciones Programadas por Día</h3>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                    {{ count($chartScheduledByDay) }} día(s) con programación
+                                </span>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                {{ count($chartScheduledByDay) }} día(s) con programación
-                            </span>
-                        </div>
-                        <div wire:ignore>
-                            <div id="scheduled-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                            <div wire:ignore>
+                                <div id="scheduled-per-day-chart" class="w-full" style="min-height: 250px;"></div>
+                            </div>
                         </div>
                     </div>
             </div>
@@ -355,48 +362,60 @@
                         @endphp
                         <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
                             @if($indicators && $indicators->total_activities > 0)
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
-                                        label="Total de actividades planificadas"
-                                        value="{{ number_format($indicators->total_activities) }}"
-                                        color="cyan"
-                                    />
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>'
-                                        label="Indicador de Cobertura Curricular"
-                                        subtext="Promedio de actividades por Área de Formación"
-                                        value="{{ $indicators->cobertura_curricular }}"
-                                        color="emerald"
-                                    />
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"></path></svg>'
-                                        label="Indicador de Participación"
-                                        subtext="% Docentes con Planificaciones Activas"
-                                        value="{{ $indicators->participacion }}%"
-                                        color="blue"
-                                    />
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>'
-                                        label="Indicador de Seguimiento"
-                                        subtext="Tasa de Comentarios en Actividades"
-                                        value="{{ $indicators->seguimiento }}%"
-                                        color="purple"
-                                    />
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-                                        label="Indicador de Aprobación"
-                                        subtext="% de Actividades Aprobadas"
-                                        value="{{ $indicators->aprobacion }}%"
-                                        color="emerald"
-                                    />
-                                    <x-indicator-box
-                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
-                                        label="Indicador de Supervisión"
-                                        subtext="Tasa de Observaciones en Áreas de Formación"
-                                        value="{{ $indicators->supervision }}%"
-                                        color="rose"
-                                    />
+                                <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                    <div class="col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
+                                            label="Total de actividades planificadas"
+                                            value="{{ number_format($indicators->total_activities) }}"
+                                            color="cyan"
+                                        />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>'
+                                            label="Indicador de Cobertura Curricular"
+                                            subtext="Promedio de actividades por Área de Formación"
+                                            value="{{ $indicators->cobertura_curricular }}"
+                                            color="emerald"
+                                        />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"></path></svg>'
+                                            label="Indicador de Participación"
+                                            subtext="% Docentes con Planificaciones Activas"
+                                            value="{{ $indicators->participacion }}%"
+                                            color="blue"
+                                        />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>'
+                                            label="Indicador de Seguimiento"
+                                            subtext="Tasa de Comentarios en Actividades"
+                                            value="{{ $indicators->seguimiento }}%"
+                                            color="purple"
+                                        />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                                            label="Indicador de Aprobación"
+                                            subtext="% de Actividades Aprobadas"
+                                            value="{{ $indicators->aprobacion }}%"
+                                            color="emerald"
+                                        />
+                                    </div>
+                                    <div class="col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
+                                            label="Indicador de Supervisión"
+                                            subtext="Tasa de Observaciones en Áreas de Formación"
+                                            value="{{ $indicators->supervision }}%"
+                                            color="rose"
+                                        />
+                                    </div>
                                 </div>
                             @else
                                 <div class="bg-white/5 rounded-lg p-6 text-center">
@@ -430,64 +449,73 @@
                         $diagStudents = $tab4DiagData->sum('students_evaluated');
                     @endphp
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>'
-                            label="Total Sesiones" value="{{ number_format($diagTotalSessions) }}" color="cyan" />
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-                            label="Completadas" value="{{ number_format($diagCompletedSessions) }}" color="emerald" />
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>'
-                            label="Precisión Prom." value="{{ $diagAvgPrecision }}%" color="amber" />
-                        <x-indicator-box
-                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
-                            label="Estudiantes Eval." value="{{ number_format($diagStudents) }}" color="purple" />
-                    </div>
+                    {{-- ═══ Diagnóstico Bento Grid (4-col, unifica KPI + preguntas + progreso) ═══ --}}
+                    <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                        {{-- KPI row — 4 tiles 1×1 --}}
+                        <div class="col-span-1">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>'
+                                label="Total Sesiones" value="{{ number_format($diagTotalSessions) }}" color="cyan" />
+                        </div>
+                        <div class="col-span-1">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                                label="Completadas" value="{{ number_format($diagCompletedSessions) }}" color="emerald" />
+                        </div>
+                        <div class="col-span-1">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>'
+                                label="Precisión Prom." value="{{ $diagAvgPrecision }}%" color="amber" />
+                        </div>
+                        <div class="col-span-1">
+                            <x-indicator-box
+                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>'
+                                label="Estudiantes Eval." value="{{ number_format($diagStudents) }}" color="purple" />
+                        </div>
 
-                    {{-- Question-level indicators --}}
-                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">Resumen de Preguntas</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-                                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Preguntas Cargadas</p>
-                                    <p class="text-lg font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
-                                </div>
+                        {{-- Preguntas Cargadas (2×1) — anchor de la segunda fila --}}
+                        <div class="col-span-2 bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con Opciones de Respuesta</p>
-                                    <p class="text-lg font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
-                                </div>
-                            </div>
-                            <div class="bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
-                                    <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Cobertura Pensum</p>
-                                    <p class="text-lg font-bold text-white">{{ $diagPensumCoveragePct }}%</p>
-                                </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Preguntas Cargadas</p>
+                                <p class="text-lg font-bold text-white">{{ number_format($diagTotalQuestions) }}</p>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Completion progress bar --}}
-                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-5">
-                        <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
-                            <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
+                        {{-- Con Opciones (1×1) --}}
+                        <div class="col-span-1 bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Con Opciones de Respuesta</p>
+                                <p class="text-lg font-bold text-white">{{ number_format($diagQuestionsWithOptions) }}</p>
+                            </div>
                         </div>
-                        <div class="w-full bg-gray-700/50 rounded-full h-2.5">
-                            <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
-                                 style="width: {{ $diagCompletionRate }}%"></div>
+
+                        {{-- Cobertura Pensum (1×1) --}}
+                        <div class="col-span-1 bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Cobertura Pensum</p>
+                                <p class="text-lg font-bold text-white">{{ $diagPensumCoveragePct }}%</p>
+                            </div>
+                        </div>
+
+                        {{-- Tasa Finalización (4×1) — barra de progreso completa --}}
+                        <div class="col-span-4 bg-gray-800/30 border border-white/5 rounded-lg p-5">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
+                                <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-700/50 rounded-full h-2.5">
+                                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                                     style="width: {{ $diagCompletionRate }}%"></div>
+                            </div>
                         </div>
                     </div>
 

@@ -203,44 +203,147 @@
 
                     {{-- ═══════ SECTION SLIDES ═══════ --}}
                     @forelse($preview['sections'] ?? [] as $section)
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-1 h-6 bg-emerald-500 rounded-full"></span>
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                            {{-- Section header with teaching structure badge + step count --}}
+                            @php
+                                $sectionTitleUpper = mb_strtoupper($section['title'] ?? '');
+                                $teachingStyle = null;
+                                if (preg_match('/\b(INICIO|INTRODUCCI[OÓ]N|APERTURA|BIENVENIDA|PRESENTACI[OÓ]N)\b/', $sectionTitleUpper)) {
+                                    $teachingStyle = ['label' => 'INICIO', 'symbol' => '→', 'class' => 'bg-blue-50 text-blue-700 border border-blue-200'];
+                                } elseif (preg_match('/\b(DESARROLLO|ACTIVIDAD|CONTENIDO|EXPLICACI[OÓ]N|EJERCICIO|PR[AÁ]CTICA|AN[AÁ]LISIS|PROFUNDIZACI[OÓ]N|REFLEXI[OÓ]N|LECTURA)\b/', $sectionTitleUpper)) {
+                                    $teachingStyle = ['label' => 'DESARROLLO', 'symbol' => '◆', 'class' => 'bg-emerald-50 text-emerald-700 border border-emerald-200'];
+                                } elseif (preg_match('/\b(CIERRE|CONCLUSI[OÓ]N|RESUMEN|EVALUACI[OÓ]N|REPASO|S[IÍ]NTESIS|FINAL|RETROALIMENTACI[OÓ]N)\b/', $sectionTitleUpper)) {
+                                    $teachingStyle = ['label' => 'CIERRE', 'symbol' => '●', 'class' => 'bg-amber-50 text-amber-700 border border-amber-200'];
+                                }
+                                $contentCount = count($section['contents'] ?? []);
+                            @endphp
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                                 <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
+                                @if($teachingStyle)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 {{ $teachingStyle['class'] }}">
+                                        <span>{{ $teachingStyle['symbol'] }}</span>
+                                        {{ $teachingStyle['label'] }}
+                                    </span>
+                                @endif
+                                @if($contentCount > 1)
+                                    <span class="ml-auto text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60 shrink-0">{{ $contentCount }} pasos</span>
+                                @elseif($contentCount === 1)
+                                    <span class="ml-auto text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200/60 shrink-0">1 paso</span>
+                                @endif
                             </div>
-                            @foreach($section['contents'] ?? [] as $content)
+
+                            {{-- Step progress indicator --}}
+                            @foreach($section['contents'] ?? [] as $idx => $content)
                                 @php
                                     $rawBody = $content['body'] ?? '';
                                     $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
                                     if (!$isMermaid) {
                                         $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
                                     }
+                                    $stepNumber = $idx + 1;
                                 @endphp
-                                @if(($content['title'] ?? null))
-                                    <div class="flex items-start gap-2 mb-2">
-                                        <span class="w-0.5 h-5 bg-emerald-500 rounded-full mt-1 shrink-0"></span>
-                                        <h3 class="text-sm font-bold text-slate-800 leading-snug">{{ $content['title'] }}</h3>
+                                <div class="flex items-start gap-3 {{ $loop->last ? '' : 'mb-3' }}">
+                                    {{-- Step circle with connector line --}}
+                                    <div class="flex flex-col items-center shrink-0">
+                                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold leading-none shadow-sm">
+                                            {{ $stepNumber }}
+                                        </span>
+                                        @if(!$loop->last)
+                                            <div class="w-0.5 flex-1 min-h-[1.5rem] bg-emerald-200/50 mt-1.5"></div>
+                                        @endif
                                     </div>
-                                @endif
-                                @if($isMermaid)
-                                    @php
-                                        preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
-                                        $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                                        if (empty($mermaidCode)) {
-                                            $mermaidCode = trim(strip_tags($rawBody));
-                                        }
-                                    @endphp
-                                    <div wire:ignore x-data="mermaidEmbed()"
-                                         data-mermaid-code="{{ $mermaidCode }}"
-                                         data-mermaid-delay
-                                         class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200">
-                                        <div x-ref="target" class="w-full"></div>
+
+                                    {{-- Step content --}}
+                                    <div class="flex-1 min-w-0 {{ $loop->last ? '' : 'pb-1' }}">
+                                        @if(($content['title'] ?? null))
+                                            <h3 class="text-sm font-bold text-slate-800 leading-snug mb-1.5">{{ $content['title'] }}</h3>
+                                        @endif
+                                        @if($isMermaid)
+                                            @php
+                                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                                $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                                if (empty($mermaidCode)) {
+                                                    $mermaidCode = trim(strip_tags($rawBody));
+                                                }
+                                            @endphp
+                                            <div wire:ignore x-data="mermaidEmbed()"
+                                                 data-mermaid-code="{{ $mermaidCode }}"
+                                                 data-mermaid-delay
+                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200">
+                                                <div x-ref="target" class="w-full"></div>
+                                            </div>
+                                        @elseif(!empty(trim(strip_tags($rawBody))))
+                                            @php
+                                                $__pt = strip_tags($rawBody);
+                                                $__len = mb_strlen(trim($__pt));
+                                                $__hasUl = str_contains($rawBody, '<ul');
+                                                $__hasOl = str_contains($rawBody, '<ol');
+                                                $__hasBq = str_contains($rawBody, '<blockquote');
+                                                $__hasEm = str_contains($rawBody, '<em') || preg_match('/<i[^>]*>/', $rawBody);
+                                                $__hasImg = str_contains($rawBody, '<img');
+                                                $__singleP = substr_count($rawBody, '<p>') <= 1 && !$__hasUl && !$__hasOl && !$__hasBq && !$__hasImg;
+                                                $__isQ = preg_match('/[¿\?]\s*$/', trim($__pt));
+
+                                                $__tpl = 'prose';
+                                                if (preg_match('/\b(actividad|ejercicio|resuelve|practica|tarea|completa|investiga|realiza|escribe|dibuja|explica|elabora|construye|crea|diseña)\b/i', $__pt) && $__len < 600) {
+                                                    $__tpl = 'activity';
+                                                } elseif ($__isQ || preg_match('/\b(pregunta|¿qué|¿cómo|¿por qué|¿cuál|¿dónde|¿cuándo)\b/i', $__pt)) {
+                                                    $__tpl = 'question';
+                                                } elseif ($__hasBq || (preg_match('/[«»]/u', $__pt) && $__len < 300)) {
+                                                    $__tpl = 'quote';
+                                                } elseif ($__hasUl || $__hasOl) {
+                                                    $__tpl = 'list';
+                                                } elseif ($__singleP && $__len < 250 && $__len > 10) {
+                                                    $__tpl = 'concept';
+                                                }
+                                            @endphp
+
+                                            @if($__tpl === 'concept')
+                                                <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-4 shadow-sm">
+                                                    <div class="flex items-start gap-3">
+                                                        <span class="text-xl leading-none mt-0.5 shrink-0">💡</span>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                    </div>
+                                                </div>
+                                            @elseif($__tpl === 'list')
+                                                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <span class="text-lg leading-none">📋</span>
+                                                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lista</span>
+                                                    </div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal">{!! $rawBody !!}</div>
+                                                </div>
+                                            @elseif($__tpl === 'quote')
+                                                <div class="bg-amber-50/60 border-l-4 border-amber-400 rounded-r-xl p-4">
+                                                    <div class="flex items-start gap-3">
+                                                        <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium">{!! $rawBody !!}</div>
+                                                    </div>
+                                                </div>
+                                            @elseif($__tpl === 'question')
+                                                <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4">
+                                                    <div class="flex items-start gap-3">
+                                                        <span class="text-xl leading-none mt-0.5 shrink-0">💭</span>
+                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                    </div>
+                                                </div>
+                                            @elseif($__tpl === 'activity')
+                                                <div class="bg-amber-50/40 border-2 border-dashed border-amber-300 rounded-xl p-4">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <span class="text-lg leading-none">✏️</span>
+                                                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actividad</span>
+                                                    </div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                </div>
+                                            @else
+                                                <div class="bg-gradient-to-br from-white to-stone-50/80 rounded-xl p-4 border border-stone-200/60">
+                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                </div>
+                                            @endif
+                                        @endif
                                     </div>
-                                @else
-                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-                                        {!! $rawBody !!}
-                                    </div>
-                                @endif
+                                </div>
                             @endforeach
 
                             {{-- HTML Embeds vinculados a esta sección --}}
@@ -655,7 +758,13 @@
 
         {{-- Footer navigation --}}
         <div class="w-full max-w-7xl mt-auto px-8 py-2 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-between">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1">
+                <button x-on:click="_getSwiper()?.slideTo(0)"
+                        class="w-8 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        :class="currentSlide <= 1 ? 'opacity-30' : ''"
+                        title="Ir al inicio">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                </button>
                 <button x-on:click="prev()"
                         class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         title="Anterior">
@@ -665,6 +774,12 @@
                         class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         title="Siguiente">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button x-on:click="_getSwiper()?.slideTo(totalSlides - 1)"
+                        class="w-8 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        :class="currentSlide >= totalSlides ? 'opacity-30' : ''"
+                        title="Ir al final">
+                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                 </button>
             </div>
             <div class="swiper-pagination-fraction text-sm font-medium text-slate-500" x-text="currentSlide + ' / ' + totalSlides"></div>
@@ -682,7 +797,12 @@
     </div>
 </div>
 
-{{-- Estilos para Mermaid fullscreen / zoom toolbar --}}
+{{-- Marca de agua institucional --}}
+@php
+    $watermarkUrl = asset('image/logo/logo1x1.png');
+@endphp
+
+{{-- Estilos para Mermaid fullscreen / zoom toolbar + watermark --}}
 @once
     <style>
         .mermaid-zoom-toolbar {
@@ -710,6 +830,27 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* ── Watermark institucional ───────────────────────────── */
+        :root {
+            --watermark-logo: url('{{ $watermarkUrl }}');
+        }
+        .swiper-slide {
+            position: relative;
+        }
+        .swiper-slide::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            height: 50%;
+            background: var(--watermark-logo) center / contain no-repeat;
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: -1;
         }
     </style>
 @endonce

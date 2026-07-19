@@ -16,6 +16,7 @@ use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Instrument\DiagReferent;
+use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
 use App\Services\NapkinAiService;
@@ -34,7 +35,15 @@ class LessonWizard extends Component
 
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
     public string $mode = 'list';
+    public string $viewMode = 'grid';
     public ?int $selectedActivityId = null;
+
+    // ─── Lifecycle hooks ─────────────────────────────────────────
+
+    public function updatedViewMode($value): void
+    {
+        session()->put('lesson_wizard_view_mode', $value);
+    }
     public ?Activity $selectedActivity = null;
 
     // ─── Filtros del listado ───────────────────────────────────
@@ -174,6 +183,9 @@ class LessonWizard extends Component
     public function mount(): void
     {
         $this->lapsoId = Lapso::current()?->id;
+
+        // Restaurar modo de vista desde sesión
+        $this->viewMode = session('lesson_wizard_view_mode', 'grid');
 
         // Si se pasa activity_id en la URL, iniciar wizard directamente
         $activityId = request()->query('activity_id');
@@ -1482,6 +1494,73 @@ PROMPT;
                 'Diagrama generado',
                 "El diagrama Mermaid para \"{$sectionTitle}\" se generó correctamente."
             );
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->generatingSection = null;
+        }
+    }
+
+    /**
+     * Etiqueta el contenido de la diapositiva actual con HTML semántico
+     * usando IA con prompt Staff Engineer. Analiza el body plano y lo
+     * envuelve en etiquetas HTML5 apropiadas según su estructura.
+     */
+    public function generateSlideHtmlTags(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex]['contents'][0])) {
+            $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido para etiquetar. Genera texto primero.');
+            return;
+        }
+        if (empty(trim(strip_tags($this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? '')))) {
+            $this->notification()->warning('Contenido vacío', 'El body de esta diapositiva está vacío.');
+            return;
+        }
+
+        $this->generatingSection = $sectionIndex;
+        $this->generationError = null;
+
+        $originalBody = $this->wizardSections[$sectionIndex]['contents'][0]['body'];
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
+
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+
+        try {
+            /** @var HtmlTaggingService $taggingService */
+            $taggingService = app(HtmlTaggingService::class);
+
+            $result = $taggingService->tag(
+                $originalBody,
+                $sectionTitle,
+                $gradeName,
+                $subjectName,
+                fn(string $systemPrompt, string $userPrompt, array $overrides) => $this->askWithCompaction(
+                    $systemPrompt,
+                    $userPrompt,
+                    $overrides
+                ),
+            );
+
+            if ($result['success']) {
+                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $result['html'];
+                $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'HTML';
+
+                $this->notification()->success(
+                    'HTML semántico generado',
+                    'El contenido se etiquetó con HTML5 semántico correctamente.'
+                );
+
+                // Disparar evento para cambiar a pestaña preview y mostrar resultado
+                $this->dispatch('show-preview');
+            } else {
+                $this->generationError = $result['error'];
+                $this->notification()->error('Error de etiquetado', $result['error']);
+            }
         } catch (\Throwable $e) {
             $this->generationError = $e->getMessage();
             $this->notification()->error('Error inesperado', $e->getMessage());

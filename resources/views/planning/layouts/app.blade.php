@@ -38,7 +38,6 @@
     <!-- Navbar compartido para todos los roles -->
     <x-role-navbar subtitle="Planificación Académica">
         <x-slot:navbarInfo>
-            <x-theme-toggle />
             @yield('navbar-info')
         </x-slot:navbarInfo>
         @include('components.navbars.planning-items')

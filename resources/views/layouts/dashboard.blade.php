@@ -42,7 +42,6 @@
     <!-- Navbar compartido para todos los roles -->
     <x-role-navbar subtitle="Panel Administrativo">
         <x-slot:navbarInfo>
-            <x-theme-toggle />
             @yield('navbar-info')
         </x-slot:navbarInfo>
         @include('components.navbars.admin-items')

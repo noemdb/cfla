@@ -3,16 +3,39 @@
     @if($mode === 'list')
         {{-- ═══════════ LISTADO DE ACTIVIDADES ═══════════ --}}
         <div wire:key="mode-list">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
                 <h1 class="text-lg font-bold text-gray-900 dark:text-white">Nueva Lección</h1>
                 <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
             </div>
-            <a href="{{ route('app.profesors.lms.editor', 0) }}"
-               class="text-xs text-slate-400 hover:text-emerald-400 transition-colors"
-               onclick="event.preventDefault()"
-               style="display:none;">
-            </a>
+            <div class="flex items-center gap-3">
+                {{-- View toggle: Grid / Lista --}}
+                <div class="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-0.5 flex">
+                    <button wire:click="$set('viewMode', 'grid')"
+                            @class([
+                                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200',
+                                'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm' => $viewMode === 'grid',
+                                'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300' => $viewMode !== 'grid',
+                            ])>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        Grid
+                    </button>
+                    <button wire:click="$set('viewMode', 'table')"
+                            @class([
+                                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200',
+                                'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm' => $viewMode === 'table',
+                                'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300' => $viewMode !== 'table',
+                            ])>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Lista
+                    </button>
+                </div>
+                <a href="{{ route('app.profesors.lms.editor', 0) }}"
+                   class="text-xs text-slate-400 hover:text-emerald-400 transition-colors"
+                   onclick="event.preventDefault()"
+                   style="display:none;">
+                </a>
+            </div>
         </div>
 
         {{-- Filtros --}}
@@ -66,6 +89,7 @@
             </div>
         </div>
 
+        @if($viewMode === 'grid')
         {{-- Grid de actividades --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($activities as $item)
@@ -254,6 +278,171 @@
                 </div>
             @endforelse
         </div>
+    @else
+        {{-- ═══════════ ACTIVIDADES EN TABLA ═══════════ --}}
+        <div wire:key="activity-table" class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700/60">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700/60">
+                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Actividad</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Asignatura / Sección</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Estado</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Contenido</th>
+                        <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Fechas</th>
+                        <th class="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($activities as $item)
+                        @php
+                            $pub = $item->lmsPublication;
+                            $sections = $item->lmsSections ?? collect();
+                            $resources = $item->lmsResources ?? collect();
+                            $links = $item->lmsLinks ?? collect();
+                            $totalContents = $sections->sum(fn($s) => $s->contents_count ?? 0);
+                            $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
+                        @endphp
+                        <tr wire:key="activity-row-{{ $item->id }}"
+                            class="border-b border-gray-100 dark:border-slate-800/60 hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors duration-150
+                                   {{ $hasLmsContent ? 'bg-emerald-500/[0.02]' : '' }}">
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg {{ $hasLmsContent ? 'bg-emerald-500/10' : 'bg-gray-100 dark:bg-slate-700/40' }} flex items-center justify-center shrink-0">
+                                        @if($hasLmsContent)
+                                            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                        @else
+                                            <svg class="w-3.5 h-3.5 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white leading-snug">{{ $item->topic ?? 'Actividad sin título' }}</p>
+                                        @if($item->description)
+                                            <p class="text-xs text-gray-500 dark:text-slate-500 mt-0.5 line-clamp-1">{{ $item->description }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="space-y-0.5">
+                                    @if($item->pevaluacion?->pensum?->asignatura?->name)
+                                        <p class="text-xs text-gray-700 dark:text-slate-300">{{ $item->pevaluacion->pensum->asignatura->name }}</p>
+                                    @endif
+                                    <p class="text-[11px] text-gray-500 dark:text-slate-500">
+                                        {{ $item->pevaluacion?->pensum?->grado?->name ?? '' }}
+                                        @if($item->pevaluacion?->seccion?->name)
+                                            · Sec. {{ $item->pevaluacion->seccion->name }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                @if($pub)
+                                    <span @class([
+                                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide',
+                                        'bg-emerald-500/12 text-emerald-400 border border-emerald-500/20' => $pub->status === 'PUBLISHED',
+                                        'bg-cyan-500/12 text-cyan-400 border border-cyan-500/20' => $pub->status === 'SCHEDULED',
+                                        'bg-slate-700/60 text-slate-500 border border-slate-600/50' => $pub->status === 'ARCHIVED',
+                                        'bg-amber-500/12 text-amber-400 border border-amber-500/20' => true,
+                                    ])>
+                                        {{ match($pub->status) {
+                                            'PUBLISHED' => 'Publicado',
+                                            'SCHEDULED' => 'Programado',
+                                            'ARCHIVED'  => 'Archivado',
+                                            default     => 'Borrador',
+                                        } }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium text-gray-500 dark:text-slate-500 bg-gray-100 dark:bg-slate-700/40 border border-gray-200 dark:border-slate-600/40">N.PUB</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                @if($hasLmsContent)
+                                    <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-slate-400">
+                                        @if($sections->count() > 0)
+                                            <span>{{ $sections->count() }} {{ Str::plural('sec.', $sections->count()) }}</span>
+                                        @endif
+                                        @if($totalContents > 0)
+                                            <span>{{ $totalContents }} {{ Str::plural('cont.', $totalContents) }}</span>
+                                        @endif
+                                        @if($resources->count() > 0)
+                                            <span>{{ $resources->count() }} {{ Str::plural('rec.', $resources->count()) }}</span>
+                                        @endif
+                                        @if($links->count() > 0)
+                                            <span>{{ $links->count() }} {{ Str::plural('link', $links->count()) }}</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-[11px] text-gray-400 dark:text-slate-600 italic">—</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="text-[11px] font-mono text-gray-500 dark:text-slate-500">
+                                    {{ \Carbon\Carbon::parse($item->finicial)->format('d/m') }}
+                                    <span class="text-gray-300 dark:text-slate-700">→</span>
+                                    {{ \Carbon\Carbon::parse($item->ffinal)->format('d/m') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-1">
+                                    <button wire:click="showDetails({{ $item->id }})"
+                                            title="Detalle"
+                                            class="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-700/60 border border-transparent hover:border-slate-600/50 transition-all duration-200">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                    <a href="{{ route('app.profesors.lms.lesson.wizard') }}?activity_id={{ $item->id }}"
+                                       title="{{ $hasLmsContent ? 'Editar' : 'Asistente IA' }}"
+                                       @class([
+                                           'p-1.5 rounded-lg transition-all duration-200 border border-transparent',
+                                           'text-purple-500 hover:text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/20' => $hasLmsContent,
+                                           'text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/20' => !$hasLmsContent,
+                                       ])>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </a>
+                                    <button wire:click="showExport({{ $item->id }})"
+                                            title="Exportar contenido"
+                                            class="p-1.5 rounded-lg text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/20 transition-all duration-200">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                    </button>
+                                    <button wire:click="showImport({{ $item->id }})"
+                                            title="{{ $hasLmsContent ? 'Ya tiene contenido' : 'Importar contenido' }}"
+                                            @disabled($hasLmsContent)
+                                            @class([
+                                                'p-1.5 rounded-lg transition-all duration-200 border border-transparent',
+                                                'text-slate-600 cursor-not-allowed' => $hasLmsContent,
+                                                'text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/20' => !$hasLmsContent,
+                                            ])>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                    </button>
+                                    @if($hasLmsContent)
+                                        <button wire:click="openListStudentPreview({{ $item->id }})"
+                                                title="Vista estudiante"
+                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all duration-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </button>
+                                        <button wire:click="confirmDeleteLesson({{ $item->id }})"
+                                                title="Eliminar lección"
+                                                class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-12">
+                                <svg class="w-12 h-12 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <p class="text-sm font-medium text-slate-400">No hay actividades disponibles</p>
+                                <p class="text-xs text-gray-500 dark:text-slate-600 mt-1">Ajusta los filtros o crea una actividad primero.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
 
         {{-- Paginación --}}
         @if($activities->hasPages())
@@ -1311,8 +1500,8 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions"
-             class="fixed inset-0 z-[9999] items-center justify-center bg-slate-900/90 backdrop-blur-md"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags"
+             class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay">
             <div class="max-w-4xl py-8 mx-auto px-6 space-y-5">
 
@@ -1329,7 +1518,7 @@
                     </div>
                     <p class="text-lg font-bold text-purple-200">Generando contenido con IA</p>
                     @if($act)
-                        <p class="text-sm text-slate-400">{{ $asignaturaName }} · {{ $gradoName }} · Sec. {{ $seccionName }}</p>
+                        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $asignaturaName }} · {{ $gradoName }} · Sec. {{ $seccionName }}</p>
                     @endif
                 </div>
 
@@ -1337,10 +1526,10 @@
                      x-data="{ openCompetencias: false, openIndicadores: false }">
 
                     {{-- Competencias (acordeón, cerrado por defecto) --}}
-                    <div class="w-full bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+                    <div class="w-full bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
                         {{-- Header clickeable --}}
                         <button @click="openCompetencias = !openCompetencias"
-                                class="w-full flex items-center gap-3 px-5 py-2.5 bg-slate-800/40 border-b border-slate-700/30 hover:bg-slate-800/60 transition-colors text-left">
+                                class="w-full flex items-center gap-3 px-5 py-2.5 bg-gray-100 dark:bg-slate-800/40 border-b border-gray-200 dark:border-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-800/60 transition-colors text-left">
                             <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center shrink-0">
                                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
@@ -1348,7 +1537,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-sm font-bold text-purple-200">Competencias</h3>
-                                <p class="text-[11px] text-slate-500 truncate">Competencias fundamentales del pensum</p>
+                                <p class="text-[11px] text-gray-400 dark:text-slate-500 truncate">Competencias fundamentales del pensum</p>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 @if($competencias?->isNotEmpty())
@@ -1356,7 +1545,7 @@
                                         {{ $competencias->count() }}
                                     </span>
                                 @endif
-                                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200"
+                                <svg class="w-4 h-4 text-gray-400 dark:text-slate-500 transition-transform duration-200"
                                      :class="openCompetencias ? 'rotate-180' : ''"
                                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -1372,16 +1561,16 @@
                                 <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                                     @foreach($competencias as $comp)
                                         @php $indCount = $comp->indicators?->count() ?? 0; @endphp
-                                        <div class="bg-slate-800/70 border border-purple-500/20 rounded-lg overflow-hidden">
+                                        <div class="bg-white dark:bg-slate-800/70 border border-purple-500/20 rounded-lg overflow-hidden">
                                             <div class="h-1 bg-gradient-to-r from-purple-500/60 to-purple-400/30 shrink-0"></div>
                                             <div class="p-4 flex flex-col gap-2">
-                                                <p class="text-sm font-semibold text-white leading-snug">{{ $comp->name }}</p>
+                                                <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{{ $comp->name }}</p>
                                                 @if($indCount > 0)
                                                     <div class="space-y-1">
                                                         @foreach($comp->indicators as $ind)
                                                             <div class="flex items-start gap-1.5">
                                                                 <span class="w-1 h-1 rounded-full bg-purple-400/40 mt-1.5 shrink-0"></span>
-                                                                <p class="text-xs text-slate-400 leading-relaxed">{{ $ind->description }}</p>
+                                                                <p class="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">{{ $ind->description }}</p>
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -1392,12 +1581,12 @@
                                 </div>
                             @else
                                 <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                                    <div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center mb-2">
-                                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-700/30 flex items-center justify-center mb-2">
+                                        <svg class="w-6 h-6 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
                                         </svg>
                                     </div>
-                                    <p class="text-sm text-slate-500 italic">No hay competencias asociadas</p>
+                                    <p class="text-sm text-gray-400 dark:text-slate-500 italic">No hay competencias asociadas</p>
                                 </div>
                             @endif
                         </div>
@@ -1405,14 +1594,14 @@
 
                     {{-- Actividad de referencia --}}
                     @if($act)
-                        <div class="bg-slate-800/30 border border-slate-700/30 rounded-lg p-4">
+                        <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/30 rounded-lg p-4">
                             <div class="flex items-center gap-2 mb-2">
-                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Actividad</span>
+                                <span class="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Actividad</span>
                             </div>
-                            <p class="text-sm text-slate-400">{{ $act->topic }}</p>
+                            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $act->topic }}</p>
                         </div>
                     @endif
                 </div>
@@ -1428,7 +1617,7 @@
 
         {{-- Overlay de resultado (sin animación, se muestra inmediatamente al completar) --}}
         @if($showGenerationResult)
-            <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/90 backdrop-blur-md">
+            <div class="fixed inset-0 z-[9999] flex items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md">
                 <div class="text-center space-y-5 max-w-2xl py-8 mx-auto px-6">
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/40 mx-auto">
                         <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1447,13 +1636,13 @@
                     </p>
 
                     @if($generationType === 'step1')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left space-y-3 min-h-[80px]">
-                            <h2 class="text-base font-bold text-white">{{ $lessonTitle }}</h2>
-                            <p class="text-sm text-slate-300 leading-relaxed">{{ $lessonDescription }}</p>
+                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 text-left space-y-3 min-h-[80px]">
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white">{{ $lessonTitle }}</h2>
+                            <p class="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">{{ $lessonDescription }}</p>
                         </div>
                     @elseif($generationType === 'section')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left">
-                            <p class="text-sm text-slate-300 leading-relaxed">
+                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 text-left">
+                            <p class="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
                                 {{ \Illuminate\Support\Str::limit(
                                     ($wizardSections[array_key_last($wizardSections)]['contents'][0]['body'] ?? ''),
                                     300
@@ -1461,13 +1650,13 @@
                             </p>
                         </div>
                     @elseif($generationType === 'step2')
-                        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 text-left max-h-80 overflow-y-auto space-y-3">
+                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 text-left max-h-80 overflow-y-auto space-y-3">
                             @foreach($wizardSections as $section)
                                 <div class="flex items-start gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0"></span>
                                     <div>
                                         <p class="text-sm font-bold text-emerald-300">{{ $section['title'] ?? '' }}</p>
-                                        <p class="text-xs text-slate-400 leading-relaxed mt-0.5">
+                                        <p class="text-xs text-gray-500 dark:text-slate-400 leading-relaxed mt-0.5">
                                             {{ \Illuminate\Support\Str::limit($section['contents'][0]['body'] ?? '', 150) }}
                                         </p>
                                     </div>
@@ -1490,14 +1679,14 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <button wire:click="backToList"
-                        class="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all">
+                        class="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/50 rounded-lg transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
                 </button>
                 <div>
-                    <h1 class="text-lg font-bold text-white">{{ $lessonTitle ?: 'Nueva Lección' }}</h1>
-                    <p class="text-xs text-slate-400">{{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—' }} · {{ $selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—' }} Sec.{{ $selectedActivity?->pevaluacion?->seccion?->name ?? '—' }}</p>
+                    <h1 class="text-lg font-bold text-gray-900 dark:text-white">{{ $lessonTitle ?: 'Nueva Lección' }}</h1>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—' }} · {{ $selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—' }} Sec.{{ $selectedActivity?->pevaluacion?->seccion?->name ?? '—' }}</p>
                 </div>
             </div>
 
@@ -1506,7 +1695,7 @@
                 @foreach(range(1, 4) as $step)
                     <div class="flex items-center">
                         <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold
-                            {{ $currentStep === $step ? 'bg-emerald-500 text-white' : ($currentStep > $step ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-500') }}">
+                            {{ $currentStep === $step ? 'bg-emerald-500 text-white' : ($currentStep > $step ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}">
                             @if($currentStep > $step)
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             @else
@@ -1514,7 +1703,7 @@
                             @endif
                         </span>
                         @if($step < 4)
-                            <span class="w-6 h-px mx-1 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-slate-700' }}"></span>
+                            <span class="w-6 h-px mx-1 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
                         @endif
                     </div>
                 @endforeach
@@ -1528,7 +1717,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <h3 class="text-base font-bold text-emerald-400 mb-1">¡Lección publicada exitosamente!</h3>
-                <p class="text-sm text-slate-400 mb-2">El contenido ya está disponible para los estudiantes.</p>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-2">El contenido ya está disponible para los estudiantes.</p>
                 <div class="flex items-center justify-center gap-3">
                     {{-- <button wire:click="openListStudentPreview({{ $selectedActivityId }})"
                             class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm rounded-lg font-medium transition-all">
@@ -1539,7 +1728,7 @@
                         Editar contenido completo
                     </button>
                     <button wire:click="backToList"
-                            class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded-lg font-medium transition-all">
+                            class="px-4 py-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm rounded-lg font-medium transition-all">
                         Volver al listado
                     </button>
                 </div>
@@ -1548,9 +1737,9 @@
             <div>
 
             {{-- Navegación entre pasos --}}
-            <div class="flex items-center justify-between my-4 border border-slate-700 rounded-lg px-4 py-2">
+            <div class="flex items-center justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2">
                 <button wire:click="goToStep({{ $currentStep - 1 }})"
-                        class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
+                        class="px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
                     ← Anterior
                 </button>
 
@@ -1572,10 +1761,10 @@
 
                     {{-- STEP 1: Información de la Lección --}}
                     @if($currentStep === 1)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-5 space-y-4">
-                            <div class="flex items-center gap-2 pb-3 border-b border-slate-700">
+                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg p-5 space-y-4">
+                            <div class="flex items-center gap-2 pb-3 border-b border-gray-200 dark:border-slate-700">
                                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">1</span>
-                                <h2 class="text-sm font-bold text-white uppercase tracking-wider">Información de la Lección</h2>
+                                <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Información de la Lección</h2>
                                 <div class="ml-auto">
                                     <button wire:click="generateStep1Content"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium
@@ -1590,58 +1779,58 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Título de la lección</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Título de la lección</label>
                                 <input type="text" wire:model="lessonTitle"
-                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
                                        placeholder="Título de la lección"/>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Descripción</label>
+                                <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Descripción</label>
                                 <textarea wire:model="lessonDescription" rows="3"
-                                          class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                                          class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
                                           placeholder="Breve descripción de la lección…"></textarea>
                             </div>
 
                             @if($selectedActivity?->learning)
-                                <div class="bg-slate-900/30 rounded-lg p-3 border border-slate-700/50">
-                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aprendizaje esperado</span>
-                                    <p class="text-sm text-slate-300 mt-1">{{ $selectedActivity->learning }}</p>
+                                <div class="bg-white dark:bg-slate-900/30 rounded-lg p-3 border border-gray-200 dark:border-slate-700/50">
+                                    <span class="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Aprendizaje esperado</span>
+                                    <p class="text-sm text-gray-600 dark:text-slate-300 mt-1">{{ $selectedActivity->learning }}</p>
                                 </div>
                             @endif
 
                             {{-- Referentes normativos con competencias e indicadores --}}
                             @if($wizardReferents && count($wizardReferents) > 0)
-                                <div class="border-t border-slate-700 pt-4 mt-2"
+                                <div class="border-t border-gray-200 dark:border-slate-700 pt-4 mt-2"
                                      x-data="{ expandedReferent: null }">
                                     <div class="flex items-center gap-2 mb-2">
                                         <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
-                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Referentes Normativos</span>
-                                        <span class="text-[10px] text-slate-600 font-mono">({{ count($wizardReferents) }})</span>
+                                        <span class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Referentes Normativos</span>
+                                        <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono">({{ count($wizardReferents) }})</span>
                                     </div>
 
                                     <div class="space-y-2">
                                         @foreach($wizardReferents as $rIdx => $referent)
-                                            <div class="bg-slate-900/40 border border-slate-700/60 rounded-lg overflow-hidden">
+                                            <div class="bg-gray-50 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden">
                                                 {{-- Cabecera del referente (click para expandir) --}}
                                                 <button @click="expandedReferent = expandedReferent === {{ $rIdx }} ? null : {{ $rIdx }}"
-                                                        class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-slate-800/40 transition-colors group">
+                                                        class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-800/40 transition-colors group">
                                                     <div class="flex items-center gap-2 min-w-0">
                                                         <svg class="w-3.5 h-3.5 text-amber-400/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                         </svg>
-                                                        <span class="text-sm font-medium text-slate-200 truncate">{{ $referent['name'] }}</span>
+                                                        <span class="text-sm font-medium text-gray-700 dark:text-slate-200 truncate">{{ $referent['name'] }}</span>
                                                         @if($referent['code'])
-                                                            <span class="text-[10px] text-slate-500 font-mono shrink-0">({{ $referent['code'] }})</span>
+                                                            <span class="text-[10px] text-gray-400 dark:text-slate-500 font-mono shrink-0">({{ $referent['code'] }})</span>
                                                         @endif
                                                     </div>
                                                     <div class="flex items-center gap-2 shrink-0">
-                                                        <span class="text-[10px] text-slate-600">
+                                                        <span class="text-[10px] text-gray-400 dark:text-slate-600">
                                                             {{ count($referent['competencies'] ?? []) }} comp.
                                                         </span>
-                                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200"
+                                                        <svg class="w-3.5 h-3.5 text-gray-400 dark:text-slate-500 transition-transform duration-200"
                                                              :class="expandedReferent === {{ $rIdx }} ? 'rotate-180' : ''"
                                                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -1653,7 +1842,7 @@
                                                 <div x-show="expandedReferent === {{ $rIdx }}"
                                                      x-cloak
                                                      x-transition:enter.duration.150ms>
-                                                    <div class="px-3 pb-3 space-y-2 border-t border-slate-700/50 pt-2">
+                                                    <div class="px-3 pb-3 space-y-2 border-t border-gray-200 dark:border-slate-700/50 pt-2">
                                                         @forelse($referent['competencies'] ?? [] as $competency)
                                                             <div class="pl-3 border-l-2 border-emerald-500/30">
                                                                 <div class="flex items-center gap-1.5 mb-1">
@@ -1665,21 +1854,21 @@
                                                                 @if(count($competency['indicators'] ?? []) > 0)
                                                                     <ul class="ml-5 space-y-0.5">
                                                                         @foreach($competency['indicators'] as $indicator)
-                                                                            <li class="text-[11px] text-slate-400 flex items-start gap-1.5">
-                                                                                <span class="text-slate-600 mt-0.5 select-none">•</span>
+                                                                            <li class="text-[11px] text-gray-500 dark:text-slate-400 flex items-start gap-1.5">
+                                                                                <span class="text-gray-400 dark:text-slate-600 mt-0.5 select-none">•</span>
                                                                                 <span>{{ $indicator['description'] }}</span>
                                                                                 @if($indicator['code'])
-                                                                                    <span class="text-[10px] text-slate-600 font-mono shrink-0">[{{ $indicator['code'] }}]</span>
+                                                                                    <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono shrink-0">[{{ $indicator['code'] }}]</span>
                                                                                 @endif
                                                                             </li>
                                                                         @endforeach
                                                                     </ul>
                                                                 @else
-                                                                    <p class="ml-5 text-[11px] text-slate-600 italic">Sin indicadores asociados</p>
+                                                                    <p class="ml-5 text-[11px] text-gray-400 dark:text-slate-600 italic">Sin indicadores asociados</p>
                                                                 @endif
                                                             </div>
                                                         @empty
-                                                            <p class="text-xs text-slate-600 italic">Sin competencias asociadas</p>
+                                                            <p class="text-xs text-gray-400 dark:text-slate-600 italic">Sin competencias asociadas</p>
                                                         @endforelse
                                                     </div>
                                                 </div>
@@ -1688,14 +1877,14 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="border-t border-slate-700 pt-4 mt-2">
+                                <div class="border-t border-gray-200 dark:border-slate-700 pt-4 mt-2">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 text-gray-400 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Referentes Normativos</span>
+                                        <span class="text-xs font-bold text-gray-400 dark:text-slate-600 uppercase tracking-wider">Referentes Normativos</span>
                                     </div>
-                                    <p class="text-xs text-slate-600 italic">No hay referentes normativos registrados para este plan de estudio.</p>
+                                    <p class="text-xs text-gray-400 dark:text-slate-600 italic">No hay referentes normativos registrados para este plan de estudio.</p>
                                 </div>
                             @endif
                         </div>
@@ -1703,7 +1892,7 @@
 
                     {{-- STEP 2: Editor de Diapositivas (Slide Editor) --}}
                     @if($currentStep === 2)
-                        <div class="bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
+                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden"
                              x-data="{
                                 showSlideList: false,
                                 editSlideTitle: false,
@@ -1717,27 +1906,27 @@
                             @endphp
 
                             {{-- Slide Navigation Bar --}}
-                            <div class="flex items-center justify-between gap-2 px-4 py-2.5 bg-slate-800/40 border-b border-slate-700/30">
+                            <div class="flex items-center justify-between gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-800/40 border-b border-gray-200 dark:border-slate-700/30">
                                 <div class="flex items-center gap-2">
                                     <button wire:click="prevSlide"
-                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex <= 0 ? 'opacity-40 pointer-events-none' : '' }}">
+                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex <= 0 ? 'opacity-40 pointer-events-none' : '' }}">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                                         Anterior
                                     </button>
-                                    <span class="text-slate-600 mx-1">|</span>
+                                    <span class="text-gray-400 dark:text-slate-600 mx-1">|</span>
                                     <button wire:click="nextSlide"
-                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex >= $totalSlides - 1 ? 'opacity-40 pointer-events-none' : '' }}">
+                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex >= $totalSlides - 1 ? 'opacity-40 pointer-events-none' : '' }}">
                                         Siguiente
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     </button>
                                 </div>
 
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[11px] text-slate-500 font-mono">
+                                    <span class="text-[11px] text-gray-400 dark:text-slate-500 font-mono">
                                         Diapositiva <span class="text-emerald-400 font-bold">{{ $currentSlideIndex + 1 }}</span> / {{ max(0, $totalSlides) }}
                                     </span>
                                     <button @click="showSlideList = !showSlideList"
-                                            class="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 rounded-lg transition-all"
+                                            class="p-1.5 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all"
                                             title="Lista de diapositivas">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                     </button>
@@ -1746,7 +1935,7 @@
 
                             {{-- Slide List (collapsible) --}}
                             <div x-show="showSlideList" x-cloak x-transition:enter.duration.150ms
-                                 class="border-b border-slate-700/30 bg-slate-900/60">
+                                 class="border-b border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-900/60">
                                 <div class="max-h-48 overflow-y-auto p-2 space-y-0.5">
                                     @foreach($wizardSections as $sIdx2 => $sec)
                                         @php
@@ -1755,13 +1944,13 @@
                                         @endphp
                                         <button wire:click="goToSlide({{ $sIdx2 }}); $el.closest('[x-data]').__x.$data.showSlideList = false"
                                                 class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs
-                                                       {{ $sIdx2 === $currentSlideIndex ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/40 border border-transparent' }}">
-                                            <span class="flex items-center justify-center w-5 h-5 rounded bg-slate-700/60 text-[10px] font-mono shrink-0">{{ $sIdx2 + 1 }}</span>
+                                                       {{ $sIdx2 === $currentSlideIndex ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border border-transparent' }}">
+                                            <span class="flex items-center justify-center w-5 h-5 rounded bg-gray-200 dark:bg-slate-700/60 text-[10px] font-mono shrink-0">{{ $sIdx2 + 1 }}</span>
                                             <span class="truncate flex-1">{{ $sec['title'] }}</span>
                                             @if($hasSecContent)
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
                                             @else
-                                                <span class="w-1.5 h-1.5 rounded-full bg-slate-600/40 shrink-0"></span>
+                                                <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
                                             @endif
                                         </button>
                                     @endforeach
@@ -1777,10 +1966,10 @@
                                             {{ $currentSlideIndex + 1 }}
                                         </span>
                                         <input wire:model="wizardSections.{{ $currentSlideIndex }}.title"
-                                               class="flex-1 bg-transparent border-b border-transparent hover:border-slate-600 focus:border-emerald-500 text-sm font-bold text-white px-0 py-0.5 focus:outline-none transition-colors"
+                                               class="flex-1 bg-transparent border-b border-transparent hover:border-gray-400 dark:hover:border-slate-600 focus:border-emerald-500 text-sm font-bold text-gray-900 dark:text-white px-0 py-0.5 focus:outline-none transition-colors"
                                                placeholder="Titulo de la diapositiva"/>
                                         <button wire:click="toggleWizardSectionVisibility({{ $currentSlideIndex }})"
-                                                class="p-1.5 rounded-lg transition-all {{ ($currentSlide['is_visible'] ?? true) ? 'text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10' : 'text-slate-600 hover:text-slate-400 hover:bg-slate-700/50' }}"
+                                                class="p-1.5 rounded-lg transition-all {{ ($currentSlide['is_visible'] ?? true) ? 'text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-400 dark:text-slate-600 hover:text-gray-600 dark:hover:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700/50' }}"
                                                 title="{{ ($currentSlide['is_visible'] ?? true) ? 'Visible' : 'Oculto' }}">
                                             @if($currentSlide['is_visible'] ?? true)
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -1796,13 +1985,13 @@
                                         {{-- Tab buttons --}}
                                         <div class="flex gap-0.5 mb-2">
                                             <button @click="editorTab = 'edit'"
-                                                    :class="editorTab === 'edit' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+                                                    :class="editorTab === 'edit' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 border-transparent'"
                                                     class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all text-center">
                                                 <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 Editor
                                             </button>
                                             <button @click="editorTab = 'preview'"
-                                                    :class="editorTab === 'preview' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/30' : 'text-slate-500 hover:text-slate-300 border-transparent'"
+                                                    :class="editorTab === 'preview' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/30' : 'text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 border-transparent'"
                                                     class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-t-lg border border-b-0 transition-all text-center">
                                                 <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                 Vista previa
@@ -1814,16 +2003,16 @@
                                             @if(isset($wizardSections[$currentSlideIndex]['contents'][0]))
                                                 <textarea wire:model="wizardSections.{{ $currentSlideIndex }}.contents.0.body"
                                                           rows="12"
-                                                          class="w-full bg-slate-950/80 border border-slate-700/50 rounded-lg px-4 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
+                                                          class="w-full bg-white dark:bg-slate-950/80 border border-gray-300 dark:border-slate-700/50 rounded-lg px-4 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
                                                           placeholder="<!-- Escribe o pega el contenido HTML de esta diapositiva -->"
                                                           spellcheck="false"></textarea>
                                             @else
-                                                <div class="text-center py-10 bg-slate-900/50 border border-dashed border-slate-700/50 rounded-lg">
-                                                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
-                                                        <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                                <div class="text-center py-10 bg-gray-50 dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-700/50 rounded-lg">
+                                                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gray-200 dark:bg-slate-700/30 flex items-center justify-center">
+                                                        <svg class="w-6 h-6 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                                     </div>
-                                                    <p class="text-xs text-slate-500 font-medium mb-1">Esta diapositiva esta vacia</p>
-                                                    <p class="text-[10px] text-slate-600">Usa los botones de abajo para generar contenido o escribe HTML directamente</p>
+                                                    <p class="text-xs text-gray-400 dark:text-slate-500 font-medium mb-1">Esta diapositiva esta vacia</p>
+                                                    <p class="text-[10px] text-gray-400 dark:text-slate-600">Usa los botones de abajo para generar contenido o escribe HTML directamente</p>
                                                 </div>
                                             @endif
 
@@ -1837,7 +2026,7 @@
                                                      x-data="{ previewIndex: null }">
                                                     @foreach($allContents as $cIdx => $content)
                                                         <div class="flex items-start gap-2 px-3 py-2 rounded-lg transition-all text-xs
-                                                                    {{ $cIdx === 0 ? 'bg-emerald-500/8 border border-emerald-500/10' : 'bg-slate-800/50 border border-slate-700/30 hover:bg-slate-800/80' }}">
+                                                                    {{ $cIdx === 0 ? 'bg-emerald-500/8 border border-emerald-500/10' : 'bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/30 hover:bg-gray-50 dark:hover:bg-slate-800/80' }}">
                                                             <div class="flex-1 min-w-0">
                                                                 <div class="flex items-center gap-1.5 mb-0.5">
                                                                     @if($cIdx === 0)
@@ -1849,12 +2038,12 @@
                                                                                 {{ ($content['type'] ?? '') === 'MEDIA' ? 'bg-fuchsia-500/10 text-fuchsia-400' : '' }}">
                                                                         {{ $content['type'] ?? 'TEXT' }}
                                                                     </span>
-                                                                    <span class="text-slate-500 truncate max-w-[200px]"
+                                                                    <span class="text-gray-400 dark:text-slate-500 truncate max-w-[200px]"
                                                                           x-data="{ editing: false }"
                                                                           x-cloak>
                                                                         {{-- Display mode --}}
                                                                         <span x-show="!editing"
-                                                                              class="inline-flex items-center gap-1 cursor-pointer hover:text-slate-300 transition-colors"
+                                                                              class="inline-flex items-center gap-1 cursor-pointer hover:text-gray-700 dark:hover:text-slate-300 transition-colors"
                                                                               @click="editing = true">
                                                                             <span class="truncate max-w-[160px]">{{ $content['title'] ? Str::limit($content['title'], 40) : 'sin título' }}</span>
                                                                             <svg class="w-3 h-3 shrink-0 text-slate-600 hover:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -1868,7 +2057,7 @@
                                                                                    @keydown.escape="editing = false"
                                                                                    @keydown.enter="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
                                                                                    x-init="$nextTick(() => $refs.titleInput?.focus())"
-                                                                                   class="w-full bg-slate-900/60 border border-emerald-500/40 rounded px-1.5 py-0.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400"/>
+                                                                                   class="w-full bg-white dark:bg-slate-900/60 border border-emerald-500/40 rounded px-1.5 py-0.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-400"/>
                                                                             <button @click="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
                                                                                     class="p-1 rounded transition-all text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15"
                                                                                     title="Guardar título">
@@ -1877,7 +2066,7 @@
                                                                         </span>
                                                                     </span>
                                                                 </div>
-                                                                <div class="text-[10px] text-slate-600 leading-relaxed line-clamp-1">
+                                                                <div class="text-[10px] text-gray-400 dark:text-slate-600 leading-relaxed line-clamp-1">
                                                                     @php
                                                                         $bodyText = strip_tags($content['body'] ?? '');
                                                                         $bodyText = preg_replace('/\s+/', ' ', $bodyText);
@@ -1888,14 +2077,14 @@
                                                             <div class="flex items-center gap-1 shrink-0">
                                                                 <button @click.prevent="previewIndex = {{ $cIdx }}"
                                                                         class="p-1.5 rounded-lg transition-all
-                                                                               text-slate-600 hover:text-white hover:bg-slate-600/50">
+                                                                               text-gray-400 dark:text-slate-600 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-600/50">
                                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                                 </button>
                                                                 @if($blockCount > 1)
                                                                     <button wire:click="removeWizardContent({{ $currentSlideIndex }}, {{ $cIdx }})"
                                                                             wire:confirm="Eliminar este bloque de contenido?"
                                                                             class="p-1.5 rounded-lg transition-all
-                                                                                   text-slate-600 hover:text-red-400 hover:bg-red-500/10">
+                                                                                   text-gray-400 dark:text-slate-600 hover:text-red-400 hover:bg-red-500/10">
                                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                                     </button>
                                                                 @endif
@@ -1954,8 +2143,8 @@
                                                         {!! $previewContent !!}
                                                     </div>
                                                 @else
-                                                    <div class="text-center py-12 text-slate-400">
-                                                        <svg class="w-10 h-10 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    <div class="text-center py-12 text-gray-400 dark:text-slate-400">
+                                                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                         <p class="text-sm font-medium">Sin contenido para previsualizar</p>
                                                         <p class="text-xs mt-1">Genera contenido o escribe HTML en la pestana Editor</p>
                                                     </div>
@@ -1976,10 +2165,10 @@
 
                                 {{-- Action Buttons --}}
                                 @php $blockCount = count($wizardSections[$currentSlideIndex]['contents'] ?? []); @endphp
-                                <div class="px-4 py-2 border-t border-slate-700/30 bg-slate-900/30">
+                                <div class="px-4 py-2 border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-900/30">
                                     <div class="flex flex-wrap items-center gap-2">
                                         @if($blockCount >= 2)
-                                            <span class="text-[10px] text-slate-500 italic px-1 mr-1">Máx. 2 bloques</span>
+                                            <span class="text-[10px] text-gray-400 dark:text-slate-500 italic px-1 mr-1">Máx. 2 bloques</span>
                                         @endif
                                         <button wire:click="generateSlideText"
                                                 @click="editorTab = 'preview'"
@@ -2024,7 +2213,17 @@
                                             Generar Diagrama
                                         </button>
 
-                                        <span class="w-px h-5 bg-slate-700/50 mx-1"></span>
+                                        <button wire:click="generateSlideHtmlTags"
+                                                @click="editorTab = 'preview'"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSlideHtmlTags"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v4a1 1 0 001 1h4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14h6m-3-3v6"/></svg>
+                                            Etiquetar HTML
+                                        </button>
+
+                                        <span class="w-px h-5 bg-slate-700/50 mx-1 ml-auto"></span>
 
                                         <button wire:click="removeWizardSection({{ $currentSlideIndex }})"
                                                 wire:confirm="Eliminar esta diapositiva?"
@@ -2057,11 +2256,11 @@
                             @else
                                 {{-- Empty State: No slides --}}
                                 <div class="p-8 text-center">
-                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-slate-700/30 flex items-center justify-center">
-                                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                    <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-200 dark:bg-slate-700/30 flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                     </div>
-                                    <h3 class="text-sm font-bold text-slate-400 mb-2">No hay diapositivas</h3>
-                                    <p class="text-xs text-slate-500 mb-2">Agrega una seccion o genera la estructura con IA para empezar.</p>
+                                    <h3 class="text-sm font-bold text-gray-500 dark:text-slate-400 mb-2">No hay diapositivas</h3>
+                                    <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">Agrega una seccion o genera la estructura con IA para empezar.</p>
                                     <div class="flex items-center justify-center gap-3">
                                         <button wire:click="generateStep2Sections"
                                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
@@ -2074,25 +2273,25 @@
                             @endif
 
                             {{-- Add Section --}}
-                            <div class="flex gap-2 px-4 py-2 border-t border-slate-700/30 bg-slate-800/20">
+                            <div class="flex gap-2 px-4 py-2 border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20">
                                 <input wire:model="newSectionTitle" wire:keydown.enter="addWizardSection"
                                        placeholder="Nueva diapositiva (ej: Introduccion)..."
-                                       class="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
+                                       class="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
                                 <button wire:click="addWizardSection"
-                                        class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded-lg font-medium transition-all whitespace-nowrap">
+                                        class="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-white text-xs rounded-lg font-medium transition-all whitespace-nowrap">
                                     + Diapositiva
                                 </button>
                             </div>
 
                             {{-- ===== PREGUNTAS DE REPASO (Markdown) ===== --}}
-                            <div class="border-t border-slate-700/30 bg-slate-800/20"
+                            <div class="border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20"
                                  x-data="{ repasoOpen: @json(!empty($reviewQuestions)) }">
                                 <button @click="repasoOpen = !repasoOpen"
-                                        class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-700/20 transition-colors">
+                                        class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/20 transition-colors">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         <span class="font-bold">Preguntas de Repaso</span>
-                                        <span class="text-[10px] text-slate-600 font-mono">Markdown</span>
+                                        <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono">Markdown</span>
                                         @if(!empty($reviewQuestions))
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60"></span>
                                         @endif
@@ -2101,13 +2300,13 @@
                                          :class="repasoOpen ? 'rotate-180' : ''"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 <div x-show="repasoOpen" x-cloak x-transition:enter.duration.150ms class="px-4 pb-3 space-y-2">
-                                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                                    <p class="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
                                         Escribe preguntas de repaso en formato Markdown. Puedes usar <code class="text-emerald-400/80">##</code> títulos,
                                         <code class="text-emerald-400/80">**negritas**</code>, listas, tablas y más.
                                     </p>
                                     <textarea wire:model="reviewQuestions"
                                               rows="8"
-                                              class="w-full bg-slate-950/80 border border-slate-700/50 rounded-lg px-4 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
+                                              class="w-full bg-white dark:bg-slate-950/80 border border-gray-300 dark:border-slate-700/50 rounded-lg px-4 py-2.5 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
                                               placeholder="## Preguntas de Repaso
 
 1. Cuál es...?
@@ -2117,7 +2316,7 @@
 Cómo...?"
                                               spellcheck="false"></textarea>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-[10px] text-slate-600">{{ strlen($reviewQuestions) }} caracteres</span>
+                                        <span class="text-[10px] text-gray-400 dark:text-slate-600">{{ strlen($reviewQuestions) }} caracteres</span>
                                         <div class="flex items-center gap-2">
                                             <button wire:click="generateReviewQuestions"
                                                     class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all">
@@ -2133,7 +2332,7 @@ Cómo...?"
                                             @endif
                                             <button wire:click="$set('reviewQuestions', '')"
                                                     wire:confirm="Limpiar las preguntas de repaso?"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 Limpiar
                                             </button>
@@ -2147,14 +2346,14 @@ Cómo...?"
                                 <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="review-preview-modal">
                                     <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="$set('showReviewPreview', false)"></div>
                                     <div class="relative min-h-screen flex items-center justify-center p-4">
-                                        <div class="relative w-full max-w-3xl bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl overflow-hidden">
+                                        <div class="relative w-full max-w-3xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-2xl shadow-2xl overflow-hidden">
                                             {{-- Header --}}
-                                            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-slate-800/90">
+                                            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/90">
                                                 <div class="flex items-center gap-2">
                                                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                    <h3 class="text-sm font-bold text-white">Vista Previa — Preguntas de Repaso</h3>
+                                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Vista Previa — Preguntas de Repaso</h3>
                                                 </div>
-                                                <button wire:click="$set('showReviewPreview', false)" class="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
+                                                <button wire:click="$set('showReviewPreview', false)" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6L18 18"/></svg>
                                                 </button>
                                             </div>
@@ -2174,9 +2373,9 @@ Cómo...?"
                                                 </div>
                                             </div>
                                             {{-- Footer --}}
-                                            <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-slate-700 bg-slate-800/60">
+                                            <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60">
                                                 <button wire:click="$set('showReviewPreview', false)"
-                                                        class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors">
+                                                        class="px-4 py-2 text-xs font-medium text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/50 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
                                                     Cerrar
                                                 </button>
                                             </div>
@@ -2190,18 +2389,18 @@ Cómo...?"
                                         {{-- STEP 3: Recursos y Enlaces — Tabbed interface --}}
                     @if($currentStep === 3)
                         <div wire:key="step3-recursos"
-                             class="w-full bg-slate-800/50 border border-slate-700 rounded-lg overflow-hidden"
+                             class="w-full bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden"
                              x-data="{ activeTab: 'resources', showConfirmDeleteResources: false }">
                             {{-- Header --}}
-                            <div class="flex items-center gap-3 px-5 py-2.5 bg-slate-800/40 border-b border-slate-700/30">
+                            <div class="flex items-center gap-3 px-5 py-2.5 bg-gray-100 dark:bg-slate-800/40 border-b border-gray-200 dark:border-slate-700/30">
                                 <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 flex items-center justify-center shrink-0">
                                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h2 class="text-sm font-bold text-white tracking-wide">Recursos y Enlaces</h2>
-                                    <p class="text-[11px] text-slate-500 truncate">Material descargable, HTML embeds y enlaces de interés para la lección</p>
+                                    <h2 class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Recursos y Enlaces</h2>
+                                    <p class="text-[11px] text-gray-400 dark:text-slate-500 truncate">Material descargable, HTML embeds y enlaces de interés para la lección</p>
                                 </div>
                                 <button @click="showConfirmDeleteResources = true"
                                         class="text-[11px] text-red-400/60 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-all inline-flex items-center gap-1.5 shrink-0 {{ count($wizardResources) === 0 && count($wizardLinks) === 0 && count($wizardHtmlEmbeds) === 0 ? 'hidden' : '' }}">
@@ -2213,9 +2412,9 @@ Cómo...?"
                             </div>
 
                             {{-- Tabs de navegación (tab-fill: ancho completo) --}}
-                            <div class="flex items-stretch gap-0.5 border-b border-slate-700/50 bg-slate-900/30 px-5">
+                            <div class="flex items-stretch gap-0.5 border-b border-gray-200 dark:border-slate-700/50 bg-gray-50 dark:bg-slate-900/30 px-5">
                                 <button @click="activeTab = 'resources'"
-                                        :class="activeTab === 'resources' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        :class="activeTab === 'resources' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/40' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 border-transparent hover:border-gray-300 dark:hover:border-slate-600/40'"
                                         class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -2226,25 +2425,25 @@ Cómo...?"
                                           x-text="{{ count($wizardResources) }}"></span>
                                 </button>
                                 <button @click="activeTab = 'embeds'"
-                                        :class="activeTab === 'embeds' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        :class="activeTab === 'embeds' ? 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/40' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 border-transparent hover:border-gray-300 dark:hover:border-slate-600/40'"
                                         class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                     </svg>
                                     HTML Embeds
                                     <span class="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-full"
-                                          :class="activeTab === 'embeds' ? 'bg-fuchsia-500/20 text-fuchsia-400' : 'bg-slate-700/50 text-slate-500'"
+                                          :class="activeTab === 'embeds' ? 'bg-fuchsia-500/20 text-fuchsia-400' : 'bg-gray-200 dark:bg-slate-700/50 text-gray-500 dark:text-slate-500'"
                                           x-text="{{ count($wizardHtmlEmbeds) }}"></span>
                                 </button>
                                 <button @click="activeTab = 'links'"
-                                        :class="activeTab === 'links' ? 'text-sky-300 bg-sky-500/10 border-sky-500/40' : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-600/40'"
+                                        :class="activeTab === 'links' ? 'text-sky-300 bg-sky-500/10 border-sky-500/40' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 border-transparent hover:border-gray-300 dark:hover:border-slate-600/40'"
                                         class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all duration-200">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                     </svg>
                                     <span class="hidden sm:inline">Enlaces</span> externos
                                     <span class="text-[10px] font-mono ml-1 px-1.5 py-0.5 rounded-full"
-                                          :class="activeTab === 'links' ? 'bg-sky-500/20 text-sky-400' : 'bg-slate-700/50 text-slate-500'"
+                                          :class="activeTab === 'links' ? 'bg-sky-500/20 text-sky-400' : 'bg-gray-200 dark:bg-slate-700/50 text-gray-500 dark:text-slate-500'"
                                           x-text="{{ count($wizardLinks) }}"></span>
                                 </button>
                             </div>
@@ -2259,10 +2458,10 @@ Cómo...?"
                                             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
-                                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Archivos descargables</h3>
+                                            <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Archivos descargables</h3>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardResources) }} archivos</span>
+                                            <span class="text-[11px] text-gray-400 dark:text-slate-500 bg-gray-200 dark:bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardResources) }} archivos</span>
                                         </div>
                                     </div>
 
@@ -2294,7 +2493,7 @@ Cómo...?"
                                                     ];
                                                     $is = $iconStyles[$icon] ?? $iconStyles['file'];
                                                 @endphp
-                                                <div wire:key="resource-{{ $res['id'] }}" class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
+                                                <div wire:key="resource-{{ $res['id'] }}" class="flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/40 rounded-lg hover:border-gray-300 dark:hover:border-slate-600/60 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition-all group">
                                                     @if($icon === 'image')
                                                         <button wire:click="previewResourceImage({{ $rIdx }})"
                                                                 class="w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-slate-600/30 hover:ring-2 hover:ring-emerald-500/50 transition-all cursor-pointer"
@@ -2326,17 +2525,17 @@ Cómo...?"
                                                         </div>
                                                     @endif
                                                     <div class="flex-1 min-w-0">
-                                                        <p class="text-xs font-medium text-slate-200 truncate">{{ $res['display_name'] }}</p>
-                                                        <p class="text-[10px] text-slate-500 truncate">{{ $res['media']['original_name'] ?? '' }} <span class="text-slate-600">·</span> {{ $res['media']['size_for_humans'] ?? '' }}
+                                                        <p class="text-xs font-medium text-gray-700 dark:text-slate-200 truncate">{{ $res['display_name'] }}</p>
+                                                        <p class="text-[10px] text-gray-400 dark:text-slate-500 truncate">{{ $res['media']['original_name'] ?? '' }} <span class="text-gray-300 dark:text-slate-600">·</span> {{ $res['media']['size_for_humans'] ?? '' }}
                                                             @if($res['section_id'])
-                                                                <span class="text-slate-600">·</span>
+                                                                <span class="text-gray-300 dark:text-slate-600">·</span>
                                                                 <span class="text-emerald-400/70">{{ collect($wizardSections)->firstWhere('id', $res['section_id'])['title'] ?? 'Sección' }}</span>
                                                             @endif
                                                         </p>
                                                     </div>
                                                     <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button wire:click="editWizardResource({{ $rIdx }})"
-                                                                class="text-slate-400/60 hover:text-sky-300 transition-all text-xs p-1 rounded hover:bg-sky-500/10"
+                                                                class="text-gray-400 dark:text-slate-400/60 hover:text-sky-300 transition-all text-xs p-1 rounded hover:bg-sky-500/10"
                                                                 title="Editar recurso">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -2354,11 +2553,11 @@ Cómo...?"
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-gray-50 dark:bg-slate-800/20 border border-dashed border-gray-200 dark:border-slate-700/30 rounded-lg mb-2">
+                                            <svg class="w-5 h-5 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                             </svg>
-                                            <p class="text-xs text-slate-500">Sin archivos aún. Agrega recursos descargables para la lección.</p>
+                                            <p class="text-xs text-gray-400 dark:text-slate-500">Sin archivos aún. Agrega recursos descargables para la lección.</p>
                                         </div>
                                     @endif
 
@@ -2372,7 +2571,7 @@ Cómo...?"
                                                     Editando: <span class="text-sky-200">{{ $wizardResources[$editingResourceIndex]['display_name'] }}</span>
                                                 </span>
                                                 <button wire:click="cancelEditResource"
-                                                        class="ml-auto text-[10px] text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 px-2 py-0.5 rounded transition-colors">
+                                                        class="ml-auto text-[10px] text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 px-2 py-0.5 rounded transition-colors">
                                                     Cancelar
                                                 </button>
                                             </div>
@@ -2382,7 +2581,7 @@ Cómo...?"
                                         <div class="flex gap-2">
                                             <div class="flex-1">
                                                 <input wire:model="resourceName" placeholder="Nombre del recurso"
-                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
+                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
                                                 @error('resourceName')
                                                     <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
                                                 @enderror
@@ -2390,7 +2589,7 @@ Cómo...?"
                                             @if(count($wizardSections) > 0)
                                                 <div class="flex-none">
                                                     <select wire:model="resourceSectionId"
-                                                            class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
                                                         <option value="">Sin sección</option>
                                                         @foreach($wizardSections as $sec)
                                                             <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
@@ -2409,7 +2608,7 @@ Cómo...?"
                                                            class="absolute inset-0 opacity-0 cursor-pointer @error('resourceFile') border-2 border-red-500/50 @enderror"
                                                            @change="const f = $event.target.files[0]; if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = e => { window._filePreviewUrl = e.target.result; window._filePreviewType = f.type; previewUrl = e.target.result; previewType = f.type }; r.readAsDataURL(f) } else { window._filePreviewUrl = null; window._filePreviewType = null; previewUrl = null; previewType = null }"/>
                                                     <label for="resourceFile"
-                                                           class="flex items-center gap-1.5 px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-slate-700 hover:bg-slate-600 border-slate-600/50 hover:border-slate-500/50 @enderror text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
+                                                           class="flex items-center gap-1.5 px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 border-gray-300 dark:border-slate-600/50 hover:border-gray-400 dark:hover:border-slate-500/50 @enderror text-gray-600 dark:text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                                                         </svg>
@@ -2419,7 +2618,7 @@ Cómo...?"
                                                         <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
                                                     @enderror
                                                 </div>
-                                                <p class="flex-1 text-[10px] text-slate-500 leading-[36px]">Máx. 2 MB por archivo · 10 MB total por lección</p>
+                                                <p class="flex-1 text-[10px] text-gray-400 dark:text-slate-500 leading-[36px]">Máx. 2 MB por archivo · 10 MB total por lección</p>
                                                 <button wire:click="addWizardResource"
                                                         class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 shrink-0">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2429,7 +2628,7 @@ Cómo...?"
                                                 </button>
                                             </div>
                                             <template x-if="previewUrl">
-                                                <div class="mt-2 rounded-xl overflow-hidden border border-emerald-500/30 bg-slate-800/50"
+                                                <div class="mt-2 rounded-xl overflow-hidden border border-emerald-500/30 bg-white dark:bg-slate-800/50"
                                                      title="Vista previa del archivo seleccionado">
                                                     <div class="relative w-full max-w-[200px] mx-auto">
                                                         <img :src="previewUrl" alt="Preview"
@@ -2439,7 +2638,7 @@ Cómo...?"
                                                         <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                         </svg>
-                                                        <span class="text-[10px] text-slate-400">Archivo seleccionado — listo para subir</span>
+                                                        <span class="text-[10px] text-gray-500 dark:text-slate-400">Archivo seleccionado — listo para subir</span>
                                                     </div>
                                                 </div>
                                             </template>
@@ -2498,11 +2697,11 @@ Cómo...?"
                                             ."Genera ÚNICAMENTE la imagen solicitada. Sin descripciones adicionales, sin explicaciones, sin variantes. Entrega la imagen en el formato y proporción especificados.";
                                     @endphp
 
-                                    <div class="mt-3 border-t border-slate-700/30 pt-3"
+                                    <div class="mt-3 border-t border-gray-200 dark:border-slate-700/30 pt-3"
                                          x-data="{ showPrompt: false }">
                                         <button @click="showPrompt = !showPrompt"
                                                 class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] font-medium transition-colors
-                                                       text-slate-400 hover:text-amber-300 hover:bg-amber-500/5">
+                                                       text-gray-500 dark:text-slate-400 hover:text-amber-300 hover:bg-amber-500/5">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                             </svg>
@@ -2516,12 +2715,12 @@ Cómo...?"
                                              class="mt-3 p-4 bg-gradient-to-br from-amber-500/5 via-slate-900/80 to-slate-900 border border-amber-500/20 rounded-lg space-y-3">
                                             {{-- Selector de sección --}}
                                             <div class="flex items-center gap-3">
-                                                <div class="flex items-center gap-2 text-[11px] text-slate-400 shrink-0">
+                                                <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-slate-400 shrink-0">
                                                     <svg class="w-3.5 h-3.5 text-amber-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                                     Sección:
                                                 </div>
                                                 <select wire:model.live="step3ImageSectionId"
-                                                        class="flex-1 bg-slate-800/80 border border-slate-600/50 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:border-amber-500/50 focus:outline-none">
+                                                        class="flex-1 bg-white dark:bg-slate-800/80 border border-gray-300 dark:border-slate-600/50 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-slate-200 focus:border-amber-500/50 focus:outline-none">
                                                     <option value="">— Seleccionar sección —</option>
                                                     @foreach($wizardSections as $sec)
                                                         <option value="{{ $sec['id'] }}">{{ $sec['title'] }}</option>
@@ -2539,22 +2738,22 @@ Cómo...?"
                                                     </div>
                                                     <div>
                                                         <h4 class="text-sm font-bold text-amber-300">Prompt — Imagen didáctica</h4>
-                                                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                                                        <p class="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">
                                                             Copia este prompt y pégalo en un generador de imágenes con IA
-                                                            (<span class="text-slate-300">DALL·E, Midjourney, Stable Diffusion, Copilot</span>)
+                                                            (<span class="text-gray-600 dark:text-slate-300">DALL·E, Midjourney, Stable Diffusion, Copilot</span>)
                                                             para crear un recurso visual descargable para la lección.
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <button @click="showPrompt = false"
-                                                        class="p-1 hover:bg-slate-700/50 rounded-lg transition-colors shrink-0">
-                                                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        class="p-1 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-colors shrink-0">
+                                                    <svg class="w-4 h-4 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
 
                                             {{-- Prompt text --}}
                                             <div class="relative" x-data="{}">
-                                                <pre class="bg-slate-950/80 border border-slate-700/50 rounded-lg p-4 text-[11px] text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $step3ImagePrompt }}</pre>
+                                                <pre class="bg-white dark:bg-slate-950/80 border border-gray-200 dark:border-slate-700/50 rounded-lg p-4 text-[11px] text-gray-600 dark:text-slate-300 leading-relaxed font-mono whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">{{ $step3ImagePrompt }}</pre>
                                                 <button @click="
                                                     const btn = $event.currentTarget;
                                                     navigator.clipboard.writeText(btn.parentElement.querySelector('pre')?.textContent || '');
@@ -2568,7 +2767,7 @@ Cómo...?"
                                             </div>
 
                                             {{-- Footer --}}
-                                            <div class="flex items-center justify-between text-[10px] text-slate-500">
+                                            <div class="flex items-center justify-between text-[10px] text-gray-400 dark:text-slate-500">
                                                 <span class="flex items-center gap-1">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                     La imagen generada podrás asociarla como recurso descargable a la lección.
@@ -2586,20 +2785,20 @@ Cómo...?"
                                             <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
-                                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">HTML Embeds</h3>
+                                            <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">HTML Embeds</h3>
                                             @if($editingEmbedIndex !== null)
                                                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                                     Editando #{{ $editingEmbedIndex + 1 }}
                                                 </span>
                                             @endif
                                         </div>
-                                        <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardHtmlEmbeds) }} embeds</span>
+                                        <span class="text-[11px] text-gray-400 dark:text-slate-500 bg-gray-200 dark:bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardHtmlEmbeds) }} embeds</span>
                                     </div>
 
                                     @if(count($wizardHtmlEmbeds) > 0)
                                         <div class="space-y-1.5 mb-2">
                                             @foreach($wizardHtmlEmbeds as $eIdx => $embed)
-                                                <div class="flex items-start gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
+                                                <div class="flex items-start gap-3 px-3 py-2.5 bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/40 rounded-lg hover:border-gray-300 dark:hover:border-slate-600/60 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition-all group">
                                                     <div class="w-9 h-9 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                                         <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -2607,18 +2806,18 @@ Cómo...?"
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center gap-2">
-                                                            <p class="text-xs font-medium text-slate-200 truncate">{{ $embed['title'] ?? 'Embed HTML' }}</p>
+                                                            <p class="text-xs font-medium text-gray-700 dark:text-slate-200 truncate">{{ $embed['title'] ?? 'Embed HTML' }}</p>
                                                             @if(!empty($embed['section_id']))
                                                                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded border text-amber-300 bg-amber-500/10 border-amber-500/20 shrink-0">
                                                                     Sección {{ collect($wizardSections)->firstWhere('id', $embed['section_id'])['title'] ?? '' }}
                                                                 </span>
                                                             @endif
                                                         </div>
-                                                        <div class="text-[10px] text-slate-500 font-mono mt-1 line-clamp-2">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 120) }}</div>
+                                                        <div class="text-[10px] text-gray-400 dark:text-slate-500 font-mono mt-1 line-clamp-2">{{ Str::limit(strip_tags($embed['html_content'] ?? ''), 120) }}</div>
                                                     </div>
                                                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                                                         <button wire:click="previewExistingEmbed({{ $eIdx }})"
-                                                                class="text-slate-400 hover:text-fuchsia-300 transition-all text-xs p-1 rounded hover:bg-fuchsia-500/10"
+                                                                class="text-gray-400 dark:text-slate-400 hover:text-fuchsia-300 transition-all text-xs p-1 rounded hover:bg-fuchsia-500/10"
                                                                 title="Vista previa">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -2626,7 +2825,7 @@ Cómo...?"
                                                             </svg>
                                                         </button>
                                                         <button wire:click="editWizardHtmlEmbed({{ $eIdx }})"
-                                                                class="text-slate-400 hover:text-amber-300 transition-all text-xs p-1 rounded hover:bg-amber-500/10"
+                                                                class="text-gray-400 dark:text-slate-400 hover:text-amber-300 transition-all text-xs p-1 rounded hover:bg-amber-500/10"
                                                                 title="Editar embed">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -2644,11 +2843,11 @@ Cómo...?"
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-gray-50 dark:bg-slate-800/20 border border-dashed border-gray-200 dark:border-slate-700/30 rounded-lg mb-2">
+                                            <svg class="w-5 h-5 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                             </svg>
-                                            <p class="text-xs text-slate-500">Sin código HTML embebido aún. Agrega contenido HTML para la lección.</p>
+                                            <p class="text-xs text-gray-400 dark:text-slate-500">Sin código HTML embebido aún. Agrega contenido HTML para la lección.</p>
                                         </div>
                                     @endif
 
@@ -2657,12 +2856,12 @@ Cómo...?"
                                         <div class="flex gap-2">
                                             <div class="flex-1">
                                                 <input wire:model="embedTitle" placeholder="Título del embed (opcional)"
-                                                       class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                             </div>
                                             @if(count($wizardSections) > 0)
                                                 <div class="flex-none">
                                                     <select wire:model.live="embedSectionId"
-                                                            class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
                                                         <option value="">Sin sección</option>
                                                         @foreach($wizardSections as $sec)
                                                             <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
@@ -2675,7 +2874,7 @@ Cómo...?"
                                         <div x-data="{ showHelpModal: false }">
                                             <div class="flex justify-end">
                                                 <button @click="showHelpModal = true"
-                                                        class="text-[11px] text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 px-2 py-1 -mb-1 rounded-lg transition-colors flex items-center gap-1">
+                                                        class="text-[11px] text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 px-2 py-1 -mb-1 rounded-lg transition-colors flex items-center gap-1">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                     </svg>
@@ -2689,17 +2888,17 @@ Cómo...?"
                                                  class="fixed inset-0 z-[9999] overflow-y-auto">
                                                 <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="showHelpModal = false"></div>
                                                 <div class="relative min-h-screen flex items-center justify-center p-4">
-                                                    <div class="relative w-full max-w-2xl bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+                                                    <div class="relative w-full max-w-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-slate-700 rounded-lg shadow-2xl overflow-hidden">
                                                         {{-- Header --}}
-                                                        <div class="flex items-center justify-between px-6 py-3 border-b border-slate-700">
+                                                        <div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-slate-700">
                                                             <div class="flex items-center gap-2">
                                                                 <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                                 </svg>
-                                                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Guía: HTML Embeds</h3>
+                                                                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Guía: HTML Embeds</h3>
                                                             </div>
                                                             <button @click="showHelpModal = false"
-                                                                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all">
+                                                                    class="p-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-all">
                                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                 </svg>
@@ -2708,27 +2907,27 @@ Cómo...?"
 
                                                         {{-- Body del modal --}}
                                                         <div class="p-6 space-y-4">
-                                                            <p class="text-xs text-slate-400 leading-relaxed">
+                                                            <p class="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
                                                                 Pega código HTML (<em>iframe</em>, <em>script</em>, tablas, etc.) para enriquecer la lección con contenido interactivo externo. Los iframes se renderizan en vivo dentro de la lección.
                                                             </p>
 
                                                             {{-- YouTube --}}
-                                                            <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
-                                                                <div class="p-3 border-b border-slate-700/50">
+                                                            <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
+                                                                <div class="p-3 border-b border-gray-200 dark:border-slate-700/50">
                                                                     <p class="text-xs font-semibold text-emerald-400/80 mb-1">📺 YouTube — Video</p>
-                                                                    <code class="text-[11px] text-slate-400 font-mono break-all select-all">&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video explicativo" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                    <code class="text-[11px] text-gray-500 dark:text-slate-400 font-mono break-all select-all">&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video explicativo" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</code>
                                                                 </div>
                                                             </div>
 
                                                             {{-- Google Maps + Google Drive --}}
                                                             <div class="grid grid-cols-2 gap-3">
-                                                                <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
+                                                                <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-3">
                                                                     <p class="text-[11px] font-semibold text-blue-400/80 mb-1">🗺️ Google Maps — Ubicación</p>
-                                                                    <code class="text-[10px] text-slate-400 font-mono break-all select-all">&lt;iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                    <code class="text-[10px] text-gray-500 dark:text-slate-400 font-mono break-all select-all">&lt;iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" allowfullscreen&gt;&lt;/iframe&gt;</code>
                                                                 </div>
-                                                                <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
+                                                                <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-3">
                                                                     <p class="text-[11px] font-semibold text-fuchsia-400/80 mb-1">📁 Google Drive — Archivo</p>
-                                                                    <code class="text-[10px] text-slate-400 font-mono break-all select-all">&lt;iframe src="https://drive.google.com/file/d/FILE_ID/preview" width="640" height="480" allowfullscreen&gt;&lt;/iframe&gt;</code>
+                                                                    <code class="text-[10px] text-gray-500 dark:text-slate-400 font-mono break-all select-all">&lt;iframe src="https://drive.google.com/file/d/FILE_ID/preview" width="640" height="480" allowfullscreen&gt;&lt;/iframe&gt;</code>
                                                                 </div>
                                                             </div>
 
@@ -2744,9 +2943,9 @@ Cómo...?"
                                                         </div>
 
                                                         {{-- Footer --}}
-                                                        <div class="flex items-center justify-end px-6 py-3 bg-slate-800/50 border-t border-slate-700">
+                                                        <div class="flex items-center justify-end px-6 py-3 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
                                                             <button @click="showHelpModal = false"
-                                                                    class="px-4 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-all">
+                                                                    class="px-4 py-2 text-xs font-medium text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-all">
                                                                 Cerrar
                                                             </button>
                                                         </div>
@@ -2758,14 +2957,14 @@ Cómo...?"
                                         <div>
                                             <textarea wire:model="embedHtml" rows="4"
                                                       placeholder="Pega aquí el código HTML (iframe, script, etc.)"
-                                                      class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y"></textarea>
+                                                      class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y"></textarea>
                                         </div>
                                         <div x-data="{ showEmbedPreview: false }">
                                             <div class="flex items-center justify-between gap-2">
                                                 <div class="flex items-center gap-2">
                                                     @if(trim($embedHtml))
                                                     <button @click="showEmbedPreview = true"
-                                                            class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-600/50">
+                                                            class="px-3 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white text-xs font-medium rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 border border-gray-300 dark:border-slate-600/50">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -2786,7 +2985,7 @@ Cómo...?"
                                                 </div>
                                                 @if($editingEmbedIndex !== null)
                                                     <button wire:click="cancelEditEmbed"
-                                                            class="px-3 py-2 text-slate-400 hover:text-white text-xs font-medium rounded-lg hover:bg-slate-700/50 transition-colors">
+                                                            class="px-3 py-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
                                                         Cancelar
                                                     </button>
                                                 @endif
@@ -2830,7 +3029,7 @@ Cómo...?"
                                                 </div>
                                             </div>
                                         </div>
-                                        <p class="text-[10px] text-slate-500 leading-relaxed">
+                                        <p class="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
                                             El código HTML se renderizará en la vista del estudiante. Usa con precaución: iframes, tablas, formularios, etc.
                                         </p>
                                     </div>
@@ -2843,9 +3042,9 @@ Cómo...?"
                                             <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                             </svg>
-                                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Enlaces externos</h3>
+                                            <h3 class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Enlaces externos</h3>
                                         </div>
-                                        <span class="text-[11px] text-slate-500 bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardLinks) }} enlaces</span>
+                                        <span class="text-[11px] text-gray-400 dark:text-slate-500 bg-gray-200 dark:bg-slate-700/40 px-2 py-0.5 rounded-full">{{ count($wizardLinks) }} enlaces</span>
                                     </div>
 
                                     @if(count($wizardLinks) > 0)
@@ -2861,7 +3060,7 @@ Cómo...?"
                                                     };
                                                     $displayUrl = parse_url($link['url'], PHP_URL_HOST) ?: $link['url'];
                                                 @endphp
-                                                <div class="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-700/40 rounded-lg hover:border-slate-600/60 hover:bg-slate-800/60 transition-all group">
+                                                <div class="flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/40 rounded-lg hover:border-gray-300 dark:hover:border-slate-600/60 hover:bg-gray-50 dark:hover:bg-slate-800/60 transition-all group">
                                                     <div class="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
                                                         <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -2869,10 +3068,10 @@ Cómo...?"
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center gap-2">
-                                                            <p class="text-xs font-medium text-slate-200 truncate">{{ $link['title'] }}</p>
+                                                            <p class="text-xs font-medium text-gray-700 dark:text-slate-200 truncate">{{ $link['title'] }}</p>
                                                             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded border {{ $badge['color'] }} shrink-0">{{ $badge['label'] }}</span>
                                                         </div>
-                                                        <p class="text-[10px] text-slate-500 truncate">{{ $displayUrl }}</p>
+                                                        <p class="text-[10px] text-gray-400 dark:text-slate-500 truncate">{{ $displayUrl }}</p>
                                                     </div>
                                                     <button wire:click="removeWizardLink({{ $lIdx }})"
                                                             class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
@@ -2885,11 +3084,11 @@ Cómo...?"
                                             @endforeach
                                         </div>
                                     @else
-                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-slate-800/20 border border-dashed border-slate-700/30 rounded-lg mb-2">
-                                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div class="flex items-center justify-center gap-3 px-4 py-5 bg-gray-50 dark:bg-slate-800/20 border border-dashed border-gray-200 dark:border-slate-700/30 rounded-lg mb-2">
+                                            <svg class="w-5 h-5 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                             </svg>
-                                            <p class="text-xs text-slate-500">Sin enlaces aún. Agrega enlaces de referencia, videos o herramientas.</p>
+                                            <p class="text-xs text-gray-400 dark:text-slate-500">Sin enlaces aún. Agrega enlaces de referencia, videos o herramientas.</p>
                                         </div>
                                     @endif
 
@@ -2897,14 +3096,14 @@ Cómo...?"
                                     <div class="flex flex-wrap gap-2 items-end">
                                         <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkTitle" placeholder="Título del enlace"
-                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                         </div>
                                         <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkUrl" placeholder="https://…"
-                                                   class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
                                         </div>
                                         <select wire:model="linkType"
-                                                class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors">
+                                                class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors">
                                             <option value="REFERENCE">Referencia</option>
                                             <option value="VIDEO">Video</option>
                                             <option value="TOOL">Herramienta</option>
@@ -2913,7 +3112,7 @@ Cómo...?"
                                         </select>
                                         @if(count($wizardSections) > 0)
                                             <select wire:model="linkSectionId"
-                                                    class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
+                                                    class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
                                                 <option value="">Sin sección</option>
                                                 @foreach($wizardSections as $sec)
                                                     <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>

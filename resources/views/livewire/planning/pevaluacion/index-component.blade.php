@@ -333,8 +333,24 @@
     </x-modal>
 
     <!-- ===== MODAL: Formulario Crear/Editar ===== -->
-    <x-modal-card title="{{ $form->isEditing ? 'Editar Carga Académica' : 'Nueva Carga Académica' }}" blur="lg" wire:model="modeForm" max-width="6xl" persistent>
-        <div class="space-y-6">
+    <x-modal-card title="{{ $form->isEditing ? 'Editar Carga Académica' : 'Nueva Carga Académica' }}" blur="lg" wire:model="modeForm" max-width="7xl" persistent class="border border-white/10 rounded-xl bg-gray-900 dark:bg-gray-900">
+        <x-slot name="action">
+            <button type="button" x-on:click="close"
+                class="cursor-pointer p-1.5 rounded-full hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-all duration-200"
+                tabindex="-1" title="Cerrar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </x-slot>
+        <div x-data="{ activeTab: 1 }" class="space-y-6">
+            {{-- CSS override: WireUI limita a 7xl (1280px) -> forzamos viewport completo --}}
+            <style>
+                .sm\:max-w-2xl, .sm\:max-w-7xl {
+                    max-width: 65vw !important;
+                    width: 65vw !important;
+                }
+            </style>
             @if($errors->any())
                 <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                     <div class="flex items-start gap-3">
@@ -353,8 +369,44 @@
                 </div>
             @endif
 
-            {{-- Sección 1: Vinculación Académica --}}
-            <div>
+            {{-- Nav Tabs --}}
+            <nav class="flex overflow-x-auto border-b border-white/5">
+                <button type="button" @click="activeTab = 1"
+                    :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Vinculación
+                </button>
+                <button type="button" @click="activeTab = 2"
+                    :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Docente
+                </button>
+                <button type="button" @click="activeTab = 3"
+                    :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"/>
+                    </svg>
+                    Configuración
+                </button>
+                <button type="button" @click="activeTab = 4"
+                    :class="activeTab === 4 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                    Descripción
+                </button>
+            </nav>
+
+            {{-- Tab 1: Vinculación Académica --}}
+            <div x-show="activeTab === 1" x-cloak>
                 <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -420,8 +472,8 @@
                 </div>
             </div>
 
-            {{-- Sección 2: Asignación Docente --}}
-            <div class="border-t border-white/5 pt-5">
+            {{-- Tab 2: Docente --}}
+            <div x-show="activeTab === 2" x-cloak>
                 <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -487,8 +539,8 @@
                 </div>
             </div>
 
-            {{-- Sección 3: Flags --}}
-            <div class="border-t border-white/5 pt-5">
+            {{-- Tab 3: Configuración --}}
+            <div x-show="activeTab === 3" x-cloak>
                 <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
@@ -523,8 +575,8 @@
                 </div>
             </div>
 
-            {{-- Sección 4: Descripción y Observaciones --}}
-            <div class="border-t border-white/5 pt-5">
+            {{-- Tab 4: Descripción --}}
+            <div x-show="activeTab === 4" x-cloak>
                 <h3 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>

@@ -2,7 +2,23 @@
 
     {{-- Grid Mode --}}
     <div x-show="mode === 'grid'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+        <style>
+            /* 🧱 Masonry Layout — Pinterest-style
+               Native CSS grid-template-rows: masonry with multi-column fallback.
+               Fallback orders items column-by-column (not left-to-right). */
+            .masonry-grid { --masonry-cols: 1; columns: var(--masonry-cols); column-gap: 0.625rem; }
+            .masonry-item { break-inside: avoid; margin-bottom: 0.625rem; }
+            .masonry-empty { break-inside: avoid; text-align: center; }
+            @media (min-width: 640px)  { .masonry-grid { --masonry-cols: 2; } }
+            @media (min-width: 1024px) { .masonry-grid { --masonry-cols: 3; } }
+            @media (min-width: 1280px) { .masonry-grid { --masonry-cols: 4; } }
+            @supports (grid-template-rows: masonry) {
+                .masonry-grid { display: grid; gap: 0.625rem; columns: unset; grid-template-columns: repeat(var(--masonry-cols), 1fr); grid-template-rows: masonry; }
+                .masonry-item { break-inside: unset; margin-bottom: unset; }
+                .masonry-empty { grid-column: 1 / -1; }
+            }
+        </style>
+        <div class="masonry-grid">
             @forelse($pevaluacions as $pevaluacion)
                 @php
                     $activities        = $pevaluacion->activities;
@@ -38,7 +54,7 @@
                     $hasEvaluative  = $activities->contains(fn($a) => !empty($a->description));
                     $allApproved    = $hasActivities && $activities->every(fn($a) => $a->status);
                 @endphp
-                <div class="bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
+                <div class="masonry-item bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
 
                     {{-- Card Header --}}
                     <div class="px-3 pt-2.5 pb-1.5 border-b border-white/5">
@@ -199,7 +215,7 @@
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-12 text-center">
+                <div class="masonry-empty py-12 text-center">
                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
