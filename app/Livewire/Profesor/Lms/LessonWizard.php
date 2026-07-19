@@ -2645,7 +2645,25 @@ PROMPT;
                 $this->wizardResources[$key]['id'] = $newRes->id;
                 $visibleResourceIds[] = $newRes->id;
             } else {
-                $visibleResourceIds[] = (int) $res['id'];
+                $resourceId = (int) $res['id'];
+                $visibleResourceIds[] = $resourceId;
+
+                // Actualizar campos editables del recurso existente
+                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                    ? $sectionIdMap[$res['section_id']]
+                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+
+                $updateData = [
+                    'display_name' => $res['display_name'],
+                    'description'  => $res['description'] ?? '',
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                if (!empty($res['media_id'])) {
+                    $updateData['media_id'] = $res['media_id'];
+                }
+                LmsActivityResource::where('id', $resourceId)->update($updateData);
             }
         }
         LmsActivityResource::where('activity_id', $activityId)
@@ -2673,7 +2691,22 @@ PROMPT;
                 $this->wizardLinks[$key]['id'] = $newLink->id;
                 $visibleLinkIds[] = $newLink->id;
             } else {
-                $visibleLinkIds[] = (int) $link['id'];
+                $linkId = (int) $link['id'];
+                $visibleLinkIds[] = $linkId;
+
+                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                    ? $sectionIdMap[$link['section_id']]
+                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+
+                $updateData = [
+                    'title'     => $link['title'],
+                    'url'       => $link['url'],
+                    'link_type' => $link['link_type'] ?? 'REFERENCE',
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                LmsActivityLink::where('id', $linkId)->update($updateData);
             }
         }
         LmsActivityLink::where('activity_id', $activityId)
@@ -2701,7 +2734,21 @@ PROMPT;
                 $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
                 $visibleEmbedIds[] = $newEmbed->id;
             } else {
-                $visibleEmbedIds[] = (int) $embed['id'];
+                $embedId = (int) $embed['id'];
+                $visibleEmbedIds[] = $embedId;
+
+                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                    ? $sectionIdMap[$embed['section_id']]
+                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+
+                $updateData = [
+                    'title'        => $embed['title'] ?? null,
+                    'html_content' => $embed['html_content'],
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                LmsHtmlEmbed::where('id', $embedId)->update($updateData);
             }
         }
         LmsHtmlEmbed::where('activity_id', $activityId)
@@ -2944,7 +2991,24 @@ PROMPT;
                 $this->wizardResources[$key]['id'] = $newRes->id;
                 $visibleResourceIds[] = $newRes->id;
             } else {
-                $visibleResourceIds[] = (int) $res['id'];
+                $resourceId = (int) $res['id'];
+                $visibleResourceIds[] = $resourceId;
+
+                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                    ? $sectionIdMap[$res['section_id']]
+                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+
+                $updateData = [
+                    'display_name' => $res['display_name'],
+                    'description'  => $res['description'] ?? '',
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                if (!empty($res['media_id'])) {
+                    $updateData['media_id'] = $res['media_id'];
+                }
+                LmsActivityResource::where('id', $resourceId)->update($updateData);
             }
         }
         LmsActivityResource::where('activity_id', $activityId)
@@ -2972,7 +3036,22 @@ PROMPT;
                 $this->wizardLinks[$key]['id'] = $newLink->id;
                 $visibleLinkIds[] = $newLink->id;
             } else {
-                $visibleLinkIds[] = (int) $link['id'];
+                $linkId = (int) $link['id'];
+                $visibleLinkIds[] = $linkId;
+
+                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                    ? $sectionIdMap[$link['section_id']]
+                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+
+                $updateData = [
+                    'title'     => $link['title'],
+                    'url'       => $link['url'],
+                    'link_type' => $link['link_type'] ?? 'REFERENCE',
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                LmsActivityLink::where('id', $linkId)->update($updateData);
             }
         }
         LmsActivityLink::where('activity_id', $activityId)
@@ -3000,7 +3079,21 @@ PROMPT;
                 $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
                 $visibleEmbedIds[] = $newEmbed->id;
             } else {
-                $visibleEmbedIds[] = (int) $embed['id'];
+                $embedId = (int) $embed['id'];
+                $visibleEmbedIds[] = $embedId;
+
+                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                    ? $sectionIdMap[$embed['section_id']]
+                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+
+                $updateData = [
+                    'title'        => $embed['title'] ?? null,
+                    'html_content' => $embed['html_content'],
+                ];
+                if ($resolvedSectionId) {
+                    $updateData['section_id'] = $resolvedSectionId;
+                }
+                LmsHtmlEmbed::where('id', $embedId)->update($updateData);
             }
         }
         LmsHtmlEmbed::where('activity_id', $activityId)
