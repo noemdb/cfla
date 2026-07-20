@@ -7,6 +7,33 @@
 @php
     $pid = $preview['activity_id'] ?? $wireKey;
 
+    // ── Helper: renderizar body detectando HTML o Markdown ────
+    $renderBody = function (string $rawBody): string {
+        $trimmed = trim($rawBody);
+        if ($trimmed === '') return $rawBody;
+
+        // Si tiene etiquetas HTML → es HTML, devolver tal cual
+        if (preg_match('/<[a-z\/][^>]*>/i', $trimmed)) return $rawBody;
+
+        // Patrones de sintaxis Markdown (flag x ignora whitespace,
+        // \# evita que #{1,6} sea tratado como comentario PCRE)
+        $isMd = (bool) preg_match('/
+            (?:^\#{1,6}\s)        |
+            (?:\*\*[^*].*?\*\*)  |
+            (?:__[^_].*?__)      |
+            (?:^\s*[-*+]\s+.+)   |
+            (?:^\s*\d+[.)]\s+.+) |
+            (?:^\s*>\s.+)        |
+            (?:`{1,3}[^`].*?`{1,3}) |
+            (?:\[[^\]]+\]\([^)]+\)) |
+            (?:\!\[[^\]]*\]\([^)]+\)) |
+            (?:\|.+\|.+\|)       |
+            (?:^[-=]{3,}\s*$)    |
+            (?:^\[.+\]:\s+.+)/mx', $trimmed);
+
+        return $isMd ? \Illuminate\Support\Str::markdown($rawBody) : $rawBody;
+    };
+
     // ── Procesamiento autónomo de html_embeds ─────────────────
     // Detecta diagramas Mermaid en html_content sin depender de
     // que el componente padre haya asignado is_mermaid.
@@ -236,7 +263,9 @@
                             {{-- Step progress indicator --}}
                             @foreach($section['contents'] ?? [] as $idx => $content)
                                 @php
-                                    $rawBody = $content['body'] ?? '';
+                                    $rawBody  = $content['body'] ?? '';
+                                    $bodyHtml = $renderBody($rawBody); // Markdown → HTML si aplica
+
                                     $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
                                     if (!$isMermaid) {
                                         $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
@@ -261,7 +290,7 @@
                                         @endif
                                         @if($isMermaid)
                                             @php
-                                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $bodyHtml, $m);
                                                 $mermaidCode = trim(strip_tags($m[1] ?? ''));
                                                 if (empty($mermaidCode)) {
                                                     $mermaidCode = trim(strip_tags($rawBody));
@@ -273,16 +302,16 @@
                                                  class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200">
                                                 <div x-ref="target" class="w-full"></div>
                                             </div>
-                                        @elseif(!empty(trim(strip_tags($rawBody))))
+                                        @elseif(!empty(trim(strip_tags($bodyHtml))))
                                             @php
-                                                $__pt = strip_tags($rawBody);
-                                                $__len = mb_strlen(trim($__pt));
-                                                $__hasUl = str_contains($rawBody, '<ul');
-                                                $__hasOl = str_contains($rawBody, '<ol');
-                                                $__hasBq = str_contains($rawBody, '<blockquote');
-                                                $__hasEm = str_contains($rawBody, '<em') || preg_match('/<i[^>]*>/', $rawBody);
-                                                $__hasImg = str_contains($rawBody, '<img');
-                                                $__singleP = substr_count($rawBody, '<p>') <= 1 && !$__hasUl && !$__hasOl && !$__hasBq && !$__hasImg;
+                                                $__pt   = strip_tags($bodyHtml);
+                                                $__len  = mb_strlen(trim($__pt));
+                                                $__hasUl = str_contains($bodyHtml, '<ul');
+                                                $__hasOl = str_contains($bodyHtml, '<ol');
+                                                $__hasBq = str_contains($bodyHtml, '<blockquote');
+                                                $__hasEm = str_contains($bodyHtml, '<em') || preg_match('/<i[^>]*>/', $bodyHtml);
+                                                $__hasImg = str_contains($bodyHtml, '<img');
+                                                $__singleP = substr_count($bodyHtml, '<p>') <= 1 && !$__hasUl && !$__hasOl && !$__hasBq && !$__hasImg;
                                                 $__isQ = preg_match('/[¿\?]\s*$/', trim($__pt));
 
                                                 $__tpl = 'prose';
@@ -303,7 +332,7 @@
                                                 <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-4 shadow-sm">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💡</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'list')
@@ -312,20 +341,20 @@
                                                         <span class="text-lg leading-none">📋</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lista</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal">{!! $rawBody !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @elseif($__tpl === 'quote')
                                                 <div class="bg-amber-50/60 border-l-4 border-amber-400 rounded-r-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium">{!! $rawBody !!}</div>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'question')
                                                 <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💭</span>
-                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'activity')
@@ -334,11 +363,11 @@
                                                         <span class="text-lg leading-none">✏️</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actividad</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @else
                                                 <div class="bg-gradient-to-br from-white to-stone-50/80 rounded-xl p-4 border border-stone-200/60">
-                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none">{!! $rawBody !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @endif
                                         @endif
