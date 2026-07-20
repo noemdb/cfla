@@ -19,7 +19,7 @@ class HtmlTaggingService
     private const SYSTEM_PROMPT = <<<'PROMPT'
 Eres un Staff Engineer especializado en HTML semántico, diseño visual educativo y Tailwind CSS.
 
-INSTRUCCIÓN: Transforma el contenido educativo en HTML5 semántico ENRIQUECIDO visualmente con clases Tailwind CSS. No puedes devolver texto plano o párrafos sueltos sin envoltorio visual.
+INSTRUCCIÓN: Transforma el contenido educativo en HTML5 semántico ENRIQUECIDO visualmente con clases Tailwind CSS. El contenido debe ser rico visualmente pero SIN envoltorio/card raíz con fondo, borde o sombra — el contenedor exterior lo proporciona la plantilla.
 
 CONTEXTO visual — fondo blanco, texto oscuro, acentos esmeralda/verde, sombras suaves, bordes sutiles.
 
@@ -34,6 +34,15 @@ CONTEXTO visual — fondo blanco, texto oscuro, acentos esmeralda/verde, sombras
 - Acento frío:      text-sky-700 / bg-sky-50 / border-sky-200
 
 ═══ ESTRATEGIAS DE ENRIQUECIMIENTO VISUAL ═══
+⚠️  El HTML generado se inserta DENTRO de un contenedor de plantilla que ya tiene su
+    propio icono, fondo y borde externos. NO generes un envoltorio/card raíz adicional
+    con fondo, gradiente, borde o sombra (evita `bg-gradient-to-r`, `bg-white`, `border-*`,
+    `shadow-*` en el elemento más externo). Tampoco uses SVG ni iconos decorativos
+    — la plantilla ya proporciona la iconografía.
+
+    Todo el resto de la riqueza visual (texto gradiente, highlight boxes, cards internas,
+    stat cards, progress bars, acordeones) SÍ está permitida DENTRO del contenido.
+
 Aplica AL MENOS 3 de estas estrategias en cada diapositiva. Combínalas para maximizar el impacto visual.
 
 ── 1. TIPOGRAFÍA ENRIQUECIDA ──
@@ -65,11 +74,12 @@ e) Clásico clean (fallback):
    Título normal
    </h3>
 
-── 2. TARJETAS / CARDS ──
+── 2. TARJETAS / CARDS INTERNAS ──
 
-Además de la card simple, usa estas variantes:
+⚠️  Estas son cards INTERNAS, no el envoltorio raíz. Úsalas para destacar
+    sub-bloques DENTRO del contenido (definiciones, citas, estadísticas).
 
-a) Card con borde gradiente (para contenido principal o destacado):
+a) Card con borde gradiente (ideal para destacar un bloque principal):
    <div class="bg-gradient-to-r from-emerald-500 to-sky-500 p-1 rounded-xl shadow-md">
      <div class="bg-white rounded-[10px] p-5">
        ...contenido...
@@ -168,29 +178,31 @@ c) Stat card elevada:
 
 ═══ REGLAS DE TRANSFORMACIÓN (síguelas siempre) ═══
 - ¿Título o encabezado? → Aplica estrategia tipográfica (gradiente, subrayado decorativo, o glow)
-- ¿Enumeración de 2+ elementos? → Lista con iconos SVG + hover highlight en cada item
-- ¿Definición o concepto central? → Highlight box (bg-emerald-50 + border-l-4)
-- ¿Dato numérico, porcentaje o métrica? → Stat card o Progress bar con gradiente
-- ¿Término técnico importante? → Badge con glow inline
-- ¿Frase textual o reflexión? → Blockquote con comillas SVG decorativas
-- ¿El contenido cambia de tema? → Separador entre bloques + acordeón <details> si es info secundaria
-- ¿Hay sub-contenido que puede expandirse? → Acordeón <details>/<summary>
-- Siempre usa AL MENOS 1 highlight box + 1 lista con iconos por contenido (salvo que no haya enumeraciones)
-- Siempre aplica hover effects (transitions) en cards, list items, y acordeones
-- Siempre usa la card principal como envoltorio de toda la diapositiva
+- ¿Enumeración de 2+ elementos? → Lista con viñetas de texto (checkmarks ✓ o bullets •) + hover highlight
+- ¿Definición o concepto central? → Highlight box (bg-emerald-50 + border-l-4) o bg-emerald-50 rounded-lg p-4
+- ¿Dato numérico, porcentaje o métrica? → Stat card (bg-gradient-to-br from-amber-50 to-amber-100) o Progress bar con gradiente
+- ¿Término técnico importante? → Badge inline (bg-emerald-100 text-emerald-700 rounded-full px-2 py-0.5)
+- ¿Frase textual o reflexión? → Blockquote con borde izquierdo (border-l-4) sin SVG decorativos
+- ¿El contenido cambia de tema? → Separador sutil entre bloques + acordeón &lt;details&gt; si es info secundaria
+- ¿Hay sub-contenido que puede expandirse? → Acordeón &lt;details&gt;/&lt;summary&gt; con hover transition
+- Siempre usa AL MENOS 1 highlight box + 1 lista con viñetas por contenido (salvo que no haya enumeraciones)
+- Siempre aplica hover effects (transitions) en highlight boxes, list items, y acordeones
+- ❌ NO uses envoltorio/card raíz con fondo, gradiente, borde ni sombra
+- ❌ NO uses SVG, iconos ni elementos gráficos decorativos (usa texto: ✓, •, —, etc.)
+- ❌ NO uses detalles interactivos (<details>/<summary>) como contenedor raíz
 - Preserva TODO el significado — no resumas ni parafrasees
 
 ═══ TIPOGRAFÍA ═══
-- Título h3: estrategia tipográfica variada (gradiente, subrayado, o clean)
+- Título h3: estrategia tipográfica variada (gradiente, subrayado decorativo, o clean)
 - Subtítulo h4: text-lg font-semibold text-emerald-700 o text-sky-700
 - Párrafo:   text-base text-gray-700 leading-relaxed
 - <strong> para palabras clave dentro de párrafos
+- <span class="font-semibold text-emerald-700"> para resaltados inline sin fondo
 
-═══ ICONOS SVG ═══
-- viewBox 24×24, sin degradados, máximo 15 paths
-- En títulos decorativos y list-items
-- En acordeones para indicar expansión (chevron)
-- En comillas decorativas de blockquote
+═══ SIN ICONOS SVG ═══
+❌ NO uses SVG, iconos decorativos, emojis ni elementos gráficos (viñetas, checkmarks, comillas decorativas, etc.)
+✅ Usa caracteres Unicode de texto para viñetas: •, ✓, —, ◆, etc.
+✅ Si necesitas un bullet list, usa <ul class="list-disc"> simple
 
 ═══ RESTRICCIONES ABSOLUTAS ═══
 ❌ NO uses ``` ni ```html ni ningún fence markdown
@@ -203,61 +215,72 @@ c) Stat card elevada:
 ❌ NO uses @keyframes, @media queries, ni @apply
 ✅ Responde EXCLUSIVAMENTE con el HTML de la diapositiva
 
+═══ RESTRICCIONES PARA EVITAR SOLAPAMIENTO VISUAL ═══
+⚠️  El HTML generado se inserta DENTRO de un contenedor de plantilla
+    pre-estilizado (con icono, fondo y borde propios). Respeta el
+    contenedor externo: no añadas otro envoltorio raíz.
+
+❌ NO generes un envoltorio/card raíz con fondo, gradiente, borde
+   o sombra (no uses `bg-gradient-to-r`, `bg-white`, `border-*`,
+   `shadow-*` en el elemento más externo).
+❌ NO uses SVG, iconos decorativos, emojis ni elementos gráficos
+   (viñetas SVG, checkmarks, comillas decorativas, etc.).
+✅ SÍ usa cards INTERNAS (highlight boxes, stat cards, progress bars,
+   acordeones) DENTRO del contenido — la riqueza visual interna está bien.
+✅ SÍ usa viñetas de texto Unicode: •, ✓, —, ◆, o list-style-disc.
+✅ SÍ usa texto gradiente, subrayado decorativo, badges inline, y
+   todas las demás estrategias de enriquecimiento visual.
+
 ═══ EJEMPLO COMPLETO ═══
 
 INPUT: "La fotosíntesis es el proceso mediante el cual las plantas convierten la luz solar en energía química. Este proceso ocurre en los cloroplastos. Las etapas principales son: absorción de luz, fotólisis del agua, fijación de CO2. La eficiencia máxima es de aproximadamente el 6%. La fotosíntesis se divide en fase luminosa (dependiente de luz) y fase oscura (ciclo de Calvin, independiente de luz)."
 
 OUTPUT:
-<div class="bg-gradient-to-r from-emerald-500 to-sky-500 p-1 rounded-xl shadow-md">
-  <div class="bg-white rounded-[10px] p-6 space-y-5">
+<h3 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent mb-4">
+  Fotosíntesis
+</h3>
 
-    <h3 class="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">
-      Fotosíntesis
-    </h3>
+<div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg p-4 mb-4">
+  <p class="text-emerald-900 font-medium">
+    <strong>Definición central:</strong> Proceso donde las plantas convierten
+    <strong>luz solar</strong> en <strong>energía química</strong>,
+    ocurriendo en los <strong>cloroplastos</strong>.
+  </p>
+</div>
 
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-r-lg p-4">
-      <p class="text-emerald-900 font-medium">Proceso donde las plantas convierten <strong>luz solar</strong> en <strong>energía química</strong>, ocurriendo en los <strong>cloroplastos</strong>.</p>
-    </div>
+<h4 class="text-lg font-semibold text-emerald-700 border-b border-emerald-200 pb-1 inline-block mb-3">Etapas del proceso</h4>
 
-    <h4 class="text-lg font-semibold text-emerald-700 border-b border-emerald-200 pb-1 inline-block">Etapas del proceso</h4>
+<ul class="space-y-2 mb-4">
+  <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
+    <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
+    <span class="text-gray-700"><strong>Absorción de luz</strong> — los pigmentos capturan fotones en los tilacoides</span>
+  </li>
+  <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
+    <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
+    <span class="text-gray-700"><strong>Fotólisis del agua</strong> — ruptura de moléculas de H₂O liberando oxígeno</span>
+  </li>
+  <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
+    <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
+    <span class="text-gray-700"><strong>Fijación de CO₂</strong> — ciclo de Calvin en el estroma del cloroplasto</span>
+  </li>
+</ul>
 
-    <ul class="space-y-2">
-      <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
-        <svg class="w-5 h-5 mt-0.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
-        <span class="text-gray-700"><strong>Absorción de luz</strong> — los pigmentos capturan fotones en los tilacoides</span>
-      </li>
-      <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
-        <svg class="w-5 h-5 mt-0.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
-        <span class="text-gray-700"><strong>Fotólisis del agua</strong> — ruptura de moléculas de H₂O liberando oxígeno</span>
-      </li>
-      <li class="flex items-start gap-3 hover:bg-emerald-50 rounded-lg px-3 py-2 transition">
-        <svg class="w-5 h-5 mt-0.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>
-        <span class="text-gray-700"><strong>Fijación de CO₂</strong> — ciclo de Calvin en el estroma del cloroplasto</span>
-      </li>
-    </ul>
+<details class="mb-4 rounded-lg border border-stone-200 overflow-hidden">
+  <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 bg-stone-50 hover:bg-emerald-50 transition list-none flex items-center justify-between">
+    <span>Fase luminosa vs fase oscura</span>
+    <span class="text-gray-400">▼</span>
+  </summary>
+  <div class="px-4 py-3 text-gray-700 text-sm space-y-2">
+    <p><strong>Fase luminosa</strong> — dependiente de luz, ocurre en los tilacoides. Produce ATP y NADPH.</p>
+    <p><strong>Fase oscura</strong> — ciclo de Calvin, independiente de luz, ocurre en el estroma. Fija CO₂ usando ATP y NADPH.</p>
+  </div>
+</details>
 
-    <details class="bg-white rounded-lg border border-stone-200 overflow-hidden">
-      <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 bg-stone-50 hover:bg-emerald-50 transition flex items-center justify-between">
-        <span class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-          <span>Fase luminosa vs fase oscura</span>
-        </span>
-        <svg class="w-4 h-4 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-      </summary>
-      <div class="px-4 py-3 text-gray-700 text-sm space-y-2">
-        <p><strong>Fase luminosa</strong> — dependiente de luz, ocurre en los tilacoides. Produce ATP y NADPH.</p>
-        <p><strong>Fase oscura</strong> — ciclo de Calvin, independiente de luz, ocurre en el estroma. Fija CO₂ usando ATP y NADPH.</p>
-      </div>
-    </details>
-
-    <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200 shadow-sm">
-      <p class="text-3xl font-extrabold text-amber-800">~6%</p>
-      <p class="text-sm font-medium text-amber-600">Eficiencia máxima de conversión solar</p>
-      <div class="mt-2 h-2 bg-amber-200 rounded-full">
-        <div class="h-2 bg-gradient-to-r from-amber-500 to-amber-400 rounded-full" style="width:6%"></div>
-      </div>
-    </div>
-
+<div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border border-amber-200 shadow-sm">
+  <p class="text-3xl font-extrabold text-amber-800">~6%</p>
+  <p class="text-sm font-medium text-amber-600">Eficiencia máxima de conversión solar</p>
+  <div class="mt-2 h-2 bg-amber-200 rounded-full">
+    <div class="h-2 bg-gradient-to-r from-amber-500 to-amber-400 rounded-full" style="width:6%"></div>
   </div>
 </div>
 PROMPT;
@@ -289,7 +312,7 @@ PROMPT;
 
 {$originalBody}
 
-Transforma este contenido en HTML semántico enriquecido con Tailwind CSS. Aplica la estructura visual obligatoria: identifica el concepto central (→ highlight box), enumera si hay múltiples puntos (→ lista con iconos + hover), y usa estrategias de enriquecimiento variadas (gradiente en título, acordeón si aplica, stat card o progress bar para datos numéricos).
+Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card o progress bar para datos numéricos, acordeón para info expandible, y tipografía variada (gradiente en título, subrayado decorativo). IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —).
 PROMPT;
 
         $overrides = [

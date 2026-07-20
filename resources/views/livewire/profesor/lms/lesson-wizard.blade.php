@@ -1925,12 +1925,13 @@
 
                     {{-- STEP 2: Editor de Diapositivas (Slide Editor) --}}
                     @if($currentStep === 2)
-                        <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden"
+                        <div class="slide-editor-root bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden"
                              x-data="{
                                 showSlideList: false,
                                 editSlideTitle: false,
                                 slideTitleBuffer: '{{ addslashes($wizardSections[$currentSlideIndex]['title'] ?? '') }}'
-                             }">
+                             }"
+                             x-init="window.addEventListener('close-slide-list', () => showSlideList = false)">
 
                             {{-- ===== SLIDE EDITOR INTERFACE ===== --}}
                             @php
@@ -1975,7 +1976,7 @@
                                             $secContent = $sec['contents'][0]['body'] ?? '';
                                             $hasSecContent = !empty($secContent);
                                         @endphp
-                                        <button wire:click="goToSlide({{ $sIdx2 }}); $el.closest('[x-data]').__x.$data.showSlideList = false"
+                                        <button wire:click="goToSlide({{ $sIdx2 }}); window.dispatchEvent(new CustomEvent('close-slide-list'))"
                                                 class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs
                                                        {{ $sIdx2 === $currentSlideIndex ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border border-transparent' }}">
                                             <span class="flex items-center justify-center w-5 h-5 rounded bg-gray-200 dark:bg-slate-700/60 text-[10px] font-mono shrink-0">{{ $sIdx2 + 1 }}</span>
@@ -2329,7 +2330,7 @@
                             {{-- ===== PREGUNTAS DE REPASO (Markdown) ===== --}}
                             <div class="border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20"
                                  x-data="{
-                                     repasoOpen: JSON.parse(sessionStorage.getItem('repasoOpen') ?? @json(!empty($reviewQuestions))),
+                                     repasoOpen: JSON.parse(sessionStorage.getItem('repasoOpen') ?? 'true'),
                                  }"
                                  x-effect="sessionStorage.setItem('repasoOpen', JSON.stringify(repasoOpen))">
                                 <button @click="repasoOpen = !repasoOpen"
@@ -4026,9 +4027,6 @@ Cómo...?"
             position: fixed;
             top: 1rem;
             right: 1rem;
-        }
-        .dark [x-data="mermaidEmbed()"]:fullscreen {
-            background: #0f172a;
         }
         .zoom-act {
             display: inline-flex;

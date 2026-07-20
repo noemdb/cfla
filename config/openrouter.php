@@ -44,4 +44,17 @@ return [
     'model_fallback3' => env('OPENROUTER_MODEL_FALLBACK3', 'nvidia/nemotron-3-nano-30b-a3b'),
     'model_fallback4' => env('OPENROUTER_MODEL_FALLBACK4', 'anthropic/claude-sonnet-4'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Diagram generation models (used by generateSlideDiagram)
+    |--------------------------------------------------------------------------
+    |
+    | Separate chain for diagram generation (Mermaid.js HTML). Primary model
+    | with two fallback levels, all configurable via .env.
+    |
+    */
+    'model_diagram_primary'   => env('OPENROUTER_MODEL_DIAGRAM_PRIMARY',   'qwen/qwen3-32b'),
+    'model_diagram_fallback1' => env('OPENROUTER_MODEL_DIAGRAM_FALLBACK1', 'mistralai/mistral-large'),
+    'model_diagram_fallback2' => env('OPENROUTER_MODEL_DIAGRAM_FALLBACK2', 'anthropic/claude-sonnet-4'),
+
 ];

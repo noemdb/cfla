@@ -422,7 +422,16 @@ class LessonWizard extends Component
                 'start_date'    => $activity->finicial,
                 'end_date'      => $activity->ffinal,
                 'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
-                'sections'      => $activity->lmsSections->toArray(),
+                // Separar "Preguntas de Repaso" de las secciones normales
+                'review_questions' => collect($activity->lmsSections->toArray())
+                    ->filter(fn($s) => ($s['title'] ?? '') === 'Preguntas de Repaso')
+                    ->flatMap(fn($s) => collect($s['contents'] ?? [])->pluck('body'))
+                    ->filter()
+                    ->implode("\n\n"),
+                'sections'      => $activity->lmsSections
+                    ->reject(fn($s) => $s->title === 'Preguntas de Repaso')
+                    ->values()
+                    ->toArray(),
                 'resources'     => $activity->lmsResources->toArray(),
                 'links'         => $activity->lmsLinks->toArray(),
                 'html_embeds'   => $activity->lmsHtmlEmbeds
@@ -520,6 +529,7 @@ class LessonWizard extends Component
             'end_date'      => $act?->ffinal,
             'allow_downloads'        => $this->allowDownloads,
             'allow_comments'         => true,
+            'review_questions'       => $this->reviewQuestions,
             'sections'               => $sections,
             'resources'     => $this->wizardResources,
             'links'         => $this->wizardLinks,
@@ -1424,7 +1434,8 @@ CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - Asegura que el overflow-x-auto del wrapping permita scroll horizontal sin truncar nodos.
 - En pantallas grandes el diagrama debe ocupar el ancho disponible sin estirarse desproporcionadamente.
 - NO uses max-w-2xl ni max-w-4xl que limiten el ancho del diagrama en monitores grandes.
-- Prefiere graph LR (horizontal) o graph TB (vertical) seg├║n el contenido, con nodos de texto razonables.
+- Prioriza graph TD (top-down, flujo vertical arriba→abajo) con hasta 3 niveles de profundidad.
+- El texto dentro de los nodos debe distribuirse en múltiples líneas (con <br/> o arreglo multi-línea [linea1, linea2, ...]) para evitar truncamiento horizontal.
 8. **NO incluyas explicaciones, introducciones, descripciones ni texto fuera del código HTML o Mermaid. Responde ÚNICAMENTE el código. Si es Mermaid, responde solo el código Mermaid. Si es HTML, responde solo el HTML desde `<div class="w-full...">`.**
 PROMPT;
 
@@ -1440,10 +1451,16 @@ PROMPT;
 **Contenido:**
 {$sectionContentPreview}
 
-Genera el c├│digo HTML del diagrama Mermaid para esta diapositiva.
+Genera el código HTML del diagrama Mermaid para esta diapositiva.
 Recuerda: el diagrama debe ser RESPONSIVE, visible correctamente desde
-pantallas de celular hasta monitores anchos (condici├│n no negociable).
-**IMPORTANTE:*** Responde ÚNICAMENTE el código. Sin textos, explicaciones, introducciones ni despedidas. Solo el código.
+pantallas de celular hasta monitores anchos (condición no negociable).
+
+Requisitos del diagrama:
+1. Máximo 3 niveles de profundidad.
+2. Texto multi-línea dentro de nodos (usa <br/> o arreglos [línea1, línea2]) para evitar truncamiento.
+3. Flujo vertical TOP-DOWN (graph TD), prioriza alineación de arriba hacia abajo.
+
+**IMPORTANTE:** Responde ÚNICAMENTE el código. Sin textos, explicaciones, introducciones ni despedidas. Solo el código.
 PROMPT;
 
         try {
@@ -1451,7 +1468,13 @@ PROMPT;
                 $systemPrompt,
                 $userPrompt,
                 ['max_tokens' => 4096, 'temperature' => 0.7, 'timeout' => 300],
-                3500
+                3500,
+                null,
+                [
+                    ['model' => config('openrouter.model_diagram_primary'),   'label' => 'Diagrama Qwen 3.1 32B primario'],
+                    ['model' => config('openrouter.model_diagram_fallback1'), 'label' => 'Diagrama Mistral Large fallback 1'],
+                    ['model' => config('openrouter.model_diagram_fallback2'), 'label' => 'Diagrama Claude Sonnet 4 fallback 2'],
+                ]
             );
 
             if (!$result['success']) {
@@ -3830,6 +3853,8 @@ PROMPT;
      * @param  int          $tokenBudget      Máx. tokens del user prompt antes de compactar.
      * @param  callable|null $contentValidator Recibe (string $content): bool.
      *                                         true = válido, false = inválido (pasar al sig. modelo).
+     * @param  array|null    $customChain      Cadena custom de modelos [['model','label'],...].
+     *                                         null = usa la cadena por defecto (lesson wizard).
      * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
      */
     private function askWithCompaction(
@@ -3837,7 +3862,8 @@ PROMPT;
         string    $userPrompt,
         array     $overrides = [],
         int       $tokenBudget = 2000,
-        ?callable $contentValidator = null
+        ?callable $contentValidator = null,
+        ?array    $customChain = null
     ): array {
         $estimatedTokens = $this->estimateTokens($userPrompt);
         $compacted = false;
@@ -3859,7 +3885,7 @@ PROMPT;
         }
 
         // ─── Cadena de modelos OpenRouter (desde config/openrouter.php) ──
-        $modelChain = [
+        $modelChain = $customChain ?? [
             ['model' => config('openrouter.model_primary'),   'label' => 'Qwen 3.1 32B primario'],
             ['model' => config('openrouter.model_fallback1'), 'label' => 'Mistral Large fallback 1'],
             ['model' => config('openrouter.model_fallback2'), 'label' => 'Ling 2.6 Flash fallback 2'],

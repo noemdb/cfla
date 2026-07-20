@@ -100,7 +100,7 @@
             </div>
 
             {{-- Swiper body --}}
-            <div class="w-full bg-stone-50 swiper overflow-hidden"
+            <div class="w-full bg-stone-50 swiper overflow-hidden flex-1 min-h-0 self-stretch"
                  x-ref="swiperContainer">
                 <div class="swiper-wrapper">
                     {{-- ═══════ SLIDE 1: PORTADA INSTITUCIONAL ═══════ --}}
@@ -230,7 +230,7 @@
 
                     {{-- ═══════ SECTION SLIDES ═══════ --}}
                     @forelse($preview['sections'] ?? [] as $section)
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                        <div class="swiper-slide overflow-y-auto w-full h-full min-h-0 p-6 md:p-8 flex flex-col">
                             {{-- Section header with teaching structure badge + step count --}}
                             @php
                                 $sectionTitleUpper = mb_strtoupper($section['title'] ?? '');
@@ -244,7 +244,7 @@
                                 }
                                 $contentCount = count($section['contents'] ?? []);
                             @endphp
-                            <div class="flex items-center gap-2 mb-4">
+                            <div class="flex items-center gap-2 mb-4 shrink-0">
                                 <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                                 <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>
                                 @if($teachingStyle)
@@ -272,7 +272,8 @@
                                     }
                                     $stepNumber = $idx + 1;
                                 @endphp
-                                <div class="flex items-start gap-3 {{ $loop->last ? '' : 'mb-3' }}">
+                                @php $isLastWithMermaid = $loop->last && $isMermaid; @endphp
+                                <div class="flex gap-3 {{ $isLastWithMermaid ? 'flex-1 min-h-0 items-stretch' : 'items-start' }} {{ $loop->last ? '' : 'mb-3' }}">
                                     {{-- Step circle with connector line --}}
                                     <div class="flex flex-col items-center shrink-0">
                                         <span class="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold leading-none shadow-sm">
@@ -284,9 +285,9 @@
                                     </div>
 
                                     {{-- Step content --}}
-                                    <div class="flex-1 min-w-0 {{ $loop->last ? '' : 'pb-1' }}">
+                                    <div class="flex-1 min-w-0 {{ $isLastWithMermaid ? 'min-h-0 flex flex-col' : '' }} {{ $loop->last ? '' : 'pb-1' }}">
                                         @if(($content['title'] ?? null))
-                                            <h3 class="text-sm font-bold text-slate-800 leading-snug mb-1.5">{{ $content['title'] }}</h3>
+                                            <h3 class="text-sm font-bold text-slate-800 leading-snug mb-1.5 shrink-0">{{ $content['title'] }}</h3>
                                         @endif
                                         @if($isMermaid)
                                             @php
@@ -299,8 +300,8 @@
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $mermaidCode }}"
                                                  data-mermaid-delay
-                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200">
-                                                <div x-ref="target" class="w-full"></div>
+                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200 flex-1 min-h-0 flex flex-col mermaid-fill-height">
+                                                <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                             </div>
                                         @elseif(!empty(trim(strip_tags($bodyHtml))))
                                             @php
@@ -332,7 +333,7 @@
                                                 <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-4 shadow-sm">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💡</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'list')
@@ -341,20 +342,20 @@
                                                         <span class="text-lg leading-none">📋</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lista</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal">{!! $bodyHtml !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @elseif($__tpl === 'quote')
                                                 <div class="bg-amber-50/60 border-l-4 border-amber-400 rounded-r-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium">{!! $bodyHtml !!}</div>
+                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium lms-content">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'question')
                                                 <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💭</span>
-                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
+                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'activity')
@@ -363,11 +364,11 @@
                                                         <span class="text-lg leading-none">✏️</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actividad</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @else
                                                 <div class="bg-gradient-to-br from-white to-stone-50/80 rounded-xl p-4 border border-stone-200/60">
-                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none">{!! $bodyHtml !!}</div>
+                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
                                                 </div>
                                             @endif
                                         @endif
@@ -386,13 +387,13 @@
                                             @if(!empty($embed['title']))
                                                 <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                             @endif
-                                            <div class="text-sm text-slate-700 prose prose-sm max-w-none html-embed-content">
+                                            <div class="text-sm text-slate-700 prose prose-sm max-w-none lms-content html-embed-content">
                                                 @if($embed['is_mermaid'] ?? false)
                                                     <div wire:ignore x-data="mermaidEmbed()"
                                                          data-mermaid-code="{{ $embed['html_content'] }}"
                                                          data-mermaid-delay
-                                                         class="w-full">
-                                                        <div x-ref="target" class="w-full"></div>
+                                                         class="w-full min-h-[250px] flex flex-col mermaid-fill-height">
+                                                        <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                                     </div>
                                                 @else
                                                     {!! $embed['html_content'] !!}
@@ -618,8 +619,8 @@
                                                 <div wire:ignore x-data="mermaidEmbed()"
                                                      data-mermaid-code="{{ $embed['html_content'] }}"
                                                      data-mermaid-delay
-                                                     class="w-full">
-                                                    <div x-ref="target" class="w-full"></div>
+                                                     class="w-full min-h-[250px] flex flex-col mermaid-fill-height">
+                                                    <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                                 </div>
                                             @else
                                                 {!! $embed['html_content'] !!}
@@ -627,6 +628,25 @@
                                         </div>
                                     </div>
                                 @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- ═══════ SLIDE: PREGUNTAS DE REPASO ═══════ --}}
+                    @if(!empty($preview['review_questions']))
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                            <div class="flex items-center gap-2 mb-4 shrink-0">
+                                <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
+                                <h2 class="text-lg font-bold text-slate-800">Preguntas de Repaso</h2>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                    <span>●</span>
+                                    CIERRE
+                                </span>
+                            </div>
+                            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                                <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">
+                                    {!! Str::markdown($preview['review_questions']) !!}
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -852,13 +872,123 @@
             top: 1rem;
             right: 1rem;
         }
-        .dark [x-data="mermaidEmbed()"]:fullscreen {
-            background: #0f172a;
-        }
         .zoom-act {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* ── Mermaid fill height (diagrama ocupa todo el alto disponible) ── */
+        .mermaid-fill-height {
+            min-height: 0;
+        }
+        .mermaid-fill-height svg {
+            min-height: 100% !important;
+            width: 100% !important;
+            flex: 1 !important;
+        }
+
+        /* ── lms-content: estilos consistentes para contenido Markdown ── */
+        .lms-content :is(h1, h2, h3, h4) {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+            letter-spacing: -0.01em !important;
+        }
+        .lms-content h1 {
+            font-size: 1.5em !important;
+            margin: 1.2em 0 0.6em !important;
+            padding-bottom: 0.3em !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+        .lms-content h2 {
+            font-size: 1.25em !important;
+            margin: 1.4em 0 0.5em !important;
+            padding-bottom: 0.25em !important;
+            border-bottom: 1.5px solid #e2e8f0 !important;
+            color: #0d9488 !important;
+        }
+        .lms-content h3 {
+            font-size: 1.05em !important;
+            margin: 1.2em 0 0.4em !important;
+            color: #1e293b !important;
+        }
+        .lms-content h4 {
+            font-size: 0.95em !important;
+            margin: 1em 0 0.3em !important;
+            color: #334155 !important;
+            font-weight: 600 !important;
+        }
+        .lms-content blockquote {
+            border-left: 3px solid #0d9488 !important;
+            background: #f0fdfa !important;
+            padding: 0.75em 1em !important;
+            margin: 1.2em 0 !important;
+            border-radius: 0 0.5rem 0.5rem 0 !important;
+        }
+        .lms-content blockquote p {
+            margin: 0 !important;
+        }
+        .lms-content table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin: 1.2em 0 !important;
+            font-size: 0.9em !important;
+            line-height: 1.5 !important;
+        }
+        .lms-content table thead {
+            border-bottom: 2px solid #0d9488 !important;
+        }
+        .lms-content table th {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            font-size: 0.9em !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.025em !important;
+            padding: 0.6rem 0.75rem !important;
+            border: 1px solid #cbd5e1 !important;
+            text-align: left !important;
+            vertical-align: top !important;
+        }
+        .lms-content table td {
+            padding: 0.5rem 0.75rem !important;
+            border: 1px solid #cbd5e1 !important;
+            vertical-align: top !important;
+            color: #334155 !important;
+        }
+        .lms-content table tbody tr {
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .lms-content table tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+        .lms-content table tbody tr:hover {
+            background-color: #f1f5f9 !important;
+        }
+        .lms-content table :is(th, td) strong {
+            color: inherit !important;
+        }
+        .lms-content p {
+            margin: 0.6em 0 !important;
+            line-height: 1.65 !important;
+        }
+        .lms-content p:first-child {
+            margin-top: 0 !important;
+        }
+        .lms-content ul, .lms-content ol {
+            margin: 0.5em 0 !important;
+            padding-left: 1.2em !important;
+        }
+        .lms-content li {
+            margin: 0.2em 0 !important;
+        }
+        .lms-content strong {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        .lms-content em {
+            color: #475569 !important;
         }
 
         /* ── Watermark institucional ───────────────────────────── */
