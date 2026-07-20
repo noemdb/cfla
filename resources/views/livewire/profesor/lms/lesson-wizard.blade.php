@@ -2285,7 +2285,10 @@
 
                             {{-- ===== PREGUNTAS DE REPASO (Markdown) ===== --}}
                             <div class="border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20"
-                                 x-data="{ repasoOpen: @json(!empty($reviewQuestions)) }">
+                                 x-data="{
+                                     repasoOpen: JSON.parse(sessionStorage.getItem('repasoOpen') ?? @json(!empty($reviewQuestions))),
+                                 }"
+                                 x-effect="sessionStorage.setItem('repasoOpen', JSON.stringify(repasoOpen))">
                                 <button @click="repasoOpen = !repasoOpen"
                                         class="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-xs font-medium text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/20 transition-colors">
                                     <div class="flex items-center gap-2">
