@@ -24,7 +24,7 @@
 <body>
 
     <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-    <h2>PLANIFICACIÓN — Resumen Ejecutivo de Actividades</h2>
+    <h2>PLANIFICACIÓN — Resumen de Actividades</h2>
     <div class="subhead">
         PE: {{ $pevaluacion->pensum?->pestudio?->name ?? '' }} — {{ $pevaluacion->pensum?->asignatura?->name ?? '' }}
         {{ $pevaluacion->seccion?->grado?->name ?? '' }} Sección {{ $pevaluacion->seccion?->name ?? '' }}
