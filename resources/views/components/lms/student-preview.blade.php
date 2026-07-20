@@ -635,6 +635,7 @@
                     {{-- ═══════ SLIDE: PREGUNTAS DE REPASO ═══════ --}}
                     @if(!empty($preview['review_questions']))
                         <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
+                            {{-- 
                             <div class="flex items-center gap-2 mb-4 shrink-0">
                                 <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                                 <h2 class="text-lg font-bold text-slate-800">Preguntas de Repaso</h2>
@@ -642,10 +643,18 @@
                                     <span>●</span>
                                     CIERRE
                                 </span>
-                            </div>
+                            </div> 
+                            --}}
                             <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
                                 <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">
-                                    {!! Str::markdown($preview['review_questions']) !!}
+                                    @php
+                                        $reviewHtml = $preview['review_questions'];
+                                        // 1) Convertir **negrita** → <strong> (pares completos)
+                                        $reviewHtml = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $reviewHtml);
+                                        // 2) Eliminar ** huérfanos (sin cierre) que el parser dejaría literales
+                                        $reviewHtml = str_replace('**', '', $reviewHtml);
+                                    @endphp
+                                    {!! Str::markdown($reviewHtml) !!}
                                 </div>
                             </div>
                         </div>

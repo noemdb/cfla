@@ -1078,6 +1078,8 @@ Estructura mínima:
 Usa Markdown estándar: ## títulos, **negritas**, tablas | |, listas -, *cursivas*.
 NO uses HTML, NO uses ```, NO incluyas explicaciones.
 Responde SOLO con el contenido Markdown.
+
+FONDOS: Si incluyes tablas o elementos con color, usa siempre fondos claros (blanco o gris muy claro). NUNCA fondos oscuros.
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -1097,6 +1099,7 @@ PROMPT;
 **Diapositiva:** {$sectionTitle}
 
 INSTRUCCIÓN: Genera contenido EXTENSO en Markdown. Mínimo 500 caracteres obligatorio.
+CRUCIAL: Nada de fondos oscuros ni colores saturados. Todo debe tener fondo claro y texto oscuro legible.
 PROMPT;
 
         try {
@@ -1104,6 +1107,13 @@ PROMPT;
                 $systemPrompt,
                 $userPrompt,
                 ['max_tokens' => 2048, 'timeout' => 120],
+                2000,
+                null,
+                [
+                    ['model' => config('openrouter.model_text_primary'),   'label' => 'Texto Ling 2.6 Flash primario'],
+                    ['model' => config('openrouter.model_text_fallback1'), 'label' => 'Texto Nemotron 3 Nano fallback 1'],
+                    ['model' => config('openrouter.model_text_fallback2'), 'label' => 'Texto Mistral Large fallback 2'],
+                ]
             );
 
             if (!$result['success']) {
@@ -1230,7 +1240,14 @@ PROMPT;
             $aiResult = $this->askWithCompaction(
                 $systemPrompt,
                 $userPrompt,
-                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 300]
+                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 300],
+                2000,
+                null,
+                [
+                    ['model' => config('openrouter.model_image_primary'),   'label' => 'Imagen Claude Sonnet 4 primario'],
+                    ['model' => config('openrouter.model_image_fallback1'), 'label' => 'Imagen Nemotron 3 Nano fallback 1'],
+                    ['model' => config('openrouter.model_image_fallback2'), 'label' => 'Imagen Mistral Large fallback 2'],
+                ]
             );
 
             if ($aiResult['success'] && $aiResult['content']) {
@@ -1287,7 +1304,7 @@ PROMPT;
 
     /**
      * Genera una ilustración SVG educativa para la diapositiva/sección actual
-     * usando el servicio GenerateIllustrationLesson (prompt SVG-educativo-v3).
+     * usando askWithCompaction() con cadena de modelos (prompt SVG-educativo-v3).
      * Inserta el resultado como un bloque de contenido en la sección.
      */
     public function generateSectionIllustration(): void
@@ -1314,19 +1331,37 @@ PROMPT;
         $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
 
-        try {
-            /** @var \App\Services\Lms\GenerateIllustrationLesson $service */
-            $service = app(\App\Services\Lms\GenerateIllustrationLesson::class);
+        $systemPrompt = \App\Services\Lms\GenerateIllustrationLesson::getSystemPrompt();
 
-            $result = $service->generate(
-                sectionTitle: $sectionTitle,
-                sectionBody: $sectionBody,
-                gradeName: $gradeName,
-                subjectName: $subjectName,
-                lessonTitle: $this->lessonTitle,
+        $userPrompt = <<<PROMPT
+Contexto pedagógico:
+- Grado: {$gradeName}
+- Asignatura: {$subjectName}
+- Lección: {$this->lessonTitle}
+- Sección: {$sectionTitle}
+
+Contenido de la sección a ilustrar:
+
+{$sectionBody}
+
+Genera el SVG ilustrativo para esta sección siguiendo estrictamente el sistema de diseño, accesibilidad y contrato de salida especificados.
+PROMPT;
+
+        try {
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 4096, 'temperature' => 0.4, 'timeout' => 300],
+                2000,
+                null,
+                [
+                    ['model' => config('openrouter.model_illustration_primary'),   'label' => 'Ilustración Claude Sonnet 4 primario'],
+                    ['model' => config('openrouter.model_illustration_fallback1'), 'label' => 'Ilustración Nemotron 3 Nano fallback 1'],
+                    ['model' => config('openrouter.model_illustration_fallback2'), 'label' => 'Ilustración Mistral Large fallback 2'],
+                ]
             );
 
-            if (!$result['success'] || empty($result['svg'])) {
+            if (!$result['success'] || empty($result['content'])) {
                 $this->notification()->error(
                     'Error al generar ilustración',
                     $result['error'] ?? 'No se pudo generar la ilustración SVG.'
@@ -1334,9 +1369,26 @@ PROMPT;
                 return;
             }
 
+            $rawSvg = $result['content'] ?? '';
+
+            // Limpiar wrappers markdown
+            $rawSvg = preg_replace('/^```(?:svg|html)?\s*\n?/i', '', $rawSvg);
+            $rawSvg = preg_replace('/\n?```\s*$/s', '', $rawSvg);
+            $rawSvg = trim($rawSvg);
+
+            // Extraer bloque <svg>...</svg>
+            if (!preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
+                $this->notification()->error(
+                    'Error al generar ilustración',
+                    'La respuesta no contiene un SVG válido.'
+                );
+                return;
+            }
+            $svgCode = $svgMatch[0];
+
             // Envolver el SVG en HTML embed para renderizado
             $svgHtml = app(\App\Services\NapkinAiService::class)->buildEmbedHtml(
-                $result['svg'],
+                $svgCode,
                 null,
                 'Ilustración: ' . $sectionTitle
             );
@@ -2717,8 +2769,8 @@ Formato obligatorio:
 5. **Pregunta 5** — ...
 
 ### Verdadero o Falso (opcional)
-- **Afirmación 1** → Verdadero. Explicación breve.
-- **Afirmación 2** → Falso. Explicación breve.
+- ✅ **Afirmación 1** → Verdadero. Explicación breve.
+- ❌ **Afirmación 2** → Falso. Explicación breve.
 
 Reglas:
 - Mínimo 8 preguntas variadas (abiertas, desarrollo, V/F).
@@ -2769,6 +2821,14 @@ PROMPT;
     {
         $activityId = $this->selectedActivityId;
         $sectionIdMap = [];
+
+        // ─── Persistir título y descripción generados (paso 1) ──
+        if (!empty($this->lessonTitle) || !empty($this->lessonDescription)) {
+            Activity::where('id', $activityId)->update([
+                'topic'       => $this->lessonTitle,
+                'description' => $this->lessonDescription,
+            ]);
+        }
 
         foreach ($this->wizardSections as $key => $sectionData) {
             $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');

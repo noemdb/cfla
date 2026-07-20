@@ -57,4 +57,46 @@ return [
     'model_diagram_fallback1' => env('OPENROUTER_MODEL_DIAGRAM_FALLBACK1', 'mistralai/mistral-large'),
     'model_diagram_fallback2' => env('OPENROUTER_MODEL_DIAGRAM_FALLBACK2', 'anthropic/claude-sonnet-4'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Text generation models (used by generateSlideText)
+    |--------------------------------------------------------------------------
+    |
+    | Chain for slide text content generation. Primary model with two fallback
+    | levels, all configurable via .env. The user prefers:
+    | primary → inclusionai/ling-2.6-flash
+    | fallback1 → nvidia/nemotron-3-nano-30b-a3b
+    | fallback2 → mistralai/mistral-large
+    |
+    */
+    'model_text_primary'   => env('OPENROUTER_MODEL_TEXT_PRIMARY',   'inclusionai/ling-2.6-flash'),
+    'model_text_fallback1' => env('OPENROUTER_MODEL_TEXT_FALLBACK1', 'nvidia/nemotron-3-nano-30b-a3b'),
+    'model_text_fallback2' => env('OPENROUTER_MODEL_TEXT_FALLBACK2', 'mistralai/mistral-large'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Image/SVG generation models (used by generateSlideImage)
+    |--------------------------------------------------------------------------
+    |
+    | Chain for educational SVG diagram generation. Primary model with two
+    | fallback levels, all configurable via .env.
+    |
+    */
+    'model_image_primary'   => env('OPENROUTER_MODEL_IMAGE_PRIMARY',   'anthropic/claude-sonnet-4'),
+    'model_image_fallback1' => env('OPENROUTER_MODEL_IMAGE_FALLBACK1', 'nvidia/nemotron-3-nano-30b-a3b'),
+    'model_image_fallback2' => env('OPENROUTER_MODEL_IMAGE_FALLBACK2', 'mistralai/mistral-large'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Illustration/SVG generation models (used by generateSectionIllustration)
+    |--------------------------------------------------------------------------
+    |
+    | Chain for educational SVG illustration generation (prompt SVG-educativo-v3).
+    | Primary model with two fallback levels, all configurable via .env.
+    |
+    */
+    'model_illustration_primary'   => env('OPENROUTER_MODEL_ILLUSTRATION_PRIMARY',   'anthropic/claude-sonnet-4'),
+    'model_illustration_fallback1' => env('OPENROUTER_MODEL_ILLUSTRATION_FALLBACK1', 'nvidia/nemotron-3-nano-30b-a3b'),
+    'model_illustration_fallback2' => env('OPENROUTER_MODEL_ILLUSTRATION_FALLBACK2', 'mistralai/mistral-large'),
+
 ];

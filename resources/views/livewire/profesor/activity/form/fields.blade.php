@@ -116,29 +116,7 @@
 
     {{-- ═══════════════ TAB NAVIGATION ═══════════════ --}}
     <div class="flex border-b border-white/10">
-        {{-- Tab 1: Datos Generales --}}
-        <button type="button" @click="activeTab = 'general'"
-            :class="activeTab === 'general' ? 'border-indigo-400 text-indigo-300' : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'"
-            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all duration-200">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <span class="hidden sm:inline">Datos Generales</span>
-            <span class="inline sm:hidden">General</span>
-        </button>
-
-        {{-- Tab 2: Contenido Pedagógico --}}
-        <button type="button" @click="activeTab = 'content'"
-            :class="activeTab === 'content' ? 'border-indigo-400 text-indigo-300' : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'"
-            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all duration-200">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
-            <span class="hidden sm:inline">Contenido Pedagógico</span>
-            <span class="inline sm:hidden">Contenido</span>
-        </button>
-
-        {{-- Tab 3: Enseñanza y Evaluación --}}
+        {{-- Tab 1: Enseñanza y Evaluación --}}
         <button type="button" @click="activeTab = 'teaching'"
             :class="activeTab === 'teaching' ? 'border-indigo-400 text-indigo-300' : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'"
             class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all duration-200">
@@ -148,90 +126,31 @@
             <span class="hidden sm:inline">Enseñanza y Evaluación</span>
             <span class="inline sm:hidden">Enseñanza</span>
         </button>
+
+        {{-- Tab 2: Datos Básicos --}}
+        <button type="button" @click="activeTab = 'general'"
+            :class="activeTab === 'general' ? 'border-indigo-400 text-indigo-300' : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="hidden sm:inline">Datos Básicos</span>
+            <span class="inline sm:hidden">Básicos</span>
+        </button>
+
+        {{-- Tab 3: Contenido Pedagógico --}}
+        <button type="button" @click="activeTab = 'content'"
+            :class="activeTab === 'content' ? 'border-indigo-400 text-indigo-300' : 'border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-600'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <span class="hidden sm:inline">Contenido Pedagógico</span>
+            <span class="inline sm:hidden">Contenido</span>
+        </button>
     </div>
 
-    {{-- ═══════════════ TAB 1: DATOS GENERALES ═══════════════ --}}
-    <div x-show="activeTab === 'general'"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-            {{-- Fecha Inicial --}}
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['finicial'] ?? 'Fecha Inicial' }}</label>
-                <input type="date" wire:model="activityForm.finicial"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
-                @error('activityForm.finicial') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-            {{-- Fecha Final --}}
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['ffinal'] ?? 'Fecha Final' }}</label>
-                <input type="date" wire:model="activityForm.ffinal"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
-                @error('activityForm.ffinal') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-            {{-- Actividad Evaluativa --}}
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['description'] ?? 'Actividad Evaluativa' }}</label>
-                <textarea wire:model="activityForm.description" rows="6"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
-                    placeholder="{{ $list_comment['description'] ?? '' }}"></textarea>
-                @error('activityForm.description') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-            {{-- Aprendizaje --}}
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['learning'] ?? 'Aprendizaje' }}</label>
-                <textarea wire:model="activityForm.learning" rows="6"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
-                    placeholder="{{ $list_comment['learning'] ?? '' }}"></textarea>
-                @error('activityForm.learning') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-        </div>
-    </div>
-
-    {{-- ═══════════════ TAB 2: CONTENIDO PEDAGÓGICO ═══════════════ --}}
-    <div x-show="activeTab === 'content'"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-            {{-- Tema generador --}}
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['topic'] ?? 'Tema Generador y Énfasis' }}</label>
-                <textarea wire:model="activityForm.topic" rows="6"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
-                    placeholder="{{ $list_comment['topic'] ?? '' }}"></textarea>
-                @error('activityForm.topic') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-            {{-- Tejido temático --}}
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['thematic'] ?? 'Tejido Temático' }}</label>
-                <textarea wire:model="activityForm.thematic" rows="6"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
-                    placeholder="{{ $list_comment['thematic'] ?? '' }}"></textarea>
-                @error('activityForm.thematic') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-            {{-- Referentes --}}
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['references'] ?? 'Referentes Teórico-Prácticos y Éticos' }}</label>
-                <textarea wire:model="activityForm.references" rows="6"
-                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
-                    placeholder="{{ $list_comment['references'] ?? '' }}"></textarea>
-                @error('activityForm.references') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
-            </div>
-
-        </div>
-    </div>
-
-    {{-- ═══════════════ TAB 3: ENSEÑANZA Y EVALUACIÓN ═══════════════ --}}
+    {{-- ═══════════════ TAB 1: ENSEÑANZA Y EVALUACIÓN ═══════════════ --}}
     <div x-show="activeTab === 'teaching'"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 translate-y-1"
@@ -296,6 +215,87 @@
                     class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
                     placeholder="{{ $list_comment['observations'] ?? '' }}"></textarea>
                 @error('activityForm.observations') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+        </div>
+    </div>
+
+    {{-- ═══════════════ TAB 2: DATOS BÁSICOS ═══════════════ --}}
+    <div x-show="activeTab === 'general'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+            {{-- Fecha Inicial --}}
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['finicial'] ?? 'Fecha Inicial' }}</label>
+                <input type="date" wire:model="activityForm.finicial"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                @error('activityForm.finicial') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Fecha Final --}}
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['ffinal'] ?? 'Fecha Final' }}</label>
+                <input type="date" wire:model="activityForm.ffinal"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                @error('activityForm.ffinal') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Actividad Evaluativa --}}
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['description'] ?? 'Actividad Evaluativa' }}</label>
+                <textarea wire:model="activityForm.description" rows="6"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
+                    placeholder="{{ $list_comment['description'] ?? '' }}"></textarea>
+                @error('activityForm.description') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Aprendizaje --}}
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['learning'] ?? 'Aprendizaje' }}</label>
+                <textarea wire:model="activityForm.learning" rows="6"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
+                    placeholder="{{ $list_comment['learning'] ?? '' }}"></textarea>
+                @error('activityForm.learning') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+        </div>
+    </div>
+
+    {{-- ═══════════════ TAB 3: CONTENIDO PEDAGÓGICO ═══════════════ --}}
+    <div x-show="activeTab === 'content'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+            {{-- Tema generador --}}
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['topic'] ?? 'Tema Generador y Énfasis' }}</label>
+                <textarea wire:model="activityForm.topic" rows="6"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
+                    placeholder="{{ $list_comment['topic'] ?? '' }}"></textarea>
+                @error('activityForm.topic') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Tejido temático --}}
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['thematic'] ?? 'Tejido Temático' }}</label>
+                <textarea wire:model="activityForm.thematic" rows="6"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
+                    placeholder="{{ $list_comment['thematic'] ?? '' }}"></textarea>
+                @error('activityForm.thematic') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            {{-- Referentes --}}
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">{{ $list_comment['references'] ?? 'Referentes Teórico-Prácticos y Éticos' }}</label>
+                <textarea wire:model="activityForm.references" rows="6"
+                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 resize-y"
+                    placeholder="{{ $list_comment['references'] ?? '' }}"></textarea>
+                @error('activityForm.references') <span class="text-red-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
             </div>
 
         </div>

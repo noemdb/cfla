@@ -252,18 +252,18 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
                                 </button>
-                                {{-- LMS: Editar Contenido --}}
-                                {{-- <a href="{{ route('app.profesors.lms.editor', $item->id) }}"
-                                    title="Editar contenido LMS"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200"
+                                {{-- LMS: Wizard de Lecciones --}}
+                                <a href="{{ route('app.profesors.lms.lesson.wizard', ['activity_id' => $item->id]) }}"
+                                    title="Abrir en Wizard de Lecciones"
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200"
                                     @if(!$enable_edit)
                                         onclick="event.preventDefault()"
                                         style="pointer-events:none; opacity:0.4;"
                                     @endif>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
-                                </a> --}}
+                                </a>
                                 <button wire:click="setEditActivity({{ $item->id }})"
                                     title="Editar actividad"
                                     {{ $enable_edit ? '' : 'disabled' }}

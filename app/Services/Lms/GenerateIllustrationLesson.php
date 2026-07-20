@@ -165,6 +165,14 @@ Confirma mentalmente, sin mostrarlo:
 PROMPT;
 
     /**
+     * Retorna el system prompt para generar ilustraciones SVG educativas.
+     */
+    public static function getSystemPrompt(): string
+    {
+        return self::SYSTEM_PROMPT;
+    }
+
+    /**
      * Genera una ilustración SVG educativa para una sección de lección.
      *
      * @param  string      $sectionTitle  Título de la sección.
