@@ -225,6 +225,10 @@ c) Stat card elevada:
    `shadow-*` en el elemento más externo).
 ❌ NO uses SVG, iconos decorativos, emojis ni elementos gráficos
    (viñetas SVG, checkmarks, comillas decorativas, etc.).
+❌ NO uses fondos oscuros — solo fondo blanco o tonos muy claros
+   (bg-white, bg-stone-50, bg-gray-50, bg-emerald-50, bg-amber-50,
+   bg-sky-50). Evita bg-gray-800, bg-slate-900, bg-emerald-700,
+   bg-amber-700, etc.
 ✅ SÍ usa cards INTERNAS (highlight boxes, stat cards, progress bars,
    acordeones) DENTRO del contenido — la riqueza visual interna está bien.
 ✅ SÍ usa viñetas de texto Unicode: •, ✓, —, ◆, o list-style-disc.
