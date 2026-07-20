@@ -33,7 +33,8 @@
 
     {{-- Main grid: sidebar + Livewire --}}
     <div class="grid grid-cols-1 gap-6"
-         x-data="{ resumenOpen: true }"
+         x-data="{ resumenOpen: localStorage.getItem('resumenOpen') !== 'false' }"
+         x-effect="localStorage.setItem('resumenOpen', resumenOpen)"
          :class="resumenOpen ? 'lg:grid-cols-4' : 'lg:grid-cols-1'">
 
         {{-- Sidebar Resumen --}}
