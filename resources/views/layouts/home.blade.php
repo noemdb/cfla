@@ -200,14 +200,25 @@
                 <a href="{{ route('home') }}#services"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Servicios</a>
                 <a href="{{ route('bot.index') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-800/50">💬 Asistente</a>
+                    class="block px-3 py-2 rounded-md text-base font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-800/50 flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zm-4 0H9v2h2V9z" clip-rule="evenodd"/>
+                    </svg>
+                    Asistente
+                </a>
+
+                {{-- SAEFL section title --}}
+                <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-400/60">SAEFL</div>
                 <a href="{{ env('APP_URL_SAEFL') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">SAEFL</a>
+                    class="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Escritorio</a>
+                <a href="{{ route('login') }}"
+                    class="block pl-6 pr-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Mod. planificación</a>
+
                 <a href="{{ route('home') }}#contacts"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Contáctanos</a>
                 <button id="installPWAMobile" style="display: none;"
                     class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-900/50">
-                    Instalar la App
+                    Instalar App
                 </button>
                 <a href="{{ route('home') }}#featured"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-emerald-800/50">Acerca
