@@ -23,6 +23,7 @@ use App\Services\NapkinAiService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -91,6 +92,7 @@ class LessonWizard extends Component
     public bool $generatingStep1 = false;
     public bool $generatingStep2 = false;
     public ?string $generationError = null;
+    public ?string $debugRawContent = null;
 
     // ─── Wizard: Resultado de generación (typewriter overlay) ──
     public bool $showGenerationResult = false;
@@ -813,11 +815,44 @@ PROMPT;
 
     public function resetWizardSections(): void
     {
+        // ─── Eliminar registros de la BD si existen ────────────
+        $realSectionIds = [];
+        $realContentIds = [];
+
+        foreach ($this->wizardSections as $section) {
+            $sectionId = $section['id'] ?? null;
+            if ($sectionId && !str_starts_with((string)$sectionId, 'temp_')) {
+                $realSectionIds[] = (int) $sectionId;
+
+                if (!empty($section['contents'])) {
+                    foreach ($section['contents'] as $content) {
+                        $contentId = $content['id'] ?? null;
+                        if ($contentId && !str_starts_with((string)$contentId, 'temp_')) {
+                            $realContentIds[] = (int) $contentId;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!empty($realSectionIds)) {
+            DB::transaction(function () use ($realSectionIds, $realContentIds) {
+                if (!empty($realContentIds)) {
+                    LmsActivityContent::whereIn('id', $realContentIds)->delete();
+                } else {
+                    LmsActivityContent::whereIn('section_id', $realSectionIds)->delete();
+                }
+                LmsActivitySection::whereIn('id', $realSectionIds)->delete();
+            });
+        }
+
+        // ─── Limpiar estado en memoria ──────────────────────────
         $this->wizardSections = [];
         $this->reviewQuestions = '';
         $this->currentSlideIndex = 0;
         $this->generatingSection = null;
         $this->generationError = null;
+        $this->debugRawContent = null;
 
         $this->notification()->success(
             'Secciones limpiadas',
@@ -1647,6 +1682,7 @@ PROMPT;
     {
         $this->generatingStep2 = true;
         $this->generationError = null;
+        $this->debugRawContent = null;
 
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
@@ -1745,9 +1781,34 @@ PROMPT;
         // ─── Llamar al servicio con compactación ───────────────
         try {
             $result = $this->askWithCompaction(
-                $systemPrompt,
-                $userPrompt,
-                ['max_tokens' => 4096, 'timeout' => 180],
+                systemPrompt: $systemPrompt,
+                userPrompt: $userPrompt,
+                overrides: ['max_tokens' => 4096, 'timeout' => 180],
+                contentValidator: function (string $content): bool {
+                    // Debe contener los tres marcadores estructurales
+                    $hasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
+                    $hasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
+                    $hasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
+
+                    if (!($hasInicio && $hasDesarrollo && $hasCierre)) {
+                        return false;
+                    }
+
+                    // Extraer el contenido entre //DESARROLLO y //CIERRE
+                    $devMatch = null;
+                    preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $devMatch);
+
+                    if (empty($devMatch[1])) {
+                        return false;
+                    }
+
+                    // Los bloques se separan por una línea en blanco
+                    $blocks = preg_split('/\n\s*\n/', trim($devMatch[1]));
+                    $validBlocks = array_filter($blocks, fn(string $b): bool => !empty(trim($b)));
+
+                    // Mínimo 5 bloques en DESARROLLO (prompt lo exige)
+                    return count($validBlocks) >= 5;
+                },
             );
 
             if (!$result['success']) {
@@ -1759,6 +1820,9 @@ PROMPT;
 
             $content = $this->sanitizeText($result['content'] ?? '');
 
+            // Debug: guardar respuesta cruda para diagnóstico
+            $this->debugRawContent = $result['content'] ?? '';
+
             if (empty($content)) {
                 $this->generationError = 'La IA no generó contenido.';
                 $this->generatingStep2 = false;
@@ -1769,6 +1833,28 @@ PROMPT;
 
             // Dividir por marcadores de sección
             $parts = preg_split('/^\/\/(INICIO|DESARROLLO|CIERRE)\s*$/m', $content, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+            // Log detallado de las partes crudas del split
+            $partsDebug = [];
+            $currentPartIdx = 0;
+            $currentMarkerForDebug = null;
+            foreach ($parts as $p) {
+                $p2 = trim($p);
+                if (in_array($p2, ['INICIO', 'DESARROLLO', 'CIERRE'], true)) {
+                    $currentMarkerForDebug = $p2;
+                    $partsDebug[] = ['marker' => $p2, 'len' => 0, 'preview' => ''];
+                } else {
+                    $partsDebug[] = [
+                        'marker'  => $currentMarkerForDebug ?? '?',
+                        'len'     => mb_strlen($p),
+                        'preview' => mb_substr(preg_replace('/\s+/', ' ', $p), 0, 200),
+                    ];
+                }
+            }
+            Log::debug('generateStep2Sections: parts from preg_split', [
+                'part_count' => count($parts),
+                'parts'      => $partsDebug,
+            ]);
 
             $currentMarker = null;
             $buffer = '';
@@ -1800,6 +1886,20 @@ PROMPT;
 
             $count = count($this->wizardSections);
 
+            // Debug: registrar el resultado de la generación
+            Log::info('generateStep2Sections: resultado', [
+                'section_count'      => $count,
+                'titles'             => collect($this->wizardSections)->pluck('title')->toArray(),
+                'content_length'     => mb_strlen($content),
+                'used_model'         => $result['model'] ?? '—',
+                'was_compacted'      => $result['compacted'] ?? false,
+                'has_markers'        => [
+                    'inicio'     => preg_match('/^\/\/INICIO\s*$/m', $content) === 1,
+                    'desarrollo' => preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1,
+                    'cierre'     => preg_match('/^\/\/CIERRE\s*$/m', $content) === 1,
+                ],
+            ]);
+
             // Mostrar overlay con resultado
             $this->generationType = 'step2';
             $this->showGenerationResult = true;
@@ -1808,6 +1908,22 @@ PROMPT;
                 'Secciones generadas',
                 "Se crearon {$count} secciones con contenido pedagógico."
             );
+
+            // Si hay menos de 7 secciones, registrar para diagnóstico
+            if ($count < 7) {
+                $titles = collect($this->wizardSections)->pluck('title')->map(fn($t) => "• {$t}")->implode("\n");
+                Log::warning('generateStep2Sections: pocas secciones', [
+                    'count'            => $count,
+                    'titles'           => collect($this->wizardSections)->pluck('title')->toArray(),
+                    'content_total_len' => mb_strlen($content),
+                    'full_content'     => $content,
+                    'has_inicio_block' => collect($this->wizardSections)->first(fn($s) => ($s['title'] ?? '') !== '') !== null,
+                    'desarrollo_sections' => collect($this->wizardSections)
+                        ->filter(fn($s) => str_contains($s['title'] ?? '', 'Desarrollo') || preg_match('/^Desarrollo\s+\d+$/', $s['title'] ?? ''))
+                        ->values()
+                        ->toArray(),
+                ]);
+            }
         } catch (\Throwable $e) {
             $this->generationError = $e->getMessage();
             $this->notification()->error('Error', $e->getMessage());
@@ -1847,20 +1963,62 @@ PROMPT;
             $title = $marker === 'INICIO' ? 'Inicio' : ($marker === 'CIERRE' ? 'Cierre' : 'Desarrollo');
         }
 
-        // Para DESARROLLO, crear una sección por cada título/contenido
-        if ($marker === 'DESARROLLO') {
-            // Si hay múltiples bloques separados por doble salto,
-            // los partimos en secciones independientes
+            if ($marker === 'DESARROLLO') {
+            // ─── Agrupar fragmentos del split en bloques (título + cuerpo) ──
+            // Los modelos pueden generar formatos diferentes:
+            //   Formato A) Título\nCuerpo\n\nTítulo2\nCuerpo2...
+            //   Formato B) Título\n\nCuerpo\n\nTítulo2\n\nCuerpo2...
+            //   Formato C) Título\n\nPárrafo1\n\nPárrafo2\n\nTítulo2...
+            // En todos los casos el split por línea en blanco fragmenta bloques.
+            // Estrategia: líneas cortas (≤ 80 chars) = título → nuevo bloque;
+            //             líneas largas (> 80 chars) = cuerpo → se acumulan al bloque anterior.
             $blocks = preg_split('/\n\s*\n/', $text);
+            $tempBlocks = []; // [['title' => string, 'body_frags' => [string, ...]], ...]
+            $thresholdTitle = 80; // máx. chars para considerar "título"
             $blockIndex = 0;
+
             foreach ($blocks as $block) {
                 $block = trim($block);
                 if (empty($block)) {
                     continue;
                 }
                 $bLines = explode("\n", $block);
-                $bTitle = trim(array_shift($bLines));
-                $bBody = trim(implode("\n", $bLines));
+                $firstLine = trim(array_shift($bLines));
+                $restOfBlock = trim(implode("\n", $bLines));
+
+                // Determinar si es continuación de cuerpo (línea larga sin body propio)
+                $isContinuation = !empty($tempBlocks)
+                    && mb_strlen($firstLine) > $thresholdTitle
+                    && empty($restOfBlock);
+
+                if ($isContinuation) {
+                    // Acumular al bloque anterior como un nuevo párrafo de cuerpo
+                    $lastIdx = count($tempBlocks) - 1;
+                    $tempBlocks[$lastIdx]['body_frags'][] = $firstLine;
+                } else {
+                    // Nuevo bloque: primera línea es título, el resto es cuerpo
+                    $bTitle = $firstLine;
+                    $bBodyLines = $restOfBlock
+                        ? [$restOfBlock]
+                        : [];
+
+                    if (empty($bTitle)) {
+                        $bTitle = 'Desarrollo ' . ($blockIndex + 1);
+                    }
+
+                    $tempBlocks[] = [
+                        'title'      => $bTitle,
+                        'body_frags' => $bBodyLines,
+                    ];
+                    $blockIndex++;
+                }
+            }
+
+            $blockCount = 0;
+            $blockIndex = 0;
+            foreach ($tempBlocks as $tb) {
+                $bTitle = $tb['title'];
+                $bBody = trim(implode("\n\n", $tb['body_frags']));
 
                 if (empty($bTitle)) {
                     $bTitle = 'Desarrollo ' . ($blockIndex + 1);
@@ -1883,7 +2041,14 @@ PROMPT;
                     ]],
                 ];
                 $blockIndex++;
+                $blockCount++;
             }
+
+            Log::debug('parseSectionBlock: DESARROLLO result', [
+                'raw_fragments'    => count($blocks),
+                'assembled_blocks' => $blockCount,
+                'titles'           => collect($tempBlocks)->pluck('title')->toArray(),
+            ]);
         } else {
             // INICIO o CIERRE — una sola sección
             $sectionTitle = $marker === 'INICIO' ? ($title ?: 'Inicio') : ($title ?: 'Cierre');
@@ -3651,20 +3816,28 @@ PROMPT;
      * Envía un prompt a OpenRouter, compactándolo automáticamente
      * con Nvidia si el user prompt supera el token budget.
      *
-     * Si OpenRouter falla (ej: créditos insuficientes), cae en
-     * NvidiaService como fallback automático.
+     * Prueba hasta 3 modelos de OpenRouter en cascada con 60s de timeout
+     * cada uno. Si todos fallan, muestra un mensaje amigable pidiendo
+     * reintento manual.
      *
-     * @param  string       $systemPrompt  Instrucción del sistema.
-     * @param  string       $userPrompt    Mensaje del usuario.
-     * @param  array        $overrides     Overrides para el LLM.
-     * @param  int          $tokenBudget   Máx. tokens del user prompt antes de compactar.
+     * Si se proporciona un $contentValidator, el contenido devuelto por
+     * cada modelo se valida con ese callable. Si retorna false, se considera
+     * que el modelo falló (contenido inválido) y se pasa al siguiente.
+     *
+     * @param  string       $systemPrompt     Instrucción del sistema.
+     * @param  string       $userPrompt       Mensaje del usuario.
+     * @param  array        $overrides        Overrides base para el LLM.
+     * @param  int          $tokenBudget      Máx. tokens del user prompt antes de compactar.
+     * @param  callable|null $contentValidator Recibe (string $content): bool.
+     *                                         true = válido, false = inválido (pasar al sig. modelo).
      * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
      */
     private function askWithCompaction(
-        string $systemPrompt,
-        string $userPrompt,
-        array  $overrides = [],
-        int    $tokenBudget = 2000
+        string    $systemPrompt,
+        string    $userPrompt,
+        array     $overrides = [],
+        int       $tokenBudget = 2000,
+        ?callable $contentValidator = null
     ): array {
         $estimatedTokens = $this->estimateTokens($userPrompt);
         $compacted = false;
@@ -3685,50 +3858,164 @@ PROMPT;
             }
         }
 
-        // ─── Fase 1: intentar con OpenRouter ─────────────────────
+        // ─── Cadena de modelos OpenRouter (desde config/openrouter.php) ──
+        $modelChain = [
+            ['model' => config('openrouter.model_primary'),   'label' => 'Qwen 3.1 32B primario'],
+            ['model' => config('openrouter.model_fallback1'), 'label' => 'Mistral Large fallback 1'],
+            ['model' => config('openrouter.model_fallback2'), 'label' => 'Ling 2.6 Flash fallback 2'],
+            ['model' => config('openrouter.model_fallback3'), 'label' => 'Nemotron 3 Nano fallback 3'],
+            ['model' => config('openrouter.model_fallback4'), 'label' => 'Claude Sonnet 4 fallback 4'],
+        ];
+
         /** @var OpenRouterService $llm */
         $llm = app(OpenRouterService::class);
-        $result = $llm->ask($systemPrompt, $userPrompt, $overrides);
+        $lastError = null;
 
-        // ─── Fase 2: si OpenRouter falla, caer en Nvidia ─────────
-        if (!$result['success']) {
-            $errorMsg = $result['error'] ?? '';
+        // Instrucciones adicionales para modelos de respaldo (se añaden al userPrompt
+        // cuando el modelo primario falló, para corregir desviaciones frecuentes).
+        $fallbackReinforcement = "\n\n⚠️ *** CORRECCIÓN OBLIGATORIA — INTENTO DE RESPALDO *** ⚠️\n\n"
+            . "El modelo de IA anterior NO siguió las instrucciones correctamente. "
+            . "Ahora TÚ debes generar el contenido.\n\n"
+            . "CRÍTICO — Cúmplelo exactamente:\n"
+            . "1. El contenido debe estar en ESPAÑOL. NO uses inglés.\n"
+            . "2. NO uses temas genéricos como superhéroes, identidades secretas, "
+            . "viajes imaginarios, narrativas creativas ni aventuras fantásticas.\n"
+            . "3. El contenido debe ser ACADÉMICO y específico para la actividad "
+            . "escolar venezolana descrita en el contexto más arriba.\n"
+            . "4. Sigue EXACTAMENTE la estructura:\n"
+            . "   //INICIO\n   ...\n   //DESARROLLO\n   Bloque 1\n   ...\n\n"
+            . "   Bloque 2\n   ...\n   (mínimo 5 bloques separados por línea en blanco)\n"
+            . "   //CIERRE\n   ...\n"
+            . "5. NO agregues meta-comentarios, explicaciones ni introducciones antes del formato.\n"
+            . "6. El ejemplo en las instrucciones anteriores es solo para mostrar el FORMATO, "
+            . "NO uses su tema (célula) ni inventes otro genérico. Usa el contexto real de la actividad.\n";
 
-            // Errores de conexión/API en OpenRouter → fallback automático a Nvidia
-            if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit exceeded') || str_contains($errorMsg, 'free-models-per-day')
-                || str_contains($errorMsg, '404') || str_contains($errorMsg, '500')
-                || str_contains($errorMsg, '28') || str_contains($errorMsg, '52')
-                || str_contains($errorMsg, 'cURL error')
-                || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')
-                || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')
-                || str_contains($errorMsg, 'excedió el límite de tokens') || str_contains($errorMsg, 'sin contenido') || str_contains($errorMsg, 'content_filter') || str_contains($errorMsg, 'finalizó sin contenido')) {
-                $reason = str_contains($errorMsg, '429') ? 'límite de requests'
-                    : (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') ? 'error del modelo'
-                    : (str_contains($errorMsg, '52') || str_contains($errorMsg, 'Empty reply') ? 'servidor cerró conexión'
-                    : (str_contains($errorMsg, 'excedió el límite') ? 'el modelo excede el límite de tokens'
-                    : 'timeout de conexión')));
-                $this->notification()->info(
-                    'Usando NVIDIA (fallback)',
-                    "OpenRouter alcanzó el {$reason}. Usando modelo NVIDIA como alternativa."
-                );
+        foreach ($modelChain as $i => $attempt) {
+            // Para modelos de respaldo (i > 0), reforzar instrucciones
+            $attemptUserPrompt = $i > 0 ? $userPrompt . $fallbackReinforcement : $userPrompt;
 
-                /** @var NvidiaService $nvidia */
-                $nvidia = app(NvidiaService::class);
-                return $nvidia->ask($systemPrompt, $userPrompt, $overrides);
+            $attemptOverrides = array_merge($overrides, [
+                'model'   => $attempt['model'],
+                'timeout' => max($overrides['timeout'] ?? 120, 120),
+            ]);
+
+            $result = $llm->ask($systemPrompt, $attemptUserPrompt, $attemptOverrides);
+
+            if ($result['success']) {
+                // Validar contenido si hay un validador
+                $content = $result['content'] ?? '';
+                if ($contentValidator !== null && (empty($content) || !$contentValidator($content))) {
+                    // Guardar respuesta para depuración aunque sea inválida
+                    $this->debugRawContent = $content;
+                    $lastError = 'Contenido inválido: no superó la validación de estructura.';
+
+                    // Inspeccionar por qué falló la validación
+                    $vHasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
+                    $vHasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
+                    $vHasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
+                    $vDevBlocks = 0;
+                    if ($vHasInicio && $vHasDesarrollo && $vHasCierre) {
+                        $vDevMatch = null;
+                        preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $vDevMatch);
+                        if (!empty($vDevMatch[1])) {
+                            $vBlocks = preg_split('/\n\s*\n/', trim($vDevMatch[1]));
+                            $vValidBlocks = array_filter($vBlocks, fn(string $b): bool => !empty(trim($b)));
+                            $vDevBlocks = count($vValidBlocks);
+                        }
+                    }
+
+                    Log::warning("askWithCompaction: {$attempt['label']} contenido inválido", [
+                        'model'         => $attempt['model'],
+                        'length'        => mb_strlen($content),
+                        'validation'    => [
+                            'has_inicio'    => $vHasInicio,
+                            'has_desarrollo' => $vHasDesarrollo,
+                            'has_cierre'    => $vHasCierre,
+                            'dev_blocks'    => $vDevBlocks,
+                        ],
+                        'content_preview' => mb_substr(preg_replace('/\s+/', ' ', $content), 0, 500),
+                    ]);
+                    $this->notification()->warning(
+                        "{$attempt['label']} contenido inválido",
+                        'El contenido generado no cumple la estructura requerida. Cambiando al siguiente modelo...'
+                    );
+                    continue;
+                }
+
+                // Éxito: registrar qué modelo de la cadena respondió
+                Log::info("askWithCompaction: {$attempt['label']} generó contenido válido", [
+                    'model'  => $attempt['model'],
+                    'length' => mb_strlen($content),
+                    'chain_index' => $i,
+                ]);
+
+                return $result;
             }
 
-            // Errores que no son rate limit: informar al usuario
-            if (str_contains($errorMsg, '402') || str_contains($errorMsg, 'Insufficient credits')) {
-                $this->notification()->error(
-                    'OpenRouter sin créditos',
-                    'La generación requiere créditos en OpenRouter. Agrega créditos en openrouter.ai/settings/credits y vuelve a intentar.'
-                );
-            }
+            // Falló este modelo — registrar y notificar
+            $lastError = $result['error'] ?? 'Error desconocido';
+            $reason = $this->describeModelError($lastError);
+            Log::warning("askWithCompaction: {$attempt['label']} falló", [
+                'model' => $attempt['model'],
+                'error' => $lastError,
+                'reason' => $reason,
+            ]);
 
-            return $result;
+            $this->notification()->warning(
+                "{$attempt['label']} no respondió",
+                "Cambiando al siguiente modelo... ({$reason})"
+            );
         }
 
-        return $result;
+        // ─── Todos los modelos fallaron ──────────────────────────
+        Log::error('askWithCompaction: los 3 modelos OpenRouter fallaron', [
+            'last_error' => $lastError,
+        ]);
+        $this->notification()->error(
+            'Generación interrumpida',
+            'Los modelos de IA no pudieron completar la generación. Verifica tu conexión a Internet y el saldo en OpenRouter, luego intenta de nuevo pulsando el botón de generar.'
+        );
+
+        return [
+            'success' => false,
+            'content' => null,
+            'model'   => null,
+            'usage'   => null,
+            'error'   => $lastError,
+        ];
+    }
+
+    /**
+     * Extrae una descripción legible del error del modelo para mostrarla
+     * en la notificación de fallback.
+     */
+    private function describeModelError(string $errorMsg): string
+    {
+        if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit')) {
+            return 'límite de requests excedido';
+        }
+        if (str_contains($errorMsg, '402') || str_contains($errorMsg, 'Insufficient credits')) {
+            return 'créditos insuficientes';
+        }
+        if (str_contains($errorMsg, '28') || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')) {
+            return 'tiempo de espera agotado (60s)';
+        }
+        if (str_contains($errorMsg, '52') || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')) {
+            return 'el servidor cerró la conexión';
+        }
+        if (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') || str_contains($errorMsg, '503')) {
+            return 'error del modelo (' . $errorMsg . ')';
+        }
+        if (str_contains($errorMsg, 'excedió el límite de tokens') || str_contains($errorMsg, 'content_filter')) {
+            return 'el modelo rechazó la solicitud por seguridad o longitud';
+        }
+        if (str_contains($errorMsg, 'sin contenido') || str_contains($errorMsg, 'finalizó sin contenido')) {
+            return 'el modelo finalizó sin generar contenido';
+        }
+
+        // Genérico
+        $truncated = mb_strlen($errorMsg) > 60 ? mb_substr($errorMsg, 0, 57) . '...' : $errorMsg;
+        return $truncated;
     }
 
     // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───

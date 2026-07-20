@@ -29,4 +29,19 @@ return [
 
     'timeout' => env('OPENROUTER_TIMEOUT', 60),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Model fallback chain (used by lesson wizard AI generation)
+    |--------------------------------------------------------------------------
+    |
+    | Three models tried in sequence. If the primary fails, fallback1 is used,
+    | then fallback2. If all three fail, the user is asked to retry manually.
+    |
+    */
+    'model_primary'   => env('OPENROUTER_MODEL_PRIMARY',   'qwen/qwen3-32b'),
+    'model_fallback1' => env('OPENROUTER_MODEL_FALLBACK1', 'mistralai/mistral-large'),
+    'model_fallback2' => env('OPENROUTER_MODEL_FALLBACK2', 'inclusionai/ling-2.6-flash'),
+    'model_fallback3' => env('OPENROUTER_MODEL_FALLBACK3', 'nvidia/nemotron-3-nano-30b-a3b'),
+    'model_fallback4' => env('OPENROUTER_MODEL_FALLBACK4', 'anthropic/claude-sonnet-4'),
+
 ];

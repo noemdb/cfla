@@ -1502,7 +1502,33 @@
         <div wire:loading.flex
              wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags"
              class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
-             id="llm-loading-overlay">
+             id="llm-loading-overlay"
+             x-data="{
+                 startTime: Date.now(),
+                 elapsed: '00:00',
+                 __timer: null,
+                 __obs: null,
+                 init() {
+                     this.__timer = setInterval(() => {
+                         if (this.$el.style.display === 'none') return;
+                         var diff = Math.floor((Date.now() - this.startTime) / 1000);
+                         var m = String(Math.floor(diff / 60)).padStart(2, '0');
+                         var s = String(diff % 60).padStart(2, '0');
+                         this.elapsed = m + ':' + s;
+                     }, 1000);
+                     this.__obs = new MutationObserver(function () {
+                         if (this.$el.style.display !== 'none' && this.$el.style.display !== '') {
+                             this.startTime = Date.now();
+                             this.elapsed = '00:00';
+                         }
+                     }.bind(this));
+                     this.__obs.observe(this.$el, { attributes: true, attributeFilter: ['style'] });
+                 },
+                 destroy() {
+                     if (this.__timer) clearInterval(this.__timer);
+                     if (this.__obs) this.__obs.disconnect();
+                 }
+             }">
             <div class="max-w-4xl py-8 mx-auto px-6 space-y-5">
 
                 {{-- Header --}}
@@ -1517,6 +1543,13 @@
                         </svg>
                     </div>
                     <p class="text-lg font-bold text-purple-200">Generando contenido con IA</p>
+                    {{-- Contador de tiempo --}}
+                    <p class="text-xs font-mono text-purple-300/70 flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span x-text="elapsed"></span>
+                    </p>
                     @if($act)
                         <p class="text-sm text-gray-500 dark:text-slate-400">{{ $asignaturaName }} · {{ $gradoName }} · Sec. {{ $seccionName }}</p>
                     @endif
@@ -2243,6 +2276,16 @@
                                         </button>
                                     </div>
                                 </div>
+
+                                {{-- Debug: raw LLM response (solo visible si hay debugRawContent) --}}
+                                @if($debugRawContent)
+                                    <details class="border-t border-gray-200 dark:border-slate-700/30 bg-gray-50/50 dark:bg-slate-900/30">
+                                        <summary class="px-4 py-2 text-[10px] font-mono text-gray-400 dark:text-slate-500 cursor-pointer hover:text-gray-600 dark:hover:text-slate-400 transition-colors select-none">
+                                            🔍 Debug: respuesta cruda del LLM
+                                        </summary>
+                                        <pre class="px-4 py-3 text-[10px] font-mono text-gray-500 dark:text-slate-400 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto border-t border-gray-200 dark:border-slate-700/20">{{ $debugRawContent }}</pre>
+                                    </details>
+                                @endif
 
                                 {{-- Generation Error --}}
                                 @if($generatingSection === $currentSlideIndex && $generationError)
