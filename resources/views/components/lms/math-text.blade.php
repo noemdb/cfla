@@ -72,7 +72,11 @@
                         // fallback regex si el componente se usa sin el bundle.
                         var __html = this._content;
                         if (window.DOMPurify) {
-                            __html = window.DOMPurify.sanitize(__html);
+                            // ADD_ATTR: preserve Alpine/Livewire directives needed by
+                            // mermaidEmbed and other dynamically-injected components.
+                            __html = window.DOMPurify.sanitize(__html, {
+                                ADD_ATTR: ['x-data', 'x-ref', 'wire:ignore'],
+                            });
                         } else {
                             // Fallback: más robusto que solo <script> tags
                             __html = __html
@@ -95,6 +99,18 @@
                         __html = __html.replace(/\\html(?:Data|Class|Style)\s*\{[^}]*\}\s*\{[^}]*\}/g, '');
 
                         target.innerHTML = __html;
+
+                        // Inicializar componentes Alpine inyectados dinámicamente
+                        // (p. ej. mermaidEmbed). Sin initTree, Alpine solo escanea
+                        // el DOM una vez al cargar la página y no detecta elementos
+                        // añadidos via innerHTML.
+                        try {
+                            if (window.Alpine && typeof Alpine.initTree === 'function') {
+                                Alpine.initTree(target);
+                            }
+                        } catch (_e) {
+                            if (window.console) console.warn('[KATEX] Alpine.initTree error', _e);
+                        }
 
                         if (!window.renderMathInElement) return;
 

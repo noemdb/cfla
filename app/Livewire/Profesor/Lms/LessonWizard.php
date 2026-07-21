@@ -1279,7 +1279,7 @@ PROMPT;
         if (!empty($svgHtml)) {
             $this->wizardSections[$sectionIndex]['contents'][] = [
                 'id'         => 'temp_' . uniqid(),
-                'type'       => 'TEXT',
+                'type'       => 'IMAGE',
                 'title'      => 'Diagrama: ' . $sectionTitle,
                 'body'       => $svgHtml,
                 'is_visible' => true,
@@ -1395,7 +1395,7 @@ PROMPT;
 
             $this->wizardSections[$sectionIndex]['contents'][] = [
                 'id'         => 'temp_' . uniqid(),
-                'type'       => 'TEXT',
+                'type'       => 'IMAGE',
                 'title'      => 'Ilustración: ' . $sectionTitle,
                 'body'       => $svgHtml,
                 'is_visible' => true,
@@ -4480,14 +4480,27 @@ PROMPT;
         }
 
         $blocks = collect($currentSlide['contents'] ?? [])
-            ->pluck('body')
-            ->filter()
+            ->filter(fn($c) => !empty($c['body']))
             ->values();
 
-        $rendered = $blocks->map(function (string $body, int $idx): string {
-            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
+        $rendered = $blocks->map(function (array $block, int $idx): string {
+            $body  = $block['body'] ?? '';
+            $type  = $block['type'] ?? 'TEXT';
+            $title = $block['title'] ?? '';
 
-            // Fallback: si no tiene class="mermaid" pero arranca con keyword Mermaid
+            $wrapperClass = 'slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd');
+
+            // ─── IMAGE: SVG/ilustración — render raw, sin mathContent ──
+            // Se detecta por type (contenido nuevo) o por body (contenido
+            // existente guardado con type TEXT antes de esta clasificación).
+            if ($type === 'IMAGE' || preg_match('/<svg\b/', $body)) {
+                return '<div class="' . $wrapperClass . '">'
+                    . "\n" . $body . "\n"
+                    . '</div>';
+            }
+
+            // ─── MERMAID: detectar por clase CSS o keyword ─────────────
+            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
             if (!$isMermaid) {
                 $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($body)) === 1;
             }
@@ -4495,12 +4508,10 @@ PROMPT;
             if ($isMermaid) {
                 preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m);
                 $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                // Si no hay extracción (fallback sin wrapper), usar el body completo
                 if (empty($mermaidCode)) {
                     $mermaidCode = trim(strip_tags($body));
                 }
-
-                return '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
+                return '<div class="' . $wrapperClass . '">'
                     . "\n"
                     . '<div wire:ignore x-data="mermaidEmbed()"'
                     . ' data-mermaid-code="' . htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8') . '"'
@@ -4511,9 +4522,14 @@ PROMPT;
                     . '</div>';
             }
 
+            // ─── TEXT / MATH / default: render con mathContent ─────────
             $html = $this->renderContentBody($body);
-            return '<div class="slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd') . '">'
-                . "\n" . $html . "\n"
+            return '<div class="' . $wrapperClass . '">'
+                . "\n"
+                . '<div x-data="mathContent()" data-math-content="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '">'
+                . '<div wire:ignore><div x-ref="target"></div></div>'
+                . '</div>'
+                . "\n"
                 . '</div>';
         });
 
