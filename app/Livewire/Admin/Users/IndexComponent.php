@@ -24,7 +24,7 @@ class IndexComponent extends Component
     public $username;
     public $email;
     public $password;
-    public $is_active = true;
+    public $is_active = 'enable';
 
     // Role flags
     public $is_admin = false;
@@ -58,7 +58,7 @@ class IndexComponent extends Component
                 $this->isEditing ? "unique:users,email,{$this->user_id}" : 'unique:users,email',
             ],
             'password'  => $this->isEditing ? 'nullable|string|min:6' : 'required|string|min:6',
-            'is_active' => 'required|boolean',
+            'is_active' => 'required|in:enable,disable',
             'is_admin'  => 'boolean',
             'is_diagnostic' => 'boolean',
             'is_planner'    => 'boolean',
@@ -168,7 +168,7 @@ class IndexComponent extends Component
         $this->user_id      = $user->id;
         $this->username     = $user->username;
         $this->email        = $user->email;
-        $this->is_active    = $user->is_active === 'enable' || $user->is_active === true;
+        $this->is_active    = $user->is_active;
         $this->is_admin     = (bool) $user->is_admin;
         $this->is_diagnostic = (bool) $user->is_diagnostic;
         $this->is_planner   = (bool) $user->is_planner;
@@ -198,7 +198,7 @@ class IndexComponent extends Component
                 'is_diagnostic' => $this->is_diagnostic ? 1 : 0,
                 'is_planner'    => $this->is_planner ? 1 : 0,
                 'is_profesor'   => $this->is_profesor ? 1 : 0,
-                'is_active'     => $this->is_active ? 'enable' : 'disable',
+                'is_active'     => $this->is_active,
             ];
 
             if ($this->isEditing) {
@@ -287,7 +287,7 @@ class IndexComponent extends Component
             'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor',
             'firstname', 'lastname', 'card_number',
         ]);
-        $this->is_active = true;
+        $this->is_active = 'enable';
     }
 
     #[Layout('layouts.dashboard')]

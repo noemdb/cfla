@@ -133,7 +133,7 @@
                                 </div>
                             </td>
                             <td class="px-4 py-2 text-center">
-                                @if($user->is_active === 'enable' || $user->is_active === true)
+                                @if($user->is_active === 'enable')
                                     <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
                                         <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
                                         Activo
@@ -246,8 +246,8 @@
                                 <label class="block text-xs font-medium text-gray-400 mb-1.5">Estado</label>
                                 <select wire:model="is_active"
                                     class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors">
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
+                                    <option value="enable">Activo</option>
+                                    <option value="disable">Inactivo</option>
                                 </select>
                             </div>
                         </div>

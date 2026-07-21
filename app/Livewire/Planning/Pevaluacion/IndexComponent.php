@@ -83,6 +83,7 @@ class IndexComponent extends Component
             ->pluck('name', 'id');
 
         $this->profesors = Profesor::where('status_active', true)
+            ->orderBy('lastname')
             ->orderBy('name')
             ->get()
             ->pluck('full_name', 'id');
@@ -154,6 +155,7 @@ class IndexComponent extends Component
                 ->toArray();
 
             $this->profesors = Profesor::where('status_active', true)
+                ->orderBy('lastname')
                 ->orderBy('name')
                 ->get()
                 ->pluck('full_name', 'id')
@@ -196,10 +198,44 @@ class IndexComponent extends Component
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterPestudio() { $this->resetPage(); }
     public function updatingFilterProfesor() { $this->resetPage(); }
-    public function updatingFilterGrado() { $this->resetPage(); }
+    public function updatingFilterGrado() { $this->resetPage(); $this->filter_seccion = ''; }
     public function updatingFilterSeccion() { $this->resetPage(); }
     public function updatingFilterLapso() { $this->resetPage(); }
     public function updatingPaginate() { $this->resetPage(); }
+
+    public function updatedFilterPestudio($value)
+    {
+        $this->filter_grado = '';
+        $this->filter_seccion = '';
+
+        if ($value) {
+            $this->grados = Grado::where('pestudio_id', $value)
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+        } else {
+            $this->grados = [];
+            $this->secciones = [];
+        }
+    }
+
+    public function updatedFilterGrado($value)
+    {
+        $this->filter_seccion = '';
+
+        if ($value && $this->filter_pestudio) {
+            $this->secciones = Seccion::where('grado_id', $value)
+                ->where('status_active', true)
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray();
+        } else {
+            $this->secciones = [];
+        }
+    }
 
     // ─── SORTING ────────────────────────────────────────────────
 
