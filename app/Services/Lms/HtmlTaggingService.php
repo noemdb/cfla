@@ -141,18 +141,24 @@ b) Badge inline (sin bg, solo borde + texto):
      ¡Nuevo!
    </span>
 
-c) Stat card (sin bg gradient, solo borde y sombra):
+c) Stat card CON progress bar (solo si el valor numérico es un porcentaje real 0–100%):
    <div class="rounded-xl p-5 border border-amber-200 shadow-sm">
      <p class="text-3xl font-extrabold text-amber-800">95%</p>
      <p class="text-sm font-medium text-amber-600">Eficiencia del proceso</p>
      <div class="mt-2 h-1.5 bg-gray-200 rounded-full"><div class="h-1.5 bg-amber-500 rounded-full" style="width:95%"></div></div>
    </div>
 
+d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectáreas, litros, etc. — números que NO son porcentajes):
+   <div class="rounded-xl p-5 border border-amber-200 shadow-sm">
+     <p class="text-3xl font-extrabold text-amber-800">10</p>
+     <p class="text-sm font-medium text-amber-600">Segundos en que el proyectil alcanza máxima altura</p>
+   </div>
+
 ═══ REGLAS DE TRANSFORMACIÓN (síguelas siempre) ═══
 - ¿Título o encabezado? → Aplica estrategia tipográfica (color de acento, subrayado decorativo, o glow)
 - ¿Definición o concepto central? → Highlight box con border-l-4 + texto destacado (sin bg-*)
 - ¿Enumeración de 2+ elementos? → Lista con viñetas de texto (✓) + hover:text color
-- ¿Dato numérico, porcentaje o métrica? → Stat card (border + shadow) o Progress bar
+- ¿Dato numérico, porcentaje o métrica? → Stat card (border + shadow). Progress bar SOLO si el valor es un porcentaje real (0–100%); para números absolutos (tiempo, unidades, hectáreas, litros, segundos, etc.) usa stat card SIN progress bar, solo número + etiqueta.
 - ¿Término técnico importante? → Badge inline con border (sin bg-*)
 - ¿Frase textual o reflexión? → Blockquote con border-l-4
 - ¿El contenido cambia de tema? → Separador sutil entre bloques + acordeón &lt;details&gt;
@@ -164,7 +170,9 @@ c) Stat card (sin bg gradient, solo borde y sombra):
 - ❌ NO uses hover:bg-* en ningún elemento
 - ❌ NO uses SVG, iconos ni elementos gráficos decorativos (usa texto: ✓, •, —, etc.)
 - ❌ NO uses detalles interactivos (<details>/<summary>) como contenedor raíz
-- Preserva TODO el significado — no resumas ni parafrasees
+- ❌ NO añadas descripciones, ejemplos, aclaraciones ni elaboraciones que no estén en el texto original. Usa EXACTAMENTE las palabras del original. Si el texto original dice "identificación de variables", NO le agregues "— reconocer incógnitas y parámetros". El HTML debe estructurar y resaltar el texto existente, no expandirlo ni explicarlo.
+- ❌ NO desarrolles conceptos que el original solo menciona de pasada. Si solo dice "basado en el método de Pólya", NO expandas los 4 pasos. Preserva el texto original sin añadidos.
+- Preserva TODO el significado — no resumas, no parafrasees, no añadas.
 
 ═══ TIPOGRAFÍA ═══
 - Título h3: estrategia tipográfica variada (color acento, subrayado decorativo, o clean)
@@ -285,7 +293,11 @@ PROMPT;
 
 {$originalBody}
 
-Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card o progress bar para datos numéricos, acordeón para info expandible, y tipografía variada (color de acento en título, subrayado decorativo). IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*.
+Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card para datos numéricos (progress bar SOLO si el valor es un porcentaje real 0–100%; para números absolutos como tiempo, unidades, hectáreas, usa stat card SIN barra), acordeón para info expandible, y tipografía variada (color de acento en título, subrayado decorativo).
+
+IMPORTANTE — PRESERVA EL TEXTO ORIGINAL: NO añadas descripciones, ejemplos, aclaraciones ni elaboraciones que no estén textualmente en el contenido original. El HTML debe estructurar y resaltar el texto que YA EXISTE, no expandirlo ni explicarlo. Si el original solo menciona algo de pasada ("método de Pólya"), no lo desarrolles. Usa las palabras exactas del original.
+
+IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*.
 PROMPT;
 
         $overrides = [

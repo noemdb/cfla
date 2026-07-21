@@ -1036,6 +1036,7 @@ PROMPT;
         $this->generationError = null;
 
         $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
+        $originalBody = $this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? '';
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
@@ -1060,19 +1061,20 @@ PROMPT;
         $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         $systemPrompt = <<<'PROMPT'
-Eres docente venezolano. Genera contenido pedagógico extenso en formato Markdown.
+Eres docente venezolano. Enriquece el contenido pedagógico existente convirtiéndolo en Markdown estructurado, preservando su significado original, ejemplos concretos y tono narrativo.
 
-EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada sección debe redactarse con el rigor y la elegancia de un libro de texto de alta calidad editorial.
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante.
+
+CRÍTICO — CONSISTENCIA NARRATIVA: Preserva los mismos ejemplos concretos que aparecen en el contenido original (artesano, cultivos, costos de producción, etc.) y el mismo tono (primera persona del plural si el original la usa). No cambies los ejemplos ni introduzcas casos genéricos no relacionados. El contenido generado debe sentirse como una continuación natural del texto original, no como un reemplazo.
 
 EXTENSIÓN OBLIGATORIA: Mínimo 500 caracteres.
 Si generas menos de 500 caracteres tu respuesta será rechazada.
-Para alcanzar 500 caracteres necesitas: título (##) + 4-5 oraciones + tabla o lista.
 
 Estructura mínima:
-1. ## Título llamativo
+1. ## Título llamativo (derivado del contenido existente)
 2. Párrafo introductorio (2-3 oraciones)
-3. Tabla o lista con información clave
-4. Párrafo de desarrollo con ejemplos
+3. Tabla o lista con información clave (basada en el contenido original)
+4. Párrafo de desarrollo retomando los ejemplos originales
 5. Párrafo de cierre
 
 Usa Markdown estándar: ## títulos, **negritas**, tablas | |, listas -, *cursivas*.
@@ -1098,8 +1100,13 @@ PROMPT;
 
 **Diapositiva:** {$sectionTitle}
 
-INSTRUCCIÓN: Genera contenido EXTENSO en Markdown. Mínimo 500 caracteres obligatorio.
-CRUCIAL: Nada de fondos oscuros ni colores saturados. Todo debe tener fondo claro y texto oscuro legible.
+### Contenido original de la diapositiva (presérvalo como base)
+
+{$originalBody}
+
+INSTRUCCIÓN: Usa el contenido original como punto de partida. Enriquece su estructura añadiendo título, tabla o lista y párrafos, pero PRESERVA el significado, los ejemplos concretos y el tono narrativo original. No reemplaces los ejemplos por otros genéricos. El Markdown generado debe sentirse como una mejora del texto original, manteniendo su esencia.
+
+CRUCIAL: Nada de fondos oscuros ni colores saturados. Todo debe tener fondo claro y texto oscuro legible. Mínimo 500 caracteres obligatorio.
 PROMPT;
 
         try {
@@ -1140,9 +1147,23 @@ PROMPT;
 
             // Sanitizar
             $content = $this->sanitizeText($content, 'basic');
-            // Limitar a 1500 caracteres (cortando correctamente con mb_substr)
+            // Limitar a 1500 caracteres, cortando en límite de párrafo para no partir tablas ni oraciones
             if (mb_strlen($content) > 1500) {
-                $content = mb_substr($content, 0, 1500);
+                $truncated = mb_substr($content, 0, 1500);
+                // Buscar el último salto de párrafo doble (\n\n) dentro de los últimos 300 caracteres
+                $lastBreak = mb_strrpos($truncated, "\n\n");
+                if ($lastBreak !== false && $lastBreak > 1100) {
+                    $content = mb_substr($truncated, 0, $lastBreak);
+                } else {
+                    // Fallback: último salto de línea simple
+                    $lastNewline = mb_strrpos($truncated, "\n");
+                    if ($lastNewline !== false && $lastNewline > 1100) {
+                        $content = mb_substr($truncated, 0, $lastNewline);
+                    } else {
+                        $content = $truncated;
+                    }
+                }
+                $content = trim($content);
             }
             // Siempre agregar como nuevo bloque adicional
             $this->wizardSections[$sectionIndex]['contents'][] = [
