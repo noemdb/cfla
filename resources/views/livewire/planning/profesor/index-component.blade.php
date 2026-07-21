@@ -191,6 +191,11 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                     @if($profesor->user)
+                                        <button type="button" wire:click="editUser({{ $profesor->id }})"
+                                            class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
+                                            title="Editar usuario">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                        </button>
                                         <button type="button" wire:click="confirmToggleActive({{ $profesor->id }})"
                                             class="p-2 rounded-lg border transition-all duration-200
                                                 {{ $profesor->user->is_active === 'enable'
@@ -643,6 +648,50 @@
                         <x-button primary label="{{ $isEditing ? 'Actualizar Profesor' : 'Guardar Profesor' }}" wire:click="save" spinner="save" />
                     @endif
                 </div>
+            </div>
+        </x-slot>
+    </x-modal-card>
+
+    <!-- ===== MODAL: Editar Usuario ===== -->
+    <x-modal-card title="Editar Usuario" blur="lg" wire:model="showUserEditModal" max-width="lg" persistent>
+        <div class="space-y-5">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nombre de Usuario *</label>
+                <input type="text" wire:model="editUserUsername"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all placeholder:text-gray-600">
+                @error('editUserUsername') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Correo Electrónico</label>
+                <input type="email" wire:model="editUserEmail"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all placeholder:text-gray-600">
+                @error('editUserEmail') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Nueva Contraseña</label>
+                <input type="password" wire:model="editUserPassword" placeholder="Dejar vacío = no cambiar"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all placeholder:text-gray-600">
+                <p class="text-[9px] text-gray-600 mt-1">Solo si deseas cambiarla. Si se deja vacío, se mantiene la actual.</p>
+                @error('editUserPassword') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Estado</label>
+                <select wire:model="editUserIsActive"
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all">
+                    <option value="enable">Activo</option>
+                    <option value="disable">Inactivo</option>
+                </select>
+                @error('editUserIsActive') <p class="text-red-400 text-[10px] mt-1">{{ $message }}</p> @enderror
+            </div>
+        </div>
+
+        <x-slot name="footer">
+            <div class="flex justify-end gap-2 w-full">
+                <x-button flat label="Cancelar" x-on:click="close" wire:click="closeUserEdit" />
+                <x-button primary label="Guardar Cambios" wire:click="saveUser" spinner="saveUser" />
             </div>
         </x-slot>
     </x-modal-card>

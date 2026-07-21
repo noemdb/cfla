@@ -74,6 +74,72 @@ class IndexComponent extends Component
     // Confirm delete
     public $confirmDeleteId = null;
 
+    // ─── Edit user modal ────────────────────────────────────────
+    public bool $showUserEditModal = false;
+    public ?int $editUserUserId = null;
+    public ?int $editUserProfesorId = null;
+    public string $editUserUsername = '';
+    public string $editUserEmail = '';
+    public string $editUserPassword = '';
+    public string $editUserIsActive = 'enable';
+
+    public function editUser(int $profesorId): void
+    {
+        $profesor = Profesor::with('user')->findOrFail($profesorId);
+
+        if (!$profesor->user) {
+            $this->notification()->error(
+                title: 'Sin usuario',
+                description: 'Este profesor no tiene un usuario asociado.'
+            );
+            return;
+        }
+
+        $this->editUserUserId = $profesor->user->id;
+        $this->editUserProfesorId = $profesor->id;
+        $this->editUserUsername = $profesor->user->username;
+        $this->editUserEmail = $profesor->user->email ?? '';
+        $this->editUserPassword = '';
+        $this->editUserIsActive = $profesor->user->is_active;
+        $this->showUserEditModal = true;
+    }
+
+    public function saveUser(): void
+    {
+        $this->validate([
+            'editUserUsername' => 'required|string|max:150',
+            'editUserEmail'    => 'nullable|email|max:255',
+            'editUserPassword' => 'nullable|string|min:4',
+            'editUserIsActive' => 'required|in:enable,disable',
+        ]);
+
+        $user = User::findOrFail($this->editUserUserId);
+
+        $user->update([
+            'username'  => $this->editUserUsername,
+            'email'     => $this->editUserEmail ?: $user->email,
+            'is_active' => $this->editUserIsActive,
+        ]);
+
+        if (!empty($this->editUserPassword)) {
+            $user->update(['password' => bcrypt($this->editUserPassword)]);
+        }
+
+        $this->showUserEditModal = false;
+        $this->notification()->success(
+            title: 'Usuario Actualizado',
+            description: 'Los datos del usuario se actualizaron correctamente.'
+        );
+    }
+
+    public function closeUserEdit(): void
+    {
+        $this->showUserEditModal = false;
+        $this->editUserUserId = null;
+        $this->editUserProfesorId = null;
+        $this->editUserPassword = '';
+    }
+
     // Toggle active
     public $confirmToggleActiveId = null;
     public $toggleActiveProfesorId = null;

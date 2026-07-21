@@ -35,9 +35,9 @@
     };
 @endphp
 
-<div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg transition-all duration-300 hover:border-{{ $color }}-500/30 hover:shadow-lg hover:shadow-{{ $color }}-500/5">
+<div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-{{ $color }}-500/30 hover:shadow-lg hover:shadow-{{ $color }}-500/5">
     <div class="flex items-start justify-between mb-2">
-        <div class="w-10 h-10 {{ $c['bg'] }} rounded-lg flex items-center justify-center {{ $c['icon'] }}">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 {{ $c['bg'] }} rounded-lg flex items-center justify-center {{ $c['icon'] }}">
             {!! $icon !!}
         </div>
         @if($trend)
@@ -47,7 +47,7 @@
             </div>
         @endif
     </div>
-    <p class="text-lg font-bold text-white mb-1">{{ $value }}</p>
+    <p class="text-base sm:text-lg font-bold text-white mb-1">{{ $value }}</p>
     <p class="text-[11px] font-medium {{ $c['text'] }} uppercase tracking-wider">{{ $label }}</p>
     @if($subtext)
         <p class="text-[10px] text-gray-500 mt-1">{{ $subtext }}</p>

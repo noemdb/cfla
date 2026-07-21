@@ -7,7 +7,7 @@
     </h2>
 
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
-        <div class="p-5">
+        <div class="p-4 sm:p-5">
             @if($seccionesGuia->isNotEmpty())
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
@@ -48,7 +48,7 @@
                                     </td>
                                     <td class="px-4 py-2 text-right">
                                         @if($reportesCount > 0)
-                                            <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div class="flex items-center justify-end gap-1.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <a href="#"
                                                     class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@
 
         {{-- Footer link to reports (only if reports exist) --}}
         @if(isset($tieneReportesDiagnosticos) && $tieneReportesDiagnosticos)
-        <div class="border-t border-white/5 px-5 py-2 flex justify-end">
+        <div class="border-t border-white/5 px-4 sm:px-5 py-2 flex justify-end">
             <a href="#"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
                 <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

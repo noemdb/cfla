@@ -7,17 +7,17 @@
                     ← Anterior
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}" rel="prev"
+                <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')"
                     class="relative inline-flex items-center px-4 py-2 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-lg leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
                     ← Anterior
-                </a>
+                </button>
             @endif
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}" rel="next"
+                <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')"
                     class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-300 bg-gray-800/50 border border-white/10 rounded-lg leading-5 hover:bg-gray-700 hover:text-white transition-all duration-200">
                     Siguiente →
-                </a>
+                </button>
             @else
                 <span class="relative inline-flex items-center px-4 py-2 ml-3 text-xs font-bold text-gray-600 bg-gray-800/50 border border-white/5 cursor-default rounded-lg leading-5 select-none">
                     Siguiente →
@@ -50,12 +50,12 @@
                             </span>
                         </span>
                     @else
-                        <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Anterior"
+                        <button type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" aria-label="Anterior"
                             class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold text-gray-400 bg-gray-800/30 border border-white/5 hover:bg-gray-700 hover:text-white hover:border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                             </svg>
-                        </a>
+                        </button>
                     @endif
 
                     {{-- Pagination Elements --}}
@@ -73,11 +73,12 @@
                                         <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 cursor-default select-none">{{ $page }}</span>
                                     </span>
                                 @else
-                                    <a href="{{ $url }}"
+                                    <button type="button" wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')"
+                                        wire:key="paginator-{{ $paginator->getPageName() }}-page{{ $page }}"
                                         class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold text-gray-400 bg-gray-800/30 border border-white/5 hover:bg-gray-700 hover:text-white hover:border-white/10 transition-all duration-200"
                                         aria-label="Ir a página {{ $page }}">
                                         {{ $page }}
-                                    </a>
+                                    </button>
                                 @endif
                             @endforeach
                         @endif
@@ -85,12 +86,12 @@
 
                     {{-- Next Page Link --}}
                     @if ($paginator->hasMorePages())
-                        <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Siguiente"
+                        <button type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" aria-label="Siguiente"
                             class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold text-gray-400 bg-gray-800/30 border border-white/5 hover:bg-gray-700 hover:text-white hover:border-white/10 transition-all duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
-                        </a>
+                        </button>
                     @else
                         <span aria-disabled="true" aria-label="Siguiente">
                             <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold text-gray-600 bg-gray-800/30 border border-white/5 cursor-default select-none">

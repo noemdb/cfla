@@ -3,31 +3,32 @@
     <x-loading-simple />
 
     <!-- Header -->
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div class="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">Indicadores de Planificación</h1>
             <p class="text-cyan-400 font-medium">Dashboard institucional con KPIs por programa educativo y período académico.</p>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
-                Planificación
+                <span class="hidden sm:inline">Planificación</span>
+                <span class="sm:hidden">Volver</span>
             </a>
             <button wire:click="$refresh"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                Refrescar
+                <span class="hidden sm:inline">Refrescar</span>
             </button>
         </div>
     </div>
 
     <!-- Global KPI Boxes -->
-    <div class="grid grid-cols-3 gap-3 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
             label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
@@ -45,8 +46,8 @@
         <nav class="flex overflow-x-auto border-b border-white/5">
             @foreach($lapsos as $lapso)
                 <button wire:click="$set('selectedLapsoId', {{ $lapso->id }})"
-                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap {{ $selectedLapsoId == $lapso->id ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
-                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex-1 px-2 sm:px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap {{ $selectedLapsoId == $lapso->id ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                     {{ $lapso->name }}
@@ -56,7 +57,7 @@
         </nav>
 
         {{-- 4 filters en grid de ancho completo --}}
-        <div class="px-3 py-2 grid grid-cols-4 gap-2">
+        <div class="px-3 py-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <select wire:model.live="selectedPeducativoId"
                 class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Educativo: Todos</option>
@@ -93,29 +94,29 @@
         <div class="border-b border-white/5">
             <nav class="flex overflow-x-auto">
                 <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Indicadores Principales
                 </button>
                 <button @click="activeTab = 2" :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path></svg>
                     Profesores
                 </button>
                 <button @click="activeTab = 3" :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     Actividades
                 </button>
                 <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     Diagnóstico
                 </button>
             </nav>
         </div>
 
-        <div class="p-6">
+        <div class="p-3 sm:p-4 lg:p-6">
 
             {{-- ═══════════════════════════════════════════════════════════════════
                  TAB 1: Indicadores Principales — grouped by Peducativo
@@ -132,8 +133,8 @@
                                 <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
                                 <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
                             </div>
-                            <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
-                                <div class="col-span-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                <div class="col-span-1 sm:col-span-2">
                                     <x-indicator-box
                                         icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                         label="Actividades Registradas"
@@ -141,7 +142,7 @@
                                         color="purple"
                                     />
                                 </div>
-                                <div class="col-span-2">
+                                <div class="col-span-1 sm:col-span-2">
                                     <x-indicator-box
                                         icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
                                         label="Profesores con Carga"
@@ -162,9 +163,9 @@
                 </div>
 
                     {{-- ═══ Charts Bento Grid (4-col) ═══ --}}
-                    <div class="grid grid-cols-4 gap-2 mt-2" style="grid-auto-flow: dense;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-2" style="grid-auto-flow: dense;">
                         {{-- ── Actividades por Día (2×1) ── --}}
-                        <div class="col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                        <div class="col-span-1 sm:col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center">
@@ -184,7 +185,7 @@
                         </div>
 
                         {{-- ── Lecciones por Día (2×1) ── --}}
-                        <div class="col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                        <div class="col-span-1 sm:col-span-2 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-sky-100 dark:bg-sky-500/20 rounded-lg flex items-center justify-center">
@@ -195,7 +196,7 @@
                                     <h3 class="text-sm font-bold text-gray-900 dark:text-white">Lecciones Registradas por Día</h3>
                                 </div>
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    {{ count($chartLessonsByDay) }} día(s) con publicación
+                                    {{ count($chartLessonsByDay['categories'] ?? []) }} día(s) con actividad
                                 </span>
                             </div>
                             <div wire:ignore>
@@ -204,7 +205,7 @@
                         </div>
 
                         {{-- ── Publicaciones Programadas por Día (4×1) ── --}}
-                        <div class="col-span-4 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                        <div class="col-span-1 sm:col-span-2 lg:col-span-4 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-violet-100 dark:bg-violet-500/20 rounded-lg flex items-center justify-center">
@@ -241,7 +242,7 @@
                                 @php $ieePROM = $tab2Data[$lapsoId][$peducativo->id]['ieePROM'] ?? 0; @endphp
                                 <button @click="activePeducativo = {{ $peducativo->id }}"
                                     :class="activePeducativo === {{ $peducativo->id }} ? 'text-violet-400 border-violet-500 bg-violet-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
-                                    class="flex-1 px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    class="flex-1 px-2 sm:px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
                                     {{ $peducativo->name }}
                                     <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
                                         Prom.Notas[{{ round($ieePROM, 2) }}]
@@ -312,14 +313,14 @@
                                     </table>
                                 </div>
                             @else
-                                <div class="bg-white/5 rounded-lg p-6 text-center">
+                                <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
                                     <p class="text-gray-500 text-sm">No hay profesores con carga académica en este programa educativo.</p>
                                 </div>
                             @endif
                         </div>
                     @endforeach
                 @else
-                    <div class="bg-white/5 rounded-lg p-6 text-center">
+                    <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
                         <p class="text-gray-500 text-sm">No hay datos de profesores para el período seleccionado.</p>
                     </div>
                 @endif
@@ -344,7 +345,7 @@
                                 @endphp
                                 <button @click="activePeducativo = {{ $peducativo->id }}"
                                     :class="activePeducativo === {{ $peducativo->id }} ? 'text-amber-400 border-amber-500 bg-amber-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
-                                    class="flex-1 px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    class="flex-1 px-2 sm:px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
                                     {{ $peducativo->name }}
                                     <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
                                         Prom.Notas[{{ round($ieePROM, 2) }}]
@@ -362,8 +363,8 @@
                         @endphp
                         <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
                             @if($indicators && $indicators->total_activities > 0)
-                                <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
-                                    <div class="col-span-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                    <div class="col-span-1 sm:col-span-2">
                                         <x-indicator-box
                                             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
                                             label="Total de actividades planificadas"
@@ -407,7 +408,7 @@
                                             color="emerald"
                                         />
                                     </div>
-                                    <div class="col-span-2">
+                                    <div class="col-span-1 sm:col-span-2">
                                         <x-indicator-box
                                             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
                                             label="Indicador de Supervisión"
@@ -418,7 +419,7 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="bg-white/5 rounded-lg p-6 text-center">
+                                <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
                                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                                     <p class="text-gray-500 text-sm mb-1">Sin actividades registradas</p>
                                     <p class="text-gray-600 text-xs">No hay actividades planificadas para este período en {{ $peducativo->name }}.</p>
@@ -427,7 +428,7 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="bg-white/5 rounded-lg p-6 text-center">
+                    <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
                         <p class="text-gray-500 text-sm">No hay datos de actividades para el período seleccionado.</p>
                     </div>
                 @endif
@@ -450,7 +451,7 @@
                     @endphp
 
                     {{-- ═══ Diagnóstico Bento Grid (4-col, unifica KPI + preguntas + progreso) ═══ --}}
-                    <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
                         {{-- KPI row — 4 tiles 1×1 --}}
                         <div class="col-span-1">
                             <x-indicator-box
@@ -474,7 +475,7 @@
                         </div>
 
                         {{-- Preguntas Cargadas (2×1) — anchor de la segunda fila --}}
-                        <div class="col-span-2 bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
+                        <div class="col-span-1 sm:col-span-2 bg-gray-800/50 border border-white/5 rounded-lg p-4 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
                                 <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
@@ -507,7 +508,7 @@
                         </div>
 
                         {{-- Tasa Finalización (4×1) — barra de progreso completa --}}
-                        <div class="col-span-4 bg-gray-800/30 border border-white/5 rounded-lg p-5">
+                        <div class="col-span-1 sm:col-span-2 lg:col-span-4 bg-gray-800/30 border border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-2">
                                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tasa de Finalización</h4>
                                 <span class="text-xs text-gray-400">{{ $diagCompletionRate }}%</span>
@@ -521,7 +522,7 @@
 
                     {{-- Per-diagnostic breakdown table --}}
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg overflow-hidden">
-                        <div class="px-5 py-2 border-b border-white/5">
+                        <div class="px-4 sm:px-5 py-2 border-b border-white/5">
                             <h4 class="text-xs font-bold text-white uppercase tracking-wider">Desempeño por Diagnóstico</h4>
                         </div>
                         @if($tab4DiagData->isNotEmpty())
@@ -568,7 +569,7 @@
                                 </table>
                             </div>
                         @else
-                            <div class="p-8 text-center">
+                            <div class="p-6 sm:p-8 text-center">
                                 <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                                 <p class="text-gray-500 text-sm mb-1">Sin diagnósticos activos</p>
                                 <p class="text-gray-600 text-xs">No hay diagnósticos activos para el período seleccionado.</p>
@@ -691,37 +692,52 @@
         if (lessonsChart) lessonsChart.destroy();
 
         const rawData = await $wire.get('chartLessonsByDay') ?? [];
+        if (!rawData || !rawData.series) return;
 
         lessonsChart = new window.ApexCharts(el, {
-            series: [{ name: 'Lecciones', data: rawData }],
+            series: rawData.series,
             chart: {
-                type: 'area',
+                type: 'line',
                 height: 300,
                 toolbar: { show: false },
                 zoom: { enabled: false },
                 fontFamily: 'Inter, system-ui, sans-serif',
-            },
-            colors: ['#0ea5e9'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: {
-                size: 4,
-                colors: ['#0ea5e9'],
-                strokeColors: '#fff',
-                strokeWidth: 2,
-                hover: { size: 6 },
-            },
-            dataLabels: { enabled: false },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    inverseColors: false,
-                    opacityFrom: 0.5,
-                    opacityTo: 0,
-                    stops: [0, 90, 100],
+                dropShadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 10,
+                    left: 5,
+                    blur: 8,
+                    opacity: 0.3,
                 },
             },
+            colors: ['#0ea5e9', '#f59e0b'],
+            dataLabels: {
+                enabled: true,
+                style: {
+                    colors: ['#e2e8f0', '#e2e8f0'],
+                    fontSize: '10px',
+                    fontWeight: 600,
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#0f172a',
+                    padding: 4,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                },
+                dropShadow: { enabled: false },
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 4,
+                hover: { size: 6 },
+            },
             xaxis: {
+                categories: rawData.categories,
                 type: 'category',
                 labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
                 axisBorder: { show: false },
@@ -731,11 +747,19 @@
                 labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
                 tickAmount: 5,
                 forceNiceScale: true,
+                min: 0,
             },
             grid: { borderColor: '#37415140', strokeDashArray: 4 },
             tooltip: {
                 theme: 'dark',
-                y: { formatter: function(val) { return val + ' lección(es)'; } },
+                shared: true,
+                intersect: false,
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right',
+                labels: { colors: '#9ca3af' },
+                markers: { width: 10, height: 10, radius: 2 },
             },
             noData: {
                 text: 'Sin datos para los filtros seleccionados',

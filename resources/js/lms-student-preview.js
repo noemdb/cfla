@@ -83,7 +83,7 @@ window._ensureMermaidReady = function _ensureMermaidReady() {
         window.renderMathInElement = autoRender.default;
         // DOMPurify para sanitización — el @once inline también lo usará
         window.DOMPurify = window.DOMPurify || DOMPurify;
-        await import('katex/dist/katex.min.css');
+        await import('../css/katex-simple.css');
     } catch (e) {
         console.warn('[KATEX] Dynamic import via Vite failed:', e);
     }

@@ -448,30 +448,17 @@ class IndexComponent extends Component
     }
 
     /**
-     * Query lms_activity_publications grouped by published_at/created_at date,
-     * joining through activities → pevaluacions → pensums for filters.
+     * Apply shared lapso + academic filters to a lesson chart query.
+     * Works with both Eloquent Builder and Query Builder.
      */
-    private function loadChartLessonsByDay()
+    private function applyLessonChartFilters($query, $lapsoId)
     {
-        $lapsoId = $this->selectedLapsoId;
-        if (!$lapsoId) {
-            $this->chartLessonsByDay = [];
-            return;
-        }
-
-        $query = DB::query()
-            ->from('lms_activity_publications')
-            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+        $query
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->where('pevaluacions.lapso_id', $lapsoId)
-            ->whereNull('pevaluacions.deleted_at')
-            ->selectRaw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at) as pub_date, COUNT(*) as total')
-            ->groupByRaw('DATE(COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at))')
-            ->orderBy('pub_date')
-            ->whereNotNull(DB::raw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at)'));
+            ->whereNull('pevaluacions.deleted_at');
 
-        // Apply filters
         if ($this->selectedProfesorId) {
             $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
         }
@@ -488,16 +475,71 @@ class IndexComponent extends Component
                   ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
-        $this->chartLessonsByDay = $query->get()->map(function ($row) {
-            $date = $row->pub_date;
-            if ($date && strpos($date, ' ') !== false) {
-                $date = explode(' ', $date)[0];
-            }
-            return [
-                'x' => $date,
-                'y' => (int) $row->total,
-            ];
-        })->toArray();
+        return $query;
+    }
+
+    /**
+     * Query lessons grouped by day, split into two series:
+     *  1) Published lessons (status = 'PUBLISHED', grouped by published_at)
+     *  2) Others (non-published OR no publication record, grouped by created_at)
+     *
+     * Uses Activity model (same as monitor) + LEFT JOIN so activities
+     * without an lms_activity_publications row are included in "Otras".
+     */
+    private function loadChartLessonsByDay()
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartLessonsByDay = [];
+            return;
+        }
+
+        // ── Series 1: Published lessons ──
+        $published = $this->applyLessonChartFilters(
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            $lapsoId
+        )
+            ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.published_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // ── Series 2: Other lessons (non-published OR no publication at all) ──
+        $other = $this->applyLessonChartFilters(
+            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            $lapsoId
+        )
+            ->where(function ($q) {
+                $q->whereNull('lms_activity_publications.status')
+                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+            })
+            ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // ── Merge all unique dates sorted ──
+        $allDates = collect(array_merge(
+            $published->keys()->toArray(),
+            $other->keys()->toArray()
+        ))->unique()->sort()->values();
+
+        $this->chartLessonsByDay = [
+            'categories' => $allDates->toArray(),
+            'series'     => [
+                [
+                    'name' => 'Publicadas',
+                    'data' => $allDates->map(fn($d) => (int) ($published[$d]->total ?? 0))->toArray(),
+                ],
+                [
+                    'name' => 'Otras',
+                    'data' => $allDates->map(fn($d) => (int) ($other[$d]->total ?? 0))->toArray(),
+                ],
+            ],
+        ];
     }
 
     /**

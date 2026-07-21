@@ -59,7 +59,7 @@
     {{-- ═══════════════════════════════════════════════════════════════════
          HEADER
          ═══════════════════════════════════════════════════════════════════ --}}
-    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <div class="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-white mb-2">
                 Bienvenido, {{ $profesor->full_name ?? Auth::user()->username }}
@@ -97,7 +97,7 @@
                         :class="activeTab === {{ $tabNum }}
                             ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5'
                             : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                        class="flex-1 px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                        class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
                     >
                         <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -110,7 +110,7 @@
         </div>
 
         {{-- Tab Content Panels --}}
-        <div class="p-6">
+        <div class="p-3 sm:p-4 lg:p-6">
             @foreach($lapsos as $lapsoItem)
                 @php
                     $tabNum = $loop->iteration;
@@ -127,12 +127,12 @@
                     {{-- ════════════════════════════════════════════════════
                          BENTO GRID — single unified dashboard grid
                          ════════════════════════════════════════════════════ --}}
-                    <div class="grid grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
 
                         {{-- ═══ 1. Enseñanza de Calidad — anchor tile 2×2 ═══ --}}
-                        <div class="col-span-2 row-span-2">
+                        <div class="col-span-1 sm:col-span-2 row-span-1 sm:row-span-2">
                             <x-indicator-box
-                                icon='<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
+                                icon='<svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
                                 label="Enseñanza de Calidad"
                                 value="{{ $ind['act_calidad_ens'] ?? 0 }}"
                                 color="indigo"
@@ -214,15 +214,15 @@
 
                         <div class="col-span-1">
                             {{-- Custom progress card with bar --}}
-                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg transition-all duration-300 hover:border-indigo-500/30 h-full flex flex-col">
+                            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-indigo-500/30 h-full flex flex-col">
                                 <div class="flex items-start justify-between mb-2">
-                                    <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                                         </svg>
                                     </div>
                                 </div>
-                                <p class="text-lg font-bold text-white mb-1">{{ $diagProgress }}%</p>
+                                <p class="text-base sm:text-lg font-bold text-white mb-1">{{ $diagProgress }}%</p>
                                 <p class="text-[11px] font-medium text-indigo-400 uppercase tracking-wider">Progreso</p>
                                 <div class="mt-auto pt-3">
                                     <div class="progress-bar-sm">
@@ -245,7 +245,7 @@
                             />
                         </div>
 
-                        <div class="col-span-2">
+                        <div class="col-span-1 sm:col-span-2">
                             <x-indicator-box
                                 icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>'
                                 label="Secciones de Contenido"
@@ -273,7 +273,7 @@
                          ════════════════════════════════════════════════════ --}}
                     <div class="mt-8 space-y-4 profesor-charts" data-lapso="{{ $lapsoItem->id }}">
                         {{-- ── Activities per day ── --}}
-                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
@@ -294,7 +294,7 @@
                         </div>
 
                         {{-- ── Lessons per day ── --}}
-                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-sky-500/20 rounded-lg flex items-center justify-center">
@@ -315,7 +315,7 @@
                         </div>
 
                         {{-- ── Scheduled per day ── --}}
-                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+                        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 sm:p-5">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 bg-violet-500/20 rounded-lg flex items-center justify-center">
