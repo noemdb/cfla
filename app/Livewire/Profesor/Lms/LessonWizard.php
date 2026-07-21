@@ -1679,6 +1679,114 @@ PROMPT;
         }
     }
 
+    // ─── Wizard: Matemáticas / LaTeX ─────────────────────────────
+
+    /**
+     * Detecta expresiones matemáticas en el body de la diapositiva actual
+     * y las convierte a LaTeX usando IA, para renderizado con KaTeX.
+     */
+    public function generateSlideMath(): void
+    {
+        $sectionIndex = $this->currentSlideIndex;
+        if (!isset($this->wizardSections[$sectionIndex]['contents'][0])) {
+            $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido. Genera texto primero.');
+            return;
+        }
+        $body = trim(strip_tags($this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? ''));
+        if (empty($body)) {
+            $this->notification()->warning('Contenido vacío', 'El body de esta diapositiva está vacío.');
+            return;
+        }
+
+        $this->generatingSection = $sectionIndex;
+        $this->generationError = null;
+
+        $systemPrompt = <<<'PROMPT'
+Eres un asistente que procesa textos educativos: detecta expresiones matemáticas, las convierte a LaTeX y devuelve HTML semántico y estructurado.
+
+INSTRUCCIONES ESTRICTAS:
+
+1. **Detección total**: Analiza TODO el texto y detecta CADA expresión matemática (fórmulas, ecuaciones, símbolos, variables con exponentes/subíndices, operadores, fracciones, raíces, integrales, sumatorias, matrices, unidades de medida, probabilidades, funciones trigonométricas, etc.).
+
+2. **Conversión a LaTeX**: Convierte TODAS las expresiones a LaTeX válido usando:
+   - Expresiones inline: \(...\) (texto normal, dentro de un párrafo)
+   - Expresiones en bloque: $$...$$ (fórmulas grandes, ecuaciones destacadas, integrales)
+
+3. **Estructura HTML obligatoria**: Devuelve TODO el contenido como HTML válido con esta estructura exacta:
+   ```
+   <div id="math-block">
+   <p>Primer párrafo con \(expresiones\) y texto normal.</p>
+   <p>Segundo párrafo con más texto y $$expresión destacada$$.</p>
+   </div>
+   ```
+   - `<div id="math-block">` envuelve todo el contenido (obligatorio).
+   - Cada párrafo separado debe ir dentro de `<p>...</p>`.
+   - Texto sin matemáticas: presérvalo EXACTAMENTE IGUAL dentro de los `<p>`.
+
+4. **Prohibido**: NO agregues explicaciones, comentarios, introducciones, ni texto fuera del HTML solicitado. Responde SOLO con el HTML.
+
+5. **Calidad LaTeX**: Asegúrate de que todo el LaTeX sea sintácticamente válido:
+   - Fracciones: \frac{num}{den}
+   - Raíces: \sqrt{expr}
+   - Potencias: x^{n}
+   - Subíndices: x_{n}
+   - Operadores: \pm, \times, \cdot, \div, \sum, \int, \prod
+   - Griegos: \pi, \alpha, \beta, \theta, \Delta, \mu
+   - Funciones: \sin, \cos, \tan, \log, \ln, \lim
+   - Paréntesis automáticos: \left( y \right)
+   - Integrales: \int_{a}^{b}
+   - Matrices: \begin{matrix}...\end{matrix}
+
+EJEMPLOS:
+- Texto: "La fórmula cuadrática es x = (-b ± √(b² - 4ac)) / 2a"
+  HTML: <div id="math-block"><p>La fórmula cuadrática es \(x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\)</p></div>
+
+- Texto: "El área de un círculo es A = π r². La integral definida ∫₀¹ x² dx = 1/3."
+  HTML: <div id="math-block"><p>El área de un círculo es \(A = \pi r^2\). La integral definida $$\int_{0}^{1} x^2 \, dx = \frac{1}{3}$$</p></div>
+
+- Texto: "Si f(x) = 2x + 3 entonces f(5) = 13. La probabilidad es P(A) = 0.75."
+  HTML: <div id="math-block"><p>Si \(f(x) = 2x + 3\) entonces \(f(5) = 13\). La probabilidad es \(P(A) = 0.75\).</p></div>
+
+Responde SOLO con el HTML, sin texto adicional fuera de él.
+PROMPT;
+
+        $userPrompt = "Convierte TODAS las expresiones matemáticas del siguiente texto a LaTeX y devuelve el HTML completo dentro de `<div id=\"math-block\">`, respetando los párrafos con `<p>`:\n\n{$body}";
+
+        $customChain = [
+            ['model' => config('openrouter.model_math_primary'),   'label' => 'Math Qwen Coder primario'],
+            ['model' => config('openrouter.model_math_fallback1'), 'label' => 'Math DeepSeek fallback 1'],
+        ];
+
+        try {
+            $result = $this->askWithCompaction(
+                $systemPrompt,
+                $userPrompt,
+                ['max_tokens' => 8192, 'temperature' => 0.05],
+                4000,
+                null,
+                $customChain
+            );
+
+            if ($result['success']) {
+                $this->wizardSections[$sectionIndex]['contents'][0]['body']
+                    = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($result['content']);
+                $this->dispatch('math-updated');
+                $this->notification()->success(
+                    title: 'Matemáticas procesadas',
+                    description: 'Las expresiones matemáticas se han convertido a LaTeX exitosamente.'
+                );
+            } else {
+                $this->generationError = $result['error'] ?? 'Error al procesar las expresiones matemáticas.';
+                $this->notification()->error(title: 'Error', description: $this->generationError);
+            }
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->notification()->error('Error inesperado', $e->getMessage());
+        } finally {
+            $this->generatingSection = null;
+        }
+    }
+
     /**
      * Obtiene los referentes normativos con competencias e indicadores
      * como arreglo estructurado para mostrar en el paso 1 del wizard.
@@ -4424,7 +4532,12 @@ PROMPT;
             return '';
         }
         if (\Illuminate\Support\Str::contains($body, '<')) {
-            return $body;
+            // Defense-in-depth: sanitizar HTML server-side antes de renderizar.
+            // El contenido viene del AI (OpenRouter) o del profesor — aunque
+            // confiable, un prompt malicioso podría inyectar HTML dañino.
+            // DOMPurify (client-side) es la defensa primaria; este sanitizador
+            // es la capa secundaria.
+            return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
         }
         return \Illuminate\Support\Str::markdown($body);
     }

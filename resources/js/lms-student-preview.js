@@ -11,6 +11,9 @@
  *   • mermaidEmbed         — Renders Mermaid diagrams on demand
  */
 
+// ── DOMPurify — sanitiza HTML antes de inyectarlo al DOM ──────────
+import DOMPurify from 'dompurify';
+
 // ── Mermaid lazy initializer ─────────────────────────────────────────
 // Ensures the mermaid library is loaded and initialized exactly once.
 // Returns a promise that resolves when mermaid is ready to render.
@@ -64,6 +67,28 @@ window._ensureMermaidReady = function _ensureMermaidReady() {
 // this module (imported via @vite).  We use the `alpine:init` event to
 // register components after Alpine is available — this makes the module
 // self-contained regardless of script-load order.
+// ── KaTeX via Vite (npm + dynamic import) ────────────────────────
+// No CDN needed — KaTeX is installed via npm and loaded via Vite's
+// dynamic import(). This creates a separate chunk that's only fetched
+// when a page has math content — and once cached, loads instantly.
+// The `@once` inline script in math-text.blade.php polls for
+// renderMathInElement and resolves window._mathKatexReady.
+(async function setupKatex() {
+    try {
+        await import('katex');
+        var autoRender = await import('katex/dist/contrib/auto-render');
+        // ESM no contamina window — asignamos manualmente para que el
+        // @once inline script (polling) y las comprobaciones en render()
+        // puedan detectar que está disponible.
+        window.renderMathInElement = autoRender.default;
+        // DOMPurify para sanitización — el @once inline también lo usará
+        window.DOMPurify = window.DOMPurify || DOMPurify;
+        await import('katex/dist/katex.min.css');
+    } catch (e) {
+        console.warn('[KATEX] Dynamic import via Vite failed:', e);
+    }
+})();
+
 document.addEventListener('alpine:init', () => {
 
 // ── Lesson Preview Swiper ────────────────────────────────────────
@@ -473,4 +498,80 @@ Alpine.data('mermaidEmbed', () => ({
     },
 }));
 
+// ── Math Content (KaTeX) — Mermaid-like pattern ────────────────────
+// Renders LaTeX on the client using KaTeX, following the same
+// architecture as mermaidEmbed: wire:ignore protects the rendered
+// output, data-math-content stores the raw HTML, and a MutationObserver
+// detects attribute changes from Livewire morphs.
+Alpine.data('mathContent', () => ({
+    _content: '',
+    _observer: null,
+
+    init() {
+        this._content = this.$el.getAttribute('data-math-content') || '';
+        this._ensureKatex().then(() => this.$nextTick(() => this.render()));
+
+        // MutationObserver: detecta cambios en data-math-content
+        // (Misma tónica que el patrón Mermaid: wire:ignore protege el
+        // renderizado, y el observer reacciona a cambios del atributo.)
+        this._observer = new MutationObserver(() => {
+            var newContent = this.$el.getAttribute('data-math-content') || '';
+            if (newContent !== this._content) {
+                this._content = newContent;
+                this.$nextTick(() => this.render());
+            }
+        });
+        this._observer.observe(this.$el, {
+            attributes: true,
+            attributeFilter: ['data-math-content'],
+        });
+    },
+
+    async _ensureKatex() {
+        return window._mathKatexReady;
+    },
+
+    render() {
+        var target = this.$refs?.target;
+        if (!target) return;
+
+        // Sanitizar antes de inyectar al DOM (XSS prevention)
+        var __html = DOMPurify.sanitize(this._content);
+
+        // Parchar vulnerabilidad conocida de KaTeX:
+        // CVE-2025-1390 — macros \htmlData, \htmlClass, \htmlStyle
+        // permiten inyectar atributos HTML arbitrarios (como onclick)
+        // en el output renderizado. DOMPurify no puede proteger contra
+        // esto porque son macros de LaTeX, no HTML.
+        // Parche: eliminar estas macros del HTML antes de que KaTeX las procese.
+        // KaTeX 0.16.21+ corrige esto; parche removible al actualizar.
+        __html = __html.replace(/\\html(?:Data|Class|Style)\s*\{[^}]*\}\s*\{[^}]*\}/g, '');
+
+        target.innerHTML = __html;
+
+        if (!window.renderMathInElement) return;
+
+        try {
+            renderMathInElement(target, {
+                delimiters: [
+                    {left:'\\(', right:'\\)', display:false},
+                    {left:'$$',   right:'$$',   display:true},
+                    {left:'\\[',  right:'\\]',  display:true},
+                    {left:'$',    right:'$',    display:false},
+                ],
+                throwOnError: false,
+            });
+        } catch (e) {
+            if (window.console) console.warn('[KATEX]', e);
+        }
+    },
+
+    destroy() {
+        if (this._observer) this._observer.disconnect();
+    },
+}));
+
+// Flag para que el @once inline script del componente sepa
+// que ya está registrado y no duplique el Alpine.data().
+Alpine._mathContentRegistered = true;
 }); // end alpine:init

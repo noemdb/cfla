@@ -75,6 +75,7 @@
 
     @livewireScripts
     @yield('script')
+    @stack('scripts')
 
     <style>
         .diagnostic-card {

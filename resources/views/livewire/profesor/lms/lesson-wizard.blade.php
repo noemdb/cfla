@@ -1500,7 +1500,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags,generateSlideMath"
              class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay"
              x-data="{
@@ -2173,9 +2173,10 @@
                                             <div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-6 min-h-[200px] overflow-x-auto shadow-sm">
                                                 @php $previewContent = trim($this->slidePreviewContent()); @endphp
                                                 @if(!empty($previewContent))
-                                                    <div class="slide-preview-wrapper" style="color: #1e293b; line-height: 1.7;">
-                                                        {!! $previewContent !!}
-                                                    </div>
+                                                    <x-lms.math-text
+                                                        :content="$previewContent"
+                                                        class="slide-preview-wrapper"
+                                                        style="color: #1e293b; line-height: 1.7;" />
                                                 @else
                                                     <div class="text-center py-12 text-gray-400 dark:text-slate-400">
                                                         <svg class="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -2258,6 +2259,17 @@
                                                        text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v4a1 1 0 001 1h4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14h6m-3-3v6"/></svg>
                                             Etiquetar HTML
+                                        </button>
+
+                                        {{-- Detectar y convertir expresiones matemáticas a LaTeX --}}
+                                        <button wire:click="generateSlideMath"
+                                                @click="editorTab = 'preview'"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateSlideMath"
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"/></svg>
+                                            Etiquetar Matemáticas
                                         </button>
 
                                         <span class="w-px h-5 bg-slate-700/50 mx-1 ml-auto"></span>
@@ -2408,20 +2420,20 @@ Cómo...?"
                                                 </button>
                                             </div>
                                             {{-- Body: Markdown rendered --}}
-                                            <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
-                                                <div class="prose prose-sm prose-invert max-w-none
-                                                            prose-headings:text-white prose-headings:font-bold
-                                                            prose-h2:text-lg prose-h2:border-b prose-h2:border-slate-700 prose-h2:pb-2 prose-h2:mb-4
-                                                            prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
-                                                            prose-p:text-slate-300 prose-p:leading-relaxed
-                                                            prose-strong:text-emerald-300
-                                                            prose-ul:text-slate-300 prose-ol:text-slate-300
-                                                            prose-li:marker:text-emerald-500
-                                                            prose-code:text-cyan-300 prose-code:bg-slate-700/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px]
-                                                            prose-hr:border-slate-700">
-                                                    {!! Str::markdown($reviewQuestions) !!}
+                                                <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                                                    <x-lms.math-text
+                                                        :content="Str::markdown($reviewQuestions)"
+                                                        class="prose prose-sm prose-invert max-w-none
+                                                               prose-headings:text-white prose-headings:font-bold
+                                                               prose-h2:text-lg prose-h2:border-b prose-h2:border-slate-700 prose-h2:pb-2 prose-h2:mb-4
+                                                               prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
+                                                               prose-p:text-slate-300 prose-p:leading-relaxed
+                                                               prose-strong:text-emerald-300
+                                                               prose-ul:text-slate-300 prose-ol:text-slate-300
+                                                               prose-li:marker:text-emerald-500
+                                                               prose-code:text-cyan-300 prose-code:bg-slate-700/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px]
+                                                               prose-hr:border-slate-700" />
                                                 </div>
-                                            </div>
                                             {{-- Footer --}}
                                             <div class="flex items-center justify-end gap-3 px-6 py-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/60">
                                                 <button wire:click="$set('showReviewPreview', false)"
@@ -3596,9 +3608,9 @@ Cómo...?"
                                                     <div x-ref="target" class="w-full"></div>
                                                 </div>
                                             @else
-                                                <div class="text-sm text-slate-400 leading-relaxed prose prose-invert prose-sm max-w-none">
-                                                    {!! $this->renderContentBody($rawBody) !!}
-                                                </div>
+                                                <x-lms.math-text
+                                                :content="$this->renderContentBody($rawBody)"
+                                                class="text-sm text-slate-400 leading-relaxed prose prose-invert prose-sm max-w-none" />
                                             @endif
                                         @endforeach
 
@@ -3841,7 +3853,7 @@ Cómo...?"
 
 {{-- ═══ Mermaid.js — bundled via Vite (resources/js/app.js) ═══ --}}
 @assets
-<style>
+    <style>
         .student-preview-modal:fullscreen {
             background: #f1f5f9;
             overflow-y: auto;
@@ -4134,7 +4146,6 @@ Cómo...?"
 @endassets
 @script
 <script>
-
     Alpine.data('tocNavigation', () => ({
         activeSection: 0,
         observer: null,

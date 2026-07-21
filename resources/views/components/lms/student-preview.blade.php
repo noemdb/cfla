@@ -333,7 +333,9 @@
                                                 <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-4 shadow-sm">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💡</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
+                                                        <x-lms.math-text
+                                                            :content="$bodyHtml"
+                                                            class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'list')
@@ -342,20 +344,26 @@
                                                         <span class="text-lg leading-none">📋</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lista</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content">{!! $bodyHtml !!}</div>
+                                                    <x-lms.math-text
+                                                        :content="$bodyHtml"
+                                                        class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
                                                 </div>
                                             @elseif($__tpl === 'quote')
                                                 <div class="bg-amber-50/60 border-l-4 border-amber-400 rounded-r-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
-                                                        <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium lms-content">{!! $bodyHtml !!}</div>
+                                                        <x-lms.math-text
+                                                            :content="$bodyHtml"
+                                                            class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none [&_em]:text-amber-800 [&_em]:not-italic [&_em]:font-medium lms-content" />
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'question')
                                                 <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💭</span>
-                                                        <div class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
+                                                        <x-lms.math-text
+                                                            :content="$bodyHtml"
+                                                            class="text-sm text-sky-900 leading-relaxed prose prose-sm max-w-none lms-content" />
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'activity')
@@ -364,11 +372,15 @@
                                                         <span class="text-lg leading-none">✏️</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actividad</span>
                                                     </div>
-                                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
+                                                    <x-lms.math-text
+                                                        :content="$bodyHtml"
+                                                        class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
                                                 </div>
                                             @else
                                                 <div class="bg-gradient-to-br from-white to-stone-50/80 rounded-xl p-4 border border-stone-200/60">
-                                                    <div class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none lms-content">{!! $bodyHtml !!}</div>
+                                                    <x-lms.math-text
+                                                        :content="$bodyHtml"
+                                                        class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none lms-content" />
                                                 </div>
                                             @endif
                                         @endif
@@ -396,7 +408,7 @@
                                                         <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                                     </div>
                                                 @else
-                                                    {!! $embed['html_content'] !!}
+                                                    <x-lms.math-text :content="$embed['html_content']" as="div" />
                                                 @endif
                                             </div>
                                         </div>
@@ -623,7 +635,7 @@
                                                     <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                                 </div>
                                             @else
-                                                {!! $embed['html_content'] !!}
+                                                <x-lms.math-text :content="$embed['html_content']" as="div" />
                                             @endif
                                         </div>
                                     </div>
@@ -654,7 +666,9 @@
                                         // 2) Eliminar ** huérfanos (sin cierre) que el parser dejaría literales
                                         $reviewHtml = str_replace('**', '', $reviewHtml);
                                     @endphp
-                                    {!! Str::markdown($reviewHtml) !!}
+                                    <x-lms.math-text
+                                        :content="Str::markdown($reviewHtml)"
+                                        class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
                                 </div>
                             </div>
                         </div>

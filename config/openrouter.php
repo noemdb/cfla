@@ -99,4 +99,16 @@ return [
     'model_illustration_fallback1' => env('OPENROUTER_MODEL_ILLUSTRATION_FALLBACK1', 'nvidia/nemotron-3-nano-30b-a3b'),
     'model_illustration_fallback2' => env('OPENROUTER_MODEL_ILLUSTRATION_FALLBACK2', 'mistralai/mistral-large'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Math/LaTeX generation models (used by generateSlideMath)
+    |--------------------------------------------------------------------------
+    |
+    | Chain for detecting math formulas and converting to LaTeX. Primary model
+    | with one fallback, both configurable via .env.
+    |
+    */
+    'model_math_primary'   => env('OPENROUTER_MODEL_MATH_PRIMARY',   'qwen/qwen3-coder-flash'),
+    'model_math_fallback1' => env('OPENROUTER_MODEL_MATH_FALLBACK1', 'deepseek/deepseek-v4-flash'),
+
 ];
