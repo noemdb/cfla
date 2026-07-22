@@ -12,6 +12,24 @@ Eres un Staff Engineer especializado en HTML semántico, diseño visual educativ
 
 INSTRUCCIÓN: Transforma el contenido educativo en HTML5 semántico ENRIQUECIDO visualmente con clases Tailwind CSS. El contenido debe ser rico visualmente pero SIN envoltorio/card raíz con fondo, borde o sombra — el contenedor exterior lo proporciona la plantilla.
 
+═══ PRIORIDAD ABSOLUTA: TEXTO ORIGINAL ═══
+Este contenido va DIRIGIDO AL ESTUDIANTE como material de enseñanza-aprendizaje.
+El HTML debe ORGANIZAR y RESALTAR visualmente las palabras del texto original,
+pero NUNCA añadir información nueva. El valor educativo está en lo que el profesor
+escribió, no en lo que el asistente pueda inferir o desarrollar.
+
+- ❌ NO desarrolles conceptos que el original solo menciona: si dice "método de Pólya",
+  no expliques los 4 pasos. Si dice "basado en la teoría de Vygotsky", no expandas la teoría.
+- ❌ NO añadas ejemplos, casos, aclaraciones ni conexiones que no estén en el original.
+- ❌ NO crees títulos, subtítulos ni etiquetas que no se deriven directamente del texto original.
+- ❌ NO uses frases introductorias como "A continuación", "Como vimos", "Podemos observar que".
+- ❌ NO agregues "conclusiones", "reflexiones" ni "resúmenes" que el original no contenga.
+- ✅ Organiza el texto existente con la estructura HTML más adecuada (párrafos, listas, highlight box para la idea central, etc.).
+- ✅ Si el original tiene enumeraciones, conviértelas a listas con viñetas de texto (✓).
+- ✅ Si el original tiene datos numéricos, usa stat cards.
+- ✅ Si el original tiene citas textuales, usa blockquote.
+- ✅ Solo extrae el título/heading del contenido del original o de $sectionTitle — no inventes headings.
+
 CONTEXTO visual — fondo blanco, texto oscuro, acentos esmeralda/verde, sombras suaves, bordes sutiles.
 
 ═══ PALETA BASE (solo fondo blanco) ═══
@@ -269,11 +287,12 @@ PROMPT;
     /**
      * Etiqueta contenido educativo con HTML semántico usando IA.
      *
-     * @param  string   $originalBody Contenido plano original a etiquetar.
-     * @param  string   $sectionTitle Título de la sección/diapositiva.
-     * @param  string   $gradeName    Nombre del grado (ej. "1er Grado").
-     * @param  string   $subjectName  Nombre de la asignatura.
-     * @param  callable $aiCallback   Función que recibe (systemPrompt, userPrompt, overrides) y retorna array{success: bool, content: ?string, error: ?string}.
+     * @param  string      $originalBody    Contenido plano original a etiquetar.
+     * @param  string      $sectionTitle    Título de la sección/diapositiva.
+     * @param  string      $gradeName       Nombre del grado (ej. "1er Grado").
+     * @param  string      $subjectName     Nombre de la asignatura.
+     * @param  callable    $aiCallback      Función que recibe (systemPrompt, userPrompt, overrides) y retorna array{success: bool, content: ?string, error: ?string}.
+     * @param  array|null  $activityContext Contexto opcional de la actividad: ['topic' => string, 'teaching' => string, 'learning' => string, 'description' => string].
      * @return array{success: bool, html: ?string, error: ?string}
      */
     public function tag(
@@ -282,20 +301,41 @@ PROMPT;
         string $gradeName,
         string $subjectName,
         callable $aiCallback,
+        ?array $activityContext = null,
     ): array {
+        $activityInfo = '';
+
+        if ($activityContext) {
+            $parts = array_filter([
+                !empty($activityContext['topic']) ? "**Tema generador:** {$activityContext['topic']}" : null,
+                !empty($activityContext['teaching']) ? "**Enseñanza:** {$activityContext['teaching']}" : null,
+                !empty($activityContext['description']) ? "**Actividad evaluativa:** {$activityContext['description']}" : null,
+            ]);
+            if ($parts) {
+                $activityInfo = "\n### Contexto de la actividad\n" . implode("\n", $parts) . "\n";
+            }
+        }
+
         $userPrompt = <<<PROMPT
 ### Contexto pedagógico
 - **Grado:** {$gradeName}
 - **Asignatura:** {$subjectName}
 - **Título de la sección:** {$sectionTitle}
-
+{$activityInfo}
 ### Contenido original a etiquetar
 
 {$originalBody}
 
-Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card para datos numéricos (progress bar SOLO si el valor es un porcentaje real 0–100%; para números absolutos como tiempo, unidades, hectáreas, usa stat card SIN barra), acordeón para info expandible, y tipografía variada (color de acento en título, subrayado decorativo).
+Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS, pensando en un estudiante que va a aprender con este material. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card para datos numéricos (progress bar SOLO si el valor es un porcentaje real 0–100%; para números absolutos como tiempo, unidades, hectáreas, usa stat card SIN barra), acordeón para info expandible, y tipografía variada (color de acento en título, subrayado decorativo).
 
-IMPORTANTE — PRESERVA EL TEXTO ORIGINAL: NO añadas descripciones, ejemplos, aclaraciones ni elaboraciones que no estén textualmente en el contenido original. El HTML debe estructurar y resaltar el texto que YA EXISTE, no expandirlo ni explicarlo. Si el original solo menciona algo de pasada ("método de Pólya"), no lo desarrolles. Usa las palabras exactas del original.
+⚠️  PRIORIDAD ABSOLUTA — PRESERVA EL TEXTO ORIGINAL:
+El contenido es material DIRIGIDO AL ESTUDIANTE para su proceso de enseñanza-aprendizaje.
+NO añadas NADA que no esté textualmente en el original: no desarrolles conceptos, no agregues
+ejemplos ni aclaraciones, no parafrasees. Usa EXACTAMENTE las palabras del original organizadas
+visualmente. El valor educativo está en el texto del profesor, no en inferencias del asistente.
+
+Si se proporcionó "Contexto de la actividad", puedes usarlo ÚNICAMENTE como referencia
+de contexto temático general, pero sin trasplantar texto de ese contexto al HTML generado.
 
 IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*.
 PROMPT;

@@ -1675,6 +1675,11 @@ PROMPT;
                     $userPrompt,
                     $overrides
                 ),
+                activityContext: $activity ? [
+                    'topic'       => $activity->topic ?? '',
+                    'teaching'    => $activity->teaching ?? '',
+                    'description' => $activity->description ?? '',
+                ] : null,
             );
 
             if ($result['success']) {
