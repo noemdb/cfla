@@ -1723,27 +1723,44 @@
                 </div>
             </div>
 
-            {{-- Indicador de pasos --}}
+            {{-- Indicador de pasos — sticky + responsive + clickeable --}}
             @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
-            <div class="hidden md:flex items-start gap-1">
-                @foreach(range(1, 5) as $step)
-                    <div class="flex items-center">
-                        <div class="flex flex-col items-center">
-                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold
-                                {{ $currentStep === $step ? 'bg-emerald-500 text-white' : ($currentStep > $step ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}">
-                                @if($currentStep > $step)
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                @else
-                                    {{ $step }}
-                                @endif
-                            </span>
-                            <span class="text-[9px] mt-0.5 whitespace-nowrap {{ $currentStep === $step ? 'text-emerald-400 font-semibold' : 'text-gray-400 dark:text-slate-500' }}">{{ $stepLabels[$step] }}</span>
-                        </div>
-                        @if($step < 5)
-                            <span class="w-6 h-px mx-1 mb-4 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
-                        @endif
-                    </div>
-                @endforeach
+            <div class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700/50 -mx-4 px-4 py-2 shadow-sm">
+                <div class="flex items-center gap-0.5 sm:gap-1">
+                    @foreach(range(1, 5) as $step)
+                        <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group">
+                            <div class="flex flex-col items-center min-w-0">
+                                <span class="inline-flex items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200
+                                    {{ $currentStep === $step ? 'w-7 h-7 bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 ring-2 ring-emerald-400/30' : ($currentStep > $step ? 'w-6 h-6 bg-emerald-500/20 text-emerald-400' : 'w-6 h-6 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}
+                                    hover:ring-2 hover:ring-emerald-400/30 hover:ring-offset-1 hover:ring-offset-white dark:hover:ring-offset-slate-900">
+                                    @if($currentStep > $step)
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    @else
+                                        {{ $step }}
+                                    @endif
+                                </span>
+                                <span class="text-[9px] mt-0.5 whitespace-nowrap {{ $currentStep === $step ? 'text-emerald-400 font-semibold' : 'text-gray-400 dark:text-slate-500' }}
+                                    {{ $step === $currentStep ? '' : 'hidden sm:inline' }}">
+                                    {{ $stepLabels[$step] }}
+                                </span>
+                            </div>
+                            @if($step < 5)
+                                <span class="w-4 sm:w-8 h-px mb-4 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
+                            @endif
+                        </button>
+                    @endforeach
+
+                    {{-- Progreso compacto --}}
+                    @php
+                        $completedSteps = collect(range(1,5))->filter(fn($s) => $s < $currentStep)->count();
+                        $progressPct = $currentStep > 0 ? round(($completedSteps / 5) * 100) : 0;
+                    @endphp
+                    <span class="ml-auto text-[10px] font-mono text-gray-400 dark:text-slate-500 hidden sm:inline shrink-0">{{ $completedSteps }}/5</span>
+                </div>
+                {{-- Barra de progreso --}}
+                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-200 dark:bg-slate-700/50">
+                    <div class="h-full bg-emerald-500/60 transition-all duration-500 ease-out" style="width: {{ $progressPct }}%"></div>
+                </div>
             </div>
         </div>
 
@@ -1771,7 +1788,26 @@
                 </div>
             </div>
         @else
-            <div>
+            <div x-on:keydown.window="
+                if (event.ctrlKey || event.metaKey) {
+                    if (event.key === 'ArrowRight') {
+                        event.preventDefault();
+                        $wire.call('goToStep', Math.min(5, {{ $currentStep }} + 1));
+                    } else if (event.key === 'ArrowLeft') {
+                        event.preventDefault();
+                        $wire.call('goToStep', Math.max(1, {{ $currentStep }} - 1));
+                    }
+                }
+                if ({{ $currentStep === 2 ? 'true' : 'false' }}) {
+                    if (event.key === 'ArrowDown' && !event.ctrlKey && !event.metaKey) {
+                        event.preventDefault();
+                        $wire.call('nextSlide');
+                    } else if (event.key === 'ArrowUp' && !event.ctrlKey && !event.metaKey) {
+                        event.preventDefault();
+                        $wire.call('prevSlide');
+                    }
+                }
+            ">
 
             {{-- Navegación entre pasos --}}
             <div class="flex items-center justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2">
@@ -1788,6 +1824,24 @@
                         </button>
                     @endif
                 </div>
+            </div>
+
+            {{-- Atajos de teclado (hint sutil) --}}
+            <div class="flex items-center justify-end gap-3 px-1 -mt-2 mb-1">
+                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">Ctrl</kbd>
+                    <span class="text-gray-300 dark:text-slate-700">+</span>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&larr;</kbd>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&rarr;</kbd>
+                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">pasos</span>
+                </span>
+                @if($currentStep === 2)
+                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&uarr;</kbd>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&darr;</kbd>
+                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">diapositivas</span>
+                </span>
+                @endif
             </div>
 
             {{-- Grid: formulario a la izquierda, preview a la derecha --}}
@@ -1929,75 +1983,127 @@
 
                     {{-- STEP 2: Editor de Diapositivas (Slide Editor) --}}
                     @if($currentStep === 2)
-                        <div class="slide-editor-root bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden"
+                        {{-- ===== SLIDE EDITOR CON SIDEBAR PERSISTENTE ===== --}}
+                        @php
+                            $totalSlides = count($wizardSections);
+                            $currentSlide = $wizardSections[$currentSlideIndex] ?? null;
+                        @endphp
+
+                        <div class="slide-editor-root bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg"
                              x-data="{
                                 showSlideList: false,
+                                dragIndex: null,
+                                dragOverIndex: null,
                                 editSlideTitle: false,
-                                slideTitleBuffer: '{{ addslashes($wizardSections[$currentSlideIndex]['title'] ?? '') }}'
-                             }"
-                             x-init="window.addEventListener('close-slide-list', () => showSlideList = false)">
+                                slideTitleBuffer: '{{ addslashes($wizardSections[$currentSlideIndex]['title'] ?? '') }}',
 
-                            {{-- ===== SLIDE EDITOR INTERFACE ===== --}}
-                            @php
-                                $totalSlides = count($wizardSections);
-                                $currentSlide = $wizardSections[$currentSlideIndex] ?? null;
-                            @endphp
+                                startDrag(idx) { this.dragIndex = idx; },
+                                dragOver(idx) { if (this.dragIndex !== null && this.dragIndex !== idx) this.dragOverIndex = idx; },
+                                endDrag() {
+                                    if (this.dragIndex !== null && this.dragOverIndex !== null && this.dragIndex !== this.dragOverIndex) {
+                                        $wire.call('moveSlide', this.dragIndex, this.dragOverIndex);
+                                    }
+                                    this.dragIndex = null; this.dragOverIndex = null;
+                                },
+                                cancelDrag() { this.dragIndex = null; this.dragOverIndex = null; }
+                             }">
 
-                            {{-- Slide Navigation Bar --}}
-                            <div class="flex items-center justify-between gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-800/40 border-b border-gray-200 dark:border-slate-700/30">
-                                <div class="flex items-center gap-2">
+                            {{-- Slide Navigation Bar — compacta --}}
+                            <div class="flex items-center justify-between gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800/40 border-b border-gray-200 dark:border-slate-700/30">
+                                <div class="flex items-center gap-1">
                                     <button wire:click="prevSlide"
-                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex <= 0 ? 'opacity-40 pointer-events-none' : '' }}">
+                                            class="flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex <= 0 ? 'opacity-40 pointer-events-none' : '' }}">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                                        Anterior
+                                        <span class="hidden sm:inline">Anterior</span>
                                     </button>
-                                    <span class="text-gray-400 dark:text-slate-600 mx-1">|</span>
+                                    <span class="text-gray-300 dark:text-slate-600 mx-0.5">|</span>
                                     <button wire:click="nextSlide"
-                                            class="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex >= $totalSlides - 1 ? 'opacity-40 pointer-events-none' : '' }}">
-                                        Siguiente
+                                            class="flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all {{ $totalSlides <= 1 || $currentSlideIndex >= $totalSlides - 1 ? 'opacity-40 pointer-events-none' : '' }}">
+                                        <span class="hidden sm:inline">Siguiente</span>
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                     </button>
+                                    <span class="text-[11px] text-gray-400 dark:text-slate-500 font-mono ml-2">
+                                        <span class="text-emerald-400 font-bold">{{ $currentSlideIndex + 1 }}</span>/{{ max(0, $totalSlides) }}
+                                    </span>
                                 </div>
 
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[11px] text-gray-400 dark:text-slate-500 font-mono">
-                                        Diapositiva <span class="text-emerald-400 font-bold">{{ $currentSlideIndex + 1 }}</span> / {{ max(0, $totalSlides) }}
-                                    </span>
                                     <button @click="showSlideList = !showSlideList"
-                                            class="p-1.5 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all"
+                                            class="lg:hidden p-1.5 text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 rounded-lg transition-all"
                                             title="Lista de diapositivas">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                     </button>
                                 </div>
                             </div>
 
-                            {{-- Slide List (collapsible) --}}
-                            <div x-show="showSlideList" x-cloak x-transition:enter.duration.150ms
-                                 class="border-b border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-900/60">
-                                <div class="max-h-48 overflow-y-auto p-2 space-y-0.5">
-                                    @foreach($wizardSections as $sIdx2 => $sec)
-                                        @php
-                                            $secContent = $sec['contents'][0]['body'] ?? '';
-                                            $hasSecContent = !empty($secContent);
-                                        @endphp
-                                        <button wire:click="goToSlide({{ $sIdx2 }}); window.dispatchEvent(new CustomEvent('close-slide-list'))"
-                                                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs
-                                                       {{ $sIdx2 === $currentSlideIndex ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border border-transparent' }}">
-                                            <span class="flex items-center justify-center w-5 h-5 rounded bg-gray-200 dark:bg-slate-700/60 text-[10px] font-mono shrink-0">{{ $sIdx2 + 1 }}</span>
-                                            <span class="truncate flex-1">{{ $sec['title'] }}</span>
-                                            @if($hasSecContent)
-                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
-                                            @else
-                                                <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
-                                            @endif
+                            {{-- 🔲 Sidebar + Contenido en flex row --}}
+                            <div class="flex flex-col lg:flex-row">
+                                {{-- ═══ SIDEBAR: Lista persistente de secciones (desktop) ═══ --}}
+                                <aside class="hidden lg:flex flex-col w-56 shrink-0 border-r border-gray-200 dark:border-slate-700/30 bg-gray-50/70 dark:bg-slate-900/40">
+                                    <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-slate-700/30">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Secciones</span>
+                                        <span class="text-[10px] font-mono text-gray-400 dark:text-slate-600">{{ $totalSlides }}</span>
+                                    </div>
+                                    <div class="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-[200px] max-h-[55vh]">
+                                        @forelse($wizardSections as $sIdx2 => $sec)
+                                            @php
+                                                $secContent = $sec['contents'][0]['body'] ?? '';
+                                                $hasSecContent = !empty($secContent);
+                                                $isActive = $sIdx2 === $currentSlideIndex;
+                                            @endphp
+                                            <div wire:key="slide-list-{{ $sIdx2 }}"
+                                                 @dragover.prevent="dragOver({{ $sIdx2 }})"
+                                                 @dragleave.prevent="if (dragOverIndex === {{ $sIdx2 }}) dragOverIndex = null"
+                                                 @drop.prevent="endDrag()">
+                                                <button wire:click="goToSlide({{ $sIdx2 }})"
+                                                        draggable="true"
+                                                        @dragstart="startDrag({{ $sIdx2 }})"
+                                                        @dragend="cancelDrag()"
+                                                        @class([
+                                                            'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all text-[11px] border cursor-grab active:cursor-grabbing group',
+                                                            'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' => $isActive,
+                                                            'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border-transparent' => !$isActive,
+                                                        ])
+                                                        :class="{ 'opacity-40': dragIndex === {{ $sIdx2 }}, 'border-t-2 border-t-emerald-400/40': dragOverIndex === {{ $sIdx2 }} }">
+                                                    <span class="flex items-center justify-center w-5 h-5 rounded shrink-0 text-[10px] font-mono {{ $hasSecContent ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-200 dark:bg-slate-700/60 text-gray-500 dark:text-slate-500' }}">
+                                                        {{ $sIdx2 + 1 }}
+                                                    </span>
+                                                    <span class="truncate flex-1">{{ $sec['title'] ?: 'Sin título' }}</span>
+                                                    @if($hasSecContent)
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
+                                                    @else
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
+                                                    @endif
+                                                    <svg class="w-3 h-3 text-gray-400 dark:text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+                                                </button>
+                                            </div>
+                                        @empty
+                                            <div class="text-center py-8">
+                                                <p class="text-[11px] text-gray-400 dark:text-slate-600">Sin secciones</p>
+                                                <p class="text-[10px] text-gray-500 dark:text-slate-500 mt-1">Agrega una abajo</p>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                    <div class="p-2 border-t border-gray-200 dark:border-slate-700/30 space-y-1">
+                                        <button wire:click="addWizardSection"
+                                                class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            Nueva diapositiva
                                         </button>
-                                    @endforeach
-                                </div>
-                            </div>
+                                        @if($totalSlides > 0)
+                                            <button wire:click="confirmResetWizardSections"
+                                                    class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                Limpiar todo
+                                            </button>
+                                        @endif
+                                    </div>
+                                </aside>
 
-                            {{-- Slide Content Area --}}
-                            @if($currentSlide)
-                                <div class="px-4 py-2" wire:key="slide-{{ $currentSlideIndex }}">
+                                {{-- ═══ CONTENIDO PRINCIPAL (slide actual) ═══ --}}
+                                <div class="flex-1 min-w-0">
+                                    @if($currentSlide)
+                                        <div class="px-4 py-2" wire:key="slide-{{ $currentSlideIndex }}">
                                     {{-- Slide Title (editable inline) --}}
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 text-emerald-400 text-xs font-bold shrink-0">
@@ -2268,14 +2374,14 @@
                                         </button>
 
                                         {{-- Detectar y convertir expresiones matemáticas a LaTeX --}}
-                                        <button wire:click="generateSlideMath"
+                                        <button title="Etiquetar con Notación matemática" wire:click="generateSlideMath"
                                                 @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideMath"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"/></svg>
-                                            Etiquetar Matemáticas
+                                            Etiquetar Not. Mat. 
                                         </button>
 
                                         <span class="w-px h-5 bg-slate-700/50 mx-1 ml-auto"></span>
@@ -2337,6 +2443,9 @@
                                 </div>
                             @endif
 
+                        </div>
+                    </div>
+
                             {{-- Add Section --}}
                             <div class="flex gap-2 px-4 py-2 border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20">
                                 <input wire:model="newSectionTitle" wire:keydown.enter="addWizardSection"
@@ -2346,6 +2455,52 @@
                                         class="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-white text-xs rounded-lg font-medium transition-all whitespace-nowrap">
                                     + Diapositiva
                                 </button>
+                            </div>
+
+                            {{-- ═══ Mobile: Bottom Sheet con lista de secciones ═══ --}}
+                            <div x-show="showSlideList" x-cloak x-transition:enter.duration.200ms
+                                 class="fixed inset-0 z-50 lg:hidden" @click.away="showSlideList = false">
+                                {{-- Backdrop --}}
+                                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                                     @click="showSlideList = false"></div>
+                                {{-- Sheet --}}
+                                <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl border-t border-gray-200 dark:border-slate-700 max-h-[60vh] overflow-hidden"
+                                     @click.stop>
+                                    {{-- Handle visual --}}
+                                    <div class="flex items-center justify-center pt-2 pb-1">
+                                        <span class="w-8 h-1 bg-gray-300 dark:bg-slate-600 rounded-full"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-slate-700/50">
+                                        <span class="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Secciones</span>
+                                        <span class="text-[10px] font-mono text-gray-400">{{ $totalSlides }} diapositivas</span>
+                                    </div>
+                                    <div class="overflow-y-auto p-2 space-y-0.5 max-h-[calc(60vh-80px)]">
+                                        @forelse($wizardSections as $sIdx2 => $sec)
+                                            @php
+                                                $secContent = $sec['contents'][0]['body'] ?? '';
+                                                $hasSecContent = !empty($secContent);
+                                            @endphp
+                                            <button wire:click="goToSlide({{ $sIdx2 }}); showSlideList = false"
+                                                    @class([
+                                                        'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all text-xs',
+                                                        'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20' => $sIdx2 === $currentSlideIndex,
+                                                        'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border border-transparent' => $sIdx2 !== $currentSlideIndex,
+                                                    ])>
+                                                <span class="flex items-center justify-center w-5 h-5 rounded shrink-0 text-[10px] font-mono {{ $hasSecContent ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-200 dark:bg-slate-700/60 text-gray-500 dark:text-slate-500' }}">
+                                                    {{ $sIdx2 + 1 }}
+                                                </span>
+                                                <span class="truncate flex-1">{{ $sec['title'] ?: 'Sin título' }}</span>
+                                                @if($hasSecContent)
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
+                                                @else
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
+                                                @endif
+                                            </button>
+                                        @empty
+                                            <p class="text-center text-[11px] text-gray-400 dark:text-slate-600 py-6">Sin secciones aún</p>
+                                        @endforelse
+                                    </div>
+                                </div>
                             </div>
 
                         </div>

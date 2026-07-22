@@ -361,6 +361,39 @@ TEXT;
     }
 
     /**
+     * Reordena una sección moviéndola de una posición a otra.
+     */
+    public function moveSlide(int $fromIndex, int $toIndex): void
+    {
+        $count = count($this->wizardSections);
+        if ($fromIndex < 0 || $fromIndex >= $count || $toIndex < 0 || $toIndex >= $count || $fromIndex === $toIndex) {
+            return;
+        }
+
+        $item = $this->wizardSections[$fromIndex];
+        unset($this->wizardSections[$fromIndex]);
+        $this->wizardSections = array_values($this->wizardSections);
+
+        array_splice($this->wizardSections, $toIndex, 0, [$item]);
+        $this->wizardSections = array_values($this->wizardSections);
+
+        // Ajustar currentSlideIndex si es necesario
+        if ($this->currentSlideIndex === $fromIndex) {
+            $this->currentSlideIndex = $toIndex;
+        } else {
+            if ($fromIndex < $toIndex) {
+                if ($this->currentSlideIndex > $fromIndex && $this->currentSlideIndex <= $toIndex) {
+                    $this->currentSlideIndex--;
+                }
+            } else {
+                if ($this->currentSlideIndex >= $toIndex && $this->currentSlideIndex < $fromIndex) {
+                    $this->currentSlideIndex++;
+                }
+            }
+        }
+    }
+
+    /**
      * Descarta el overlay de resultado de generación.
      */
     public function dismissGenerationResult(): void

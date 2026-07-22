@@ -1,4 +1,4 @@
-<div x-cloak x-data="{ mode: localStorage.getItem('pevaluacions-view-mode') || 'table' }" x-init="() => { if (!localStorage.getItem('pevaluacions-view-mode')) localStorage.setItem('pevaluacions-view-mode', 'table') }" x-on:pevaluacions-view-mode-changed.window="mode = $event.detail.mode">
+<div x-cloak x-data="{ mode: localStorage.getItem('students-view-mode') || 'table' }" x-init="() => { if (!localStorage.getItem('students-view-mode')) localStorage.setItem('students-view-mode', 'table') }" x-on:students-view-mode-changed.window="mode = $event.detail.mode">
 
     {{-- Grid Mode --}}
     <div x-show="mode === 'grid'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
