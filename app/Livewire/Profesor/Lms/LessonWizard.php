@@ -2124,10 +2124,23 @@ PROMPT;
                 }
             }
 
-            // 5. Verificar longitud mínima por bloque (150 palabras)
-            foreach ($validBlocks as $block) {
+            // 5. Verificar longitud mínima por bloque (100+ palabras)
+            // Primero, fusionar bloques muy cortos (< 50 palabras) con el siguiente,
+            // ya que algunos modelos separan el título en negrita del contenido con
+            // una línea en blanco, creando bloques de solo 5-10 palabras.
+            $processedBlocks = [];
+            foreach ($validBlocks as $i => $block) {
                 $wordCount = preg_match_all('/\p{L}+/u', trim($block));
-                if ($wordCount < 150) {
+                if ($wordCount < 50 && isset($validBlocks[$i + 1])) {
+                    // Fusionar título separado con su contenido
+                    $validBlocks[$i + 1] = trim($block) . "\n\n" . trim($validBlocks[$i + 1]);
+                    continue;
+                }
+                $processedBlocks[] = $block;
+            }
+            foreach ($processedBlocks as $block) {
+                $wordCount = preg_match_all('/\p{L}+/u', trim($block));
+                if ($wordCount < 100) {
                     Log::warning('generateStep2Sections: content rejected — block too short', [
                         'words' => $wordCount,
                         'preview' => mb_substr(trim($block), 0, 100),
