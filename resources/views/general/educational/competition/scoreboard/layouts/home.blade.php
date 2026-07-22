@@ -1,4 +1,4 @@
-<html class="scroll-smooth">
+<html class="scroll-smooth" data-reverb="enabled">
 
 <head>
     <title>@yield('title')</title>
