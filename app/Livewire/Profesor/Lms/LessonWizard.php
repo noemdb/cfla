@@ -1099,8 +1099,10 @@ Estructura mínima:
 5. Párrafo de cierre
 
 Usa Markdown estándar: ## títulos, **negritas**, tablas | |, listas -, *cursivas*.
-NO uses HTML, NO uses ```, NO incluyas explicaciones.
-Responde SOLO con el contenido Markdown.
+⚠️ REGLA ESTRICTA — NO uses etiquetas HTML de ningún tipo (<h2>, <p>, <strong>,
+<ul>, <li>, <br>, etc.). El motor convierte el markdown a HTML automáticamente;
+si mezclas HTML con markdown, los ## quedan visibles y se rompe el contenido.
+Responde ÚNICAMENTE con markdown plano. NO uses ```, NO incluyas explicaciones.
 
 FONDOS: Si incluyes tablas o elementos con color, usa siempre fondos claros (blanco o gris muy claro). NUNCA fondos oscuros.
 PROMPT;
@@ -4695,7 +4697,7 @@ PROMPT;
 
             // ─── MATH: render con mathContent (KaTeX para LaTeX) ──────
             if ($type === 'MATH') {
-                $html = $this->renderContentBody($body);
+                $html = $this->renderContentBody($body, 'MATH');
                 return '<div class="' . $wrapperClass . '">'
                     . "\n"
                     . '<div x-data="mathContent()" data-math-content="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '">'
@@ -4706,7 +4708,7 @@ PROMPT;
             }
 
             // ─── TEXT / default: render sin mathContent ──────────────
-            $html = $this->renderContentBody($body);
+            $html = $this->renderContentBody($body, 'TEXT');
             return '<div class="' . $wrapperClass . '">'
                 . "\n"
                 . '<div class="prose max-w-none">'
@@ -4722,23 +4724,32 @@ PROMPT;
     /**
      * Renderiza el body de un bloque de contenido.
      *
-     * Si el body contiene etiquetas HTML (<) se renderiza raw.
-     * En caso contrario se asume Markdown y se convierte a HTML.
+     * Para TEXT: convierte Markdown a HTML primero (incluso si contiene
+     *           HTML mixto), luego sanitiza. Así los ## de markdown
+     *           nunca quedan visibles aunque el AI mezcle formatos.
+     * Para MATH: solo sanitiza, preservando LaTeX (\(...\) y $$...$$)
+     *            que el markdown rompería (subíndices con _).
      */
-    public function renderContentBody(?string $body): string
+    public function renderContentBody(?string $body, string $type = 'TEXT'): string
     {
         if (empty($body)) {
             return '';
         }
-        if (\Illuminate\Support\Str::contains($body, '<')) {
-            // Defense-in-depth: sanitizar HTML server-side antes de renderizar.
-            // El contenido viene del AI (OpenRouter) o del profesor — aunque
-            // confiable, un prompt malicioso podría inyectar HTML dañino.
-            // DOMPurify (client-side) es la defensa primaria; este sanitizador
-            // es la capa secundaria.
+
+        // MATH: body es HTML procesado con LaTeX — no convertir markdown
+        if ($type === 'MATH') {
             return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
         }
-        return \Illuminate\Support\Str::markdown($body);
+
+        // TEXT: siempre convertir markdown primero, luego sanitizar
+        $html = \Illuminate\Support\Str::markdown($body);
+        // Defense-in-depth: eliminar marcadores markdown ## residuales que CommonMark
+        // no procesa cuando están dentro de etiquetas HTML (ej: "<h2>## texto</h2>").
+        $html = preg_replace('/(?:^|(?<=>))#{1,6}\s+/m', '', $html);
+        if (\Illuminate\Support\Str::contains($html, '<')) {
+            return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($html);
+        }
+        return $html;
     }
 
     /**
