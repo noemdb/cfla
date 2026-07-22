@@ -46,17 +46,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Step2 generation models (used by generateStep2Sections)
+    | Structure/section generation models (used by generateStep2Sections)
     |--------------------------------------------------------------------------
     |
     | Specialized chain for generating full lesson structure (INICIO, DESARROLLO,
     | CIERRE). Primary model prioritized for quality, with 3 fallback levels.
     |
     */
-    'model_step2_primary'   => env('OPENROUTER_MODEL_STEP2_PRIMARY',   'anthropic/claude-sonnet-4'),
-    'model_step2_fallback1' => env('OPENROUTER_MODEL_STEP2_FALLBACK1', 'qwen/qwen3-32b'),
-    'model_step2_fallback2' => env('OPENROUTER_MODEL_STEP2_FALLBACK2', 'mistralai/mistral-large'),
-    'model_step2_fallback3' => env('OPENROUTER_MODEL_STEP2_FALLBACK3', 'inclusionai/ling-2.6-flash'),
+    'model_struc_section_primary'   => env('OPENROUTER_MODEL_STRUC_SECTION_PRIMARY',   'anthropic/claude-sonnet-4'),
+    'model_struc_section_fallback1' => env('OPENROUTER_MODEL_STRUC_SECTION_FALLBACK1', 'qwen/qwen3-32b'),
+    'model_struc_section_fallback2' => env('OPENROUTER_MODEL_STRUC_SECTION_FALLBACK2', 'mistralai/mistral-large'),
+    'model_struc_section_fallback3' => env('OPENROUTER_MODEL_STRUC_SECTION_FALLBACK3', 'inclusionai/ling-2.6-flash'),
 
     /*
     |--------------------------------------------------------------------------

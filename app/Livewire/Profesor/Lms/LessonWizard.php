@@ -2164,10 +2164,10 @@ PROMPT;
                 tokenBudget: 3500,
                 contentValidator: $contentValidator,
                 customChain: [
-                    ['model' => config('openrouter.model_step2_primary'),   'label' => 'Sonnet 4 primario'],
-                    ['model' => config('openrouter.model_step2_fallback1'), 'label' => 'Qwen 32B fallback 1'],
-                    ['model' => config('openrouter.model_step2_fallback2'), 'label' => 'Mistral Large fallback 2'],
-                    ['model' => config('openrouter.model_step2_fallback3'), 'label' => 'Ling 2.6 Flash fallback 3'],
+                    ['model' => config('openrouter.model_struc_section_primary'),   'label' => 'Sonnet 4 primario'],
+                    ['model' => config('openrouter.model_struc_section_fallback1'), 'label' => 'Qwen 32B fallback 1'],
+                    ['model' => config('openrouter.model_struc_section_fallback2'), 'label' => 'Mistral Large fallback 2'],
+                    ['model' => config('openrouter.model_struc_section_fallback3'), 'label' => 'Ling 2.6 Flash fallback 3'],
                 ],
             );
 
