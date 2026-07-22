@@ -1817,6 +1817,7 @@ PROMPT;
             if ($result['success']) {
                 $this->wizardSections[$sectionIndex]['contents'][0]['body']
                     = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($result['content']);
+                $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'MATH';
                 $this->dispatch('math-updated');
                 $this->notification()->success(
                     title: 'Matemáticas procesadas',
@@ -4692,12 +4693,24 @@ PROMPT;
                     . '</div>';
             }
 
-            // ─── TEXT / MATH / default: render con mathContent ─────────
+            // ─── MATH: render con mathContent (KaTeX para LaTeX) ──────
+            if ($type === 'MATH') {
+                $html = $this->renderContentBody($body);
+                return '<div class="' . $wrapperClass . '">'
+                    . "\n"
+                    . '<div x-data="mathContent()" data-math-content="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '">'
+                    . '<div wire:ignore><div x-ref="target"></div></div>'
+                    . '</div>'
+                    . "\n"
+                    . '</div>';
+            }
+
+            // ─── TEXT / default: render sin mathContent ──────────────
             $html = $this->renderContentBody($body);
             return '<div class="' . $wrapperClass . '">'
                 . "\n"
-                . '<div x-data="mathContent()" data-math-content="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '">'
-                . '<div wire:ignore><div x-ref="target"></div></div>'
+                . '<div class="prose max-w-none">'
+                . "\n" . $html . "\n"
                 . '</div>'
                 . "\n"
                 . '</div>';
