@@ -300,7 +300,7 @@
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $mermaidCode }}"
                                                  data-mermaid-delay
-                                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200 flex-1 min-h-0 flex flex-col mermaid-fill-height">
+                                                 class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex-1 min-h-0 flex flex-col mermaid-fill-height">
                                                 <div x-ref="target" class="w-full flex-1 min-h-0"></div>
                                             </div>
                                         @elseif(!empty(trim(strip_tags($bodyHtml))))
@@ -330,7 +330,7 @@
                                             @endphp
 
                                             @if($__tpl === 'concept')
-                                                <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-4 shadow-sm">
+                                                <div class="bg-transparent border-l-4 border-emerald-400 rounded-r-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💡</span>
                                                         <x-lms.math-text
@@ -339,7 +339,7 @@
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'list')
-                                                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                                                <div class="bg-transparent rounded-xl p-4 border border-slate-200/60">
                                                     <div class="flex items-center gap-2 mb-2">
                                                         <span class="text-lg leading-none">📋</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lista</span>
@@ -349,7 +349,7 @@
                                                         class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
                                                 </div>
                                             @elseif($__tpl === 'quote')
-                                                <div class="bg-amber-50/60 border-l-4 border-amber-400 rounded-r-xl p-4">
+                                                <div class="bg-transparent border-l-4 border-amber-400 rounded-r-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
                                                         <x-lms.math-text
@@ -358,7 +358,7 @@
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'question')
-                                                <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4">
+                                                <div class="bg-transparent border border-sky-200/60 rounded-xl p-4">
                                                     <div class="flex items-start gap-3">
                                                         <span class="text-xl leading-none mt-0.5 shrink-0">💭</span>
                                                         <x-lms.math-text
@@ -367,7 +367,7 @@
                                                     </div>
                                                 </div>
                                             @elseif($__tpl === 'activity')
-                                                <div class="bg-amber-50/40 border-2 border-dashed border-amber-300 rounded-xl p-4">
+                                                <div class="bg-transparent border-2 border-dashed border-amber-300/60 rounded-xl p-4">
                                                     <div class="flex items-center gap-2 mb-2">
                                                         <span class="text-lg leading-none">✏️</span>
                                                         <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600">Actividad</span>
@@ -377,7 +377,7 @@
                                                         class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
                                                 </div>
                                             @else
-                                                <div class="bg-gradient-to-br from-white to-stone-50/80 rounded-xl p-4 border border-stone-200/60">
+                                                <div class="bg-transparent rounded-xl p-4 border border-stone-200/60">
                                                     <x-lms.math-text
                                                         :content="$bodyHtml"
                                                         class="text-sm text-slate-700 leading-loose prose prose-sm max-w-none lms-content" />
@@ -395,7 +395,7 @@
                             @if($sectionEmbeds->count() > 0)
                                 <div class="space-y-2 pt-2">
                                     @foreach($sectionEmbeds as $embed)
-                                        <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
+                                        <div class="p-4 bg-transparent border border-fuchsia-200/60 rounded-lg html-embed-item">
                                             @if(!empty($embed['title']))
                                                 <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                             @endif
@@ -425,12 +425,12 @@
                                 <div class="border-t border-slate-200 pt-3 mt-2 space-y-2">
                                     @foreach($secResources as $res)
                                         @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
-                                            <div class="rounded-lg overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                            <div class="rounded-lg overflow-hidden border border-stone-200/60 bg-transparent resource-image-wrap">
                                                 <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
                                                      onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
-                                                     class="w-full h-auto max-h-80 object-contain bg-slate-50">
+                                                     class="w-full h-auto max-h-80 object-contain bg-transparent">
                                                 <div class="image-fallback hidden">
-                                                    <div class="flex items-center gap-3 p-3 bg-slate-100">
+                                                    <div class="flex items-center gap-3 p-3 bg-transparent">
                                                         <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
                                                             <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                                         </div>
@@ -440,7 +440,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-100">
+                                                <div class="flex items-center justify-between px-3 py-2 bg-transparent border-t border-stone-200/40">
                                                     <span class="text-xs text-slate-600 truncate">{{ $res['display_name'] }}</span>
                                                     <a href="{{ $res['media']['public_url'] }}" target="_blank"
                                                        class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
@@ -453,7 +453,7 @@
                                                 </div>
                                             </div>
                                         @else
-                                            <div class="flex items-center gap-3 p-3 bg-slate-100 rounded-lg border border-slate-200">
+                                            <div class="flex items-center gap-3 p-3 bg-transparent rounded-lg border border-stone-200/60">
                                                 <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
                                                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -479,7 +479,7 @@
                             @if(count($secLinks) > 0)
                                 <div class="space-y-2 pt-2">
                                     @foreach($secLinks as $link)
-                                        <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                        <div class="flex items-center gap-3 p-3 bg-transparent rounded-lg border border-blue-200/60">
                                             <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
                                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -530,7 +530,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach($unlinkedResources as $res)
                                     @if(str_starts_with($res['media']['mime_type'] ?? '', 'image/'))
-                                        <div class="rounded-lg overflow-hidden border border-slate-200 bg-white resource-image-wrap">
+                                        <div class="rounded-lg overflow-hidden border border-stone-200/60 bg-transparent resource-image-wrap">
                                             <img src="{{ $res['media']['public_url'] }}" alt="{{ $res['display_name'] }}"
                                                  onerror="this.closest('.resource-image-wrap')?.querySelector('.image-fallback')?.classList?.remove('hidden'); this.classList.add('hidden')"
                                                  class="w-full h-48 object-cover">
@@ -594,7 +594,7 @@
                             </h3>
                             <div class="space-y-2">
                                 @foreach($unlinkedLinks as $link)
-                                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                    <div class="flex items-center gap-3 p-3 bg-transparent rounded-lg border border-blue-200/60">
                                         <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                                             <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -622,7 +622,7 @@
                             </h3>
                             <div class="space-y-3">
                                 @foreach($unlinkedEmbeds as $embed)
-                                    <div class="p-4 bg-fuchsia-50 border border-fuchsia-100 rounded-lg html-embed-item">
+                                    <div class="p-4 bg-transparent border border-fuchsia-200/60 rounded-lg html-embed-item">
                                         @if(!empty($embed['title']))
                                             <h4 class="text-sm font-semibold text-fuchsia-800 mb-2">{{ $embed['title'] }}</h4>
                                         @endif
@@ -657,7 +657,7 @@
                                 </span>
                             </div> 
                             --}}
-                            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                            <div class="bg-transparent rounded-xl p-5 border border-stone-200/60">
                                 <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">
                                     @php
                                         $reviewHtml = $preview['review_questions'];

@@ -337,7 +337,7 @@ TEXT;
 
     public function goToStep(int $step): void
     {
-        $this->currentStep = max(1, min(4, $step));
+        $this->currentStep = max(1, min(5, $step));
         // Al volver al wizard desde el estado "guardado", ocultar el mensaje de éxito
         $this->saved = false;
     }
