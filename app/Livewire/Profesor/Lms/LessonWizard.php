@@ -2067,8 +2067,8 @@ PROMPT;
             }
 
             // 2. Verificar idioma español (heurística: acentos + ñ)
-            $espanolChars = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/', '', $content));
-            $totalAlpha = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/', '', $content));
+            $espanolChars = mb_strlen(preg_replace('/[^áéíóúüñÁÉÍÓÚÜÑ]/u', '', $content));
+            $totalAlpha = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/u', '', $content));
             if ($totalAlpha > 0 && ($espanolChars / $totalAlpha) < 0.15) {
                 Log::warning('generateStep2Sections: content rejected — not Spanish');
                 return false;
@@ -2076,7 +2076,7 @@ PROMPT;
 
             // 3. Detectar contenido genérico
             $genericPatterns = [
-                '/superhéroe/i', '/superhéroe/i', '/identidad secreta/i',
+                '/superhéroe/i', '/identidad secreta/i',
                 '/viaje imaginario/i', '/tierra mágica/i',
                 '/mundo fantástico/i', '/poderes especiales/i',
             ];
@@ -2105,7 +2105,7 @@ PROMPT;
 
             // 5. Verificar longitud mínima por bloque (150 palabras)
             foreach ($validBlocks as $block) {
-                $wordCount = str_word_count(trim($block));
+                $wordCount = preg_match_all('/\p{L}+/u', trim($block));
                 if ($wordCount < 150) {
                     Log::warning('generateStep2Sections: content rejected — block too short', [
                         'words' => $wordCount,
