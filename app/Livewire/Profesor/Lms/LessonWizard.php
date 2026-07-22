@@ -34,6 +34,27 @@ class LessonWizard extends Component
 {
     use WithPagination, WithFileUploads, WireUiActions;
 
+    // ─── FALLBACK REINFORCEMENT ─────────────────────────────────
+    private const FALLBACK_REINFORCEMENT = <<<'TEXT'
+
+⚠️ CORRECCIÓN — Intento anterior no siguió las instrucciones.
+
+Reglas críticas:
+1. Todo en ESPAÑOL académico. NO uses inglés.
+2. Usa SOLO el contexto de la actividad — nada de superhéroes, aventuras fantásticas, identidades secretas ni temas genéricos.
+3. Estructura exacta:
+   //INICIO
+   ...
+   //DESARROLLO
+   Bloque 1
+   ...
+   (mínimo 5 bloques separados por línea en blanco)
+   //CIERRE
+   ...
+4. Sin meta-comentarios, explicaciones ni introducciones.
+5. El ejemplo en las instrucciones es solo para mostrar el FORMATO — usa el contexto real de la actividad.
+TEXT;
+
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
     public string $mode = 'list';
     public string $viewMode = 'grid';
@@ -4091,28 +4112,12 @@ PROMPT;
         $llm = app(OpenRouterService::class);
         $lastError = null;
 
-        // Instrucciones adicionales para modelos de respaldo (se añaden al userPrompt
-        // cuando el modelo primario falló, para corregir desviaciones frecuentes).
-        $fallbackReinforcement = "\n\n⚠️ *** CORRECCIÓN OBLIGATORIA — INTENTO DE RESPALDO *** ⚠️\n\n"
-            . "El modelo de IA anterior NO siguió las instrucciones correctamente. "
-            . "Ahora TÚ debes generar el contenido.\n\n"
-            . "CRÍTICO — Cúmplelo exactamente:\n"
-            . "1. El contenido debe estar en ESPAÑOL. NO uses inglés.\n"
-            . "2. NO uses temas genéricos como superhéroes, identidades secretas, "
-            . "viajes imaginarios, narrativas creativas ni aventuras fantásticas.\n"
-            . "3. El contenido debe ser ACADÉMICO y específico para la actividad "
-            . "escolar venezolana descrita en el contexto más arriba.\n"
-            . "4. Sigue EXACTAMENTE la estructura:\n"
-            . "   //INICIO\n   ...\n   //DESARROLLO\n   Bloque 1\n   ...\n\n"
-            . "   Bloque 2\n   ...\n   (mínimo 5 bloques separados por línea en blanco)\n"
-            . "   //CIERRE\n   ...\n"
-            . "5. NO agregues meta-comentarios, explicaciones ni introducciones antes del formato.\n"
-            . "6. El ejemplo en las instrucciones anteriores es solo para mostrar el FORMATO, "
-            . "NO uses su tema (célula) ni inventes otro genérico. Usa el contexto real de la actividad.\n";
+        // Instrucciones adicionales para modelos de respaldo. Se añaden limpias
+        // en cada intento (sin acumulación) para reforzar las reglas.
 
         foreach ($modelChain as $i => $attempt) {
-            // Para modelos de respaldo (i > 0), reforzar instrucciones
-            $attemptUserPrompt = $i > 0 ? $userPrompt . $fallbackReinforcement : $userPrompt;
+            // Reconstruir prompt fresco con refuerzo (sin acumulación entre intentos)
+            $attemptUserPrompt = $i > 0 ? $userPrompt . self::FALLBACK_REINFORCEMENT : $userPrompt;
 
             $attemptOverrides = array_merge($overrides, [
                 'model'   => $attempt['model'],
