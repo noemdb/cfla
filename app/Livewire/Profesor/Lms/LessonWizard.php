@@ -2066,11 +2066,32 @@ PROMPT;
                 return false;
             }
 
-            // 2. Verificar idioma español (heurística: acentos + ñ)
+            // 2. Verificar idioma español (heurística combinada)
+            // Buscar palabras funcionales españolas que aparecen en casi todo texto en español.
+            // Esto es más fiable que el ratio de acentos, porque el español formal puede tener
+            // pocos acentos (p.ej. "Las fracciones en la vida cotidiana" = 0 acentos).
+            $spanishWords = [
+                ' de ', ' la ', ' en ', ' el ', ' que ', ' con ',
+                ' los ', ' las ', ' del ', ' por ', ' para ', ' se ',
+                ' su ', ' una ', ' más ', ' entre ', ' esta ', ' son ',
+                ' cada ', ' como ', ' sobre ', ' esta ', ' mismo ',
+            ];
+            $foundWords = 0;
+            foreach ($spanishWords as $word) {
+                if (mb_stripos($content, $word) !== false) {
+                    $foundWords++;
+                }
+            }
+            // Señal secundaria: ratio de caracteres acentuados
             $espanolChars = mb_strlen(preg_replace('/[^áéíóúüñÁÉÍÓÚÜÑ]/u', '', $content));
             $totalAlpha = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/u', '', $content));
-            if ($totalAlpha > 0 && ($espanolChars / $totalAlpha) < 0.15) {
-                Log::warning('generateStep2Sections: content rejected — not Spanish');
+            $accentRatio = $totalAlpha > 0 ? $espanolChars / $totalAlpha : 0;
+            // Se rechaza solo si NO encuentra palabras funcionales Y el ratio de acentos es mínimo
+            if ($foundWords < 2 && $accentRatio < 0.01) {
+                Log::warning('generateStep2Sections: content rejected — not Spanish', [
+                    'function_words' => $foundWords,
+                    'accent_ratio' => round($accentRatio, 4),
+                ]);
                 return false;
             }
 
