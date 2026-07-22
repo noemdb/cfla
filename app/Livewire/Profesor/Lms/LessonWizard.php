@@ -4680,6 +4680,18 @@ PROMPT;
                     . '</div>';
             }
 
+            // ─── HTML: contenido semántico estructurado, render raw — sin mathContent ──
+            if ($type === 'HTML') {
+                $sanitized = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
+                return '<div class="' . $wrapperClass . '">'
+                    . "\n"
+                    . '<div class="prose max-w-none">'
+                    . "\n" . $sanitized . "\n"
+                    . '</div>'
+                    . "\n"
+                    . '</div>';
+            }
+
             // ─── TEXT / MATH / default: render con mathContent ─────────
             $html = $this->renderContentBody($body);
             return '<div class="' . $wrapperClass . '">'
