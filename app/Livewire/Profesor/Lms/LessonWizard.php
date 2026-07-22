@@ -1922,6 +1922,7 @@ PROMPT;
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
         $sectionName = $pevaluacion?->seccion?->name ?? '—';
         $lessonTitle = $this->lessonTitle ?: $activity->topic ?? '';
+        $lessonDescription = $this->lessonDescription;
 
         $activityContext = collect([
             'Tema generador'       => $activity->topic,
@@ -1952,51 +1953,81 @@ Debes generar EXACTAMENTE el formato que se indica. NO expliques lo que vas a ha
 
 Estructura obligatoria: //INICIO, luego //DESARROLLO con MÍNIMO 5 bloques, luego //CIERRE (total mínimo 7 secciones).
 
-Ejemplo de formato (cambia el contenido, no la estructura):
-
-//INICIO
-La célula y sus partes fundamentales
-En esta lección exploraremos la célula como unidad fundamental de todos los seres vivos. Conoceremos sus partes principales y las funciones específicas que cumple cada una para mantener la vida. A través de ejemplos cotidianos y actividades prácticas entenderemos por qué es indispensable conocer su estructura y funcionamiento. La célula representa el nivel más básico de organización biológica y su estudio nos permite comprender procesos vitales esenciales como la nutrición, el crecimiento y la reproducción. Cada ser vivo, desde una bacteria hasta un ser humano complejo, está formado por células que trabajan en conjunto para mantener el organismo en equilibrio. Abordaremos también la diversidad celular existente en la naturaleza y cómo las características de cada tipo celular determinan las funciones específicas de los tejidos y órganos que conforman un ser vivo multicelular.
-
-//DESARROLLO
-¿Qué es una célula y por qué es tan importante?
-Definiremos el concepto de célula y su importancia fundamental en el campo de la biología moderna. La célula es reconocida como la unidad estructural, funcional y de origen de todo ser vivo, constituyendo el bloque básico de construcción de la vida en nuestro planeta. Todos los organismos vivos están compuestos por células, ya sean organismos unicelulares como las bacterias y los protozoos, o multicelulares complejos como las plantas y los animales. Cada célula individual realiza funciones vitales esenciales como la nutrición, mediante la cual obtiene energía y materiales del entorno; la relación, que le permite detectar y responder a estímulos del medio ambiente; y la reproducción, que garantiza la continuidad de la vida a través de la división celular. El estudio de la célula ha revolucionado nuestra comprensión de la biología humana, la medicina y la biotecnología, permitiendo avances significativos en el tratamiento de enfermedades y en el desarrollo de nuevas terapias.
-
-Partes fundamentales de la célula
-Identificaremos y describiremos los componentes celulares básicos que comparten la mayoría de las células. La membrana plasmática es una estructura delgada que rodea la célula y regula el intercambio de sustancias entre el interior y el exterior celular, actuando como una barrera selectiva que permite el paso de nutrientes y la eliminación de desechos. El citoplasma es una sustancia gelatinosa que ocupa el espacio interior de la célula y contiene los orgánulos celulares, cada uno especializado en funciones particulares como la producción de energía o la síntesis de proteínas. El núcleo es el centro de control de la célula que almacena el material genético en forma de ADN, dirigiendo todas las actividades celulares y transmitiendo la información hereditaria a las células hijas durante la división. Cada una de estas partes cumple una función específica e indispensable para el funcionamiento adecuado del organismo en su conjunto.
-
-Célula animal versus célula vegetal
-Realizaremos una comparación detallada entre las características distintivas de la célula animal y la célula vegetal. Ambos tipos celulares comparten estructuras comunes como el núcleo, la membrana plasmática, las mitocondrias y el retículo endoplasmático, pero presentan diferencias fundamentales que determinan sus funciones específicas. La célula vegetal posee una pared celular rígida compuesta principalmente de celulosa que proporciona soporte estructural y protección, además de cloroplastos que contienen clorofila y permiten realizar la fotosíntesis, proceso mediante el cual las plantas convierten la energía solar en energía química. Las células vegetales también cuentan con una gran vacuola central que almacena agua y nutrientes, manteniendo la turgencia y presión interna necesaria para la estabilidad de la planta. En contraste, las células animales carecen de pared celular y cloroplastos, poseen vacuolas más pequeñas y múltiples, y presentan estructuras especializadas como los lisosomas y los centriolos que participan en la digestión celular y la división celular respectivamente.
-
-Funciones vitales que realiza la célula
-Explicaremos en detalle cómo las células llevan a cabo las tres funciones vitales esenciales para mantener la vida. La nutrición celular puede ser autótrofa, cuando la célula produce su propio alimento mediante fotosíntesis o quimiosíntesis, o heterótrofa, cuando obtiene nutrientes del medio externo mediante procesos de ingestión y digestión celular. La función de relación permite a las células detectar cambios en su entorno a través de receptores especializados en la membrana y responder adecuadamente mediante movimientos, secreciones o cambios metabólicos que garantizan su supervivencia y adaptación al medio. La reproducción celular puede ser asexual, mediante división simple como la fisión binaria en bacterias o la mitosis en células eucariotas, produciendo células genéticamente idénticas, o sexual, mediante la meiosis que genera células sexuales con variabilidad genética. Estos procesos vitales están finamente regulados por mecanismos moleculares complejos que aseguran el correcto funcionamiento del organismo.
-
-Aplicaciones del estudio celular en la vida cotidiana
-Reflexionaremos sobre la importancia práctica del conocimiento celular en diversos campos de la ciencia y la tecnología moderna. El estudio de las células ha permitido avances revolucionarios en la medicina, incluyendo el desarrollo de vacunas, la comprensión de enfermedades como el cáncer a nivel molecular y el desarrollo de terapias celulares y génicas que ofrecen nuevas esperanzas para enfermedades antes consideradas incurables. En la biotecnología, el conocimiento celular ha facilitado la producción de medicamentos mediante cultivos celulares, la creación de organismos genéticamente modificados para mejorar la producción de alimentos y el desarrollo de técnicas de clonación y edición genética como CRISPR. La investigación celular continúa abriendo nuevas fronteras en la ciencia, desde la medicina regenerativa con células madre hasta el desarrollo de biosensores y tejidos artificiales, demostrando que el estudio de la célula sigue siendo fundamental para el progreso humano.
-
-Importancia de la célula en los ecosistemas
-Analizaremos cómo las células, organizadas en tejidos y organismos, contribuyen al funcionamiento de los ecosistemas y al equilibrio de la vida en la Tierra. Los organismos unicelulares como las bacterias y las algas microscópicas realizan funciones ecológicas esenciales como la fijación de nitrógeno, la descomposición de materia orgánica y la producción de oxígeno mediante fotosíntesis, procesos que mantienen los ciclos biogeoquímicos fundamentales para la vida. Las células especializadas de organismos multicelulares forman tejidos con funciones específicas que permiten a las plantas realizar fotosíntesis, a los animales moverse y responder a su entorno, y a los hongos descomponer materia orgánica reciclando nutrientes.
-
-//CIERRE
-Resumen y reflexión final sobre la célula
-Hemos aprendido que la célula es la unidad básica de la vida, con partes y funciones específicas que trabajan de manera coordinada. Comparamos las similitudes y diferencias entre células animales y vegetales, entendimos los procesos vitales que realizan y exploramos la importancia práctica del conocimiento celular en la medicina y la biotecnología. Estos conocimientos son fundamentales para comprender la biología y sus aplicaciones en la vida diaria. La célula nos recuerda que la vida, en su nivel más fundamental, comparte principios comunes que unen a todos los seres vivos, desde el organismo más simple hasta el más complejo, en un mismo árbol de la vida.
-
 Reglas estrictas:
 - MÍNIMO 5 bloques en //DESARROLLO (más si el contenido lo requiere)
 - Cada bloque de DESARROLLO separado por una línea en blanco
-- Títulos cortos (máx 10 palabras), lenguaje acorde al grado
-- Cada contenido debe tener AL MENOS 200 palabras (aproximadamente 3-5 párrafos por bloque)
-- NO uses la palabra TÍTULO ni CONTENIDO como etiquetas dentro del contenido
-- NO incluyas explicaciones, introducciones ni comentarios — solo el formato indicado
-- Alineado con los referentes normativos y al contexto de la actividad
+- Primera línea de cada bloque = título (máx 10 palabras), lenguaje acorde al grado
+- Cada bloque de DESARROLLO: mínimo 150 palabras (3-5 párrafos)
+- SIN meta-comentarios, explicaciones ni introducciones antes del formato
+- Alineado con los referentes normativos y el contexto de la actividad
+- NO uses temas genéricos — usa EXACTAMENTE el contexto proporcionado
+
+--- EJEMPLO 1 (Matemáticas - 5to grado) ---
+
+//INICIO
+Las fracciones en la vida cotidiana
+En nuestra vida diaria nos encontramos constantemente con situaciones que requieren el uso de fracciones, aunque a veces no nos demos cuenta. Cuando compartimos una pizza entre amigos, medimos ingredientes para una receta o calculamos descuentos en una tienda, estamos aplicando conceptos fraccionarios de manera natural. En esta lección exploraremos qué son las fracciones, cómo se representan y cómo podemos operar con ellas para resolver problemas prácticos. Las fracciones son una herramienta matemática fundamental que nos permite expresar partes de un todo, y su dominio es esencial para avanzar en el estudio de las matemáticas y sus aplicaciones en la ciencia, la tecnología y la vida cotidiana.
+
+//DESARROLLO
+¿Qué es una fracción?
+Una fracción representa una o varias partes iguales de un todo que ha sido dividido en partes iguales. Se compone de dos números separados por una línea horizontal: el numerador, que indica cuántas partes tomamos, y el denominador, que indica en cuántas partes iguales se divide el todo. Por ejemplo, si dividimos una torta en 8 partes iguales y tomamos 3, la fracción que representa esta situación es 3/8, donde 3 es el numerador y 8 es el denominador. Las fracciones nos permiten expresar cantidades que no son enteras y son fundamentales para la medición, la proporción y el cálculo en innumerables contextos.
+
+Tipos de fracciones
+Las fracciones se clasifican en tres tipos principales según la relación entre numerador y denominador. Las fracciones propias son aquellas donde el numerador es menor que el denominador, como 2/5 o 3/4, y representan cantidades menores que la unidad. Las fracciones impropias tienen el numerador mayor o igual que el denominador, como 7/4 o 5/3, y representan cantidades mayores o iguales que la unidad. Las fracciones mixtas combinan un número entero con una fracción propia, como 1 1/2, y son especialmente útiles en contextos de medición y cocina.
+
+Fracciones equivalentes
+Dos fracciones son equivalentes cuando representan la misma cantidad, aunque tengan diferentes numeradores y denominadores. Por ejemplo, 1/2, 2/4, 3/6 y 4/8 son todas fracciones equivalentes porque representan la mitad de un todo. Para obtener una fracción equivalente, multiplicamos o dividimos tanto el numerador como el denominador por el mismo número. Este concepto es fundamental para comparar fracciones, realizar operaciones aritméticas y simplificar resultados.
+
+Suma y resta de fracciones con igual denominador
+Cuando dos fracciones tienen el mismo denominador, sumarlas o restarlas es muy sencillo: simplemente sumamos o restamos los numeradores y mantenemos el mismo denominador. Por ejemplo, 2/7 + 3/7 = 5/7, y 5/8 - 2/8 = 3/8. Es importante recordar que el resultado debe simplificarse cuando sea posible. Este proceso es similar a contar partes del mismo tipo: si tenemos 2 séptimos y agregamos 3 séptimos, obtenemos 5 séptimos.
+
+Multiplicación de fracciones
+Para multiplicar fracciones, multiplicamos los numeradores entre sí y los denominadores entre sí, obteniendo una nueva fracción. Por ejemplo, 2/3 × 4/5 = 8/15. A diferencia de la suma y la resta, no es necesario que las fracciones tengan el mismo denominador, lo que hace que la multiplicación sea un proceso más directo. La multiplicación de fracciones tiene aplicaciones prácticas como calcular la fracción de una fracción, determinar proporciones en recetas de cocina y resolver problemas de áreas en geometría.
+
+//CIERRE
+Resumen y aplicación de las fracciones
+A lo largo de esta lección hemos aprendido que las fracciones son una herramienta matemática esencial para representar partes de un todo. Hemos explorado los diferentes tipos de fracciones —propias, impropias y mixtas— y comprendido cómo identificarlas y utilizarlas. Estudiamos el concepto de fracciones equivalentes y aprendimos a sumar, restar y multiplicar fracciones con confianza. Estos conocimientos no solo son fundamentales para avanzar en matemáticas, sino que también tienen aplicaciones directas en situaciones cotidianas como cocinar, medir, compartir y calcular descuentos. La práctica constante nos ayudará a dominar estos conceptos y a reconocer las fracciones como una parte natural de nuestro entorno numérico.
+
+--- EJEMPLO 2 (Historia - 3er año) ---
+
+//INICIO
+La independencia de Venezuela y sus protagonistas
+El proceso de independencia de Venezuela representa uno de los capítulos más trascendentales de nuestra historia nacional, un período de profundas transformaciones políticas, sociales y económicas que marcaron el nacimiento de nuestra república. En esta lección recorreremos los acontecimientos fundamentales que llevaron a la emancipación del dominio español, conoceremos a los principales líderes que protagonizaron esta gesta heroica y comprenderemos las ideas que impulsaron el movimiento independentista. La independencia no fue un hecho aislado sino un proceso complejo que involucró múltiples factores internos y externos, desde las reformas borbónicas hasta la invasión napoleónica a España, pasando por las desigualdades sociales del sistema colonial.
+
+//DESARROLLO
+Causas de la independencia
+Las causas de la independencia venezolana fueron múltiples y estuvieron interconectadas. Entre las causas externas destacan la Ilustración europea, cuyas ideas de libertad, igualdad y soberanía popular inspiraron a los criollos ilustrados, y la invasión de Napoleón a España en 1808, que generó un vacío de poder en las colonias americanas. Las causas internas incluyen el descontento de los criollos por la exclusión política y las restricciones económicas impuestas por la Corona española, así como las desigualdades sociales del sistema de castas colonial. La conjunción de estos factores creó el ambiente propicio para el inicio del proceso independentista.
+
+Primera República
+La Primera República se estableció el 5 de julio de 1811 con la firma del Acta de Independencia, convirtiendo a Venezuela en la primera colonia hispanoamericana en declarar su independencia. Este período estuvo marcado por intensos debates entre independentistas y realistas, la redacción de la primera constitución del país y los primeros enfrentamientos militares. Sin embargo, la República cayó en 1812 debido a diversos factores: el terremoto de Caracas que afectó principalmente las zonas republicanas, la falta de recursos militares, las divisiones internas entre los líderes patriotas y la hábil campaña del jefe realista Domingo de Monteverde.
+
+La Campaña Admirable
+La Campaña Admirable, liderada por Simón Bolívar en 1813, fue una de las operaciones militares más brillantes de la guerra de independencia. Bolívar partió desde Cúcuta con un ejército relativamente pequeño y en apenas seis meses logró liberar gran parte del territorio venezolano, obteniendo victorias decisivas en batallas como Niquitao, Barinas y Taguanes. El 6 de agosto de 1813, Bolívar entró triunfante en Caracas, donde recibió el título de Libertador. Esta campaña demostró el genio militar de Bolívar y su capacidad para movilizar y motivar a las tropas.
+
+La Guerra a Muerte
+El decreto de Guerra a Muerte, promulgado por Bolívar el 15 de junio de 1813 en Trujillo, fue una estrategia militar y política que radicalizó el conflicto. Este decreto establecía que todo español que no apoyara activamente la causa patriota sería ejecutado, mientras que los americanos serían perdonados incluso si apoyaban a los realistas. Aunque permitió a Bolívar ganar apoyo popular y debilitar la resistencia realista, también generó un ciclo de violencia que endureció el conflicto y tuvo consecuencias humanitarias devastadoras en ambos bandos.
+
+La Batalla de Carabobo
+La Batalla de Carabobo, librada el 24 de junio de 1821, fue el enfrentamiento militar más importante de la guerra de independencia venezolana. El ejército patriota, comandado por Simón Bolívar y con la participación crucial del General José Antonio Páez y sus lanceros llaneros, derrotó decisivamente a las fuerzas realistas del General Miguel de la Torre. La batalla aseguró la independencia de Venezuela y abrió el camino para la liberación de Ecuador, Perú y Bolivia. La victoria en Carabobo representó la culminación de años de lucha y sacrificio.
+
+El Congreso de Angostura
+El Congreso de Angostura, instalado por Bolívar el 15 de febrero de 1819, fue un evento político fundamental en el proceso independentista. En su discurso inaugural, Bolívar presentó su visión para la organización política de las nuevas repúblicas, incluyendo la creación de la Gran Colombia y propuestas constitucionales que reflejaban sus ideas sobre el poder ejecutivo fuerte, la división de poderes y la educación popular. Este congreso sentó las bases institucionales para la creación de la República de Colombia, demostrando que la independencia no solo era un proyecto militar sino también político y constitucional.
+
+//CIERRE
+Legado de la independencia
+El proceso de independencia de Venezuela nos legó no solo la libertad política sino también un conjunto de ideales y valores que siguen siendo relevantes hoy. La gesta independentista nos enseñó que la unidad y la determinación pueden superar obstáculos aparentemente insuperables. Los líderes de la independencia nos dejaron un ejemplo de compromiso con la libertad, la justicia y la soberanía nacional que continúa inspirando a las nuevas generaciones. Comprender este proceso histórico es esencial para valorar nuestra identidad nacional y para enfrentar los desafíos del presente con la misma determinación que nuestros próceres.
+
+--- AHORA GENERA LA LECCIÓN PARA EL CONTEXTO PROPORCIONADO ---
 PROMPT;
 
         $userPrompt = <<<PROMPT
 ### Contexto
 
-**Curso:** {$lessonTitle} · {$gradeName} · {$subjectName} · Sec. {$sectionName}
+**Lección:** {$lessonTitle}
+**Descripción:** {$lessonDescription}
+**Curso:** {$gradeName} · {$subjectName} · Sec. {$sectionName}
 
-**Actividad pedagogica:**
+**Actividad pedagógica:**
 {$activityContext}
 
 **Indicadores de logro:**
@@ -2005,40 +2036,102 @@ PROMPT;
 **Referentes normativos:**
 {$referentsText}
 
-Genera estructura completa leccion con //INICIO, minimo 5 bloques en //DESARROLLO y //CIERRE. Sin explicaciones ni meta-comentarios.
+Genera estructura completa con //INICIO, mínimo 5 bloques en //DESARROLLO y //CIERRE. Sin explicaciones ni meta-comentarios.
 PROMPT;
 
-        // ─── Llamar al servicio con compactación ───────────────
+        // ─── Validación de contenido mejorada ───────────────
+        $contentValidator = function (string $content): bool {
+            // 1. Debe contener los tres marcadores estructurales
+            $hasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
+            $hasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
+            $hasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
+
+            if (!($hasInicio && $hasDesarrollo && $hasCierre)) {
+                return false;
+            }
+
+            // Extraer contenido entre //DESARROLLO y //CIERRE
+            $devMatch = null;
+            preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $devMatch);
+
+            if (empty($devMatch[1])) {
+                return false;
+            }
+
+            $blocks = preg_split('/\n\s*\n/', trim($devMatch[1]));
+            $validBlocks = array_filter($blocks, fn(string $b): bool => !empty(trim($b)));
+
+            // Mínimo 5 bloques en DESARROLLO
+            if (count($validBlocks) < 5) {
+                return false;
+            }
+
+            // 2. Verificar idioma español (heurística: acentos + ñ)
+            $espanolChars = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]/', '', $content));
+            $totalAlpha = mb_strlen(preg_replace('/[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]/', '', $content));
+            if ($totalAlpha > 0 && ($espanolChars / $totalAlpha) < 0.15) {
+                Log::warning('generateStep2Sections: content rejected — not Spanish');
+                return false;
+            }
+
+            // 3. Detectar contenido genérico
+            $genericPatterns = [
+                '/superhéroe/i', '/superhéroe/i', '/identidad secreta/i',
+                '/viaje imaginario/i', '/tierra mágica/i',
+                '/mundo fantástico/i', '/poderes especiales/i',
+            ];
+            foreach ($genericPatterns as $pattern) {
+                if (preg_match($pattern, $content)) {
+                    Log::warning('generateStep2Sections: content rejected — generic theme detected', [
+                        'pattern' => $pattern,
+                    ]);
+                    return false;
+                }
+            }
+
+            // 4. Verificar títulos coherentes (sin placeholders)
+            $titlePlaceholders = ['/^título$/im', '/^contenido$/im', '/^título del bloque$/im'];
+            foreach ($validBlocks as $block) {
+                $firstLine = trim(explode("\n", trim($block))[0]);
+                foreach ($titlePlaceholders as $placeholder) {
+                    if (preg_match($placeholder, $firstLine)) {
+                        Log::warning('generateStep2Sections: content rejected — placeholder title', [
+                            'title' => $firstLine,
+                        ]);
+                        return false;
+                    }
+                }
+            }
+
+            // 5. Verificar longitud mínima por bloque (150 palabras)
+            foreach ($validBlocks as $block) {
+                $wordCount = str_word_count(trim($block));
+                if ($wordCount < 150) {
+                    Log::warning('generateStep2Sections: content rejected — block too short', [
+                        'words' => $wordCount,
+                        'preview' => mb_substr(trim($block), 0, 100),
+                    ]);
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        // ─── Llamar al servicio con cadena dedicada ──────────
         try {
             $result = $this->askWithCompaction(
                 systemPrompt: $systemPrompt,
                 userPrompt: $userPrompt,
                 overrides: ['max_tokens' => 4096, 'timeout' => 180],
-                contentValidator: function (string $content): bool {
-                    // Debe contener los tres marcadores estructurales
-                    $hasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
-                    $hasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
-                    $hasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
-
-                    if (!($hasInicio && $hasDesarrollo && $hasCierre)) {
-                        return false;
-                    }
-
-                    // Extraer el contenido entre //DESARROLLO y //CIERRE
-                    $devMatch = null;
-                    preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $devMatch);
-
-                    if (empty($devMatch[1])) {
-                        return false;
-                    }
-
-                    // Los bloques se separan por una línea en blanco
-                    $blocks = preg_split('/\n\s*\n/', trim($devMatch[1]));
-                    $validBlocks = array_filter($blocks, fn(string $b): bool => !empty(trim($b)));
-
-                    // Mínimo 5 bloques en DESARROLLO (prompt lo exige)
-                    return count($validBlocks) >= 5;
-                },
+                tokenBudget: 3500,
+                contentValidator: $contentValidator,
+                customChain: [
+                    ['model' => config('openrouter.model_step2_primary'),   'label' => 'Sonnet 4 primario'],
+                    ['model' => config('openrouter.model_step2_fallback1'), 'label' => 'Qwen 32B fallback 1'],
+                    ['model' => config('openrouter.model_step2_fallback2'), 'label' => 'Mistral Large fallback 2'],
+                    ['model' => config('openrouter.model_step2_fallback3'), 'label' => 'Ling 2.6 Flash fallback 3'],
+                ],
             );
 
             if (!$result['success']) {
