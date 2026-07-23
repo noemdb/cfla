@@ -2,12 +2,10 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
 class LessonScheduledForApproval extends Notification
 {
-    use Queueable;
 
     public function __construct(
         private int $activityId,

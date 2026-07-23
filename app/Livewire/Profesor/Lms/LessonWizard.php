@@ -3710,7 +3710,7 @@ PROMPT;
             auth()->id()
         );
 
-        LmsActivityLog::record($activityId, auth()->id(), 'PUBLISH');
+        LmsActivityLog::record($activityId, auth()->id(), $this->isCurrentUserPlanner() ? 'PUBLISH' : 'SCHEDULE');
 
         // Si el usuario es profesor (no planner), notificar a planning
         if (!$this->isCurrentUserPlanner()) {
