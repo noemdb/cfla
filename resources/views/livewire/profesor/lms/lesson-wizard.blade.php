@@ -3646,21 +3646,7 @@ Cómo...?"
                                 </div>
 
                                 <p class="text-[11px] text-amber-400/70 leading-relaxed">
-                                    @auth
-                                        @if(auth()->user()->isPlanner)
-                                            @if(blank($publishAt))
-                                                Al <strong class="text-amber-300">guardar</strong> sin fecha, la lección quedará como <strong class="text-slate-400">borrador</strong> y no será visible para los estudiantes.
-                                            @else
-                                                Al <strong class="text-amber-300">programar</strong>, la lección se programará para el <strong class="text-cyan-400">{{ \Carbon\Carbon::parse($publishAt)->format('d/m/Y H:i') }}</strong> y quedará <strong class="text-amber-300">pendiente de aprobación</strong>.
-                                            @endif
-                                        @else
-                                            @if(blank($publishAt))
-                                                Al programar con una fecha, la lección quedará <strong class="text-amber-300">pendiente de aprobación</strong> por Planificación.
-                                            @else
-                                                La lección se programará para el <strong class="text-cyan-400">{{ \Carbon\Carbon::parse($publishAt)->format('d/m/Y H:i') }}</strong> y quedará <strong class="text-amber-300">pendiente de aprobación</strong> por Planificación.
-                                            @endif
-                                        @endif
-                                    @endauth
+                                    Al <strong class="text-amber-300">guardar</strong>, se genera la notificación para la aprobación / publicación.
                                     Si aún no está lista, usa el botón flotante <strong class="text-blue-400">Guardar</strong> para mantenerla en borrador.
                                 </p>
                             </div>
