@@ -4076,7 +4076,7 @@ Cómo...?"
                         <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Pendiente de aprobación</span>
+                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Pendiente de aprobación@if(!$this->saved) · Sin guardar@endif</span>
                     </div>
                 @else
                     <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-600/20 border border-slate-500/20 shadow-lg">
