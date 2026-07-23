@@ -2084,7 +2084,7 @@
                                                  @dragover.prevent="dragOver({{ $sIdx2 }})"
                                                  @dragleave.prevent="if (dragOverIndex === {{ $sIdx2 }}) dragOverIndex = null"
                                                  @drop.prevent="endDrag()">
-                                                <button @click="sidebarCompact = false; $wire.call('goToSlide', {{ $sIdx2 }})"
+                                                <button wire:click="goToSlide({{ $sIdx2 }})"
                                                         draggable="true"
                                                         @dragstart="startDrag({{ $sIdx2 }})"
                                                         @dragend="cancelDrag()"

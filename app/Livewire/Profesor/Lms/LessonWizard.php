@@ -350,11 +350,6 @@ TEXT;
     {
         $max = max(0, count($this->wizardSections) - 1);
         $this->currentSlideIndex = max(0, min($max, $index));
-
-        if ($this->sidebarCompact) {
-            $this->sidebarCompact = false;
-            session(['lms_sidebar_compact' => false]);
-        }
     }
 
     public function toggleSidebar(): void
