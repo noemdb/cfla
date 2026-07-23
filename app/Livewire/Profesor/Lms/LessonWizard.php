@@ -1596,6 +1596,15 @@ Reglas:
 6. Sin scripts externos. Sin wrappers markdown. Solo HTML puro.
 7. El diagrama debe reflejar fielmente el contenido pedag├│gico.
 
+
+REQUISITO ESTRICTO — TEXTO MULTI-LÍNEA EN NODOS:
+- Cada nodo del diagrama DEBE usar texto multi-línea con <br/> o arreglo [línea1, línea2, ...].
+- LÍMITES: máximo 30 caracteres POR LÍNEA. Si una línea excede los 30 caracteres, DIVÍDELA en dos.
+- El texto se distribuye en 2-3 líneas como máximo. Ejemplo correcto:
+    A["Primera línea<br/>Segunda línea<br/>Tercera línea"] --> B["Línea A<br/>Línea B"]
+- SIN etiquetas de una línea larga. Cada nodo usa <br/> para partir el texto.
+- SIN emojis de relleno en los labels de nodos (🎯, 🌉, 👤, etc.) — solo texto pedagógico limpio.
+
 CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - El diagrama debe visualizarse correctamente en pantallas anchas (1920px+) y estrechas (320px+).
 - El contenedor debe usar max-w-full y overflow-x-auto para evitar desbordamiento.
@@ -1604,7 +1613,7 @@ CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - En pantallas grandes el diagrama debe ocupar el ancho disponible sin estirarse desproporcionadamente.
 - NO uses max-w-2xl ni max-w-4xl que limiten el ancho del diagrama en monitores grandes.
 - Prioriza graph TD (top-down, flujo vertical arriba→abajo) con hasta 3 niveles de profundidad.
-- El texto dentro de los nodos debe distribuirse en múltiples líneas (con <br/> o arreglo multi-línea [linea1, linea2, ...]) para evitar truncamiento horizontal.
+- El texto dentro de los nodos DEBE distribuirse en múltiples líneas (con <br/> o arreglo multi-línea [línea1, línea2, ...]). Máximo 30 caracteres POR LÍNEA. Sin excepciones.
 8. **NO incluyas explicaciones, introducciones, descripciones ni texto fuera del código HTML o Mermaid. Responde ÚNICAMENTE el código. Si es Mermaid, responde solo el código Mermaid. Si es HTML, responde solo el HTML desde `<div class="w-full...">`.**
 PROMPT;
 
@@ -1692,6 +1701,29 @@ PROMPT;
                 $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código de diagrama.');
                 return;
             }
+
+            // ─── Post-procesado: partir etiquetas largas en multi-línea con <br/> ───
+            // Detecta nodos Mermaid con sintaxis label["texto"] o label["texto"][]
+            // y divide textos de más de 30 caracteres en varias líneas.
+            $code = preg_replace_callback('/\["([^"]{35,})"\]/', function($m) {
+                $text = $m[1];
+                // Dividir por espacios o puntos cada ~25-30 caracteres
+                $words = preg_split('/\s+/', $text);
+                $lines = [];
+                $currentLine = '';
+                foreach ($words as $word) {
+                    $test = $currentLine ? $currentLine . ' ' . $word : $word;
+                    if (mb_strlen($test) > 28 && $currentLine) {
+                        $lines[] = $currentLine;
+                        $currentLine = $word;
+                    } else {
+                        $currentLine = $test;
+                    }
+                }
+                if ($currentLine) $lines[] = $currentLine;
+                $multiLine = implode('<br/>', $lines);
+                return '["' . $multiLine . '"]';
+            }, $code);
 
             // ─── Si es Mermaid puro (sin HTML), envolverlo ───
             $isMermaidRaw = !str_contains($code, '<div') && !str_contains($code, '<span')

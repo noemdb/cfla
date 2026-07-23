@@ -2456,16 +2456,6 @@
                         </div>
                     </div>
 
-                            {{-- Add Section --}}
-                            <div class="flex gap-2 px-4 py-2 border-t border-gray-200 dark:border-slate-700/30 bg-gray-50 dark:bg-slate-800/20">
-                                <input wire:model="newSectionTitle" wire:keydown.enter="addWizardSection"
-                                       placeholder="Nueva diapositiva (ej: Introduccion)..."
-                                       class="flex-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
-                                <button wire:click="addWizardSection"
-                                        class="px-4 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-white text-xs rounded-lg font-medium transition-all whitespace-nowrap">
-                                    + Diapositiva
-                                </button>
-                            </div>
 
                             {{-- ═══ Mobile: Bottom Sheet con lista de secciones ═══ --}}
                             <div x-show="showSlideList" x-cloak x-transition:enter.duration.200ms
@@ -4317,6 +4307,20 @@ Cómo...?"
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+        /* Mermaid: text wrapping en nodos con texto largo */
+        .mermaid .nodeLabel p,
+        .mermaid svg foreignObject div p,
+        .mermaid svg foreignObject span.nodeLabel {
+            white-space: normal !important;
+            text-wrap: wrap !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            max-width: 100%;
+        }
+        .mermaid svg foreignObject {
+            overflow: visible !important;
+            height: auto !important;
         }
         /* ── Review Questions: cards for each Q&A pair ── */
         .review-questions {
