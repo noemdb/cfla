@@ -3617,56 +3617,43 @@ Cómo...?"
                                     <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Estados de publicación</span>
                                 </div>
 
-                                {{-- Flow visual --}}
                                 <div class="flex items-center gap-1.5 text-[11px]">
                                     <span class="px-2 py-0.5 rounded bg-slate-700/60 text-slate-400 border border-slate-600/50 font-medium whitespace-nowrap">📋 Borrador</span>
                                     <svg class="w-3 h-3 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
 
-                                    @if(blank($publishAt))
-                                        <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-medium ring-1 ring-emerald-500/30 whitespace-nowrap">🟢 Publicado</span>
-                                    @else
-                                        <span class="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/25 font-medium ring-1 ring-cyan-500/30 whitespace-nowrap">⏰ Programado</span>
-                                    @endif
+                                    <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 font-medium ring-1 ring-emerald-500/30 whitespace-nowrap">🟢 Publicado</span>
 
                                     <span class="text-slate-600 mx-1">·</span>
 
-                                    @if(blank($publishAt))
-                                        <span class="text-amber-400/70">{{-- El estado "Programado" aparece si completas la fecha --}}o programa con fecha</span>
-                                    @else
-                                        <span class="text-slate-500">Publicado</span>
-                                    @endif
+                                    <span class="text-amber-400/70">o programa con fecha</span>
                                 </div>
 
-                                {{-- Glosario rápido de estados --}}
                                 <div class="grid grid-cols-3 gap-1.5 pt-0.5">
                                     <div class="text-center px-1.5 py-1 rounded bg-slate-800/40 border border-slate-700/40">
                                         <p class="text-[10px] font-semibold text-slate-400">📋 Borrador</p>
                                         <p class="text-[9px] text-slate-500 leading-tight">No visible</p>
                                     </div>
-                                    <div class="text-center px-1.5 py-1 rounded @if(blank($publishAt)) bg-emerald-500/8 border border-emerald-500/15 @else bg-slate-800/40 border border-slate-700/40 @endif">
-                                        <p class="text-[10px] font-semibold @if(blank($publishAt)) text-emerald-400 @else text-slate-400 @endif">🟢 Publicado</p>
-                                        <p class="text-[9px] @if(blank($publishAt)) text-emerald-400/60 @else text-slate-500 @endif leading-tight">Visible ahora</p>
+                                    <div class="text-center px-1.5 py-1 rounded bg-emerald-500/8 border border-emerald-500/15">
+                                        <p class="text-[10px] font-semibold text-emerald-400">🟢 Publicado</p>
+                                        <p class="text-[9px] text-emerald-400/60 leading-tight">Visible ahora</p>
                                     </div>
-                                    <div class="text-center px-1.5 py-1 rounded @if(!blank($publishAt)) bg-cyan-500/8 border border-cyan-500/15 @else bg-slate-800/40 border border-slate-700/40 @endif">
-                                        <p class="text-[10px] font-semibold @if(!blank($publishAt)) text-cyan-400 @else text-slate-400 @endif">⏰ Programado</p>
-                                        <p class="text-[9px] @if(!blank($publishAt)) text-cyan-400/60 @else text-slate-500 @endif leading-tight">Pub. automática</p>
+                                    <div class="text-center px-1.5 py-1 rounded bg-slate-800/40 border border-slate-700/40">
+                                        <p class="text-[10px] font-semibold text-slate-400">⏰ Programado</p>
+                                        <p class="text-[9px] text-slate-500 leading-tight">Pub. automática</p>
                                     </div>
                                 </div>
 
-                                {{-- Mensaje contextual según acción --}}
                                 <p class="text-[11px] text-amber-400/70 leading-relaxed">
                                     @auth
                                         @if(auth()->user()->isPlanner)
-                                            {{-- Mensaje para Planner/Admin --}}
                                             @if(blank($publishAt))
                                                 Al publicar <strong class="text-amber-300">sin fecha</strong>, la lección será <strong class="text-emerald-400">visible para los estudiantes</strong> inmediatamente.
                                             @else
                                                 Al publicar, la lección será <strong class="text-emerald-400">visible para los estudiantes</strong> y la programación planificada se aplicará el <strong class="text-cyan-400">{{ \Carbon\Carbon::parse($publishAt)->format('d/m/Y H:i') }}</strong>.
                                             @endif
                                         @else
-                                            {{-- Mensaje para Profesor --}}
                                             @if(blank($publishAt))
                                                 Al programar con una fecha, la lección quedará <strong class="text-amber-300">pendiente de aprobación</strong> por Planificación.
                                             @else
@@ -3704,15 +3691,27 @@ Cómo...?"
                             @php $isPlanner = auth()->user()->isPlanner; @endphp
 
                             @if($isPlanner)
-                                {{-- Planner/Admin: botón "Publicar lección" (comportamiento actual) --}}
+                                {{-- Planner/Admin: botón contextual --}}
                                 <button wire:click="confirmPublish"
                                         wire:loading.attr="disabled"
                                         class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-white text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
                                     <svg wire:loading wire:target="confirmPublish" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                     </svg>
-                                    <span wire:loading.remove wire:target="confirmPublish">Publicar lección</span>
-                                    <span wire:loading wire:target="confirmPublish">Publicando…</span>
+                                    <span wire:loading.remove wire:target="confirmPublish">
+                                        @if(blank($publishAt))
+                                            Guardar lección
+                                        @else
+                                            Programar lección
+                                        @endif
+                                    </span>
+                                    <span wire:loading wire:target="confirmPublish">
+                                        @if(blank($publishAt))
+                                            Guardando…
+                                        @else
+                                            Programando…
+                                        @endif
+                                    </span>
                                 </button>
                             @else
                                 {{-- Profesor: botón "Programar lección" --}}
