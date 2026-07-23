@@ -4067,7 +4067,39 @@ Cómo...?"
             @endif
 
             {{-- ═══ BOTONES FLOTANTES: Vista estudiante + Guardar (group button) ═══ --}}
-            <div class="fixed bottom-6 right-6 z-50 flex">
+            @php
+                $lmsPub = $selectedActivity->lmsPublication ?? null;
+                $isPublished = $lmsPub && $lmsPub->status === 'PUBLISHED';
+                $hasSchedule = !blank($this->publishAt);
+            @endphp
+
+            <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+                {{-- Status notification --}}
+                @if($isPublished)
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 shadow-lg">
+                        <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m9.364-7.364A9 9 0 1112 3a9 9 0 017.364 13.636z"/>
+                        </svg>
+                        <span class="text-[10px] font-semibold text-red-400 whitespace-nowrap">Publicado · No se permite edición</span>
+                    </div>
+                @elseif($hasSchedule)
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 shadow-lg">
+                        <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Pendiente de aprobación</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-600/20 border border-slate-500/20 shadow-lg">
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        <span class="text-[10px] font-semibold text-slate-400 whitespace-nowrap">📋 Borrador · No visible</span>
+                    </div>
+                @endif
+
+                {{-- Button group --}}
+                <div class="flex">
                 <button wire:click="openWizardStudentPreview"
                         title="Vista estudiante"
                         class="inline-flex items-center justify-center w-11 h-11 rounded-l-xl text-sm font-semibold transition-all duration-200
@@ -4099,6 +4131,7 @@ Cómo...?"
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                     </svg>
                 </button>
+                </div>
             </div>
 
         @endif
