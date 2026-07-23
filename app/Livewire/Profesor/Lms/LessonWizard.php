@@ -1605,6 +1605,12 @@ REQUISITO ESTRICTO — TEXTO MULTI-LÍNEA EN NODOS:
 - SIN etiquetas de una línea larga. Cada nodo usa <br/> para partir el texto.
 - SIN emojis de relleno en los labels de nodos (🎯, 🌉, 👤, etc.) — solo texto pedagógico limpio.
 
+REQUISITO ESTRICTO — ORIENTACIÓN VERTICAL TOP-DOWN:
+- El diagrama DEBE usar ÚNICAMENTE graph TD (top-down, flujo vertical arriba→abajo).
+- PROHIBIDO usar graph LR (left-right), graph RL, graph BT, o cualquier otra orientación.
+- Todo el flujo va de arriba hacia abajo, con nodos raíz en la parte superior.
+- Máximo 3 niveles de profundidad desde el nodo raíz.
+
 CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - El diagrama debe visualizarse correctamente en pantallas anchas (1920px+) y estrechas (320px+).
 - El contenedor debe usar max-w-full y overflow-x-auto para evitar desbordamiento.
@@ -1612,7 +1618,7 @@ CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - Asegura que el overflow-x-auto del wrapping permita scroll horizontal sin truncar nodos.
 - En pantallas grandes el diagrama debe ocupar el ancho disponible sin estirarse desproporcionadamente.
 - NO uses max-w-2xl ni max-w-4xl que limiten el ancho del diagrama en monitores grandes.
-- Prioriza graph TD (top-down, flujo vertical arriba→abajo) con hasta 3 niveles de profundidad.
+- SOLO graph TD (top-down, flujo vertical arriba→abajo). PROHIBIDO graph LR, graph RL, graph BT u otras orientaciones. Máximo 3 niveles.
 - El texto dentro de los nodos DEBE distribuirse en múltiples líneas (con <br/> o arreglo multi-línea [línea1, línea2, ...]). Máximo 30 caracteres POR LÍNEA. Sin excepciones.
 8. **NO incluyas explicaciones, introducciones, descripciones ni texto fuera del código HTML o Mermaid. Responde ÚNICAMENTE el código. Si es Mermaid, responde solo el código Mermaid. Si es HTML, responde solo el HTML desde `<div class="w-full...">`.**
 PROMPT;
@@ -1636,7 +1642,7 @@ pantallas de celular hasta monitores anchos (condición no negociable).
 Requisitos del diagrama:
 1. Máximo 3 niveles de profundidad.
 2. Texto multi-línea dentro de nodos (usa <br/> o arreglos [línea1, línea2]) para evitar truncamiento.
-3. Flujo vertical TOP-DOWN (graph TD), prioriza alineación de arriba hacia abajo.
+3. ORIENTACIÓN ESTRICTA: SOLO graph TD (top-down). PROHIBIDO graph LR, RL, BT u otras.
 
 **IMPORTANTE:** Responde ÚNICAMENTE el código. Sin textos, explicaciones, introducciones ni despedidas. Solo el código.
 PROMPT;
@@ -1701,6 +1707,10 @@ PROMPT;
                 $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código de diagrama.');
                 return;
             }
+
+            // ─── Post-procesado: forzar orientación vertical graph TD ────────────
+            $code = preg_replace('/^graph\s+(LR|RL|BT)\b/m', 'graph TD', $code);
+            $code = preg_replace('/^flowchart\s+(LR|RL|BT)\b/m', 'graph TD', $code);
 
             // ─── Post-procesado: partir etiquetas largas en multi-línea con <br/> ───
             // Detecta nodos Mermaid con sintaxis label["texto"] o label["texto"][]
