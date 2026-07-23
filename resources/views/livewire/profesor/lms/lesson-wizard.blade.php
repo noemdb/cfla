@@ -1778,8 +1778,8 @@
                 </button>
 
                 {{-- Barra de progreso --}}
-                <div class="flex-1 flex justify-center overflow-x-auto min-w-0 px-2 mx-2">
-                    <div class="flex items-center gap-0.5 sm:gap-1 min-w-max">
+                <div class="flex-1 flex justify-center min-w-0 px-2 mx-2 py-2">
+                    <div class="flex items-center gap-0.5 sm:gap-1 min-w-max" style="overflow: visible;">
                         @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
                         @foreach(range(1, 5) as $step)
                             <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group shrink-0">
@@ -1799,7 +1799,7 @@
                                     </span>
                                 </div>
                                 @if($step < 5)
-                                    <span class="w-4 sm:w-8 h-px mb-4 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
+                                    <span class="w-4 sm:w-8 h-px {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
                                 @endif
                             </button>
                         @endforeach
