@@ -1709,7 +1709,7 @@
         @endif
 
         {{-- Encabezado del wizard --}}
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1">
+        <div class="flex flex-col gap-1">
             <div class="flex items-center gap-3 min-w-0 shrink">
                 <button wire:click="backToList"
                         class="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/50 rounded-lg transition-all">
@@ -1723,45 +1723,6 @@
                 </div>
             </div>
 
-            {{-- Indicador de pasos — sticky + responsive + clickeable --}}
-            @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
-            <div class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700/50 -mx-4 px-4 py-2 shadow-sm overflow-x-auto w-full sm:w-auto">
-                <div class="flex items-center gap-0.5 sm:gap-1 min-w-max px-1">
-                    @foreach(range(1, 5) as $step)
-                        <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group shrink-0">
-                            <div class="flex flex-col items-center min-w-0">
-                                <span class="inline-flex items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200
-                                    {{ $currentStep === $step ? 'w-7 h-7 bg-emerald-500 text-white shadow-md shadow-emerald-500/40 ring-2 ring-emerald-400/40 scale-110' : ($currentStep > $step ? 'w-6 h-6 bg-emerald-500/20 text-emerald-400' : 'w-6 h-6 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}
-                                    hover:ring-2 hover:ring-emerald-400/30 hover:ring-offset-1 hover:ring-offset-white dark:hover:ring-offset-slate-900">
-                                    @if($currentStep > $step)
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    @else
-                                        {{ $step }}
-                                    @endif
-                                </span>
-                                <span class="text-[9px] mt-0.5 whitespace-nowrap {{ $currentStep === $step ? 'text-emerald-400 font-semibold' : 'text-gray-400 dark:text-slate-500' }}
-                                    {{ $step === $currentStep ? '' : 'hidden sm:inline' }}">
-                                    {{ $stepLabels[$step] }}
-                                </span>
-                            </div>
-                            @if($step < 5)
-                                <span class="w-4 sm:w-8 h-px mb-4 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
-                            @endif
-                        </button>
-                    @endforeach
-
-                    {{-- Progreso compacto --}}
-                    @php
-                        $completedSteps = collect(range(1,5))->filter(fn($s) => $s < $currentStep)->count();
-                        $progressPct = $currentStep > 0 ? round(($completedSteps / 5) * 100) : 0;
-                    @endphp
-                    <span class="ml-3 text-[10px] font-mono text-gray-400 dark:text-slate-500 shrink-0 whitespace-nowrap">{{ $completedSteps }}/5</span>
-                </div>
-                {{-- Barra de progreso --}}
-                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-200 dark:bg-slate-700/50">
-                    <div class="h-full bg-emerald-500/60 transition-all duration-500 ease-out" style="width: {{ $progressPct }}%"></div>
-                </div>
-            </div>
         </div>
 
         {{-- Mensaje de guardado exitoso --}}
@@ -1815,6 +1776,39 @@
                         class="px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
                     ← Anterior
                 </button>
+
+                {{-- Barra de progreso --}}
+                <div class="flex-1 flex justify-center overflow-x-auto min-w-0 px-2 mx-2">
+                    <div class="flex items-center gap-0.5 sm:gap-1 min-w-max">
+                        @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
+                        @foreach(range(1, 5) as $step)
+                            <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group shrink-0">
+                                <div class="flex flex-col items-center min-w-0">
+                                    <span class="inline-flex items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200
+                                        {{ $currentStep === $step ? 'w-7 h-7 bg-emerald-500 text-white shadow-md shadow-emerald-500/40 ring-2 ring-emerald-400/40 scale-110' : ($currentStep > $step ? 'w-6 h-6 bg-emerald-500/20 text-emerald-400' : 'w-6 h-6 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}
+                                        hover:ring-2 hover:ring-emerald-400/30 hover:ring-offset-1 hover:ring-offset-white dark:hover:ring-offset-slate-900">
+                                        @if($currentStep > $step)
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                        @else
+                                            {{ $step }}
+                                        @endif
+                                    </span>
+                                    <span class="text-[9px] mt-0.5 whitespace-nowrap {{ $currentStep === $step ? 'text-emerald-400 font-semibold' : 'text-gray-400 dark:text-slate-500' }}
+                                        {{ $step === $currentStep ? '' : 'hidden sm:inline' }}">
+                                        {{ $stepLabels[$step] }}
+                                    </span>
+                                </div>
+                                @if($step < 5)
+                                    <span class="w-4 sm:w-8 h-px mb-4 {{ $currentStep > $step ? 'bg-emerald-500/40' : 'bg-gray-200 dark:bg-slate-700' }}"></span>
+                                @endif
+                            </button>
+                        @endforeach
+                        @php
+                            $completedSteps = collect(range(1,5))->filter(fn($s) => $s < $currentStep)->count();
+                        @endphp
+                        <span class="ml-3 text-[10px] font-mono text-gray-400 dark:text-slate-500 shrink-0 whitespace-nowrap">{{ $completedSteps }}/5</span>
+                    </div>
+                </div>
 
                 <div class="flex items-center gap-2">
                     @if($currentStep < 5)
