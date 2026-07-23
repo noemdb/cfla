@@ -1725,8 +1725,8 @@
 
         </div>
 
-        {{-- Mensaje de guardado exitoso --}}
-        @if($saved)
+        {{-- Mensaje de publicación exitosa --}}
+        @if($published)
             <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 text-center">
                 <svg class="w-12 h-12 text-emerald-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1818,24 +1818,6 @@
                         </button>
                     @endif
                 </div>
-            </div>
-
-            {{-- Atajos de teclado (hint sutil) --}}
-            <div class="flex items-center justify-end gap-3 px-1 -mt-2 mb-1">
-                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">Ctrl</kbd>
-                    <span class="text-gray-300 dark:text-slate-700">+</span>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&larr;</kbd>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&rarr;</kbd>
-                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">pasos</span>
-                </span>
-                @if($currentStep === 2)
-                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&uarr;</kbd>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&darr;</kbd>
-                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">diapositivas</span>
-                </span>
-                @endif
             </div>
 
             {{-- Grid: formulario a la izquierda, preview a la derecha --}}
@@ -3724,6 +3706,24 @@ Cómo...?"
 
                 </div>
 
+            </div>
+
+            {{-- Atajos de teclado (hint sutil) --}}
+            <div class="flex items-center justify-end gap-3 px-1 mb-1">
+                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">Ctrl</kbd>
+                    <span class="text-gray-300 dark:text-slate-700">+</span>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&larr;</kbd>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&rarr;</kbd>
+                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">pasos</span>
+                </span>
+                @if($currentStep === 2)
+                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&uarr;</kbd>
+                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&darr;</kbd>
+                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">diapositivas</span>
+                </span>
+                @endif
             </div>
 
             {{-- Botón flotante: abrir preview full-screen --}}

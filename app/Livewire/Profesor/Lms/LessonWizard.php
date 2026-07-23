@@ -189,6 +189,7 @@ TEXT;
     public string $pubStatus = 'DRAFT';
     public ?string $publishAt = null;
     public bool $saved = false;
+    public bool $published = false;
     public bool $showPublishConfirm = false;
 
     protected $paginationTheme = 'tailwind';
@@ -345,6 +346,7 @@ TEXT;
         $this->currentStep = max(1, min(5, $step));
         // Al volver al wizard desde el estado "guardado", ocultar el mensaje de éxito
         $this->saved = false;
+        $this->published = false;
     }
 
     // ─── Slide navigation (paso 2) ────────────────────────────
@@ -425,6 +427,7 @@ TEXT;
         $this->wizardHtmlEmbeds = [];
         $this->wizardReferents = null;
         $this->saved = false;
+        $this->published = false;
         $this->showPublishConfirm = false;
         $this->editingSectionIndex = null;
         $this->resourcePanelSection = null;
@@ -1340,22 +1343,48 @@ PROMPT;
 
             if ($aiResult['success'] && $aiResult['content']) {
                 $rawSvg = $aiResult['content'];
-                // Limpiar wrappers de markdown
-                $rawSvg = preg_replace('/^```(?:svg|html)?\s*\n?/i', '', $rawSvg);
-                $rawSvg = preg_replace('/\n?```\s*$/s', '', $rawSvg);
-                $rawSvg = trim($rawSvg);
 
-                // Extraer <svg>...</svg> aunque haya texto antes/después
-                if (preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
-                    $rawSvg = $svgMatch[0];
+                // ─── Estrategia 1: extraer SVG dentro de ```svg ``` ───
+                $svgCode = $rawSvg;
+                if (preg_match('/```(?:svg|html)?\s*\n?(.*?)```/s', $rawSvg, $m)) {
+                    $svgCode = trim($m[1]);
+                }
+
+                // ─── Estrategia 2: extraer <svg>...</svg> del contenido ───
+                if (preg_match('/<svg[\s>].*?<\/svg>/is', $svgCode, $svgMatch)) {
+                    $svgCode = $svgMatch[0];
+                } elseif (str_contains($svgCode, '<svg') || str_contains($svgCode, '<?xml')) {
+                    // ─── Estrategia 3: tiene <svg pero no capturado — intentar extraer desde <svg hasta el final ───
+                    if (preg_match('/<svg[\s>].*/is', $svgCode, $fallbackMatch)) {
+                        $svgCode = $fallbackMatch[0];
+                        // Cerrar SVG si falta </svg>
+                        if (!str_contains($svgCode, '</svg>')) {
+                            $svgCode .= '</svg>';
+                        }
+                    }
+                }
+
+                // ─── Limpiar doctype, xml declaration ───
+                $svgCode = preg_replace('/<!DOCTYPE[^>]*>/i', '', $svgCode);
+                $svgCode = preg_replace('/<\?xml.*?\?>\s*/', '', $svgCode);
+                $svgCode = trim($svgCode);
+
+                if (!empty($svgCode) && preg_match('/<svg[\s>]/i', $svgCode)) {
                     $title = e('Diagrama: ' . $sectionTitle);
                     $svgHtml = '<figure class="my-6">' . "\n"
                         . '  <figcaption class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">'
                         . $title . '</figcaption>' . "\n"
                         . '  <div class="flex justify-center rounded-xl p-2">'
-                        . "\n    " . $rawSvg . "\n  </div>\n"
+                        . "\n    " . $svgCode . "\n  </div>\n"
                         . '</figure>';
                 }
+            }
+
+            if (empty($svgHtml)) {
+                \Illuminate\Support\Facades\Log::warning('generateSlideImage: no se pudo extraer SVG del contenido generado', [
+                    'content_length' => mb_strlen($aiResult['content'] ?? ''),
+                    'section'        => $sectionTitle,
+                ]);
             }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('generateSlideImage: OpenRouter falló', [
@@ -3720,7 +3749,7 @@ PROMPT;
         }
 
         $this->showPublishConfirm = false;
-        $this->saved = true;
+        $this->published = true;
         $this->dispatch('lesson-saved');
     }
 
