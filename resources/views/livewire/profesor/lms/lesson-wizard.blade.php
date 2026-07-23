@@ -3649,9 +3649,9 @@ Cómo...?"
                                     @auth
                                         @if(auth()->user()->isPlanner)
                                             @if(blank($publishAt))
-                                                Al publicar <strong class="text-amber-300">sin fecha</strong>, la lección será <strong class="text-emerald-400">visible para los estudiantes</strong> inmediatamente.
+                                                Al <strong class="text-amber-300">guardar</strong> sin fecha, la lección quedará como <strong class="text-slate-400">borrador</strong> y no será visible para los estudiantes.
                                             @else
-                                                Al publicar, la lección será <strong class="text-emerald-400">visible para los estudiantes</strong> y la programación planificada se aplicará el <strong class="text-cyan-400">{{ \Carbon\Carbon::parse($publishAt)->format('d/m/Y H:i') }}</strong>.
+                                                Al <strong class="text-amber-300">programar</strong>, la lección se programará para el <strong class="text-cyan-400">{{ \Carbon\Carbon::parse($publishAt)->format('d/m/Y H:i') }}</strong> y quedará <strong class="text-amber-300">pendiente de aprobación</strong>.
                                             @endif
                                         @else
                                             @if(blank($publishAt))
