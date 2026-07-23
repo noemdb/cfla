@@ -172,7 +172,7 @@ class LessonScheduledForApproval extends Notification
             'activity_title' => $this->activityTitle,
             'scheduled_at'   => $this->scheduledAt,
             'message'        => "{$this->teacherName} ha programado la lección «{$this->activityTitle}» para aprobación de Planificación.",
-            'url'            => route('app.planning.monitor', ['filterStatus' => 'SCHEDULED']),
+            'url'            => route('app.planning.lms.monitor', ['filterStatus' => 'SCHEDULED']),
         ];
     }
 }
