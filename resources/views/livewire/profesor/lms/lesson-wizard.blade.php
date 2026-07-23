@@ -4067,22 +4067,11 @@ Cómo...?"
             @endif
 
             {{-- ═══ BOTONES FLOTANTES: Vista estudiante + Guardar (group button) ═══ --}}
-            @php
-                $lmsPub = $selectedActivity->lmsPublication ?? null;
-                $isPublished = $lmsPub && $lmsPub->status === 'PUBLISHED';
-                $hasSchedule = !blank($this->publishAt);
-            @endphp
+            @php $hasSchedule = !blank($this->publishAt); @endphp
 
             <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
                 {{-- Status notification --}}
-                @if($isPublished)
-                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 shadow-lg">
-                        <svg class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m9.364-7.364A9 9 0 1112 3a9 9 0 017.364 13.636z"/>
-                        </svg>
-                        <span class="text-[10px] font-semibold text-red-400 whitespace-nowrap">Publicado · No se permite edición</span>
-                    </div>
-                @elseif($hasSchedule)
+                @if($hasSchedule)
                     <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 shadow-lg">
                         <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
