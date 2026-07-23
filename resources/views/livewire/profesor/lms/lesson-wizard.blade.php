@@ -2153,7 +2153,15 @@
                                         </div>
 
                                         {{-- EDIT TAB: HTML Content Editor --}}
-                                        <div x-show="editorTab === 'edit'" x-transition:enter.duration.150ms>
+                                        <div x-show="editorTab === 'edit'" x-transition:enter.duration.150ms class="space-y-3">
+                                            {{-- Título de la diapositiva --}}
+                                            <div>
+                                                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 mb-1">Título de la diapositiva</label>
+                                                <input type="text" wire:model="wizardSections.{{ $currentSlideIndex }}.title"
+                                                       class="w-full bg-white dark:bg-slate-950/80 border border-gray-300 dark:border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
+                                                       placeholder="Título de la diapositiva"/>
+                                            </div>
+
                                             @if(isset($wizardSections[$currentSlideIndex]['contents'][0]))
                                                 <textarea wire:model="wizardSections.{{ $currentSlideIndex }}.contents.0.body"
                                                           rows="12"
@@ -3607,13 +3615,13 @@ Cómo...?"
                                         <p class="text-[10px] font-semibold text-slate-400">📋 Borrador</p>
                                         <p class="text-[9px] text-slate-500 leading-tight">No visible</p>
                                     </div>
-                                    <div class="text-center px-1.5 py-1 rounded bg-emerald-500/8 border border-emerald-500/15">
-                                        <p class="text-[10px] font-semibold text-emerald-400">🟢 Publicado</p>
-                                        <p class="text-[9px] text-emerald-400/60 leading-tight">Visible ahora</p>
-                                    </div>
                                     <div class="text-center px-1.5 py-1 rounded bg-slate-800/40 border border-slate-700/40">
                                         <p class="text-[10px] font-semibold text-slate-400">⏰ Programado</p>
                                         <p class="text-[9px] text-slate-500 leading-tight">Pub. automática</p>
+                                    </div>
+                                    <div class="text-center px-1.5 py-1 rounded bg-emerald-500/8 border border-emerald-500/15">
+                                        <p class="text-[10px] font-semibold text-emerald-400">🟢 Publicado</p>
+                                        <p class="text-[9px] text-emerald-400/60 leading-tight">Visible ahora</p>
                                     </div>
                                 </div>
 
@@ -3641,7 +3649,8 @@ Cómo...?"
                                     <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ collect($this->previewSections)->sum(fn($s) => count($s['contents'])) }}</span> bloques de contenido ·
                                     <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ count($wizardResources) }}</span> recursos ·
                                     <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ count($wizardHtmlEmbeds) }}</span> embeds ·
-                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ count($wizardLinks) }}</span> enlaces
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ count($wizardLinks) }}</span> enlaces ·
+                                    <span class="{{ empty($this->reviewQuestions) ? 'text-red-400 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} font-medium">{{ empty($this->reviewQuestions) ? '0' : '✓' }}</span> preguntas de repaso
                                 </p>
                             </div>
 
@@ -3698,23 +3707,6 @@ Cómo...?"
 
             </div>
 
-            {{-- Atajos de teclado (hint sutil) --}}
-            <div class="flex items-center justify-end gap-3 px-1 mb-1">
-                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">Ctrl</kbd>
-                    <span class="text-gray-300 dark:text-slate-700">+</span>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&larr;</kbd>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&rarr;</kbd>
-                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">pasos</span>
-                </span>
-                @if($currentStep === 2)
-                <span class="text-[10px] text-gray-400 dark:text-slate-600 font-mono flex items-center gap-1.5">
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&uarr;</kbd>
-                    <kbd class="px-1 py-0.5 rounded text-[9px] bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border border-gray-300 dark:border-slate-600">&darr;</kbd>
-                    <span class="text-gray-400 dark:text-slate-600 mx-0.5">diapositivas</span>
-                </span>
-                @endif
-            </div>
 
             {{-- Botón flotante: abrir preview full-screen --}}
             {{-- <button wire:click="$set('showFullPreview', true)"

@@ -54,6 +54,11 @@ class LmsMonitor extends Component
     public string $settingsNotes = '';
     public string $settingsStatus = '';
 
+    // ─── Publish confirmation modal ────────────────────────────
+    public bool $showPublishModal = false;
+    public ?int $publishActivityId = null;
+    public string $publishActivityTitle = '';
+
     // ─── Preview modal (student-preview component) ────────────
     public bool $showPreviewModal = false;
     public ?array $previewData = null;
@@ -222,6 +227,32 @@ class LmsMonitor extends Component
     }
 
     // ─── Publicación inmediata ─────────────────────────────────
+    public function confirmPublish(int $activityId): void
+    {
+        $activity = Activity::find($activityId);
+        $this->publishActivityId = $activityId;
+        $this->publishActivityTitle = $activity?->topic ?? 'Lección';
+        $this->showPublishModal = true;
+    }
+
+    public function doPublish(): void
+    {
+        if (!$this->publishActivityId) {
+            return;
+        }
+        $this->publish($this->publishActivityId);
+        $this->showPublishModal = false;
+        $this->publishActivityId = null;
+        $this->publishActivityTitle = '';
+    }
+
+    public function cancelPublish(): void
+    {
+        $this->showPublishModal = false;
+        $this->publishActivityId = null;
+        $this->publishActivityTitle = '';
+    }
+
     public function publish(int $activityId): void
     {
         $activity = Activity::findOrFail($activityId);

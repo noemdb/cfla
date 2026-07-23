@@ -244,6 +244,7 @@
                                 }
                                 $contentCount = count($section['contents'] ?? []);
                             @endphp
+                            <div class="text-[10px] font-medium text-slate-400 dark:text-slate-500 tracking-wide px-0.5 mb-1 text-right">{{ $preview['title'] }}</div>
                             <div class="flex items-center gap-2 mb-4 shrink-0">
                                 <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                                 <h2 class="text-lg font-bold text-slate-800">{{ $section['title'] }}</h2>

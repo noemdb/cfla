@@ -839,11 +839,13 @@ PROMPT;
 
     public function addWizardSection(): void
     {
-        $this->validate(['newSectionTitle' => 'required|string|max:255']);
+        $title = !empty(trim($this->newSectionTitle ?? ''))
+            ? trim($this->newSectionTitle)
+            : 'Nueva diapositiva';
 
         $this->wizardSections[] = [
             'id'         => 'temp_' . uniqid(),
-            'title'      => $this->newSectionTitle,
+            'title'      => $title,
             'is_visible' => true,
             'contents'   => [],
         ];
