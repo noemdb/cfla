@@ -225,6 +225,9 @@
                             @if($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
                                 <span class="block text-[10px] text-amber-600/70 dark:text-amber-500/70 mt-0.5">
                                     {{ $pub->lmsPublication->publish_at->format('d/m/Y H:i') }}
+                                    @if($pub->lmsPublication->created_at && $pub->lmsPublication->created_at->gt(now()->subHours(48)))
+                                        <span class="inline-block ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
+                                    @endif
                                 </span>
                             @endif
                         </td>
