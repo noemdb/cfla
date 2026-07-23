@@ -1771,7 +1771,7 @@
             ">
 
             {{-- Navegación entre pasos --}}
-            <div class="flex items-center justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-4">
+            <div class="flex items-start justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-5" style="min-height: 5rem;">
                 <button wire:click="goToStep({{ $currentStep - 1 }})"
                         class="px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
                     ← Anterior
