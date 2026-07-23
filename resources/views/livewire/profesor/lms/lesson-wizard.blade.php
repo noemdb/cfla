@@ -1709,8 +1709,8 @@
         @endif
 
         {{-- Encabezado del wizard --}}
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1">
+            <div class="flex items-center gap-3 min-w-0 shrink">
                 <button wire:click="backToList"
                         class="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/50 rounded-lg transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1725,13 +1725,13 @@
 
             {{-- Indicador de pasos — sticky + responsive + clickeable --}}
             @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
-            <div class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700/50 -mx-4 px-4 py-2 shadow-sm">
-                <div class="flex items-center gap-0.5 sm:gap-1">
+            <div class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700/50 -mx-4 px-4 py-2 shadow-sm overflow-x-auto w-full sm:w-auto">
+                <div class="flex items-center gap-0.5 sm:gap-1 min-w-max px-1">
                     @foreach(range(1, 5) as $step)
-                        <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group">
+                        <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group shrink-0">
                             <div class="flex flex-col items-center min-w-0">
                                 <span class="inline-flex items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200
-                                    {{ $currentStep === $step ? 'w-7 h-7 bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 ring-2 ring-emerald-400/30' : ($currentStep > $step ? 'w-6 h-6 bg-emerald-500/20 text-emerald-400' : 'w-6 h-6 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}
+                                    {{ $currentStep === $step ? 'w-7 h-7 bg-emerald-500 text-white shadow-md shadow-emerald-500/40 ring-2 ring-emerald-400/40 scale-110' : ($currentStep > $step ? 'w-6 h-6 bg-emerald-500/20 text-emerald-400' : 'w-6 h-6 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-500') }}
                                     hover:ring-2 hover:ring-emerald-400/30 hover:ring-offset-1 hover:ring-offset-white dark:hover:ring-offset-slate-900">
                                     @if($currentStep > $step)
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
@@ -1755,7 +1755,7 @@
                         $completedSteps = collect(range(1,5))->filter(fn($s) => $s < $currentStep)->count();
                         $progressPct = $currentStep > 0 ? round(($completedSteps / 5) * 100) : 0;
                     @endphp
-                    <span class="ml-auto text-[10px] font-mono text-gray-400 dark:text-slate-500 hidden sm:inline shrink-0">{{ $completedSteps }}/5</span>
+                    <span class="ml-3 text-[10px] font-mono text-gray-400 dark:text-slate-500 shrink-0 whitespace-nowrap">{{ $completedSteps }}/5</span>
                 </div>
                 {{-- Barra de progreso --}}
                 <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-200 dark:bg-slate-700/50">
@@ -1992,6 +1992,7 @@
                         <div class="slide-editor-root bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg"
                              x-data="{
                                 showSlideList: false,
+                                sidebarCompact: $wire.entangle('sidebarCompact'),
                                 dragIndex: null,
                                 dragOverIndex: null,
                                 editSlideTitle: false,
@@ -2036,13 +2037,41 @@
                                 </div>
                             </div>
 
+                            {{-- Mobile: Navegación rápida de diapositivas (collapsed) --}}
+                            <div class="flex lg:hidden items-center gap-1 px-3 py-1.5 border-b border-gray-200 dark:border-slate-700/30 overflow-x-auto bg-gray-50/50 dark:bg-slate-800/20" x-show="!showSlideList">
+                                <button @click="showSlideList = !showSlideList"
+                                        class="flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 shrink-0 transition-all"
+                                        title="Lista de diapositivas">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                                </button>
+                                <span class="w-px h-4 bg-gray-200 dark:bg-slate-700 shrink-0"></span>
+                                @if($totalSlides > 0)
+                                    @foreach(range(0, $totalSlides - 1) as $sIdx)
+                                        <button wire:click="goToSlide({{ $sIdx }})"
+                                                @class([
+                                                    'flex items-center justify-center w-7 h-7 rounded-full text-[10px] font-bold shrink-0 transition-all',
+                                                    'bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-400/30' => $sIdx === $currentSlideIndex,
+                                                    'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-300 dark:hover:bg-slate-600' => $sIdx !== $currentSlideIndex,
+                                                ])>
+                                            {{ $sIdx + 1 }}
+                                        </button>
+                                    @endforeach
+                                @endif
+                            </div>
+
                             {{-- 🔲 Sidebar + Contenido en flex row --}}
                             <div class="flex flex-col lg:flex-row">
                                 {{-- ═══ SIDEBAR: Lista persistente de secciones (desktop) ═══ --}}
-                                <aside class="hidden lg:flex flex-col w-56 shrink-0 border-r border-gray-200 dark:border-slate-700/30 bg-gray-50/70 dark:bg-slate-900/40">
+                                <aside :style="`width: ${sidebarCompact ? '3rem' : '14rem'}`" class="hidden lg:flex flex-col shrink-0 border-r border-gray-200 dark:border-slate-700/30 bg-gray-50/70 dark:bg-slate-900/40 transition-all duration-200" style="width: 14rem">
                                     <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-slate-700/30">
-                                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Secciones</span>
-                                        <span class="text-[10px] font-mono text-gray-400 dark:text-slate-600">{{ $totalSlides }}</span>
+                                        <span x-show="!sidebarCompact" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">Secciones</span>
+                                        <span x-show="!sidebarCompact" class="text-[10px] font-mono text-gray-400 dark:text-slate-600">{{ $totalSlides }}</span>
+                                        <button wire:click="toggleSidebar"
+                                                class="p-1 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 transition-all ml-auto"
+                                                title="Toggle sidebar">
+                                            <svg x-show="!sidebarCompact" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+                                            <svg x-show="sidebarCompact" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                        </button>
                                     </div>
                                     <div class="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-[200px] max-h-[55vh]">
                                         @forelse($wizardSections as $sIdx2 => $sec)
@@ -2055,26 +2084,31 @@
                                                  @dragover.prevent="dragOver({{ $sIdx2 }})"
                                                  @dragleave.prevent="if (dragOverIndex === {{ $sIdx2 }}) dragOverIndex = null"
                                                  @drop.prevent="endDrag()">
-                                                <button wire:click="goToSlide({{ $sIdx2 }})"
+                                                <button @click="sidebarCompact = false; $wire.call('goToSlide', {{ $sIdx2 }})"
                                                         draggable="true"
                                                         @dragstart="startDrag({{ $sIdx2 }})"
                                                         @dragend="cancelDrag()"
                                                         @class([
-                                                            'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all text-[11px] border cursor-grab active:cursor-grabbing group',
+                                                            'w-full flex items-center py-2 rounded-lg transition-all text-[11px] border cursor-grab active:cursor-grabbing group',
                                                             'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' => $isActive,
                                                             'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/40 border-transparent' => !$isActive,
                                                         ])
-                                                        :class="{ 'opacity-40': dragIndex === {{ $sIdx2 }}, 'border-t-2 border-t-emerald-400/40': dragOverIndex === {{ $sIdx2 }} }">
+                                                        :class="{
+                                                            'opacity-40': dragIndex === {{ $sIdx2 }},
+                                                            'border-t-2 border-t-emerald-400/40': dragOverIndex === {{ $sIdx2 }},
+                                                            'px-2.5 gap-2 text-left': !sidebarCompact,
+                                                            'px-1 justify-center': sidebarCompact
+                                                        }">
                                                     <span class="flex items-center justify-center w-5 h-5 rounded shrink-0 text-[10px] font-mono {{ $hasSecContent ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-200 dark:bg-slate-700/60 text-gray-500 dark:text-slate-500' }}">
                                                         {{ $sIdx2 + 1 }}
                                                     </span>
-                                                    <span class="truncate flex-1">{{ $sec['title'] ?: 'Sin título' }}</span>
+                                                    <span x-show="!sidebarCompact" class="truncate flex-1">{{ $sec['title'] ?: 'Sin título' }}</span>
                                                     @if($hasSecContent)
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
+                                                        <span x-show="!sidebarCompact" class="w-1.5 h-1.5 rounded-full bg-emerald-400/60 shrink-0"></span>
                                                     @else
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
+                                                        <span x-show="!sidebarCompact" class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-slate-600/40 shrink-0"></span>
                                                     @endif
-                                                    <svg class="w-3 h-3 text-gray-400 dark:text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
+                                                    <svg x-show="!sidebarCompact" class="w-3 h-3 text-gray-400 dark:text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M8 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm8 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>
                                                 </button>
                                             </div>
                                         @empty
@@ -2084,7 +2118,7 @@
                                             </div>
                                         @endforelse
                                     </div>
-                                    <div class="p-2 border-t border-gray-200 dark:border-slate-700/30 space-y-1">
+                                    <div x-show="!sidebarCompact" class="p-2 border-t border-gray-200 dark:border-slate-700/30 space-y-1">
                                         <button wire:click="addWizardSection"
                                                 class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>

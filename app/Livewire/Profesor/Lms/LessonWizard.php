@@ -80,6 +80,7 @@ TEXT;
 
     // ─── Wizard: paso actual ───────────────────────────────────
     public int $currentStep = 1;
+    public bool $sidebarCompact = false;
 
     // ─── Wizard: Datos de la lección ───────────────────────────
     public string $lessonTitle = '';
@@ -209,6 +210,7 @@ TEXT;
 
         // Restaurar modo de vista desde sesión
         $this->viewMode = session('lesson_wizard_view_mode', 'grid');
+        $this->sidebarCompact = session('lms_sidebar_compact', false);
 
         // Si se pasa activity_id en la URL, iniciar wizard directamente
         $activityId = request()->query('activity_id');
@@ -348,6 +350,17 @@ TEXT;
     {
         $max = max(0, count($this->wizardSections) - 1);
         $this->currentSlideIndex = max(0, min($max, $index));
+
+        if ($this->sidebarCompact) {
+            $this->sidebarCompact = false;
+            session(['lms_sidebar_compact' => false]);
+        }
+    }
+
+    public function toggleSidebar(): void
+    {
+        $this->sidebarCompact = !$this->sidebarCompact;
+        session(['lms_sidebar_compact' => $this->sidebarCompact]);
     }
 
     public function nextSlide(): void
