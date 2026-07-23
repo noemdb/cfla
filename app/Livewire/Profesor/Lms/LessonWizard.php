@@ -3336,6 +3336,8 @@ PROMPT;
             'Guardado',
             count($this->wizardSections) . ' secciones, ' . count($visibleResourceIds) . ' recursos, ' . count($visibleLinkIds) . ' enlaces y ' . count($visibleEmbedIds) . ' embeds guardados correctamente'
         );
+
+        $this->saved = true;
     }
 
     // ─── Guarda o elimina la sección de preguntas de repaso ──────
