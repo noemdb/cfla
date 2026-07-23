@@ -1771,7 +1771,7 @@
             ">
 
             {{-- Navegación entre pasos --}}
-            <div class="flex items-center justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2">
+            <div class="flex items-center justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-4">
                 <button wire:click="goToStep({{ $currentStep - 1 }})"
                         class="px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
                     ← Anterior
@@ -4062,7 +4062,7 @@ Cómo...?"
                         <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Al guardar, se establece la notificación para la aprobación{{ $this->saved ? '' : ' · Sin guardar' }}</span>
+                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Al guardar, se establece la notificación para la aprobación/publicación {{ $this->saved ? '' : ' · ¡Sin guardar!' }}</span>
                     </div>
                 @else
                     <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-600/20 border border-slate-500/20 shadow-lg">
