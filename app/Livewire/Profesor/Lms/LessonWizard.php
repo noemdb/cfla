@@ -24,6 +24,9 @@ use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Notifications\LessonScheduledForApproval;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -3414,13 +3417,33 @@ PROMPT;
         $this->previewResourceIndex = null;
     }
 
+    public function isCurrentUserPlanner(): bool
+    {
+        return auth()->user()->isPlanner;
+    }
+
     public function confirmPublish(): void
     {
-        if (blank($this->publishAt)) {
-            $this->showPublishConfirm = true;
-        } else {
-            $this->saveAndPublish();
+        // Planners/admins pueden publicar directamente (comportamiento actual)
+        if ($this->isCurrentUserPlanner()) {
+            if (blank($this->publishAt)) {
+                $this->showPublishConfirm = true;
+            } else {
+                $this->saveAndPublish();
+            }
+            return;
         }
+
+        // Profesores: solo pueden programar (requiere fecha)
+        if (blank($this->publishAt)) {
+            $this->notification()->warning(
+                'Fecha requerida',
+                'Debes establecer una fecha de programación. La lección será revisada y publicada por Planificación.'
+            );
+            return;
+        }
+
+        $this->saveAndPublish();
     }
 
     public function saveAndPublish(): void
@@ -3689,9 +3712,42 @@ PROMPT;
 
         LmsActivityLog::record($activityId, auth()->id(), 'PUBLISH');
 
+        // Si el usuario es profesor (no planner), notificar a planning
+        if (!$this->isCurrentUserPlanner()) {
+            $this->notifyPlanningScheduled($activityId);
+        }
+
         $this->showPublishConfirm = false;
         $this->saved = true;
         $this->dispatch('lesson-saved');
+    }
+
+    // ─── Wizard orchestrator ──────────────────────────────────
+
+    private function notifyPlanningScheduled(int $activityId): void
+    {
+        $activity = \App\Models\app\Academy\Activity::find($activityId);
+        if (!$activity) {
+            return;
+        }
+
+        $planners = User::query()
+            ->where('is_planner', true)
+            ->orWhere('is_admin', true)
+            ->get();
+
+        $scheduledDate = $this->publishAt
+            ? \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i')
+            : '—';
+
+        Notification::send($planners, new LessonScheduledForApproval(
+            activityId: $activityId,
+            teacherName: auth()->user()->fullName ?? 'Profesor',
+            activityTitle: $activity->topic ?? 'Lección',
+            scheduledAt: $scheduledDate,
+        ));
+
+        \App\Models\app\Academy\Lms\LmsActivityLog::record($activityId, auth()->id(), 'SCHEDULE');
     }
 
     // ─── Export/Import ─────────────────────────────────────────
