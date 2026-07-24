@@ -76,9 +76,9 @@
     <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/50 rounded-lg p-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Estado</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Estado</label>
                 <select wire:model.live="filterStatus"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todos</option>
                     <option value="DRAFT">Borrador</option>
                     <option value="SCHEDULED">Programado</option>
@@ -87,9 +87,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Profesor</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Profesor</label>
                 <select wire:model.live="filterProfesor"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todos</option>
                     @foreach($profesores as $prof)
                         <option value="{{ $prof->id }}">{{ $prof->user?->name ?? $prof->lastname ?? 'Profesor #'.$prof->id }}</option>
@@ -97,9 +97,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Grado</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Grado</label>
                 <select wire:model.live="filterGrado"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todos</option>
                     @foreach($grados as $g)
                         <option value="{{ $g->id }}">{{ $g->name }}</option>
@@ -107,9 +107,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Sección</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Sección</label>
                 <select wire:model.live="filterSeccion"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todas</option>
                     @foreach($secciones as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -117,9 +117,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Asignatura</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Asignatura</label>
                 <select wire:model.live="filterAsignatura"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todas</option>
                     @foreach($asignaturas as $a)
                         <option value="{{ $a->id }}">{{ $a->name }}</option>
@@ -127,9 +127,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">P.Estudio</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">P.Estudio</label>
                 <select wire:model.live="filterPestudio"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todos</option>
                     @foreach($pestudios as $p)
                         <option value="{{ $p->id }}">{{ $p->name }}</option>
@@ -137,9 +137,9 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Buscar</label>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Buscar</label>
                 <input wire:model.live.debounce.300ms="search" type="search" placeholder="Título actividad…"
-                       class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-1.5 text-sm placeholder-slate-500 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none"/>
+                       class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm placeholder-slate-500 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none"/>
             </div>
         </div>
         @php $hasFilters = $search || $filterStatus || $filterProfesor || $filterGrado || $filterSeccion || $filterAsignatura || $filterPestudio; @endphp
@@ -160,9 +160,9 @@
 
     {{-- Bulk action bar --}}
     @if(count($selectedIds) > 0)
-        <div class="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
             <span class="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{{ count($selectedIds) }} seleccionado(s)</span>
-            <div class="flex items-center gap-2 ml-auto">
+            <div class="flex items-center gap-2 flex-wrap sm:ml-auto">
                 <button wire:click="bulkPublish"
                         wire:confirm="¿Publicar {{ count($selectedIds) }} contenido(s)?"
                         class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 border border-emerald-200 dark:border-emerald-500/30 transition-colors">
@@ -187,7 +187,16 @@
     @endif
 
     {{-- Tabla de publicaciones --}}
-    <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden">
+    <style>
+        .scrollbar-fino::-webkit-scrollbar { width: 5px; height: 5px; }
+        .scrollbar-fino::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-fino::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .scrollbar-fino::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark .scrollbar-fino::-webkit-scrollbar-thumb { background: #475569; }
+        .dark .scrollbar-fino::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+    <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/50 rounded-lg">
+        <div class="overflow-x-auto scrollbar-fino" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
         <table class="w-full text-sm">
             <thead class="bg-gray-100 dark:bg-slate-700/30">
                 <tr>
@@ -258,10 +267,10 @@
                                 } }}
                             </span>
                             @if($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
-                                <span class="block text-[10px] text-amber-600/70 dark:text-amber-500/70 mt-0.5">
+                                <span class="block text-[11px] text-amber-600/70 dark:text-amber-500/70 mt-0.5">
                                     {{ $pub->lmsPublication->publish_at->format('d/m/Y H:i') }}
                                     @if($pub->lmsPublication->created_at && $pub->lmsPublication->created_at->gt(now()->subHours(48)))
-                                        <span class="inline-block ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
+                                        <span class="inline-block ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
                                     @endif
                                 </span>
                             @endif
@@ -288,8 +297,8 @@
                             {{ $pub->lms_links_count > 0 ? $pub->lms_links_count : '—' }}
                         </td>
                         <td class="px-4 py-2.5">
-                            <div class="flex items-center justify-center gap-1">
-                                {{-- Ver contenido en dialog --}}
+                            <div class="flex items-center justify-center gap-1" x-data="{ actionsOpen: false }" @click.away="actionsOpen = false">
+                                {{-- Preview — always visible --}}
                                 <button wire:click="openPreview({{ $pub->id }})"
                                         class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 hover:border-slate-500/50 transition-all"
                                         title="Vista previa de lección">
@@ -299,28 +308,7 @@
                                     </svg>
                                 </button>
 
-                                {{-- Auditar --}}
-                                <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
-                                   class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-300 bg-cyan-50 dark:bg-cyan-500/10 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/20 hover:border-cyan-400/40 transition-all"
-                                   title="Auditar">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                </a>
-
-                                {{-- Configuración --}}
-                                @if($pub->lmsPublication && $pubStatus !== 'DRAFT')
-                                    <button wire:click="openSettings({{ $pub->id }})"
-                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/20 hover:border-blue-400/40 transition-all"
-                                            title="Configurar">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                    </button>
-                                @endif
-
-                                {{-- Publicar ahora (para SCHEDULED — aprobar y publicar inmediatamente) --}}
+                                {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                                 @if($pubStatus === 'SCHEDULED')
                                     <button wire:click="confirmPublish({{ $pub->id }})"
                                             class="px-2.5 py-1.5 rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all text-xs font-bold flex items-center gap-1"
@@ -328,48 +316,148 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                         </svg>
-                                        Publicar
                                     </button>
                                 @endif
 
-                                {{-- Programar / Publicar (incluye actividades sin publicación) --}}
-                                @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
-                                    <button wire:click="publish({{ $pub->id }})"
-                                            wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
-                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-400/40 transition-all"
-                                            title="Publicar ahora">
+                                {{-- Desktop group (hidden on mobile) --}}
+                                <div class="hidden sm:flex items-center gap-1">
+                                    {{-- Auditar --}}
+                                    <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                                       class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-300 bg-cyan-50 dark:bg-cyan-500/10 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/20 hover:border-cyan-400/40 transition-all"
+                                       title="Auditar">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </a>
+
+                                    {{-- Configuración --}}
+                                    @if($pub->lmsPublication && $pubStatus !== 'DRAFT')
+                                        <button wire:click="openSettings({{ $pub->id }})"
+                                                class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/20 hover:border-blue-400/40 transition-all"
+                                                title="Configurar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+
+                                    {{-- Programar / Publicar (incluye actividades sin publicación) --}}
+                                    @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                                        <button wire:click="publish({{ $pub->id }})"
+                                                wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                                class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-400/40 transition-all"
+                                                title="Publicar ahora">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                                            </svg>
+                                        </button>
+                                        <button wire:click="openSchedule({{ $pub->id }})"
+                                                class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 hover:border-amber-400/40 transition-all"
+                                                title="Programar publicación">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                        <button wire:click="unpublish({{ $pub->id }})"
+                                                wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
+                                                class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 hover:border-red-400/40 transition-all"
+                                                title="Archivar">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                        <button wire:click="setDraft({{ $pub->id }})"
+                                                wire:confirm="¿Revertir a borrador? La lección dejará de estar {{ $pubStatus === 'SCHEDULED' ? 'programada' : 'publicada' }}."
+                                                class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 border border-orange-200 dark:border-orange-500/20 hover:border-orange-400/40 transition-all"
+                                                title="Revertir a borrador">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+
+                                {{-- Mobile "···" dropdown (hidden on sm+) --}}
+                                <div class="relative sm:hidden">
+                                    <button @click="actionsOpen = !actionsOpen"
+                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                            title="Más acciones">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                                         </svg>
                                     </button>
-                                    <button wire:click="openSchedule({{ $pub->id }})"
-                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 hover:border-amber-400/40 transition-all"
-                                            title="Programar publicación">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </button>
-                                @endif
-                                @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
-                                    <button wire:click="unpublish({{ $pub->id }})"
-                                            wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
-                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 hover:border-red-400/40 transition-all"
-                                            title="Archivar">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                                        </svg>
-                                    </button>
-                                @endif
-                                @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
-                                    <button wire:click="setDraft({{ $pub->id }})"
-                                            wire:confirm="¿Revertir a borrador? La lección dejará de estar {{ $pubStatus === 'SCHEDULED' ? 'programada' : 'publicada' }}."
-                                            class="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-orange-700 dark:hover:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 border border-orange-200 dark:border-orange-500/20 hover:border-orange-400/40 transition-all"
-                                            title="Revertir a borrador">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                        </svg>
-                                    </button>
-                                @endif
+                                    <div x-show="actionsOpen"
+                                         x-transition:enter="transition ease-out duration-100"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-75"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute right-0 z-50 mt-1 min-w-[180px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
+                                         @click="actionsOpen = false">
+                                        {{-- Audit --}}
+                                        <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                                           class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                            <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            Auditar
+                                        </a>
+                                        {{-- Settings --}}
+                                        @if($pub->lmsPublication && $pubStatus !== 'DRAFT')
+                                            <button wire:click="openSettings({{ $pub->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                                Configurar
+                                            </button>
+                                        @endif
+                                        {{-- Publish / Schedule --}}
+                                        @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                                            <button wire:click="publish({{ $pub->id }})"
+                                                    wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                                                </svg>
+                                                Publicar ahora
+                                            </button>
+                                            <button wire:click="openSchedule({{ $pub->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                Programar
+                                            </button>
+                                        @endif
+                                        {{-- Archive / Revert --}}
+                                        @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                            <button wire:click="unpublish({{ $pub->id }})"
+                                                    wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                                </svg>
+                                                Archivar
+                                            </button>
+                                            <button wire:click="setDraft({{ $pub->id }})"
+                                                    wire:confirm="¿Revertir a borrador? La lección dejará de estar {{ $pubStatus === 'SCHEDULED' ? 'programada' : 'publicada' }}."
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                </svg>
+                                                Revertir a borrador
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -382,6 +470,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     {{-- Paginación --}}
@@ -443,7 +532,7 @@
                             } }}
                         </span>
                     </div>
-                    <span class="shrink-0 text-[10px] font-mono text-gray-400 dark:text-slate-600">
+                    <span class="shrink-0 text-[11px] font-mono text-gray-400 dark:text-slate-600">
                         {{ $pub->finicial ? \Carbon\Carbon::parse($pub->finicial)->format('d/m') : '' }}
                         <span class="text-gray-300 dark:text-slate-700">—</span>
                         {{ $pub->ffinal ? \Carbon\Carbon::parse($pub->ffinal)->format('d/m') : '' }}
@@ -495,22 +584,22 @@
 
                     {{-- Published date --}}
                     @if($pub->lmsPublication?->published_at)
-                        <div class="text-[10px] text-gray-400 dark:text-slate-600">
+                        <div class="text-[11px] text-gray-400 dark:text-slate-600">
                             Publicado {{ \Carbon\Carbon::parse($pub->lmsPublication->published_at)->format('d/m/Y H:i') }}
                         </div>
                     @elseif($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
-                        <div class="text-[10px] text-amber-600/70 dark:text-amber-500/70">
+                        <div class="text-[11px] text-amber-600/70 dark:text-amber-500/70">
                             Programado {{ $pub->lmsPublication->publish_at->format('d/m/Y H:i') }}
                             @if($pub->lmsPublication->created_at && $pub->lmsPublication->created_at->gt(now()->subHours(48)))
-                                <span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
+                                <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
                             @endif
                         </div>
                     @endif
                 </div>
 
                 {{-- Acciones --}}
-                <div class="mt-2 px-4 py-2 bg-gray-50 dark:bg-slate-900/40 border-t border-gray-200 dark:border-slate-700/40 flex items-center gap-1.5 flex-wrap">
-                    {{-- Vista previa --}}
+                <div class="mt-2 px-4 py-2 bg-gray-50 dark:bg-slate-900/40 border-t border-gray-200 dark:border-slate-700/40 flex items-center gap-1.5 flex-wrap" x-data="{ actionsOpen: false }" @click.away="actionsOpen = false">
+                    {{-- Vista previa — always visible --}}
                     <button wire:click="openPreview({{ $pub->id }})"
                             class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-gray-100 dark:bg-slate-700/40 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-600/40 transition-all"
                             title="Vista previa">
@@ -518,17 +607,7 @@
                         Vista
                     </button>
 
-                    {{-- Auditar --}}
-                    <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
-                       class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/20 transition-all"
-                       title="Auditar">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Auditar
-                    </a>
-
-                    <span class="flex-1"></span>
-
-                    {{-- Publicar ahora (para SCHEDULED) --}}
+                    {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                     @if($pubStatus === 'SCHEDULED')
                         <button wire:click="confirmPublish({{ $pub->id }})"
                                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all"
@@ -538,40 +617,109 @@
                         </button>
                     @endif
 
-                    {{-- Publicar / Programar --}}
-                    @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
-                        <button wire:click="publish({{ $pub->id }})"
-                                wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
-                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 transition-all"
-                                title="Publicar ahora">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                        </button>
-                        <button wire:click="openSchedule({{ $pub->id }})"
-                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 transition-all"
-                                title="Programar publicación">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </button>
-                    @endif
+                    <span class="hidden sm:block flex-1"></span>
 
-                    {{-- Archivar --}}
-                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
-                        <button wire:click="unpublish({{ $pub->id }})"
-                                wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
-                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 transition-all"
-                                title="Archivar">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                        </button>
-                    @endif
+                    {{-- Desktop group --}}
+                    <div class="hidden sm:flex items-center gap-1.5">
+                        {{-- Auditar --}}
+                        <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                           class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/20 transition-all"
+                           title="Auditar">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Auditar
+                        </a>
 
-                    {{-- Revertir a borrador --}}
-                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
-                        <button wire:click="setDraft({{ $pub->id }})"
-                                wire:confirm="¿Revertir a borrador?"
-                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 border border-orange-200 dark:border-orange-500/20 transition-all"
-                                title="Revertir a borrador">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        {{-- Publicar / Programar --}}
+                        @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                            <button wire:click="publish({{ $pub->id }})"
+                                    wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                    class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 transition-all"
+                                    title="Publicar ahora">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                            </button>
+                            <button wire:click="openSchedule({{ $pub->id }})"
+                                    class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 transition-all"
+                                    title="Programar publicación">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </button>
+                        @endif
+
+                        {{-- Archivar --}}
+                        @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                            <button wire:click="unpublish({{ $pub->id }})"
+                                    wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
+                                    class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 transition-all"
+                                    title="Archivar">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                            </button>
+                        @endif
+
+                        {{-- Revertir a borrador --}}
+                        @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                            <button wire:click="setDraft({{ $pub->id }})"
+                                    wire:confirm="¿Revertir a borrador?"
+                                    class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 border border-orange-200 dark:border-orange-500/20 transition-all"
+                                    title="Revertir a borrador">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </button>
+                        @endif
+                    </div>
+
+                    {{-- Mobile ··· dropdown --}}
+                    <div class="relative sm:hidden">
+                        <button @click="actionsOpen = !actionsOpen"
+                                class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/40 hover:bg-gray-200 dark:hover:bg-slate-700/60 border border-gray-200 dark:border-slate-600/40 transition-all"
+                                title="Más acciones">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                            </svg>
                         </button>
-                    @endif
+                        <div x-show="actionsOpen"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 z-50 mt-1 min-w-[180px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
+                             @click="actionsOpen = false">
+                            {{-- Audit --}}
+                            <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                               class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Auditar
+                            </a>
+                            {{-- Publish / Schedule --}}
+                            @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                                <button wire:click="publish({{ $pub->id }})"
+                                        wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                                    Publicar ahora
+                                </button>
+                                <button wire:click="openSchedule({{ $pub->id }})"
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Programar
+                                </button>
+                            @endif
+                            {{-- Archive --}}
+                            @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                                <button wire:click="unpublish({{ $pub->id }})"
+                                        wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                    <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                    Archivar
+                                </button>
+                                <button wire:click="setDraft({{ $pub->id }})"
+                                        wire:confirm="¿Revertir a borrador?"
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Revertir a borrador
+                                </button>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         @empty
@@ -858,7 +1006,7 @@
                 </div>
 
                 {{-- Tabs navigation --}}
-                <div class="flex gap-1 bg-gray-100 dark:bg-slate-900/50 rounded-lg p-1 mb-6" role="tablist">
+                <div class="flex gap-1 bg-gray-100 dark:bg-slate-900/50 rounded-lg p-1 mb-6 overflow-x-auto" role="tablist">
                     <button @click="tab = 'published'"
                             :class="tab === 'published' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30 shadow-sm' : 'text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 border-transparent'"
                             class="flex-1 px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200">
@@ -1345,7 +1493,7 @@
                                 <span class="text-emerald-600 dark:text-emerald-500">→ Publicado (automático)</span>
                             </div>
                         </div>
-                        <p class="text-[10px] text-gray-400 dark:text-slate-600 text-center mt-1">
+                        <p class="text-[11px] text-gray-400 dark:text-slate-600 text-center mt-1">
                             Las lecciones transitan de izquierda a derecha. Desde Publicado y Archivado se puede
                             <strong class="text-gray-600 dark:text-slate-500">revertir a Borrador</strong> para editar y reiniciar el ciclo.
                         </p>

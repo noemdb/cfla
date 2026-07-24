@@ -32,6 +32,7 @@ Usa este skill cuando el usuario diga:
 | **ADR-002** | CSS antes que Alpine.js para estados visuales. `x-data` solo si CSS no alcanza |
 | **ADR-003** | Componentes compartidos: variante vía prop opcional, no cambiar default |
 | **ADR-004** | Paridad de información — mobile es más denso, no más pobre. Prohibido eliminar info visible en desktop |
+| **ADR-005** | Contenedores: `<main>` mobile `px-2 py-2` (`sm:px-4 sm:py-8`). Divs contenedores siempre `px-2 py-2` base. Sin scroll horizontal en 320px |
 
 ## Flujo de ejecución
 
