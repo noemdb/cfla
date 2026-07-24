@@ -74,11 +74,11 @@
          wire:click="{{ $closeMethod }}"></div>
 
     {{-- Modal panel --}}
-    <div class="relative min-h-screen flex flex-col items-center p-4 pt-10"
+    <div class="relative min-h-screen flex flex-col items-center p-4 pt-6 sm:pt-10"
          x-data="lessonPreviewSwiper">
         <div class="w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0">
             {{-- Header --}}
-            <div class="flex items-center justify-between px-8 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
+            <div class="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
                     </div>
                 </div>
                 <button wire:click="{{ $closeMethod }}"
-                        class="p-2 hover:bg-white/10 rounded-lg transition-all">
+                        class="min-w-[44px] min-h-[44px] p-2 hover:bg-white/10 rounded-lg transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -104,7 +104,7 @@
                  x-ref="swiperContainer">
                 <div class="swiper-wrapper">
                     {{-- ═══════ SLIDE 1: PORTADA INSTITUCIONAL ═══════ --}}
-                    <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-10 flex flex-col min-h-[65vh] bg-stone-50">
+                    <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-6 md:p-10 flex flex-col min-h-[65vh] bg-stone-50">
                         {{-- Letterhead --}}
                         <div class="shrink-0">
                             <div class="h-[3px] w-24 rounded-full bg-amber-400 mb-5"></div>
@@ -127,14 +127,6 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="hidden sm:block text-right shrink-0">
-                                    <p class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
-                                        {{ $preview['plan_estudio'] ?: 'Plan de Estudio' }}
-                                    </p>
-                                    @if($preview['plan_estudio_code'])
-                                        <p class="text-[10px] text-stone-400 mt-0.5">Cód. {{ $preview['plan_estudio_code'] }}</p>
-                                    @endif
-                                </div>
                             </div>
                             <div class="border-t border-stone-200 mt-4 mb-6"></div>
                         </div>
@@ -148,6 +140,10 @@
                                 @if($preview['lapso'])
                                     <span class="text-stone-300 text-[10px]">/</span>
                                     <span class="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">{{ $preview['lapso'] }}</span>
+                                @endif
+                                @if($preview['plan_estudio'])
+                                    <span class="text-stone-300 text-[10px]">/</span>
+                                    <span class="text-[11px] font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200/60">{{ $preview['plan_estudio'] }}</span>
                                 @endif
                             </div>
 
@@ -230,7 +226,7 @@
 
                     {{-- ═══════ SECTION SLIDES ═══════ --}}
                     @forelse($preview['sections'] ?? [] as $section)
-                        <div class="swiper-slide overflow-y-auto w-full h-full min-h-0 p-6 md:p-8 flex flex-col">
+                        <div class="swiper-slide overflow-y-auto w-full h-full min-h-0 p-4 sm:p-6 md:p-8 flex flex-col">
                             {{-- Section header with teaching structure badge + step count --}}
                             @php
                                 $sectionTitleUpper = mb_strtoupper($section['title'] ?? '');
@@ -444,7 +440,7 @@
                                                 <div class="flex items-center justify-between px-3 py-2 bg-transparent border-t border-stone-200/40">
                                                     <span class="text-xs text-slate-600 truncate">{{ $res['display_name'] }}</span>
                                                     <a href="{{ $res['media']['public_url'] }}" target="_blank"
-                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 min-h-[44px] rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
                                                        title="Descargar {{ $res['display_name'] }}">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -465,7 +461,7 @@
                                                     <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                                 </div>
                                                 <a href="{{ $res['media']['public_url'] }}" target="_blank"
-                                                   class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                   class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 min-h-[44px] rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
                                                    title="Descargar {{ $res['display_name'] }}">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -497,7 +493,7 @@
                             @endif
                         </div>
                     @empty
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-8">
                             <div class="text-center py-12">
                                 <svg class="w-16 h-16 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
@@ -515,7 +511,7 @@
                         $unlinkedEmbeds = $previewHtmlEmbeds->filter(fn($e) => empty($e['section_id']))->values()->all();
                     @endphp
                     @if(count($unlinkedResources) > 0)
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-8">
                             <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -549,7 +545,7 @@
                                             <div class="flex items-center justify-between px-3 py-2 bg-slate-50 border-t border-slate-100">
                                                     <p class="text-sm font-medium text-slate-700 truncate">{{ $res['display_name'] }}</p>
                                                     <a href="{{ $res['media']['public_url'] }}" target="_blank"
-                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                                       class="ml-2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 min-h-[44px] rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
                                                        title="Descargar {{ $res['display_name'] }}">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -570,7 +566,7 @@
                                                 <p class="text-xs text-slate-400">{{ $res['media']['size_for_humans'] ?? '' }}</p>
                                             </div>
                                             <a href="{{ $res['media']['public_url'] }}" target="_blank"
-                                               class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
+                                               class="ml-auto text-[10px] font-medium text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 min-h-[44px] rounded border border-emerald-200 transition-colors shrink-0 flex items-center gap-1"
                                                title="Descargar {{ $res['display_name'] }}">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -586,7 +582,7 @@
 
                     {{-- ═══════ SLIDE: ENLACES NO VINCULADOS ═══════ --}}
                     @if(count($unlinkedLinks) > 0)
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-8">
                             <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -614,7 +610,7 @@
 
                     {{-- ═══════ SLIDE: HTML EMBEDS NO VINCULADOS ═══════ --}}
                     @if(count($unlinkedEmbeds) > 0)
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-8">
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-8">
                             <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
@@ -647,8 +643,8 @@
 
                     {{-- ═══════ SLIDE: PREGUNTAS DE REPASO ═══════ --}}
                     @if(!empty($preview['review_questions']))
-                        <div class="swiper-slide overflow-y-auto w-full h-auto p-6 md:p-8">
-                            {{-- 
+                        <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-6 md:p-8">
+                            {{--
                             <div class="flex items-center gap-2 mb-4 shrink-0">
                                 <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                                 <h2 class="text-lg font-bold text-slate-800">Preguntas de Repaso</h2>
@@ -830,26 +826,26 @@
         </div>{{-- /card --}}
 
         {{-- Footer navigation --}}
-        <div class="w-full max-w-7xl mt-auto px-8 py-2 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-between">
+        <div class="w-full max-w-7xl mt-auto px-4 sm:px-8 py-2 bg-white border-t border-slate-200 rounded-lg shadow-lg flex items-center justify-center sm:justify-between flex-wrap sm:flex-nowrap gap-y-2">
             <div class="flex items-center gap-1">
                 <button x-on:click="_getSwiper()?.slideTo(0)"
-                        class="w-8 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        class="min-w-[44px] min-h-[44px] rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         :class="currentSlide <= 1 ? 'opacity-30' : ''"
                         title="Ir al inicio">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
                 </button>
                 <button x-on:click="prev()"
-                        class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        class="min-w-[44px] min-h-[44px] rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         title="Anterior">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <button x-on:click="next()"
-                        class="w-9 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        class="min-w-[44px] min-h-[44px] rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         title="Siguiente">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button x-on:click="_getSwiper()?.slideTo(totalSlides - 1)"
-                        class="w-8 h-9 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
+                        class="min-w-[44px] min-h-[44px] rounded-lg bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center transition-all"
                         :class="currentSlide >= totalSlides ? 'opacity-30' : ''"
                         title="Ir al final">
                     <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
@@ -858,11 +854,11 @@
             <div class="swiper-pagination-fraction text-sm font-medium text-slate-500" x-text="currentSlide + ' / ' + totalSlides"></div>
             <div class="flex items-center gap-2">
                 <button x-on:click="toggleFullscreen"
-                        class="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-white transition-all">
+                        class="px-3 py-1.5 min-h-[44px] inline-flex items-center text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg hover:bg-white transition-all">
                     ⛶ Pantalla completa
                 </button>
                 <button wire:click="{{ $closeMethod }}"
-                        class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-all">
+                        class="px-4 py-1.5 min-h-[44px] inline-flex items-center bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-all">
                     Cerrar
                 </button>
             </div>
