@@ -5,37 +5,36 @@ namespace App\Livewire\Profesor\Lms;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Lms\LmsActivityContent;
+use App\Models\app\Academy\Lms\LmsActivityLink;
+use App\Models\app\Academy\Lms\LmsActivityLog;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lms\LmsActivitySection;
+use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
-use App\Models\app\Academy\Lms\LmsActivityLink;
-use App\Models\app\Academy\Lms\LmsActivityResource;
-use App\Models\app\Academy\Lms\LmsActivityContent;
-use App\Models\app\Academy\Lms\LmsActivitySection;
-use App\Models\app\Academy\Lms\LmsActivityPublication;
-use App\Models\app\Academy\Lms\LmsActivityLog;
-use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Instrument\DiagReferent;
+use App\Models\User;
+use App\Notifications\LessonScheduledForApproval;
 use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
-use App\Services\NapkinAiService;
 use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Notifications\LessonScheduledForApproval;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
 class LessonWizard extends Component
 {
-    use WithPagination, WithFileUploads, WireUiActions;
+    use WireUiActions, WithFileUploads, WithPagination;
 
     // ─── FALLBACK REINFORCEMENT ─────────────────────────────────
     private const FALLBACK_REINFORCEMENT = <<<'TEXT'
@@ -60,7 +59,9 @@ TEXT;
 
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
     public string $mode = 'list';
+
     public string $viewMode = 'grid';
+
     public ?int $selectedActivityId = null;
 
     // ─── Lifecycle hooks ─────────────────────────────────────────
@@ -69,25 +70,36 @@ TEXT;
     {
         session()->put('lesson_wizard_view_mode', $value);
     }
+
     public ?Activity $selectedActivity = null;
 
     // ─── Filtros del listado ───────────────────────────────────
     public $lapsoId = null;
+
     public $pestudioId = null;
+
     public $gradoId = null;
+
     public $seccionId = null;
+
     public string $search = '';
+
     public string $detailActivityId = '';
+
     public bool $showDetailModal = false;
+
     public $detailActivity = null;
 
     // ─── Wizard: paso actual ───────────────────────────────────
     public int $currentStep = 1;
+
     public bool $sidebarCompact = false;
 
     // ─── Wizard: Datos de la lección ───────────────────────────
     public string $lessonTitle = '';
+
     public string $lessonDescription = '';
+
     public bool $allowDownloads = true;
 
     // ─── Wizard: Referentes normativos (paso 1) ──────────────
@@ -95,11 +107,14 @@ TEXT;
 
     // ─── Wizard: Secciones (colección en memoria) ──────────────
     public array $wizardSections = [];
+
     public string $newSectionTitle = '';
 
     // ─── Wizard: Contenido temporal ────────────────────────────
     public ?int $editingSectionIndex = null;
+
     public string $contentTitle = '';
+
     public string $contentBody = '';
 
     // ─── Wizard: Preguntas de repaso (markdown) ─────────────────
@@ -110,17 +125,23 @@ TEXT;
 
     // ─── Slide navigation (paso 2) ────────────────────────────
     public int $currentSlideIndex = 0;
+
     public bool $showSlideHtmlPreview = false;
 
     // ─── Wizard: Generación con IA ─────────────────────────────
     public ?int $generatingSection = null;
+
     public bool $generatingStep1 = false;
+
     public bool $generatingStep2 = false;
+
     public ?string $generationError = null;
+
     public ?string $debugRawContent = null;
 
     // ─── Wizard: Resultado de generación (typewriter overlay) ──
     public bool $showGenerationResult = false;
+
     public ?string $generationType = null; // 'step1' | 'step2' | 'section'
 
     // ─── Wizard: Vista previa profesor (full-screen dialog) ──
@@ -131,20 +152,32 @@ TEXT;
 
     // ─── Export/Import ─────────────────────────────────────────
     public bool $showExportModal = false;
+
     public bool $showImportModal = false;
+
     public ?int $exportActivityId = null;
+
     public ?int $importActivityId = null;
+
     public ?int $exportTargetSectionId = null;
+
     public ?int $exportTargetActivityId = null;
+
     public array $exportAvailableSections = [];
+
     public array $exportAvailableActivities = [];
+
     public ?int $importSourceSectionId = null;
+
     public ?int $importSourceActivityId = null;
+
     public array $importAvailableSections = [];
+
     public array $importAvailableActivities = [];
 
     // ─── Import wizard ─────────────────────────────────────────
     public int $importWizardStep = 1;
+
     public ?array $importPreviewData = null;
 
     // ─── Step 3: Section selector for image prompt ─────────────
@@ -152,45 +185,79 @@ TEXT;
 
     // ─── Export wizard ─────────────────────────────────────────
     public int $exportWizardStep = 1;
+
     public ?array $exportPreviewData = null;
 
     // ─── Vista previa estudiante (unificada) ─────────────────
     public bool $showListStudentPreview = false;
+
     public ?array $listPreviewData = null;
 
     // ─── Wizard: Recursos temporales ───────────────────────────
     public $resourceFile;
+
     public string $resourceName = '';
+
     public mixed $resourceSectionId = null;
+
     public array $wizardResources = [];
+
     public ?int $editingResourceIndex = null;
 
     // ─── Wizard: Enlaces temporales ────────────────────────────
     public string $linkTitle = '';
+
     public string $linkUrl = '';
+
     public string $linkType = 'REFERENCE';
+
     public mixed $linkSectionId = null;
+
     public array $wizardLinks = [];
 
     // ─── Wizard: HTML embeds temporales ────────────────────────
     public array $wizardHtmlEmbeds = [];
+
     public string $embedTitle = '';
+
     public string $embedHtml = '';
+
     public mixed $embedSectionId = null;
+
     public ?int $previewEmbedIndex = null;
+
     public ?int $editingEmbedIndex = null;
+
     public ?int $previewResourceIndex = null;
+
     public bool $generatingEmbedCard = false;
+
     public bool $showEmbedPreview = false;
+
     public string $embedDiagramType = '';
+
     public string $embedPromptRefinement = '';
 
     // ─── Wizard: Publicación ───────────────────────────────────
     public string $pubStatus = 'DRAFT';
+
     public ?string $publishAt = null;
+
     public bool $saved = false;
+
     public bool $published = false;
+
+    public bool $isPublished = false;
+
     public bool $showPublishConfirm = false;
+
+    public bool $showUnsavedConfirm = false;
+
+    public bool $showHelpModal = false;
+
+    public bool $saveAnyway = false;
+
+    public ?string $pendingSaveAction = null;
 
     protected $paginationTheme = 'tailwind';
 
@@ -198,11 +265,11 @@ TEXT;
     {
         return [
             'newSectionTitle' => 'required|string|max:255',
-            'contentBody'     => 'required|string|min:1',
-            'resourceFile'    => 'nullable|file|max:2048|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
-            'resourceName'    => 'required_with:resourceFile|nullable|string|max:255',
-            'linkTitle'       => 'required_with:linkUrl|nullable|string|max:255',
-            'linkUrl'         => 'required_with:linkTitle|nullable|url|max:1000',
+            'contentBody' => 'required|string|min:1',
+            'resourceFile' => 'nullable|file|max:2048|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
+            'resourceName' => 'required_with:resourceFile|nullable|string|max:255',
+            'linkTitle' => 'required_with:linkUrl|nullable|string|max:255',
+            'linkUrl' => 'required_with:linkTitle|nullable|url|max:1000',
         ];
     }
 
@@ -225,11 +292,55 @@ TEXT;
 
     // ─── Listado: filtros ──────────────────────────────────────
 
-    public function updatingSearch()    { $this->resetPage(); }
-    public function updatingPestudioId(){ $this->resetPage(); $this->gradoId = null; $this->seccionId = null; }
-    public function updatingGradoId()   { $this->resetPage(); $this->seccionId = null; }
-    public function updatingSeccionId() { $this->resetPage(); }
-    public function updatingLapsoId()   { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPestudioId()
+    {
+        $this->resetPage();
+        $this->gradoId = null;
+        $this->seccionId = null;
+    }
+
+    public function updatingGradoId()
+    {
+        $this->resetPage();
+        $this->seccionId = null;
+    }
+
+    public function updatingSeccionId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingLapsoId()
+    {
+        $this->resetPage();
+    }
+
+    // ─── Detección de cambios sin guardar ────────────────────
+    // Marca $saved = false cuando el usuario modifica datos desde el frontend
+    public function updating($name, $value): void
+    {
+        if ($this->mode !== 'wizard') {
+            return;
+        }
+
+        $dirtyPrefixes = ['lessonTitle', 'lessonDescription', 'reviewQuestions',
+            'publishAt', 'allowDownloads',
+            'wizardSections', 'wizardResources',
+            'wizardLinks', 'wizardHtmlEmbeds'];
+
+        foreach ($dirtyPrefixes as $prefix) {
+            if (str_starts_with($name, $prefix)) {
+                $this->saved = false;
+
+                return;
+            }
+        }
+    }
 
     // ─── Listado: detalle en modal ─────────────────────────────
 
@@ -273,11 +384,19 @@ TEXT;
             403
         );
 
-        $this->selectedActivity   = $activity;
+        $this->selectedActivity = $activity;
         $this->selectedActivityId = $activityId;
-        $this->lessonTitle        = $activity->topic ?? '';
-        $this->lessonDescription  = $activity->description ?? '';
-        $this->allowDownloads     = $activity->lmsPublication?->allow_downloads ?? true;
+        $this->lessonTitle = $activity->topic ?? '';
+        $this->lessonDescription = $activity->description ?? '';
+        $this->allowDownloads = $activity->lmsPublication?->allow_downloads ?? true;
+        $this->publishAt = $activity->lmsPublication?->publish_at?->format('Y-m-d\TH:i');
+
+        // ─── Verificar si la lección ya está publicada ───────────
+        $this->isPublished = $activity->lmsPublication?->status === 'PUBLISHED';
+        $this->pubStatus = $activity->lmsPublication?->status ?? 'DRAFT';
+        // NOTA: no se setea $this->published aquí — esa propiedad
+        // solo se usa para mostrar el mensaje de éxito tras publicar.
+        // El estado de solo-lectura se controla con $this->isPublished.
 
         // Cargar secciones existentes en el wizard (sanear)
         $this->wizardSections = $activity->lmsSections()
@@ -291,7 +410,7 @@ TEXT;
             $this->wizardSections[$sKey]['title'] = $this->sanitizeText($section['title']);
             foreach ($section['contents'] ?? [] as $cKey => $content) {
                 $this->wizardSections[$sKey]['contents'][$cKey]['title'] = $this->sanitizeText($content['title'] ?? null);
-                $this->wizardSections[$sKey]['contents'][$cKey]['body']  = $this->sanitizeText($content['body'] ?? '');
+                $this->wizardSections[$sKey]['contents'][$cKey]['body'] = $this->sanitizeText($content['body'] ?? '');
             }
         }
 
@@ -300,7 +419,7 @@ TEXT;
         foreach ($this->wizardSections as $sKey => $section) {
             if (($section['title'] ?? '') === 'Preguntas de Repaso') {
                 $reviewBody = $section['contents'][0]['body'] ?? '';
-                if (!empty($reviewBody)) {
+                if (! empty($reviewBody)) {
                     $this->reviewQuestions = $this->sanitizeText($reviewBody);
                 }
                 unset($this->wizardSections[$sKey]);
@@ -323,12 +442,13 @@ TEXT;
         $this->wizardHtmlEmbeds = $activity->lmsHtmlEmbeds()
             ->where('is_visible', true)
             ->get()
-            ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+            ->map(fn ($e) => $this->ensureMermaidWrapper($e->toArray()))
             ->values()
             ->toArray();
 
         $this->currentStep = 1;
         $this->mode = 'wizard';
+        $this->saved = true; // recién cargado, sin cambios
 
         // Cargar referentes normativos del plan de estudio,
         // filtrando competencias a través del pensum
@@ -359,7 +479,7 @@ TEXT;
 
     public function toggleSidebar(): void
     {
-        $this->sidebarCompact = !$this->sidebarCompact;
+        $this->sidebarCompact = ! $this->sidebarCompact;
         session(['lms_sidebar_compact' => $this->sidebarCompact]);
     }
 
@@ -378,7 +498,11 @@ TEXT;
      */
     public function moveSlide(int $fromIndex, int $toIndex): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $count = count($this->wizardSections);
+        $this->saved = false;
         if ($fromIndex < 0 || $fromIndex >= $count || $toIndex < 0 || $toIndex >= $count || $fromIndex === $toIndex) {
             return;
         }
@@ -428,6 +552,7 @@ TEXT;
         $this->wizardReferents = null;
         $this->saved = false;
         $this->published = false;
+        $this->isPublished = false;
         $this->showPublishConfirm = false;
         $this->editingSectionIndex = null;
         $this->resourcePanelSection = null;
@@ -470,12 +595,12 @@ TEXT;
                 'pevaluacion.pensum.asignatura',
                 'pevaluacion.pensum.pestudio.peducativo.pescolar.institucion',
                 'lmsPublication',
-                'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
-                'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
-                'lmsResources' => fn($q) => $q->where('is_visible', true),
+                'lmsSections' => fn ($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+                'lmsSections.contents' => fn ($q) => $q->where('is_visible', true),
+                'lmsResources' => fn ($q) => $q->where('is_visible', true),
                 'lmsResources.media',
-                'lmsLinks' => fn($q) => $q->where('is_visible', true),
-                'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
+                'lmsLinks' => fn ($q) => $q->where('is_visible', true),
+                'lmsHtmlEmbeds' => fn ($q) => $q->where('is_visible', true),
             ])->findOrFail($activityId);
 
             // Reiniciar propiedades primero para forzar detección de cambio
@@ -483,59 +608,59 @@ TEXT;
             $this->listPreviewData = null;
 
             $this->listPreviewData = [
-                'activity_id'   => $activity->id,
-                'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
-                'title'         => $activity->topic ?? 'Lección',
-                'description'   => $activity->description ?? '',
-                'start_date'    => $activity->finicial,
-                'end_date'      => $activity->ffinal,
+                'activity_id' => $activity->id,
+                'subject' => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+                'title' => $activity->topic ?? 'Lección',
+                'description' => $activity->description ?? '',
+                'start_date' => $activity->finicial,
+                'end_date' => $activity->ffinal,
                 'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
                 // Separar "Preguntas de Repaso" de las secciones normales
                 'review_questions' => collect($activity->lmsSections->toArray())
-                    ->filter(fn($s) => ($s['title'] ?? '') === 'Preguntas de Repaso')
-                    ->flatMap(fn($s) => collect($s['contents'] ?? [])->pluck('body'))
+                    ->filter(fn ($s) => ($s['title'] ?? '') === 'Preguntas de Repaso')
+                    ->flatMap(fn ($s) => collect($s['contents'] ?? [])->pluck('body'))
                     ->filter()
                     ->implode("\n\n"),
-                'sections'      => $activity->lmsSections
-                    ->reject(fn($s) => $s->title === 'Preguntas de Repaso')
+                'sections' => $activity->lmsSections
+                    ->reject(fn ($s) => $s->title === 'Preguntas de Repaso')
                     ->values()
                     ->toArray(),
-                'resources'     => $activity->lmsResources->toArray(),
-                'links'         => $activity->lmsLinks->toArray(),
-                'html_embeds'   => $activity->lmsHtmlEmbeds
-                    ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+                'resources' => $activity->lmsResources->toArray(),
+                'links' => $activity->lmsLinks->toArray(),
+                'html_embeds' => $activity->lmsHtmlEmbeds
+                    ->map(fn ($e) => $this->ensureMermaidWrapper($e->toArray()))
                     ->values()
                     ->toArray(),
                 // Portada institucional
-                'institution'       => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->name ?? '',
-                'institution_rif'   => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->rif_institution ?? '',
-                'institution_city'  => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->city ?? '',
-                'periodo'           => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->name ?? '',
-                'periodo_finicial'  => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->finicial ?? '',
-                'periodo_ffinal'    => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->ffinal ?? '',
-                'plan_educativo'    => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->name ?? '',
+                'institution' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->name ?? '',
+                'institution_rif' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->rif_institution ?? '',
+                'institution_city' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->city ?? '',
+                'periodo' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->name ?? '',
+                'periodo_finicial' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->finicial ?? '',
+                'periodo_ffinal' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->ffinal ?? '',
+                'plan_educativo' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->name ?? '',
                 'plan_educativo_desc' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->description ?? '',
-                'plan_estudio'      => $activity->pevaluacion?->pensum?->pestudio?->name ?? '',
+                'plan_estudio' => $activity->pevaluacion?->pensum?->pestudio?->name ?? '',
                 'plan_estudio_code' => $activity->pevaluacion?->pensum?->pestudio?->code ?? '',
-                'grado'             => $activity->pevaluacion?->pensum?->grado?->name ?? '',
-                'grado_code'        => $activity->pevaluacion?->pensum?->grado?->code ?? '',
-                'seccion'           => $activity->pevaluacion?->seccion?->name ?? '',
-                'seccion_desc'      => $activity->pevaluacion?->seccion?->description ?? '',
-                'seccion_students'  => $activity->pevaluacion?->seccion?->amount_student ?? '',
-                'pensum'            => $activity->pevaluacion?->pensum?->asignatura?->name ?? '',
-                'asignatura_code'   => $activity->pevaluacion?->pensum?->asignatura?->code ?? '',
-                'asignatura_hours'  => $activity->pevaluacion?->pensum?->asignatura?->hour_t_week ?? '',
-                'lapso'             => $activity->pevaluacion?->lapso?->name ?? '',
-                'lapso_finicial'    => $activity->pevaluacion?->lapso?->finicial ?? '',
-                'lapso_ffinal'      => $activity->pevaluacion?->lapso?->ffinal ?? '',
+                'grado' => $activity->pevaluacion?->pensum?->grado?->name ?? '',
+                'grado_code' => $activity->pevaluacion?->pensum?->grado?->code ?? '',
+                'seccion' => $activity->pevaluacion?->seccion?->name ?? '',
+                'seccion_desc' => $activity->pevaluacion?->seccion?->description ?? '',
+                'seccion_students' => $activity->pevaluacion?->seccion?->amount_student ?? '',
+                'pensum' => $activity->pevaluacion?->pensum?->asignatura?->name ?? '',
+                'asignatura_code' => $activity->pevaluacion?->pensum?->asignatura?->code ?? '',
+                'asignatura_hours' => $activity->pevaluacion?->pensum?->asignatura?->hour_t_week ?? '',
+                'lapso' => $activity->pevaluacion?->lapso?->name ?? '',
+                'lapso_finicial' => $activity->pevaluacion?->lapso?->finicial ?? '',
+                'lapso_ffinal' => $activity->pevaluacion?->lapso?->ffinal ?? '',
                 // Activity extras
-                'thematic'          => $activity->thematic ?? '',
-                'references'        => $activity->references ?? '',
-                'activity_status'   => $activity->status ?? false,
-                'teaching'          => $activity->teaching ?? '',
+                'thematic' => $activity->thematic ?? '',
+                'references' => $activity->references ?? '',
+                'activity_status' => $activity->status ?? false,
+                'teaching' => $activity->teaching ?? '',
                 'has_teaching_structure' => $activity->hasTeachingStructure(),
                 'teaching_sections' => collect($activity->getTeachingSections())
-                    ->map(fn($content, $title) => compact('title', 'content'))
+                    ->map(fn ($content, $title) => compact('title', 'content'))
                     ->values()
                     ->toArray(),
             ];
@@ -544,7 +669,7 @@ TEXT;
         } catch (\Throwable $e) {
             $this->notification()->error(
                 'Error al cargar vista',
-                'No se pudo cargar la vista previa: ' . $e->getMessage()
+                'No se pudo cargar la vista previa: '.$e->getMessage()
             );
         }
     }
@@ -576,12 +701,12 @@ TEXT;
             foreach ($sec['contents'] as $c) {
                 $contents[] = [
                     'title' => $c['title'] ?? '',
-                    'body'  => $c['body'] ?? '',
+                    'body' => $c['body'] ?? '',
                 ];
             }
             $sections[] = [
-                'id'       => $sec['id'],
-                'title'    => $sec['title'],
+                'id' => $sec['id'],
+                'title' => $sec['title'],
                 'contents' => $contents,
             ];
         }
@@ -589,49 +714,49 @@ TEXT;
         $pe = $act?->pevaluacion;
 
         $this->listPreviewData = [
-            'activity_id'   => $act?->id,
-            'subject'       => $pe?->pensum?->asignatura?->name ?? 'Asignatura',
-            'title'         => $this->lessonTitle ?: $act?->topic ?? 'Lección',
-            'description'   => $this->lessonDescription ?: $act?->description ?? '',
-            'start_date'    => $act?->finicial,
-            'end_date'      => $act?->ffinal,
-            'allow_downloads'        => $this->allowDownloads,
-            'allow_comments'         => true,
-            'review_questions'       => $this->reviewQuestions,
-            'sections'               => $sections,
-            'resources'     => $this->wizardResources,
-            'links'         => $this->wizardLinks,
-            'html_embeds'   => collect($this->wizardHtmlEmbeds)
-                ->map(fn($e) => $this->ensureMermaidWrapper($e))
+            'activity_id' => $act?->id,
+            'subject' => $pe?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title' => $this->lessonTitle ?: $act?->topic ?? 'Lección',
+            'description' => $this->lessonDescription ?: $act?->description ?? '',
+            'start_date' => $act?->finicial,
+            'end_date' => $act?->ffinal,
+            'allow_downloads' => $this->allowDownloads,
+            'allow_comments' => true,
+            'review_questions' => $this->reviewQuestions,
+            'sections' => $sections,
+            'resources' => $this->wizardResources,
+            'links' => $this->wizardLinks,
+            'html_embeds' => collect($this->wizardHtmlEmbeds)
+                ->map(fn ($e) => $this->ensureMermaidWrapper($e))
                 ->toArray(),
             // Portada — no hay datos institucionales en wizard, se usan defaults
-            'institution'       => '',
-            'institution_rif'   => '',
-            'institution_city'  => '',
-            'periodo'           => '',
-            'plan_educativo'    => '',
-            'plan_estudio'      => '',
+            'institution' => '',
+            'institution_rif' => '',
+            'institution_city' => '',
+            'periodo' => '',
+            'plan_educativo' => '',
+            'plan_estudio' => '',
             'plan_estudio_code' => '',
-            'grado'             => $pe?->pensum?->grado?->name ?? '',
-            'grado_code'        => $pe?->pensum?->grado?->code ?? '',
-            'seccion'           => $pe?->seccion?->name ?? '',
-            'seccion_desc'      => '',
-            'seccion_students'  => '',
-            'pensum'            => $pe?->pensum?->asignatura?->name ?? '',
-            'asignatura_code'   => $pe?->pensum?->asignatura?->code ?? '',
-            'asignatura_hours'  => $pe?->pensum?->asignatura?->hour_t_week ?? '',
-            'lapso'             => $pe?->lapso?->name ?? '',
-            'lapso_finicial'    => $pe?->lapso?->finicial ?? '',
-            'lapso_ffinal'      => $pe?->lapso?->ffinal ?? '',
+            'grado' => $pe?->pensum?->grado?->name ?? '',
+            'grado_code' => $pe?->pensum?->grado?->code ?? '',
+            'seccion' => $pe?->seccion?->name ?? '',
+            'seccion_desc' => '',
+            'seccion_students' => '',
+            'pensum' => $pe?->pensum?->asignatura?->name ?? '',
+            'asignatura_code' => $pe?->pensum?->asignatura?->code ?? '',
+            'asignatura_hours' => $pe?->pensum?->asignatura?->hour_t_week ?? '',
+            'lapso' => $pe?->lapso?->name ?? '',
+            'lapso_finicial' => $pe?->lapso?->finicial ?? '',
+            'lapso_ffinal' => $pe?->lapso?->ffinal ?? '',
             // Activity extras
-            'thematic'          => $act?->thematic ?? '',
-            'references'        => $act?->references ?? '',
-            'activity_status'   => $act?->status ?? false,
-            'teaching'          => $act?->teaching ?? '',
+            'thematic' => $act?->thematic ?? '',
+            'references' => $act?->references ?? '',
+            'activity_status' => $act?->status ?? false,
+            'teaching' => $act?->teaching ?? '',
             'has_teaching_structure' => $act?->hasTeachingStructure() ?? false,
             'teaching_sections' => $act?->hasTeachingStructure()
                 ? collect($act->getTeachingSections())
-                    ->map(fn($content, $title) => compact('title', 'content'))
+                    ->map(fn ($content, $title) => compact('title', 'content'))
                     ->values()
                     ->toArray()
                 : [],
@@ -649,17 +774,21 @@ TEXT;
      */
     public function confirmDeleteLesson(int $activityId): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $activity = Activity::findOrFail($activityId);
+        $this->saved = false;
 
         $this->dialog()->confirm([
-            'title'       => 'Eliminar Lección',
+            'title' => 'Eliminar Lección',
             'description' => "¿Eliminar todo el contenido LMS de la actividad \"{$activity->topic}\"? Se eliminarán secciones, contenidos, recursos, enlaces y la publicación. Esta acción no se puede deshacer.",
-            'icon'        => 'error',
-            'accept'      => [
-                'label'  => 'Eliminar',
+            'icon' => 'error',
+            'accept' => [
+                'label' => 'Eliminar',
                 'method' => 'deleteLesson',
                 'params' => $activityId,
-                'color'  => 'negative',
+                'color' => 'negative',
             ],
             'reject' => [
                 'label' => 'Cancelar',
@@ -672,7 +801,11 @@ TEXT;
      */
     public function deleteLesson(int $activityId): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $activity = Activity::findOrFail($activityId);
+        $this->saved = false;
 
         // Verificar permisos
         $profesor = \App\Models\app\Academy\Profesor::where('user_id', auth()->id())->first();
@@ -711,9 +844,30 @@ TEXT;
         } catch (\Throwable $e) {
             $this->notification()->error(
                 'Error',
-                'No se pudo eliminar el contenido: ' . $e->getMessage()
+                'No se pudo eliminar el contenido: '.$e->getMessage()
             );
         }
+    }
+
+    // ─── Guard: lección publicada ──────────────────────────────
+
+    /**
+     * Verifica si la lección está publicada. Si lo está, muestra una
+     * notificación de error y retorna true para que el llamador retorne
+     * inmediatamente sin ejecutar la acción.
+     */
+    private function publishedGuard(): bool
+    {
+        if ($this->isPublished) {
+            $this->notification()->error(
+                'Lección publicada',
+                'Esta lección ya está publicada y no puede ser modificada.'
+            );
+
+            return true; // bloqueado
+        }
+
+        return false; // permitido
     }
 
     // ─── Wizard: Paso 1 — Generar con IA ───────────────────────
@@ -724,31 +878,35 @@ TEXT;
      */
     public function generateStep1Content(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $this->generatingStep1 = true;
+        $this->saved = false;
         $this->generationError = null;
 
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
         // ─── Contexto de la actividad ───────────────────────────
-        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
         $sectionName = $pevaluacion?->seccion?->name ?? '—';
 
         $activityContext = collect([
-            'Tema generador'       => $activity->topic,
-            'Tejido temático'      => $activity->thematic,
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Enseñanza'            => $activity->teaching,
+            'Enseñanza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-            'Referentes teóricos'  => $activity->references,
-            'ODS/Sistematización'  => $activity->observations,
-        ])->filter()->map(fn($v, $k) => "• {$k}: {$v}")->implode("\n");
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
 
         // ─── Indicadores de logro ───────────────────────────────
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn($n) => "• {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
@@ -792,10 +950,11 @@ PROMPT;
                 ['max_tokens' => 8192, 'timeout' => 120],
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingStep1 = false;
                 $this->notification()->error('Error al generar', $result['error']);
+
                 return;
             }
 
@@ -804,6 +963,7 @@ PROMPT;
             if (empty($content)) {
                 $this->generationError = 'La IA no generó contenido.';
                 $this->generatingStep1 = false;
+
                 return;
             }
 
@@ -816,6 +976,7 @@ PROMPT;
             if (empty($this->lessonTitle) && empty($this->lessonDescription)) {
                 $this->generationError = 'La respuesta de la IA no contiene título ni descripción válidos.';
                 $this->notification()->error('Error al generar', $this->generationError);
+
                 return;
             }
 
@@ -839,15 +1000,19 @@ PROMPT;
 
     public function addWizardSection(): void
     {
-        $title = !empty(trim($this->newSectionTitle ?? ''))
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
+        $title = ! empty(trim($this->newSectionTitle ?? ''))
             ? trim($this->newSectionTitle)
             : 'Nueva diapositiva';
 
         $this->wizardSections[] = [
-            'id'         => 'temp_' . uniqid(),
-            'title'      => $title,
+            'id' => 'temp_'.uniqid(),
+            'title' => $title,
             'is_visible' => true,
-            'contents'   => [],
+            'contents' => [],
         ];
 
         $this->newSectionTitle = '';
@@ -855,15 +1020,23 @@ PROMPT;
 
     public function toggleWizardSectionVisibility(int $index): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         if (isset($this->wizardSections[$index])) {
+            $this->saved = false;
             $this->wizardSections[$index]['is_visible'] =
-                !$this->wizardSections[$index]['is_visible'];
+                ! $this->wizardSections[$index]['is_visible'];
         }
     }
 
     public function removeWizardSection(int $index): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         unset($this->wizardSections[$index]);
+        $this->saved = false;
         $this->wizardSections = array_values($this->wizardSections);
     }
 
@@ -872,20 +1045,25 @@ PROMPT;
      */
     public function confirmResetWizardSections(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $count = count($this->wizardSections);
+        $this->saved = false;
         if ($count === 0) {
             $this->notification()->info('Sin secciones', 'No hay diapositivas que limpiar.');
+
             return;
         }
 
         $this->dialog()->confirm([
-            'title'       => 'Limpiar todas las diapositivas',
+            'title' => 'Limpiar todas las diapositivas',
             'description' => "¿Eliminar las {$count} diapositivas de la estructura actual? Se borrarán títulos, contenidos y bloques. Esta acción no se puede deshacer.",
-            'icon'        => 'error',
-            'accept'      => [
-                'label'  => 'Limpiar todo',
+            'icon' => 'error',
+            'accept' => [
+                'label' => 'Limpiar todo',
                 'method' => 'resetWizardSections',
-                'color'  => 'negative',
+                'color' => 'negative',
             ],
             'reject' => [
                 'label' => 'Cancelar',
@@ -895,19 +1073,23 @@ PROMPT;
 
     public function resetWizardSections(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         // ─── Eliminar registros de la BD si existen ────────────
+        $this->saved = false;
         $realSectionIds = [];
         $realContentIds = [];
 
         foreach ($this->wizardSections as $section) {
             $sectionId = $section['id'] ?? null;
-            if ($sectionId && !str_starts_with((string)$sectionId, 'temp_')) {
+            if ($sectionId && ! str_starts_with((string) $sectionId, 'temp_')) {
                 $realSectionIds[] = (int) $sectionId;
 
-                if (!empty($section['contents'])) {
+                if (! empty($section['contents'])) {
                     foreach ($section['contents'] as $content) {
                         $contentId = $content['id'] ?? null;
-                        if ($contentId && !str_starts_with((string)$contentId, 'temp_')) {
+                        if ($contentId && ! str_starts_with((string) $contentId, 'temp_')) {
                             $realContentIds[] = (int) $contentId;
                         }
                     }
@@ -915,9 +1097,9 @@ PROMPT;
             }
         }
 
-        if (!empty($realSectionIds)) {
+        if (! empty($realSectionIds)) {
             DB::transaction(function () use ($realSectionIds, $realContentIds) {
-                if (!empty($realContentIds)) {
+                if (! empty($realContentIds)) {
                     LmsActivityContent::whereIn('id', $realContentIds)->delete();
                 } else {
                     LmsActivityContent::whereIn('section_id', $realSectionIds)->delete();
@@ -942,25 +1124,58 @@ PROMPT;
 
     public function addWizardContent(int $sectionIndex): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $this->validate(['contentBody' => 'required|string|min:1']);
+        $this->saved = false;
 
         $this->wizardSections[$sectionIndex]['contents'][] = [
-            'id'       => 'temp_' . uniqid(),
-            'type'     => 'TEXT',
-            'title'    => $this->sanitizeText($this->contentTitle) ?: null,
-            'body'     => $this->sanitizeText($this->contentBody),
+            'id' => 'temp_'.uniqid(),
+            'type' => 'TEXT',
+            'title' => $this->sanitizeText($this->contentTitle) ?: null,
+            'body' => $this->sanitizeText($this->contentBody),
             'is_visible' => true,
-            'media'    => null,
+            'media' => null,
         ];
 
-        $this->contentTitle       = '';
-        $this->contentBody        = '';
+        $this->contentTitle = '';
+        $this->contentBody = '';
         $this->editingSectionIndex = null;
+    }
+
+    /**
+     * Crea el primer bloque de contenido vacío para una sección,
+     * permitiendo que el editor de texto aparezca para escribir
+     * contenido directamente sin usar generación por IA.
+     */
+    public function addWizardFirstBlock(int $sectionIndex): void
+    {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+        $this->saved = false;
+
+        $this->wizardSections[$sectionIndex]['contents'][] = [
+            'id' => 'temp_'.uniqid(),
+            'type' => 'TEXT',
+            'title' => null,
+            'body' => '',
+            'is_visible' => true,
+            'media' => null,
+        ];
     }
 
     public function removeWizardContent(int $sectionIndex, int $contentIndex): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         unset($this->wizardSections[$sectionIndex]['contents'][$contentIndex]);
+        $this->saved = false;
         $this->wizardSections[$sectionIndex]['contents'] =
             array_values($this->wizardSections[$sectionIndex]['contents']);
     }
@@ -973,7 +1188,11 @@ PROMPT;
      */
     public function generateSectionContent(int $sectionIndex): void
     {
-        if (!isset($this->wizardSections[$sectionIndex])) {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex])) {
             return;
         }
 
@@ -985,24 +1204,24 @@ PROMPT;
         $pevaluacion = $activity?->pevaluacion;
 
         // ─── Contexto de la actividad ───────────────────────────
-        $gradeName  = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
         $sectionName = $pevaluacion?->seccion?->name ?? '—';
 
         $activityContext = collect([
-            'Tema generador'       => $activity->topic,
-            'Tejido temático'      => $activity->thematic,
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Enseñanza'            => $activity->teaching,
+            'Enseñanza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-            'Referentes teóricos'  => $activity->references,
-            'ODS/Sistematización'  => $activity->observations,
-        ])->filter()->map(fn($v, $k) => "• {$k}: {$v}")->implode("\n");
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
 
         // ─── Indicadores de logro ───────────────────────────────
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn($n) => "• {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
@@ -1045,10 +1264,11 @@ PROMPT;
                 ['max_tokens' => 512, 'timeout' => 120],
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingSection = null;
                 $this->notification()->error('Error al generar', $result['error']);
+
                 return;
             }
 
@@ -1057,17 +1277,18 @@ PROMPT;
             if (empty($content)) {
                 $this->generationError = 'La IA no generó contenido.';
                 $this->generatingSection = null;
+
                 return;
             }
 
             // ─── Agregar como nuevo bloque de contenido (sanear) ─
             $this->wizardSections[$sectionIndex]['contents'][] = [
-                'id'       => 'temp_' . uniqid(),
-                'type'     => 'TEXT',
-                'title'    => null,
-                'body'     => $this->sanitizeText($content),
+                'id' => 'temp_'.uniqid(),
+                'type' => 'TEXT',
+                'title' => null,
+                'body' => $this->sanitizeText($content),
                 'is_visible' => true,
-                'media'    => null,
+                'media' => null,
             ];
 
             // Mostrar overlay con resultado
@@ -1093,12 +1314,17 @@ PROMPT;
      */
     public function generateSlideText(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex])) {
             return;
         }
         if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
             $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+
             return;
         }
 
@@ -1110,22 +1336,22 @@ PROMPT;
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
-        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
 
         $activityContext = collect([
-            'Tema generador'       => $activity->topic,
-            'Tejido tem├ítico'      => $activity->thematic,
+            'Tema generador' => $activity->topic,
+            'Tejido tem├ítico' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Ense├▒anza'            => $activity->teaching,
+            'Ense├▒anza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-            'Referentes te├│ricos'  => $activity->references,
-            'ODS/Sistematizaci├│n'  => $activity->observations,
-        ])->filter()->map(fn($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
+            'Referentes te├│ricos' => $activity->references,
+            'ODS/Sistematizaci├│n' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
 
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn($n) => "├ó—ó {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "├ó—ó {$n}")->implode("\n")
             : '—';
 
         $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
@@ -1195,10 +1421,11 @@ PROMPT;
                 ]
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingSection = null;
                 $this->notification()->error('Error al generar', $result['error']);
+
                 return;
             }
 
@@ -1209,6 +1436,7 @@ PROMPT;
             if (empty($content)) {
                 $this->generationError = 'La IA no gener├│ contenido.';
                 $this->generatingSection = null;
+
                 return;
             }
 
@@ -1239,12 +1467,12 @@ PROMPT;
             }
             // Siempre agregar como nuevo bloque adicional
             $this->wizardSections[$sectionIndex]['contents'][] = [
-                'id'         => 'temp_' . uniqid(),
-                'type'       => 'TEXT',
-                'title'      => null,
-                'body'       => $content,
+                'id' => 'temp_'.uniqid(),
+                'type' => 'TEXT',
+                'title' => null,
+                'body' => $content,
                 'is_visible' => true,
-                'media'      => null,
+                'media' => null,
             ];
 
             $charCount = mb_strlen($content);
@@ -1270,12 +1498,17 @@ PROMPT;
      */
     public function generateSlideImage(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex])) {
             return;
         }
         if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
             $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+
             return;
         }
 
@@ -1283,11 +1516,11 @@ PROMPT;
         $sectionBody = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
             ->pluck('body')
             ->filter()
-            ->map(fn($b) => strip_tags($b))
+            ->map(fn ($b) => strip_tags($b))
             ->implode("\n");
         $sectionPreview = \Illuminate\Support\Str::limit($sectionBody, 300) ?: 'Contenido pedagógico de la sección';
 
-        $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
 
         // ─── OpenRouter: IA genera SVG ──────────────────────────────
@@ -1360,7 +1593,7 @@ PROMPT;
                     if (preg_match('/<svg[\s>].*/is', $svgCode, $fallbackMatch)) {
                         $svgCode = $fallbackMatch[0];
                         // Cerrar SVG si falta </svg>
-                        if (!str_contains($svgCode, '</svg>')) {
+                        if (! str_contains($svgCode, '</svg>')) {
                             $svgCode .= '</svg>';
                         }
                     }
@@ -1371,21 +1604,21 @@ PROMPT;
                 $svgCode = preg_replace('/<\?xml.*?\?>\s*/', '', $svgCode);
                 $svgCode = trim($svgCode);
 
-                if (!empty($svgCode) && preg_match('/<svg[\s>]/i', $svgCode)) {
-                    $title = e('Diagrama: ' . $sectionTitle);
-                    $svgHtml = '<figure class="my-6">' . "\n"
-                        . '  <figcaption class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">'
-                        . $title . '</figcaption>' . "\n"
-                        . '  <div class="flex justify-center rounded-xl p-2">'
-                        . "\n    " . $svgCode . "\n  </div>\n"
-                        . '</figure>';
+                if (! empty($svgCode) && preg_match('/<svg[\s>]/i', $svgCode)) {
+                    $title = e('Diagrama: '.$sectionTitle);
+                    $svgHtml = '<figure class="my-6">'."\n"
+                        .'  <figcaption class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">'
+                        .$title.'</figcaption>'."\n"
+                        .'  <div class="flex justify-center rounded-xl p-2">'
+                        ."\n    ".$svgCode."\n  </div>\n"
+                        .'</figure>';
                 }
             }
 
             if (empty($svgHtml)) {
                 \Illuminate\Support\Facades\Log::warning('generateSlideImage: no se pudo extraer SVG del contenido generado', [
                     'content_length' => mb_strlen($aiResult['content'] ?? ''),
-                    'section'        => $sectionTitle,
+                    'section' => $sectionTitle,
                 ]);
             }
         } catch (\Throwable $e) {
@@ -1395,20 +1628,21 @@ PROMPT;
         }
 
         // ─── Insertar el SVG en la sección ──────────────────────────
-        if (!empty($svgHtml)) {
+        if (! empty($svgHtml)) {
             $this->wizardSections[$sectionIndex]['contents'][] = [
-                'id'         => 'temp_' . uniqid(),
-                'type'       => 'IMAGE',
-                'title'      => 'Diagrama: ' . $sectionTitle,
-                'body'       => $svgHtml,
+                'id' => 'temp_'.uniqid(),
+                'type' => 'IMAGE',
+                'title' => 'Diagrama: '.$sectionTitle,
+                'body' => $svgHtml,
                 'is_visible' => true,
-                'media'      => null,
+                'media' => null,
             ];
 
             $this->notification()->success(
                 'Diagrama SVG generado',
                 "Se generó un diagrama educativo para \"{$sectionTitle}\"."
             );
+
             return;
         }
 
@@ -1428,12 +1662,17 @@ PROMPT;
      */
     public function generateSectionIllustration(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex])) {
             return;
         }
         if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
             $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+
             return;
         }
 
@@ -1442,12 +1681,12 @@ PROMPT;
         $sectionBody = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
             ->pluck('body')
             ->filter()
-            ->map(fn($b) => strip_tags($b))
+            ->map(fn ($b) => strip_tags($b))
             ->implode("\n");
 
         $sectionBody = \Illuminate\Support\Str::limit($sectionBody, 2000) ?: 'Contenido pedagógico de la sección';
 
-        $gradeName   = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $this->selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $this->selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—';
 
         $systemPrompt = \App\Services\Lms\GenerateIllustrationLesson::getSystemPrompt();
@@ -1480,11 +1719,12 @@ PROMPT;
                 ]
             );
 
-            if (!$result['success'] || empty($result['content'])) {
+            if (! $result['success'] || empty($result['content'])) {
                 $this->notification()->error(
                     'Error al generar ilustración',
                     $result['error'] ?? 'No se pudo generar la ilustración SVG.'
                 );
+
                 return;
             }
 
@@ -1496,11 +1736,12 @@ PROMPT;
             $rawSvg = trim($rawSvg);
 
             // Extraer bloque <svg>...</svg>
-            if (!preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
+            if (! preg_match('/<svg[\s>].*?<\/svg>/is', $rawSvg, $svgMatch)) {
                 $this->notification()->error(
                     'Error al generar ilustración',
                     'La respuesta no contiene un SVG válido.'
                 );
+
                 return;
             }
             $svgCode = $svgMatch[0];
@@ -1509,16 +1750,16 @@ PROMPT;
             $svgHtml = app(\App\Services\NapkinAiService::class)->buildEmbedHtml(
                 $svgCode,
                 null,
-                'Ilustración: ' . $sectionTitle
+                'Ilustración: '.$sectionTitle
             );
 
             $this->wizardSections[$sectionIndex]['contents'][] = [
-                'id'         => 'temp_' . uniqid(),
-                'type'       => 'IMAGE',
-                'title'      => 'Ilustración: ' . $sectionTitle,
-                'body'       => $svgHtml,
+                'id' => 'temp_'.uniqid(),
+                'type' => 'IMAGE',
+                'title' => 'Ilustración: '.$sectionTitle,
+                'body' => $svgHtml,
                 'is_visible' => true,
-                'media'      => null,
+                'media' => null,
             ];
 
             $this->notification()->success(
@@ -1529,7 +1770,7 @@ PROMPT;
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('generateSectionIllustration: error', [
                 'section' => $sectionTitle,
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             $this->notification()->error(
@@ -1549,12 +1790,17 @@ PROMPT;
      */
     public function generateSlideDiagram(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex])) {
             return;
         }
         if (count($this->wizardSections[$sectionIndex]['contents'] ?? []) >= 2) {
             $this->notification()->warning('Límite alcanzado', 'Máximo 2 bloques de contenido por diapositiva.');
+
             return;
         }
 
@@ -1563,25 +1809,25 @@ PROMPT;
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
-        $gradeName    = $pevaluacion?->pensum?->grado?->name ?? '—';
-        $subjectName  = $pevaluacion?->pensum?->asignatura?->name ?? '—';
-        $sectionName  = $pevaluacion?->seccion?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName = $pevaluacion?->seccion?->name ?? '—';
 
         $activityContext = collect([
-            'T├¡tulo de la lecci├│n'   => $this->lessonTitle,
-            'Tema generador'         => $activity->topic,
-            'Tejido tem├ítico'        => $activity->thematic,
-            'Actividad evaluativa'   => $activity->description,
-            'Ense├▒anza'              => $activity->teaching,
-            'Aprendizaje esperado'   => $activity->learning,
-        ])->filter()->map(fn($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
+            'T├¡tulo de la lecci├│n' => $this->lessonTitle,
+            'Tema generador' => $activity->topic,
+            'Tejido tem├ítico' => $activity->thematic,
+            'Actividad evaluativa' => $activity->description,
+            'Ense├▒anza' => $activity->teaching,
+            'Aprendizaje esperado' => $activity->learning,
+        ])->filter()->map(fn ($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
 
         $sectionContents = collect($sectionData['contents'] ?? [])
-            ->map(fn($c) => ($c['title'] ?? '') . ($c['title'] ? "\n" : '') . ($c['body'] ?? ''))
+            ->map(fn ($c) => ($c['title'] ?? '').($c['title'] ? "\n" : '').($c['body'] ?? ''))
             ->filter()
             ->implode("\n\n");
 
-        $sectionContentPreview = !empty($sectionContents)
+        $sectionContentPreview = ! empty($sectionContents)
             ? $sectionContents
             : '(La secci├│n no tiene contenido a├║n.)';
 
@@ -1663,10 +1909,11 @@ PROMPT;
                 ]
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingSection = null;
                 $this->notification()->error('Error al generar diagrama', $result['error'] ?? 'Error desconocido');
+
                 return;
             }
 
@@ -1679,7 +1926,7 @@ PROMPT;
             } else {
                 // ─── Estrategia 2: sin fences — extraer código Mermaid desde su keyword ───
                 $mermaidKeywords = 'flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline';
-                if (preg_match('/\b(' . $mermaidKeywords . ')\s+(LR|TD|BT|RL)?/s', $raw, $kwMatch, PREG_OFFSET_CAPTURE)) {
+                if (preg_match('/\b('.$mermaidKeywords.')\s+(LR|TD|BT|RL)?/s', $raw, $kwMatch, PREG_OFFSET_CAPTURE)) {
                     $startPos = $kwMatch[0][1];
                     // Código desde el keyword hasta el final
                     $rawCode = substr($raw, $startPos);
@@ -1707,6 +1954,7 @@ PROMPT;
                 $this->generationError = 'La IA no generó código de diagrama.';
                 $this->generatingSection = null;
                 $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código de diagrama.');
+
                 return;
             }
 
@@ -1717,14 +1965,14 @@ PROMPT;
             // ─── Post-procesado: partir etiquetas largas en multi-línea con <br/> ───
             // Detecta nodos Mermaid con sintaxis label["texto"] o label["texto"][]
             // y divide textos de más de 30 caracteres en varias líneas.
-            $code = preg_replace_callback('/\["([^"]{35,})"\]/', function($m) {
+            $code = preg_replace_callback('/\["([^"]{35,})"\]/', function ($m) {
                 $text = $m[1];
                 // Dividir por espacios o puntos cada ~25-30 caracteres
                 $words = preg_split('/\s+/', $text);
                 $lines = [];
                 $currentLine = '';
                 foreach ($words as $word) {
-                    $test = $currentLine ? $currentLine . ' ' . $word : $word;
+                    $test = $currentLine ? $currentLine.' '.$word : $word;
                     if (mb_strlen($test) > 28 && $currentLine) {
                         $lines[] = $currentLine;
                         $currentLine = $word;
@@ -1732,33 +1980,36 @@ PROMPT;
                         $currentLine = $test;
                     }
                 }
-                if ($currentLine) $lines[] = $currentLine;
+                if ($currentLine) {
+                    $lines[] = $currentLine;
+                }
                 $multiLine = implode('<br/>', $lines);
-                return '["' . $multiLine . '"]';
+
+                return '["'.$multiLine.'"]';
             }, $code);
 
             // ─── Si es Mermaid puro (sin HTML), envolverlo ───
-            $isMermaidRaw = !str_contains($code, '<div') && !str_contains($code, '<span')
+            $isMermaidRaw = ! str_contains($code, '<div') && ! str_contains($code, '<span')
                 && preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', $code);
 
             if ($isMermaidRaw) {
                 $code = '<div class="w-full bg-white rounded-xl shadow-sm border border-gray-200">'
-                    . '<div class="p-3 sm:p-4 overflow-x-auto">'
-                    . '<div class="mermaid">' . "\n"
-                    . $code . "\n"
-                    . '</div>'
-                    . '</div>'
-                    . '</div>';
+                    .'<div class="p-3 sm:p-4 overflow-x-auto">'
+                    .'<div class="mermaid">'."\n"
+                    .$code."\n"
+                    .'</div>'
+                    .'</div>'
+                    .'</div>';
             }
 
             // Agregar como bloque de contenido HTML
             $this->wizardSections[$sectionIndex]['contents'][] = [
-                'id'         => 'temp_' . uniqid(),
-                'type'       => 'HTML',
-                'title'      => 'Diagrama: ' . $sectionTitle,
-                'body'       => $code,
+                'id' => 'temp_'.uniqid(),
+                'type' => 'HTML',
+                'title' => 'Diagrama: '.$sectionTitle,
+                'body' => $code,
                 'is_visible' => true,
-                'media'      => null,
+                'media' => null,
             ];
 
             $this->notification()->success(
@@ -1780,13 +2031,19 @@ PROMPT;
      */
     public function generateSlideHtmlTags(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex]['contents'][0])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex]['contents'][0])) {
             $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido para etiquetar. Genera texto primero.');
+
             return;
         }
         if (empty(trim(strip_tags($this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? '')))) {
             $this->notification()->warning('Contenido vacío', 'El body de esta diapositiva está vacío.');
+
             return;
         }
 
@@ -1798,7 +2055,7 @@ PROMPT;
 
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
-        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
 
         try {
@@ -1810,14 +2067,14 @@ PROMPT;
                 $sectionTitle,
                 $gradeName,
                 $subjectName,
-                fn(string $systemPrompt, string $userPrompt, array $overrides) => $this->askWithCompaction(
+                fn (string $systemPrompt, string $userPrompt, array $overrides) => $this->askWithCompaction(
                     $systemPrompt,
                     $userPrompt,
                     $overrides
                 ),
                 activityContext: $activity ? [
-                    'topic'       => $activity->topic ?? '',
-                    'teaching'    => $activity->teaching ?? '',
+                    'topic' => $activity->topic ?? '',
+                    'teaching' => $activity->teaching ?? '',
                     'description' => $activity->description ?? '',
                 ] : null,
             );
@@ -1853,14 +2110,20 @@ PROMPT;
      */
     public function generateSlideMath(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $sectionIndex = $this->currentSlideIndex;
-        if (!isset($this->wizardSections[$sectionIndex]['contents'][0])) {
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex]['contents'][0])) {
             $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido. Genera texto primero.');
+
             return;
         }
         $body = trim(strip_tags($this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? ''));
         if (empty($body)) {
             $this->notification()->warning('Contenido vacío', 'El body de esta diapositiva está vacío.');
+
             return;
         }
 
@@ -1963,7 +2226,7 @@ PROMPT;
      */
     private function loadWizardReferents(?int $pestudioId, $pensum): ?array
     {
-        if (!$pestudioId) {
+        if (! $pestudioId) {
             return null;
         }
 
@@ -1983,7 +2246,7 @@ PROMPT;
      */
     private function getReferentsContext(?int $pestudioId, $pensum = null): string
     {
-        if (!$pestudioId) {
+        if (! $pestudioId) {
             return '—';
         }
 
@@ -2006,12 +2269,12 @@ PROMPT;
             foreach ($ref->competencies as $comp) {
                 $indList = $comp->indicators->take(3);
                 $text = mb_strlen($comp->name) > 80
-                    ? mb_substr($comp->name, 0, 80) . '…'
+                    ? mb_substr($comp->name, 0, 80).'…'
                     : $comp->name;
                 $lines[] = "  {$text}";
                 foreach ($indList as $ind) {
                     $t = mb_strlen($ind->description) > 60
-                        ? mb_substr($ind->description, 0, 60) . '…'
+                        ? mb_substr($ind->description, 0, 60).'…'
                         : $ind->description;
                     $lines[] = "    - {$t}";
                 }
@@ -2030,7 +2293,11 @@ PROMPT;
      */
     public function generateStep2Sections(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $this->generatingStep2 = true;
+        $this->saved = false;
         $this->generationError = null;
         $this->debugRawContent = null;
 
@@ -2038,26 +2305,26 @@ PROMPT;
         $pevaluacion = $activity?->pevaluacion;
 
         // ─── Contexto de la actividad ───────────────────────────
-        $gradeName   = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
         $sectionName = $pevaluacion?->seccion?->name ?? '—';
         $lessonTitle = $this->lessonTitle ?: $activity->topic ?? '';
         $lessonDescription = $this->lessonDescription;
 
         $activityContext = collect([
-            'Tema generador'       => $activity->topic,
-            'Tejido temático'      => $activity->thematic,
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Enseñanza'            => $activity->teaching,
+            'Enseñanza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-            'Referentes teóricos'  => $activity->references,
-            'ODS/Sistematización'  => $activity->observations,
-        ])->filter()->map(fn($v, $k) => "• {$k}: {$v}")->implode("\n");
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
 
         // ─── Indicadores de logro ───────────────────────────────
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn($n) => "• {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
@@ -2162,11 +2429,11 @@ PROMPT;
         // ─── Validación de contenido mejorada ───────────────
         $contentValidator = function (string $content): bool {
             // 1. Debe contener los tres marcadores estructurales
-            $hasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
+            $hasInicio = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
             $hasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
-            $hasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
+            $hasCierre = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
 
-            if (!($hasInicio && $hasDesarrollo && $hasCierre)) {
+            if (! ($hasInicio && $hasDesarrollo && $hasCierre)) {
                 return false;
             }
 
@@ -2179,7 +2446,7 @@ PROMPT;
             }
 
             $blocks = preg_split('/\n\s*\n/', trim($devMatch[1]));
-            $validBlocks = array_filter($blocks, fn(string $b): bool => !empty(trim($b)));
+            $validBlocks = array_filter($blocks, fn (string $b): bool => ! empty(trim($b)));
 
             // Mínimo 5 bloques en DESARROLLO
             if (count($validBlocks) < 5) {
@@ -2212,6 +2479,7 @@ PROMPT;
                     'function_words' => $foundWords,
                     'accent_ratio' => round($accentRatio, 4),
                 ]);
+
                 return false;
             }
 
@@ -2226,6 +2494,7 @@ PROMPT;
                     Log::warning('generateStep2Sections: content rejected — generic theme detected', [
                         'pattern' => $pattern,
                     ]);
+
                     return false;
                 }
             }
@@ -2239,6 +2508,7 @@ PROMPT;
                         Log::warning('generateStep2Sections: content rejected — placeholder title', [
                             'title' => $firstLine,
                         ]);
+
                         return false;
                     }
                 }
@@ -2253,7 +2523,8 @@ PROMPT;
                 $wordCount = preg_match_all('/\p{L}+/u', trim($block));
                 if ($wordCount < 50 && isset($validBlocks[$i + 1])) {
                     // Fusionar título separado con su contenido
-                    $validBlocks[$i + 1] = trim($block) . "\n\n" . trim($validBlocks[$i + 1]);
+                    $validBlocks[$i + 1] = trim($block)."\n\n".trim($validBlocks[$i + 1]);
+
                     continue;
                 }
                 $processedBlocks[] = $block;
@@ -2265,6 +2536,7 @@ PROMPT;
                         'words' => $wordCount,
                         'preview' => mb_substr(trim($block), 0, 100),
                     ]);
+
                     return false;
                 }
             }
@@ -2288,10 +2560,11 @@ PROMPT;
                 ],
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingStep2 = false;
                 $this->notification()->error('Error al generar', $result['error']);
+
                 return;
             }
 
@@ -2303,6 +2576,7 @@ PROMPT;
             if (empty($content)) {
                 $this->generationError = 'La IA no generó contenido.';
                 $this->generatingStep2 = false;
+
                 return;
             }
 
@@ -2322,15 +2596,15 @@ PROMPT;
                     $partsDebug[] = ['marker' => $p2, 'len' => 0, 'preview' => ''];
                 } else {
                     $partsDebug[] = [
-                        'marker'  => $currentMarkerForDebug ?? '?',
-                        'len'     => mb_strlen($p),
+                        'marker' => $currentMarkerForDebug ?? '?',
+                        'len' => mb_strlen($p),
                         'preview' => mb_substr(preg_replace('/\s+/', ' ', $p), 0, 200),
                     ];
                 }
             }
             Log::debug('generateStep2Sections: parts from preg_split', [
                 'part_count' => count($parts),
-                'parts'      => $partsDebug,
+                'parts' => $partsDebug,
             ]);
 
             $currentMarker = null;
@@ -2340,24 +2614,25 @@ PROMPT;
                 $part = trim($part);
                 if ($part === 'INICIO' || $part === 'DESARROLLO' || $part === 'CIERRE') {
                     // Guardar bloque anterior
-                    if ($currentMarker && !empty(trim($buffer))) {
+                    if ($currentMarker && ! empty(trim($buffer))) {
                         $this->parseSectionBlock($currentMarker, $buffer);
                     }
                     $currentMarker = $part;
                     $buffer = '';
                 } else {
-                    $buffer .= $part . "\n";
+                    $buffer .= $part."\n";
                 }
             }
             // Último bloque
-            if ($currentMarker && !empty(trim($buffer))) {
+            if ($currentMarker && ! empty(trim($buffer))) {
                 $this->parseSectionBlock($currentMarker, $buffer);
             }
 
             if (empty($this->wizardSections)) {
                 $this->generationError = 'No se pudieron extraer secciones del contenido generado.';
-                $this->notification()->error('Error de formato', $this->generationError . ' La respuesta de la IA no incluyó los marcadores //INICIO, //DESARROLLO, //CIERRE.');
+                $this->notification()->error('Error de formato', $this->generationError.' La respuesta de la IA no incluyó los marcadores //INICIO, //DESARROLLO, //CIERRE.');
                 $this->generatingStep2 = false;
+
                 return;
             }
 
@@ -2365,15 +2640,15 @@ PROMPT;
 
             // Debug: registrar el resultado de la generación
             Log::info('generateStep2Sections: resultado', [
-                'section_count'      => $count,
-                'titles'             => collect($this->wizardSections)->pluck('title')->toArray(),
-                'content_length'     => mb_strlen($content),
-                'used_model'         => $result['model'] ?? '—',
-                'was_compacted'      => $result['compacted'] ?? false,
-                'has_markers'        => [
-                    'inicio'     => preg_match('/^\/\/INICIO\s*$/m', $content) === 1,
+                'section_count' => $count,
+                'titles' => collect($this->wizardSections)->pluck('title')->toArray(),
+                'content_length' => mb_strlen($content),
+                'used_model' => $result['model'] ?? '—',
+                'was_compacted' => $result['compacted'] ?? false,
+                'has_markers' => [
+                    'inicio' => preg_match('/^\/\/INICIO\s*$/m', $content) === 1,
                     'desarrollo' => preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1,
-                    'cierre'     => preg_match('/^\/\/CIERRE\s*$/m', $content) === 1,
+                    'cierre' => preg_match('/^\/\/CIERRE\s*$/m', $content) === 1,
                 ],
             ]);
 
@@ -2388,15 +2663,15 @@ PROMPT;
 
             // Si hay menos de 7 secciones, registrar para diagnóstico
             if ($count < 7) {
-                $titles = collect($this->wizardSections)->pluck('title')->map(fn($t) => "• {$t}")->implode("\n");
+                $titles = collect($this->wizardSections)->pluck('title')->map(fn ($t) => "• {$t}")->implode("\n");
                 Log::warning('generateStep2Sections: pocas secciones', [
-                    'count'            => $count,
-                    'titles'           => collect($this->wizardSections)->pluck('title')->toArray(),
+                    'count' => $count,
+                    'titles' => collect($this->wizardSections)->pluck('title')->toArray(),
                     'content_total_len' => mb_strlen($content),
-                    'full_content'     => $content,
-                    'has_inicio_block' => collect($this->wizardSections)->first(fn($s) => ($s['title'] ?? '') !== '') !== null,
+                    'full_content' => $content,
+                    'has_inicio_block' => collect($this->wizardSections)->first(fn ($s) => ($s['title'] ?? '') !== '') !== null,
                     'desarrollo_sections' => collect($this->wizardSections)
-                        ->filter(fn($s) => str_contains($s['title'] ?? '', 'Desarrollo') || preg_match('/^Desarrollo\s+\d+$/', $s['title'] ?? ''))
+                        ->filter(fn ($s) => str_contains($s['title'] ?? '', 'Desarrollo') || preg_match('/^Desarrollo\s+\d+$/', $s['title'] ?? ''))
                         ->values()
                         ->toArray(),
                 ]);
@@ -2425,7 +2700,7 @@ PROMPT;
             if (empty($line)) {
                 continue;
             }
-            if (!$inBody) {
+            if (! $inBody) {
                 // Primera línea no vacía es el título
                 $title = $line;
                 $inBody = true;
@@ -2440,7 +2715,7 @@ PROMPT;
             $title = $marker === 'INICIO' ? 'Inicio' : ($marker === 'CIERRE' ? 'Cierre' : 'Desarrollo');
         }
 
-            if ($marker === 'DESARROLLO') {
+        if ($marker === 'DESARROLLO') {
             // ─── Agrupar fragmentos del split en bloques (título + cuerpo) ──
             // Los modelos pueden generar formatos diferentes:
             //   Formato A) Título\nCuerpo\n\nTítulo2\nCuerpo2...
@@ -2464,7 +2739,7 @@ PROMPT;
                 $restOfBlock = trim(implode("\n", $bLines));
 
                 // Determinar si es continuación de cuerpo (línea larga sin body propio)
-                $isContinuation = !empty($tempBlocks)
+                $isContinuation = ! empty($tempBlocks)
                     && mb_strlen($firstLine) > $thresholdTitle
                     && empty($restOfBlock);
 
@@ -2480,11 +2755,11 @@ PROMPT;
                         : [];
 
                     if (empty($bTitle)) {
-                        $bTitle = 'Desarrollo ' . ($blockIndex + 1);
+                        $bTitle = 'Desarrollo '.($blockIndex + 1);
                     }
 
                     $tempBlocks[] = [
-                        'title'      => $bTitle,
+                        'title' => $bTitle,
                         'body_frags' => $bBodyLines,
                     ];
                     $blockIndex++;
@@ -2498,23 +2773,23 @@ PROMPT;
                 $bBody = trim(implode("\n\n", $tb['body_frags']));
 
                 if (empty($bTitle)) {
-                    $bTitle = 'Desarrollo ' . ($blockIndex + 1);
+                    $bTitle = 'Desarrollo '.($blockIndex + 1);
                 }
                 if (empty($bBody)) {
                     continue;
                 }
 
                 $this->wizardSections[] = [
-                    'id'         => 'temp_' . uniqid(),
-                    'title'      => $this->sanitizeText($bTitle),
+                    'id' => 'temp_'.uniqid(),
+                    'title' => $this->sanitizeText($bTitle),
                     'is_visible' => true,
-                    'contents'   => [[
-                        'id'         => 'temp_' . uniqid(),
-                        'type'       => 'TEXT',
-                        'title'      => null,
-                        'body'       => $this->sanitizeText($bBody),
+                    'contents' => [[
+                        'id' => 'temp_'.uniqid(),
+                        'type' => 'TEXT',
+                        'title' => null,
+                        'body' => $this->sanitizeText($bBody),
                         'is_visible' => true,
-                        'media'      => null,
+                        'media' => null,
                     ]],
                 ];
                 $blockIndex++;
@@ -2522,25 +2797,25 @@ PROMPT;
             }
 
             Log::debug('parseSectionBlock: DESARROLLO result', [
-                'raw_fragments'    => count($blocks),
+                'raw_fragments' => count($blocks),
                 'assembled_blocks' => $blockCount,
-                'titles'           => collect($tempBlocks)->pluck('title')->toArray(),
+                'titles' => collect($tempBlocks)->pluck('title')->toArray(),
             ]);
         } else {
             // INICIO o CIERRE — una sola sección
             $sectionTitle = $marker === 'INICIO' ? ($title ?: 'Inicio') : ($title ?: 'Cierre');
 
             $this->wizardSections[] = [
-                'id'         => 'temp_' . uniqid(),
-                'title'      => $this->sanitizeText($sectionTitle),
+                'id' => 'temp_'.uniqid(),
+                'title' => $this->sanitizeText($sectionTitle),
                 'is_visible' => true,
-                'contents'   => [[
-                    'id'         => 'temp_' . uniqid(),
-                    'type'       => 'TEXT',
-                    'title'      => null,
-                    'body'       => $this->sanitizeText($body ?: $text),
+                'contents' => [[
+                    'id' => 'temp_'.uniqid(),
+                    'type' => 'TEXT',
+                    'title' => null,
+                    'body' => $this->sanitizeText($body ?: $text),
                     'is_visible' => true,
-                    'media'      => null,
+                    'media' => null,
                 ]],
             ];
         }
@@ -2550,7 +2825,11 @@ PROMPT;
 
     public function addWizardResource(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $isUpdate = $this->editingResourceIndex !== null;
+        $this->saved = false;
 
         try {
             $rules = [
@@ -2580,6 +2859,7 @@ PROMPT;
                 $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
             } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
                 $this->notification()->error('Error al subir', $e->getMessage());
+
                 return;
             }
 
@@ -2588,7 +2868,9 @@ PROMPT;
             $totalBytes = $newFileSize;
             foreach ($this->wizardResources as $idx => $res) {
                 // En actualización, excluir el recurso actual si ya tiene tamaño
-                if ($isUpdate && $idx === $this->editingResourceIndex) continue;
+                if ($isUpdate && $idx === $this->editingResourceIndex) {
+                    continue;
+                }
                 $totalBytes += $res['media']['size_bytes'] ?? 0;
             }
             if ($totalBytes > 10485760) { // 10 MB en bytes
@@ -2596,16 +2878,17 @@ PROMPT;
                     'Límite excedido',
                     'El total de recursos de la lección no puede superar los 10 MB. Este archivo excede el límite disponible.'
                 );
+
                 return;
             }
 
             $mediaData = [
-                'id'              => $media->id,
-                'original_name'   => $media->original_name,
-                'mime_type'       => $media->mime_type,
-                'size_bytes'      => $media->size_bytes,
+                'id' => $media->id,
+                'original_name' => $media->original_name,
+                'mime_type' => $media->mime_type,
+                'size_bytes' => $media->size_bytes,
                 'size_for_humans' => $media->size_for_humans,
-                'public_url'      => $media->public_url,
+                'public_url' => $media->public_url,
             ];
         }
 
@@ -2613,10 +2896,10 @@ PROMPT;
             // ─── Actualizar recurso existente ───────────────────
             $existing = $this->wizardResources[$this->editingResourceIndex];
             $existing['display_name'] = $this->resourceName;
-            $existing['section_id']   = $this->resourceSectionId;
+            $existing['section_id'] = $this->resourceSectionId;
             if ($mediaData) {
-                $existing['media_id']  = $mediaData['id'];
-                $existing['media']     = $mediaData;
+                $existing['media_id'] = $mediaData['id'];
+                $existing['media'] = $mediaData;
             }
             $this->wizardResources[$this->editingResourceIndex] = $existing;
 
@@ -2631,13 +2914,13 @@ PROMPT;
         } else {
             // ─── Agregar nuevo recurso ──────────────────────────
             $this->wizardResources[] = [
-                'id'           => 'temp_' . uniqid(),
-                'section_id'   => $this->resourceSectionId,
-                'media_id'     => $mediaData['id'],
-                'uploaded_by'  => auth()->id(),
+                'id' => 'temp_'.uniqid(),
+                'section_id' => $this->resourceSectionId,
+                'media_id' => $mediaData['id'],
+                'uploaded_by' => auth()->id(),
                 'display_name' => $this->resourceName,
-                'description'  => '',
-                'media'        => $mediaData,
+                'description' => '',
+                'media' => $mediaData,
             ];
 
             $addedName = $this->resourceName;
@@ -2653,7 +2936,13 @@ PROMPT;
 
     public function editWizardResource(int $index): void
     {
-        if (!isset($this->wizardResources[$index])) return;
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardResources[$index])) {
+            return;
+        }
+        $this->saved = false;
 
         $res = $this->wizardResources[$index];
         $this->editingResourceIndex = $index;
@@ -2670,7 +2959,11 @@ PROMPT;
 
     public function removeWizardResource(int $index): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         unset($this->wizardResources[$index]);
+        $this->saved = false;
         $this->wizardResources = array_values($this->wizardResources);
 
         // Ajustar o cancelar edición si el recurso eliminado afecta al índice de edición
@@ -2685,7 +2978,11 @@ PROMPT;
 
     public function removeAllWizardResources(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         $this->wizardResources = [];
+        $this->saved = false;
         $this->wizardLinks = [];
         $this->wizardHtmlEmbeds = [];
         $this->editingResourceIndex = null;
@@ -2711,10 +3008,14 @@ PROMPT;
 
     public function addWizardLink(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         try {
+            $this->saved = false;
             $rules = [
                 'linkTitle' => 'required|string|max:255',
-                'linkUrl'   => 'required|url|max:1000',
+                'linkUrl' => 'required|url|max:1000',
             ];
             if (count($this->wizardSections) > 0) {
                 $rules['linkSectionId'] = 'required';
@@ -2728,11 +3029,11 @@ PROMPT;
         }
 
         $this->wizardLinks[] = [
-            'id'         => 'temp_' . uniqid(),
+            'id' => 'temp_'.uniqid(),
             'section_id' => $this->linkSectionId,
-            'title'      => $this->linkTitle,
-            'url'        => $this->linkUrl,
-            'link_type'  => $this->linkType,
+            'title' => $this->linkTitle,
+            'url' => $this->linkUrl,
+            'link_type' => $this->linkType,
             'sort_order' => count($this->wizardLinks) + 1,
         ];
 
@@ -2748,7 +3049,11 @@ PROMPT;
 
     public function removeWizardLink(int $index): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         unset($this->wizardLinks[$index]);
+        $this->saved = false;
         $this->wizardLinks = array_values($this->wizardLinks);
     }
 
@@ -2756,7 +3061,11 @@ PROMPT;
 
     public function addWizardHtmlEmbed(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         try {
+            $this->saved = false;
             $rules = [
                 'embedHtml' => 'required|string|min:1',
             ];
@@ -2772,12 +3081,12 @@ PROMPT;
         }
 
         $data = [
-            'id'               => 'temp_' . uniqid(),
-            'section_id'       => $this->embedSectionId,
-            'title'            => $this->embedTitle ?: null,
-            'html_content'     => $this->embedHtml,
+            'id' => 'temp_'.uniqid(),
+            'section_id' => $this->embedSectionId,
+            'title' => $this->embedTitle ?: null,
+            'html_content' => $this->embedHtml,
             'render_condition' => 'ALWAYS',
-            'is_visible'       => true,
+            'is_visible' => true,
         ];
 
         $isUpdate = $this->editingEmbedIndex !== null;
@@ -2806,7 +3115,13 @@ PROMPT;
 
     public function editWizardHtmlEmbed(int $index): void
     {
-        if (!isset($this->wizardHtmlEmbeds[$index])) return;
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardHtmlEmbeds[$index])) {
+            return;
+        }
+        $this->saved = false;
 
         $embed = $this->wizardHtmlEmbeds[$index];
         $this->editingEmbedIndex = $index;
@@ -2825,7 +3140,11 @@ PROMPT;
 
     public function removeWizardHtmlEmbed(int $index): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
         unset($this->wizardHtmlEmbeds[$index]);
+        $this->saved = false;
         $this->wizardHtmlEmbeds = array_values($this->wizardHtmlEmbeds);
     }
 
@@ -2833,7 +3152,13 @@ PROMPT;
 
     public function addWizardResourceSection(int $sectionIndex): void
     {
-        if (!isset($this->wizardSections[$sectionIndex])) return;
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+        $this->saved = false;
         $this->resourceSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
             ? (int) $this->wizardSections[$sectionIndex]['id']
             : null;
@@ -2843,7 +3168,13 @@ PROMPT;
 
     public function addWizardLinkSection(int $sectionIndex): void
     {
-        if (!isset($this->wizardSections[$sectionIndex])) return;
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+        $this->saved = false;
         $this->linkSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
             ? (int) $this->wizardSections[$sectionIndex]['id']
             : null;
@@ -2853,7 +3184,13 @@ PROMPT;
 
     public function addWizardHtmlEmbedSection(int $sectionIndex): void
     {
-        if (!isset($this->wizardSections[$sectionIndex])) return;
+        if ($this->publishedGuard()) {
+            return;
+        }
+        if (! isset($this->wizardSections[$sectionIndex])) {
+            return;
+        }
+        $this->saved = false;
         $this->embedSectionId = is_numeric($this->wizardSections[$sectionIndex]['id'])
             ? (int) $this->wizardSections[$sectionIndex]['id']
             : null;
@@ -2870,11 +3207,16 @@ PROMPT;
      */
     public function generateEmbedCard(): void
     {
-        if (!$this->embedSectionId) {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
+        if (! $this->embedSectionId) {
             $this->notification()->warning(
                 'Selecciona una sección',
                 'Debes seleccionar una sección destino para generar el diagrama.'
             );
+
             return;
         }
 
@@ -2889,11 +3231,12 @@ PROMPT;
             }
         }
 
-        if (!$sectionData) {
+        if (! $sectionData) {
             $this->notification()->error(
                 'Sección no encontrada',
                 'La sección seleccionada no existe en la lección.'
             );
+
             return;
         }
 
@@ -2903,39 +3246,39 @@ PROMPT;
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
-        $gradeName    = $pevaluacion?->pensum?->grado?->name ?? '—';
-        $subjectName  = $pevaluacion?->pensum?->asignatura?->name ?? '—';
-        $sectionName  = $pevaluacion?->seccion?->name ?? '—';
-        $lapsoName    = $pevaluacion?->lapso?->name ?? '—';
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName = $pevaluacion?->seccion?->name ?? '—';
+        $lapsoName = $pevaluacion?->lapso?->name ?? '—';
 
         // ─── Contexto completo de la actividad ───────────────────
         $activityContext = collect([
-            'Título de la lección'   => $this->lessonTitle,
-            'Descripción'            => $this->lessonDescription,
-            'Tema generador'         => $activity->topic,
-            'Tejido temático'        => $activity->thematic,
-            'Actividad evaluativa'   => $activity->description,
-            'Enseñanza'              => $activity->teaching,
-            'Aprendizaje esperado'   => $activity->learning,
-            'Referentes teóricos'    => $activity->references,
-            'ODS/Sistematización'    => $activity->observations,
-        ])->filter()->map(fn($v, $k) => "• {$k}: {$v}")->implode("\n");
+            'Título de la lección' => $this->lessonTitle,
+            'Descripción' => $this->lessonDescription,
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
+            'Actividad evaluativa' => $activity->description,
+            'Enseñanza' => $activity->teaching,
+            'Aprendizaje esperado' => $activity->learning,
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
 
         // ─── Contenido de la sección destino ─────────────────────
         $sectionTitle = $sectionData['title'];
         $sectionContents = collect($sectionData['contents'] ?? [])
-            ->map(fn($c) => ($c['title'] ?? '') . ($c['title'] ? "\n" : '') . ($c['body'] ?? ''))
+            ->map(fn ($c) => ($c['title'] ?? '').($c['title'] ? "\n" : '').($c['body'] ?? ''))
             ->filter()
             ->implode("\n\n");
 
-        $sectionContentPreview = !empty($sectionContents)
+        $sectionContentPreview = ! empty($sectionContents)
             ? $sectionContents
             : '(La sección no tiene contenido aún. Genera contenido representativo basado en el nombre de la sección y el contexto de la actividad.)';
 
         // ─── Indicadores de logro ────────────────────────────────
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn($n) => "• {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
             : '—';
 
         // ─── Referentes normativos ───────────────────────────────
@@ -2954,13 +3297,13 @@ PROMPT;
         // ══════════════════════════════════════════════════════════
 
         $diagramTypeConstraint = '';
-        if (!empty($this->embedDiagramType)) {
+        if (! empty($this->embedDiagramType)) {
             $typeLabels = [
-                'graph'    => 'graph (flowchart)',
+                'graph' => 'graph (flowchart)',
                 'sequence' => 'sequenceDiagram', 'class' => 'classDiagram',
-                'pie'      => 'pie', 'mindmap' => 'mindmap', 'gantt' => 'gantt',
-                'er'       => 'erDiagram', 'state' => 'stateDiagram',
-                'journey'  => 'journey', 'gitgraph' => 'gitgraph', 'timeline' => 'timeline',
+                'pie' => 'pie', 'mindmap' => 'mindmap', 'gantt' => 'gantt',
+                'er' => 'erDiagram', 'state' => 'stateDiagram',
+                'journey' => 'journey', 'gitgraph' => 'gitgraph', 'timeline' => 'timeline',
             ];
             $label = $typeLabels[$this->embedDiagramType] ?? $this->embedDiagramType;
             $diagramTypeConstraint = "\n\n**Tipo solicitado:** `{$label}`. Usa EXCLUSIVAMENTE este tipo de diagrama.\n";
@@ -3010,7 +3353,7 @@ graph TD
 </div>
 PROMPT;
 
-        $promptRefinementText = !empty($this->embedPromptRefinement)
+        $promptRefinementText = ! empty($this->embedPromptRefinement)
             ? trim($this->embedPromptRefinement)
             : '(El docente no añadió instrucciones adicionales. Genera el diagrama según el contexto.)';
 
@@ -3062,17 +3405,18 @@ PROMPT;
                 $systemPrompt,
                 $userPrompt,
                 [
-                    'max_tokens'  => 2048,
+                    'max_tokens' => 2048,
                     'temperature' => 0.7,
-                    'timeout'     => 120,
+                    'timeout' => 120,
                 ],
                 3500
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 $this->generationError = $result['error'];
                 $this->generatingEmbedCard = false;
                 $this->notification()->error('Error al generar diagrama', $result['error'] ?? 'Error desconocido');
+
                 return;
             }
 
@@ -3088,6 +3432,7 @@ PROMPT;
                 $this->generationError = 'La IA no generó contenido HTML.';
                 $this->generatingEmbedCard = false;
                 $this->notification()->error('Respuesta vacía', 'La IA no generó ningún código HTML.');
+
                 return;
             }
 
@@ -3107,7 +3452,7 @@ PROMPT;
 
             // Sugerir título basado en la sección
             if (empty($this->embedTitle)) {
-                $this->embedTitle = 'Diagrama: ' . $sectionTitle;
+                $this->embedTitle = 'Diagrama: '.$sectionTitle;
             }
 
             $this->generatingEmbedCard = false;
@@ -3128,8 +3473,13 @@ PROMPT;
 
     public function generateReviewQuestions(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
         if (empty($this->lessonTitle)) {
             $this->notification()->error('Sin título', 'Primero escribe un título para la lección en el paso 1.');
+
             return;
         }
 
@@ -3138,11 +3488,11 @@ PROMPT;
         foreach ($this->wizardSections as $sec) {
             $title = $sec['title'] ?? '';
             $bodyPreview = '';
-            if (!empty($sec['contents'])) {
+            if (! empty($sec['contents'])) {
                 $bodyPreview = strip_tags($sec['contents'][0]['body'] ?? '');
                 $bodyPreview = mb_substr($bodyPreview, 0, 300);
             }
-            if (!empty($title) || !empty($bodyPreview)) {
+            if (! empty($title) || ! empty($bodyPreview)) {
                 $sectionsSummary .= "- {$title}: {$bodyPreview}\n";
             }
         }
@@ -3199,8 +3549,9 @@ PROMPT;
             ['max_tokens' => 4096, 'timeout' => 180],
         );
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             $this->notification()->error('Error al generar preguntas', $result['error'] ?? 'Error desconocido');
+
             return;
         }
 
@@ -3208,6 +3559,7 @@ PROMPT;
 
         if (empty($this->reviewQuestions)) {
             $this->notification()->error('Respuesta vacía', 'La IA no generó preguntas de repaso.');
+
             return;
         }
 
@@ -3221,13 +3573,26 @@ PROMPT;
 
     public function saveStep2(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+
+        if (count($this->wizardSections) === 0 && ! $this->saveAnyway) {
+            $this->showUnsavedConfirm = true;
+            $this->pendingSaveAction = 'saveStep2';
+
+            return;
+        }
+        $this->saveAnyway = false;
+        $this->showUnsavedConfirm = false;
+        $this->pendingSaveAction = null;
         $activityId = $this->selectedActivityId;
         $sectionIdMap = [];
 
         // ─── Persistir título y descripción generados (paso 1) ──
-        if (!empty($this->lessonTitle) || !empty($this->lessonDescription)) {
+        if (! empty($this->lessonTitle) || ! empty($this->lessonDescription)) {
             Activity::where('id', $activityId)->update([
-                'topic'       => $this->lessonTitle,
+                'topic' => $this->lessonTitle,
                 'description' => $this->lessonDescription,
             ]);
         }
@@ -3235,13 +3600,13 @@ PROMPT;
         foreach ($this->wizardSections as $key => $sectionData) {
             $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
 
-            if (str_starts_with((string)$sectionData['id'], 'temp_')) {
+            if (str_starts_with((string) $sectionData['id'], 'temp_')) {
                 $tempId = $sectionData['id'];
                 $section = LmsActivitySection::create([
                     'activity_id' => $activityId,
-                    'title'       => $sectionTitle,
-                    'sort_order'  => $sectionData['sort_order'] ?? 1,
-                    'is_visible'  => $sectionData['is_visible'] ?? true,
+                    'title' => $sectionTitle,
+                    'sort_order' => $sectionData['sort_order'] ?? 1,
+                    'is_visible' => $sectionData['is_visible'] ?? true,
                 ]);
                 $sectionIdMap[$tempId] = $section->id;
                 // Reemplazar el id temporal con el real
@@ -3250,7 +3615,7 @@ PROMPT;
                 $section = LmsActivitySection::find($sectionData['id']);
                 if ($section) {
                     $section->update([
-                        'title'      => $sectionTitle,
+                        'title' => $sectionTitle,
                         'is_visible' => $sectionData['is_visible'] ?? true,
                     ]);
                     // Limpiar contenidos previos para evitar duplicados
@@ -3258,13 +3623,13 @@ PROMPT;
                 }
             }
 
-            if ($section && !empty($sectionData['contents'])) {
+            if ($section && ! empty($sectionData['contents'])) {
                 foreach ($sectionData['contents'] as $i => $contentData) {
                     LmsActivityContent::create([
                         'section_id' => $section->id,
-                        'type'       => $contentData['type'] ?? 'TEXT',
-                        'title'      => $this->sanitizeText($contentData['title'] ?? null),
-                        'body'       => $this->sanitizeText($contentData['body'] ?? ''),
+                        'type' => $contentData['type'] ?? 'TEXT',
+                        'title' => $this->sanitizeText($contentData['title'] ?? null),
+                        'body' => $this->sanitizeText($contentData['body'] ?? ''),
                         'sort_order' => $i + 1,
                         'is_visible' => $contentData['is_visible'] ?? true,
                     ]);
@@ -3278,19 +3643,19 @@ PROMPT;
         // ─── Guardar recursos ──────────────────────────────────
         $visibleResourceIds = [];
         foreach ($this->wizardResources as $key => $res) {
-            if (str_starts_with((string)($res['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($res['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
                     ? $sectionIdMap[$res['section_id']]
-                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+                    : (! empty($res['section_id']) ? $res['section_id'] : null);
 
                 $newRes = LmsActivityResource::create([
-                    'activity_id'  => $activityId,
-                    'section_id'   => $resolvedSectionId,
-                    'media_id'     => $res['media_id'],
-                    'uploaded_by'  => $res['uploaded_by'] ?? auth()->id(),
+                    'activity_id' => $activityId,
+                    'section_id' => $resolvedSectionId,
+                    'media_id' => $res['media_id'],
+                    'uploaded_by' => $res['uploaded_by'] ?? auth()->id(),
                     'display_name' => $res['display_name'],
-                    'description'  => $res['description'] ?? '',
-                    'is_visible'   => true,
+                    'description' => $res['description'] ?? '',
+                    'is_visible' => true,
                 ]);
                 $this->wizardResources[$key]['id'] = $newRes->id;
                 $visibleResourceIds[] = $newRes->id;
@@ -3301,16 +3666,16 @@ PROMPT;
                 // Actualizar campos editables del recurso existente
                 $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
                     ? $sectionIdMap[$res['section_id']]
-                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+                    : (! empty($res['section_id']) ? $res['section_id'] : null);
 
                 $updateData = [
                     'display_name' => $res['display_name'],
-                    'description'  => $res['description'] ?? '',
+                    'description' => $res['description'] ?? '',
                 ];
                 if ($resolvedSectionId) {
                     $updateData['section_id'] = $resolvedSectionId;
                 }
-                if (!empty($res['media_id'])) {
+                if (! empty($res['media_id'])) {
                     $updateData['media_id'] = $res['media_id'];
                 }
                 LmsActivityResource::where('id', $resourceId)->update($updateData);
@@ -3323,20 +3688,20 @@ PROMPT;
         // ─── Guardar enlaces ───────────────────────────────────
         $visibleLinkIds = [];
         foreach ($this->wizardLinks as $key => $link) {
-            if (str_starts_with((string)($link['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($link['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
                     ? $sectionIdMap[$link['section_id']]
-                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+                    : (! empty($link['section_id']) ? $link['section_id'] : null);
 
                 $newLink = LmsActivityLink::create([
                     'activity_id' => $activityId,
-                    'section_id'  => $resolvedSectionId,
-                    'added_by'    => auth()->id(),
-                    'title'       => $link['title'],
-                    'url'         => $link['url'],
-                    'link_type'   => $link['link_type'] ?? 'REFERENCE',
-                    'sort_order'  => $link['sort_order'] ?? 1,
-                    'is_visible'  => true,
+                    'section_id' => $resolvedSectionId,
+                    'added_by' => auth()->id(),
+                    'title' => $link['title'],
+                    'url' => $link['url'],
+                    'link_type' => $link['link_type'] ?? 'REFERENCE',
+                    'sort_order' => $link['sort_order'] ?? 1,
+                    'is_visible' => true,
                 ]);
                 $this->wizardLinks[$key]['id'] = $newLink->id;
                 $visibleLinkIds[] = $newLink->id;
@@ -3346,11 +3711,11 @@ PROMPT;
 
                 $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
                     ? $sectionIdMap[$link['section_id']]
-                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+                    : (! empty($link['section_id']) ? $link['section_id'] : null);
 
                 $updateData = [
-                    'title'     => $link['title'],
-                    'url'       => $link['url'],
+                    'title' => $link['title'],
+                    'url' => $link['url'],
                     'link_type' => $link['link_type'] ?? 'REFERENCE',
                 ];
                 if ($resolvedSectionId) {
@@ -3366,20 +3731,20 @@ PROMPT;
         // ─── Guardar HTML embeds ───────────────────────────────
         $visibleEmbedIds = [];
         foreach ($this->wizardHtmlEmbeds as $key => $embed) {
-            if (str_starts_with((string)($embed['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($embed['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
                     ? $sectionIdMap[$embed['section_id']]
-                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
                 $newEmbed = LmsHtmlEmbed::create([
-                    'activity_id'      => $activityId,
-                    'section_id'       => $resolvedSectionId,
-                    'added_by'         => auth()->id(),
-                    'title'            => $embed['title'] ?? null,
-                    'html_content'     => $embed['html_content'],
+                    'activity_id' => $activityId,
+                    'section_id' => $resolvedSectionId,
+                    'added_by' => auth()->id(),
+                    'title' => $embed['title'] ?? null,
+                    'html_content' => $embed['html_content'],
                     'render_condition' => 'ALWAYS',
-                    'sort_order'       => $embed['sort_order'] ?? 1,
-                    'is_visible'       => true,
+                    'sort_order' => $embed['sort_order'] ?? 1,
+                    'is_visible' => true,
                 ]);
                 $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
                 $visibleEmbedIds[] = $newEmbed->id;
@@ -3389,10 +3754,10 @@ PROMPT;
 
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
                     ? $sectionIdMap[$embed['section_id']]
-                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
                 $updateData = [
-                    'title'        => $embed['title'] ?? null,
+                    'title' => $embed['title'] ?? null,
                     'html_content' => $embed['html_content'],
                 ];
                 if ($resolvedSectionId) {
@@ -3407,7 +3772,7 @@ PROMPT;
 
         $this->notification()->success(
             'Guardado',
-            count($this->wizardSections) . ' secciones, ' . count($visibleResourceIds) . ' recursos, ' . count($visibleLinkIds) . ' enlaces y ' . count($visibleEmbedIds) . ' embeds guardados correctamente'
+            count($this->wizardSections).' secciones, '.count($visibleResourceIds).' recursos, '.count($visibleLinkIds).' enlaces y '.count($visibleEmbedIds).' embeds guardados correctamente'
         );
 
         $this->saved = true;
@@ -3419,7 +3784,7 @@ PROMPT;
     {
         $reviewTitle = 'Preguntas de Repaso';
 
-        if (!empty($this->reviewQuestions)) {
+        if (! empty($this->reviewQuestions)) {
             // Buscar sección existente de repaso
             $existingSection = LmsActivitySection::where('activity_id', $activityId)
                 ->where('title', $reviewTitle)
@@ -3432,17 +3797,17 @@ PROMPT;
                 $maxSort = LmsActivitySection::where('activity_id', $activityId)->max('sort_order') ?? 0;
                 $section = LmsActivitySection::create([
                     'activity_id' => $activityId,
-                    'title'       => $reviewTitle,
-                    'sort_order'  => $maxSort + 1,
-                    'is_visible'  => true,
+                    'title' => $reviewTitle,
+                    'sort_order' => $maxSort + 1,
+                    'is_visible' => true,
                 ]);
             }
 
             LmsActivityContent::create([
                 'section_id' => $section->id,
-                'type'       => 'TEXT',
-                'title'      => null,
-                'body'       => $this->sanitizeText($this->reviewQuestions),
+                'type' => 'TEXT',
+                'title' => null,
+                'body' => $this->sanitizeText($this->reviewQuestions),
                 'sort_order' => 1,
                 'is_visible' => true,
             ]);
@@ -3499,6 +3864,20 @@ PROMPT;
 
     public function confirmPublish(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+
+        if (count($this->wizardSections) === 0 && ! $this->saveAnyway) {
+            $this->showUnsavedConfirm = true;
+            $this->pendingSaveAction = 'confirmPublish';
+
+            return;
+        }
+        $this->saveAnyway = false;
+        $this->showUnsavedConfirm = false;
+        $this->pendingSaveAction = null;
+
         // Planners/admins pueden publicar directamente (comportamiento actual)
         if ($this->isCurrentUserPlanner()) {
             if (blank($this->publishAt)) {
@@ -3506,6 +3885,7 @@ PROMPT;
             } else {
                 $this->saveAndPublish();
             }
+
             return;
         }
 
@@ -3515,19 +3895,38 @@ PROMPT;
                 'Fecha requerida',
                 'Debes establecer una fecha de programación. La lección será revisada y publicada por Planificación.'
             );
+
             return;
         }
 
         $this->saveAndPublish();
     }
 
+    public function confirmSaveAnyway(): void
+    {
+        $action = $this->pendingSaveAction;
+        $this->showUnsavedConfirm = false;
+        $this->saveAnyway = true;
+
+        if ($action === 'saveStep2') {
+            $this->saveStep2();
+        } elseif ($action === 'confirmPublish') {
+            $this->confirmPublish();
+        }
+    }
+
     public function saveAndPublish(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+
         $activityId = $this->selectedActivityId;
+        $this->saved = false;
 
         // 0. Guardar título y descripción en la actividad (sanear)
         $this->selectedActivity->update([
-            'topic'       => $this->sanitizeText($this->lessonTitle),
+            'topic' => $this->sanitizeText($this->lessonTitle),
             'description' => $this->sanitizeText($this->lessonDescription),
         ]);
 
@@ -3537,13 +3936,13 @@ PROMPT;
         foreach ($this->wizardSections as $key => $sectionData) {
             $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
 
-            if (str_starts_with((string)$sectionData['id'], 'temp_')) {
+            if (str_starts_with((string) $sectionData['id'], 'temp_')) {
                 $tempId = $sectionData['id'];
                 $section = LmsActivitySection::create([
                     'activity_id' => $activityId,
-                    'title'       => $sectionTitle,
-                    'sort_order'  => $sectionData['sort_order'] ?? 1,
-                    'is_visible'  => $sectionData['is_visible'],
+                    'title' => $sectionTitle,
+                    'sort_order' => $sectionData['sort_order'] ?? 1,
+                    'is_visible' => $sectionData['is_visible'],
                 ]);
 
                 // Actualizar el id temporal con el id real de BD
@@ -3554,7 +3953,7 @@ PROMPT;
                 $section = LmsActivitySection::find($sectionData['id']);
                 if ($section) {
                     $section->update([
-                        'title'      => $sectionTitle,
+                        'title' => $sectionTitle,
                         'is_visible' => $sectionData['is_visible'],
                     ]);
                 }
@@ -3562,7 +3961,7 @@ PROMPT;
 
             if ($section) {
                 // Limpiar contenidos existentes de la sección (si ya existía)
-                if (!str_starts_with((string)$sectionData['id'], 'temp_')) {
+                if (! str_starts_with((string) $sectionData['id'], 'temp_')) {
                     LmsActivityContent::where('section_id', $section->id)->delete();
                 }
 
@@ -3576,7 +3975,7 @@ PROMPT;
 
                     // Caso 2: código Mermaid plano (sin HTML wrapper) — contenido
                     // guardado antes de que existiera la lógica de detección.
-                    if (!$isMermaid && $rawBody !== '' && !str_contains($rawBody, '<')) {
+                    if (! $isMermaid && $rawBody !== '' && ! str_contains($rawBody, '<')) {
                         $trimmed = trim(strip_tags($rawBody));
                         $isMermaid = preg_match(
                             '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/',
@@ -3588,7 +3987,7 @@ PROMPT;
                         $mermaidCode = $rawBody;
                         if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m)) {
                             $mermaidCode = trim(strip_tags($m[1]));
-                        } elseif (!str_contains($rawBody, '<')) {
+                        } elseif (! str_contains($rawBody, '<')) {
                             // Raw Mermaid code — usar tal cual
                             $mermaidCode = $this->sanitizeText($rawBody);
                         } else {
@@ -3598,14 +3997,14 @@ PROMPT;
 
                         // Guardar como LmsHtmlEmbed (se renderiza con <x-mermaid::component>)
                         $mermaidEmbed = LmsHtmlEmbed::create([
-                            'activity_id'      => $activityId,
-                            'section_id'       => $section->id,
-                            'added_by'         => auth()->id(),
-                            'title'            => ($contentData['title'] ?? null) ?: 'Diagrama',
-                            'html_content'     => $mermaidCode,
+                            'activity_id' => $activityId,
+                            'section_id' => $section->id,
+                            'added_by' => auth()->id(),
+                            'title' => ($contentData['title'] ?? null) ?: 'Diagrama',
+                            'html_content' => $mermaidCode,
                             'render_condition' => 'ALWAYS',
-                            'sort_order'       => $i + 1,
-                            'is_visible'       => true,
+                            'sort_order' => $i + 1,
+                            'is_visible' => true,
                         ]);
                         $mermaidEmbedIds[] = $mermaidEmbed->id;
                     } else {
@@ -3613,9 +4012,9 @@ PROMPT;
                         $safeBody = $this->sanitizeText($rawBody);
                         LmsActivityContent::create([
                             'section_id' => $section->id,
-                            'type'       => $contentType,
-                            'title'      => $this->sanitizeText($contentData['title'] ?? null),
-                            'body'       => $safeBody,
+                            'type' => $contentType,
+                            'title' => $this->sanitizeText($contentData['title'] ?? null),
+                            'body' => $safeBody,
                             'sort_order' => $i + 1,
                             'is_visible' => true,
                         ]);
@@ -3625,7 +4024,7 @@ PROMPT;
         }
 
         // 2. Limpiar secciones eliminadas en el wizard
-        $existingIds = array_filter(array_map(fn($s) => is_numeric($s['id']) ? $s['id'] : null, $this->wizardSections));
+        $existingIds = array_filter(array_map(fn ($s) => is_numeric($s['id']) ? $s['id'] : null, $this->wizardSections));
         LmsActivitySection::where('activity_id', $activityId)
             ->whereNotIn('id', $existingIds)
             ->delete();
@@ -3640,25 +4039,26 @@ PROMPT;
                 'Límite excedido',
                 'El total de recursos de la lección supera los 10 MB. Elimine algunos recursos o reduzca su tamaño antes de publicar.'
             );
+
             return;
         }
 
         // 3. Guardar recursos
         $visibleResourceIds = [];
         foreach ($this->wizardResources as $key => $res) {
-            if (str_starts_with((string)($res['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($res['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
                     ? $sectionIdMap[$res['section_id']]
-                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+                    : (! empty($res['section_id']) ? $res['section_id'] : null);
 
                 $newRes = LmsActivityResource::create([
-                    'activity_id'  => $activityId,
-                    'section_id'   => $resolvedSectionId,
-                    'media_id'     => $res['media_id'],
-                    'uploaded_by'  => $res['uploaded_by'] ?? auth()->id(),
+                    'activity_id' => $activityId,
+                    'section_id' => $resolvedSectionId,
+                    'media_id' => $res['media_id'],
+                    'uploaded_by' => $res['uploaded_by'] ?? auth()->id(),
                     'display_name' => $res['display_name'],
-                    'description'  => $res['description'] ?? '',
-                    'is_visible'   => true,
+                    'description' => $res['description'] ?? '',
+                    'is_visible' => true,
                 ]);
                 $this->wizardResources[$key]['id'] = $newRes->id;
                 $visibleResourceIds[] = $newRes->id;
@@ -3668,16 +4068,16 @@ PROMPT;
 
                 $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
                     ? $sectionIdMap[$res['section_id']]
-                    : (!empty($res['section_id']) ? $res['section_id'] : null);
+                    : (! empty($res['section_id']) ? $res['section_id'] : null);
 
                 $updateData = [
                     'display_name' => $res['display_name'],
-                    'description'  => $res['description'] ?? '',
+                    'description' => $res['description'] ?? '',
                 ];
                 if ($resolvedSectionId) {
                     $updateData['section_id'] = $resolvedSectionId;
                 }
-                if (!empty($res['media_id'])) {
+                if (! empty($res['media_id'])) {
                     $updateData['media_id'] = $res['media_id'];
                 }
                 LmsActivityResource::where('id', $resourceId)->update($updateData);
@@ -3690,20 +4090,20 @@ PROMPT;
         // 4. Guardar enlaces
         $visibleLinkIds = [];
         foreach ($this->wizardLinks as $key => $link) {
-            if (str_starts_with((string)($link['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($link['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
                     ? $sectionIdMap[$link['section_id']]
-                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+                    : (! empty($link['section_id']) ? $link['section_id'] : null);
 
                 $newLink = LmsActivityLink::create([
                     'activity_id' => $activityId,
-                    'section_id'  => $resolvedSectionId,
-                    'added_by'    => auth()->id(),
-                    'title'       => $link['title'],
-                    'url'         => $link['url'],
-                    'link_type'   => $link['link_type'] ?? 'REFERENCE',
-                    'sort_order'  => $link['sort_order'] ?? 1,
-                    'is_visible'  => true,
+                    'section_id' => $resolvedSectionId,
+                    'added_by' => auth()->id(),
+                    'title' => $link['title'],
+                    'url' => $link['url'],
+                    'link_type' => $link['link_type'] ?? 'REFERENCE',
+                    'sort_order' => $link['sort_order'] ?? 1,
+                    'is_visible' => true,
                 ]);
                 $this->wizardLinks[$key]['id'] = $newLink->id;
                 $visibleLinkIds[] = $newLink->id;
@@ -3713,11 +4113,11 @@ PROMPT;
 
                 $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
                     ? $sectionIdMap[$link['section_id']]
-                    : (!empty($link['section_id']) ? $link['section_id'] : null);
+                    : (! empty($link['section_id']) ? $link['section_id'] : null);
 
                 $updateData = [
-                    'title'     => $link['title'],
-                    'url'       => $link['url'],
+                    'title' => $link['title'],
+                    'url' => $link['url'],
                     'link_type' => $link['link_type'] ?? 'REFERENCE',
                 ];
                 if ($resolvedSectionId) {
@@ -3733,20 +4133,20 @@ PROMPT;
         // 5. Guardar HTML embeds
         $visibleEmbedIds = $mermaidEmbedIds; // Incluir embeds creados desde secciones Mermaid
         foreach ($this->wizardHtmlEmbeds as $key => $embed) {
-            if (str_starts_with((string)($embed['id'] ?? ''), 'temp_')) {
+            if (str_starts_with((string) ($embed['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
                     ? $sectionIdMap[$embed['section_id']]
-                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
                 $newEmbed = LmsHtmlEmbed::create([
-                    'activity_id'      => $activityId,
-                    'section_id'       => $resolvedSectionId,
-                    'added_by'         => auth()->id(),
-                    'title'            => $embed['title'] ?? null,
-                    'html_content'     => $embed['html_content'],
+                    'activity_id' => $activityId,
+                    'section_id' => $resolvedSectionId,
+                    'added_by' => auth()->id(),
+                    'title' => $embed['title'] ?? null,
+                    'html_content' => $embed['html_content'],
                     'render_condition' => 'ALWAYS',
-                    'sort_order'       => $embed['sort_order'] ?? 1,
-                    'is_visible'       => true,
+                    'sort_order' => $embed['sort_order'] ?? 1,
+                    'is_visible' => true,
                 ]);
                 $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
                 $visibleEmbedIds[] = $newEmbed->id;
@@ -3756,10 +4156,10 @@ PROMPT;
 
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
                     ? $sectionIdMap[$embed['section_id']]
-                    : (!empty($embed['section_id']) ? $embed['section_id'] : null);
+                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
                 $updateData = [
-                    'title'        => $embed['title'] ?? null,
+                    'title' => $embed['title'] ?? null,
                     'html_content' => $embed['html_content'],
                 ];
                 if ($resolvedSectionId) {
@@ -3779,7 +4179,7 @@ PROMPT;
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
-                'publish_at'      => $this->publishAt,
+                'publish_at' => $this->publishAt,
                 'allow_downloads' => $this->allowDownloads,
             ],
             auth()->id()
@@ -3788,10 +4188,11 @@ PROMPT;
         LmsActivityLog::record($activityId, auth()->id(), $this->isCurrentUserPlanner() ? 'PUBLISH' : 'SCHEDULE');
 
         // Si el usuario es profesor (no planner), notificar a planning
-        if (!$this->isCurrentUserPlanner()) {
+        if (! $this->isCurrentUserPlanner()) {
             $this->notifyPlanningScheduled($activityId);
         }
 
+        $this->saved = true;
         $this->showPublishConfirm = false;
         $this->published = true;
         $this->dispatch('lesson-saved');
@@ -3802,7 +4203,7 @@ PROMPT;
     private function notifyPlanningScheduled(int $activityId): void
     {
         $activity = \App\Models\app\Academy\Activity::find($activityId);
-        if (!$activity) {
+        if (! $activity) {
             return;
         }
 
@@ -3850,6 +4251,7 @@ PROMPT;
                 'Sin secciones',
                 'No hay otras secciones en el mismo grado para exportar contenido.'
             );
+
             return;
         }
 
@@ -3871,12 +4273,12 @@ PROMPT;
         $this->exportTargetActivityId = null;
         $this->exportAvailableActivities = [];
 
-        if (!$value || !$this->exportActivityId) {
+        if (! $value || ! $this->exportActivityId) {
             return;
         }
 
         $activity = Activity::with('pevaluacion')->find($this->exportActivityId);
-        if (!$activity) {
+        if (! $activity) {
             return;
         }
 
@@ -3886,31 +4288,31 @@ PROMPT;
             'pevaluacion.seccion',
             'pevaluacion.lapso',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->withCount('contents'),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->withCount('contents'),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
         ])->whereHas('pevaluacion', function ($q) use ($value, $activity) {
             $q->where('seccion_id', $value)
-              ->where('lapso_id', $activity->pevaluacion->lapso_id)
-              ->where('profesor_id', $activity->pevaluacion->profesor_id);
+                ->where('lapso_id', $activity->pevaluacion->lapso_id)
+                ->where('profesor_id', $activity->pevaluacion->profesor_id);
         })->where('id', '!=', $this->exportActivityId)
             ->orderBy('topic')
             ->get()
-            ->map(fn($a) => [
-                'id'          => $a->id,
-                'topic'       => $a->topic ?? 'Actividad sin título',
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'topic' => $a->topic ?? 'Actividad sin título',
                 'description' => $a->description ?? '',
-                'start_date'  => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
-                'end_date'    => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
-                'asignatura'  => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
-                'grado'       => $a->pevaluacion?->pensum?->grado?->name ?? '—',
-                'seccion'     => $a->pevaluacion?->seccion?->name ?? '—',
-                'lapso'       => $a->pevaluacion?->lapso?->name ?? '—',
-                'has_lms'     => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
+                'start_date' => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
+                'end_date' => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
+                'asignatura' => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
+                'grado' => $a->pevaluacion?->pensum?->grado?->name ?? '—',
+                'seccion' => $a->pevaluacion?->seccion?->name ?? '—',
+                'lapso' => $a->pevaluacion?->lapso?->name ?? '—',
+                'has_lms' => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
                 'sections_count' => $a->lmsSections->count(),
-                'contents_count' => $a->lmsSections->sum(fn($s) => $s->contents_count ?? 0),
+                'contents_count' => $a->lmsSections->sum(fn ($s) => $s->contents_count ?? 0),
                 'resources_count' => $a->lmsResources->count(),
-                'links_count'     => $a->lmsLinks->count(),
+                'links_count' => $a->lmsLinks->count(),
             ])->values()->toArray();
     }
 
@@ -3920,6 +4322,10 @@ PROMPT;
      */
     public function exportLesson(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
         $this->validate([
             'exportTargetSectionId' => 'required',
             'exportTargetActivityId' => 'required',
@@ -3946,34 +4352,34 @@ PROMPT;
      */
     public function loadExportPreview(): void
     {
-        if (!$this->exportTargetActivityId) {
+        if (! $this->exportTargetActivityId) {
             return;
         }
 
         $activity = Activity::with([
             'pevaluacion.pensum.asignatura',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
-            'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+            'lmsSections.contents' => fn ($q) => $q->where('is_visible', true),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
             'lmsResources.media',
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
-            'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
+            'lmsHtmlEmbeds' => fn ($q) => $q->where('is_visible', true),
         ])->findOrFail($this->exportActivityId);
 
         $this->exportPreviewData = [
-            'activity_id'   => $activity->id,
-            'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
-            'title'         => $activity->topic ?? 'Lección',
-            'description'   => $activity->description ?? '',
-            'start_date'    => $activity->finicial,
-            'end_date'      => $activity->ffinal,
+            'activity_id' => $activity->id,
+            'subject' => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title' => $activity->topic ?? 'Lección',
+            'description' => $activity->description ?? '',
+            'start_date' => $activity->finicial,
+            'end_date' => $activity->ffinal,
             'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
-            'sections'      => $activity->lmsSections->toArray(),
-            'resources'     => $activity->lmsResources->toArray(),
-            'links'         => $activity->lmsLinks->toArray(),
-            'html_embeds'   => $activity->lmsHtmlEmbeds
-                ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+            'sections' => $activity->lmsSections->toArray(),
+            'resources' => $activity->lmsResources->toArray(),
+            'links' => $activity->lmsLinks->toArray(),
+            'html_embeds' => $activity->lmsHtmlEmbeds
+                ->map(fn ($e) => $this->ensureMermaidWrapper($e->toArray()))
                 ->values()
                 ->toArray(),
         ];
@@ -4018,6 +4424,7 @@ PROMPT;
                 'Lección existente',
                 'Esta actividad ya tiene contenido LMS. No se puede importar contenido adicional.'
             );
+
             return;
         }
 
@@ -4035,6 +4442,7 @@ PROMPT;
                 'Sin secciones',
                 'No hay otras secciones en el mismo grado para importar contenido.'
             );
+
             return;
         }
 
@@ -4056,12 +4464,12 @@ PROMPT;
         $this->importSourceActivityId = null;
         $this->importAvailableActivities = [];
 
-        if (!$value || !$this->importActivityId) {
+        if (! $value || ! $this->importActivityId) {
             return;
         }
 
         $activity = Activity::with('pevaluacion')->find($this->importActivityId);
-        if (!$activity) {
+        if (! $activity) {
             return;
         }
 
@@ -4071,31 +4479,31 @@ PROMPT;
             'pevaluacion.seccion',
             'pevaluacion.lapso',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->withCount('contents'),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->withCount('contents'),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
         ])->whereHas('pevaluacion', function ($q) use ($value, $activity) {
             $q->where('seccion_id', $value)
-              ->where('lapso_id', $activity->pevaluacion->lapso_id)
-              ->where('profesor_id', $activity->pevaluacion->profesor_id);
+                ->where('lapso_id', $activity->pevaluacion->lapso_id)
+                ->where('profesor_id', $activity->pevaluacion->profesor_id);
         })->where('id', '!=', $this->importActivityId)
             ->orderBy('topic')
             ->get()
-            ->map(fn($a) => [
-                'id'          => $a->id,
-                'topic'       => $a->topic ?? 'Actividad sin título',
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'topic' => $a->topic ?? 'Actividad sin título',
                 'description' => $a->description ?? '',
-                'start_date'  => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
-                'end_date'    => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
-                'asignatura'  => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
-                'grado'       => $a->pevaluacion?->pensum?->grado?->name ?? '—',
-                'seccion'     => $a->pevaluacion?->seccion?->name ?? '—',
-                'lapso'       => $a->pevaluacion?->lapso?->name ?? '—',
-                'has_lms'     => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
+                'start_date' => optional(\Carbon\Carbon::parse($a->finicial))->format('d/m'),
+                'end_date' => optional(\Carbon\Carbon::parse($a->ffinal))->format('d/m'),
+                'asignatura' => $a->pevaluacion?->pensum?->asignatura?->name ?? '—',
+                'grado' => $a->pevaluacion?->pensum?->grado?->name ?? '—',
+                'seccion' => $a->pevaluacion?->seccion?->name ?? '—',
+                'lapso' => $a->pevaluacion?->lapso?->name ?? '—',
+                'has_lms' => ($a->lmsSections->isNotEmpty() || $a->lmsResources->isNotEmpty() || $a->lmsLinks->isNotEmpty()),
                 'sections_count' => $a->lmsSections->count(),
-                'contents_count' => $a->lmsSections->sum(fn($s) => $s->contents_count ?? 0),
+                'contents_count' => $a->lmsSections->sum(fn ($s) => $s->contents_count ?? 0),
                 'resources_count' => $a->lmsResources->count(),
-                'links_count'     => $a->lmsLinks->count(),
+                'links_count' => $a->lmsLinks->count(),
             ])->values()->toArray();
     }
 
@@ -4105,6 +4513,10 @@ PROMPT;
      */
     public function importLesson(): void
     {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
         $this->validate([
             'importSourceSectionId' => 'required',
             'importSourceActivityId' => 'required',
@@ -4131,34 +4543,34 @@ PROMPT;
      */
     public function loadImportPreview(): void
     {
-        if (!$this->importSourceActivityId) {
+        if (! $this->importSourceActivityId) {
             return;
         }
 
         $activity = Activity::with([
             'pevaluacion.pensum.asignatura',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
-            'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+            'lmsSections.contents' => fn ($q) => $q->where('is_visible', true),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
             'lmsResources.media',
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
-            'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
+            'lmsHtmlEmbeds' => fn ($q) => $q->where('is_visible', true),
         ])->findOrFail($this->importSourceActivityId);
 
         $this->importPreviewData = [
-            'activity_id'   => $activity->id,
-            'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
-            'title'         => $activity->topic ?? 'Lección',
-            'description'   => $activity->description ?? '',
-            'start_date'    => $activity->finicial,
-            'end_date'      => $activity->ffinal,
+            'activity_id' => $activity->id,
+            'subject' => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title' => $activity->topic ?? 'Lección',
+            'description' => $activity->description ?? '',
+            'start_date' => $activity->finicial,
+            'end_date' => $activity->ffinal,
             'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
-            'sections'      => $activity->lmsSections->toArray(),
-            'resources'     => $activity->lmsResources->toArray(),
-            'links'         => $activity->lmsLinks->toArray(),
-            'html_embeds'   => $activity->lmsHtmlEmbeds
-                ->map(fn($e) => $this->ensureMermaidWrapper($e->toArray()))
+            'sections' => $activity->lmsSections->toArray(),
+            'resources' => $activity->lmsResources->toArray(),
+            'links' => $activity->lmsLinks->toArray(),
+            'html_embeds' => $activity->lmsHtmlEmbeds
+                ->map(fn ($e) => $this->ensureMermaidWrapper($e->toArray()))
                 ->values()
                 ->toArray(),
         ];
@@ -4247,9 +4659,9 @@ PROMPT;
         LmsActivityPublication::firstOrCreate(
             ['activity_id' => $targetActivityId],
             [
-                'published_by'    => auth()->id(),
-                'status'          => 'DRAFT',
-                'allow_comments'  => true,
+                'published_by' => auth()->id(),
+                'status' => 'DRAFT',
+                'allow_comments' => true,
                 'allow_downloads' => true,
             ]
         );
@@ -4259,7 +4671,7 @@ PROMPT;
 
     public function getPreviewSectionsProperty()
     {
-        return array_filter($this->wizardSections, fn($s) => $s['is_visible']);
+        return array_filter($this->wizardSections, fn ($s) => $s['is_visible']);
     }
 
     // ─── Estrategia de compactación de prompts ─────────────────
@@ -4298,12 +4710,12 @@ PROMPT;
             'Eres un asistente que compacta texto pedagógico. Preserva TODA la información esencial: datos curriculares, nombres de competencias, indicadores de logro, áreas de aprendizaje y contenidos. Elimina solo redundancias, relleno y repeticiones. No pierdas contenido sustantivo ni datos clave. Responde SOLO con el texto compactado, sin explicaciones ni metadatos.',
             $text,
             [
-                'max_tokens'  => min(1536, (int) ceil($this->estimateTokens($text) * 0.55)),
+                'max_tokens' => min(1536, (int) ceil($this->estimateTokens($text) * 0.55)),
                 'temperature' => 0.3,
             ]
         );
 
-        if (!$result['success'] || empty(trim($result['content'] ?? ''))) {
+        if (! $result['success'] || empty(trim($result['content'] ?? ''))) {
             return $text;
         }
 
@@ -4347,8 +4759,10 @@ PROMPT;
             if (preg_match('/^(?:\*{1,2}\s*)?Safety\s*:\s*(?:\*{1,2}\s*)?\w+\s*$/i', $trimmed)) {
                 return false;
             }
+
             return true;
         });
+
         return trim(implode("\n", $filtered));
     }
 
@@ -4364,23 +4778,23 @@ PROMPT;
      * cada modelo se valida con ese callable. Si retorna false, se considera
      * que el modelo falló (contenido inválido) y se pasa al siguiente.
      *
-     * @param  string       $systemPrompt     Instrucción del sistema.
-     * @param  string       $userPrompt       Mensaje del usuario.
-     * @param  array        $overrides        Overrides base para el LLM.
-     * @param  int          $tokenBudget      Máx. tokens del user prompt antes de compactar.
-     * @param  callable|null $contentValidator Recibe (string $content): bool.
-     *                                         true = válido, false = inválido (pasar al sig. modelo).
-     * @param  array|null    $customChain      Cadena custom de modelos [['model','label'],...].
-     *                                         null = usa la cadena por defecto (lesson wizard).
+     * @param  string  $systemPrompt  Instrucción del sistema.
+     * @param  string  $userPrompt  Mensaje del usuario.
+     * @param  array  $overrides  Overrides base para el LLM.
+     * @param  int  $tokenBudget  Máx. tokens del user prompt antes de compactar.
+     * @param  callable|null  $contentValidator  Recibe (string $content): bool.
+     *                                           true = válido, false = inválido (pasar al sig. modelo).
+     * @param  array|null  $customChain  Cadena custom de modelos [['model','label'],...].
+     *                                   null = usa la cadena por defecto (lesson wizard).
      * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
      */
     private function askWithCompaction(
-        string    $systemPrompt,
-        string    $userPrompt,
-        array     $overrides = [],
-        int       $tokenBudget = 2000,
+        string $systemPrompt,
+        string $userPrompt,
+        array $overrides = [],
+        int $tokenBudget = 2000,
         ?callable $contentValidator = null,
-        ?array    $customChain = null
+        ?array $customChain = null
     ): array {
         $estimatedTokens = $this->estimateTokens($userPrompt);
         $compacted = false;
@@ -4396,7 +4810,7 @@ PROMPT;
                 $this->notification()->info(
                     'Prompt compactado',
                     'El contexto se compactó vía NVIDIA para optimizar tokens ('
-                    . number_format($originalSize) . ' → ' . number_format(mb_strlen($compactResult)) . ' chars).'
+                    .number_format($originalSize).' → '.number_format(mb_strlen($compactResult)).' chars).'
                 );
             }
         }
@@ -4419,10 +4833,10 @@ PROMPT;
 
         foreach ($modelChain as $i => $attempt) {
             // Reconstruir prompt fresco con refuerzo (sin acumulación entre intentos)
-            $attemptUserPrompt = $i > 0 ? $userPrompt . self::FALLBACK_REINFORCEMENT : $userPrompt;
+            $attemptUserPrompt = $i > 0 ? $userPrompt.self::FALLBACK_REINFORCEMENT : $userPrompt;
 
             $attemptOverrides = array_merge($overrides, [
-                'model'   => $attempt['model'],
+                'model' => $attempt['model'],
                 'timeout' => max($overrides['timeout'] ?? 120, 120),
             ]);
 
@@ -4431,34 +4845,34 @@ PROMPT;
             if ($result['success']) {
                 // Validar contenido si hay un validador
                 $content = $result['content'] ?? '';
-                if ($contentValidator !== null && (empty($content) || !$contentValidator($content))) {
+                if ($contentValidator !== null && (empty($content) || ! $contentValidator($content))) {
                     // Guardar respuesta para depuración aunque sea inválida
                     $this->debugRawContent = $content;
                     $lastError = 'Contenido inválido: no superó la validación de estructura.';
 
                     // Inspeccionar por qué falló la validación
-                    $vHasInicio    = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
+                    $vHasInicio = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
                     $vHasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
-                    $vHasCierre    = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
+                    $vHasCierre = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
                     $vDevBlocks = 0;
                     if ($vHasInicio && $vHasDesarrollo && $vHasCierre) {
                         $vDevMatch = null;
                         preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $vDevMatch);
-                        if (!empty($vDevMatch[1])) {
+                        if (! empty($vDevMatch[1])) {
                             $vBlocks = preg_split('/\n\s*\n/', trim($vDevMatch[1]));
-                            $vValidBlocks = array_filter($vBlocks, fn(string $b): bool => !empty(trim($b)));
+                            $vValidBlocks = array_filter($vBlocks, fn (string $b): bool => ! empty(trim($b)));
                             $vDevBlocks = count($vValidBlocks);
                         }
                     }
 
                     Log::warning("askWithCompaction: {$attempt['label']} contenido inválido", [
-                        'model'         => $attempt['model'],
-                        'length'        => mb_strlen($content),
-                        'validation'    => [
-                            'has_inicio'    => $vHasInicio,
+                        'model' => $attempt['model'],
+                        'length' => mb_strlen($content),
+                        'validation' => [
+                            'has_inicio' => $vHasInicio,
                             'has_desarrollo' => $vHasDesarrollo,
-                            'has_cierre'    => $vHasCierre,
-                            'dev_blocks'    => $vDevBlocks,
+                            'has_cierre' => $vHasCierre,
+                            'dev_blocks' => $vDevBlocks,
                         ],
                         'content_preview' => mb_substr(preg_replace('/\s+/', ' ', $content), 0, 500),
                     ]);
@@ -4466,12 +4880,13 @@ PROMPT;
                         "{$attempt['label']} contenido inválido",
                         'El contenido generado no cumple la estructura requerida. Cambiando al siguiente modelo...'
                     );
+
                     continue;
                 }
 
                 // Éxito: registrar qué modelo de la cadena respondió
                 Log::info("askWithCompaction: {$attempt['label']} generó contenido válido", [
-                    'model'  => $attempt['model'],
+                    'model' => $attempt['model'],
                     'length' => mb_strlen($content),
                     'chain_index' => $i,
                 ]);
@@ -4506,9 +4921,9 @@ PROMPT;
         return [
             'success' => false,
             'content' => null,
-            'model'   => null,
-            'usage'   => null,
-            'error'   => $lastError,
+            'model' => null,
+            'usage' => null,
+            'error' => $lastError,
         ];
     }
 
@@ -4531,7 +4946,7 @@ PROMPT;
             return 'el servidor cerró la conexión';
         }
         if (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') || str_contains($errorMsg, '503')) {
-            return 'error del modelo (' . $errorMsg . ')';
+            return 'error del modelo ('.$errorMsg.')';
         }
         if (str_contains($errorMsg, 'excedió el límite de tokens') || str_contains($errorMsg, 'content_filter')) {
             return 'el modelo rechazó la solicitud por seguridad o longitud';
@@ -4541,7 +4956,8 @@ PROMPT;
         }
 
         // Genérico
-        $truncated = mb_strlen($errorMsg) > 60 ? mb_substr($errorMsg, 0, 57) . '...' : $errorMsg;
+        $truncated = mb_strlen($errorMsg) > 60 ? mb_substr($errorMsg, 0, 57).'...' : $errorMsg;
+
         return $truncated;
     }
 
@@ -4579,11 +4995,11 @@ PROMPT;
         if (str_contains($content, '||')) {
             $parts = explode('||', $content, 2);
             $title = trim($parts[0]);
-            $desc  = trim($parts[1] ?? '');
+            $desc = trim($parts[1] ?? '');
             // Limpiar posibles prefijos tipo "Título:" o "Linea 1 →"
             $title = $this->stripLabelPrefix($title, ['titulo', 'título', 'title', 'linea 1', 'línea 1']);
-            $desc  = $this->stripLabelPrefix($desc, ['descripcion', 'descripción', 'description', 'linea 2', 'línea 2']);
-            if (!empty($title)) {
+            $desc = $this->stripLabelPrefix($desc, ['descripcion', 'descripción', 'description', 'linea 2', 'línea 2']);
+            if (! empty($title)) {
                 return [$title, $desc];
             }
         }
@@ -4592,7 +5008,7 @@ PROMPT;
         $mdPattern = '/\*\*(?:T[íi]tulo|Título|Title|Descripci[oó]n|Description)\s*:\s*\*\*(.*?)(?=\s*\*\*(?:T[íi]tulo|Descripci[oó]n|))\s*/ius';
         if (preg_match_all($mdPattern, $content, $mdMatches)) {
             $title = '';
-            $desc  = '';
+            $desc = '';
             foreach ($mdMatches[0] as $i => $fullMatch) {
                 $value = trim($mdMatches[1][$i] ?? '');
                 if (stripos($fullMatch, 'título') !== false || stripos($fullMatch, 'titulo') !== false || stripos($fullMatch, 'title') !== false) {
@@ -4601,7 +5017,7 @@ PROMPT;
                     $desc = $value;
                 }
             }
-            if (!empty($title) && !empty($desc)) {
+            if (! empty($title) && ! empty($desc)) {
                 return [$title, $desc];
             }
         }
@@ -4611,7 +5027,7 @@ PROMPT;
         // Buscar párrafos etiquetados
         $lines = explode("\n", $content);
         $title = '';
-        $desc  = '';
+        $desc = '';
         $currentLabel = null;
         $buffer = '';
         foreach ($lines as $rawLine) {
@@ -4624,9 +5040,9 @@ PROMPT;
             foreach (['Título:', 'Titulo:', 'Title:', 'Descripción:', 'Descripcion:', 'Description:'] as $label) {
                 if (str_starts_with(mb_strtolower($line), mb_strtolower($label))) {
                     // Guardar buffer anterior
-                    if ($currentLabel === 'title' && !empty($buffer)) {
+                    if ($currentLabel === 'title' && ! empty($buffer)) {
                         $title = trim($buffer);
-                    } elseif ($currentLabel === 'desc' && !empty($buffer)) {
+                    } elseif ($currentLabel === 'desc' && ! empty($buffer)) {
                         $desc = trim($buffer);
                     }
                     $currentLabel = (stripos($label, 'título') !== false || stripos($label, 'titulo') !== false || stripos($label, 'title') !== false) ? 'title' : 'desc';
@@ -4635,34 +5051,35 @@ PROMPT;
                     break;
                 }
             }
-            if (!$matched) {
-                $buffer .= "\n" . $line;
+            if (! $matched) {
+                $buffer .= "\n".$line;
             }
         }
         // Último buffer
-        if ($currentLabel === 'title' && !empty($buffer)) {
+        if ($currentLabel === 'title' && ! empty($buffer)) {
             $title = trim($buffer);
-        } elseif ($currentLabel === 'desc' && !empty($buffer)) {
+        } elseif ($currentLabel === 'desc' && ! empty($buffer)) {
             $desc = trim($buffer);
         }
-        if (!empty($title) && !empty($desc)) {
+        if (! empty($title) && ! empty($desc)) {
             return [$title, $desc];
         }
 
         // ── Estrategia 4: primera línea = título, resto = descripción ──
-        $nonEmpty = array_values(array_filter(explode("\n", $content), fn($l) => !empty(trim($l))));
+        $nonEmpty = array_values(array_filter(explode("\n", $content), fn ($l) => ! empty(trim($l))));
         if (count($nonEmpty) >= 2) {
             $first = trim($nonEmpty[0]);
-            $rest  = trim(implode("\n", array_slice($nonEmpty, 1)));
+            $rest = trim(implode("\n", array_slice($nonEmpty, 1)));
             // La primera línea no debería ser muy larga para ser título
-            if (mb_strlen($first) <= 200 && !empty($rest)) {
+            if (mb_strlen($first) <= 200 && ! empty($rest)) {
                 return [$first, $rest];
             }
         }
 
         // ── Estrategia 5 (fallback absoluto): todo es el título ──
         $maxTitle = 120;
-        $fallbackTitle = mb_strlen($content) > $maxTitle ? mb_substr($content, 0, $maxTitle) . '…' : $content;
+        $fallbackTitle = mb_strlen($content) > $maxTitle ? mb_substr($content, 0, $maxTitle).'…' : $content;
+
         return [$fallbackTitle, ''];
     }
 
@@ -4674,18 +5091,19 @@ PROMPT;
         $text = trim($text);
         foreach ($labels as $label) {
             // Con dos puntos
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . ':')) {
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).':')) {
                 $text = trim(mb_substr($text, mb_strlen($label) + 1));
             }
             // Con flecha "→"
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . '→')) {
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).'→')) {
                 $text = trim(mb_substr($text, mb_strlen($label) + 1));
             }
             // Con guión " - " o " -> "
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label) . ' -')) {
+            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).' -')) {
                 $text = trim(mb_substr($text, mb_strlen($label) + 2));
             }
         }
+
         return trim($text);
     }
 
@@ -4708,10 +5126,10 @@ PROMPT;
                 $q->where('lapso_id', $this->lapsoId);
             }
             if ($this->pestudioId) {
-                $q->whereHas('pensum', fn($pq) => $pq->where('pestudio_id', $this->pestudioId));
+                $q->whereHas('pensum', fn ($pq) => $pq->where('pestudio_id', $this->pestudioId));
             }
             if ($this->gradoId) {
-                $q->whereHas('pensum', fn($pq) => $pq->where('grado_id', $this->gradoId));
+                $q->whereHas('pensum', fn ($pq) => $pq->where('grado_id', $this->gradoId));
             }
             if ($this->seccionId) {
                 $q->where('seccion_id', $this->seccionId);
@@ -4722,31 +5140,31 @@ PROMPT;
             'pevaluacion.seccion',
             'pevaluacion.lapso',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->withCount('contents'),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->withCount('contents'),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
         ]);
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('topic', 'like', '%' . $this->search . '%')
-                  ->orWhere('thematic', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('topic', 'like', '%'.$this->search.'%')
+                    ->orWhere('thematic', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
         $activities = $query->orderBy('finicial', 'desc')->paginate(12);
 
         // Listas para filtros
-        $listLapso    = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+        $listLapso = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
         $listPestudio = Pestudio::where('planning_module', true)
             ->where('status_active', 'true')
             ->orderBy('name')
             ->pluck('name', 'id');
-        $listGrado    = $this->pestudioId
+        $listGrado = $this->pestudioId
             ? Grado::where('pestudio_id', $this->pestudioId)->pluck('name', 'id')
             : collect();
-        $listSeccion  = $this->gradoId
+        $listSeccion = $this->gradoId
             ? Seccion::where('grado_id', $this->gradoId)->pluck('name', 'id')
             : collect();
 
@@ -4766,13 +5184,14 @@ PROMPT;
         $mermaidPattern = '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/';
 
         // 1. Ya procesado (flag is_mermaid)
-        if (!empty($embed['is_mermaid'])) {
+        if (! empty($embed['is_mermaid'])) {
             return $embed;
         }
 
         // 2. Código Mermaid suelto (empieza con keyword)
         if (preg_match($mermaidPattern, $content) === 1) {
             $embed['is_mermaid'] = true;
+
             // html_content se deja como está (código plano)
             return $embed;
         }
@@ -4783,6 +5202,7 @@ PROMPT;
             $code = htmlspecialchars_decode($m[1], ENT_QUOTES);
             $embed['html_content'] = $code;
             $embed['is_mermaid'] = true;
+
             return $embed;
         }
 
@@ -4792,12 +5212,14 @@ PROMPT;
             if (preg_match($mermaidPattern, $innerCode)) {
                 $embed['html_content'] = $innerCode;
                 $embed['is_mermaid'] = true;
+
                 return $embed;
             }
         }
 
         // 5. No es mermaid → dejar intacto
         $embed['is_mermaid'] = false;
+
         return $embed;
     }
 
@@ -4808,33 +5230,33 @@ PROMPT;
     public function slidePreviewContent(): string
     {
         $currentSlide = $this->wizardSections[$this->currentSlideIndex] ?? null;
-        if (!$currentSlide) {
+        if (! $currentSlide) {
             return '';
         }
 
         $blocks = collect($currentSlide['contents'] ?? [])
-            ->filter(fn($c) => !empty($c['body']))
+            ->filter(fn ($c) => ! empty($c['body']))
             ->values();
 
         $rendered = $blocks->map(function (array $block, int $idx): string {
-            $body  = $block['body'] ?? '';
-            $type  = $block['type'] ?? 'TEXT';
+            $body = $block['body'] ?? '';
+            $type = $block['type'] ?? 'TEXT';
             $title = $block['title'] ?? '';
 
-            $wrapperClass = 'slide-block slide-block-' . ($idx % 2 === 0 ? 'even' : 'odd');
+            $wrapperClass = 'slide-block slide-block-'.($idx % 2 === 0 ? 'even' : 'odd');
 
             // ─── IMAGE: SVG/ilustración — render raw, sin mathContent ──
             // Se detecta por type (contenido nuevo) o por body (contenido
             // existente guardado con type TEXT antes de esta clasificación).
             if ($type === 'IMAGE' || preg_match('/<svg\b/', $body)) {
-                return '<div class="' . $wrapperClass . '">'
-                    . "\n" . $body . "\n"
-                    . '</div>';
+                return '<div class="'.$wrapperClass.'">'
+                    ."\n".$body."\n"
+                    .'</div>';
             }
 
             // ─── MERMAID: detectar por clase CSS o keyword ─────────────
             $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
-            if (!$isMermaid) {
+            if (! $isMermaid) {
                 $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($body)) === 1;
             }
 
@@ -4844,50 +5266,54 @@ PROMPT;
                 if (empty($mermaidCode)) {
                     $mermaidCode = trim(strip_tags($body));
                 }
-                return '<div class="' . $wrapperClass . '">'
-                    . "\n"
-                    . '<div wire:ignore x-data="mermaidEmbed()"'
-                    . ' data-mermaid-code="' . htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8') . '"'
-                    . ' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
-                    . '<div x-ref="target" class="w-full"></div>'
-                    . '</div>'
-                    . "\n"
-                    . '</div>';
+
+                return '<div class="'.$wrapperClass.'">'
+                    ."\n"
+                    .'<div wire:ignore x-data="mermaidEmbed()"'
+                    .' data-mermaid-code="'.htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8').'"'
+                    .' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
+                    .'<div x-ref="target" class="w-full"></div>'
+                    .'</div>'
+                    ."\n"
+                    .'</div>';
             }
 
             // ─── HTML: contenido semántico estructurado, render raw — sin mathContent ──
             if ($type === 'HTML') {
                 $sanitized = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
-                return '<div class="' . $wrapperClass . '">'
-                    . "\n"
-                    . '<div class="prose max-w-none">'
-                    . "\n" . $sanitized . "\n"
-                    . '</div>'
-                    . "\n"
-                    . '</div>';
+
+                return '<div class="'.$wrapperClass.'">'
+                    ."\n"
+                    .'<div class="prose max-w-none">'
+                    ."\n".$sanitized."\n"
+                    .'</div>'
+                    ."\n"
+                    .'</div>';
             }
 
             // ─── MATH: render con mathContent (KaTeX para LaTeX) ──────
             if ($type === 'MATH') {
                 $html = $this->renderContentBody($body, 'MATH');
-                return '<div class="' . $wrapperClass . '">'
-                    . "\n"
-                    . '<div x-data="mathContent()" data-math-content="' . htmlspecialchars($html, ENT_QUOTES, 'UTF-8') . '">'
-                    . '<div wire:ignore><div x-ref="target"></div></div>'
-                    . '</div>'
-                    . "\n"
-                    . '</div>';
+
+                return '<div class="'.$wrapperClass.'">'
+                    ."\n"
+                    .'<div x-data="mathContent()" data-math-content="'.htmlspecialchars($html, ENT_QUOTES, 'UTF-8').'">'
+                    .'<div wire:ignore><div x-ref="target"></div></div>'
+                    .'</div>'
+                    ."\n"
+                    .'</div>';
             }
 
             // ─── TEXT / default: render sin mathContent ──────────────
             $html = $this->renderContentBody($body, 'TEXT');
-            return '<div class="' . $wrapperClass . '">'
-                . "\n"
-                . '<div class="prose max-w-none">'
-                . "\n" . $html . "\n"
-                . '</div>'
-                . "\n"
-                . '</div>';
+
+            return '<div class="'.$wrapperClass.'">'
+                ."\n"
+                .'<div class="prose max-w-none">'
+                ."\n".$html."\n"
+                .'</div>'
+                ."\n"
+                .'</div>';
         });
 
         return $rendered->implode("\n");
@@ -4921,6 +5347,7 @@ PROMPT;
         if (\Illuminate\Support\Str::contains($html, '<')) {
             return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($html);
         }
+
         return $html;
     }
 
@@ -4938,19 +5365,20 @@ PROMPT;
         // Detectar si el body contiene un div.mermaid
         if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m)) {
             $mermaidCode = trim(strip_tags($m[1]));
-            if (!empty($mermaidCode)) {
+            if (! empty($mermaidCode)) {
                 // Envolver en mermaidEmbed() como lo hace slidePreviewContent()
                 return '<div class="slide-block">'
-                    . "\n"
-                    . '<div wire:ignore x-data="mermaidEmbed()"'
-                    . ' data-mermaid-code="' . htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8') . '"'
-                    . ' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
-                    . '<div x-ref="target" class="w-full"></div>'
-                    . '</div>'
-                    . "\n"
-                    . '</div>';
+                    ."\n"
+                    .'<div wire:ignore x-data="mermaidEmbed()"'
+                    .' data-mermaid-code="'.htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8').'"'
+                    .' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
+                    .'<div x-ref="target" class="w-full"></div>'
+                    .'</div>'
+                    ."\n"
+                    .'</div>';
             }
         }
+
         return $this->renderContentBody($body);
     }
 
@@ -4977,7 +5405,7 @@ PROMPT;
         $html = \Illuminate\Support\Str::markdown($body);
 
         // Envolver en un contenedor con estilos dedicados
-        return '<div class="review-questions">' . "\n" . $html . "\n" . '</div>';
+        return '<div class="review-questions">'."\n".$html."\n".'</div>';
     }
 
     /**

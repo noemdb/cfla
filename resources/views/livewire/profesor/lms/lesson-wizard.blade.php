@@ -261,7 +261,7 @@
                                 {{-- Eliminar lección --}}
                                 <button wire:click="confirmDeleteLesson({{ $item->id }})"
                                         title="Eliminar lección"
-                                        class="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200">
+                                        class="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200" @disabled($isPublished)>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             @endif
@@ -421,7 +421,7 @@
                                         </button>
                                         <button wire:click="confirmDeleteLesson({{ $item->id }})"
                                                 title="Eliminar lección"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200">
+                                                class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200" @disabled($isPublished)>
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     @endif
@@ -1058,7 +1058,7 @@
                                 </button>
                                 <button wire:click="exportLesson"
                                         wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-5 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        class="inline-flex items-center gap-1.5 px-5 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" @disabled($isPublished)>
                                     <svg wire:loading wire:target="exportLesson" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                     </svg>
@@ -1465,7 +1465,7 @@
                                 </button>
                                 <button wire:click="importLesson"
                                         wire:loading.attr="disabled"
-                                        class="inline-flex items-center gap-1.5 px-5 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 border border-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        class="inline-flex items-center gap-1.5 px-5 py-1.5 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 border border-blue-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed" @disabled($isPublished)>
                                     <svg wire:loading wire:target="importLesson" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                     </svg>
@@ -1721,9 +1721,51 @@
                     <h1 class="text-lg font-bold text-gray-900 dark:text-white">{{ $lessonTitle ?: 'Nueva Lección' }}</h1>
                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—' }} · {{ $selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—' }} Sec.{{ $selectedActivity?->pevaluacion?->seccion?->name ?? '—' }}</p>
                 </div>
+
+                {{-- Estado de publicación --}}
+                @php $hasSchedule = !blank($this->publishAt); @endphp
+                @if($isPublished)
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 shrink-0 ml-auto" role="alert">
+                        <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-[10px] font-medium text-emerald-400 whitespace-nowrap">🟢 Publicado</span>
+                    </div>
+                @elseif($hasSchedule)
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/8 border border-amber-500/15 shrink-0 ml-auto" role="alert">
+                        <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-[10px] font-medium text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }}</span>
+                    </div>
+                @else
+                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-700/30 border border-slate-600/30 shrink-0 ml-auto" role="alert">
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        <span class="text-[10px] font-medium text-slate-400 whitespace-nowrap">📋 Borrador</span>
+                    </div>
+                @endif
             </div>
 
         </div>
+
+        {{-- Banner de solo lectura para lecciones publicadas --}}
+        @if($isPublished)
+            <div class="bg-amber-500/12 border border-amber-500/20 rounded-lg p-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/15 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-300">Lección publicada — solo lectura</h3>
+                        <p class="text-xs text-gray-500 dark:text-slate-400">Esta lección ya está publicada y no puede ser modificada. Puedes visualizar todo su contenido y usar la vista previa para estudiantes.</p>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         {{-- Mensaje de publicación exitosa --}}
         @if($published)
@@ -1771,7 +1813,14 @@
             ">
 
             {{-- Navegación entre pasos --}}
-            <div class="flex items-start justify-between my-4 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-5" style="min-height: 5rem;">
+            @php
+                $topBorderStyle = match(true) {
+                    $isPublished     => 'border-top: 4px solid rgba(59,130,246,0.35)',   // blue-500/35 (azul rey)
+                    !blank($this->publishAt) => 'border-top: 4px solid rgba(168,85,247,0.35)',  // purple-500/35 (púrpura)
+                    default          => 'border-top: 4px solid rgba(251,191,36,0.35)',  // amber-400/35 (warning)
+                };
+            @endphp
+            <div class="flex items-start justify-between my-4 border-x border-b border-gray-200 dark:border-slate-700 rounded-lg px-4 py-5" style="min-height: 5rem; {{ $topBorderStyle }}">
                 <button wire:click="goToStep({{ $currentStep - 1 }})"
                         class="px-4 py-2 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors {{ $currentStep <= 1 ? 'invisible' : '' }}">
                     ← Anterior
@@ -1834,9 +1883,10 @@
                                 <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Información de la Lección</h2>
                                 <div class="ml-auto">
                                     <button wire:click="generateStep1Content"
+                                            @disabled($isPublished)
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium
                                                    text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20
-                                                   transition-all duration-200">
+                                                   transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                         </svg>
@@ -1848,14 +1898,16 @@
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Título de la lección</label>
                                 <input type="text" wire:model="lessonTitle"
-                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                                       @disabled($isPublished)
+                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-slate-700/50 disabled:cursor-not-allowed"
                                        placeholder="Título de la lección"/>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Descripción</label>
                                 <textarea wire:model="lessonDescription" rows="3"
-                                          class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"
+                                          @disabled($isPublished)
+                                          class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none disabled:bg-gray-100 dark:disabled:bg-slate-700/50 disabled:cursor-not-allowed"
                                           placeholder="Breve descripción de la lección…"></textarea>
                             </div>
 
@@ -2061,7 +2113,7 @@
                                                  @dragleave.prevent="if (dragOverIndex === {{ $sIdx2 }}) dragOverIndex = null"
                                                  @drop.prevent="endDrag()">
                                                 <button wire:click="goToSlide({{ $sIdx2 }})"
-                                                        draggable="true"
+                                                        draggable="{{ $isPublished ? 'false' : 'true' }}"
                                                         @dragstart="startDrag({{ $sIdx2 }})"
                                                         @dragend="cancelDrag()"
                                                         @class([
@@ -2096,13 +2148,13 @@
                                     </div>
                                     <div x-show="!sidebarCompact" class="p-2 border-t border-gray-200 dark:border-slate-700/30 space-y-1">
                                         <button wire:click="addWizardSection"
-                                                class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all">
+                                                class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all" @disabled($isPublished)>
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                             Nueva diapositiva
                                         </button>
                                         @if($totalSlides > 0)
                                             <button wire:click="confirmResetWizardSections"
-                                                    class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                                                    class="w-full flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all" @disabled($isPublished)>
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 Limpiar todo
                                             </button>
@@ -2121,10 +2173,10 @@
                                         </span>
                                         <input wire:model="wizardSections.{{ $currentSlideIndex }}.title"
                                                class="flex-1 bg-transparent border-b border-transparent hover:border-gray-400 dark:hover:border-slate-600 focus:border-emerald-500 text-sm font-bold text-gray-900 dark:text-white px-0 py-0.5 focus:outline-none transition-colors"
-                                               placeholder="Titulo de la diapositiva"/>
+                                               placeholder="Titulo de la diapositiva" @disabled($isPublished)/>
                                         <button wire:click="toggleWizardSectionVisibility({{ $currentSlideIndex }})"
                                                 class="p-1.5 rounded-lg transition-all {{ ($currentSlide['is_visible'] ?? true) ? 'text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-400 dark:text-slate-600 hover:text-gray-600 dark:hover:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700/50' }}"
-                                                title="{{ ($currentSlide['is_visible'] ?? true) ? 'Visible' : 'Oculto' }}">
+                                                title="{{ ($currentSlide['is_visible'] ?? true) ? 'Visible' : 'Oculto' }}" @disabled($isPublished)>
                                             @if($currentSlide['is_visible'] ?? true)
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             @else
@@ -2159,7 +2211,7 @@
                                                 <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 mb-1">Título de la diapositiva</label>
                                                 <input type="text" wire:model="wizardSections.{{ $currentSlideIndex }}.title"
                                                        class="w-full bg-white dark:bg-slate-950/80 border border-gray-300 dark:border-slate-700/50 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all"
-                                                       placeholder="Título de la diapositiva"/>
+                                                       placeholder="Título de la diapositiva" @disabled($isPublished)/>
                                             </div>
 
                                             @if(isset($wizardSections[$currentSlideIndex]['contents'][0]))
@@ -2167,14 +2219,20 @@
                                                           rows="12"
                                                           class="w-full bg-white dark:bg-slate-950/80 border border-gray-300 dark:border-slate-700/50 rounded-lg px-4 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-600 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all resize-y font-mono leading-relaxed"
                                                           placeholder="<!-- Escribe o pega el contenido HTML de esta diapositiva -->"
-                                                          spellcheck="false"></textarea>
+                                                          spellcheck="false" @disabled($isPublished)></textarea>
                                             @else
                                                 <div class="text-center py-10 bg-gray-50 dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-700/50 rounded-lg">
                                                     <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gray-200 dark:bg-slate-700/30 flex items-center justify-center">
                                                         <svg class="w-6 h-6 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                                     </div>
-                                                    <p class="text-xs text-gray-400 dark:text-slate-500 font-medium mb-1">Esta diapositiva esta vacia</p>
-                                                    <p class="text-[10px] text-gray-400 dark:text-slate-600">Usa los botones de abajo para generar contenido o escribe HTML directamente</p>
+                                                    <p class="text-xs text-gray-400 dark:text-slate-500 font-medium mb-2">Esta diapositiva esta vacia</p>
+                                                    <button wire:click="addWizardFirstBlock({{ $currentSlideIndex }})"
+                                                            @disabled($isPublished)
+                                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[11px] font-medium transition-all
+                                                                   text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                        Crear bloque
+                                                    </button>
                                                 </div>
                                             @endif
 
@@ -2219,10 +2277,10 @@
                                                                                    @keydown.escape="editing = false"
                                                                                    @keydown.enter="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
                                                                                    x-init="$nextTick(() => $refs.titleInput?.focus())"
-                                                                                   class="w-full bg-white dark:bg-slate-900/60 border border-emerald-500/40 rounded px-1.5 py-0.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-400"/>
+                                                                                   class="w-full bg-white dark:bg-slate-900/60 border border-emerald-500/40 rounded px-1.5 py-0.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-400" @disabled($isPublished)/>
                                                                             <button @click="$wire.set('wizardSections.{{ $currentSlideIndex }}.contents.{{ $cIdx }}.title', $refs.titleInput.value).then(() => { editing = false })"
                                                                                     class="p-1 rounded transition-all text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/15"
-                                                                                    title="Guardar título">
+                                                                                    title="Guardar título" @disabled($isPublished)>
                                                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                                             </button>
                                                                         </span>
@@ -2246,7 +2304,7 @@
                                                                     <button wire:click="removeWizardContent({{ $currentSlideIndex }}, {{ $cIdx }})"
                                                                             wire:confirm="Eliminar este bloque de contenido?"
                                                                             class="p-1.5 rounded-lg transition-all
-                                                                                   text-gray-400 dark:text-slate-600 hover:text-red-400 hover:bg-red-500/10">
+                                                                                   text-gray-400 dark:text-slate-600 hover:text-red-400 hover:bg-red-500/10" @disabled($isPublished)>
                                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                                     </button>
                                                                 @endif
@@ -2340,6 +2398,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideText"
                                                 {{ $blockCount >= 2 ? 'disabled' : '' }}
+                                                @disabled($isPublished)
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]
                                                        {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
@@ -2350,6 +2409,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideImage"
                                                 {{ $blockCount >= 2 ? 'disabled' : '' }}
+                                                @disabled($isPublished)
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 active:scale-[0.97]
                                                        {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
@@ -2362,6 +2422,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSectionIllustration"
                                                 {{ $blockCount >= 2 ? 'disabled' : '' }}
+                                                @disabled($isPublished)
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-sky-400 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 active:scale-[0.97]
                                                        disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100
@@ -2374,6 +2435,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideDiagram"
                                                 {{ $blockCount >= 2 ? 'disabled' : '' }}
+                                                @disabled($isPublished)
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
                                                        text-fuchsia-400 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 hover:border-fuchsia-500/40 active:scale-[0.97]
                                                        {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
@@ -2386,7 +2448,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideHtmlTags"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 active:scale-[0.97]">
+                                                       text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40 active:scale-[0.97]" @disabled($isPublished)>
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v4a1 1 0 001 1h4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14h6m-3-3v6"/></svg>
                                             Etiquetar HTML
                                         </button>
@@ -2397,7 +2459,7 @@
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideMath"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]" @disabled($isPublished)>
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM8 12h8m-4-4v8"/></svg>
                                             Etiquetar Not. Mat. 
                                         </button>
@@ -2407,7 +2469,7 @@
                                         <button wire:click="removeWizardSection({{ $currentSlideIndex }})"
                                                 wire:confirm="Eliminar esta diapositiva?"
                                                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all
-                                                       text-red-400/70 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
+                                                       text-red-400/70 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20" @disabled($isPublished)>
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             Eliminar
                                         </button>
@@ -2416,7 +2478,7 @@
 
                                         <button wire:click="confirmResetWizardSections"
                                                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all
-                                                       text-red-400/50 hover:text-red-300 hover:bg-red-500/15 border border-red-900/30 hover:border-red-500/30">
+                                                       text-red-400/50 hover:text-red-300 hover:bg-red-500/15 border border-red-900/30 hover:border-red-500/30" @disabled($isPublished)>
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3 3m0 0l3-3m-3 3V8"/></svg>
                                             Limpiar todo
                                         </button>
@@ -2453,7 +2515,7 @@
                                     <div class="flex items-center justify-center gap-3">
                                         <button wire:click="generateStep2Sections"
                                                 class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
-                                                       text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all">
+                                                       text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all" @disabled($isPublished)>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                             Generar estructura con IA
                                         </button>
@@ -2664,14 +2726,14 @@
                                                     <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button wire:click="editWizardResource({{ $rIdx }})"
                                                                 class="text-gray-400 dark:text-slate-400/60 hover:text-sky-300 transition-all text-xs p-1 rounded hover:bg-sky-500/10"
-                                                                title="Editar recurso">
+                                                                title="Editar recurso" @disabled($isPublished)>
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                             </svg>
                                                         </button>
                                                         <button wire:click="removeWizardResource({{ $rIdx }})"
                                                                 class="text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
-                                                                title="Eliminar recurso">
+                                                                title="Eliminar recurso" @disabled($isPublished)>
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                             </svg>
@@ -2699,7 +2761,7 @@
                                                     Editando: <span class="text-sky-200">{{ $wizardResources[$editingResourceIndex]['display_name'] }}</span>
                                                 </span>
                                                 <button wire:click="cancelEditResource"
-                                                        class="ml-auto text-[10px] text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 px-2 py-0.5 rounded transition-colors">
+                                                        class="ml-auto text-[10px] text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50 px-2 py-0.5 rounded transition-colors" @disabled($isPublished)>
                                                     Cancelar
                                                 </button>
                                             </div>
@@ -2709,7 +2771,7 @@
                                         <div class="flex gap-2">
                                             <div class="flex-1">
                                                 <input wire:model="resourceName" placeholder="Nombre del recurso"
-                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror"/>
+                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors @error('resourceName') border-red-500/50 @enderror" @disabled($isPublished)/>
                                                 @error('resourceName')
                                                     <p class="text-[10px] text-red-400 mt-1">{{ $message }}</p>
                                                 @enderror
@@ -2717,7 +2779,7 @@
                                             @if(count($wizardSections) > 0)
                                                 <div class="flex-none">
                                                     <select wire:model="resourceSectionId"
-                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]" @disabled($isPublished)>
                                                         <option value="">Sin sección</option>
                                                         @foreach($wizardSections as $sec)
                                                             <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
@@ -2734,7 +2796,7 @@
                                                 <div class="relative flex-none">
                                                     <input wire:model="resourceFile" type="file" id="resourceFile"
                                                            class="absolute inset-0 opacity-0 cursor-pointer @error('resourceFile') border-2 border-red-500/50 @enderror"
-                                                           @change="const f = $event.target.files[0]; if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = e => { window._filePreviewUrl = e.target.result; window._filePreviewType = f.type; previewUrl = e.target.result; previewType = f.type }; r.readAsDataURL(f) } else { window._filePreviewUrl = null; window._filePreviewType = null; previewUrl = null; previewType = null }"/>
+                                                           @change="const f = $event.target.files[0]; if (f && f.type.startsWith('image/')) { const r = new FileReader(); r.onload = e => { window._filePreviewUrl = e.target.result; window._filePreviewType = f.type; previewUrl = e.target.result; previewType = f.type }; r.readAsDataURL(f) } else { window._filePreviewUrl = null; window._filePreviewType = null; previewUrl = null; previewType = null }" @disabled($isPublished)/>
                                                     <label for="resourceFile"
                                                            class="flex items-center gap-1.5 px-3 py-2 @error('resourceFile') bg-red-800/40 border-red-500/50 @else bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 border-gray-300 dark:border-slate-600/50 hover:border-gray-400 dark:hover:border-slate-500/50 @enderror text-gray-600 dark:text-slate-300 text-xs rounded-lg cursor-pointer transition-colors whitespace-nowrap border">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2748,7 +2810,7 @@
                                                 </div>
                                                 <p class="flex-1 text-[10px] text-gray-400 dark:text-slate-500 leading-[36px]">Máx. 2 MB por archivo · 10 MB total por lección</p>
                                                 <button wire:click="addWizardResource"
-                                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 shrink-0">
+                                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5 shrink-0" @disabled($isPublished)>
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                     </svg>
@@ -2954,14 +3016,14 @@
                                                         </button>
                                                         <button wire:click="editWizardHtmlEmbed({{ $eIdx }})"
                                                                 class="text-gray-400 dark:text-slate-400 hover:text-amber-300 transition-all text-xs p-1 rounded hover:bg-amber-500/10"
-                                                                title="Editar embed">
+                                                                title="Editar embed" @disabled($isPublished)>
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                             </svg>
                                                         </button>
                                                         <button wire:click="removeWizardHtmlEmbed({{ $eIdx }})"
                                                                 class="text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
-                                                                title="Eliminar embed">
+                                                                title="Eliminar embed" @disabled($isPublished)>
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                             </svg>
@@ -2984,12 +3046,12 @@
                                         <div class="flex gap-2">
                                             <div class="flex-1">
                                                 <input wire:model="embedTitle" placeholder="Título del embed (opcional)"
-                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors" @disabled($isPublished)/>
                                             </div>
                                             @if(count($wizardSections) > 0)
                                                 <div class="flex-none">
                                                     <select wire:model.live="embedSectionId"
-                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]">
+                                                            class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[130px]" @disabled($isPublished)>
                                                         <option value="">Sin sección</option>
                                                         @foreach($wizardSections as $sec)
                                                             <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
@@ -3085,7 +3147,7 @@
                                         <div>
                                             <textarea wire:model="embedHtml" rows="4"
                                                       placeholder="Pega aquí el código HTML (iframe, script, etc.)"
-                                                      class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y"></textarea>
+                                                      class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors font-mono resize-y" @disabled($isPublished)></textarea>
                                         </div>
                                         <div x-data="{ showEmbedPreview: false }">
                                             <div class="flex items-center justify-between gap-2">
@@ -3101,7 +3163,7 @@
                                                     </button>
                                                     @endif
                                                     <button wire:click="addWizardHtmlEmbed"
-                                                            class="px-4 py-2 {{ $editingEmbedIndex !== null ? 'bg-amber-600 hover:bg-amber-500' : 'bg-fuchsia-600 hover:bg-fuchsia-500' }} text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
+                                                            class="px-4 py-2 {{ $editingEmbedIndex !== null ? 'bg-amber-600 hover:bg-amber-500' : 'bg-fuchsia-600 hover:bg-fuchsia-500' }} text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5" @disabled($isPublished)>
                                                         @if($editingEmbedIndex !== null)
                                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                             Actualizar cambios
@@ -3113,7 +3175,7 @@
                                                 </div>
                                                 @if($editingEmbedIndex !== null)
                                                     <button wire:click="cancelEditEmbed"
-                                                            class="px-3 py-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                                            class="px-3 py-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors" @disabled($isPublished)>
                                                         Cancelar
                                                     </button>
                                                 @endif
@@ -3203,7 +3265,7 @@
                                                     </div>
                                                     <button wire:click="removeWizardLink({{ $lIdx }})"
                                                             class="opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-300 transition-all text-xs p-1 rounded hover:bg-red-500/10"
-                                                            title="Eliminar enlace">
+                                                            title="Eliminar enlace" @disabled($isPublished)>
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                         </svg>
@@ -3224,14 +3286,14 @@
                                     <div class="flex flex-wrap gap-2 items-end">
                                         <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkTitle" placeholder="Título del enlace"
-                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors" @disabled($isPublished)/>
                                         </div>
                                         <div class="flex-1 min-w-[140px]">
                                             <input wire:model="linkUrl" placeholder="https://…"
-                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors"/>
+                                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition-colors" @disabled($isPublished)/>
                                         </div>
                                         <select wire:model="linkType"
-                                                class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors">
+                                                class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors" @disabled($isPublished)>
                                             <option value="REFERENCE">Referencia</option>
                                             <option value="VIDEO">Video</option>
                                             <option value="TOOL">Herramienta</option>
@@ -3240,7 +3302,7 @@
                                         </select>
                                         @if(count($wizardSections) > 0)
                                             <select wire:model="linkSectionId"
-                                                    class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]">
+                                                    class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none transition-colors min-w-[120px]" @disabled($isPublished)>
                                                 <option value="">Sin sección</option>
                                                 @foreach($wizardSections as $sec)
                                                     <option value="{{ $sec['id'] }}">{{ $sec['title'] }} {{ !$sec['is_visible'] ? '(oculta)' : '' }}</option>
@@ -3248,7 +3310,7 @@
                                             </select>
                                         @endif
                                         <button wire:click="addWizardLink"
-                                                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5">
+                                                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap flex items-center gap-1.5" @disabled($isPublished)>
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
@@ -3324,7 +3386,7 @@
                                             </button>
                                             <button wire:click="removeAllWizardResources"
                                                     @click="showConfirmDeleteResources = false"
-                                                    class="px-4 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all flex items-center gap-1.5">
+                                                    class="px-4 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-500 rounded-lg transition-all flex items-center gap-1.5" @disabled($isPublished)>
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>
@@ -3434,7 +3496,7 @@
                                             Cerrar
                                         </button>
                                         <button wire:click="addWizardHtmlEmbed"
-                                                class="px-4 py-2 text-xs font-medium text-white bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg transition-all">
+                                                class="px-4 py-2 text-xs font-medium text-white bg-fuchsia-600 hover:bg-fuchsia-500 rounded-lg transition-all" @disabled($isPublished)>
                                             Agregar Embed
                                         </button>
                                     </div>
@@ -3512,13 +3574,13 @@
 
 ### Sección 2
 Cómo...?"
-                                      spellcheck="false"></textarea>
+                                      spellcheck="false" @disabled($isPublished)></textarea>
                             <div class="flex items-center justify-between">
                                 <span class="text-xs text-gray-400 dark:text-slate-600">{{ strlen($reviewQuestions) }} caracteres</span>
                                 <div class="flex items-center gap-2">
                                     <button wire:click="generateReviewQuestions"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
-                                                   text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all">
+                                                   text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all" @disabled($isPublished)>
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                         Generar con IA
                                     </button>
@@ -3531,7 +3593,7 @@ Cómo...?"
                                     @endif
                                     <button wire:click="$set('reviewQuestions', '')"
                                             wire:confirm="Limpiar las preguntas de repaso?"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium text-gray-400 dark:text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all" @disabled($isPublished)>
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         Limpiar
                                     </button>
@@ -3634,12 +3696,12 @@ Cómo...?"
                             <div class="flex items-center gap-3">
                                 <label class="text-sm text-gray-600 dark:text-slate-300">Programar publicación:</label>
                                 <input wire:model.live="publishAt" type="datetime-local"
-                                       class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none"/>
+                                       class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-slate-200 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none" @disabled($isPublished)/>
                             </div>
 
                             <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300 cursor-pointer">
                                 <input wire:model="allowDownloads" type="checkbox"
-                                       class="rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-500"/>
+                                       class="rounded border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-500" @disabled($isPublished)/>
                                 Permitir descarga de recursos
                             </label>
 
@@ -3661,7 +3723,7 @@ Cómo...?"
                                 {{-- Planner/Admin: botón contextual --}}
                                 <button wire:click="confirmPublish"
                                         wire:loading.attr="disabled"
-                                        class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-white text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+                                        class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-white text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2" @disabled($isPublished)>
                                     <svg wire:loading wire:target="confirmPublish" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                     </svg>
@@ -3685,7 +3747,7 @@ Cómo...?"
                                 <button wire:click="confirmPublish"
                                         wire:loading.attr="disabled"
                                         @if(blank($publishAt)) disabled @endif
-                                        class="w-full py-2 @if(blank($publishAt)) bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 cursor-not-allowed @else bg-amber-600 hover:bg-amber-500 text-white @endif disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+                                        class="w-full py-2 @if(blank($publishAt)) bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 cursor-not-allowed @else bg-amber-600 hover:bg-amber-500 text-white @endif disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2" @disabled($isPublished)>
                                     <svg class="w-4 h-4 @if(!blank($publishAt)) text-amber-200 @endif" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
@@ -3997,6 +4059,43 @@ Cómo...?"
             {{-- ═══════════ MODAL VISTA ESTUDIANTE (wizard → unificado) ═══════════ --}}
             {{-- openWizardStudentPreview() normaliza los datos del wizard y activa el componente unificado --}}
 
+            {{-- ═══════════ MODAL CONFIRMACIÓN GUARDAR SIN SECCIONES ═══════════ --}}
+            @if($showUnsavedConfirm)
+                <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="unsaved-confirm-modal">
+                    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
+                    <div class="relative min-h-screen flex items-center justify-center p-4">
+                        <div class="relative w-full max-w-md bg-gray-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden">
+                            <div class="p-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.93 4.93a10 10 0 0114.14 0m-1.41 1.41a6 6 0 00-8.48 0m1.41 1.41a2 2 0 012.83 0"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Sin diapositivas</h3>
+                                        <p class="text-xs text-slate-400 mt-1">
+                                            Esta lección no tiene diapositivas ni contenido. ¿Guardar de todas formas?
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-end gap-3 pt-2">
+                                    <button wire:click="$set('showUnsavedConfirm', false)"
+                                            class="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">
+                                        Cancelar
+                                    </button>
+                                    <button wire:click="confirmSaveAnyway"
+                                            class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all">
+                                        {{ $pendingSaveAction === 'confirmPublish' ? 'Programar de todas formas' : 'Guardar de todas formas' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- ═══════════ MODAL CONFIRMACIÓN PUBLICAR SIN FECHA ═══════════ --}}
             @if($showPublishConfirm)
                 <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="publish-confirm-modal">
@@ -4024,7 +4123,8 @@ Cómo...?"
                                         Cancelar
                                     </button>
                                     <button wire:click="saveAndPublish"
-                                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-all">
+                                            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-all"
+                                            @disabled($isPublished)>
                                         Guardar de todas formas
                                     </button>
                                 </div>
@@ -4034,53 +4134,44 @@ Cómo...?"
                 </div>
             @endif
 
-            {{-- ═══ BOTONES FLOTANTES: Vista estudiante + Guardar (group button) ═══ --}}
-            @php $hasSchedule = !blank($this->publishAt); @endphp
-
+            {{-- ═══ BOTONES FLOTANTES: Ayuda + Vista estudiante + Guardar ═══ --}}
             <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                {{-- Status notification --}}
-                @if($hasSchedule)
-                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 shadow-lg">
-                        <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">⏰ {{ \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i') }} · Al guardar, se establece la notificación para la aprobación/publicación {{ $this->saved ? '' : ' · ¡Sin guardar!' }}</span>
-                    </div>
-                @else
-                    <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-600/20 border border-slate-500/20 shadow-lg">
-                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        <span class="text-[10px] font-semibold text-slate-400 whitespace-nowrap">📋 Borrador · No visible</span>
-                    </div>
-                @endif
-
-                {{-- Button group --}}
                 <div class="flex">
+                <button wire:click="$set('showHelpModal', true)"
+                        title="Ayuda del wizard"
+                        class="inline-flex items-center justify-center w-11 h-11 rounded-l-xl text-sm font-semibold transition-all duration-200
+                               text-slate-400 bg-slate-800/80 hover:bg-slate-700 hover:text-white
+                               border border-slate-600/30 hover:border-slate-500/50
+                               active:scale-[0.95]
+                               border-r-0">
+                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
+                    </svg>
+                </button>
+
                 <button wire:click="openWizardStudentPreview"
                         title="Vista estudiante"
-                        class="inline-flex items-center justify-center w-11 h-11 rounded-l-xl text-sm font-semibold transition-all duration-200
+                        class="inline-flex items-center justify-center w-11 h-11 text-sm font-semibold transition-all duration-200
                                text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20
                                border border-fuchsia-500/20 hover:border-fuchsia-500/40
                                active:scale-[0.95]
-                               border-r-0">
+                               border-r-0 border-l-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                 </button>
 
-                <button wire:click="saveStep2"
-                        wire:loading.attr="disabled"
-                        wire:target="saveStep2"
-                        title="Guardar lección"
-                        class="inline-flex items-center justify-center w-11 h-11 rounded-r-xl text-sm font-semibold transition-all duration-200
-                               shadow-lg shadow-blue-500/20
-                               text-white bg-gradient-to-br from-blue-500 to-blue-600
-                               hover:from-blue-400 hover:to-blue-500
-                               active:scale-[0.95] active:shadow-blue-500/30
-                               disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
-                               border border-blue-400/30">
+	                <button wire:click="saveStep2"
+	                        wire:loading.attr="disabled"
+	                        wire:target="saveStep2"
+	                        title="{{ $saved ? 'Guardado - sin cambios pendientes' : 'Guardar lección - hay cambios sin guardar' }}"
+	                        @class([
+	                            'inline-flex items-center justify-center w-11 h-11 rounded-r-xl text-sm font-semibold transition-all duration-200 text-white active:scale-[0.95] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100',
+	                            'shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 active:shadow-blue-500/30 border border-blue-400/30' => $saved,
+	                            'shadow-lg shadow-amber-500/20 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:shadow-amber-500/30 border border-amber-400/30' => !$saved,
+	                        ])
+	                        @disabled($isPublished)>
                     <svg wire:loading wire:target="saveStep2" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
@@ -4101,11 +4192,618 @@ Cómo...?"
         <x-lms.student-preview :preview="$listPreviewData" closeMethod="closeListStudentPreview" />
     @endif
 
+	    {{-- ═══════════ MODAL DE AYUDA DEL WIZARD ═══════════ --}}
+	    @if($showHelpModal)
+	        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="help-modal">
+	            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" wire:click="$set('showHelpModal', false)"></div>
+	            <div class="relative min-h-screen flex items-center justify-center p-4">
+	                <div class="relative w-full max-w-6xl max-h-[95vh] bg-gray-900 border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden"
+	                     x-data="helpWizardData()">
+
+	                    {{-- ─── Header ─── --}}
+	                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 bg-slate-900/50">
+	                        <div class="flex items-center gap-3">
+	                            <div class="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center">
+	                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
+	                                </svg>
+	                            </div>
+	                            <h2 class="text-lg font-bold text-white tracking-tight">Ayuda del Wizard de Lecciones</h2>
+	                        </div>
+	                        <button wire:click="$set('showHelpModal', false)"
+	                                class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 transition-colors">
+	                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+	                            </svg>
+	                        </button>
+	                    </div>
+
+	                    {{-- ─── Body: Sidebar + Content ─── --}}
+	                    <div class="flex" style="min-height:400px; max-height:65vh;">
+	                        {{-- Sidebar --}}
+	                        <div class="border-r border-slate-700/30 flex flex-col shrink-0 transition-all duration-300 overflow-hidden"
+	                             :class="sidebarOpen ? 'w-44' : 'w-12'">
+	                            <button @click="sidebarOpen = !sidebarOpen"
+	                                    class="flex items-center justify-center h-9 border-b border-slate-700/30 text-slate-500 hover:text-white transition-colors">
+	                                <svg class="w-4 h-4 transition-transform duration-300" :class="sidebarOpen ? 'rotate-180' : ''"
+	                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+	                                </svg>
+	                            </button>
+	                            <template x-for="(tab, i) in tabs" :key="i">
+	                                <button @click="activeTab = i"
+	                                        :class="activeTab === i ? 'bg-blue-500/10 text-blue-300 border-l-2 border-blue-500' : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border-l-2 border-transparent'"
+	                                        class="flex items-center gap-3 px-3 py-2.5 text-xs font-medium transition-all whitespace-nowrap"
+	                                        :title="sidebarOpen ? '' : tab.short">
+	                                    <span class="shrink-0 w-5 h-5 flex items-center justify-center" x-html="tab.icon"></span>
+	                                    <span x-show="sidebarOpen" x-text="tab.label" class="truncate text-[11px]"></span>
+	                                </button>
+	                            </template>
+	                        </div>
+
+	                        {{-- Content --}}
+	                        <div class="flex-1 overflow-y-auto p-5 space-y-4">
+
+		                            {{-- TAB: Visión General --}}
+		                            <div x-show="activeTab === 0" x-cloak class="space-y-3">
+		                                <h3 class="text-sm font-bold text-white">📋 Visión General del Wizard</h3>
+		                                <p class="text-xs text-slate-400 leading-relaxed">
+		                                    El wizard te guía en <strong class="text-white">4 pasos</strong> para crear una lección educativa completa.
+		                                    Puedes avanzar y retroceder libremente; los cambios se guardan en cada paso.
+		                                </p>
+
+		                                {{-- Paso 1 --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: true }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <span class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-[10px] font-bold shrink-0">1</span>
+		                                            <span class="text-xs font-semibold text-white">Título y Descripción</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Qué hago aquí?</strong> Define el tema central de tu lección:
+		                                            un título llamativo, una descripción que contextualice, el nivel educativo al que va dirigida
+		                                            y los objetivos de aprendizaje.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🎯 Ejemplo de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                <strong class="text-white">Tema:</strong> "Sistema Solar" · <strong class="text-white">Nivel:</strong> 5to grado<br>
+		                                                <strong class="text-white">Objetivo:</strong> "Identificar los planetas del sistema solar y sus características principales"
+		                                            </p>
+		                                        </div>
+		                                        <div class="flex flex-wrap gap-1.5">
+		                                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">💡 La IA puede generar título + descripción + objetivos con un clic</span>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Paso 2 --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <span class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-[10px] font-bold shrink-0">2</span>
+		                                            <span class="text-xs font-semibold text-white">Diapositivas (Secciones)</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Qué hago aquí?</strong> Cada <strong>sección</strong> es una diapositiva.
+		                                            Agrégalas con título y contenido, luego usa la IA para generar texto, imágenes,
+		                                            ilustraciones o diagramas para cada una.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">📖 Estructura sugerida</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                <strong class="text-white">Sección 1:</strong> Introducción al tema<br>
+		                                                <strong class="text-white">Sección 2:</strong> Desarrollo con conceptos clave<br>
+		                                                <strong class="text-white">Sección 3:</strong> Ejemplos y aplicaciones<br>
+		                                                <strong class="text-white">Sección 4:</strong> Resumen y conclusiones
+		                                            </p>
+		                                        </div>
+		                                        <p class="text-[10px] text-slate-500">💡 Puedes reordenar, ocultar o eliminar secciones libremente</p>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Paso 3 --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <span class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 text-[10px] font-bold shrink-0">3</span>
+		                                            <span class="text-xs font-semibold text-white">Recursos y Enlaces</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Qué hago aquí?</strong> Adjunta materiales complementarios:
+		                                            archivos PDF con lecturas, imágenes de referencia, videos explicativos,
+		                                            o enlaces a sitios web relacionados con el tema.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">📎 Ejemplos de recursos</p>
+		                                            <ul class="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
+		                                                <li>PDF con la lectura complementaria del tema</li>
+		                                                <li>Video de YouTube embedded como material de apoyo</li>
+		                                                <li>Enlace a simulador interactivo externo</li>
+		                                                <li>Infografía en imagen PNG</li>
+		                                            </ul>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Paso 4 --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <span class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-[10px] font-bold shrink-0">4</span>
+		                                            <span class="text-xs font-semibold text-white">Publicación</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Qué hago aquí?</strong> Revisa el contenido completo y decide
+		                                            el destino de tu lección.
+		                                        </p>
+		                                        <div class="grid grid-cols-2 gap-2">
+		                                            <div class="bg-purple-500/10 rounded-lg p-2 border border-purple-500/20">
+		                                                <p class="text-[10px] font-semibold text-purple-300">📅 Programar</p>
+		                                                <p class="text-[10px] text-slate-400 mt-0.5">Elige fecha futura. La lección se publicará automáticamente.</p>
+		                                            </div>
+		                                            <div class="bg-emerald-500/10 rounded-lg p-2 border border-emerald-500/20">
+		                                                <p class="text-[10px] font-semibold text-emerald-300">🚀 Publicar ahora</p>
+		                                                <p class="text-[10px] text-slate-400 mt-0.5">Disponible para estudiantes de inmediato.</p>
+		                                            </div>
+		                                        </div>
+		                                        <p class="text-[10px] text-red-400">⚠️ Una vez publicada, la lección no se puede editar</p>
+		                                    </div>
+		                                </div>
+		                            </div>
+
+		                            {{-- TAB: Herramientas IA --}}
+		                            <div x-show="activeTab === 1" x-cloak class="space-y-3">
+		                                <h3 class="text-sm font-bold text-white">🤖 Herramientas de Inteligencia Artificial</h3>
+		                                <p class="text-xs text-slate-400 leading-relaxed">
+		                                    La IA está integrada en cada sección para ayudarte a crear contenido de calidad
+		                                    en segundos. Cada herramienta tiene un propósito específico.
+		                                </p>
+
+		                                {{-- Generar texto --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: true }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <div class="w-6 h-6 rounded bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div>
+		                                            <span class="text-xs font-semibold text-white">✏️ Generar texto</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Para qué sirve?</strong> Redacta automáticamente el contenido
+		                                            textual de una sección a partir de su título. Ideal cuando tienes clara la estructura
+		                                            pero necesitas ayuda con la redacción.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🔍 Caso de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Tienes una sección llamada <strong class="text-white">"La fotosíntesis"</strong> pero no sabes
+		                                                cómo redactar el contenido. La IA genera párrafos explicativos con ejemplos
+		                                                adaptados al nivel educativo que elegiste.
+		                                            </p>
+		                                        </div>
+		                                        <span class="inline-block text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700">Botón: <span class="text-emerald-400">✨ Generar texto</span></span>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Generar imagen --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <div class="w-6 h-6 rounded bg-violet-500/15 flex items-center justify-center text-violet-400 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+		                                            <span class="text-xs font-semibold text-white">🖼️ Generar imagen</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Para qué sirve?</strong> Crea una imagen original que
+		                                            represente visualmente el contenido de la sección. Ideal para secciones donde
+		                                            una imagen vale más que mil palabras.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🔍 Caso de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Sección sobre <strong class="text-white">"Ecosistemas acuáticos"</strong> → la IA genera
+		                                                una imagen de un ecosistema marino con arrecifes, peces y vegetación acuática
+		                                                para complementar la explicación.
+		                                            </p>
+		                                        </div>
+		                                        <span class="inline-block text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700">Botón: <span class="text-violet-400">✨ Generar imagen</span></span>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Generar ilustración --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <div class="w-6 h-6 rounded bg-rose-500/15 flex items-center justify-center text-rose-400 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg></div>
+		                                            <span class="text-xs font-semibold text-white">🎨 Generar ilustración decorativa</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Para qué sirve?</strong> Similar a la imagen pero con un estilo
+		                                            más artístico e ilustrativo. Ideal para portadas de sección, transiciones o
+		                                            elementos decorativos que embellezcan la lección.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🔍 Caso de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Quieres una <strong class="text-white">ilustración de portada</strong> para tu lección
+		                                                "El ciclo del agua". La IA genera un dibujo estilizado con el ciclo completo:
+		                                                evaporación, condensación, precipitación — ideal como imagen principal.
+		                                            </p>
+		                                        </div>
+		                                        <span class="inline-block text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700">Botón: <span class="text-rose-400">✨ Generar ilustración</span></span>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Generar diagrama --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <div class="w-6 h-6 rounded bg-cyan-500/15 flex items-center justify-center text-cyan-400 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg></div>
+		                                            <span class="text-xs font-semibold text-white">📊 Generar diagrama</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Para qué sirve?</strong> Genera diagramas conceptuales
+		                                            usando <strong class="text-white">Mermaid.js</strong>: diagramas de flujo,
+		                                            mapas conceptuales, líneas de tiempo, organigramas y más. Puedes refinar
+		                                            el resultado con instrucciones adicionales.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🔍 Caso de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Lección sobre <strong class="text-white">"La cadena alimenticia"</strong> → la IA genera
+		                                                un diagrama de flujo mostrando productores → consumidores primarios → secundarios →
+		                                                descomponedores, con ejemplos de cada nivel.
+		                                            </p>
+		                                        </div>
+		                                        <div class="flex flex-wrap gap-1.5">
+		                                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono border border-slate-700">Botón: <span class="text-cyan-400">✨ Generar diagrama</span></span>
+		                                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">🖱️ Zoom + pantalla completa</span>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                {{-- Generar todo --}}
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <div class="flex items-center gap-2">
+		                                            <div class="w-6 h-6 rounded bg-yellow-500/15 flex items-center justify-center text-yellow-400 shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+		                                            <span class="text-xs font-semibold text-white">⚡ Generar lección completa</span>
+		                                        </div>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            <strong class="text-white">¿Para qué sirve?</strong> Disponible en el <strong class="text-white">Paso 1</strong>.
+		                                            La IA genera automáticamente el título, la descripción, los objetivos de aprendizaje
+		                                            y todas las diapositivas estructuradas a partir de un tema o palabra clave.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded-lg p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">🔍 Caso de uso</p>
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Escribes <strong class="text-white">"Fracciones"</strong> y la IA genera:
+		                                                título, descripción, objetivos y 4-6 diapositivas con contenido,
+		                                                ejemplos y ejercicios prácticos listos para editar.
+		                                            </p>
+		                                        </div>
+		                                        <span class="inline-block text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 italic border border-slate-700">📌 Solo disponible en el Paso 1 del wizard</span>
+		                                    </div>
+		                                </div>
+		                            </div>
+
+		                            {{-- TAB: Estados --}}
+		                            <div x-show="activeTab === 2" x-cloak class="space-y-3">
+		                                <h3 class="text-sm font-bold text-white">📊 Estados de la Lección</h3>
+		                                <p class="text-xs text-slate-400 leading-relaxed">
+		                                    Cada lección pasa por diferentes estados. El estado actual determina lo que puedes
+		                                    hacer con ella y quién puede verla.
+		                                </p>
+
+		                                {{-- Flujo de estados --}}
+		                                <div class="bg-slate-800/40 rounded-lg p-3 border border-slate-700/30">
+		                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-2">🔄 Flujo de transición</p>
+		                                    <div class="flex items-center justify-between text-[10px]">
+		                                        <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 font-medium">Borrador</span>
+		                                        <span class="text-slate-600">→</span>
+		                                        <span class="px-2 py-1 rounded bg-purple-500/20 text-purple-300 font-medium">Programada</span>
+		                                        <span class="text-slate-600">→</span>
+		                                        <span class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-medium">Publicada</span>
+		                                    </div>
+		                                    <p class="text-[10px] text-slate-500 mt-2 text-center">También puedes ir directo de Borrador → Publicada (solo planificadores)</p>
+		                                </div>
+
+		                                <div class="space-y-2">
+		                                    {{-- Borrador --}}
+		                                    <div class="rounded-lg border border-amber-500/20 overflow-hidden" x-data="{ open: true }">
+		                                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-left">
+		                                            <div class="flex items-center gap-2">
+		                                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"></span>
+		                                                <span class="text-xs font-semibold text-white">Borrador <span class="text-amber-400 font-normal">(DRAFT)</span></span>
+		                                            </div>
+		                                            <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                        </button>
+		                                        <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                <strong class="text-white">Estado inicial</strong> al crear una lección.
+		                                                Solo tú y los administradores pueden verla. Todos los controles de edición
+		                                                están habilitados.
+		                                            </p>
+		                                            <div class="bg-slate-800/60 rounded p-2">
+		                                                <p class="text-[10px] text-slate-400"><span class="text-amber-300">✅</span> Edición completa · <span class="text-slate-500">👁️ No visible para estudiantes</span></p>
+		                                            </div>
+		                                        </div>
+		                                    </div>
+
+		                                    {{-- Programada --}}
+		                                    <div class="rounded-lg border border-purple-500/20 overflow-hidden" x-data="{ open: false }">
+		                                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-purple-500/5 hover:bg-purple-500/10 transition-colors text-left">
+		                                            <div class="flex items-center gap-2">
+		                                                <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shrink-0"></span>
+		                                                <span class="text-xs font-semibold text-white">Programada <span class="text-purple-400 font-normal">(SCHEDULED)</span></span>
+		                                            </div>
+		                                            <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                        </button>
+		                                        <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Tiene una <strong class="text-white">fecha de publicación</strong> establecida.
+		                                                Se publicará automáticamente en esa fecha. Puedes seguir editando
+		                                                hasta el momento de la publicación.
+		                                            </p>
+		                                            <div class="grid grid-cols-2 gap-2">
+		                                                <div class="bg-purple-500/10 rounded p-2 border border-purple-500/15">
+		                                                    <p class="text-[10px] text-purple-300 font-semibold">✅ Edición habilitada</p>
+		                                                    <p class="text-[10px] text-slate-400">Puedes modificar contenido</p>
+		                                                </div>
+		                                                <div class="bg-purple-500/10 rounded p-2 border border-purple-500/15">
+		                                                    <p class="text-[10px] text-purple-300 font-semibold">📅 Auto-publicación</p>
+		                                                    <p class="text-[10px] text-slate-400">Se publica en la fecha indicada</p>
+		                                                </div>
+		                                            </div>
+		                                        </div>
+		                                    </div>
+
+		                                    {{-- Publicada --}}
+		                                    <div class="rounded-lg border border-emerald-500/20 overflow-hidden" x-data="{ open: false }">
+		                                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors text-left">
+		                                            <div class="flex items-center gap-2">
+		                                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+		                                                <span class="text-xs font-semibold text-white">Publicada <span class="text-emerald-400 font-normal">(PUBLISHED)</span></span>
+		                                            </div>
+		                                            <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                        </button>
+		                                        <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                            <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                                Visible para los estudiantes según la configuración del período académico.
+		                                                <strong class="text-red-400">No se puede editar el contenido ni las secciones.</strong>
+		                                                Para modificar una lección publicada, primero debe archivarse.
+		                                            </p>
+		                                            <div class="bg-red-500/10 rounded p-2 border border-red-500/20">
+		                                                <p class="text-[10px] text-red-300"><span class="font-semibold">🔴 Importante:</span> Verifica siempre el contenido con la vista estudiante antes de publicar.</p>
+		                                            </div>
+		                                        </div>
+		                                    </div>
+		                                </div>
+		                            </div>
+
+		                            {{-- TAB: Secciones --}}
+		                            <div x-show="activeTab === 3" x-cloak class="space-y-3">
+		                                <h3 class="text-sm font-bold text-white">📐 Gestión de Secciones</h3>
+		                                <p class="text-xs text-slate-400 leading-relaxed">
+		                                    Las secciones son las diapositivas que componen la lección. Aprende a organizarlas
+		                                    como un profesional.
+		                                </p>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: true }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> ➕ Agregar secciones</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            Cada sección nueva se agrega al final. Asígnale un <strong class="text-white">título descriptivo</strong>
+		                                            y luego genera o escribe el contenido. Las secciones vacías no se muestran
+		                                            a los estudiantes.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded p-2 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-400">📌 <strong class="text-white">Tip:</strong> Usa títulos claros como "Introducción", "Desarrollo", "Ejemplos", "Actividad"</p>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2"><svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg> ↕️ Reordenar diapositivas</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            Usa los botones <strong class="text-white">▲</strong> y <strong class="text-white">▼</strong>
+		                                            junto a cada sección para cambiar su orden. La diapositiva en la posición 1
+		                                            es la primera que verán los estudiantes.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded p-2 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-400">🎯 <strong class="text-white">Ejemplo:</strong> Mueve la sección "Actividad práctica" al final para que los estudiantes primero lean la teoría</p>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> 👁️ Visibilidad individual</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            El toggle <strong class="text-white">👁️ ojo</strong> permite ocultar una sección
+		                                            sin eliminarla. Útil cuando quieres <strong class="text-white">desactivar temporalmente</strong>
+		                                            contenido que aún no está listo.
+		                                        </p>
+		                                        <div class="bg-slate-800/60 rounded p-2 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-400">💡 Las secciones ocultas se conservan en el editor pero no aparecen en la vista estudiante</p>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2"><svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> 🗑️ Eliminar secciones</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <p class="text-[11px] text-slate-300 leading-relaxed">
+		                                            Elimina secciones permanentemente. También puedes usar <strong class="text-white">"Reiniciar secciones"</strong>
+		                                            para limpiar todas las diapositivas y empezar de cero.
+		                                        </p>
+		                                        <div class="bg-red-500/10 rounded p-2 border border-red-500/20">
+		                                            <p class="text-[10px] text-red-300">⚠️ La eliminación es permanente. No hay papelera de reciclaje.</p>
+		                                        </div>
+		                                    </div>
+		                                </div>
+		                            </div>
+
+		                            {{-- TAB: Consejos --}}
+		                            <div x-show="activeTab === 4" x-cloak class="space-y-3">
+		                                <h3 class="text-sm font-bold text-white">💡 Consejos y Buenas Prácticas</h3>
+		                                <p class="text-xs text-slate-400 leading-relaxed">
+		                                    Recomendaciones para crear lecciones efectivas y aprovechar al máximo el wizard.
+		                                </p>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: true }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2">📝 Flujo de trabajo recomendado</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <ol class="text-[11px] text-slate-300 space-y-1.5 list-decimal list-inside">
+		                                            <li><strong class="text-white">Empieza con IA</strong> en el Paso 1: genera toda la lección con un tema</li>
+		                                            <li><strong class="text-white">Revisa y ajusta</strong> el contenido generado en cada sección</li>
+		                                            <li><strong class="text-white">Agrega recursos visuales</strong>: imágenes, ilustraciones o diagramas</li>
+		                                            <li><strong class="text-white">Adjunta materiales</strong> complementarios en el Paso 3</li>
+		                                            <li><strong class="text-white">Previsualiza</strong> con 👁️ Vista estudiante</li>
+		                                            <li><strong class="text-white">Guarda frecuentemente</strong> con el botón 💾</li>
+		                                            <li><strong class="text-white">Publica o programa</strong> cuando estés satisfecho</li>
+		                                        </ol>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2">🎯 Cómo estructurar una lección</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <div class="bg-slate-800/60 rounded p-2.5 border border-slate-700/30">
+		                                            <p class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1.5">📖 Ejemplo: "La Revolución Industrial"</p>
+		                                            <ul class="text-[11px] text-slate-300 space-y-1">
+		                                                <li><strong class="text-white">Sección 1:</strong> ¿Qué fue la Revolución Industrial? (texto + imagen)</li>
+		                                                <li><strong class="text-white">Sección 2:</strong> Inventos clave (diagrama de línea de tiempo)</li>
+		                                                <li><strong class="text-white">Sección 3:</strong> Impacto social (texto + ilustración)</li>
+		                                                <li><strong class="text-white">Sección 4:</strong> Actividad: mapa conceptual (solo instructivo)</li>
+		                                                <li><strong class="text-white">Recursos:</strong> PDF con lectura complementaria + video</li>
+		                                            </ul>
+		                                        </div>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2">⚠️ Errores comunes</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <ul class="text-[11px] text-slate-300 space-y-1.5">
+		                                            <li class="flex items-start gap-2"><span class="text-red-400 shrink-0">✗</span><span><strong class="text-white">Publicar sin previsualizar</strong> — errores de formato o contenido incompleto</span></li>
+		                                            <li class="flex items-start gap-2"><span class="text-red-400 shrink-0">✗</span><span><strong class="text-white">No guardar cambios frecuentemente</strong> — podrías perder el progreso</span></li>
+		                                            <li class="flex items-start gap-2"><span class="text-red-400 shrink-0">✗</span><span><strong class="text-white">Secciones sin título claro</strong> — confusión al navegar</span></li>
+		                                            <li class="flex items-start gap-2"><span class="text-red-400 shrink-0">✗</span><span><strong class="text-white">No ajustar el contenido generado por IA</strong> — revisa siempre antes de publicar</span></li>
+		                                        </ul>
+		                                    </div>
+		                                </div>
+
+		                                <div class="rounded-lg border border-slate-700/40 overflow-hidden" x-data="{ open: false }">
+		                                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 bg-slate-800/40 hover:bg-slate-800/70 transition-colors text-left">
+		                                        <span class="text-xs font-semibold text-white flex items-center gap-2">🔑 Roles: ¿quién puede hacer qué?</span>
+		                                        <svg class="w-3.5 h-3.5 text-slate-500 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+		                                    </button>
+		                                    <div x-show="open" x-collapse class="px-3 py-2.5 space-y-2">
+		                                        <div class="grid grid-cols-2 gap-2">
+		                                            <div class="bg-slate-800/60 rounded p-2 border border-slate-700/30">
+		                                                <p class="text-[10px] font-semibold text-white">👨‍🏫 Profesor</p>
+		                                                <ul class="text-[10px] text-slate-400 mt-1 space-y-0.5">
+		                                                    <li>✅ Crear y editar lecciones</li>
+		                                                    <li>✅ Programar fecha de publicación</li>
+		                                                    <li>❌ No puede publicar directamente</li>
+		                                                </ul>
+		                                            </div>
+		                                            <div class="bg-slate-800/60 rounded p-2 border border-slate-700/30">
+		                                                <p class="text-[10px] font-semibold text-white">📋 Planificador</p>
+		                                                <ul class="text-[10px] text-slate-400 mt-1 space-y-0.5">
+		                                                    <li>✅ Crear y editar lecciones</li>
+		                                                    <li>✅ Publicar directamente</li>
+		                                                    <li>✅ Programar fechas</li>
+		                                                </ul>
+		                                            </div>
+		                                        </div>
+		                                    </div>
+		                                </div>
+		                            </div>
+
+	                        </div>
+	                    </div>
+
+	                    {{-- ─── Footer: referencia al doc ─── --}}
+	                    <div class="px-6 py-3 border-t border-slate-700/50 bg-slate-900/30">
+	                        <p class="text-[11px] text-slate-500 flex items-center gap-2">
+	                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+	                            </svg>
+	                            {{-- Documentación completa en <code class="text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono">blueprint/lesson/docWizardLesson.md</code> --}}
+	                        </p>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    @endif
+
+        {{-- @endif --}}
+
 </div>
 
 {{-- ═══ Mermaid.js — bundled via Vite (resources/js/app.js) ═══ --}}
 @assets
     <style>
+        /* ── Published state: disable all interactive controls ── */
+        button[disabled],
+        button:disabled,
+        input:disabled,
+        textarea:disabled,
+        select:disabled {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
+        /* Restore pointer for the banner so it can be read */
         .student-preview-modal:fullscreen {
             background: #f1f5f9;
             overflow-y: auto;
@@ -4410,6 +5108,8 @@ Cómo...?"
         }
     </style>
 @endassets
+
+
 @script
 <script>
     Alpine.data('tocNavigation', () => ({
@@ -4447,5 +5147,16 @@ Cómo...?"
             }
         }
     }));
+	    Alpine.data('helpWizardData', () => ({
+	        activeTab: 0,
+	        sidebarOpen: true,
+	        tabs: [
+	            { label: 'Visión General', short: 'Gral', icon: '📋' },
+	            { label: 'Herramientas IA', short: 'IA', icon: '🤖' },
+	            { label: 'Estados', short: 'Est', icon: '📊' },
+	            { label: 'Secciones', short: 'Sec', icon: '📐' },
+	            { label: 'Consejos', short: 'Tips', icon: '💡' },
+	        ],
+	    }));
 </script>
 @endscript
