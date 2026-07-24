@@ -42,10 +42,10 @@
         </div>
 
         <input type="date" wire:model.live="filterDateFrom"
-            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 min-h-[44px] text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
 
         <input type="date" wire:model.live="filterDateTo"
-            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
+            class="bg-gray-800/50 border border-white/10 rounded-lg px-3 py-1.5 min-h-[44px] text-xs text-gray-300 focus:border-purple-500/50 transition-all duration-200">
 
         <button wire:click="resetSessionFilters"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
@@ -124,7 +124,7 @@
                             <div class="inline-flex items-center gap-1">
                                 <button wire:click="viewSession({{ $session->id }})"
                                     title="Ver detalles"
-                                    class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
+                                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -133,7 +133,7 @@
                                 @if($session->completado_at)
                                     <button wire:click="openAiReport({{ $session->estudiant_id }}, {{ $session->diag_main_id }})"
                                         title="Reporte IA"
-                                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                                        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                         </svg>

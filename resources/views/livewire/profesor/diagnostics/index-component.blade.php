@@ -12,7 +12,7 @@
     {{-- Main card --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         {{-- Header: Área de Formación Selector --}}
-        <div class="border-b border-white/5 px-6 py-2">
+        <div class="border-b border-white/5 px-4 sm:px-6 py-2">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h3 class="text-sm font-bold text-white uppercase tracking-wider">
                     <svg class="w-4 h-4 inline mr-1.5 -mt-0.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
         </div>
 
         {{-- Filters Section --}}
-        <div class="border-b border-white/5 px-6 py-2">
+        <div class="border-b border-white/5 px-4 sm:px-6 py-2">
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Diagnóstico filter --}}
                 <div class="relative">
@@ -51,7 +51,7 @@
                         @endforeach
                     </select>
                     @if($filterDiagMainId)
-                        <button wire:click="$set('filterDiagMainId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                        <button wire:click="$set('filterDiagMainId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -69,7 +69,7 @@
                         @endforeach
                     </select>
                     @if($filterGradoId)
-                        <button wire:click="$set('filterGradoId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                        <button wire:click="$set('filterGradoId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -90,7 +90,7 @@
                         @endif
                     </select>
                     @if($filterSeccionId)
-                        <button wire:click="$set('filterSeccionId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                        <button wire:click="$set('filterSeccionId', '')" class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[28px] min-h-[28px] flex items-center justify-center text-gray-500 hover:text-white">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -135,7 +135,7 @@
         </div>
 
         {{-- Tab Content --}}
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             @if($activeTab === 'dashboard')
                 @include('livewire.profesor.diagnostics.partials.dashboard')
             @elseif($activeTab === 'questions')

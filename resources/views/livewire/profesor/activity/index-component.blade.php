@@ -30,11 +30,11 @@
                         <p class="text-sm text-gray-500">No hay observaciones registradas.</p>
                     @endif
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap">
                     {{-- S2526: Actividades periodo anterior --}}
                     <button wire:click="openS2526Modal"
                         title="Actividades de períodos anteriores"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                         </svg>
@@ -42,7 +42,7 @@
                     {{-- Competencias e Indicadores --}}
                     <button @click="window.Livewire.dispatch('openCompetenciasDialog', { pensumId: {{ $pevaluacion->pensum_id }} })"
                         title="Competencias e Indicadores"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
@@ -51,7 +51,7 @@
                     <a href="{{ route('app.profesors.activities.resume', $pevaluacion->id) }}"
                         title="Resumen del Plan de Actividades"
                         target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                         </svg>
@@ -60,7 +60,7 @@
                     <a href="{{ route('app.profesors.activities.format', $pevaluacion->id) }}"
                         title="Plan de Actividades Completo"
                         target="_blank"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
+                        class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
@@ -70,7 +70,7 @@
                     <button wire:click="emptyActivities"
                             title="Eliminar todas las actividades"
                             {{ $disabled ? 'disabled' : '' }}
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg {{ $disabled ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' }} transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg {{ $disabled ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' }} transition-all duration-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -87,7 +87,34 @@
                     Actividades registradas
                     <span class="text-gray-500 font-normal normal-case">({{ $activities->total() }})</span>
                 </h3>
-                <div class="flex items-center gap-2">
+                {{-- View Toggle --}}
+                <div x-data="{ mode: localStorage.getItem('activities-view-mode') || 'grid' }"
+                     x-init="$watch('mode', val => {
+                         localStorage.setItem('activities-view-mode', val);
+                         window.dispatchEvent(new CustomEvent('activities-view-mode-changed', { detail: { mode: val } }))
+                     })"
+                     class="flex items-center gap-0.5">
+                    <button @click="mode = 'grid'"
+                        :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-l-lg border transition-all duration-200 text-[10px] font-bold"
+                        title="Vista Grid">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Grid</span>
+                    </button>
+                    <button @click="mode = 'table'"
+                        :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-r-lg border border-l-0 transition-all duration-200 text-[10px] font-bold"
+                        title="Vista Tabla">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Tabla</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
                     {{-- Search --}}
                     <div class="relative">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +159,7 @@
                             title="Vista previa del plan a clonar"
                             x-bind:disabled="!$wire.seccion_id"
                             x-bind:class="$wire.seccion_id ? 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed'"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -160,9 +187,20 @@
                 </div>
             </div>
 
-            {{-- Activities --}}
-            <div class="space-y-4">
-                @forelse($activities as $item)
+            <div x-cloak
+                 x-data="{ mode: localStorage.getItem('activities-view-mode') || 'grid' }"
+                 x-init="() => { if (!localStorage.getItem('activities-view-mode')) localStorage.setItem('activities-view-mode', 'grid') }"
+                 x-on:activities-view-mode-changed.window="mode = $event.detail.mode">
+
+                {{-- Grid Mode (current cards) --}}
+                <div x-show="mode === 'grid'"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100">
+
+                    {{-- Activities --}}
+                    <div class="space-y-4">
+                        @forelse($activities as $item)
                     @php $achievements = $item->achievements; @endphp
                     <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }}">
 
@@ -242,46 +280,7 @@
                                 @endif
                             </div>
 
-                            {{-- Action buttons --}}
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                <button wire:click="viewDetail({{ $item->id }})"
-                                    title="Ver todos los detalles"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                </button>
-                                {{-- LMS: Wizard de Lecciones --}}
-                                <a href="{{ route('app.profesors.lms.lesson.wizard', ['activity_id' => $item->id]) }}"
-                                    title="Abrir en Wizard de Lecciones"
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-all duration-200"
-                                    @if(!$enable_edit)
-                                        onclick="event.preventDefault()"
-                                        style="pointer-events:none; opacity:0.4;"
-                                    @endif>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                    </svg>
-                                </a>
-                                <button wire:click="setEditActivity({{ $item->id }})"
-                                    title="Editar actividad"
-                                    {{ $enable_edit ? '' : 'disabled' }}
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold {{ $enable_edit ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20' : 'bg-gray-800/50 text-gray-600 cursor-not-allowed' }} transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                @php $disabled = ($achievements->count() > 0 || !$enable_edit); @endphp
-                                <button wire:click="delActivity({{ $item->id }})"
-                                    title="Eliminar actividad"
-                                    {{ $disabled ? 'disabled' : '' }}
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold {{ $disabled ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' }} transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                            @include('livewire.profesor.activity.partials.action-buttons')
                         </div>
 
                         {{-- Achievements Section --}}
@@ -312,13 +311,13 @@
                                         <div class="flex items-center gap-1">
                                             @if($enable_edit)
                                                 <button wire:click="setEditAchievement({{ $ach->id }})"
-                                                    class="p-1 text-gray-500 hover:text-amber-400 transition-colors">
+                                                    class="p-1.5 text-gray-500 hover:text-amber-400 transition-colors">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                                     </svg>
                                                 </button>
                                                 <button wire:click="deleteAchievement({{ $ach->id }})"
-                                                    class="p-1 text-gray-500 hover:text-red-400 transition-colors">
+                                                    class="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                     </svg>
@@ -364,15 +363,106 @@
                         @endif
                     </div>
                 @endforelse
-            </div>
-
-            {{-- Pagination --}}
-            @if($activities->hasPages())
-                <div class="mt-4 pt-4 border-t border-white/5">
-                    {{ $activities->links('vendor.livewire.custom-tailwind') }}
+                    </div>
                 </div>
-            @endif
-        </div>
+
+                {{-- Table Mode --}}
+                <div x-show="mode === 'table'"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px]">
+                            <thead>
+                                <tr class="border-b border-white/5">
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-8">#</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tema</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">Act.Eval.</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider">T.Temático</th>
+                                    <th class="px-2 py-2.5 text-left text-[10px] font-bold text-gray-500 uppercase tracking-wider w-24">Fechas</th>
+                                    <th class="px-2 py-2.5 text-center text-[10px] font-bold text-gray-500 uppercase tracking-wider w-12">Ind.</th>
+                                    <th class="px-2 py-2.5 text-center text-[10px] font-bold text-gray-500 uppercase tracking-wider w-20">Estado</th>
+                                    <th class="px-2 py-2.5 text-right text-[10px] font-bold text-gray-500 uppercase tracking-wider w-28">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($activities as $item)
+                                    @php $achievements = $item->achievements; @endphp
+                                    <tr class="border-b border-white/5 hover:bg-gray-700/20 transition-colors group">
+                                        <td class="px-2 py-2.5 text-gray-500 text-[10px] font-medium">{{ $activities->firstItem() + $loop->index }}</td>
+                                        <td class="px-2 py-2.5">
+                                            <p class="text-xs text-white font-medium leading-tight max-w-[250px] truncate" title="{{ $item->topic }}">{{ $item->topic }}</p>
+                                        </td>
+                                        <td class="px-2 py-2.5">
+                                            <span class="text-xs text-gray-400 max-w-[200px] inline-block truncate" title="{{ $item->description }}">
+                                                {{ $item->description ? \Str::limit($item->description, 40) : '—' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-2 py-2.5">
+                                            <span class="text-xs text-gray-400 max-w-[150px] inline-block truncate" title="{{ $item->thematic }}">{{ $item->thematic }}</span>
+                                        </td>
+                                        <td class="px-2 py-2.5">
+                                            <span class="text-[10px] text-gray-500 font-mono whitespace-nowrap">
+                                                {{ \Carbon\Carbon::parse($item->finicial)->format('d/m') }} — {{ \Carbon\Carbon::parse($item->ffinal)->format('d/m') }}
+                                            </span>
+                                        </td>
+                                        <td class="px-2 py-2.5 text-center">
+                                            <span class="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 rounded text-[10px] font-bold {{ $achievements->count() > 0 ? 'bg-blue-500/10 text-blue-400' : 'bg-gray-500/10 text-gray-500' }}">
+                                                {{ $achievements->count() }}
+                                            </span>
+                                        </td>
+                                        <td class="px-2 py-2.5">
+                                            <div class="flex items-center justify-center gap-1">
+                                                @if($item->status_resume)
+                                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="Tiene actividad evaluativa">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                                        <span>Eval.</span>
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20" title="Sin actividad evaluativa">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                                        <span>S/Eval.</span>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-2 py-2.5 text-right">
+                                            @include('livewire.profesor.activity.partials.action-buttons')
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-2 py-12 text-center">
+                                            <svg class="w-10 h-10 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                            <p class="text-sm font-medium text-gray-400">
+                                                @if($search)
+                                                    No se encontraron actividades
+                                                @else
+                                                    No hay actividades registradas
+                                                @endif
+                                            </p>
+                                            @if($search)
+                                                <p class="text-xs text-gray-600 mt-1">No hay resultados para "<span class="text-emerald-400 font-medium">{{ $search }}</span>".</p>
+                                            @else
+                                                <p class="text-xs text-gray-600 mt-1">Presione <span class="text-emerald-400 font-medium">"+ Nuevo"</span> para comenzar.</p>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- Pagination --}}
+                @if($activities->hasPages())
+                    <div class="mt-4 pt-4 border-t border-white/5">
+                        {{ $activities->links('vendor.livewire.custom-tailwind') }}
+                    </div>
+                @endif
+            </div>
     </div>
 
     {{-- DETAIL MODAL --}}
@@ -622,7 +712,7 @@
                     </div>
 
                     {{-- Body: form fields --}}
-                    <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                    <div class="px-4 sm:px-6 py-5 max-h-[70vh] overflow-y-auto">
                         @include('livewire.profesor.activity.form.fields')
                     </div>
 
@@ -685,7 +775,7 @@
                     </div>
 
                     {{-- Body --}}
-                    <div class="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                    <div class="px-4 sm:px-6 py-5 max-h-[70vh] overflow-y-auto">
                         <div class="space-y-4">
 
                             {{-- Achievement Name --}}
@@ -783,7 +873,7 @@
                             </div>
                         </div>
                         <button wire:click="closeS2526Modal"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -974,7 +1064,7 @@
                                 {{-- Previous --}}
                                 <button wire:click="gotoPageS2526({{ $s2526Page - 1 }})"
                                     {{ $s2526Page <= 1 ? 'disabled' : '' }}
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
+                                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
                                         {{ $s2526Page <= 1 ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10' }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -1005,7 +1095,7 @@
                                 {{-- Next --}}
                                 <button wire:click="gotoPageS2526({{ $s2526Page + 1 }})"
                                     {{ $s2526Page >= $s2526LastPage ? 'disabled' : '' }}
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
+                                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200
                                         {{ $s2526Page >= $s2526LastPage ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10' }}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

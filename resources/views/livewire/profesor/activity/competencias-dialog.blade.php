@@ -30,7 +30,7 @@
                             </div>
                         </div>
                         <button wire:click="close"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200 shrink-0">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-gray-700/50 text-gray-400 hover:bg-gray-700 border border-white/10 transition-all duration-200 shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -38,7 +38,7 @@
                     </div>
 
                     {{-- ─── CONTENT ─── --}}
-                    <div class="p-8 max-h-[80vh] overflow-y-auto">
+                    <div class="p-4 sm:p-6 lg:p-8 max-h-[80vh] overflow-y-auto">
 
                         @php
                             $uniqueReferents = collect($competencias)->pluck('referent')->filter()->unique('id')->values();

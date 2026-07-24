@@ -11,7 +11,7 @@
                     </h3>
                     <p class="text-[11px] text-gray-500 mt-0.5">Paso {{ $wizardStep }} de 3</p>
                 </div>
-                <button wire:click="closeQuestionModal" class="w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                <button wire:click="closeQuestionModal" class="min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg bg-gray-800/50 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

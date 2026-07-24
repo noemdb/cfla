@@ -64,6 +64,17 @@ class IndexComponent extends Component
     public $chartLessonsByDay = [];
     public $chartScheduledByDay = [];
 
+    // ─── Lesson stats (global, not filtered by lapso) ──────────────────
+    public $lessonTotal = 0;
+    public $lessonScheduled = 0;
+    public $lessonPublished = 0;
+
+    // ─── Registration flow charts (global, with date range) ────────────
+    public $registrationRange = '7d';
+    public $chartActivitiesFlow = [];
+    public $chartLessonsFlow = [];
+    public $chartDiagnosticsFlow = [];
+
     public function mount()
     {
         $this->pestudios = Pestudio::where('status_active', 'true')
@@ -396,6 +407,12 @@ class IndexComponent extends Component
 
         // ══ Chart: Scheduled publications per day ══
         $this->loadChartScheduledByDay();
+
+        // ══ Lesson stats (global, not filtered by lapso) ══
+        $this->loadLessonStats();
+
+        // ══ Registration flow charts (global, with date range) ══
+        $this->loadRegistrationFlowCharts();
     }
 
     /**
@@ -494,7 +511,7 @@ class IndexComponent extends Component
             return;
         }
 
-        // ── Series 1: Published lessons ──
+        // ── Series 1: Published lessons (status = 'PUBLISHED') ──
         $published = $this->applyLessonChartFilters(
             Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
             $lapsoId
@@ -506,11 +523,25 @@ class IndexComponent extends Component
             ->get()
             ->keyBy('date');
 
-        // ── Series 2: Other lessons (non-published OR no publication at all) ──
-        $other = $this->applyLessonChartFilters(
+        // ── Series 2: Scheduled lessons (status != 'PUBLISHED', publish_at IS NOT NULL) ──
+        $scheduled = $this->applyLessonChartFilters(
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
+            $lapsoId
+        )
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.publish_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // ── Series 3: Drafts (publish_at IS NULL, status != 'PUBLISHED' OR null) ──
+        $drafts = $this->applyLessonChartFilters(
             Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
             $lapsoId
         )
+            ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
                   ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
@@ -524,7 +555,8 @@ class IndexComponent extends Component
         // ── Merge all unique dates sorted ──
         $allDates = collect(array_merge(
             $published->keys()->toArray(),
-            $other->keys()->toArray()
+            $scheduled->keys()->toArray(),
+            $drafts->keys()->toArray()
         ))->unique()->sort()->values();
 
         $this->chartLessonsByDay = [
@@ -535,8 +567,12 @@ class IndexComponent extends Component
                     'data' => $allDates->map(fn($d) => (int) ($published[$d]->total ?? 0))->toArray(),
                 ],
                 [
-                    'name' => 'Otras',
-                    'data' => $allDates->map(fn($d) => (int) ($other[$d]->total ?? 0))->toArray(),
+                    'name' => 'Programadas',
+                    'data' => $allDates->map(fn($d) => (int) ($scheduled[$d]->total ?? 0))->toArray(),
+                ],
+                [
+                    'name' => 'Borradores',
+                    'data' => $allDates->map(fn($d) => (int) ($drafts[$d]->total ?? 0))->toArray(),
                 ],
             ],
         ];
@@ -589,6 +625,110 @@ class IndexComponent extends Component
                 'y' => (int) $row->total,
             ];
         })->toArray();
+    }
+
+    /**
+     * Load global lesson stats (not filtered by lapso).
+     */
+    private function loadLessonStats()
+    {
+        $this->lessonTotal = \App\Models\app\Academy\Lms\LmsActivityPublication::count();
+        $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')->count();
+        $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')->count();
+    }
+
+    /**
+     * Load registration flow charts (activities/lessons/diagnostics by created_at).
+     * Global scope — not filtered by lapso; uses $this->registrationRange for date window.
+     */
+    public function updatedRegistrationRange()
+    {
+        $this->loadRegistrationFlowCharts();
+    }
+
+    private function loadRegistrationFlowCharts()
+    {
+        $since = match ($this->registrationRange) {
+            '7d'  => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m'  => now()->subMonths(3)->startOfDay(),
+            'all' => null,
+            default => now()->subDays(7)->startOfDay(),
+        };
+
+        // ── Activities flow ──
+        $query = \App\Models\app\Academy\Activity::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date');
+        if ($since) {
+            $query->where('created_at', '>=', $since);
+        }
+        $this->chartActivitiesFlow = $query->get()->map(fn ($r) => [
+            'x' => $r->date,
+            'y' => (int) $r->total,
+        ])->toArray();
+
+        // ── Lessons flow (same logic as loadChartLessonsByDay — published/scheduled/drafts — global scope) ──
+        $merged = collect();
+
+        // Published (by published_at)
+        $pubQuery = DB::table('lms_activity_publications')
+            ->where('status', 'PUBLISHED')
+            ->whereNotNull('published_at')
+            ->selectRaw('DATE(published_at) as date, COUNT(*) as total')
+            ->groupBy('date');
+        if ($since) $pubQuery->where('published_at', '>=', $since);
+        foreach ($pubQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        // Scheduled (by publish_at, not published)
+        $schQuery = DB::table('lms_activity_publications')
+            ->whereNotNull('publish_at')
+            ->where('status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(publish_at) as date, COUNT(*) as total')
+            ->groupBy('date');
+        if ($since) $schQuery->where('publish_at', '>=', $since);
+        foreach ($schQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        // Drafts — use Activity + LEFT JOIN (matching loadChartLessonsByDay's Borradores logic),
+        // to catch activities WITHOUT any publication record that the DB::table approach misses.
+        $drfQuery = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->whereNull('lms_activity_publications.publish_at')
+            ->where(function ($q) {
+                $q->whereNull('lms_activity_publications.status')
+                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+            })
+            ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
+            ->orderBy('date');
+        if ($since) {
+            $drfQuery->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since]);
+        }
+        foreach ($drfQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        $this->chartLessonsFlow = $merged
+            ->groupBy('date')
+            ->map(fn ($items, $date) => ['x' => $date, 'y' => $items->sum('total')])
+            ->sortBy('x')
+            ->values()
+            ->toArray();
+
+        // ── Diagnostics flow ──
+        $query = \App\Models\app\Instrument\DiagSession::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date');
+        if ($since) {
+            $query->where('created_at', '>=', $since);
+        }
+        $this->chartDiagnosticsFlow = $query->get()->map(fn ($r) => [
+            'x' => $r->date,
+            'y' => (int) $r->total,
+        ])->toArray();
     }
 
     public function render()

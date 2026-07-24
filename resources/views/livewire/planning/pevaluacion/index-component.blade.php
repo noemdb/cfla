@@ -109,9 +109,38 @@
             </div>
         </div>
     </div>
+    {{-- ===== View Container (Grid/Table toggle) ===== --}}
+    <div x-cloak
+         x-data="{ mode: localStorage.getItem('pevaluacions-view-mode') || 'table' }"
+         x-init="if (!localStorage.getItem('pevaluacions-view-mode')) localStorage.setItem('pevaluacions-view-mode', 'table')">
 
-    <!-- Table -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+        {{-- View mode toggle: Grid/Table --}}
+        <div wire:ignore.self class="mb-4 flex items-center gap-2">
+            <button @click="mode = 'grid'; localStorage.setItem('pevaluacions-view-mode', 'grid')"
+                :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                </svg>
+                <span class="hidden sm:inline">Grid</span>
+            </button>
+            <button @click="mode = 'table'; localStorage.setItem('pevaluacions-view-mode', 'table')"
+                :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span class="hidden sm:inline">Tabla</span>
+            </button>
+        </div>
+
+        {{-- ── Table Mode ── --}}
+        <div x-show="mode === 'table'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100">
+
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -146,7 +175,7 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($pevaluacions as $pevaluacion)
                         @php $lapsoClosed = $pevaluacion->is_lapso_closed; @endphp
-                        <tr class="hover:bg-white/[0.02] transition-colors group {{ $lapsoClosed ? 'opacity-60' : '' }}">
+                        <tr class="hover:bg-white/[0.02] transition-colors {{ $lapsoClosed ? 'opacity-60' : '' }}">
                             <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $pevaluacion->id }}</td>
                             <td class="px-4 py-2">
                                 <div class="flex items-center gap-2">
@@ -179,31 +208,120 @@
                                 </span>
                             </td>
                             <td class="px-5 py-2 text-right">
-                                <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
-                                        class="p-2 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
-                                        title="Vista previa">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" wire:click="edit({{ $pevaluacion->id }})"
-                                        class="p-2 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-200"
-                                        title="{{ $lapsoClosed ? 'Lapso cerrado: no se puede editar' : 'Editar asignación' }}"
-                                        @if($lapsoClosed) disabled @endif>
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </button>
-                                    <button type="button" wire:click="confirmDelete({{ $pevaluacion->id }})"
-                                        class="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg border border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400 transition-all duration-200"
-                                        title="Eliminar asignación"
-                                        @if($pevaluacion->activities_count > 0) disabled @endif>
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                {{-- btnGroup: Action buttons with mobile dropdown --}}
+                                <div class="flex items-center justify-end gap-1.5 shrink-0"
+                                     x-data="{ actionsOpen: false }"
+                                     @click.away="actionsOpen = false">
+
+                                    {{-- Desktop group: all 3 buttons inline on sm+ --}}
+                                    <div class="hidden sm:flex items-center gap-1.5">
+                                        <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
+                                            title="Vista previa"
+                                            aria-label="Vista previa">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                        </button>
+                                        <button type="button" wire:click="edit({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg border transition-all duration-200
+                                                {{ $lapsoClosed
+                                                    ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed border-transparent'
+                                                    : 'bg-white/5 hover:bg-emerald-500/10 border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400' }}"
+                                            title="{{ $lapsoClosed ? 'Lapso cerrado: no se puede editar' : 'Editar asignación' }}"
+                                            aria-label="Editar asignación"
+                                            @if($lapsoClosed) disabled @endif>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        @php $delDisabled = ($pevaluacion->activities_count > 0); @endphp
+                                        <button type="button" wire:click="confirmDelete({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg border transition-all duration-200
+                                                {{ $delDisabled
+                                                    ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed border-transparent'
+                                                    : 'bg-white/5 hover:bg-red-500/10 border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400' }}"
+                                            title="Eliminar asignación"
+                                            aria-label="Eliminar asignación"
+                                            @if($delDisabled) disabled @endif>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {{-- Mobile: "···" dropdown (solo visible en mobile) --}}
+                                    <div class="relative sm:hidden">
+                                        <button @click="actionsOpen = !actionsOpen"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                            title="Más acciones"
+                                            aria-label="Más acciones">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                                <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
+                                                <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                            </svg>
+                                        </button>
+
+                                        <div x-show="actionsOpen"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="opacity-0 scale-95"
+                                             x-transition:enter-end="opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="opacity-100 scale-100"
+                                             x-transition:leave-end="opacity-0 scale-95"
+                                             class="absolute right-0 z-50 mt-1 min-w-[200px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
+                                             @click="actionsOpen = false">
+
+                                            {{-- Vista previa --}}
+                                            <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
+                                                class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 shrink-0 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                Vista previa
+                                            </button>
+
+                                            {{-- Editar --}}
+                                            @if(!$lapsoClosed)
+                                                <button type="button" wire:click="edit({{ $pevaluacion->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Editar asignación
+                                                </button>
+                                            @else
+                                                <span class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-500 cursor-not-allowed">
+                                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Editar asignación
+                                                </span>
+                                            @endif
+
+                                            {{-- Eliminar --}}
+                                            @php $delDisabled = ($pevaluacion->activities_count > 0); @endphp
+                                            @if(!$delDisabled)
+                                                <button type="button" wire:click="confirmDelete({{ $pevaluacion->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Eliminar asignación
+                                                </button>
+                                            @else
+                                                <span class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-500 cursor-not-allowed">
+                                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Eliminar asignación
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -229,7 +347,182 @@
                 {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
             </div>
         @endif
-    </div>
+            </div>
+        </div> {{-- end table mode --}}
+
+        {{-- ── Grid Mode ── --}}
+        <div x-show="mode === 'grid'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100">
+
+            <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                    @forelse($pevaluacions as $pevaluacion)
+                        @php $lapsoClosed = $pevaluacion->is_lapso_closed; @endphp
+                        @php $delDisabled = ($pevaluacion->activities_count > 0); @endphp
+                        <div class="bg-gray-900/60 backdrop-blur-md border border-white/5 rounded-lg p-4 space-y-3">
+                            {{-- Header: avatar + nombre --}}
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0">
+                                        {{ strtoupper(substr($pevaluacion->profesor?->name ?? '?', 0, 1)) }}{{ strtoupper(substr($pevaluacion->profesor?->lastname ?? '', 0, 1)) }}
+                                    </div>
+                                    <span class="text-sm text-white font-medium truncate">{{ $pevaluacion->profesor?->full_name ?? '—' }}</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500 font-mono shrink-0">#{{ $pevaluacion->id }}</span>
+                            </div>
+
+                            {{-- Asignatura + Grado/Sección --}}
+                            <div class="min-w-0">
+                                <span class="text-sm text-gray-200">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</span>
+                                <span class="block text-[10px] text-gray-500 mt-0.5">
+                                    {{ $pevaluacion->seccion?->grado?->name ?? '?' }} - Secc. {{ $pevaluacion->seccion?->name ?? '?' }}
+                                </span>
+                            </div>
+
+                            {{-- Badges: Plan Estudio + Momento --}}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold rounded-md border border-cyan-500/20">
+                                    {{ $pevaluacion->pensum?->pestudio?->code ?? '—' }}
+                                </span>
+                                <span class="text-[10px] text-gray-400">{{ $pevaluacion->lapso?->name ?? '—' }}</span>
+                                @if($lapsoClosed)
+                                    <span class="text-[10px] text-red-400 font-medium">Cerrado</span>
+                                @endif
+                            </div>
+
+                            {{-- Footer: activities + actions --}}
+                            <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                                <span class="inline-flex items-center gap-1.5 text-[10px] text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                    {{ $pevaluacion->activities_count }} actividades
+                                </span>
+
+                                {{-- btnGroup: actions --}}
+                                <div class="flex items-center gap-1.5 shrink-0"
+                                     x-data="{ gActions: false }"
+                                     @click.away="gActions = false">
+                                    <div class="hidden sm:flex items-center gap-1.5">
+                                        <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-400 hover:text-cyan-400 transition-all duration-200"
+                                            title="Vista previa" aria-label="Vista previa">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
+                                        <button type="button" wire:click="edit({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg border transition-all duration-200
+                                                {{ $lapsoClosed
+                                                    ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed border-transparent'
+                                                    : 'bg-white/5 hover:bg-emerald-500/10 border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400' }}"
+                                            title="{{ $lapsoClosed ? 'Lapso cerrado: no se puede editar' : 'Editar asignaci&oacute;n' }}"
+                                            aria-label="Editar asignaci&oacute;n"
+                                            @if($lapsoClosed) disabled @endif>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </button>
+                                        <button type="button" wire:click="confirmDelete({{ $pevaluacion->id }})"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg border transition-all duration-200
+                                                {{ $delDisabled
+                                                    ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed border-transparent'
+                                                    : 'bg-white/5 hover:bg-red-500/10 border-white/5 hover:border-red-500/20 text-gray-400 hover:text-red-400' }}"
+                                            title="Eliminar asignaci&oacute;n"
+                                            aria-label="Eliminar asignaci&oacute;n"
+                                            @if($delDisabled) disabled @endif>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="relative sm:hidden">
+                                        <button @click="gActions = !gActions"
+                                            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                            title="M&aacute;s acciones" aria-label="M&aacute;s acciones">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                                <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
+                                                <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                            </svg>
+                                        </button>
+                                        <div x-show="gActions"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="opacity-0 scale-95"
+                                             x-transition:enter-end="opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="opacity-100 scale-100"
+                                             x-transition:leave-end="opacity-0 scale-95"
+                                             class="absolute right-0 z-50 mt-1 min-w-[200px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
+                                             @click="gActions = false">
+                                            <button type="button" wire:click="showPreview({{ $pevaluacion->id }})"
+                                                class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                <svg class="w-4 h-4 shrink-0 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                Vista previa
+                                            </button>
+                                            @if(!$lapsoClosed)
+                                                <button type="button" wire:click="edit({{ $pevaluacion->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Editar asignaci&oacute;n
+                                                </button>
+                                            @else
+                                                <span class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-500 cursor-not-allowed">
+                                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Editar asignaci&oacute;n
+                                                </span>
+                                            @endif
+                                            @if(!$delDisabled)
+                                                <button type="button" wire:click="confirmDelete({{ $pevaluacion->id }})"
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Eliminar asignaci&oacute;n
+                                                </button>
+                                            @else
+                                                <span class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-500 cursor-not-allowed">
+                                                    <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Eliminar asignaci&oacute;n
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full text-center py-16">
+                            <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            <p class="text-gray-500 font-medium mb-1">No hay asignaciones registradas</p>
+                            <p class="text-gray-600 text-sm">Crea la primera asignaci&oacute;n usando el bot&oacute;n "Nueva Asignaci&oacute;n".</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                @if($pevaluacions->hasPages())
+                    <div class="mt-4 px-2 py-2 border-t border-white/5">
+                        {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
+                    </div>
+                @endif
+            </div>
+        </div> {{-- end grid mode --}}
+
+    </div> {{-- end view container --}}
 
     <!-- ===== MODAL: Confirmar Eliminación ===== -->
     <x-modal title="Eliminar Carga Académica" blur="lg" wire:model="confirmDeleteId" max-width="md" persistent>

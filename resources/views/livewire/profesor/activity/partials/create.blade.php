@@ -30,7 +30,7 @@
             </div>
 
             {{-- Body --}}
-            <div class="px-6 py-5 max-h-[75vh] overflow-y-auto">
+            <div class="px-4 sm:px-6 py-5 max-h-[75vh] overflow-y-auto">
                 @include('livewire.profesor.activity.form.fields')
             </div>
 

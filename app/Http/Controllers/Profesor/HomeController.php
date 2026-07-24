@@ -13,6 +13,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Instrument\DiagSession;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -258,6 +259,11 @@ class HomeController extends Controller
             }
         }
 
+        // ── Registration Flow Charts (Flujo de Registros) ──
+        $registrationFlow = $profesor
+            ? $this->loadRegistrationFlowData($profesor->id, $pensumIds)
+            : [];
+
         return view('profesors.home', compact(
             'profesor',
             'indicadores',
@@ -268,7 +274,116 @@ class HomeController extends Controller
             'seccionesGuia',
             'tieneReportesDiagnosticos',
             'ultimoReporte',
-            'mostrarModalNotificacion'
+            'mostrarModalNotificacion',
+            'registrationFlow'
         ));
+    }
+
+    /**
+     * Compute registration flow chart data for all date ranges.
+     * Three series: activities, lessons (merged), diagnostics.
+     * All filtered by profesor ID.
+     */
+    private function loadRegistrationFlowData(int $profesorId, Collection $pensumIds): array
+    {
+        $ranges = [
+            '7d'  => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m'  => now()->subMonths(3)->startOfDay(),
+            'all' => null,
+        ];
+
+        $flow = [];
+
+        foreach ($ranges as $key => $since) {
+            // ── Activities ─────────────────────────────────────────
+            $activitiesQuery = Activity::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                ->whereHas('pevaluacion', fn($q) => $q->where('profesor_id', $profesorId))
+                ->groupBy('date')
+                ->orderBy('date');
+            if ($since) {
+                $activitiesQuery->where('created_at', '>=', $since);
+            }
+
+            $flow[$key]['activities'] = $activitiesQuery->get()
+                ->map(fn($r) => ['x' => $r->date, 'y' => (int) $r->total])
+                ->toArray();
+
+            // ── Lessons (merged: published + scheduled + drafts) ──
+            $merged = collect();
+
+            // Published lessons (published_at)
+            $pubQuery = DB::table('lms_activity_publications')
+                ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+                ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->where('pevaluacions.profesor_id', $profesorId)
+                ->where('lms_activity_publications.status', 'PUBLISHED')
+                ->whereNotNull('lms_activity_publications.published_at')
+                ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
+                ->groupBy('date');
+            if ($since) $pubQuery->where('lms_activity_publications.published_at', '>=', $since);
+            foreach ($pubQuery->get() as $r) {
+                $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+            }
+
+            // Scheduled lessons (publish_at, not yet published)
+            $schQuery = DB::table('lms_activity_publications')
+                ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+                ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->where('pevaluacions.profesor_id', $profesorId)
+                ->whereNotNull('lms_activity_publications.publish_at')
+                ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+                ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
+                ->groupBy('date');
+            if ($since) $schQuery->where('lms_activity_publications.publish_at', '>=', $since);
+            foreach ($schQuery->get() as $r) {
+                $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+            }
+
+            // Draft lessons (no publication record → use activity created_at)
+            $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->where('pevaluacions.profesor_id', $profesorId)
+                ->whereNull('lms_activity_publications.publish_at')
+                ->where(function ($q) {
+                    $q->whereNull('lms_activity_publications.status')
+                      ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+                })
+                ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
+                ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))');
+            if ($since) {
+                $drfQuery->where(function ($q) use ($since) {
+                    $q->where('lms_activity_publications.created_at', '>=', $since)
+                      ->orWhere('activities.created_at', '>=', $since);
+                });
+            }
+            foreach ($drfQuery->get() as $r) {
+                $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+            }
+
+            // Merge all lesson sub-queries by date
+            $flow[$key]['lessons'] = $merged
+                ->groupBy('date')
+                ->map(fn($items, $date) => ['x' => $date, 'y' => $items->sum('total')])
+                ->sortBy('x')
+                ->values()
+                ->toArray();
+
+            // ── Diagnostics ───────────────────────────────────────
+            if ($pensumIds->isNotEmpty()) {
+                $diagQuery = DiagSession::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                    ->whereIn('pensum_id', $pensumIds)
+                    ->groupBy('date')
+                    ->orderBy('date');
+                if ($since) $diagQuery->where('created_at', '>=', $since);
+                $flow[$key]['diagnostics'] = $diagQuery->get()
+                    ->map(fn($r) => ['x' => $r->date, 'y' => (int) $r->total])
+                    ->toArray();
+            } else {
+                $flow[$key]['diagnostics'] = [];
+            }
+        }
+
+        return $flow;
     }
 }

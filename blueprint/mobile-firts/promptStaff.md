@@ -181,3 +181,158 @@ Registrar aquí cualquier desviación de ADR-001/002/003, con justificación y q
 ## 8. Fuera de alcance (sin cambios respecto a v1)
 
 No rediseño visual completo · no cambio de identidad visual · no Bootstrap/React/Vue · no cambios de rutas · no cambios de lógica de negocio · no componentes experimentales · no dependencias nuevas sin ADR que lo justifique · no modificación de defaults de componentes compartidos (ver ADR-003).
+
+---
+
+## 9. Patrón btnGroup: Overflow de botones de acción en tablas/móvil
+
+### 9.1 Problema
+
+En tablas con múltiples acciones por fila (ver detalle, editar, eliminar, wizard LMS, auditar, activar/desactivar, etc.), mostrar todos los botones inline en mobile provoca:
+- **Scroll horizontal** no intencional en el contenedor de acciones.
+- **Área táctil insuficiente** (<44×44px) si se reducen los botones para que quepan.
+- **Texto de celda comprimido**: los botones roban espacio horizontal a la información de la fila.
+- **Overflow visual**: botones se salen del contenedor o se superponen.
+
+### 9.2 Regla general
+
+> Todo grupo de botones de acción en una celda de tabla o contenedor horizontal debe implementar el patrón **btnGroup**: en desktop todos los botones visibles inline, en mobile (>2 botones) colapsar a un menú "···" con Alpine.js. El envoltorio `btnGroup` es obligatorio **siempre**, incluso si solo hay 1–2 botones.
+
+### 9.3 Casuística de aplicación
+
+| # Botones en la celda | Desktop (≥640px) | Mobile (<640px) |
+|---|---|---|
+| 1 | Inline, visible | Inline, visible |
+| 2 | Inline, visibles | Inline, visibles |
+| 3+ | Inline visibles (en `hidden sm:flex`) | Colapsar a "···" dropdown con labels de texto |
+| Botón primario (opcional) | Fuera del dropdown, siempre visible en ambos breakpoints | Mismo comportamiento |
+
+### 9.4 Estructura obligatoria del contenedor
+
+```blade
+{{-- ═══════════════════════════════════════════════════════════════ --}}
+{{--  btnGroup — Contenedor obligatorio para botones de acción    --}}
+{{--  ═══════════════════════════════════════════════════════════════ --}}
+<div class="flex items-center gap-1 shrink-0"
+     x-data="{ actionsOpen: false }"
+     @click.away="actionsOpen = false">
+
+    {{-- ── Botones primarios (opcional, ≤1, siempre visibles) ── --}}
+    {{-- Ejemplo: botón "Ver" o "Preview" que debe quedar fuera    --}}
+    {{-- del dropdown incluso en mobile.                            --}}
+    <button wire:click="somePrimaryAction"
+            class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg ..."
+            title="Acción primaria">
+        <svg class="w-4 h-4">...</svg>
+    </button>
+
+    {{-- ── Desktop group: todos los botones inline en sm+ ─────── --}}
+    <div class="hidden sm:flex items-center gap-1">
+        {{-- Botón 1 --}}
+        <button wire:click="action1"
+                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg ..."
+                title="Acción 1">
+            <svg class="w-4 h-4">...</svg>
+        </button>
+        {{-- Botón 2 --}}
+        <button wire:click="action2"
+                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg ..."
+                title="Acción 2">
+            <svg class="w-4 h-4">...</svg>
+        </button>
+        {{-- ... más botones --}}
+    </div>
+
+    {{-- ── Mobile dropdown "···" (solo visible en mobile) ─────── --}}
+    <div class="relative sm:hidden">
+        <button @click="actionsOpen = !actionsOpen"
+                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400
+                       hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30
+                       hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200
+                       dark:border-slate-600/30 transition-all"
+                title="Más acciones">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
+                <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
+                <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
+            </svg>
+        </button>
+
+        {{-- Panel dropdown --}}
+        <div x-show="actionsOpen"
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="absolute right-0 z-50 mt-1 min-w-[180px] bg-white dark:bg-slate-800
+                    border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
+             @click="actionsOpen = false">
+
+            {{-- Cada acción en el dropdown debe incluir icono + texto label --}}
+            <button wire:click="action1"
+                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs
+                           text-gray-700 dark:text-slate-200
+                           hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                <svg class="w-4 h-4 shrink-0 text-cyan-500" ...>
+                    ...
+                </svg>
+                Auditar
+            </button>
+
+            <button wire:click="action2"
+                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs
+                           text-gray-700 dark:text-slate-200
+                           hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                <svg class="w-4 h-4 shrink-0 text-blue-500" ...>
+                    ...
+                </svg>
+                Configurar
+            </button>
+
+            {{-- ... más acciones --}}
+        </div>
+    </div>
+</div>
+```
+
+### 9.5 Reglas del dropdown
+
+1. **Cada item del dropdown** debe incluir el mismo icono SVG que su versión desktop (con `text-{color}-500`) más el **texto label** de la acción. No solo icono.
+2. **El label** debe ser la versión textual completa de la acción (ej. "Auditar", "Configurar", "Publicar ahora") — no abreviaturas.
+3. **El orden** de los items en el dropdown debe coincidir con el orden de los botones en el desktop group.
+4. **Condicionales** (`@if`) en botones individuales se replican idénticamente dentro del dropdown.
+5. **`wire:click`/`wire:confirm`/`href`** deben ser exactamente los mismos que en la versión desktop.
+6. **Touch target**: cada item del dropdown tiene `px-3 py-2.5` (≥44px altura garantizada).
+7. **Cierre**: `@click="actionsOpen = false"` en el contenedor del dropdown para cerrar al seleccionar una acción.
+
+### 9.6 Reglas del desktop group (`hidden sm:flex`)
+
+1. Todos los botones secundarios van dentro de `<div class="hidden sm:flex items-center gap-1">`.
+2. Cada botón debe cumplir touch target **44×44px**: `min-w-[44px] min-h-[44px] p-1.5`.
+3. Los botones condicionales (`@if`) se mantienen dentro del `hidden sm:flex` — la condición gobierna visibilidad en desktop y también replica la misma condición en el dropdown mobile.
+
+### 9.7 Referencia de implementación existente
+
+Ver la tabla del monitor LMS para un ejemplo funcional completo:
+`resources/views/livewire/planning/lms/monitor.blade.php` (bloque `td class="px-4 py-2.5"`, líneas ~299-461).
+
+Buscar el patrón:
+```
+x-data="{ actionsOpen: false }" @click.away="actionsOpen = false"
+  → hidden sm:flex (desktop group)
+  → sm:hidden (mobile dropdown)
+```
+
+### 9.8 Checklist de auditoría para hallazgos btnGroup
+
+Cuando se audite una celda de tabla con botones de acción, verificar:
+
+- [ ] ¿Los botones están envueltos en un contenedor `btnGroup` con `x-data="{ actionsOpen: false }"`?
+- [ ] Si hay **>2 botones**, ¿existe un `hidden sm:flex` desktop group y un `sm:hidden` mobile dropdown?
+- [ ] ¿El dropdown mobile contiene **todas** las acciones (mismas condiciones `@if`, mismos `wire:click`/`href`)?
+- [ ] ¿Cada item del dropdown tiene **icono + texto label**?
+- [ ] ¿Cada botón tiene **min-w-[44px] min-h-[44px]**?
+- [ ] ¿El dropdown se cierra al hacer click en una acción (`@click="actionsOpen = false"`)?
+- [ ] ¿El botón "···" tiene `title="Más acciones"`?

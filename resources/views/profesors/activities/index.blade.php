@@ -41,7 +41,7 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
 
         {{-- Header --}}
-        <div class="border-b border-white/5 px-5 py-2">
+        <div class="border-b border-white/5 px-3 sm:px-5 py-2">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider">
                     <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

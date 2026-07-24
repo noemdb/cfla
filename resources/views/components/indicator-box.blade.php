@@ -6,6 +6,7 @@
     'subtext' => '',
     'trend' => null, // null | 'up' | 'down' | 'neutral'
     'trendValue' => '',
+    'topBorderColor' => '', // '' = sin borde, o color del mapa debajo
 ])
 
 @php
@@ -23,6 +24,20 @@
     ];
     $c = $colorMap[$color] ?? $colorMap['emerald'];
 
+    $topBorderMap = [
+        'blue'     => 'border-t-4 border-t-blue-500/60',
+        'emerald'  => 'border-t-4 border-t-emerald-500/60',
+        'indigo'   => 'border-t-4 border-t-indigo-500/60',
+        'amber'    => 'border-t-4 border-t-amber-500/60',
+        'teal'     => 'border-t-4 border-t-teal-500/60',
+        'violet'   => 'border-t-4 border-t-violet-500/60',
+        'pink'     => 'border-t-4 border-t-pink-500/60',
+        'rose'     => 'border-t-4 border-t-rose-500/60',
+        'cyan'     => 'border-t-4 border-t-cyan-500/60',
+        'purple'   => 'border-t-4 border-t-purple-500/60',
+    ];
+    $topBorderClass = $topBorderMap[$topBorderColor] ?? '';
+
     $trendIcon = match($trend) {
         'up' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>',
         'down' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/>',
@@ -35,7 +50,7 @@
     };
 @endphp
 
-<div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-{{ $color }}-500/30 hover:shadow-lg hover:shadow-{{ $color }}-500/5">
+<div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-{{ $color }}-500/30 hover:shadow-lg hover:shadow-{{ $color }}-500/5 {{ $topBorderClass }}">
     <div class="flex items-start justify-between mb-2">
         <div class="w-9 h-9 sm:w-10 sm:h-10 {{ $c['bg'] }} rounded-lg flex items-center justify-center {{ $c['icon'] }}">
             {!! $icon !!}
@@ -50,6 +65,6 @@
     <p class="text-base sm:text-lg font-bold text-white mb-1">{{ $value }}</p>
     <p class="text-[11px] font-medium {{ $c['text'] }} uppercase tracking-wider">{{ $label }}</p>
     @if($subtext)
-        <p class="text-[10px] text-gray-500 mt-1">{{ $subtext }}</p>
+        <p class="text-[10px] sm:text-[11px] text-gray-500 mt-1">{{ $subtext }}</p>
     @endif
 </div>

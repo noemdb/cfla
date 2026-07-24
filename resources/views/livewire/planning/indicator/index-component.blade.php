@@ -10,7 +10,7 @@
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('app.planning.index') }}"
-                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 min-h-[44px] bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -18,7 +18,7 @@
                 <span class="sm:hidden">Volver</span>
             </a>
             <button wire:click="$refresh"
-                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 min-h-[44px] min-w-[44px] bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg border border-white/5 transition-all duration-300 text-sm font-bold">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
@@ -28,7 +28,7 @@
     </div>
 
     <!-- Global KPI Boxes -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>'
             label="Actividades" value="{{ number_format($totalActivities) }}" color="purple" />
@@ -38,15 +38,104 @@
         <x-indicator-box
             icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
             label="Profesores Activos" value="{{ number_format($totalProfesoresActivos) }}" color="amber" />
+
+        {{-- Lessons Card (global, not affected by lapso) --}}
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-4 sm:p-5 rounded-lg transition-all duration-300 hover:border-sky-500/30 hover:shadow-lg hover:shadow-sky-500/5">
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 bg-sky-500/10 rounded-lg flex items-center justify-center text-sky-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($lessonTotal) }}</p>
+            <p class="text-[11px] font-medium text-sky-400 uppercase tracking-wider">Lecciones</p>
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] text-gray-500">
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Programadas: <strong class="text-sky-400 font-bold">{{ $lessonScheduled }}</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Publicadas: <strong class="text-emerald-400 font-bold">{{ $lessonPublished }}</strong>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══ Registration Flow Charts (global, with date range filter) ═══ --}}
+    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-4 sm:p-5 mb-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Flujo de Registros</h3>
+            <div class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-0.5">
+                @php $ranges = ['7d' => '7 días', '30d' => '30 días', '3m' => '3 meses', 'all' => 'Todo']; @endphp
+                @foreach($ranges as $val => $label)
+                    <button wire:click="$set('registrationRange', '{{ $val }}')"
+                        class="px-3 py-1.5 min-h-[36px] text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap
+                               {{ $registrationRange === $val ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/5' }}">
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            {{-- Activities Flow --}}
+            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 bg-purple-500/20 rounded-md flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Actividades</span>
+                    <span class="ml-auto text-[9px] text-gray-500 dark:text-gray-500">{{ count($chartActivitiesFlow) }} día(s)</span>
+                </div>
+                <div wire:ignore>
+                    <div id="activities-flow-chart" class="w-full" style="min-height: 200px;"></div>
+                </div>
+            </div>
+
+            {{-- Lessons Flow --}}
+            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 bg-sky-500/20 rounded-md flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Lecciones</span>
+                    <span class="ml-auto text-[9px] text-gray-500 dark:text-gray-500">{{ count($chartLessonsFlow) }} día(s)</span>
+                </div>
+                <div wire:ignore>
+                    <div id="lessons-flow-chart" class="w-full" style="min-height: 200px;"></div>
+                </div>
+            </div>
+
+            {{-- Diagnostics Flow --}}
+            <div class="bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg p-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 bg-emerald-500/20 rounded-md flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Diagnósticos</span>
+                    <span class="ml-auto text-[9px] text-gray-500 dark:text-gray-500">{{ count($chartDiagnosticsFlow) }} día(s)</span>
+                </div>
+                <div wire:ignore>
+                    <div id="diagnostics-flow-chart" class="w-full" style="min-height: 200px;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Lapso NavTabs + Filters -->
     <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden mb-4">
         {{-- Lapso navtabs (replica el patrón de profesors/activities) --}}
-        <nav class="flex overflow-x-auto border-b border-white/5">
+        <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory border-b border-white/5">
             @foreach($lapsos as $lapso)
                 <button wire:click="$set('selectedLapsoId', {{ $lapso->id }})"
-                    class="flex-1 px-2 sm:px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap {{ $selectedLapsoId == $lapso->id ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
+                    class="shrink-0 sm:flex-1 px-2 sm:px-4 py-2 min-h-[44px] text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap {{ $selectedLapsoId == $lapso->id ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600' }}">
                     <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5 hidden sm:inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -57,30 +146,30 @@
         </nav>
 
         {{-- 4 filters en grid de ancho completo --}}
-        <div class="px-3 py-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="px-2 py-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <select wire:model.live="selectedPeducativoId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Educativo: Todos</option>
                 @foreach($peducativos as $ped)
                     <option value="{{ $ped->id }}">{{ $ped->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedPestudioId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Estudio: Todos</option>
                 @foreach($pestudios as $pest)
                     <option value="{{ $pest->id }}">{{ $pest->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedGradoId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">Grado: Todos</option>
                 @foreach($gradosOptions as $grd)
                     <option value="{{ $grd->id }}">{{ $grd->name }}</option>
                 @endforeach
             </select>
             <select wire:model.live="selectedProfesorId"
-                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
+                class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">Profesor: Todos</option>
                 @foreach($profesoresOptions as $prof)
                     <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
@@ -92,31 +181,31 @@
     <!-- Main Tabs -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden" x-data="{ activeTab: {{ $activeTab }} }">
         <div class="border-b border-white/5">
-            <nav class="flex overflow-x-auto">
-                <button @click="activeTab = 1" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
-                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Indicadores Principales
+            <nav class="flex w-full overflow-x-auto gap-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-1" style="scrollbar-width: thin;">
+                <button @click="activeTab = 1" title="Indicadores Principales" :class="activeTab === 1 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="hidden sm:inline">Indicadores Principales</span>
                 </button>
-                <button @click="activeTab = 2" :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
-                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path></svg>
-                    Profesores
+                <button @click="activeTab = 2" title="Profesores" :class="activeTab === 2 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path></svg>
+                    <span class="hidden sm:inline">Profesores</span>
                 </button>
-                <button @click="activeTab = 3" :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
-                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                    Actividades
+                <button @click="activeTab = 3" title="Actividades" :class="activeTab === 3 ? 'text-cyan-400 border-cyan-500 bg-cyan-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <span class="hidden sm:inline">Actividades</span>
                 </button>
-                <button @click="activeTab = 4" :class="activeTab === 4 ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
-                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
-                    <svg class="w-4 h-4 inline mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    Diagnóstico
+                <button @click="activeTab = 4" title="Diagnóstico" :class="activeTab === 4 ? 'text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <span class="hidden sm:inline">Diagnóstico</span>
                 </button>
             </nav>
         </div>
 
-        <div class="p-3 sm:p-4 lg:p-6">
+        <div class="p-2 sm:p-4 lg:p-6">
 
             {{-- ═══════════════════════════════════════════════════════════════════
                  TAB 1: Indicadores Principales — grouped by Peducativo
@@ -237,12 +326,12 @@
                 @if(isset($tab2Data[$lapsoId]) && count($tab2Data[$lapsoId]) > 0)
                     <!-- Peducativo nav-tabs (uses selected lapso only) -->
                     <div class="border-b border-white/5 mb-2">
-                        <nav class="flex overflow-x-auto -mb-px">
+                        <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory -mb-px">
                             @foreach($peducativos as $peducativo)
                                 @php $ieePROM = $tab2Data[$lapsoId][$peducativo->id]['ieePROM'] ?? 0; @endphp
                                 <button @click="activePeducativo = {{ $peducativo->id }}"
                                     :class="activePeducativo === {{ $peducativo->id }} ? 'text-violet-400 border-violet-500 bg-violet-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
-                                    class="flex-1 px-2 sm:px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    class="shrink-0 sm:flex-1 px-2 sm:px-4 py-2 min-h-[44px] text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
                                     {{ $peducativo->name }}
                                     <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
                                         Prom.Notas[{{ round($ieePROM, 2) }}]
@@ -337,7 +426,7 @@
                 @if(isset($tab3Data[$lapsoId]) && count($tab3Data[$lapsoId]) > 0)
                     <!-- Peducativo nav-tabs (uses selected lapso only) -->
                     <div class="border-b border-white/5 mb-2">
-                        <nav class="flex overflow-x-auto -mb-px">
+                        <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory -mb-px">
                             @foreach($peducativos as $peducativo)
                                 @php
                                     $tab3Item = $tab3Data[$lapsoId][$peducativo->id] ?? null;
@@ -345,7 +434,7 @@
                                 @endphp
                                 <button @click="activePeducativo = {{ $peducativo->id }}"
                                     :class="activePeducativo === {{ $peducativo->id }} ? 'text-amber-400 border-amber-500 bg-amber-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
-                                    class="flex-1 px-2 sm:px-4 py-2 text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    class="shrink-0 sm:flex-1 px-2 sm:px-4 py-2 min-h-[44px] text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
                                     {{ $peducativo->name }}
                                     <span class="block text-[9px] font-normal text-gray-500 normal-case" title="Cantidad promedio de notas por profesor">
                                         Prom.Notas[{{ round($ieePROM, 2) }}]
@@ -711,7 +800,7 @@
                     opacity: 0.3,
                 },
             },
-            colors: ['#0ea5e9', '#f59e0b'],
+            colors: ['#10b981', '#0ea5e9', '#f59e0b'],
             dataLabels: {
                 enabled: true,
                 style: {
@@ -850,5 +939,306 @@
 
     initScheduledChart();
     $wire.$watch('chartScheduledByDay', () => initScheduledChart());
+</script>
+@endscript
+
+{{-- Registration flow charts (activities/lessons/diagnostics by created_at) --}}
+
+{{-- Light mode support: detect dark class and expose theme-aware chart colors --}}
+<script>
+    window.flowChartColors = (function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        return {
+            isDark: isDark,
+            tooltip: { theme: isDark ? 'dark' : 'light' },
+            chartBackground: isDark ? 'transparent' : '#ffffff',
+            gridColor: isDark ? '#37415140' : '#e5e7eb',
+            labelStyle: { colors: isDark ? '#9ca3af' : '#6b7280', fontSize: '10px', fontWeight: 600 },
+        };
+    })();
+</script>
+
+@script
+<script>
+    let activitiesFlowChart = null;
+
+    async function initActivitiesFlowChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('activities-flow-chart');
+        if (!el) return;
+
+        if (activitiesFlowChart) activitiesFlowChart.destroy();
+
+        const rawData = await $wire.get('chartActivitiesFlow') ?? [];
+
+        activitiesFlowChart = new window.ApexCharts(el, {
+            series: [{
+                name: 'Actividades',
+                data: rawData,
+            }],
+            chart: {
+                type: 'area',
+                height: 200,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+            },
+            colors: ['#a855f7'],
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 3,
+                colors: ['#a855f7'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 5 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                tickAmount: 4,
+                forceNiceScale: true,
+            },
+            grid: {
+                borderColor: window.flowChartColors.gridColor,
+                strokeDashArray: 4,
+            },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                y: {
+                    formatter: function(val) {
+                        return val + ' actividad(es)';
+                    },
+                },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        activitiesFlowChart.render();
+    }
+
+    initActivitiesFlowChart();
+    $wire.$watch('chartActivitiesFlow', () => initActivitiesFlowChart());
+    $wire.$watch('registrationRange', () => { setTimeout(() => initActivitiesFlowChart(), 100); });
+</script>
+@endscript
+
+@script
+<script>
+    let lessonsFlowChart = null;
+
+    async function initLessonsFlowChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('lessons-flow-chart');
+        if (!el) return;
+
+        if (lessonsFlowChart) lessonsFlowChart.destroy();
+
+        const rawData = await $wire.get('chartLessonsFlow') ?? [];
+
+        lessonsFlowChart = new window.ApexCharts(el, {
+            series: [{
+                name: 'Lecciones',
+                data: rawData,
+            }],
+            chart: {
+                type: 'area',
+                height: 200,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+            },
+            colors: ['#0ea5e9'],
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 3,
+                colors: ['#0ea5e9'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 5 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                tickAmount: 4,
+                forceNiceScale: true,
+            },
+            grid: {
+                borderColor: window.flowChartColors.gridColor,
+                strokeDashArray: 4,
+            },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                y: {
+                    formatter: function(val) {
+                        return val + ' lección(es)';
+                    },
+                },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        lessonsFlowChart.render();
+    }
+
+    initLessonsFlowChart();
+    $wire.$watch('chartLessonsFlow', () => initLessonsFlowChart());
+    $wire.$watch('registrationRange', () => { setTimeout(() => initLessonsFlowChart(), 100); });
+</script>
+@endscript
+
+@script
+<script>
+    let diagnosticsFlowChart = null;
+
+    async function initDiagnosticsFlowChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('diagnostics-flow-chart');
+        if (!el) return;
+
+        if (diagnosticsFlowChart) diagnosticsFlowChart.destroy();
+
+        const rawData = await $wire.get('chartDiagnosticsFlow') ?? [];
+
+        diagnosticsFlowChart = new window.ApexCharts(el, {
+            series: [{
+                name: 'Diagnósticos',
+                data: rawData,
+            }],
+            chart: {
+                type: 'area',
+                height: 200,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+            },
+            colors: ['#10b981'],
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            markers: {
+                size: 3,
+                colors: ['#10b981'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 5 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: {
+                    style: window.flowChartColors.labelStyle,
+                },
+                tickAmount: 4,
+                forceNiceScale: true,
+            },
+            grid: {
+                borderColor: window.flowChartColors.gridColor,
+                strokeDashArray: 4,
+            },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                y: {
+                    formatter: function(val) {
+                        return val + ' diagnóstico(s)';
+                    },
+                },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        diagnosticsFlowChart.render();
+    }
+
+    initDiagnosticsFlowChart();
+    $wire.$watch('chartDiagnosticsFlow', () => initDiagnosticsFlowChart());
+    $wire.$watch('registrationRange', () => { setTimeout(() => initDiagnosticsFlowChart(), 100); });
 </script>
 @endscript

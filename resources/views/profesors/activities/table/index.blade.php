@@ -2,23 +2,8 @@
 
     {{-- Grid Mode --}}
     <div x-show="mode === 'grid'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-        <style>
-            /* 🧱 Masonry Layout — Pinterest-style
-               Native CSS grid-template-rows: masonry with multi-column fallback.
-               Fallback orders items column-by-column (not left-to-right). */
-            .masonry-grid { --masonry-cols: 1; columns: var(--masonry-cols); column-gap: 0.625rem; }
-            .masonry-item { break-inside: avoid; margin-bottom: 0.625rem; }
-            .masonry-empty { break-inside: avoid; text-align: center; }
-            @media (min-width: 640px)  { .masonry-grid { --masonry-cols: 2; } }
-            @media (min-width: 1024px) { .masonry-grid { --masonry-cols: 3; } }
-            @media (min-width: 1280px) { .masonry-grid { --masonry-cols: 4; } }
-            @supports (grid-template-rows: masonry) {
-                .masonry-grid { display: grid; gap: 0.625rem; columns: unset; grid-template-columns: repeat(var(--masonry-cols), 1fr); grid-template-rows: masonry; }
-                .masonry-item { break-inside: unset; margin-bottom: unset; }
-                .masonry-empty { grid-column: 1 / -1; }
-            }
-        </style>
-        <div class="masonry-grid">
+        {{-- Masonry grid: Tailwind columns-{n} con responsive prefixes (ADR-001 compliant) --}}
+        <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-2.5">
             @forelse($pevaluacions as $pevaluacion)
                 @php
                     $activities        = $pevaluacion->activities;
@@ -54,7 +39,7 @@
                     $hasEvaluative  = $activities->contains(fn($a) => !empty($a->description));
                     $allApproved    = $hasActivities && $activities->every(fn($a) => $a->status);
                 @endphp
-                <div class="masonry-item bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
+                <div class="break-inside-avoid mb-2.5 bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
 
                     {{-- Card Header --}}
                     <div class="px-3 pt-2.5 pb-1.5 border-b border-white/5">
@@ -190,7 +175,7 @@
                         <a href="{{ route('app.profesors.activities.resume', $pevaluacion->id) }}"
                             title="Resumen PDF"
                             target="_blank"
-                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-all duration-200">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
@@ -198,7 +183,7 @@
                         <a href="{{ route('app.profesors.activities.format', $pevaluacion->id) }}"
                             title="Plan Completo PDF"
                             target="_blank"
-                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -207,7 +192,7 @@
                         <button type="button"
                             @click="window.Livewire.dispatch('openCompetenciasDialog', { pensumId: {{ $pevaluacion->pensum_id }} })"
                             title="Competencias / Indicadores"
-                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] w-7 h-7 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all duration-200">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
@@ -215,7 +200,7 @@
                     </div>
                 </div>
             @empty
-                <div class="masonry-empty py-12 text-center">
+                <div class="break-inside-avoid text-center py-12">
                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>

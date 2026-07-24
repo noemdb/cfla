@@ -53,7 +53,7 @@
     </x-role-navbar>
 
     <!-- Main Content -->
-    <main class="flex-1 container-fluid w-full mx-auto  px-4 py-8">
+    <main class="flex-1 container-fluid w-full mx-auto px-2 py-2 sm:px-4 sm:py-8">
         {{ $slot ?? '' }}
         @yield('content')
     </main>
@@ -91,6 +91,9 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in { animation: none; }
         }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #020617; }
