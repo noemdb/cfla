@@ -21,12 +21,14 @@ use App\Notifications\LessonScheduledForApproval;
 use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
-use App\Services\NvidiaService;
+use App\Services\Lms\LmsAiOrchestrationService;
+use App\Services\Lms\LmsContentRendererService;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -36,26 +38,15 @@ class LessonWizard extends Component
 {
     use WireUiActions, WithFileUploads, WithPagination;
 
-    // ─── FALLBACK REINFORCEMENT ─────────────────────────────────
-    private const FALLBACK_REINFORCEMENT = <<<'TEXT'
+    // ─── Servicios inyectados ──────────────────────────────────
+    protected LmsAiOrchestrationService $aiService;
+    protected LmsContentRendererService $rendererService;
 
-⚠️ CORRECCIÓN — Intento anterior no siguió las instrucciones.
-
-Reglas críticas:
-1. Todo en ESPAÑOL académico. NO uses inglés.
-2. Usa SOLO el contexto de la actividad — nada de superhéroes, aventuras fantásticas, identidades secretas ni temas genéricos.
-3. Estructura exacta:
-   //INICIO
-   ...
-   //DESARROLLO
-   Bloque 1
-   ...
-   (mínimo 5 bloques separados por línea en blanco)
-   //CIERRE
-   ...
-4. Sin meta-comentarios, explicaciones ni introducciones.
-5. El ejemplo en las instrucciones es solo para mostrar el FORMATO — usa el contexto real de la actividad.
-TEXT;
+    public function boot(): void
+    {
+        $this->aiService ??= app(LmsAiOrchestrationService::class);
+        $this->rendererService ??= app(LmsContentRendererService::class);
+    }
 
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
     public string $mode = 'list';
@@ -910,7 +901,7 @@ TEXT;
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
-        $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
@@ -971,7 +962,7 @@ PROMPT;
             $content = $this->sanitizeText($content);
 
             // ─── Parsear resultado: título y descripción ─────────
-            [$this->lessonTitle, $this->lessonDescription] = $this->parseTitleDescription($content);
+            [$this->lessonTitle, $this->lessonDescription] = $this->aiService->parseTitleDescription($content);
 
             if (empty($this->lessonTitle) && empty($this->lessonDescription)) {
                 $this->generationError = 'La respuesta de la IA no contiene título ni descripción válidos.';
@@ -1225,7 +1216,7 @@ PROMPT;
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
-        $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
@@ -1354,7 +1345,7 @@ PROMPT;
             ? $indicators->map(fn ($n) => "├ó—ó {$n}")->implode("\n")
             : '—';
 
-        $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         $systemPrompt = <<<'PROMPT'
 Eres docente venezolano. Enriquece el contenido pedagógico existente convirtiéndolo en Markdown estructurado, preservando su significado original, ejemplos concretos y tono narrativo.
@@ -2240,50 +2231,6 @@ PROMPT;
         return $referents->isNotEmpty() ? $referents->toArray() : null;
     }
 
-    /**
-     * Obtiene el contexto de referentes normativos formateado,
-     * filtrado por pensum para reducir tokens.
-     */
-    private function getReferentsContext(?int $pestudioId, $pensum = null): string
-    {
-        if (! $pestudioId) {
-            return '—';
-        }
-
-        $referents = DiagReferent::with(['competencies' => function ($q) use ($pensum) {
-            if ($pensum) {
-                $q->where('pensum_id', $pensum->id);
-            }
-        }, 'competencies.indicators'])
-            ->where('pestudio_id', $pestudioId)
-            ->where('active', true)
-            ->get();
-
-        if ($referents->isEmpty()) {
-            return 'No hay referentes registrados para este plan de estudio.';
-        }
-
-        $lines = [];
-        foreach ($referents as $ref) {
-            $lines[] = "Referente: {$ref->name} ({$ref->code})";
-            foreach ($ref->competencies as $comp) {
-                $indList = $comp->indicators->take(3);
-                $text = mb_strlen($comp->name) > 80
-                    ? mb_substr($comp->name, 0, 80).'…'
-                    : $comp->name;
-                $lines[] = "  {$text}";
-                foreach ($indList as $ind) {
-                    $t = mb_strlen($ind->description) > 60
-                        ? mb_substr($ind->description, 0, 60).'…'
-                        : $ind->description;
-                    $lines[] = "    - {$t}";
-                }
-            }
-        }
-
-        return implode("\n", $lines);
-    }
-
     // ─── Wizard: Paso 2 — Generar secciones con IA ────────────
 
     /**
@@ -2328,7 +2275,7 @@ PROMPT;
             : '—';
 
         // ─── Referentes normativos ──────────────────────────────
-        $referentsText = $this->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
 
         // ─── Construir prompt ───────────────────────────────────
         $systemPrompt = <<<'PROMPT'
@@ -3282,7 +3229,7 @@ PROMPT;
             : '—';
 
         // ─── Referentes normativos ───────────────────────────────
-        $referentsText = $this->getReferentsContext(
+        $referentsText = $this->aiService->getReferentsContext(
             $pevaluacion?->pensum?->pestudio_id,
             $pevaluacion?->pensum
         );
@@ -4674,119 +4621,11 @@ PROMPT;
         return array_filter($this->wizardSections, fn ($s) => $s['is_visible']);
     }
 
-    // ─── Estrategia de compactación de prompts ─────────────────
-    //
-    // Para evitar que prompts con muchos referentes normativos
-    // excedan el budget de tokens en OpenRouter, se sigue esta
-    // estrategia en 2 fases:
-    //
-    //   1. NVIDIA (gratuito, qwen3.5-122b) → compacta el user
-    //      prompt cuando supera el budget, preservando datos
-    //      curriculares esenciales.
-    //   2. OpenRouter (modelo superior) → recibe el prompt
-    //      compactado y genera la respuesta final.
-    //
-    // Si la compactación falla, se envía el original a OpenRouter
-    // como fallback.
 
     /**
-     * Estima tokens de forma conservadora (~3.5 chars/token para español).
-     */
-    private function estimateTokens(string $text): int
-    {
-        return max(1, (int) ceil(mb_strlen($text) / 3.5));
-    }
-
-    /**
-     * Compacta texto vía NvidiaService preservando la información
-     * pedagógica esencial. Si falla, retorna el texto original.
-     */
-    private function compactWithNvidia(string $text): string
-    {
-        /** @var NvidiaService $nvidia */
-        $nvidia = app(NvidiaService::class);
-
-        $result = $nvidia->ask(
-            'Eres un asistente que compacta texto pedagógico. Preserva TODA la información esencial: datos curriculares, nombres de competencias, indicadores de logro, áreas de aprendizaje y contenidos. Elimina solo redundancias, relleno y repeticiones. No pierdas contenido sustantivo ni datos clave. Responde SOLO con el texto compactado, sin explicaciones ni metadatos.',
-            $text,
-            [
-                'max_tokens' => min(1536, (int) ceil($this->estimateTokens($text) * 0.55)),
-                'temperature' => 0.3,
-            ]
-        );
-
-        if (! $result['success'] || empty(trim($result['content'] ?? ''))) {
-            return $text;
-        }
-
-        $compacted = trim($result['content']);
-
-        // Limpiar anotaciones de seguridad que Nvidia a veces prefija
-        $compacted = $this->stripSafetyAnnotations($compacted);
-
-        if (empty($compacted)) {
-            return $text;
-        }
-
-        // Solo usar si realmente se redujo (evita respuestas espurias)
-        if (mb_strlen($compacted) >= mb_strlen($text) * 0.95) {
-            return $text;
-        }
-
-        return $compacted;
-    }
-
-    /**
-     * Elimina líneas de anotaciones de seguridad que ciertos modelos
-     * (Nvidia, etc.) prefijan en las respuestas.
-     *
-     * Ejemplos: "User Safety: safe", "**Content Safety:** medium_low",
-     * "Output Safety: high", "Safety: safe".
-     */
-    private function stripSafetyAnnotations(string $text): string
-    {
-        $lines = explode("\n", $text);
-        $filtered = array_filter($lines, function (string $line): bool {
-            $trimmed = trim($line);
-            if (empty($trimmed)) {
-                return true;
-            }
-            // "User Safety: safe", "**User Safety:** safe"
-            if (preg_match('/^(?:\*{1,2}\s*)?(?:User|Content|Output|Model)\s+Safety\s*:\s*(?:\*{1,2}\s*)?\w+/i', $trimmed)) {
-                return false;
-            }
-            // "Safety: high", "**Safety:** safe"
-            if (preg_match('/^(?:\*{1,2}\s*)?Safety\s*:\s*(?:\*{1,2}\s*)?\w+\s*$/i', $trimmed)) {
-                return false;
-            }
-
-            return true;
-        });
-
-        return trim(implode("\n", $filtered));
-    }
-
-    /**
-     * Envía un prompt a OpenRouter, compactándolo automáticamente
-     * con Nvidia si el user prompt supera el token budget.
-     *
-     * Prueba hasta 3 modelos de OpenRouter en cascada con 60s de timeout
-     * cada uno. Si todos fallan, muestra un mensaje amigable pidiendo
-     * reintento manual.
-     *
-     * Si se proporciona un $contentValidator, el contenido devuelto por
-     * cada modelo se valida con ese callable. Si retorna false, se considera
-     * que el modelo falló (contenido inválido) y se pasa al siguiente.
-     *
-     * @param  string  $systemPrompt  Instrucción del sistema.
-     * @param  string  $userPrompt  Mensaje del usuario.
-     * @param  array  $overrides  Overrides base para el LLM.
-     * @param  int  $tokenBudget  Máx. tokens del user prompt antes de compactar.
-     * @param  callable|null  $contentValidator  Recibe (string $content): bool.
-     *                                           true = válido, false = inválido (pasar al sig. modelo).
-     * @param  array|null  $customChain  Cadena custom de modelos [['model','label'],...].
-     *                                   null = usa la cadena por defecto (lesson wizard).
-     * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string}
+     * Thin wrapper que delega la orquestación IA
+     * a LmsAiOrchestrationService y maneja las notificaciones
+     * WireUi y debug_raw_content a nivel de componente.
      */
     private function askWithCompaction(
         string $systemPrompt,
@@ -4796,325 +4635,39 @@ PROMPT;
         ?callable $contentValidator = null,
         ?array $customChain = null
     ): array {
-        $estimatedTokens = $this->estimateTokens($userPrompt);
-        $compacted = false;
-        $originalSize = mb_strlen($userPrompt);
-
-        if ($estimatedTokens > $tokenBudget) {
-            $compactResult = $this->compactWithNvidia($userPrompt);
-
-            if ($compactResult !== $userPrompt && mb_strlen($compactResult) < $originalSize * 0.9) {
-                $userPrompt = $compactResult;
-                $compacted = true;
-
-                $this->notification()->info(
-                    'Prompt compactado',
-                    'El contexto se compactó vía NVIDIA para optimizar tokens ('
-                    .number_format($originalSize).' → '.number_format(mb_strlen($compactResult)).' chars).'
-                );
-            }
-        }
-
-        // ─── Cadena de modelos OpenRouter (desde config/openrouter.php) ──
-        $modelChain = $customChain ?? [
-            ['model' => config('openrouter.model_primary'),   'label' => 'Qwen 3.1 32B primario'],
-            ['model' => config('openrouter.model_fallback1'), 'label' => 'Mistral Large fallback 1'],
-            ['model' => config('openrouter.model_fallback2'), 'label' => 'Ling 2.6 Flash fallback 2'],
-            ['model' => config('openrouter.model_fallback3'), 'label' => 'Nemotron 3 Nano fallback 3'],
-            ['model' => config('openrouter.model_fallback4'), 'label' => 'Claude Sonnet 4 fallback 4'],
-        ];
-
-        /** @var OpenRouterService $llm */
-        $llm = app(OpenRouterService::class);
-        $lastError = null;
-
-        // Instrucciones adicionales para modelos de respaldo. Se añaden limpias
-        // en cada intento (sin acumulación) para reforzar las reglas.
-
-        foreach ($modelChain as $i => $attempt) {
-            // Reconstruir prompt fresco con refuerzo (sin acumulación entre intentos)
-            $attemptUserPrompt = $i > 0 ? $userPrompt.self::FALLBACK_REINFORCEMENT : $userPrompt;
-
-            $attemptOverrides = array_merge($overrides, [
-                'model' => $attempt['model'],
-                'timeout' => max($overrides['timeout'] ?? 120, 120),
-            ]);
-
-            $result = $llm->ask($systemPrompt, $attemptUserPrompt, $attemptOverrides);
-
-            if ($result['success']) {
-                // Validar contenido si hay un validador
-                $content = $result['content'] ?? '';
-                if ($contentValidator !== null && (empty($content) || ! $contentValidator($content))) {
-                    // Guardar respuesta para depuración aunque sea inválida
-                    $this->debugRawContent = $content;
-                    $lastError = 'Contenido inválido: no superó la validación de estructura.';
-
-                    // Inspeccionar por qué falló la validación
-                    $vHasInicio = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
-                    $vHasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
-                    $vHasCierre = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
-                    $vDevBlocks = 0;
-                    if ($vHasInicio && $vHasDesarrollo && $vHasCierre) {
-                        $vDevMatch = null;
-                        preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $vDevMatch);
-                        if (! empty($vDevMatch[1])) {
-                            $vBlocks = preg_split('/\n\s*\n/', trim($vDevMatch[1]));
-                            $vValidBlocks = array_filter($vBlocks, fn (string $b): bool => ! empty(trim($b)));
-                            $vDevBlocks = count($vValidBlocks);
-                        }
-                    }
-
-                    Log::warning("askWithCompaction: {$attempt['label']} contenido inválido", [
-                        'model' => $attempt['model'],
-                        'length' => mb_strlen($content),
-                        'validation' => [
-                            'has_inicio' => $vHasInicio,
-                            'has_desarrollo' => $vHasDesarrollo,
-                            'has_cierre' => $vHasCierre,
-                            'dev_blocks' => $vDevBlocks,
-                        ],
-                        'content_preview' => mb_substr(preg_replace('/\s+/', ' ', $content), 0, 500),
-                    ]);
-                    $this->notification()->warning(
-                        "{$attempt['label']} contenido inválido",
-                        'El contenido generado no cumple la estructura requerida. Cambiando al siguiente modelo...'
-                    );
-
-                    continue;
-                }
-
-                // Éxito: registrar qué modelo de la cadena respondió
-                Log::info("askWithCompaction: {$attempt['label']} generó contenido válido", [
-                    'model' => $attempt['model'],
-                    'length' => mb_strlen($content),
-                    'chain_index' => $i,
-                ]);
-
-                return $result;
-            }
-
-            // Falló este modelo — registrar y notificar
-            $lastError = $result['error'] ?? 'Error desconocido';
-            $reason = $this->describeModelError($lastError);
-            Log::warning("askWithCompaction: {$attempt['label']} falló", [
-                'model' => $attempt['model'],
-                'error' => $lastError,
-                'reason' => $reason,
-            ]);
-
-            $this->notification()->warning(
-                "{$attempt['label']} no respondió",
-                "Cambiando al siguiente modelo... ({$reason})"
-            );
-        }
-
-        // ─── Todos los modelos fallaron ──────────────────────────
-        Log::error('askWithCompaction: los 3 modelos OpenRouter fallaron', [
-            'last_error' => $lastError,
-        ]);
-        $this->notification()->error(
-            'Generación interrumpida',
-            'Los modelos de IA no pudieron completar la generación. Verifica tu conexión a Internet y el saldo en OpenRouter, luego intenta de nuevo pulsando el botón de generar.'
+        $result = $this->aiService->askWithCompaction(
+            $systemPrompt,
+            $userPrompt,
+            $overrides,
+            $tokenBudget,
+            $contentValidator,
+            $customChain,
+            notify: function(string $type, string $title, string $desc) {
+                match($type) {
+                    'info' => $this->notification()->info($title, $desc),
+                    'warning' => $this->notification()->warning($title, $desc),
+                    'error' => $this->notification()->error($title, $desc),
+                    default => null,
+                };
+            },
         );
 
-        return [
-            'success' => false,
-            'content' => null,
-            'model' => null,
-            'usage' => null,
-            'error' => $lastError,
-        ];
-    }
-
-    /**
-     * Extrae una descripción legible del error del modelo para mostrarla
-     * en la notificación de fallback.
-     */
-    private function describeModelError(string $errorMsg): string
-    {
-        if (str_contains($errorMsg, '429') || str_contains($errorMsg, 'Rate limit')) {
-            return 'límite de requests excedido';
-        }
-        if (str_contains($errorMsg, '402') || str_contains($errorMsg, 'Insufficient credits')) {
-            return 'créditos insuficientes';
-        }
-        if (str_contains($errorMsg, '28') || str_contains($errorMsg, 'timed out') || str_contains($errorMsg, 'timeout')) {
-            return 'tiempo de espera agotado (60s)';
-        }
-        if (str_contains($errorMsg, '52') || str_contains($errorMsg, 'Empty reply') || str_contains($errorMsg, 'Connection refused')) {
-            return 'el servidor cerró la conexión';
-        }
-        if (str_contains($errorMsg, '404') || str_contains($errorMsg, '500') || str_contains($errorMsg, '503')) {
-            return 'error del modelo ('.$errorMsg.')';
-        }
-        if (str_contains($errorMsg, 'excedió el límite de tokens') || str_contains($errorMsg, 'content_filter')) {
-            return 'el modelo rechazó la solicitud por seguridad o longitud';
-        }
-        if (str_contains($errorMsg, 'sin contenido') || str_contains($errorMsg, 'finalizó sin contenido')) {
-            return 'el modelo finalizó sin generar contenido';
+        if (isset($result['debug_raw_content'])) {
+            $this->debugRawContent = $result['debug_raw_content'];
         }
 
-        // Genérico
-        $truncated = mb_strlen($errorMsg) > 60 ? mb_substr($errorMsg, 0, 57).'...' : $errorMsg;
-
-        return $truncated;
-    }
-
-    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
-
-    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
-
-    // ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ─── ───
-
-    /**
-     * Parsea la respuesta del LLM extrayendo título y descripción.
-     * Soporta múltiples formatos de respuesta:
-     *
-     *   "Título || Descripción"        (separador ||)
-     *   "Título\nDescripción"           (primera línea = título)
-     *   "**Título:** ...\n**Descripción:** ..."  (markdown)
-     *   "Título: ...\nDescripción: ..." (etiquetas literales)
-     */
-    private function parseTitleDescription(string $content): array
-    {
-        $content = trim($content);
-        if (empty($content)) {
-            return ['', ''];
-        }
-
-        // ── Pre-procesamiento: eliminar líneas de seguridad/anotaciones ──
-        $content = $this->stripSafetyAnnotations($content);
-
-        // Si después de filtrar solo quedaban anotaciones de seguridad
-        if (empty($content)) {
-            return ['', ''];
-        }
-
-        // ── Estrategia 1: separador "||" (formato original) ──────
-        if (str_contains($content, '||')) {
-            $parts = explode('||', $content, 2);
-            $title = trim($parts[0]);
-            $desc = trim($parts[1] ?? '');
-            // Limpiar posibles prefijos tipo "Título:" o "Linea 1 →"
-            $title = $this->stripLabelPrefix($title, ['titulo', 'título', 'title', 'linea 1', 'línea 1']);
-            $desc = $this->stripLabelPrefix($desc, ['descripcion', 'descripción', 'description', 'linea 2', 'línea 2']);
-            if (! empty($title)) {
-                return [$title, $desc];
-            }
-        }
-
-        // ── Estrategia 2: etiquetas markdown "**Título:** /**Descripción:**" ─
-        $mdPattern = '/\*\*(?:T[íi]tulo|Título|Title|Descripci[oó]n|Description)\s*:\s*\*\*(.*?)(?=\s*\*\*(?:T[íi]tulo|Descripci[oó]n|))\s*/ius';
-        if (preg_match_all($mdPattern, $content, $mdMatches)) {
-            $title = '';
-            $desc = '';
-            foreach ($mdMatches[0] as $i => $fullMatch) {
-                $value = trim($mdMatches[1][$i] ?? '');
-                if (stripos($fullMatch, 'título') !== false || stripos($fullMatch, 'titulo') !== false || stripos($fullMatch, 'title') !== false) {
-                    $title = $value;
-                } elseif (stripos($fullMatch, 'descripción') !== false || stripos($fullMatch, 'descripcion') !== false || stripos($fullMatch, 'description') !== false) {
-                    $desc = $value;
-                }
-            }
-            if (! empty($title) && ! empty($desc)) {
-                return [$title, $desc];
-            }
-        }
-
-        // ── Estrategia 3: etiquetas literales "Título:" / "Descripción:" ──
-        $labelPattern = '/(?:T[íi]tulo|Título|Title|Descripci[oó]n|Description)\s*:\s*(.*?)(?=(?:\n(?:T[íi]tulo|Descripci[oó]n|Description)\s*:))/ius';
-        // Buscar párrafos etiquetados
-        $lines = explode("\n", $content);
-        $title = '';
-        $desc = '';
-        $currentLabel = null;
-        $buffer = '';
-        foreach ($lines as $rawLine) {
-            $line = trim($rawLine);
-            if (empty($line)) {
-                continue;
-            }
-            // Detectar etiqueta
-            $matched = false;
-            foreach (['Título:', 'Titulo:', 'Title:', 'Descripción:', 'Descripcion:', 'Description:'] as $label) {
-                if (str_starts_with(mb_strtolower($line), mb_strtolower($label))) {
-                    // Guardar buffer anterior
-                    if ($currentLabel === 'title' && ! empty($buffer)) {
-                        $title = trim($buffer);
-                    } elseif ($currentLabel === 'desc' && ! empty($buffer)) {
-                        $desc = trim($buffer);
-                    }
-                    $currentLabel = (stripos($label, 'título') !== false || stripos($label, 'titulo') !== false || stripos($label, 'title') !== false) ? 'title' : 'desc';
-                    $buffer = trim(mb_substr($line, mb_strlen($label)));
-                    $matched = true;
-                    break;
-                }
-            }
-            if (! $matched) {
-                $buffer .= "\n".$line;
-            }
-        }
-        // Último buffer
-        if ($currentLabel === 'title' && ! empty($buffer)) {
-            $title = trim($buffer);
-        } elseif ($currentLabel === 'desc' && ! empty($buffer)) {
-            $desc = trim($buffer);
-        }
-        if (! empty($title) && ! empty($desc)) {
-            return [$title, $desc];
-        }
-
-        // ── Estrategia 4: primera línea = título, resto = descripción ──
-        $nonEmpty = array_values(array_filter(explode("\n", $content), fn ($l) => ! empty(trim($l))));
-        if (count($nonEmpty) >= 2) {
-            $first = trim($nonEmpty[0]);
-            $rest = trim(implode("\n", array_slice($nonEmpty, 1)));
-            // La primera línea no debería ser muy larga para ser título
-            if (mb_strlen($first) <= 200 && ! empty($rest)) {
-                return [$first, $rest];
-            }
-        }
-
-        // ── Estrategia 5 (fallback absoluto): todo es el título ──
-        $maxTitle = 120;
-        $fallbackTitle = mb_strlen($content) > $maxTitle ? mb_substr($content, 0, $maxTitle).'…' : $content;
-
-        return [$fallbackTitle, ''];
-    }
-
-    /**
-     * Elimina prefijos de etiqueta como "Título:" o "Línea 1 →" del texto.
-     */
-    private function stripLabelPrefix(string $text, array $labels): string
-    {
-        $text = trim($text);
-        foreach ($labels as $label) {
-            // Con dos puntos
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).':')) {
-                $text = trim(mb_substr($text, mb_strlen($label) + 1));
-            }
-            // Con flecha "→"
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).'→')) {
-                $text = trim(mb_substr($text, mb_strlen($label) + 1));
-            }
-            // Con guión " - " o " -> "
-            if (str_starts_with(mb_strtolower($text), mb_strtolower($label).' -')) {
-                $text = trim(mb_substr($text, mb_strlen($label) + 2));
-            }
-        }
-
-        return trim($text);
+        return $result;
     }
 
     // ─── Render ────────────────────────────────────────────────
 
+    #[Layout('profesors.layouts.app')]
     public function render()
     {
         if ($this->mode === 'wizard') {
             return view('livewire.profesor.lms.lesson-wizard', [
                 'totalSteps' => 4,
-            ])->layout('profesors.layouts.app');
+            ]);
         }
 
         // Modo listado
@@ -5170,251 +4723,59 @@ PROMPT;
 
         return view('livewire.profesor.lms.lesson-wizard', compact(
             'activities', 'listLapso', 'listPestudio', 'listGrado', 'listSeccion'
-        ))->layout('profesors.layouts.app');
+        ));
     }
+
+    // ─── Thin wrappers → LmsContentRendererService ─────────────
 
     /**
      * Asegura que el contenido de un embed con código Mermaid esté
      * envuelto en el contenedor HTML + div.mermaid más CDN.
-     * Útil para embeds existentes guardados antes del wrapper automático.
      */
     private function ensureMermaidWrapper(array $embed): array
     {
-        $content = trim($embed['html_content'] ?? '');
-        $mermaidPattern = '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/';
-
-        // 1. Ya procesado (flag is_mermaid)
-        if (! empty($embed['is_mermaid'])) {
-            return $embed;
-        }
-
-        // 2. Código Mermaid suelto (empieza con keyword)
-        if (preg_match($mermaidPattern, $content) === 1) {
-            $embed['is_mermaid'] = true;
-
-            // html_content se deja como está (código plano)
-            return $embed;
-        }
-
-        // 3. Formato legacy: tenía data-mermaid-code o div.mermaid con wrapper HTML
-        // Extraer el código de data-mermaid-code
-        if (preg_match('/data-mermaid-code="([^"]*)"/', $content, $m)) {
-            $code = htmlspecialchars_decode($m[1], ENT_QUOTES);
-            $embed['html_content'] = $code;
-            $embed['is_mermaid'] = true;
-
-            return $embed;
-        }
-
-        // 4. Formato legacy: div.mermaid con código inline
-        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content, $m)) {
-            $innerCode = strip_tags(trim($m[1]));
-            if (preg_match($mermaidPattern, $innerCode)) {
-                $embed['html_content'] = $innerCode;
-                $embed['is_mermaid'] = true;
-
-                return $embed;
-            }
-        }
-
-        // 5. No es mermaid → dejar intacto
-        $embed['is_mermaid'] = false;
-
-        return $embed;
+        return $this->rendererService->ensureMermaidWrapper($embed);
     }
 
     /**
      * Renderiza el contenido de la diapositiva actual para la vista previa.
-     * Renderiza todos los bloques de contenido de la diapositiva actual.
      */
     public function slidePreviewContent(): string
     {
         $currentSlide = $this->wizardSections[$this->currentSlideIndex] ?? null;
-        if (! $currentSlide) {
-            return '';
-        }
 
-        $blocks = collect($currentSlide['contents'] ?? [])
-            ->filter(fn ($c) => ! empty($c['body']))
-            ->values();
-
-        $rendered = $blocks->map(function (array $block, int $idx): string {
-            $body = $block['body'] ?? '';
-            $type = $block['type'] ?? 'TEXT';
-            $title = $block['title'] ?? '';
-
-            $wrapperClass = 'slide-block slide-block-'.($idx % 2 === 0 ? 'even' : 'odd');
-
-            // ─── IMAGE: SVG/ilustración — render raw, sin mathContent ──
-            // Se detecta por type (contenido nuevo) o por body (contenido
-            // existente guardado con type TEXT antes de esta clasificación).
-            if ($type === 'IMAGE' || preg_match('/<svg\b/', $body)) {
-                return '<div class="'.$wrapperClass.'">'
-                    ."\n".$body."\n"
-                    .'</div>';
-            }
-
-            // ─── MERMAID: detectar por clase CSS o keyword ─────────────
-            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $body) === 1;
-            if (! $isMermaid) {
-                $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($body)) === 1;
-            }
-
-            if ($isMermaid) {
-                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m);
-                $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                if (empty($mermaidCode)) {
-                    $mermaidCode = trim(strip_tags($body));
-                }
-
-                return '<div class="'.$wrapperClass.'">'
-                    ."\n"
-                    .'<div wire:ignore x-data="mermaidEmbed()"'
-                    .' data-mermaid-code="'.htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8').'"'
-                    .' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
-                    .'<div x-ref="target" class="w-full"></div>'
-                    .'</div>'
-                    ."\n"
-                    .'</div>';
-            }
-
-            // ─── HTML: contenido semántico estructurado, render raw — sin mathContent ──
-            if ($type === 'HTML') {
-                $sanitized = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
-
-                return '<div class="'.$wrapperClass.'">'
-                    ."\n"
-                    .'<div class="prose max-w-none">'
-                    ."\n".$sanitized."\n"
-                    .'</div>'
-                    ."\n"
-                    .'</div>';
-            }
-
-            // ─── MATH: render con mathContent (KaTeX para LaTeX) ──────
-            if ($type === 'MATH') {
-                $html = $this->renderContentBody($body, 'MATH');
-
-                return '<div class="'.$wrapperClass.'">'
-                    ."\n"
-                    .'<div x-data="mathContent()" data-math-content="'.htmlspecialchars($html, ENT_QUOTES, 'UTF-8').'">'
-                    .'<div wire:ignore><div x-ref="target"></div></div>'
-                    .'</div>'
-                    ."\n"
-                    .'</div>';
-            }
-
-            // ─── TEXT / default: render sin mathContent ──────────────
-            $html = $this->renderContentBody($body, 'TEXT');
-
-            return '<div class="'.$wrapperClass.'">'
-                ."\n"
-                .'<div class="prose max-w-none">'
-                ."\n".$html."\n"
-                .'</div>'
-                ."\n"
-                .'</div>';
-        });
-
-        return $rendered->implode("\n");
+        return $this->rendererService->slidePreviewContent($currentSlide);
     }
 
     /**
      * Renderiza el body de un bloque de contenido.
-     *
-     * Para TEXT: convierte Markdown a HTML primero (incluso si contiene
-     *           HTML mixto), luego sanitiza. Así los ## de markdown
-     *           nunca quedan visibles aunque el AI mezcle formatos.
-     * Para MATH: solo sanitiza, preservando LaTeX (\(...\) y $$...$$)
-     *            que el markdown rompería (subíndices con _).
      */
     public function renderContentBody(?string $body, string $type = 'TEXT'): string
     {
-        if (empty($body)) {
-            return '';
-        }
-
-        // MATH: body es HTML procesado con LaTeX — no convertir markdown
-        if ($type === 'MATH') {
-            return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($body);
-        }
-
-        // TEXT: siempre convertir markdown primero, luego sanitizar
-        $html = \Illuminate\Support\Str::markdown($body);
-        // Defense-in-depth: eliminar marcadores markdown ## residuales que CommonMark
-        // no procesa cuando están dentro de etiquetas HTML (ej: "<h2>## texto</h2>").
-        $html = preg_replace('/(?:^|(?<=>))#{1,6}\s+/m', '', $html);
-        if (\Illuminate\Support\Str::contains($html, '<')) {
-            return app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($html);
-        }
-
-        return $html;
+        return $this->rendererService->renderContentBody($body, $type);
     }
 
     /**
      * Renderiza el body de un bloque de contenido para el modal de previsualización.
-     *
-     * Si el body contiene un diagrama Mermaid (<div class="mermaid">),
-     * lo envuelve en el componente Alpine mermaidEmbed() para que se renderice
-     * correctamente sin que Mermaid haga auto-scan del DOM.
-     *
-     * En caso contrario delega en renderContentBody().
      */
     public function renderPreviewContent(string $body): string
     {
-        // Detectar si el body contiene un div.mermaid
-        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $body, $m)) {
-            $mermaidCode = trim(strip_tags($m[1]));
-            if (! empty($mermaidCode)) {
-                // Envolver en mermaidEmbed() como lo hace slidePreviewContent()
-                return '<div class="slide-block">'
-                    ."\n"
-                    .'<div wire:ignore x-data="mermaidEmbed()"'
-                    .' data-mermaid-code="'.htmlspecialchars($mermaidCode, ENT_QUOTES, 'UTF-8').'"'
-                    .' class="w-full bg-white rounded-xl p-4 overflow-x-auto border border-slate-200">'
-                    .'<div x-ref="target" class="w-full"></div>'
-                    .'</div>'
-                    ."\n"
-                    .'</div>';
-            }
-        }
-
-        return $this->renderContentBody($body);
+        return $this->rendererService->renderPreviewContent($body);
     }
 
     /**
      * Renderiza las preguntas de repaso con formato visual mejorado.
-     * Procesa el markdown, extrae el título principal si existe,
-     * y envuelve cada pregunta/respuesta en un diseño tipo card.
      */
     public function renderReviewQuestions(string $markdown): string
     {
-        if (empty($markdown)) {
-            return '';
-        }
-
-        // Eliminar el título "## Preguntas de Repaso" si existe (lo mostramos como heading de sección)
-        $body = preg_replace('/^##\s+Preguntas?\s+de\s+Repaso\s*\n+/im', '', $markdown);
-        $body = trim($body);
-
-        if (empty($body)) {
-            return '';
-        }
-
-        // Convertir markdown a HTML
-        $html = \Illuminate\Support\Str::markdown($body);
-
-        // Envolver en un contenedor con estilos dedicados
-        return '<div class="review-questions">'."\n".$html."\n".'</div>';
+        return $this->rendererService->renderReviewQuestions($markdown);
     }
 
     /**
      * Sanitiza texto delegando en LmsTextSanitizerService.
-     * Elimina espacios múltiples, saltos de línea excesivos,
-     * ** markdown (común en respuestas de IA) y espacios al inicio/final.
      */
     private function sanitizeText(?string $text, string $level = 'standard'): ?string
     {
-        return app(\App\Services\Lms\LmsTextSanitizerService::class)->sanitize($text, $level);
+        return $this->rendererService->sanitizeText($text, $level);
     }
 }

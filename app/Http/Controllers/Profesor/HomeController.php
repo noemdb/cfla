@@ -76,7 +76,7 @@ class HomeController extends Controller
 
         // ── Lapsos ──────────────────────────────────────────────
         $lapso       = Lapso::current();
-        $lapsos       = Lapso::all();
+        $lapsos       = Lapso::all()->reject(fn($l) => str_contains(strtolower($l->code ?? ''), 'debug') || str_contains(strtolower($l->name ?? ''), 'debug'));
         $lapso_active = $lapso;
 
         // ── Modal de notificación ──────────────────────────────
@@ -184,28 +184,25 @@ class HomeController extends Controller
                 )->count();
 
                 // ── Chart: Activities by day ────────────────────────
-                $chartActivitiesByDay = Activity::selectRaw('activities.finicial, COUNT(*) as total')
-                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
-                    ->where('pevaluacions.profesor_id', $profesor->id)
-                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
-                    ->whereNull('pevaluacions.deleted_at')
+                $chartActivitiesByDay = Activity::selectRaw('activities.finicial as date, COUNT(*) as total')
+                    ->whereHas('pevaluacion', fn($q) =>
+                        $q->where('profesor_id', $profesor->id)
+                            ->where('lapso_id', $lapsoItem->id)
+                    )
                     ->groupBy('activities.finicial')
                     ->orderBy('activities.finicial')
                     ->get()
-                    ->map(fn($row) => ['x' => $row->finicial, 'y' => (int) $row->total])
+                    ->map(fn($row) => ['x' => $row->date, 'y' => (int) $row->total])
                     ->toArray();
 
                 // ── Chart: Lessons by day ────────────────────────
-                $chartLessonsByDay = DB::table('lms_activity_publications')
-                    ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
-                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
-                    ->where('pevaluacions.profesor_id', $profesor->id)
-                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
-                    ->whereNull('pevaluacions.deleted_at')
-                    ->selectRaw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at) as pub_date, COUNT(*) as total')
+                $chartLessonsByDay = LmsActivityPublication::selectRaw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at) as pub_date, COUNT(*) as total')
+                    ->whereHas('activity.pevaluacion', fn($q) =>
+                        $q->where('profesor_id', $profesor->id)
+                            ->where('lapso_id', $lapsoItem->id)
+                    )
                     ->groupByRaw('DATE(COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at))')
                     ->orderBy('pub_date')
-                    ->whereNotNull(DB::raw('COALESCE(lms_activity_publications.published_at, lms_activity_publications.created_at)'))
                     ->get()
                     ->map(function ($row) {
                         $date = $row->pub_date;
@@ -215,14 +212,12 @@ class HomeController extends Controller
                     ->toArray();
 
                 // ── Chart: Scheduled by day ──────────────────────
-                $chartScheduledByDay = DB::table('lms_activity_publications')
-                    ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
-                    ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
-                    ->where('pevaluacions.profesor_id', $profesor->id)
-                    ->where('pevaluacions.lapso_id', $lapsoItem->id)
-                    ->whereNull('pevaluacions.deleted_at')
+                $chartScheduledByDay = LmsActivityPublication::selectRaw('DATE(lms_activity_publications.publish_at) as pub_date, COUNT(*) as total')
+                    ->whereHas('activity.pevaluacion', fn($q) =>
+                        $q->where('profesor_id', $profesor->id)
+                            ->where('lapso_id', $lapsoItem->id)
+                    )
                     ->whereNotNull('lms_activity_publications.publish_at')
-                    ->selectRaw('DATE(lms_activity_publications.publish_at) as pub_date, COUNT(*) as total')
                     ->groupByRaw('DATE(lms_activity_publications.publish_at)')
                     ->orderBy('pub_date')
                     ->get()

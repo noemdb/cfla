@@ -291,7 +291,8 @@
          ═══════════════════════════════════════════════════════════════════ --}}
     @if(isset($indicadores) && $indicadores->isNotEmpty())
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden"
-         x-data="{ activeTab: {{ $lapsos->first()->id === ($lapso_active->id ?? $lapsos->first()->id) ? 1 : 1 }} }">
+         x-data="{ activeTab: {{ $lapsos->first()->id === ($lapso_active->id ?? $lapsos->first()->id) ? 1 : 1 }} }"
+         x-init="$watch('activeTab', () => $nextTick(() => window._initProfCharts && window._initProfCharts()))">
 
         {{-- Tab Navigation (Alpine.js, border-b-2 pattern like Planning) --}}
         <div class="border-b border-white/5">
@@ -939,109 +940,116 @@
      * Initialize all profesor chart containers using IntersectionObserver.
      * Defers rendering until the container becomes visible (tab is active).
      */
-    (function initProfesorCharts() {
-        const containers = document.querySelectorAll('[id^="chart-"]');
+    // ─── Chart config factory (shared) ────────────────────────────
+    function makeChartConfig(seriesData, name, color) {
+        return {
+            series: [{ name: name, data: seriesData }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+            },
+            colors: [color],
+            stroke: { curve: 'smooth', width: 2 },
+            markers: {
+                size: 4,
+                colors: [color],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0,
+                    stops: [0, 90, 100],
+                },
+            },
+            xaxis: {
+                type: 'category',
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: { borderColor: '#37415140', strokeDashArray: 4 },
+            tooltip: {
+                theme: 'dark',
+                y: { formatter: function(val) { return val + ' ' + name.toLowerCase() + '(es)'; } },
+            },
+            noData: {
+                text: 'Sin datos para este período',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        };
+    }
+
+    /**
+     * Initialize a single chart container.
+     */
+    async function renderChart(el) {
+        if (!el || el.dataset.chartInited) return;
+
+        // Load ApexCharts dynamically
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const rawData = el.getAttribute('data-chart-data');
+        let data = [];
+        try { data = JSON.parse(rawData) || []; } catch (e) { data = []; }
+
+        const name = el.getAttribute('data-series-name') || 'Serie';
+        const color = el.getAttribute('data-series-color') || '#10b981';
+
+        const chart = new window.ApexCharts(el, makeChartConfig(data, name, color));
+        chart.render();
+        el.dataset.chartInited = '1';
+
+        // Store reference for potential cleanup
+        window._profCharts = window._profCharts || {};
+        window._profCharts[el.id] = chart;
+    }
+
+    /**
+     * Scan DOM for uninitialized chart containers and observe them.
+     * Safe to call multiple times — new tabs rendered by Alpine x-if
+     * will be picked up without duplicating already-initialized charts.
+     */
+    window._initProfCharts = function() {
+        const containers = document.querySelectorAll('[id^="chart-"]:not([data-chart-inited])');
         if (!containers.length) return;
 
-        // Shared ApexCharts area config
-        function makeChartConfig(seriesData, name, color) {
-            return {
-                series: [{ name: name, data: seriesData }],
-                chart: {
-                    type: 'area',
-                    height: 300,
-                    toolbar: { show: false },
-                    zoom: { enabled: false },
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                },
-                colors: [color],
-                stroke: { curve: 'smooth', width: 2 },
-                markers: {
-                    size: 4,
-                    colors: [color],
-                    strokeColors: '#fff',
-                    strokeWidth: 2,
-                    hover: { size: 6 },
-                },
-                dataLabels: { enabled: false },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        inverseColors: false,
-                        opacityFrom: 0.5,
-                        opacityTo: 0,
-                        stops: [0, 90, 100],
-                    },
-                },
-                xaxis: {
-                    type: 'category',
-                    labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false },
-                },
-                yaxis: {
-                    labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } },
-                    tickAmount: 5,
-                    forceNiceScale: true,
-                },
-                grid: { borderColor: '#37415140', strokeDashArray: 4 },
-                tooltip: {
-                    theme: 'dark',
-                    y: { formatter: function(val) { return val + ' ' + name.toLowerCase() + '(es)'; } },
-                },
-                noData: {
-                    text: 'Sin datos para este período',
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    style: { color: '#6b7280', fontSize: '13px' },
-                },
-            };
-        }
+        containers.forEach(el => {
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            renderChart(entry.target);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.01 });
+                observer.observe(el);
+            } else {
+                renderChart(el);
+            }
+        });
+    };
 
-        /**
-         * Initialize a single chart container.
-         */
-        async function renderChart(el) {
-            if (!el || el.dataset.chartInited) return;
-
-            // Load ApexCharts dynamically
-            if (window.loadApexCharts) await window.loadApexCharts();
-            if (!window.ApexCharts) return;
-
-            const rawData = el.getAttribute('data-chart-data');
-            let data = [];
-            try { data = JSON.parse(rawData) || []; } catch (e) { data = []; }
-
-            const name = el.getAttribute('data-series-name') || 'Serie';
-            const color = el.getAttribute('data-series-color') || '#10b981';
-
-            const chart = new window.ApexCharts(el, makeChartConfig(data, name, color));
-            chart.render();
-            el.dataset.chartInited = '1';
-
-            // Store reference for potential cleanup
-            window._profCharts = window._profCharts || {};
-            window._profCharts[el.id] = chart;
-        }
-
-        // Use IntersectionObserver: charts render only when visible in viewport
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        renderChart(entry.target);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.01 });
-
-            containers.forEach(el => observer.observe(el));
-        } else {
-            // Fallback: render all immediately
-            containers.forEach(el => renderChart(el));
-        }
-    })();
+    // Initial scan (tab 1 charts are already in the DOM)
+    window._initProfCharts();
 
     /**
      * Render the Flujo de Registros charts (Activities, Lessons, Diagnostics)

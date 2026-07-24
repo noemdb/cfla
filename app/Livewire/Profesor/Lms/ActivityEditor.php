@@ -10,6 +10,7 @@ use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -214,9 +215,9 @@ class ActivityEditor extends Component
         $this->loadPublication();
     }
 
+    #[Layout('planning.layouts.app')]
     public function render(): \Illuminate\View\View
     {
-        return view('livewire.profesor.lms.activity-editor')
-               ->layout('planning.layouts.app');
+        return view('livewire.profesor.lms.activity-editor');
     }
 }
