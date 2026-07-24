@@ -629,12 +629,29 @@ class IndexComponent extends Component
 
     /**
      * Load global lesson stats (not filtered by lapso).
+     * Total = published + scheduled + drafts (including activities without LMS publication record),
+     * matching the same 3-series logic used in loadRegistrationFlowCharts().
      */
     private function loadLessonStats()
     {
-        $this->lessonTotal = \App\Models\app\Academy\Lms\LmsActivityPublication::count();
-        $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')->count();
-        $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')->count();
+        $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')
+            ->whereNotNull('published_at')
+            ->count();
+        $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')
+            ->where('status', '!=', 'PUBLISHED')
+            ->count();
+
+        // Drafts: activities WITH a publication record (publish_at NULL, no PUBLISHED)
+        // and activities WITHOUT any publication record (via LEFT JOIN).
+        $draftsCount = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->whereNull('lms_activity_publications.publish_at')
+            ->where(function ($q) {
+                $q->whereNull('lms_activity_publications.status')
+                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+            })
+            ->count(\Illuminate\Support\Facades\DB::raw('DISTINCT activities.id'));
+
+        $this->lessonTotal = $this->lessonPublished + $this->lessonScheduled + $draftsCount;
     }
 
     /**
