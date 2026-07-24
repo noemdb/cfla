@@ -21,6 +21,14 @@ class LmsMonitor extends Component
     use WithPagination;
     use WireUiActions;
 
+    // ─── View mode ─────────────────────────────────────────────
+    public string $viewMode = 'table';
+
+    public function updatedViewMode(string $value): void
+    {
+        session()->put('lms_monitor_view_mode', $value);
+    }
+
     // ─── Filtros ───────────────────────────────────────────────
     public string $search = '';
     public string $filterStatus = '';
@@ -175,6 +183,7 @@ class LmsMonitor extends Component
     public function mount(): void
     {
         $this->seccionesFiltradas = collect();
+        $this->viewMode = session('lms_monitor_view_mode', 'table');
     }
 
     /** Hook: cuando cambia filterGrado, actualiza las secciones disponibles */

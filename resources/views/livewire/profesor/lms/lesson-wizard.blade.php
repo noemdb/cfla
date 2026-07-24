@@ -100,9 +100,10 @@
                     $links = $item->lmsLinks ?? collect();
                     $totalContents = $sections->sum(fn($s) => $s->contents_count ?? 0);
                     $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
+                    $isPublished = $pub?->status === 'PUBLISHED';
                 @endphp
                 <div wire:key="activity-card-{{ $item->id }}"
-                     class="relative bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden mt-2
+                     class="relative {{ $isPublished ? 'bg-emerald-200 dark:bg-emerald-950' : 'bg-white dark:bg-slate-800/40' }} border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden mt-2
                             transition-all duration-200 group
                             hover:bg-gray-50 dark:hover:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/10
                             {{ $hasLmsContent ? 'ring-1 ring-emerald-500/15' : '' }}">
@@ -301,10 +302,11 @@
                             $links = $item->lmsLinks ?? collect();
                             $totalContents = $sections->sum(fn($s) => $s->contents_count ?? 0);
                             $hasLmsContent = $sections->isNotEmpty() || $resources->isNotEmpty() || $links->isNotEmpty() || !is_null($pub);
+                            $isPublished = $pub?->status === 'PUBLISHED';
                         @endphp
                         <tr wire:key="activity-row-{{ $item->id }}"
                             class="border-b border-gray-100 dark:border-slate-800/60 hover:bg-gray-50 dark:hover:bg-slate-800/30 transition-colors duration-150
-                                   {{ $hasLmsContent ? 'bg-emerald-500/[0.02]' : '' }}">
+                                   {{ $isPublished ? 'bg-emerald-200 dark:bg-emerald-950' : ($hasLmsContent ? 'bg-emerald-500/[0.02]' : '') }}">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-7 h-7 rounded-lg {{ $hasLmsContent ? 'bg-emerald-500/10' : 'bg-gray-100 dark:bg-slate-700/40' }} flex items-center justify-center shrink-0">

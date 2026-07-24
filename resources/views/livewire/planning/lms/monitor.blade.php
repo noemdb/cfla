@@ -44,6 +44,34 @@
         </div>
     </div>
 
+    {{-- View mode toggle --}}
+    <div class="flex items-center justify-end">
+        <div class="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-0.5 flex">
+            <button wire:click="$set('viewMode', 'table')"
+                    @class([
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200',
+                        'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm' => $viewMode === 'table',
+                        'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300' => $viewMode !== 'table',
+                    ])>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <span class="hidden sm:inline">Tabla</span>
+            </button>
+            <button wire:click="$set('viewMode', 'grid')"
+                    @class([
+                        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200',
+                        'bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm' => $viewMode === 'grid',
+                        'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300' => $viewMode !== 'grid',
+                    ])>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                </svg>
+                <span class="hidden sm:inline">Grid</span>
+            </button>
+        </div>
+    </div>
+
     {{-- Filtros --}}
     <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/50 rounded-lg p-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -128,6 +156,8 @@
         @endif
     </div>
 
+    @if($viewMode === 'table')
+
     {{-- Bulk action bar --}}
     @if(count($selectedIds) > 0)
         <div class="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
@@ -185,8 +215,13 @@
                         $seccion = $pub->pevaluacion?->seccion?->name ?? '—';
                         $isSelected = in_array($pub->id, $selectedIds);
                         $pubStatus = $pub->lmsPublication?->status;
+                        $rowBg = match($pubStatus) {
+                            'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
+                            'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
+                            default     => '',
+                        };
                     @endphp
-                    <tr class="hover:bg-gray-100 dark:hover:bg-slate-700/20 {{ $isSelected ? 'bg-emerald-500/5' : '' }}">
+                    <tr class="hover:bg-gray-100 dark:hover:bg-slate-700/20 {{ $isSelected ? 'bg-emerald-500/5' : ($rowBg ?: '') }}">
                         <td class="text-center px-2 py-2.5">
                             <input type="checkbox" value="{{ $pub->id }}"
                                    wire:change="toggleSelect({{ $pub->id }})"
@@ -354,6 +389,209 @@
         <div class="mt-4">
             {{ $publications->links('vendor.pagination.custom-tailwind') }}
         </div>
+    @endif
+
+    @elseif($viewMode === 'grid')
+
+    {{-- Grid de actividades --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @forelse($publications as $pub)
+            @php
+                $profesor = $pub->pevaluacion?->profesor;
+                $grado = $pub->pevaluacion?->pensum?->grado?->name ?? '—';
+                $seccion = $pub->pevaluacion?->seccion?->name ?? '—';
+                $pubStatus = $pub->lmsPublication?->status;
+                $isPublished = $pubStatus === 'PUBLISHED';
+                $cardBg = match($pubStatus) {
+                    'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
+                    'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
+                    default     => '',
+                };
+            @endphp
+            <div class="relative bg-white dark:bg-slate-800/40 border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden transition-all duration-200 group hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/10 {{ $cardBg }}">
+                @if($pubStatus === 'PUBLISHED')
+                    <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
+                @elseif($pubStatus === 'SCHEDULED')
+                    <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></span>
+                @endif
+
+                {{-- Header: estado + fecha --}}
+                <div class="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span @class([
+                            'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide',
+                            'bg-emerald-500/12 text-emerald-400 border border-emerald-500/20' => $pubStatus === 'PUBLISHED',
+                            'bg-amber-500/12 text-amber-400 border border-amber-500/20'        => $pubStatus === 'SCHEDULED',
+                            'bg-gray-100 dark:bg-slate-700/40 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-600/50' => $pubStatus === 'DRAFT' || is_null($pubStatus),
+                            'bg-red-500/12 text-red-400 border border-red-500/20'              => $pubStatus === 'ARCHIVED',
+                        ])>
+                            @if($pubStatus === 'PUBLISHED')
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            @elseif($pubStatus === 'SCHEDULED')
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @elseif($pubStatus === 'ARCHIVED')
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg>
+                            @else
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            @endif
+                            {{ match($pubStatus) {
+                                'PUBLISHED' => 'Publicado',
+                                'SCHEDULED' => 'Programado',
+                                'ARCHIVED'  => 'Archivado',
+                                'DRAFT'     => 'Borrador',
+                                default     => 'Sin publicar',
+                            } }}
+                        </span>
+                    </div>
+                    <span class="shrink-0 text-[10px] font-mono text-gray-400 dark:text-slate-600">
+                        {{ $pub->finicial ? \Carbon\Carbon::parse($pub->finicial)->format('d/m') : '' }}
+                        <span class="text-gray-300 dark:text-slate-700">—</span>
+                        {{ $pub->ffinal ? \Carbon\Carbon::parse($pub->ffinal)->format('d/m') : '' }}
+                    </span>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-4 pb-2 space-y-2">
+                    {{-- Título --}}
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors duration-200">
+                        {{ $pub->topic ?? 'Actividad sin título' }}
+                    </h3>
+
+                    {{-- Metadata: asignatura + grado --}}
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                        @if($pub->pevaluacion?->pensum?->asignatura?->name)
+                            <span class="inline-flex items-center gap-1 text-gray-500 dark:text-slate-400">
+                                <svg class="w-3.5 h-3.5 text-emerald-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                {{ $pub->pevaluacion->pensum->asignatura->name }}
+                            </span>
+                        @endif
+                        <span class="inline-flex items-center gap-1 text-gray-500 dark:text-slate-400">
+                            <svg class="w-3.5 h-3.5 text-blue-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            {{ $grado }} · Sec. {{ $seccion }}
+                        </span>
+                    </div>
+
+                    {{-- Profesor --}}
+                    <div class="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-slate-500">
+                        <svg class="w-3.5 h-3.5 text-violet-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        {{ $profesor ? trim($profesor->lastname.' '.$profesor->name) : '—' }}
+                    </div>
+
+                    {{-- Content stats --}}
+                    <div class="flex flex-wrap items-center gap-2 pt-0.5">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium {{ $pub->lms_sections_count > 0 ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'bg-gray-100 dark:bg-slate-700/40 text-gray-500 dark:text-slate-500 border border-gray-200 dark:border-slate-600/40' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            {{ $pub->lms_sections_count }} {{ Str::plural('sec', $pub->lms_sections_count) }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium {{ $pub->lms_resources_count > 0 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-gray-100 dark:bg-slate-700/40 text-gray-500 dark:text-slate-500 border border-gray-200 dark:border-slate-600/40' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            {{ $pub->lms_resources_count }} {{ Str::plural('rec', $pub->lms_resources_count) }}
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium {{ $pub->lms_links_count > 0 ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-gray-100 dark:bg-slate-700/40 text-gray-500 dark:text-slate-500 border border-gray-200 dark:border-slate-600/40' }}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                            {{ $pub->lms_links_count }} {{ Str::plural('link', $pub->lms_links_count) }}
+                        </span>
+                    </div>
+
+                    {{-- Published date --}}
+                    @if($pub->lmsPublication?->published_at)
+                        <div class="text-[10px] text-gray-400 dark:text-slate-600">
+                            Publicado {{ \Carbon\Carbon::parse($pub->lmsPublication->published_at)->format('d/m/Y H:i') }}
+                        </div>
+                    @elseif($pubStatus === 'SCHEDULED' && $pub->lmsPublication?->publish_at)
+                        <div class="text-[10px] text-amber-600/70 dark:text-amber-500/70">
+                            Programado {{ $pub->lmsPublication->publish_at->format('d/m/Y H:i') }}
+                            @if($pub->lmsPublication->created_at && $pub->lmsPublication->created_at->gt(now()->subHours(48)))
+                                <span class="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Acciones --}}
+                <div class="mt-2 px-4 py-2 bg-gray-50 dark:bg-slate-900/40 border-t border-gray-200 dark:border-slate-700/40 flex items-center gap-1.5 flex-wrap">
+                    {{-- Vista previa --}}
+                    <button wire:click="openPreview({{ $pub->id }})"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-gray-100 dark:bg-slate-700/40 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/60 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-600/40 transition-all"
+                            title="Vista previa">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Vista
+                    </button>
+
+                    {{-- Auditar --}}
+                    <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                       class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/20 transition-all"
+                       title="Auditar">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Auditar
+                    </a>
+
+                    <span class="flex-1"></span>
+
+                    {{-- Publicar ahora (para SCHEDULED) --}}
+                    @if($pubStatus === 'SCHEDULED')
+                        <button wire:click="confirmPublish({{ $pub->id }})"
+                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all"
+                                title="Publicar ahora">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                            Publicar
+                        </button>
+                    @endif
+
+                    {{-- Publicar / Programar --}}
+                    @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
+                        <button wire:click="publish({{ $pub->id }})"
+                                wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 transition-all"
+                                title="Publicar ahora">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        </button>
+                        <button wire:click="openSchedule({{ $pub->id }})"
+                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 transition-all"
+                                title="Programar publicación">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </button>
+                    @endif
+
+                    {{-- Archivar --}}
+                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                        <button wire:click="unpublish({{ $pub->id }})"
+                                wire:confirm="¿Archivar esta lección? Dejará de ser visible para los estudiantes."
+                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 border border-red-200 dark:border-red-500/20 transition-all"
+                                title="Archivar">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        </button>
+                    @endif
+
+                    {{-- Revertir a borrador --}}
+                    @if($pubStatus === 'PUBLISHED' || $pubStatus === 'SCHEDULED')
+                        <button wire:click="setDraft({{ $pub->id }})"
+                                wire:confirm="¿Revertir a borrador?"
+                                class="inline-flex items-center gap-1 p-1.5 rounded-lg text-[10px] font-medium text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10 hover:bg-orange-100 dark:hover:bg-orange-500/20 border border-orange-200 dark:border-orange-500/20 transition-all"
+                                title="Revertir a borrador">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        </button>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="col-span-full text-center py-16">
+                <svg class="w-12 h-12 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <p class="text-sm font-medium text-slate-400">No hay actividades disponibles</p>
+                <p class="text-xs text-gray-500 dark:text-slate-600 mt-1">Ajusta los filtros o crea una actividad primero.</p>
+            </div>
+        @endforelse
+    </div>
+
+    {{-- Paginación grid --}}
+    @if($publications->hasPages())
+        <div class="mt-4">
+            {{ $publications->links('vendor.pagination.custom-tailwind') }}
+        </div>
+    @endif
+
     @endif
 
     {{-- ============================================================ --}}

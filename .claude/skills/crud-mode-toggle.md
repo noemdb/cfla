@@ -1,9 +1,9 @@
 ---
-name: view-mode-toggle
+name: crud-mode-toggle
 description: Use when adding a Grid/Table (or List) view toggle that persists to localStorage and syncs across sibling Blade components rendered in the same page with Alpine.js
 ---
 
-# View Mode Toggle (Grid / Table)
+# CRUD Mode Toggle (Grid / Table)
 
 ## Overview
 
