@@ -5,6 +5,7 @@ namespace App\Livewire\Planning\AreaConocimiento;
 use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\CampoConocimiento;
 use App\Models\app\Academy\Asignatura;
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Peducativo;
 use App\Models\User;
@@ -43,6 +44,14 @@ class IndexComponent extends Component
     public $peducativos = [];
     public $usuarios = [];
     public $asignaturasList = [];        // for campo asignatura selection
+    public $gradosList = [];             // for wizard grado filter
+
+    // Wizard step
+    public $wizardStep = 1;
+    public $wizardFilterPestudio = '';
+    public $wizardFilterGrado = '';
+    public $wizardSearch = '';
+    public $selectedSubjects = [];
 
     // Search & filters
     public $search = '';
@@ -91,7 +100,15 @@ class IndexComponent extends Component
             ->pluck('username', 'id')
             ->toArray();
 
+        // Flat list for individual assignment (fallback)
         $this->asignaturasList = Asignatura::orderBy('code')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
+
+        // Grados activos for wizard filter
+        $this->gradosList = Grado::where('status_active', 'true')
+            ->orderBy('code_sm')
             ->get()
             ->pluck('full_name', 'id')
             ->toArray();
@@ -239,6 +256,7 @@ class IndexComponent extends Component
         $this->campoAreaId = $area->id;
         $this->campoAreaName = $area->name;
         $this->resetCampoForm();
+        $this->resetWizard();
         $this->modeCampo = true;
     }
 
@@ -248,6 +266,166 @@ class IndexComponent extends Component
         $this->campoAreaId = null;
         $this->campoAreaName = '';
         $this->resetCampoForm();
+        $this->resetWizard();
+    }
+
+    // ─── WIZARD 2-STEP (CampoConocimiento) ───────────────────────
+
+    public function resetWizard()
+    {
+        $this->wizardStep = 1;
+        $this->wizardFilterPestudio = '';
+        $this->wizardFilterGrado = '';
+        $this->wizardSearch = '';
+        $this->selectedSubjects = [];
+        // Restore full grados list
+        $this->gradosList = Grado::where('status_active', 'true')
+            ->orderBy('code_sm')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
+    }
+
+    /**
+     * When wizard pestudio changes, reload grados list filtered by that pestudio.
+     */
+    public function updatedWizardFilterPestudio($value)
+    {
+        $this->wizardFilterGrado = ''; // reset grado selection
+        $query = Grado::where('status_active', 'true');
+        if ($value) {
+            $query->where('pestudio_id', $value);
+        }
+        $this->gradosList = $query->orderBy('code_sm')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
+    }
+
+    public function nextStepWizard()
+    {
+        // No validation needed — filters are optional; just advance
+        $this->wizardStep = 2;
+        $this->selectedSubjects = [];
+    }
+
+    public function prevStepWizard()
+    {
+        $this->wizardStep = 1;
+        $this->wizardSearch = '';
+        $this->selectedSubjects = [];
+    }
+
+    /**
+     * Computed: available subjects (not yet assigned to this area),
+     * optionally filtered by grado (via pensum) and search text.
+     */
+    public function getAvailableSubjectsProperty()
+    {
+        if (! $this->campoAreaId) return collect();
+
+        // IDs of subjects already assigned to this area
+        $assignedIds = CampoConocimiento::where('area_conocimiento_id', $this->campoAreaId)
+            ->pluck('asignatura_id')
+            ->toArray();
+
+        $query = Asignatura::whereNotIn('id', $assignedIds);
+
+        // Filter by plan de estudio
+        if ($this->wizardFilterPestudio) {
+            $query->where('pestudio_id', $this->wizardFilterPestudio);
+        }
+
+        // Filter by grado via pensum relationship
+        if ($this->wizardFilterGrado) {
+            $query->whereHas('pensums', function ($q) {
+                $q->where('grado_id', $this->wizardFilterGrado);
+            });
+        }
+
+        // Search by name or code
+        if ($this->wizardSearch) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', "%{$this->wizardSearch}%")
+                  ->orWhere('code', 'like', "%{$this->wizardSearch}%");
+            });
+        }
+
+        return $query->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Toggle a subject in the multi-select array.
+     */
+    public function toggleSubject($id)
+    {
+        $id = (int) $id;
+        if (in_array($id, $this->selectedSubjects)) {
+            $this->selectedSubjects = array_values(array_diff($this->selectedSubjects, [$id]));
+        } else {
+            $this->selectedSubjects[] = $id;
+        }
+    }
+
+    /**
+     * Select all currently available subjects.
+     */
+    public function selectAllAvailable()
+    {
+        $this->selectedSubjects = $this->availableSubjects->pluck('id')->toArray();
+    }
+
+    /**
+     * Deselect all subjects.
+     */
+    public function deselectAll()
+    {
+        $this->selectedSubjects = [];
+    }
+
+    /**
+     * Batch-assign selected subjects as CampoConocimiento records.
+     */
+    public function assignSelectedSubjects()
+    {
+        if (empty($this->selectedSubjects)) {
+            $this->notification()->error(
+                title: 'Sin selección',
+                description: 'Selecciona al menos una asignatura para adscribir.'
+            );
+            return;
+        }
+
+        // Validate that all IDs exist and aren't already assigned
+        $assignedIds = CampoConocimiento::where('area_conocimiento_id', $this->campoAreaId)
+            ->pluck('asignatura_id')
+            ->toArray();
+
+        $newIds = array_diff($this->selectedSubjects, $assignedIds);
+        $count = 0;
+
+        foreach ($newIds as $asignaturaId) {
+            CampoConocimiento::create([
+                'area_conocimiento_id' => $this->campoAreaId,
+                'asignatura_id'        => $asignaturaId,
+            ]);
+            $count++;
+        }
+
+        if ($count > 0) {
+            $this->notification()->success(
+                title: 'Asignaturas Adscritas',
+                description: "{$count} asignatura(s) se adscribieron al área correctamente."
+            );
+        } else {
+            $this->notification()->info(
+                title: 'Sin cambios',
+                description: 'Las asignaturas seleccionadas ya estaban adscritas.'
+            );
+        }
+
+        $this->selectedSubjects = [];
     }
 
     public function resetCampoForm()
