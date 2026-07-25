@@ -207,9 +207,9 @@
                     .masonry-item-pla { break-inside: unset; margin-bottom: unset; }
                 }
             </style>
-            <div wire:key="tab-content-grid-{{ $lapso_id }}" class="masonry-grid-pla">
+            <div wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}" class="masonry-grid-pla">
                 @forelse($pevaluacions as $item)
-                    <div class="masonry-item-pla bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10">
+                    <div class="masonry-item-pla bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10 @if($item->activities && $item->activities->where('status', 0)->isNotEmpty()) border-t-4 border-t-amber-500 @endif">
                         <div class="p-4">
                             {{-- Header --}}
                             <div class="flex items-center justify-between mb-3">
@@ -319,7 +319,7 @@
         {{-- TABLE MODE (current view) --}}
         <div :class="mode === 'table' ? '' : '!hidden'">
             <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
-            <div wire:key="tab-content-{{ $lapso_id }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
+            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200 dark:border-white/5">
@@ -344,7 +344,7 @@
         {{-- Tab Content --}}
         <div class="space-y-6 p-2 sm:p-4 lg:p-6">
             @forelse($pevaluacions as $item)
-                <div class="bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10"
+                <div class="bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10 @if($item->activities && $item->activities->where('status', 0)->isNotEmpty()) border-t-4 border-t-amber-500 @endif"
                     wire:key="peva-{{ $item->id }}"
                     x-data="{ open: false, activeTab: 0 }">
 
