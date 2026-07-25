@@ -209,13 +209,18 @@
                 <div class="space-y-8">
                     @forelse($peducativoMainIndicators as $item)
                         <div>
-                            <div class="flex items-center gap-3 mb-2">
-                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                                    <span class="text-cyan-400 text-xs font-bold">{{ $item->peducativo?->code ?? '' }}</span>
+                            <div class="flex items-start gap-3 mb-2">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
+                                    @if($item->peducativo?->description)
+                                    <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">{{ $item->peducativo->description }}</p>
+                                    @endif
                                 </div>
-                                <h3 class="text-lg font-bold text-white">{{ $item->peducativo?->name ?? '' }}</h3>
-                                <span class="text-xs text-gray-500">[{{ $item->peducativo?->code ?? '' }}]</span>
-                                <span class="ml-auto text-[10px] text-gray-500">{{ $item->pestudios->count() }} plan(es)</span>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->grados_count }} grado(s)</span>
+                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pensums_count }} pensum(s)</span>
+                                    <span class="text-[10px] text-gray-500 whitespace-nowrap">{{ $item->pestudios->count() }} plan(es)</span>
+                                </div>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
                                 <div class="col-span-1 sm:col-span-2">
@@ -232,6 +237,14 @@
                                         label="Profesores con Carga"
                                         value="{{ $item->profesores_count }}"
                                         color="amber"
+                                    />
+                                </div>
+                                <div class="col-span-1 sm:col-span-2">
+                                    <x-indicator-box
+                                        icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>'
+                                        label="Lecciones Registradas"
+                                        value="{{ number_format($item->lessons_count) }}"
+                                        color="sky"
                                     />
                                 </div>
                             </div>

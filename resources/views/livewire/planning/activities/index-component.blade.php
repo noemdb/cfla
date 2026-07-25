@@ -30,7 +30,7 @@
 
     <!-- Filter Bar -->
     <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Plan Estudio</label>
                 <select wire:model.live="pestudio_id"
@@ -97,15 +97,26 @@
             </div>
 
             <div class="flex items-end">
-                <button wire:click="$refresh"
-                    class="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-500/10 hover:bg-emerald-200 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-lg border border-emerald-200 dark:border-emerald-500/20 transition-all duration-300 text-sm font-bold">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Filtrar
-                </button>
+                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
+                    <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
+                    <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
+                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Observaciones
+                    </span>
+                    <span wire:loading wire:target="filter_observations" class="w-3 h-3">
+                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </span>
+                </label>
             </div>
-        </div>
+
+            </div>
     </div>
 
     <!-- Global Indicator (solo cuando hay profesor seleccionado) -->
@@ -151,8 +162,164 @@
         </div>
     @endif
 
-    <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
-    <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
+    <!-- ===== VIEW MODE TOGGLE (Grid / Table) ===== -->
+    <div class="flex items-center gap-2 mb-4"
+         x-data="{ mode: localStorage.getItem('planning-activities-view-mode') || 'table' }"
+         x-init="$watch('mode', val => {
+             localStorage.setItem('planning-activities-view-mode', val);
+             window.dispatchEvent(new CustomEvent('planning-activities-view-mode-changed', { detail: { mode: val } }))
+         })">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
+        <button @click="mode = 'grid'"
+            :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+            </svg>
+            <span class="hidden sm:inline">Grid</span>
+        </button>
+        <button @click="mode = 'table'"
+            :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-white/5 hover:text-gray-700 dark:hover:text-gray-300'"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            <span class="hidden sm:inline">Tabla</span>
+        </button>
+    </div>
+
+    <!-- ===== CONTENT: View container ===== -->
+    <div x-cloak
+         x-data="{ mode: localStorage.getItem('planning-activities-view-mode') || 'table' }"
+         x-init="() => { if (!localStorage.getItem('planning-activities-view-mode')) localStorage.setItem('planning-activities-view-mode', 'table') }"
+         x-on:planning-activities-view-mode-changed.window="mode = $event.detail.mode">
+
+        {{-- GRID MODE --}}
+        <div :class="mode === 'grid' ? '' : '!hidden'">
+            <style>
+                .masonry-grid-pla { columns: 1; column-gap: 0.75rem; }
+                .masonry-item-pla { break-inside: avoid; margin-bottom: 0.75rem; }
+                @media (min-width: 640px)  { .masonry-grid-pla { columns: 2; } }
+                @media (min-width: 1024px) { .masonry-grid-pla { columns: 3; } }
+                @media (min-width: 1280px) { .masonry-grid-pla { columns: 4; } }
+                @supports (grid-template-rows: masonry) {
+                    .masonry-grid-pla { display: grid; gap: 0.75rem; columns: unset; grid-template-columns: repeat(var(--masonry-cols), 1fr); grid-template-rows: masonry; }
+                    .masonry-item-pla { break-inside: unset; margin-bottom: unset; }
+                }
+            </style>
+            <div wire:key="tab-content-grid-{{ $lapso_id }}" class="masonry-grid-pla">
+                @forelse($pevaluacions as $item)
+                    <div class="masonry-item-pla bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10">
+                        <div class="p-4">
+                            {{-- Header --}}
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                </div>
+                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-white/5 text-[10px] font-bold text-gray-500 dark:text-gray-400 rounded-md border border-gray-200 dark:border-white/5">{{ $item->pensum?->asignatura?->code ?? '' }}</span>
+                            </div>
+
+                            {{-- Asignatura --}}
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 leading-tight">{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}</h3>
+
+                            {{-- Metadata --}}
+                            <div class="space-y-1 mb-3">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                    {{ $item->seccion?->grado?->name ?? '' }} · Sección {{ $item->seccion?->name ?? '' }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    {{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}
+                                </p>
+                            </div>
+
+                            {{-- Badge --}}
+                            <div class="mb-3">
+                                @if($item->activities_count > 0)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-200 dark:border-emerald-500/20">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    {{ $item->activities_count }} {{ $item->activities_count === 1 ? 'Actividad' : 'Actividades' }}
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-md border border-red-200 dark:border-red-500/20">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        Sin actividades
+                                    </span>
+                                @endif
+                            </div>
+
+                            {{-- Observations (in card) --}}
+                            @if($item->observations)
+                                <div class="mb-3 p-2.5 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/10 rounded-lg">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[9px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-0.5">Observaciones</p>
+                                            <p class="text-xs text-gray-700 dark:text-gray-200 line-clamp-3">{{ $item->observations }}</p>
+                                        </div>
+                                        <button type="button"
+                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes($item->pensum->asignatura->name ?? '') }}»?' })"
+                                            class="shrink-0 inline-flex items-center justify-center p-1.5 text-[10px] font-bold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md border border-red-200 dark:border-red-500/20 transition-all"
+                                            title="Eliminar observaciones">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Actions --}}
+                            <div class="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-white/5">
+                                <button type="button" wire:click="createObservation({{ $item->id }})" stop
+                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/20 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                                    title="Observaciones del coordinador">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
+                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-sky-500/20 text-gray-500 dark:text-gray-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                </a>
+                                <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank" title="Plan Completo PDF"
+                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-purple-300 dark:hover:border-purple-500/20 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="masonry-item-pla bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-white/5 rounded-lg py-16 text-center col-span-full">
+                        <svg class="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-gray-500 dark:text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
+                        <p class="text-gray-400 dark:text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
+                    </div>
+                @endforelse
+            </div>
+            @if($pevaluacions->hasPages())
+                <div class="mt-6">
+                    {{ $pevaluacions->links('vendor.pagination.custom-tailwind') }}
+                </div>
+            @endif
+        </div>
+
+        {{-- TABLE MODE (current view) --}}
+        <div :class="mode === 'table' ? '' : '!hidden'">
+            <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
+            <div wire:key="tab-content-{{ $lapso_id }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200 dark:border-white/5">
@@ -217,32 +384,31 @@
                                 @endif
                             </div>
 
-                            <!-- Observation button -->
-                            <button type="button" wire:click="createObservation({{ $item->id }})" stop
-                                class="p-2 min-w-[44px] min-h-[44px] bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 rounded-lg border border-gray-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/20 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300"
-                                title="Observaciones del coordinador">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
-
-                            <!-- PDF links -->
-                            @if($item->activities_count > 0)
-                                <a href="{{ route('app.profesors.activities.format', $item->id) }}" target="_blank"
-                                    class="p-2 min-w-[44px] min-h-[44px] bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 rounded-lg border border-gray-200 dark:border-white/5 hover:border-purple-300 dark:hover:border-purple-500/20 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300"
-                                    title="Formato completo (9 columnas)">
+                            <!-- Button Group: Observación + PDFs -->
+                            <div class="inline-flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-white/5 divide-x divide-gray-200 dark:divide-white/5" role="group">
+                                <!-- Observation -->
+                                <button type="button" wire:click="createObservation({{ $item->id }})" stop
+                                    class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
+                                    title="Observaciones del coordinador">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <!-- PDF Resume -->
+                                <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
+                                    class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-500/10 text-gray-500 dark:text-gray-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
                                 </a>
-                                <a href="{{ route('app.profesors.activities.resume', $item->id) }}" target="_blank"
-                                    class="p-2 min-w-[44px] min-h-[44px] bg-gray-100 dark:bg-white/5 hover:bg-emerald-100 dark:hover:bg-emerald-500/10 rounded-lg border border-gray-200 dark:border-white/5 hover:border-emerald-300 dark:hover:border-emerald-500/20 text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all duration-300"
-                                    title="Resumen ejecutivo (6 columnas)">
+                                <!-- PDF Format -->
+                                <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank" title="Plan Completo PDF"
+                                    class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                 </a>
-                            @endif
+                            </div>
 
                             <!-- Toggle -->
                             <div class="min-w-[44px] min-h-[44px] w-8 h-8 rounded-lg bg-gray-100 dark:bg-white/5 flex items-center justify-center border border-gray-200 dark:border-white/5 transition-transform duration-300"
@@ -255,7 +421,7 @@
                     </div>
 
                     <!-- Expanded Activities with Tabs -->
-                    <div x-show="open" x-collapse x-cloak>
+                    <div :class="open ? '' : '!hidden'">
                         <div class="px-5 pb-5 pt-0 border-t border-gray-200 dark:border-white/5">
                             @if($item->activities_count > 0)
                                 {{-- Activity Tab Bar (border-b-2 style like profesor home) --}}
@@ -306,7 +472,7 @@
 
                                 {{-- Activity Tab Content --}}
                                 @foreach($item->activities as $i => $act)
-                                    <div x-show="activeTab === {{ $i }}" x-cloak x-transition:enter.duration.200ms class="mt-4">
+                                    <div :class="activeTab === {{ $i }} ? 'mt-4' : '!hidden'" class="transition-all duration-200">
                                         <div class="bg-gray-50 dark:bg-white/[0.03] p-4 rounded-lg border border-gray-200 dark:border-white/5">
                                             <div class="flex items-start justify-between gap-3">
                                                 <div class="flex-1 min-w-0">
@@ -417,8 +583,20 @@
                             <!-- Observations -->
                             @if($item->observations)
                                 <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/10 rounded-lg">
-                                    <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">Observaciones del Coordinador</p>
-                                    <p class="text-xs text-gray-700 dark:text-gray-200">{{ $item->observations }}</p>
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">Observaciones del Coordinador</p>
+                                            <p class="text-xs text-gray-700 dark:text-gray-200">{{ $item->observations }}</p>
+                                        </div>
+                                        <button type="button"
+                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes($item->pensum->asignatura->name ?? '') }}»?' })"
+                                            class="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md border border-red-200 dark:border-red-500/20 transition-all"
+                                            title="Eliminar observaciones">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -442,35 +620,150 @@
             @endif
         </div>
     </div>
+        </div>
+    </div>
 
     <!-- ===== MODAL: Observaciones del Coordinador ===== -->
-    <x-modal-card title="Observaciones del Coordinador" blur wire:model="modeObservation" max-width="lg">
-        <div class="space-y-4">
-            @if($pevaluacion)
-                <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
-                    <div class="text-xs text-gray-500 dark:text-gray-500 mb-1 font-bold uppercase tracking-wider">Plan de Evaluación</div>
-                    <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $pevaluacion->pensum?->asignatura?->name ?? '' }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {{ $pevaluacion->seccion?->grado?->name ?? '' }} - Sección {{ $pevaluacion->seccion?->name ?? '' }}
-                        · {{ $pevaluacion->profesor?->lastname ?? '' }} {{ $pevaluacion->profesor?->name ?? '' }}
-                        · {{ $pevaluacion->lapso?->name ?? '' }}
-                    </p>
+    <div x-show="modeObservation" x-cloak
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+        @keydown.escape.window="modeObservation = false">
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-gray-950/70 backdrop-blur-sm" @click="modeObservation = false"></div>
+
+        {{-- Panel --}}
+        <div x-show="modeObservation" x-cloak
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
+            class="relative w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
+
+            {{-- Top accent bar --}}
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Observaciones del Coordinador</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Supervisión pedagógica del plan de evaluación</p>
+                    </div>
                 </div>
-            @endif
-            <div>
-                <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Observaciones</label>
-                <textarea wire:model="observations" rows="5"
-                    class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all"
-                    placeholder="Escribe las observaciones del coordinador de evaluación..."></textarea>
+                <button type="button" @click="modeObservation = false"
+                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-all shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="px-6 py-5 space-y-4">
+                @if($pevaluacion)
+                <div class="bg-gray-50 dark:bg-white/[0.03] p-4 rounded-lg border border-gray-200 dark:border-white/5 space-y-3">
+                    {{-- Section label --}}
+                    <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-500 font-bold uppercase tracking-widest">
+                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Plan de Evaluación
+                    </div>
+                    {{-- Asignatura --}}
+                    <p class="text-sm text-gray-900 dark:text-white font-semibold">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</p>
+                    {{-- Metadata row --}}
+                    <div class="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            {{ $pevaluacion->seccion?->grado?->name ?? '—' }} · Sección {{ $pevaluacion->seccion?->name ?? '—' }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            {{ $pevaluacion->profesor?->lastname ?? '—' }} {{ $pevaluacion->profesor?->name ?? '—' }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ $pevaluacion->lapso?->name ?? '—' }}
+                        </span>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Textarea con contador --}}
+                <div x-data="{ obsCount: {{ strlen($observations ?? '') }} }">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Observaciones</label>
+                        <span class="text-[10px] tabular-nums text-gray-400" x-text="`${obsCount}/65535 caracteres`"></span>
+                    </div>
+                    <textarea wire:model="observations" rows="5" maxlength="65535"
+                        x-on:input="obsCount = $el.value.length"
+                        class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 @error('observations') border-red-300 dark:border-red-500/50 focus:ring-red-500/50 focus:border-red-500/50 @enderror"
+                        placeholder="Escribe las observaciones del coordinador de evaluación..."></textarea>
+                    @error('observations')
+                        <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5 font-medium">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5">
+                <div class="flex items-center gap-2">
+                    @if($pevaluacion && $pevaluacion->observations)
+                        <span class="inline-flex items-center gap-1 text-emerald-500 not-italic font-medium text-[10px]">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Tiene observaciones previas
+                        </span>
+                    @else
+                        <span class="text-[10px] text-gray-400 italic">Sin observaciones previas</span>
+                    @endif
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" @click="modeObservation = false"
+                        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg border border-gray-200 dark:border-white/5 transition-all">
+                        Cancelar
+                    </button>
+                    <button type="button" wire:click="saveObservation" wire:loading.attr="disabled"
+                        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-white bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 rounded-lg shadow-lg shadow-emerald-500/10 disabled:opacity-50 transition-all">
+                        <span wire:loading.remove wire:target="saveObservation">
+                            <span class="hidden sm:inline">Guardar </span>Observaciones
+                        </span>
+                        <span wire:loading wire:target="saveObservation" class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Guardando...
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
-        <x-slot name="footer">
-            <div class="flex justify-end gap-x-4">
-                <x-button flat label="Cancelar" x-on:click="modeObservation = false" />
-                <x-button primary label="Guardar Observaciones" wire:click="saveObservation" spinner="saveObservation" />
-            </div>
-        </x-slot>
-    </x-modal-card>
+    </div>
 
     <!-- ===== MODAL: Comentario del Jefe de Área ===== -->
     <x-modal-card title="Comentario del Jefe de Área" blur wire:model="modeComments" max-width="lg">
@@ -696,6 +989,16 @@
             </div>
         </x-slot>
     </x-modal-card>
+
+    <x-confirm-modal
+        name="delete-observation"
+        title="Eliminar observaciones"
+        message="Esta acción no se puede deshacer."
+        confirm-text="Sí, eliminar"
+        cancel-text="Cancelar"
+        type="danger"
+        action="deleteObservation"
+    />
 
     @script
     <script>

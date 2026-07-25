@@ -218,11 +218,30 @@ class IndexComponent extends Component
                 );
             }
 
+            $pestudioIds = $pestudios->pluck('id');
+
+            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+                ->whereIn('pensums.pestudio_id', $pestudioIds)
+                ->where('pevaluacions.lapso_id', $lapsoId)
+                ->whereNull('pevaluacions.deleted_at')
+                ->count(DB::raw('DISTINCT activities.id'));
+
             return (object) [
                 'peducativo' => $peducativo,
                 'pestudios' => $pestudios,
                 'activities_count' => $totalActivities,
                 'profesores_count' => $totalProfesores->unique('id')->count(),
+                'lessons_count' => $lessonsCount,
+                'grados_count' => DB::table('grados')
+                    ->whereIn('pestudio_id', $pestudioIds)
+                    ->whereNull('deleted_at')
+                    ->count(),
+                'pensums_count' => DB::table('pensums')
+                    ->whereIn('pestudio_id', $pestudioIds)
+                    ->whereNull('deleted_at')
+                    ->count(),
             ];
         });
 

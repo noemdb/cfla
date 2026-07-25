@@ -178,9 +178,9 @@ Route::prefix('app')->name('app.')->group(function () {
         // Módulo de Actividades de Planificación
         Route::prefix('activities')->name('activities.')->group(function () {
             Route::get('/', \App\Livewire\Planning\Activities\IndexComponent::class)->name('index');
-            // Rutas PDF (redirigen al módulo profesor)
-            Route::get('/format/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.format', $pevaluacion))->name('format');
-            Route::get('/resume/{pevaluacion}', fn($pevaluacion) => redirect()->route('app.profesors.activities.resume', $pevaluacion))->name('resume');
+            // Rutas PDF (controlador propio)
+            Route::get('/format/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'format'])->name('format');
+            Route::get('/resume/{pevaluacion}', [\App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'])->name('resume');
         });
 
         // Módulo de Planes de Estudio

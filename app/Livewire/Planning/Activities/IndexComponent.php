@@ -36,6 +36,7 @@ class IndexComponent extends Component
     // Filters
     public $pestudio_id, $grado_id, $seccion_id, $lapso_id, $profesor_id;
     public $status_activities, $search, $paginate = 10;
+    public $filter_observations = false;
 
     // Select lists
     public $list_pestudio, $list_grado, $list_seccion, $list_lapso;
@@ -87,6 +88,7 @@ class IndexComponent extends Component
             'lapso_id' => $this->lapso_id,
             'profesor_id' => $this->profesor_id,
             'status_activities' => $this->status_activities,
+            'filter_observations' => $this->filter_observations ? true : null,
         ], fn($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);
@@ -155,6 +157,10 @@ class IndexComponent extends Component
 
     public function updatedStatusActivities($value) { $this->resetPage(); }
 
+    public function updatedFilterObservations($value) { $this->resetPage(); }
+
+    public function updatedFilterHasActivities($value) { $this->resetPage(); }
+
     public function updatedPaginate($value) { $this->resetPage(); }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -168,8 +174,8 @@ class IndexComponent extends Component
             'seccion.grado',
             'profesor',
             'lapso',
-            'activities',
         ])
+        ->with('activities')
         ->withCount('activities')
         ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
         ->whereNull('pevaluacions.deleted_at');
@@ -195,6 +201,10 @@ class IndexComponent extends Component
             } elseif ($filters['status_activities'] === 'NO') {
                 $query->having('activities_count', '=', 0);
             }
+        }
+        if (!empty($filters['filter_observations'])) {
+            $query->whereNotNull('pevaluacions.observations')
+                  ->where('pevaluacions.observations', '!=', '');
         }
 
         $query->orderBy('created_at', 'desc');
@@ -243,6 +253,13 @@ class IndexComponent extends Component
 
     public function saveObservation()
     {
+        $this->validate([
+            'observations' => 'required|min:5',
+        ], [
+            'observations.required' => 'Las observaciones del coordinador son obligatorias.',
+            'observations.min' => 'Las observaciones deben tener al menos 5 caracteres.',
+        ]);
+
         $this->pevaluacion->observations = $this->observations;
         $this->pevaluacion->save();
         $this->pevaluacion = null;
@@ -253,6 +270,18 @@ class IndexComponent extends Component
         $this->notification()->success(
             title: 'Observación Guardada',
             description: 'Las observaciones del plan de evaluación se actualizaron correctamente.'
+        );
+    }
+
+    public function deleteObservation($id)
+    {
+        $pevaluacion = Pevaluacion::findOrFail($id);
+        $pevaluacion->observations = null;
+        $pevaluacion->save();
+
+        $this->notification()->success(
+            title: 'Observación Eliminada',
+            description: 'Las observaciones del plan de evaluación se eliminaron correctamente.'
         );
     }
 
