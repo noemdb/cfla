@@ -96,7 +96,7 @@
                 </select>
             </div>
 
-            <div class="flex items-end">
+            <div class="flex items-end gap-4">
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
                     <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
                     <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
@@ -109,6 +109,25 @@
                     </span>
                     <span wire:loading wire:target="filter_observations" class="w-3 h-3">
                         <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </span>
+                </label>
+
+                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none group">
+                    <input type="checkbox" wire:model.live="filter_revision" class="sr-only peer">
+                    <div class="relative w-10 h-6 rounded-full transition-all duration-500 peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-lg peer-checked:shadow-amber-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-md after:border after:border-gray-200 dark:after:border-white/10 peer-checked:after:shadow-amber-500/30 group-hover:after:scale-110 peer-checked:group-hover:after:scale-110"></div>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-amber-600 dark:peer-checked:text-amber-400 transition-all duration-300 peer-checked:drop-shadow-[0_1px_2px_rgba(217,119,6,0.15)]">
+                        <svg class="w-3.5 h-3.5 transition-transform duration-300 peer-checked:scale-110 peer-checked:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+                        </svg>
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 peer-checked:bg-amber-500 transition-all duration-300 peer-checked:shadow-[0_0_6px_rgba(217,119,6,0.5)]"></span>
+                        En revisión
+                    </span>
+                    <span wire:loading wire:target="filter_revision" class="w-3 h-3">
+                        <svg class="w-3 h-3 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
@@ -207,7 +226,7 @@
                     .masonry-item-pla { break-inside: unset; margin-bottom: unset; }
                 }
             </style>
-            <div wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}" class="masonry-grid-pla">
+            <div wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}" class="masonry-grid-pla">
                 @forelse($pevaluacions as $item)
                     <div class="masonry-item-pla bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10 @if($item->activities && $item->activities->where('status', 0)->isNotEmpty()) border-t-4 border-t-amber-500 @endif">
                         <div class="p-4">
@@ -319,7 +338,7 @@
         {{-- TABLE MODE (current view) --}}
         <div :class="mode === 'table' ? '' : '!hidden'">
             <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
-            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
+            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200 dark:border-white/5">

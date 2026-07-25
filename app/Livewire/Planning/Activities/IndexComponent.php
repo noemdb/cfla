@@ -37,6 +37,7 @@ class IndexComponent extends Component
     public $pestudio_id, $grado_id, $seccion_id, $lapso_id, $profesor_id;
     public $status_activities, $search, $paginate = 10;
     public $filter_observations = false;
+    public $filter_revision = false;
 
     // Select lists
     public $list_pestudio, $list_grado, $list_seccion, $list_lapso;
@@ -89,6 +90,7 @@ class IndexComponent extends Component
             'profesor_id' => $this->profesor_id,
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
+            'filter_revision' => $this->filter_revision ? true : null,
         ], fn($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);
@@ -159,7 +161,7 @@ class IndexComponent extends Component
 
     public function updatedFilterObservations($value) { $this->resetPage(); }
 
-    public function updatedFilterHasActivities($value) { $this->resetPage(); }
+    public function updatedFilterRevision($value) { $this->resetPage(); }
 
     public function updatedPaginate($value) { $this->resetPage(); }
 
@@ -205,6 +207,9 @@ class IndexComponent extends Component
         if (!empty($filters['filter_observations'])) {
             $query->whereNotNull('pevaluacions.observations')
                   ->where('pevaluacions.observations', '!=', '');
+        }
+        if (!empty($filters['filter_revision'])) {
+            $query->whereHas('activities', fn($q) => $q->where('status', 0));
         }
 
         $query->orderBy('created_at', 'desc');
