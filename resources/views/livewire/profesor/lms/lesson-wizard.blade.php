@@ -238,7 +238,7 @@
                     </svg>
                 </button>
                 <div>
-                    <h1 class="text-lg font-bold text-gray-900 dark:text-white">{{ $lessonTitle ?: 'Nueva Lección' }}</h1>
+                    <h1 class="text-lg font-bold text-gray-900 dark:text-white">{{ $lessonTitle ?: 'Lecciones' }}</h1>
                     <p class="text-xs text-gray-500 dark:text-slate-400">{{ $selectedActivity?->pevaluacion?->pensum?->asignatura?->name ?? '—' }} · {{ $selectedActivity?->pevaluacion?->pensum?->grado?->name ?? '—' }} Sec.{{ $selectedActivity?->pevaluacion?->seccion?->name ?? '—' }}</p>
                 </div>
 

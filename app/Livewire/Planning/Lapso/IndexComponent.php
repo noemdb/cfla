@@ -33,6 +33,7 @@ class IndexComponent extends Component
 
     // Search & filters
     public $search = '';
+    public $paginate = 15;
 
     // Confirm delete
     public $confirmDeleteId = null;
@@ -72,12 +73,17 @@ class IndexComponent extends Component
         }
 
         $lapsos = $query->orderBy('id')
-            ->paginate(15);
+            ->paginate($this->paginate);
 
         return view('livewire.planning.lapso.index-component', [
             'lapsos' => $lapsos,
         ]);
     }
+
+    // ─── PAGINATION & FILTERS ────────────────────────────────────
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 
     // ─── FORM ────────────────────────────────────────────────────
 

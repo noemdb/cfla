@@ -134,8 +134,7 @@
                     </span>
                 </label>
             </div>
-
-            </div>
+        </div>
     </div>
 
     <!-- Global Indicator (solo cuando hay profesor seleccionado) -->
@@ -213,130 +212,210 @@
          x-init="() => { if (!localStorage.getItem('planning-activities-view-mode')) localStorage.setItem('planning-activities-view-mode', 'table') }"
          x-on:planning-activities-view-mode-changed.window="mode = $event.detail.mode">
 
-        {{-- GRID MODE --}}
-        <div :class="mode === 'grid' ? '' : '!hidden'">
-            <style>
-                .masonry-grid-pla { columns: 1; column-gap: 0.75rem; }
-                .masonry-item-pla { break-inside: avoid; margin-bottom: 0.75rem; }
-                @media (min-width: 640px)  { .masonry-grid-pla { columns: 2; } }
-                @media (min-width: 1024px) { .masonry-grid-pla { columns: 3; } }
-                @media (min-width: 1280px) { .masonry-grid-pla { columns: 4; } }
-                @supports (grid-template-rows: masonry) {
-                    .masonry-grid-pla { display: grid; gap: 0.75rem; columns: unset; grid-template-columns: repeat(var(--masonry-cols), 1fr); grid-template-rows: masonry; }
-                    .masonry-item-pla { break-inside: unset; margin-bottom: unset; }
-                }
-            </style>
-            <div wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}" class="masonry-grid-pla">
-                @forelse($pevaluacions as $item)
-                    <div class="masonry-item-pla bg-white dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden transition-all duration-300 hover:border-emerald-300 dark:hover:border-emerald-500/10 @if($item->activities && $item->activities->where('status', 0)->isNotEmpty()) border-t-4 border-t-amber-500 @endif">
-                        <div class="p-4">
-                            {{-- Header --}}
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center shrink-0">
-                                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                    </svg>
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- BENTO GRID MODE (bento-grid-modile pattern)                  --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        <div x-show="mode === 'grid'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}">
+            <div class="bg-gray-900/60 border border-white/5 rounded-2xl p-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @forelse($pevaluacions as $item)
+                        <div class="rounded-2xl border border-white/5 bg-gray-900 hover:border-emerald-500/30 transition-all duration-200 flex flex-col overflow-hidden h-full {{ $item->activities && $item->activities->where('status', 0)->isNotEmpty() ? 'ring-1 ring-amber-500/20' : '' }}">
+
+                            {{-- Header: Asignatura + Code Badge --}}
+                            <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-white/5 gap-3">
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-sm font-bold text-white truncate line-clamp-2" title="{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}">
+                                        {{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}
+                                    </h3>
                                 </div>
-                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-white/5 text-[10px] font-bold text-gray-500 dark:text-gray-400 rounded-md border border-gray-200 dark:border-white/5">{{ $item->pensum?->asignatura?->code ?? '' }}</span>
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/12 text-purple-400 border border-purple-500/20 shrink-0">
+                                    {{ $item->pensum?->asignatura?->code ?? '' }}
+                                </span>
                             </div>
 
-                            {{-- Asignatura --}}
-                            <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-1 leading-tight">{{ $item->pensum?->asignatura?->name ?? 'Sin asignatura' }}</h3>
-
-                            {{-- Metadata --}}
-                            <div class="space-y-1 mb-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {{-- Body: Sección, Profesor, Actividades, Observaciones --}}
+                            <div class="px-4 py-3 space-y-2.5 flex-1">
+                                {{-- Grado · Sección --}}
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
-                                    {{ $item->seccion?->grado?->name ?? '' }} · Sección {{ $item->seccion?->name ?? '' }}
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <span class="text-gray-400 truncate">
+                                        {{ $item->seccion?->grado?->name ?? '' }}
+                                        <span class="text-gray-600">· Sección</span> {{ $item->seccion?->name ?? '' }}
+                                    </span>
+                                </div>
+
+                                {{-- Profesor --}}
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
-                                    {{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}
-                                </p>
+                                    <span class="text-gray-400 truncate" title="{{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}">
+                                        {{ $item->profesor?->lastname ?? '' }} {{ $item->profesor?->name ?? '' }}
+                                    </span>
+                                </div>
+
+                                {{-- Actividades count + Status --}}
+                                <div class="flex items-center gap-2">
+                                    @php $hasPending = $item->activities && $item->activities->where('status', 0)->isNotEmpty(); @endphp
+                                    @if($item->activities_count > 0)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-emerald-500/12 text-emerald-400 border border-emerald-500/20 rounded-md">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                            </svg>
+                                            {{ $item->activities_count }} {{ $item->activities_count === 1 ? 'Actividad' : 'Actividades' }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-red-500/12 text-red-400 border border-red-500/20 rounded-md">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            Sin actividades
+                                        </span>
+                                    @endif
+                                    @if($hasPending)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-amber-500/12 text-amber-400 border border-amber-500/20 rounded-md">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                            Revisión
+                                        </span>
+                                    @endif
+                                </div>
+
+                                {{-- Observations (inline en el card) --}}
+                                @if($item->observations)
+                                    <div class="flex items-start gap-2 text-[11px]">
+                                        <svg class="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                        </svg>
+                                        <span class="text-gray-500 line-clamp-2 leading-relaxed" title="{{ $item->observations }}">
+                                            {{ $item->observations }}
+                                        </span>
+                                    </div>
+                                @endif
+
+                                {{-- Lapso --}}
+                                <div class="flex items-center gap-2 text-[11px]">
+                                    <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="text-gray-500 font-mono text-[10px]">{{ $item->lapso?->name ?? '—' }}</span>
+                                </div>
                             </div>
 
-                            {{-- Badge --}}
-                            <div class="mb-3">
-                                @if($item->activities_count > 0)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-md border border-emerald-200 dark:border-emerald-500/20">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                    </svg>
-                                    {{ $item->activities_count }} {{ $item->activities_count === 1 ? 'Actividad' : 'Actividades' }}
-                                @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-md border border-red-200 dark:border-red-500/20">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                        Sin actividades
+                            {{-- Footer Stats: Observaciones count if exists --}}
+                            <div class="px-4 py-2.5 border-t border-white/5 bg-white/[0.03] flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span @class([
+                                        'inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold',
+                                        'bg-blue-500/12 text-blue-400' => $item->activities_count > 0,
+                                        'bg-gray-500/12 text-gray-500' => $item->activities_count === 0,
+                                    ])>
+                                        {{ $item->activities_count }}
+                                    </span>
+                                    <span class="text-[10px] text-gray-500 font-medium">actividades</span>
+                                </div>
+                                @if($item->observations)
+                                    <span class="text-[9px] text-blue-400/70 font-medium">
+                                        <svg class="w-3 h-3 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        Obs.
                                     </span>
                                 @endif
                             </div>
 
-                            {{-- Observations (in card) --}}
-                            @if($item->observations)
-                                <div class="mb-3 p-2.5 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/10 rounded-lg">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-[9px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-0.5">Observaciones</p>
-                                            <p class="text-xs text-gray-700 dark:text-gray-200 line-clamp-3">{{ $item->observations }}</p>
-                                        </div>
-                                        <button type="button"
-                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes($item->pensum->asignatura->name ?? '') }}»?' })"
-                                            class="shrink-0 inline-flex items-center justify-center p-1.5 text-[10px] font-bold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md border border-red-200 dark:border-red-500/20 transition-all"
-                                            title="Eliminar observaciones">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
+                            {{-- Actions: btnGroup (bento-grid-modile pattern) --}}
+                            <div class="px-4 pb-4 pt-2.5 border-t border-white/5 flex items-center gap-2"
+                                 x-data="{ actionsOpen: false }"
+                                 @click.away="actionsOpen = false">
+
+                                {{-- Primary: Observation (siempre visible) --}}
+                                <button type="button" wire:click="createObservation({{ $item->id }})"
+                                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold bg-cyan-500/12 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Observación
+                                </button>
+
+                                {{-- Desktop group (sm+) --}}
+                                <div class="hidden sm:flex items-center gap-2">
+                                    <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank"
+                                        class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-sky-500/12 text-sky-400 hover:bg-sky-500/20 border border-sky-500/20 transition-all duration-200"
+                                        title="Resumen PDF">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank"
+                                        class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-purple-500/12 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200"
+                                        title="Plan Completo PDF">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+
+                                {{-- Mobile dropdown (<sm) --}}
+                                <div class="relative sm:hidden">
+                                    <button @click="actionsOpen = !actionsOpen"
+                                        class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                        title="Más acciones">
+                                        <svg class="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                            <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
+                                            <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                        </svg>
+                                    </button>
+                                    <div x-show="actionsOpen"
+                                         x-transition:enter="transition ease-out duration-100"
+                                         x-transition:enter-start="opacity-0 scale-95"
+                                         x-transition:enter-end="opacity-100 scale-100"
+                                         x-transition:leave="transition ease-in duration-75"
+                                         x-transition:leave-start="opacity-100 scale-100"
+                                         x-transition:leave-end="opacity-0 scale-95"
+                                         class="absolute right-0 z-50 mt-1 min-w-[180px] bg-gray-800 border border-white/10 rounded-lg shadow-xl py-1"
+                                         @click="actionsOpen = false">
+                                        <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank"
+                                            class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                            <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                            Resumen PDF
+                                        </a>
+                                        <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank"
+                                            class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                            <svg class="w-4 h-4 shrink-0 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            Plan Completo PDF
+                                        </a>
                                     </div>
                                 </div>
-                            @endif
-
-                            {{-- Actions --}}
-                            <div class="flex items-center gap-2 pt-3 border-t border-gray-200 dark:border-white/5">
-                                <button type="button" wire:click="createObservation({{ $item->id }})" stop
-                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/20 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
-                                    title="Observaciones del coordinador">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
-                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-sky-500/20 text-gray-500 dark:text-gray-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                    </svg>
-                                </a>
-                                <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank" title="Plan Completo PDF"
-                                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 rounded-md border border-gray-200 dark:border-white/5 hover:border-purple-300 dark:hover:border-purple-500/20 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
-                    </div>
-                @empty
-                    <div class="masonry-item-pla bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-white/5 rounded-lg py-16 text-center col-span-full">
-                        <svg class="w-16 h-16 text-gray-300 dark:text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p class="text-gray-500 dark:text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
-                        <p class="text-gray-400 dark:text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
-                    </div>
-                @endforelse
-            </div>
-            @if($pevaluacions->hasPages())
-                <div class="mt-6">
-                    {{ $pevaluacions->links('vendor.pagination.custom-tailwind') }}
+                    @empty
+                        <div class="col-span-full py-16 text-center">
+                            <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
+                            <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
+                        </div>
+                    @endforelse
                 </div>
-            @endif
+
+                @if($pevaluacions->hasPages())
+                    <div class="mt-6">
+                        {{ $pevaluacions->links('vendor.pagination.custom-tailwind') }}
+                    </div>
+                @endif
+            </div>
         </div>
 
-        {{-- TABLE MODE (current view) --}}
-        <div :class="mode === 'table' ? '' : '!hidden'">
+        {{-- TABLE MODE (legacy — unchanged) --}}
+        <div x-show="mode === 'table'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100">
             <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
             <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
@@ -406,7 +485,7 @@
                             <!-- Button Group: Observación + PDFs -->
                             <div class="inline-flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-white/5 divide-x divide-gray-200 dark:divide-white/5" role="group">
                                 <!-- Observation -->
-                                <button type="button" wire:click="createObservation({{ $item->id }})" stop
+                                <button type="button" wire:click="createObservation({{ $item->id }})"
                                     class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
                                     title="Observaciones del coordinador">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,7 +522,7 @@
                     <div :class="open ? '' : '!hidden'">
                         <div class="px-5 pb-5 pt-0 border-t border-gray-200 dark:border-white/5">
                             @if($item->activities_count > 0)
-                                {{-- Activity Tab Bar (border-b-2 style like profesor home) --}}
+                                {{-- Activity Tab Bar --}}
                                 <div class="border-b border-gray-200 dark:border-white/5 mt-4">
                                     <nav class="flex overflow-x-auto [&::-webkit-scrollbar]:h-1" style="scrollbar-width: thin;">
                                         @foreach($item->activities as $i => $act)
@@ -894,7 +973,6 @@
                         @endif
                     </div>
 
-                    {{-- Teaching structured view --}}
                     @php $sections = $previewActivity->getTeachingSections(); @endphp
                     @if(!empty($sections))
                         <div x-show="showTeaching" x-cloak x-transition:enter.duration.200ms>
@@ -915,7 +993,6 @@
                         </div>
                     @endif
 
-                    {{-- Teaching raw view --}}
                     <div x-show="!showTeaching">
                         <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{{ $previewActivity->teaching ?? '—' }}</p>
                     </div>
@@ -935,7 +1012,6 @@
 
                 {{-- Grid: Achievements + ODS --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {{-- Achievements --}}
                     <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
                         <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1.5">Indicadores de Logro</div>
                         @if($previewActivity->achievements->isNotEmpty())
@@ -957,7 +1033,6 @@
                         @endif
                     </div>
 
-                    {{-- Observations / ODS --}}
                     <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-lg border border-gray-200 dark:border-white/5">
                         <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1.5">ODS / Sistematización</div>
                         <p class="text-sm text-gray-700 dark:text-gray-200">{{ $previewActivity->observations ?? '—' }}</p>
@@ -1021,7 +1096,6 @@
 
     @script
     <script>
-        // Fix for WireUI modal not closing properly
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('close-modal', () => {
                 // WireUI handles modal closing via wire:model

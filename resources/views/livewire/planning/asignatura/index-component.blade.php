@@ -443,7 +443,7 @@
     <x-preview-modal
         wire:model="previewMode"
         title="{{ $previewAsignatura->name ?? '' }}"
-        x-on:close="closePreview"
+        x-on:close="$wire.closePreview()"
     >
         @if($previewAsignatura)
         {{-- Badges en el header debajo del título --}}
