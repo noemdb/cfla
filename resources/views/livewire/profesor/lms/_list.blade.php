@@ -6,6 +6,15 @@
                 <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
             </div>
             <div class="flex items-center gap-3">
+                {{-- Botón: Todas las Lecciones (Modal XXL) --}}
+                <button wire:click="toggleAllLessonsModal"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
+                               bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-slate-600
+                               hover:bg-gray-50 dark:hover:bg-slate-600 hover:border-emerald-300 dark:hover:border-emerald-500/30">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <span class="hidden sm:inline">Todas las Lecciones</span>
+                </button>
+
                 {{-- View toggle: Grid / Lista --}}
                 <div class="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-0.5 flex">
                     <button wire:click="$set('viewMode', 'grid')"

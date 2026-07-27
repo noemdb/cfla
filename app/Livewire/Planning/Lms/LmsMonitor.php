@@ -497,7 +497,7 @@ class LmsMonitor extends Component
         return view('livewire.planning.lms.monitor', [
             'publications'   => $query->latest('updated_at')->paginate(20),
             'stats'          => $this->getStats(),
-            'profesores'     => Profesor::with('user')->whereHas('pevaluacions.activities')->get(),
+            'profesores'     => Profesor::with('user')->whereHas('pevaluacions.activities')->orderBy('lastname')->orderBy('name')->get(),
             'grados'         => Grado::whereHas('pensums.pevaluacions.activities')->get(),
             'secciones'      => $this->seccionesFiltradas,
             'asignaturas'    => Asignatura::whereHas('pensums.pevaluacions.activities')->get(),

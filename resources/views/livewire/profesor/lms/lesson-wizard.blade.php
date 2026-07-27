@@ -575,6 +575,241 @@
 
     @include("livewire.profesor.lms._help-modal")
 
+    {{-- ═══════════ MODAL XXL: TODAS LAS LECCIONES ═══════════ --}}
+    @if($showAllLessonsModal)
+    <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="all-lessons-modal">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="toggleAllLessonsModal"></div>
+        <div class="relative min-h-screen flex items-start justify-center p-4 pt-10">
+            <div class="relative w-full max-w-7xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden">
+
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Todas las Lecciones</h3>
+                            <p class="text-xs text-gray-500">Explora y filtra todas las lecciones registradas</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button wire:click="toggleAllLessonsModal"
+                                class="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Filtros --}}
+                <div class="px-6 py-4 border-b border-white/5 bg-gray-800/20">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                        {{-- Búsqueda --}}
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Buscar</label>
+                            <input type="text" wire:model.live.debounce.300ms="allLessonsSearch"
+                                   placeholder="Tema, descripción…"
+                                   class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:border-emerald-500 focus:outline-none"/>
+                        </div>
+                        {{-- P.Educativo --}}
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">P.Educativo</label>
+                            <select wire:model.live="allLessonsPeducativoId"
+                                    class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                                <option value="">Todos</option>
+                                @foreach($listAllPeducativos as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        {{-- Grado --}}
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Grado</label>
+                            <select wire:model.live="allLessonsGradoId"
+                                    class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                                <option value="">Todos</option>
+                                @foreach($listAllGrados as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        {{-- Sección --}}
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Sección</label>
+                            <select wire:model.live="allLessonsSeccionId"
+                                    class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none appearance-none">
+                                <option value="">Todos</option>
+                                @foreach($listAllSecciones as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        {{-- Fecha creación --}}
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Desde</label>
+                                <input type="date" wire:model.live="allLessonsDateFrom"
+                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none"/>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Hasta</label>
+                                <input type="date" wire:model.live="allLessonsDateTo"
+                                       class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-slate-200 focus:border-emerald-500 focus:outline-none"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tabla --}}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-800/60 border-b border-white/5">
+                                <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 cursor-pointer select-none hover:text-white transition-colors"
+                                    wire:click="sortByAllLessons('topic')">
+                                    <span class="inline-flex items-center gap-1">
+                                        Título
+                                        @if($allLessonsSortField === 'topic')
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $allLessonsSortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </th>
+                                <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">Asignatura / Sección</th>
+                                <th class="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 cursor-pointer select-none hover:text-white transition-colors"
+                                    wire:click="sortByAllLessons('created_at')">
+                                    <span class="inline-flex items-center gap-1">
+                                        Creado
+                                        @if($allLessonsSortField === 'created_at')
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ $allLessonsSortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/>
+                                            </svg>
+                                        @endif
+                                    </span>
+                                </th>
+                                <th class="text-center px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">Estado</th>
+                                <th class="text-right px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($allLessons as $item)
+                                @php
+                                    $pub = $item->lmsPublication;
+                                    $sections = $item->lmsSections ?? collect();
+                                    $hasLmsContent = $sections->isNotEmpty() || !is_null($pub);
+                                    $isPublished = $pub?->status === 'PUBLISHED';
+                                @endphp
+                                <tr wire:key="all-lessons-row-{{ $item->id }}"
+                                    class="border-b border-white/5 hover:bg-white/5 transition-colors duration-150 cursor-pointer {{ $isPublished ? 'bg-emerald-500/[0.04]' : '' }}"
+                                    wire:click="viewLessonFromModal({{ $item->id }})">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-7 h-7 rounded-lg {{ $hasLmsContent ? 'bg-emerald-500/10' : 'bg-gray-800' }} flex items-center justify-center shrink-0">
+                                                @if($hasLmsContent)
+                                                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                                @else
+                                                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-200 leading-snug">{{ $item->topic ?? 'Actividad sin título' }}</p>
+                                                @if($item->description)
+                                                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ $item->description }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="space-y-0.5">
+                                            @if($item->pevaluacion?->pensum?->asignatura?->name)
+                                                <p class="text-xs text-gray-300">{{ $item->pevaluacion->pensum->asignatura->name }}</p>
+                                            @endif
+                                            <p class="text-[11px] text-gray-500">
+                                                {{ $item->pevaluacion?->pensum?->grado?->name ?? '' }}
+                                                @if($item->pevaluacion?->seccion?->name)
+                                                    · Sec. {{ $item->pevaluacion->seccion->name }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-xs font-mono text-gray-500">
+                                            {{ $item->created_at->format('d/m/Y') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        @if($pub)
+                                            <span @class([
+                                                'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide',
+                                                'bg-emerald-500/12 text-emerald-400 border border-emerald-500/20' => $pub->status === 'PUBLISHED',
+                                                'bg-cyan-500/12 text-cyan-400 border border-cyan-500/20' => $pub->status === 'SCHEDULED',
+                                                'bg-amber-500/12 text-amber-400 border border-amber-500/20' => $pub->status === 'DRAFT' || !in_array($pub->status, ['PUBLISHED','SCHEDULED']),
+                                            ])>
+                                                {{ match($pub->status) {
+                                                    'PUBLISHED' => 'Publicado',
+                                                    'SCHEDULED' => 'Programado',
+                                                    default     => 'Borrador',
+                                                } }}
+                                            </span>
+                                        @else
+                                            <span class="text-[10px] text-gray-600 italic">N.PUB</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <button wire:click.stop="viewLessonFromModal({{ $item->id }})"
+                                                class="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-200">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            Abrir
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-16">
+                                        <svg class="w-12 h-12 text-slate-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        </svg>
+                                        <p class="text-sm font-medium text-slate-400">No se encontraron lecciones</p>
+                                        <p class="text-xs text-slate-600 mt-1">Ajusta los filtros o crea una actividad primero.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Paginación --}}
+                @if($allLessons && $allLessons->hasPages())
+                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/20">
+                        {{ $allLessons->links('vendor.livewire.custom-tailwind') }}
+                    </div>
+                @endif
+
+                {{-- Footer --}}
+                <div class="flex items-center justify-between px-6 py-2 border-t border-white/5 bg-gray-800/30">
+                    <p class="text-xs text-gray-600">
+                        @if($allLessons)
+                            {{ $allLessons->total() }} lección(es) encontrada(s)
+                        @endif
+                    </p>
+                    <button wire:click="toggleAllLessonsModal"
+                            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
         {{-- @endif --}}
 
 </div>

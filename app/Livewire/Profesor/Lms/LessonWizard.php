@@ -12,6 +12,7 @@ use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
 use App\Models\app\Academy\Lms\LmsHtmlEmbed;
+use App\Models\app\Academy\Peducativo;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
@@ -74,6 +75,25 @@ class LessonWizard extends Component
     public $seccionId = null;
 
     public string $search = '';
+
+    // ─── Modal: Todas las Lecciones ──────────────────────────
+    public bool $showAllLessonsModal = false;
+
+    public string $allLessonsSearch = '';
+
+    public $allLessonsPeducativoId = null;
+
+    public $allLessonsGradoId = null;
+
+    public $allLessonsSeccionId = null;
+
+    public string $allLessonsDateFrom = '';
+
+    public string $allLessonsDateTo = '';
+
+    public string $allLessonsSortField = 'created_at';
+
+    public string $allLessonsSortDirection = 'desc';
 
     public string $detailActivityId = '';
 
@@ -311,6 +331,41 @@ class LessonWizard extends Component
         $this->resetPage();
     }
 
+    // ─── Modal Todas las Lecciones: filtros ──────────────────
+
+    public function updatingAllLessonsSearch()
+    {
+        $this->resetPage('allLessonsPage');
+    }
+
+    public function updatingAllLessonsPeducativoId()
+    {
+        $this->resetPage('allLessonsPage');
+        $this->allLessonsGradoId = null;
+        $this->allLessonsSeccionId = null;
+    }
+
+    public function updatingAllLessonsGradoId()
+    {
+        $this->resetPage('allLessonsPage');
+        $this->allLessonsSeccionId = null;
+    }
+
+    public function updatingAllLessonsSeccionId()
+    {
+        $this->resetPage('allLessonsPage');
+    }
+
+    public function updatingAllLessonsDateFrom()
+    {
+        $this->resetPage('allLessonsPage');
+    }
+
+    public function updatingAllLessonsDateTo()
+    {
+        $this->resetPage('allLessonsPage');
+    }
+
     // ─── Detección de cambios sin guardar ────────────────────
     // Marca $saved = false cuando el usuario modifica datos desde el frontend
     public function updating($name, $value): void
@@ -352,6 +407,92 @@ class LessonWizard extends Component
     {
         $this->showDetailModal = false;
         $this->detailActivity = null;
+    }
+
+    // ─── Modal: Todas las Lecciones ──────────────────────────
+
+    public function toggleAllLessonsModal(): void
+    {
+        $this->showAllLessonsModal = !$this->showAllLessonsModal;
+
+        if ($this->showAllLessonsModal) {
+            $this->reset([
+                'allLessonsSearch', 'allLessonsPeducativoId',
+                'allLessonsGradoId', 'allLessonsSeccionId',
+                'allLessonsDateFrom', 'allLessonsDateTo',
+                'allLessonsSortField', 'allLessonsSortDirection',
+            ]);
+        }
+    }
+
+    public function getAllLessons()
+    {
+        $profesor = Profesor::where('user_id', auth()->id())->first();
+
+        $query = Activity::whereHas('pevaluacion', function ($q) use ($profesor) {
+            $q->where('profesor_id', $profesor?->id);
+        })->with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.pensum.grado',
+            'pevaluacion.seccion',
+            'pevaluacion.lapso',
+            'lmsPublication',
+            'lmsSections' => fn ($q) => $q->withCount('contents'),
+        ]);
+
+        if ($this->allLessonsSearch) {
+            $query->where(function ($q) {
+                $q->where('topic', 'like', '%'.$this->allLessonsSearch.'%')
+                    ->orWhere('thematic', 'like', '%'.$this->allLessonsSearch.'%')
+                    ->orWhere('description', 'like', '%'.$this->allLessonsSearch.'%');
+            });
+        }
+
+        if ($this->allLessonsDateFrom) {
+            $query->whereDate('created_at', '>=', $this->allLessonsDateFrom);
+        }
+
+        if ($this->allLessonsDateTo) {
+            $query->whereDate('created_at', '<=', $this->allLessonsDateTo);
+        }
+
+        if ($this->allLessonsPeducativoId) {
+            $query->whereHas('pevaluacion.pensum.pestudio', fn ($q) =>
+                $q->where('peducativo_id', $this->allLessonsPeducativoId)
+            );
+        }
+
+        if ($this->allLessonsGradoId) {
+            $query->whereHas('pevaluacion.pensum', fn ($q) =>
+                $q->where('grado_id', $this->allLessonsGradoId)
+            );
+        }
+
+        if ($this->allLessonsSeccionId) {
+            $query->whereHas('pevaluacion', fn ($q) =>
+                $q->where('seccion_id', $this->allLessonsSeccionId)
+            );
+        }
+
+        $query->orderBy($this->allLessonsSortField, $this->allLessonsSortDirection);
+
+        return $query->paginate(15, ['*'], 'allLessonsPage');
+    }
+
+    public function sortByAllLessons(string $field): void
+    {
+        if ($this->allLessonsSortField === $field) {
+            $this->allLessonsSortDirection = $this->allLessonsSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->allLessonsSortField = $field;
+            $this->allLessonsSortDirection = 'asc';
+        }
+    }
+
+    public function viewLessonFromModal(int $activityId): void
+    {
+        $this->showAllLessonsModal = false;
+        $this->startWizard($activityId);
     }
 
     // ─── Wizard: iniciar ───────────────────────────────────────
@@ -4733,8 +4874,34 @@ PROMPT;
             ? Seccion::where('grado_id', $this->gradoId)->pluck('name', 'id')
             : collect();
 
+        // ─── Modal Todas las Lecciones ─────────────────────────
+        $allLessons = null;
+        $listAllPeducativos = collect();
+        $listAllGrados = collect();
+        $listAllSecciones = collect();
+
+        if ($this->showAllLessonsModal) {
+            $allLessons = $this->getAllLessons();
+
+            $listAllPeducativos = Peducativo::where('status_active', 'true')
+                ->orderBy('name')
+                ->pluck('name', 'id');
+
+            if ($this->allLessonsPeducativoId) {
+                $listAllGrados = Grado::whereIn('pestudio_id',
+                    Pestudio::where('peducativo_id', $this->allLessonsPeducativoId)->select('id')
+                )->pluck('name', 'id');
+            }
+
+            if ($this->allLessonsGradoId) {
+                $listAllSecciones = Seccion::where('grado_id', $this->allLessonsGradoId)
+                    ->pluck('name', 'id');
+            }
+        }
+
         return view('livewire.profesor.lms.lesson-wizard', compact(
-            'activities', 'listLapso', 'listPestudio', 'listGrado', 'listSeccion'
+            'activities', 'listLapso', 'listPestudio', 'listGrado', 'listSeccion',
+            'allLessons', 'listAllPeducativos', 'listAllGrados', 'listAllSecciones'
         ));
     }
 

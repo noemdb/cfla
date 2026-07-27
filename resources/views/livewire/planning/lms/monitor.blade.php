@@ -64,7 +64,7 @@
                         class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
                     <option value="">Todos</option>
                     @foreach($profesores as $prof)
-                        <option value="{{ $prof->id }}">{{ $prof->user?->name ?? $prof->lastname ?? 'Profesor #'.$prof->id }}</option>
+                        <option value="{{ $prof->id }}">{{ trim($prof->lastname.' '.$prof->name) ?: 'Profesor #'.$prof->id }}</option>
                     @endforeach
                 </select>
             </div>
