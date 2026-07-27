@@ -80,225 +80,133 @@
         </div>
     </div>
 
-    <!-- Bento Grid -->
+    <!-- Bento Grid — Cards uniformes -->
     <div class="bg-gray-900/60 border border-white/5 rounded-2xl p-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @forelse($area_conocimientos as $area)
-                @php
-                    $mod = $loop->index % 5;
-                    $isHero  = $mod === 0;              // col-span-2 row-span-2
-                    $isWide  = $mod === 3 || $mod === 4; // col-span-2
-                    $isSmall = $mod === 1 || $mod === 2; // col-span-1
-                @endphp
+                <div class="rounded-2xl border border-white/5 bg-gray-900 hover:border-emerald-500/30 transition-all duration-200 group flex flex-col overflow-hidden min-h-[280px]">
 
-                <div @class([
-                    'rounded-2xl border transition-all duration-200 group flex flex-col overflow-hidden',
-                    'bg-gray-900 border-white/5 hover:border-emerald-500/30',
-                    'col-span-2 row-span-2' => $isHero,
-                    'col-span-2'             => $isWide,
-                    'col-span-1'             => $isSmall,
-                ])>
-
-                    @if($isHero)
-                        {{-- ── HERO 2x2 ── --}}
-                        <div class="flex items-start justify-between px-5 pt-4 pb-3 border-b border-white/5">
-                            <div class="min-w-0 flex-1">
-                                <h3 class="text-base font-bold text-white truncate">{{ $area->name }}</h3>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-400 border border-purple-500/20">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                        {{ $area->code_sm }}
-                                    </span>
-                                    @if($area->pestudio)
-                                        <span class="text-[10px] text-gray-500 truncate">{{ $area->pestudio->full_name }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <span @class([
-                                'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0',
-                                'bg-emerald-500/12 text-emerald-400' => $area->enable_academic_index === 'true',
-                                'bg-gray-500/12 text-gray-500' => $area->enable_academic_index !== 'true',
-                            ])>
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ $area->enable_academic_index === 'true' ? 'I. Académico' : '—' }}
-                            </span>
-                        </div>
-                        <div class="px-5 py-3 space-y-2.5 flex-1">
-                            <div class="flex items-center gap-2 text-xs">
-                                <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                <span class="text-gray-400 font-mono">{{ $area->code ?: '—' }}</span>
-                            </div>
-                            @if($area->description)
-                                <div class="flex items-start gap-2 text-xs">
-                                    <svg class="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                                    <span class="text-gray-400 line-clamp-3 leading-relaxed">{{ $area->description }}</span>
-                                </div>
-                            @endif
-                            <div class="flex items-center gap-2 text-xs">
-                                <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                <span class="text-gray-400">{{ $area->leader?->username ?? 'Sin jefe' }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-xs">
-                                <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
-                                <span class="text-gray-400">Orden {{ $area->order }}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between px-5 py-3 border-t border-white/5 bg-white/[0.03]">
-                            <div class="flex items-center gap-2">
-                                <span @class([
-                                    'inline-flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-bold',
-                                    'bg-blue-500/12 text-blue-400' => $area->campo_conocimientos_count > 0,
-                                    'bg-gray-500/12 text-gray-500' => $area->campo_conocimientos_count === 0,
-                                ])>
-                                    {{ $area->campo_conocimientos_count }}
+                    {{-- ── Header: Name + Code + Pestudio + Index ── --}}
+                    <div class="flex items-start justify-between px-4 pt-4 pb-3 border-b border-white/5 gap-3">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-sm font-bold text-white truncate" title="{{ $area->name }}">{{ $area->name }}</h3>
+                            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/12 text-purple-400 border border-purple-500/20">
+                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                    {{ $area->code_sm }}
                                 </span>
-                                <span class="text-[11px] text-gray-500 font-medium">asignaturas</span>
+                                @if($area->pestudio)
+                                    <span class="text-[9px] text-gray-500 truncate max-w-[120px]">{{ $area->pestudio->full_name }}</span>
+                                @endif
                             </div>
-                            @if($area->observations)
-                                <span class="text-[10px] text-gray-600 truncate max-w-[140px]" title="{{ $area->observations }}">{{ \Illuminate\Support\Str::limit($area->observations, 24) }}</span>
-                            @endif
                         </div>
-                        <div class="px-5 pb-4 pt-3 border-t border-white/5 flex items-center gap-2">
-                            <button type="button" wire:click="openCampoManager({{ $area->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/12 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/12 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                Asignaturas
-                            </button>
-                            <button type="button" wire:click="edit({{ $area->id }})"
-                                class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-xs font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-                            <button type="button" wire:click="confirmDelete({{ $area->id }})"
-                                class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-xs font-bold bg-red-500/12 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
+                        <span @class([
+                            'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0',
+                            'bg-emerald-500/12 text-emerald-400' => $area->enable_academic_index === 'true',
+                            'bg-gray-500/12 text-gray-500' => $area->enable_academic_index !== 'true',
+                        ])>
+                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ $area->enable_academic_index === 'true' ? 'I.Acad' : '—' }}
+                        </span>
+                    </div>
 
-                    @elseif($isWide)
-                        {{-- ── WIDE 2x1 ── --}}
-                        <div class="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                            <div class="min-w-0 flex-1">
-                                <h3 class="text-sm font-bold text-white truncate">{{ $area->name }}</h3>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/12 text-purple-400 border border-purple-500/20">
-                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                        {{ $area->code_sm }}
-                                    </span>
-                                    @if($area->pestudio)
-                                        <span class="text-[9px] text-gray-500 truncate">{{ $area->pestudio->code }}</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-1">
-                                    <span @class([
-                                        'inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold',
-                                        'bg-blue-500/12 text-blue-400' => $area->campo_conocimientos_count > 0,
-                                        'bg-gray-500/12 text-gray-500' => $area->campo_conocimientos_count === 0,
-                                    ])>{{ $area->campo_conocimientos_count }}</span>
-                                    <span class="text-[10px] text-gray-500">asig.</span>
-                                </div>
-                                <span @class([
-                                    'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0',
-                                    'bg-emerald-500/12 text-emerald-400' => $area->enable_academic_index === 'true',
-                                    'bg-gray-500/12 text-gray-500' => $area->enable_academic_index !== 'true',
-                                ])>{{ $area->enable_academic_index === 'true' ? 'I.Acad' : '—' }}</span>
-                            </div>
+                    {{-- ── Body: Code + Description + Leader + Order ── --}}
+                    <div class="px-4 py-3 space-y-2.5 flex-1">
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                            <span class="text-gray-400 font-mono">{{ $area->code ?: '—' }}</span>
                         </div>
-                        <div class="flex-1 flex items-center gap-4 px-5 py-2.5">
-                            <div class="flex items-center gap-1.5 text-[11px] text-gray-400">
-                                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                <span>{{ $area->code ?: '—' }}</span>
+                        @if($area->description)
+                            <div class="flex items-start gap-2 text-[11px]">
+                                <svg class="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                                <span class="text-gray-500 line-clamp-2 leading-relaxed">{{ $area->description }}</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[11px] text-gray-400">
-                                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
-                                <span>Orden {{ $area->order }}</span>
-                            </div>
-                            @if($area->leader)
-                                <div class="flex items-center gap-1.5 text-[11px] text-gray-500">
-                                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                    <span class="truncate max-w-[80px]">{{ $area->leader->username }}</span>
-                                </div>
-                            @endif
+                        @endif
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span class="text-gray-400">{{ $area->leader?->username ?? 'Sin jefe' }}</span>
                         </div>
-                        <div class="flex items-center gap-1.5 px-5 pb-3 pt-2 border-t border-white/5">
-                            <button type="button" wire:click="openCampoManager({{ $area->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[9px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/12 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/12 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
-                                Adscribir
-                            </button>
-                            <button type="button" wire:click="edit({{ $area->id }})"
-                                class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-[9px] font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-                            <button type="button" wire:click="confirmDelete({{ $area->id }})"
-                                class="w-7 h-7 inline-flex items-center justify-center rounded-lg text-[9px] font-bold bg-red-500/12 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
+                        <div class="flex items-center gap-2 text-[11px]">
+                            <svg class="w-3.5 h-3.5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
+                            <span class="text-gray-400">Orden {{ $area->order }}</span>
                         </div>
+                    </div>
 
-                    @else
-                        {{-- ── SMALL 1x1 ── --}}
-                        <div class="flex items-start justify-between px-4 pt-3 pb-2 border-b border-white/5">
-                            <div class="min-w-0 flex-1">
-                                <h3 class="text-sm font-bold text-white truncate" title="{{ $area->name }}">{{ $area->name }}</h3>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/12 text-purple-400 border border-purple-500/20">
-                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                        {{ $area->code_sm }}
-                                    </span>
-                                </div>
-                            </div>
+                    {{-- ── Footer: Subject count + Observations ── --}}
+                    <div class="flex items-center justify-between px-4 py-2.5 border-t border-white/5 bg-white/[0.03]">
+                        <div class="flex items-center gap-2">
                             <span @class([
-                                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0',
-                                'bg-emerald-500/12 text-emerald-400' => $area->enable_academic_index === 'true',
-                                'bg-gray-500/12 text-gray-500' => $area->enable_academic_index !== 'true',
+                                'inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold',
+                                'bg-blue-500/12 text-blue-400' => $area->campo_conocimientos_count > 0,
+                                'bg-gray-500/12 text-gray-500' => $area->campo_conocimientos_count === 0,
                             ])>
-                                {{ $area->enable_academic_index === 'true' ? 'I.A' : '—' }}
+                                {{ $area->campo_conocimientos_count }}
                             </span>
+                            <span class="text-[10px] text-gray-500 font-medium">asignaturas</span>
                         </div>
-                        <div class="px-4 py-2 space-y-2 flex-1">
-                            <div class="flex items-center gap-1.5 text-[10px]">
-                                <svg class="w-3 h-3 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                                <span class="text-gray-400 font-mono">{{ $area->code ?: '—' }}</span>
-                            </div>
-                            <div class="flex items-center gap-1.5 text-[10px]">
-                                <svg class="w-3 h-3 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9l5-5 5 5M7 15l5 5 5-5"/></svg>
-                                <span class="text-gray-400">Ord. {{ $area->order }}</span>
-                            </div>
-                            @if($area->description)
-                                <div class="flex items-start gap-1.5 text-[10px]">
-                                    <svg class="w-3 h-3 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                                    <span class="text-gray-500 line-clamp-2">{{ $area->description }}</span>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex items-center justify-between px-4 py-2 border-t border-white/5 bg-white/[0.02]">
-                            <div class="flex items-center gap-1">
-                                <span @class([
-                                    'inline-flex items-center justify-center w-5 h-5 rounded text-[9px] font-bold',
-                                    'bg-blue-500/12 text-blue-400' => $area->campo_conocimientos_count > 0,
-                                    'bg-gray-500/12 text-gray-500' => $area->campo_conocimientos_count === 0,
-                                ])>{{ $area->campo_conocimientos_count }}</span>
-                                <svg class="w-2.5 h-2.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                            </div>
-                            <div class="flex gap-1">
-                                <button type="button" wire:click="openCampoManager({{ $area->id }})"
-                                    class="p-1.5 rounded-lg transition-all duration-200 bg-blue-500/12 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20"
-                                    title="Adscribir">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                </button>
-                                <button type="button" wire:click="edit({{ $area->id }})"
-                                    class="p-1.5 rounded-lg bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                </button>
-                                <button type="button" wire:click="confirmDelete({{ $area->id }})"
-                                    class="p-1.5 rounded-lg bg-red-500/12 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    @endif
+                        @if($area->observations)
+                            <span class="text-[9px] text-gray-600 truncate max-w-[120px]" title="{{ $area->observations }}">{{ \Illuminate\Support\Str::limit($area->observations, 20) }}</span>
+                        @endif
+                    </div>
 
+                    {{-- ── Actions: btnGroup ── --}}
+                    <div class="px-4 pb-4 pt-2.5 border-t border-white/5 flex items-center gap-2"
+                         x-data="{ actionsOpen: false }"
+                         @click.away="actionsOpen = false">
+                        {{-- Primary: Asignaturas (siempre visible) --}}
+                        <button type="button" wire:click="openCampoManager({{ $area->id }})"
+                            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 {{ $area->campo_conocimientos_count > 0 ? 'bg-blue-500/12 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20' : 'bg-gray-500/12 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            Asignaturas
+                        </button>
+
+                        {{-- Desktop group (Editar + Eliminar) --}}
+                        <div class="hidden sm:flex items-center gap-2">
+                            <button type="button" wire:click="edit({{ $area->id }})"
+                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200"
+                                title="Editar">
+                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button type="button" wire:click="confirmDelete({{ $area->id }})"
+                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-red-500/12 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200"
+                                title="Eliminar">
+                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+
+                        {{-- Mobile dropdown "···" (2 botones secundarios) --}}
+                        <div class="relative sm:hidden">
+                            <button @click="actionsOpen = !actionsOpen"
+                                class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-700/30 hover:bg-gray-200 dark:hover:bg-slate-600/50 border border-gray-200 dark:border-slate-600/30 transition-all"
+                                title="Más acciones">
+                                <svg class="w-4 h-4 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4z"/>
+                                    <path d="M10 12a2 2 0 110-4 2 2 0 010 4z"/>
+                                    <path d="M10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                                </svg>
+                            </button>
+                            <div x-show="actionsOpen"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute right-0 z-50 mt-1 min-w-[160px] bg-gray-800 border border-white/10 rounded-lg shadow-xl py-1"
+                                 @click="actionsOpen = false">
+                                <button wire:click="edit({{ $area->id }})"
+                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                    <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Editar
+                                </button>
+                                <button wire:click="confirmDelete({{ $area->id }})"
+                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
+                                    <svg class="w-4 h-4 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @empty
                 <div class="col-span-full py-20 text-center">
