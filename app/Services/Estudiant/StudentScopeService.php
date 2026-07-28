@@ -1,0 +1,171 @@
+<?php
+
+namespace App\Services\Estudiant;
+
+use App\Models\User;
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Pensum;
+use App\Models\app\Learner\Estudiant;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+
+class StudentScopeService
+{
+    protected ?Estudiant $estudiant = null;
+    protected ?Collection $seccionIds = null;
+    protected ?Collection $gradoIds = null;
+
+    public function __construct(
+        protected User $user
+    ) {
+        $this->estudiant = Estudiant::where('user_id', $user->id)->first();
+    }
+
+    /**
+     * Obtener el estudiante asociado al user.
+     */
+    public function getEstudiant(): ?Estudiant
+    {
+        return $this->estudiant;
+    }
+
+    /**
+     * IDs de secciones del estudiante (vía inscripción activa).
+     * Retorna colección vacía si no hay inscripción o estudiante.
+     */
+    public function getSeccionIds(): Collection
+    {
+        if ($this->seccionIds !== null) {
+            return $this->seccionIds;
+        }
+
+        if (!$this->estudiant) {
+            return $this->seccionIds = collect();
+        }
+
+        $inscripcion = $this->estudiant->inscripcion;
+
+        if (!$inscripcion || !$inscripcion->seccion) {
+            return $this->seccionIds = collect();
+        }
+
+        return $this->seccionIds = collect([$inscripcion->seccion_id]);
+    }
+
+    /**
+     * IDs de grados del estudiante (vía sección de la inscripción).
+     * Retorna colección vacía si no hay inscripción activa.
+     */
+    public function getGradoIds(): Collection
+    {
+        if ($this->gradoIds !== null) {
+            return $this->gradoIds;
+        }
+
+        $seccionIds = $this->getSeccionIds();
+        if ($seccionIds->isEmpty()) {
+            return $this->gradoIds = collect();
+        }
+
+        $seccion = \App\Models\app\Academy\Seccion::find($seccionIds->first());
+
+        return $this->gradoIds = $seccion && $seccion->grado_id
+            ? collect([$seccion->grado_id])
+            : collect();
+    }
+
+    /**
+     * Query scope para Pevaluacions visibles al estudiante.
+     * Cuando no hay sección asignada, retorna query que no trae resultados.
+     */
+    public function scopePevaluacions(Builder $query): Builder
+    {
+        $seccionIds = $this->getSeccionIds();
+        if ($seccionIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('seccion_id', $seccionIds);
+    }
+
+    /**
+     * Query scope para Activities con publicación visible.
+     * Cuando no hay sección asignada, retorna query que no trae resultados.
+     */
+    public function scopeActivities(Builder $query): Builder
+    {
+        $seccionIds = $this->getSeccionIds();
+        if ($seccionIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+            ->whereHas('lmsPublication', fn($q) => $q->visibleNow());
+    }
+
+    /**
+     * Query scope para LmsActivityResource visibles.
+     * Cuando no hay sección asignada, retorna query que no trae resultados.
+     */
+    public function scopeResources(Builder $query): Builder
+    {
+        $seccionIds = $this->getSeccionIds();
+        if ($seccionIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->where('is_visible', true)
+            ->whereHas('activity.pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds));
+    }
+
+    /**
+     * IDs de pensums asociados al estudiante.
+     * Retorna colección vacía si no hay grado asignado.
+     */
+    public function getPensumIds(): Collection
+    {
+        $gradoIds = $this->getGradoIds();
+        if ($gradoIds->isEmpty()) {
+            return collect();
+        }
+
+        return Pensum::whereIn('grado_id', $gradoIds)->pluck('id');
+    }
+
+    /**
+     * Datos completos de inscripción del estudiante.
+     * Retorna null si no hay estudiante o inscripción.
+     */
+    public function getInscripcionData(): ?array
+    {
+        if (!$this->estudiant) {
+            return null;
+        }
+
+        $inscripcion = $this->estudiant->inscripcion;
+        if (!$inscripcion) {
+            return null;
+        }
+
+        $seccion = $inscripcion->seccion;
+        if (!$seccion) {
+            return null;
+        }
+
+        $grado = $seccion->grado;
+        $pestudio = $grado?->pestudio;
+
+        return [
+            'estudiant'   => $this->estudiant,
+            'inscripcion' => $inscripcion,
+            'seccion'     => $seccion,
+            'grado'       => $grado,
+            'pestudio'    => $pestudio,
+            'peducativo'  => $pestudio?->peducativo,
+        ];
+    }
+}
