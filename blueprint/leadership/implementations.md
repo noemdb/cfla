@@ -68,6 +68,8 @@ Un **Jefe de Área (Seguimiento)** es un usuario con capacidad de supervisar, co
 | `IndexComponent` base | Se modifica para agregar `$leadershipMode` | No se toca — subclase pura (ya lo decía ADR-004, pero el código lo contradecía) |
 | Autorización en escritura | Query retorna 0 filas silenciosamente | `assertCanAccessAsignatura()` lanza 403 explícito y testeable |
 | Índices de BD | Solo `users.is_leadership` | + índices en `area_conocimientos.leader_id`, `campo_conocimientos.*`, `pensums.asignatura_id`, `pevaluacions.pensum_id` |
+| Filtros del Dashboard | Profesor como 4º filtro estático sin cascada | Sección como 4º filtro, cascada real `peducativo → pestudio → grado → seccion` con `refreshFilteredPestudios()` / `refreshSeccionesOptions()` |
+| Botón Áreas + modal XXL | No existía | Botón "Áreas" junto a "Refrescar" que abre modal con árbol área → asignatura → pensum (datos eager-loaded via `campo_conocimientos.asignatura.pensums.grado/pestudio`) |
 
 ---
 
@@ -876,7 +878,7 @@ Route::prefix('leadership')
     ->name('leadership.')
     ->group(function () {
         // Dashboard con KPIs globales
-        Route::get('/dashboard', \App\Livewire\Planning\Leadership\Dashboard::class)
+        Route::get('/dashboard', \App\Livewire\Planning\Leadership\IndicatorDashboard::class)
             ->name('dashboard');
 
         // Activities (reuso IndexComponent scoped)
@@ -1073,6 +1075,136 @@ class Dashboard extends Component
         @endif
     </div>
 </div>
+```
+
+#### 5.1.b IndicatorDashboard — Tablero con indicadores y filtros en cascada
+
+> **Nota de implementación:** La ruta `/app/leadership/dashboard` utiliza el componente
+> `IndicatorDashboard` (no el `Dashboard` simple de 5.1), que incluye 3 tabs
+> (Indicadores Principales, Profesores, Actividades), gráficos ApexCharts, métricas
+> globales y un sistema de filtros anidados (cascading selects).
+
+**Filtros en cascada:**
+
+Los 4 selects del panel de filtros son dependientes entre sí:
+
+```
+peducativo ──► pestudio ──► grado ──► seccion
+```
+
+| Filtro | Nombre | Depende de | Método de refresco |
+|--------|--------|------------|-------------------|
+| `selectedPeducativoId` | P.Educativo | — (raíz) | — |
+| `selectedPestudioId` | P.Estudio | `selectedPeducativoId` | `refreshFilteredPestudios()` |
+| `selectedGradoId` | Grado | `selectedPestudioId` | `refreshGradosOptions()` |
+| `selectedSeccionId` | Sección | `selectedGradoId` | `refreshSeccionesOptions()` |
+
+**Nuevos métodos en `IndicatorDashboard`:**
+
+```php
+/**
+ * Filtra pestudios según el peducativo seleccionado (cascading).
+ * Si no hay peducativo seleccionado, muestra todos los pestudios scoped.
+ */
+private function refreshFilteredPestudios()
+{
+    $pestudios = $this->pestudios;
+    if ($this->selectedPeducativoId) {
+        $pestudios = $pestudios->where('peducativo_id', $this->selectedPeducativoId);
+    }
+    $this->filteredPestudios = $pestudios->values();
+}
+
+/**
+ * Secciones activas del grado seleccionado (cascading).
+ */
+private function refreshSeccionesOptions()
+{
+    if ($this->selectedGradoId) {
+        $this->seccionesOptions = Seccion::where('status_active', true)
+            ->where('grado_id', $this->selectedGradoId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'grado_id']);
+    } else {
+        $this->seccionesOptions = [];
+    }
+}
+```
+
+**Efecto en cascada al cambiar un filtro:**
+
+| Cambio | Resets | Refresca |
+|--------|--------|----------|
+| `selectedPeducativoId` | pestudio, grado, seccion | `filteredPestudios` → `gradosOptions` → `seccionesOptions` |
+| `selectedPestudioId` | grado, seccion | `gradosOptions` → `seccionesOptions` |
+| `selectedGradoId` | seccion | `seccionesOptions` |
+| `selectedSeccionId` | — | Recarga datos globales |
+
+**Métodos de consulta actualizados:** Todos los métodos que antes filtrabana por
+`pevaluacions.profesor_id` ahora filtran por `pevaluacions.seccion_id` usando
+`$this->selectedSeccionId`:
+
+- `applyLessonChartFilters()`
+- `loadChartActivitiesByDay()`
+- `loadChartScheduledByDay()`
+
+Además, `getScopedProfesores()`, `getScopedProfesoresIEEsPROM()` y
+`getScopedProfesorsWithKPIs()` ahora aceptan un parámetro opcional `?int $seccionId = null`
+que agrega `->where('pevaluacions.seccion_id', $seccionId)` a la query cuando se provee.
+
+**Modal de Áreas de Conocimiento con Pensums:**
+
+Junto al botón "Refrescar" se agregó un botón "Áreas" (indigo) que abre un modal XXL
+(`max-w-[90vw]`) mostrando todas las áreas de conocimiento asociadas al usuario logueado
+(vía `leader_id`) con su árbol completo:
+
+```
+Área de Conocimiento (P.Educativo: Primaria)
+  ├── Asignatura 1 (código)
+  │     ├── Pensum: 1er Grado · Plan 2024
+  │     └── Pensum: 2do Grado · Plan 2024
+  ├── Asignatura 2 (código)
+  │     └── Pensum: 3er Grado · Plan 2024
+```
+
+**Propiedades y métodos del modal:**
+
+| Elemento | Nombre | Tipo |
+|----------|--------|------|
+| Toggle | `$showAreasPensumsModal` | `bool` (wire:model del modal) |
+| Datos | `$areasPensumsData` | `array` (toArray de AreaConocimiento con relaciones eager-loaded) |
+| Carga | `loadAreasPensumsData()` | Query con `peducativo`, `campo_conocimientos.asignatura.pensums.grado`, `campo_conocimientos.asignatura.pensums.pestudio` |
+| Apertura | `openAreasPensumsModal()` | Refresca datos + abre modal |
+
+**Eager loading en `loadAreasPensumsData()`:**
+
+```php
+$query = AreaConocimiento::with([
+    'peducativo',
+    'campo_conocimientos.asignatura' => function ($q) { $q->orderBy('name'); },
+    'campo_conocimientos.asignatura.pensums.grado',
+    'campo_conocimientos.asignatura.pensums.pestudio',
+])->orderBy('name');
+```
+
+**Blade del filtro reemplazado:**
+
+```blade
+{{-- Antes: Profesor estático --}}
+<select wire:model.live="selectedProfesorId" ...>
+    <option value="">Profesor: Todos</option>
+    @foreach($profesoresOptions as $prof)
+        <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
+    @endforeach
+</select>
+
+{{-- Después: Sección en cascada --}}
+<select wire:model.live="selectedSeccionId" ...>
+    <option value="">Sección: Todas</option>
+    @foreach($seccionesOptions as $sec)
+        <option value="{{ $sec->id }}">{{ $sec->name }}</option>
+    @endforeach
+</select>
 ```
 
 #### 5.2 ActivityOverview — Reuso del IndexComponent existente
@@ -1448,12 +1580,14 @@ NUEVOS:
   app/Http/Middleware/IsLeadership.php
   app/Services/Planning/LeadershipService.php
   app/Observers/AreaConocimientoObserver.php                       [REVISIÓN v2]
-  app/Livewire/Planning/Leadership/Dashboard.php
+  app/Livewire/Planning/Leadership/Dashboard.php                   (simple KPI)
+  app/Livewire/Planning/Leadership/IndicatorDashboard.php          (dashboard real con tabs + filtros en cascada)
   app/Livewire/Planning/Leadership/ActivityOverview.php
   app/Livewire/Planning/Leadership/LessonMonitor.php
   app/Livewire/Planning/Leadership/ProfesorIndicators.php
   app/Livewire/Planning/Leadership/Concerns/HasLeadershipScope.php
-  resources/views/livewire/planning/leadership/dashboard.blade.php
+  resources/views/livewire/planning/leadership/dashboard.blade.php (vista simple)
+  resources/views/livewire/planning/leadership/indicator-dashboard.blade.php  (dashboard real con cascading filters)
   resources/views/livewire/planning/leadership/lesson-monitor.blade.php
   resources/views/livewire/planning/leadership/profesor-indicators.blade.php
   tests/Feature/Leadership/ (suite)
@@ -1481,18 +1615,19 @@ NO SE TOCA (a diferencia del draft original):
 | 3. LeadershipService (con caché + memoización) | 1 | 60 min |
 | 3.b Observer de invalidación [REVISIÓN v2] | 1 | 20 min |
 | 4. Routes + Navbar | 2 | 30 min |
-| 5a. Dashboard | 2 (component + blade) | 45 min |
+| 5a. Dashboard | 4 (Dashboard + IndicatorDashboard + 2 blade views) | 90 min |
 | 5b. ActivityOverview (subclase, sin tocar IndexComponent) | 1 | 30 min |
 | 5c. LessonMonitor | 2 (component + blade) | 60 min |
 | 5d. ProfesorIndicators | 2 (component + blade) | 60 min |
 | 6. Testing (incluye tests de caché y 403 explícito) | ~11 tests | 110 min |
-| **Total** | **~18 archivos** | **~8 horas** |
+| **Total** | **~19 archivos** | **~8.75 horas** |
 
-> El total sube de ~6-7h a ~8h respecto al draft original: la diferencia son
-> los 20+20+20 min de la migración de índices, el observer y los tests
-> adicionales de ADR-007/ADR-008. Es tiempo bien gastado — evita depurar en
-> producción un scope que se cae de performance con la primera institución
-> grande, o una brecha de autorización silenciosa que nadie testeó.
+> El total sube de ~8h a ~8.75h: los 45 min adicionales son el componente
+> `IndicatorDashboard` (dashboard real con 3 tabs, gráficos ApexCharts, filtros
+> en cascada `peducativo → pestudio → grado → seccion`, métodos
+> `refreshFilteredPestudios()`/`refreshSeccionesOptions()`, y la actualización de
+> todas las queries de scope para usar `pevaluacions.seccion_id` en vez de
+> `pevaluacions.profesor_id`).
 
 ---
 

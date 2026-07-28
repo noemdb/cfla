@@ -18,6 +18,13 @@
                 </svg>
                 <span class="hidden sm:inline">Refrescar</span>
             </button>
+            <button wire:click="openAreasPensumsModal"
+                class="inline-flex items-center gap-2 px-3 py-2 sm:px-5 sm:py-2.5 min-h-[44px] min-w-[44px] bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-lg border border-indigo-500/20 transition-all duration-300 text-sm font-bold">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <span class="hidden sm:inline">Áreas</span>
+            </button>
         </div>
     </div>
 
@@ -145,7 +152,7 @@
             <select wire:model.live="selectedPestudioId"
                 class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none appearance-none cursor-pointer w-full">
                 <option value="">P.Estudio: Todos</option>
-                @foreach($pestudios as $pest)
+                @foreach($filteredPestudios as $pest)
                     <option value="{{ $pest->id }}">{{ $pest->name }}</option>
                 @endforeach
             </select>
@@ -156,11 +163,11 @@
                     <option value="{{ $grd->id }}">{{ $grd->name }}</option>
                 @endforeach
             </select>
-            <select wire:model.live="selectedProfesorId"
+            <select wire:model.live="selectedSeccionId"
                 class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[44px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none appearance-none cursor-pointer w-full">
-                <option value="">Profesor: Todos</option>
-                @foreach($profesoresOptions as $prof)
-                    <option value="{{ $prof->id }}">{{ $prof->lastname }}, {{ $prof->name }}</option>
+                <option value="">Sección: Todas</option>
+                @foreach($seccionesOptions as $sec)
+                    <option value="{{ $sec->id }}">{{ $sec->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -475,6 +482,103 @@
         <p class="text-gray-600 text-sm">Contacta al administrador para asignarte como líder de áreas de conocimiento.</p>
     </div>
     @endif
+
+    {{-- ═══ Áreas de Conocimiento XXL Modal ═══ --}}
+    <x-modal-card title="Áreas de Conocimiento"
+        wire:model="showAreasPensumsModal"
+        width="max-w-[90vw]">
+        <div class="max-h-[80vh] overflow-y-auto space-y-4 px-1">
+
+            @forelse($areasPensumsData as $area)
+                <div class="border border-white/10 rounded-lg overflow-hidden">
+                    {{-- Area header --}}
+                    <div class="flex items-start justify-between gap-3 bg-white/5 px-4 py-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-white">{{ $area['name'] }}</h3>
+                                @if($area['code'])
+                                    <span class="text-[10px] font-mono text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">{{ $area['code'] }}</span>
+                                @endif
+                            </div>
+                            @if($area['description'])
+                                <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{{ $area['description'] }}</p>
+                            @endif
+                        </div>
+                        <div class="shrink-0 text-right">
+                            @if($area['peducativo'] ?? false)
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 bg-amber-500/10 px-2 py-1 rounded">
+                                    {{ $area['peducativo']['name'] ?? '' }}
+                                </span>
+                            @endif
+                            <span class="block text-[10px] text-gray-500 mt-0.5">
+                                {{ count($area['campo_conocimientos'] ?? []) }} asignatura(s)
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Asignaturas list --}}
+                    @if(!empty($area['campo_conocimientos']))
+                        <div class="divide-y divide-white/5">
+                            @foreach($area['campo_conocimientos'] as $cc)
+                                @php $asignatura = $cc['asignatura'] ?? null; @endphp
+                                @if($asignatura)
+                                    <div class="px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                            </svg>
+                                            <span class="text-sm font-medium text-gray-200">{{ $asignatura['name'] }}</span>
+                                            @if($asignatura['code'])
+                                                <span class="text-[10px] font-mono text-gray-500">({{ $asignatura['code'] }})</span>
+                                            @endif
+                                        </div>
+
+                                        {{-- Pensums --}}
+                                        @if(!empty($asignatura['pensums']))
+                                            <div class="ml-5 mt-1.5 flex flex-wrap gap-1.5">
+                                                @foreach($asignatura['pensums'] as $pensum)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-300 border border-white/5">
+                                                        <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                        </svg>
+                                                        {{ $pensum['grado']['name'] ?? '?' }}
+                                                        <span class="text-gray-600">·</span>
+                                                        {{ $pensum['pestudio']['name'] ?? '?' }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <p class="ml-5 text-[10px] text-gray-600 mt-1">Sin pensums asociados</p>
+                                        @endif
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="px-4 py-3 text-center">
+                            <p class="text-xs text-gray-500">Sin asignaturas asociadas</p>
+                        </div>
+                    @endif
+                </div>
+            @empty
+                <div class="py-16 text-center">
+                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
+                    <p class="text-gray-500 font-medium">No hay áreas de conocimiento asignadas</p>
+                    <p class="text-gray-600 text-sm mt-1">No tienes áreas de conocimiento bajo tu supervisión.</p>
+                </div>
+            @endforelse
+
+        </div>
+
+        <x-slot:footer>
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">{{ count($areasPensumsData) }} área(s) de conocimiento</span>
+                <x-button xs wire:click="$set('showAreasPensumsModal', false)" label="Cerrar" class="font-bold" />
+            </div>
+        </x-slot:footer>
+    </x-modal-card>
 </div>
 
 {{-- ═══ ApexCharts scripts ═══ --}}
@@ -491,196 +595,235 @@
     })();
 </script>
 
-@script
 <script>
-    // ── Activities per Day ──
-    let ldActivitiesChart = null;
-    async function initLdActivitiesChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-activities-per-day-chart');
-        if (!el) return;
-        if (ldActivitiesChart) ldActivitiesChart.destroy();
-        const rawData = await $wire.get('chartActivitiesByDay') ?? [];
-        ldActivitiesChart = new window.ApexCharts(el, {
-            series: [{ name: 'Actividades', data: rawData }],
-            chart: { type: 'area', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif' },
-            colors: ['#f59e0b'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 4, colors: ['#f59e0b'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
-            dataLabels: { enabled: false },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
-            xaxis: { type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true },
-            grid: { borderColor: '#37415140', strokeDashArray: 4 },
-            tooltip: { theme: 'dark', y: { formatter: v => v + ' actividad(es)' } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldActivitiesChart.render();
-    }
-    initLdActivitiesChart();
-    $wire.$watch('chartActivitiesByDay', () => initLdActivitiesChart());
-</script>
-@endscript
+(function() {
+    'use strict';
 
-@script
-<script>
-    // ── Lessons per Day ──
-    let ldLessonsChart = null;
-    async function initLdLessonsChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-lessons-per-day-chart');
-        if (!el) return;
-        if (ldLessonsChart) ldLessonsChart.destroy();
-        const rawData = await $wire.get('chartLessonsByDay') ?? [];
-        if (!rawData || !rawData.series) return;
-        ldLessonsChart = new window.ApexCharts(el, {
-            series: rawData.series,
-            chart: { type: 'line', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', dropShadow: { enabled: true, color: '#000', top: 10, left: 5, blur: 8, opacity: 0.3 } },
-            colors: ['#10b981', '#0ea5e9', '#f59e0b'],
-            dataLabels: { enabled: true, style: { colors: ['#e2e8f0', '#e2e8f0'], fontSize: '10px', fontWeight: 600 }, background: { enabled: true, foreColor: '#0f172a', padding: 4, borderRadius: 4, borderWidth: 0 }, dropShadow: { enabled: false } },
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 4, hover: { size: 6 } },
-            xaxis: { categories: rawData.categories, type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true, min: 0 },
-            grid: { borderColor: '#37415140', strokeDashArray: 4 },
-            tooltip: { theme: 'dark', shared: true, intersect: false },
-            legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#9ca3af' }, markers: { width: 10, height: 10, radius: 2 } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldLessonsChart.render();
-    }
-    initLdLessonsChart();
-    $wire.$watch('chartLessonsByDay', () => initLdLessonsChart());
-</script>
-@endscript
+    // Chart configuration for all 6 ApexCharts
+    var CHARTS = [
+        {
+            id: 'ld-activities-per-day-chart',
+            varName: 'ldActivitiesChart',
+            dataProp: 'chartActivitiesByDay',
+            build: function(rawData) {
+                return {
+                    series: [{ name: 'Actividades', data: rawData || [] }],
+                    chart: { type: 'area', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif' },
+                    colors: ['#f59e0b'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 4, colors: ['#f59e0b'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
+                    dataLabels: { enabled: false },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+                    xaxis: { type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true },
+                    grid: { borderColor: '#37415140', strokeDashArray: 4 },
+                    tooltip: { theme: 'dark', y: { formatter: function(v) { return v + ' actividad(es)'; } } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+        {
+            id: 'ld-lessons-per-day-chart',
+            varName: 'ldLessonsChart',
+            dataProp: 'chartLessonsByDay',
+            build: function(rawData) {
+                var d = rawData || {};
+                return {
+                    series: d.series || [],
+                    chart: { type: 'line', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', dropShadow: { enabled: true, color: '#000', top: 10, left: 5, blur: 8, opacity: 0.3 } },
+                    colors: ['#10b981', '#0ea5e9', '#f59e0b'],
+                    dataLabels: { enabled: true, style: { colors: ['#e2e8f0', '#e2e8f0'], fontSize: '10px', fontWeight: 600 }, background: { enabled: true, foreColor: '#0f172a', padding: 4, borderRadius: 4, borderWidth: 0 }, dropShadow: { enabled: false } },
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 4, hover: { size: 6 } },
+                    xaxis: { categories: d.categories || [], type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true, min: 0 },
+                    grid: { borderColor: '#37415140', strokeDashArray: 4 },
+                    tooltip: { theme: 'dark', shared: true, intersect: false },
+                    legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#9ca3af' }, markers: { width: 10, height: 10, radius: 2 } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+        {
+            id: 'ld-scheduled-per-day-chart',
+            varName: 'ldScheduledChart',
+            dataProp: 'chartScheduledByDay',
+            build: function(rawData) {
+                return {
+                    series: [{ name: 'Programadas', data: rawData || [] }],
+                    chart: { type: 'area', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif' },
+                    colors: ['#8b5cf6'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 4, colors: ['#8b5cf6'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
+                    dataLabels: { enabled: false },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+                    xaxis: { type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true },
+                    grid: { borderColor: '#37415140', strokeDashArray: 4 },
+                    tooltip: { theme: 'dark', y: { formatter: function(v) { return v + ' programación(es)'; } } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+        // Flow charts
+        {
+            id: 'ld-activities-flow-chart',
+            varName: 'ldActivitiesFlowChart',
+            dataProp: 'chartActivitiesFlow',
+            flow: true,
+            build: function(rawData) {
+                var c = window.ldFlowChartColors || {};
+                return {
+                    series: [{ name: 'Actividades', data: rawData || [] }],
+                    chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: c.chartBackground },
+                    colors: ['#f59e0b'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 3, colors: ['#f59e0b'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
+                    dataLabels: { enabled: false },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+                    xaxis: { type: 'category', labels: { style: c.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: c.labelStyle }, tickAmount: 4, forceNiceScale: true },
+                    grid: { borderColor: c.gridColor, strokeDashArray: 4 },
+                    tooltip: { theme: c.tooltip ? c.tooltip.theme : 'dark', y: { formatter: function(v) { return v + ' actividad(es)'; } } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+        {
+            id: 'ld-lessons-flow-chart',
+            varName: 'ldLessonsFlowChart',
+            dataProp: 'chartLessonsFlow',
+            flow: true,
+            build: function(rawData) {
+                var c = window.ldFlowChartColors || {};
+                return {
+                    series: [{ name: 'Lecciones', data: rawData || [] }],
+                    chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: c.chartBackground },
+                    colors: ['#0ea5e9'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 3, colors: ['#0ea5e9'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
+                    dataLabels: { enabled: false },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+                    xaxis: { type: 'category', labels: { style: c.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: c.labelStyle }, tickAmount: 4, forceNiceScale: true },
+                    grid: { borderColor: c.gridColor, strokeDashArray: 4 },
+                    tooltip: { theme: c.tooltip ? c.tooltip.theme : 'dark', y: { formatter: function(v) { return v + ' lección(es)'; } } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+        {
+            id: 'ld-diagnostics-flow-chart',
+            varName: 'ldDiagnosticsFlowChart',
+            dataProp: 'chartDiagnosticsFlow',
+            flow: true,
+            build: function(rawData) {
+                var c = window.ldFlowChartColors || {};
+                return {
+                    series: [{ name: 'Diagnósticos', data: rawData || [] }],
+                    chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: c.chartBackground },
+                    colors: ['#10b981'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    markers: { size: 3, colors: ['#10b981'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
+                    dataLabels: { enabled: false },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
+                    xaxis: { type: 'category', labels: { style: c.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
+                    yaxis: { labels: { style: c.labelStyle }, tickAmount: 4, forceNiceScale: true },
+                    grid: { borderColor: c.gridColor, strokeDashArray: 4 },
+                    tooltip: { theme: c.tooltip ? c.tooltip.theme : 'dark', y: { formatter: function(v) { return v + ' diagnóstico(s)'; } } },
+                    noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
+                };
+            },
+        },
+    ];
 
-@script
-<script>
-    // ── Scheduled per Day ──
-    let ldScheduledChart = null;
-    async function initLdScheduledChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-scheduled-per-day-chart');
-        if (!el) return;
-        if (ldScheduledChart) ldScheduledChart.destroy();
-        const rawData = await $wire.get('chartScheduledByDay') ?? [];
-        ldScheduledChart = new window.ApexCharts(el, {
-            series: [{ name: 'Programadas', data: rawData }],
-            chart: { type: 'area', height: 300, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif' },
-            colors: ['#8b5cf6'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 4, colors: ['#8b5cf6'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
-            dataLabels: { enabled: false },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
-            xaxis: { type: 'category', labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 600 } }, tickAmount: 5, forceNiceScale: true },
-            grid: { borderColor: '#37415140', strokeDashArray: 4 },
-            tooltip: { theme: 'dark', y: { formatter: v => v + ' programación(es)' } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldScheduledChart.render();
-    }
-    initLdScheduledChart();
-    $wire.$watch('chartScheduledByDay', () => initLdScheduledChart());
-</script>
-@endscript
+    // Store chart instances
+    var instances = {};
 
-{{-- Registration flow charts --}}
-@script
-<script>
-    let ldActivitiesFlowChart = null;
-    async function initLdActivitiesFlowChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-activities-flow-chart');
-        if (!el) return;
-        if (ldActivitiesFlowChart) ldActivitiesFlowChart.destroy();
-        const rawData = await $wire.get('chartActivitiesFlow') ?? [];
-        ldActivitiesFlowChart = new window.ApexCharts(el, {
-            series: [{ name: 'Actividades', data: rawData }],
-            chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: window.ldFlowChartColors.chartBackground },
-            colors: ['#f59e0b'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 3, colors: ['#f59e0b'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
-            dataLabels: { enabled: false },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
-            xaxis: { type: 'category', labels: { style: window.ldFlowChartColors.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: window.ldFlowChartColors.labelStyle }, tickAmount: 4, forceNiceScale: true },
-            grid: { borderColor: window.ldFlowChartColors.gridColor, strokeDashArray: 4 },
-            tooltip: { theme: window.ldFlowChartColors.tooltip.theme, y: { formatter: v => v + ' actividad(es)' } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldActivitiesFlowChart.render();
+    function destroyChart(varName) {
+        if (instances[varName]) {
+            try { instances[varName].destroy(); } catch(e) {}
+            instances[varName] = null;
+        }
     }
-    initLdActivitiesFlowChart();
-    $wire.$watch('chartActivitiesFlow', () => initLdActivitiesFlowChart());
-    $wire.$watch('registrationRange', () => { setTimeout(() => initLdActivitiesFlowChart(), 100); });
-</script>
-@endscript
 
-@script
-<script>
-    let ldLessonsFlowChart = null;
-    async function initLdLessonsFlowChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-lessons-flow-chart');
-        if (!el) return;
-        if (ldLessonsFlowChart) ldLessonsFlowChart.destroy();
-        const rawData = await $wire.get('chartLessonsFlow') ?? [];
-        ldLessonsFlowChart = new window.ApexCharts(el, {
-            series: [{ name: 'Lecciones', data: rawData }],
-            chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: window.ldFlowChartColors.chartBackground },
-            colors: ['#0ea5e9'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 3, colors: ['#0ea5e9'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
-            dataLabels: { enabled: false },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
-            xaxis: { type: 'category', labels: { style: window.ldFlowChartColors.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: window.ldFlowChartColors.labelStyle }, tickAmount: 4, forceNiceScale: true },
-            grid: { borderColor: window.ldFlowChartColors.gridColor, strokeDashArray: 4 },
-            tooltip: { theme: window.ldFlowChartColors.tooltip.theme, y: { formatter: v => v + ' lección(es)' } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldLessonsFlowChart.render();
+    function loadApex() {
+        if (window.loadApexCharts) {
+            return window.loadApexCharts().then(function() { return true; });
+        }
+        return Promise.resolve(!!window.ApexCharts);
     }
-    initLdLessonsFlowChart();
-    $wire.$watch('chartLessonsFlow', () => initLdLessonsFlowChart());
-    $wire.$watch('registrationRange', () => { setTimeout(() => initLdLessonsFlowChart(), 100); });
-</script>
-@endscript
 
-@script
-<script>
-    let ldDiagnosticsFlowChart = null;
-    async function initLdDiagnosticsFlowChart() {
-        if (window.loadApexCharts) await window.loadApexCharts();
-        if (!window.ApexCharts) return;
-        const el = document.getElementById('ld-diagnostics-flow-chart');
-        if (!el) return;
-        if (ldDiagnosticsFlowChart) ldDiagnosticsFlowChart.destroy();
-        const rawData = await $wire.get('chartDiagnosticsFlow') ?? [];
-        ldDiagnosticsFlowChart = new window.ApexCharts(el, {
-            series: [{ name: 'Diagnósticos', data: rawData }],
-            chart: { type: 'area', height: 200, toolbar: { show: false }, zoom: { enabled: false }, fontFamily: 'Inter, system-ui, sans-serif', background: window.ldFlowChartColors.chartBackground },
-            colors: ['#10b981'],
-            stroke: { curve: 'smooth', width: 2 },
-            markers: { size: 3, colors: ['#10b981'], strokeColors: '#fff', strokeWidth: 2, hover: { size: 5 } },
-            dataLabels: { enabled: false },
-            fill: { type: 'gradient', gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] } },
-            xaxis: { type: 'category', labels: { style: window.ldFlowChartColors.labelStyle }, axisBorder: { show: false }, axisTicks: { show: false } },
-            yaxis: { labels: { style: window.ldFlowChartColors.labelStyle }, tickAmount: 4, forceNiceScale: true },
-            grid: { borderColor: window.ldFlowChartColors.gridColor, strokeDashArray: 4 },
-            tooltip: { theme: window.ldFlowChartColors.tooltip.theme, y: { formatter: v => v + ' diagnóstico(s)' } },
-            noData: { text: 'Sin datos para los filtros seleccionados', align: 'center', verticalAlign: 'middle', style: { color: '#6b7280', fontSize: '13px' } },
-        });
-        ldDiagnosticsFlowChart.render();
+    function initSingleChart($wire, cfg) {
+        var el = document.getElementById(cfg.id);
+        if (!el || !window.ApexCharts) return;
+        destroyChart(cfg.varName);
+
+        // In Livewire 3, $wire.property reads directly from the reactive data
+        var rawData = $wire[cfg.dataProp];
+        if (rawData === undefined) rawData = null;
+
+        try {
+            instances[cfg.varName] = new window.ApexCharts(el, cfg.build(rawData));
+            instances[cfg.varName].render();
+        } catch(e) {
+            console.warn('Chart ' + cfg.id + ' error:', e);
+        }
     }
-    initLdDiagnosticsFlowChart();
-    $wire.$watch('chartDiagnosticsFlow', () => initLdDiagnosticsFlowChart());
-    $wire.$watch('registrationRange', () => { setTimeout(() => initLdDiagnosticsFlowChart(), 100); });
+
+    function initAllCharts($wire) {
+        loadApex().then(function(loaded) {
+            if (!loaded) return;
+            for (var i = 0; i < CHARTS.length; i++) {
+                initSingleChart($wire, CHARTS[i]);
+            }
+
+            // Set up watches via $wire.$watch (public Livewire API)
+            for (var j = 0; j < CHARTS.length; j++) {
+                (function(cfg) {
+                    try {
+                        $wire.$watch(cfg.dataProp, function() {
+                            setTimeout(function() { initSingleChart($wire, cfg); }, 100);
+                        });
+                    } catch(e) {
+                        console.warn('$watch error for ' + cfg.id, e);
+                    }
+                })(CHARTS[j]);
+            }
+
+            // Extra watch on registrationRange for flow charts
+            try {
+                $wire.$watch('registrationRange', function() {
+                    setTimeout(function() {
+                        for (var k = 0; k < CHARTS.length; k++) {
+                            if (CHARTS[k].flow) initSingleChart($wire, CHARTS[k]);
+                        }
+                    }, 150);
+                });
+            } catch(e) {}
+        });
+    }
+
+    // Poll for Livewire component and $wire availability
+    function bootstrap() {
+        var el = document.querySelector('div.fade-in[wire\\:id]');
+        if (!el) { setTimeout(bootstrap, 100); return; }
+        var componentId = el.getAttribute('wire:id');
+        if (!componentId) { setTimeout(bootstrap, 100); return; }
+        if (typeof window.Livewire === 'undefined' || typeof window.Livewire.find !== 'function') {
+            setTimeout(bootstrap, 100);
+            return;
+        }
+        // Livewire.find(id) returns $wire directly (see livewire.esm.js:9229)
+        var $wire = window.Livewire.find(componentId);
+        if (!$wire) { setTimeout(bootstrap, 100); return; }
+        initAllCharts($wire);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrap);
+    } else {
+        bootstrap();
+    }
+})();
 </script>
-@endscript

@@ -8,6 +8,8 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Peducativo;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Seccion;
+use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Instrument\DiagMain;
@@ -26,15 +28,16 @@ class IndicatorDashboard extends Component
     // ─── Filters ─────────────────────────────────────────────────────
     public $selectedPeducativoId = null;
     public $selectedPestudioId = null;
-    public $selectedProfesorId = null;
     public $selectedGradoId = null;
+    public $selectedSeccionId = null;
 
     // Master data (scoped to leadership areas)
     public $pestudios;
+    public $filteredPestudios;
     public $peducativos;
     public $lapsos;
     public $lapsoActive;
-    public $profesoresOptions = [];
+    public $seccionesOptions = [];
     public $gradosOptions = [];
 
     // Tab 1: Main indicators per peducativo
@@ -66,6 +69,10 @@ class IndicatorDashboard extends Component
     public $chartActivitiesFlow = [];
     public $chartLessonsFlow = [];
     public $chartDiagnosticsFlow = [];
+
+    // ─── Areas/Pensums Modal ──────────────────────────────────────────
+    public $showAreasPensumsModal = false;
+    public $areasPensumsData = [];
 
     private LeadershipService $leadershipService;
 
@@ -114,17 +121,45 @@ class IndicatorDashboard extends Component
         $this->lapsoActive = Lapso::current();
         $this->selectedLapsoId = $this->lapsoActive?->id ?? $this->lapsos->first()?->id;
 
-        // Profesores scoped to leader's areas
-        $this->profesoresOptions = Profesor::where('status_active', 'true')
-            ->whereHas('pevaluacions.pensum', function ($q) {
-                $q->whereIn('asignatura_id', $this->asignaturaIds);
-            })
-            ->orderBy('lastname')
-            ->orderBy('name')
-            ->get(['id', 'name', 'lastname']);
-
+        // Init cascading filter options
+        $this->refreshFilteredPestudios();
         $this->refreshGradosOptions();
+        $this->refreshSeccionesOptions();
+        $this->loadAreasPensumsData();
         $this->loadAllData();
+    }
+
+    /**
+     * Recarga datos del modal de áreas/pensums.
+     */
+    public function loadAreasPensumsData()
+    {
+        $query = AreaConocimiento::with([
+            'peducativo',
+            'campo_conocimientos.asignatura' => function ($q) {
+                $q->orderBy('name');
+            },
+            'campo_conocimientos.asignatura.pensums.grado',
+            'campo_conocimientos.asignatura.pensums.pestudio',
+        ])->orderBy('name');
+
+        if ($this->isAdmin) {
+            // Admin sees all areas that have planning-related asignaturas
+            $query->whereHas('campo_conocimientos.asignatura.pensums.pestudio', fn($q) => $q->where('planning_module', true));
+        } else {
+            $query->where('leader_id', Auth::id());
+        }
+
+        $this->areasPensumsData = $query->get()->toArray();
+    }
+
+    /**
+     * Abre el modal de áreas/pensums y refresca los datos.
+     */
+    public function openAreasPensumsModal()
+    {
+        $this->loadAreasPensumsData();
+        $this->showAreasPensumsModal = true;
     }
 
     // ─── Filter change handlers ──────────────────────────────────────
@@ -133,21 +168,25 @@ class IndicatorDashboard extends Component
     {
         $this->selectedPestudioId = null;
         $this->selectedGradoId = null;
-        $this->selectedProfesorId = null;
+        $this->selectedSeccionId = null;
+        $this->refreshFilteredPestudios();
         $this->refreshGradosOptions();
+        $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
     public function updatedSelectedPestudioId()
     {
         $this->selectedGradoId = null;
-        $this->selectedProfesorId = null;
+        $this->selectedSeccionId = null;
         $this->refreshGradosOptions();
+        $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
-    public function updatedSelectedProfesorId() { $this->loadAllData(); }
+    public function updatedSelectedSeccionId() { $this->loadAllData(); }
     public function updatedSelectedGradoId()
     {
-        $this->selectedProfesorId = null;
+        $this->selectedSeccionId = null;
+        $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
     public function switchTab($tab) { $this->activeTab = $tab; }
@@ -174,6 +213,34 @@ class IndicatorDashboard extends Component
         }
 
         $this->gradosOptions = $query->get(['id', 'name', 'pestudio_id']);
+    }
+
+    /**
+     * Filtra pestudios según el peducativo seleccionado (cascading).
+     * Si no hay peducativo seleccionado, muestra todos los pestudios scoped.
+     */
+    private function refreshFilteredPestudios()
+    {
+        $pestudios = $this->pestudios;
+        if ($this->selectedPeducativoId) {
+            $pestudios = $pestudios->where('peducativo_id', $this->selectedPeducativoId);
+        }
+        $this->filteredPestudios = $pestudios->values();
+    }
+
+    /**
+     * Secciones activas del grado seleccionado (cascading).
+     */
+    private function refreshSeccionesOptions()
+    {
+        if ($this->selectedGradoId) {
+            $this->seccionesOptions = Seccion::where('status_active', true)
+                ->where('grado_id', $this->selectedGradoId)
+                ->orderBy('name')
+                ->get(['id', 'name', 'grado_id']);
+        } else {
+            $this->seccionesOptions = [];
+        }
     }
 
     /** Scope a pevaluacion query by the leader's asignatura_ids */
@@ -292,12 +359,9 @@ class IndicatorDashboard extends Component
                 $profesorCount = 0;
 
                 foreach ($pestudios as $pestudio) {
-                    $profs = $this->getScopedProfesorsWithKPIs($pestudio->id, $tab2Lapso->id);
-                    if ($this->selectedProfesorId) {
-                        $profs = $profs->where('id', $this->selectedProfesorId);
-                    }
+                    $profs = $this->getScopedProfesorsWithKPIs($pestudio->id, $tab2Lapso->id, $this->selectedSeccionId);
                     $allProfesors = $allProfesors->merge($profs);
-                    $pestIeeProm = $this->getScopedProfesoresIEEsPROM($pestudio->id, $tab2Lapso->id);
+                    $pestIeeProm = $this->getScopedProfesoresIEEsPROM($pestudio->id, $tab2Lapso->id, $this->selectedSeccionId);
                     $totalBoletinsPROM += $pestIeeProm * $profs->count();
                     $profesorCount += $profs->count();
                 }
@@ -402,7 +466,7 @@ class IndicatorDashboard extends Component
         return $query->count();
     }
 
-    private function getScopedProfesores(int $pestudioId, ?int $lapsoId)
+    private function getScopedProfesores(int $pestudioId, ?int $lapsoId, ?int $seccionId = null)
     {
         $profesors = Profesor::select('profesors.*')
             ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
@@ -411,6 +475,7 @@ class IndicatorDashboard extends Component
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
             ->whereNull('pevaluacions.deleted_at')
             ->whereNull('pensums.deleted_at')
+            ->when($seccionId, fn($q) => $q->where('pevaluacions.seccion_id', $seccionId))
             ->distinct();
 
         if ($lapsoId) {
@@ -420,9 +485,9 @@ class IndicatorDashboard extends Component
         return $profesors->get();
     }
 
-    private function getScopedProfesoresIEEsPROM(int $pestudioId, ?int $lapsoId): float
+    private function getScopedProfesoresIEEsPROM(int $pestudioId, ?int $lapsoId, ?int $seccionId = null): float
     {
-        $profesors = $this->getScopedProfesores($pestudioId, $lapsoId);
+        $profesors = $this->getScopedProfesores($pestudioId, $lapsoId, $seccionId);
         if ($profesors->isEmpty()) return 0;
 
         $totalBoletins = 0;
@@ -432,7 +497,7 @@ class IndicatorDashboard extends Component
         return $totalBoletins / $profesors->count();
     }
 
-    private function getScopedProfesorsWithKPIs(int $pestudioId, ?int $lapsoId)
+    private function getScopedProfesorsWithKPIs(int $pestudioId, ?int $lapsoId, ?int $seccionId = null)
     {
         $profesors = Profesor::where('profesors.status_active', 'true')
             ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
@@ -441,11 +506,12 @@ class IndicatorDashboard extends Component
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
             ->whereNull('pevaluacions.deleted_at')
             ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+            ->when($seccionId, fn($q) => $q->where('pevaluacions.seccion_id', $seccionId))
             ->select('profesors.id', 'profesors.name', 'profesors.lastname', 'profesors.ci_profesor')
             ->distinct()
             ->get();
 
-        $ieePROM = $this->getScopedProfesoresIEEsPROM($pestudioId, $lapsoId);
+        $ieePROM = $this->getScopedProfesoresIEEsPROM($pestudioId, $lapsoId, $seccionId);
 
         return $profesors->map(function ($profesor) use ($lapsoId, $pestudioId, $ieePROM) {
             $fullProfesor = Profesor::find($profesor->id);
@@ -533,8 +599,8 @@ class IndicatorDashboard extends Component
             ->whereNull('pevaluacions.deleted_at')
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds);
 
-        if ($this->selectedProfesorId) {
-            $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        if ($this->selectedSeccionId) {
+            $query->where('pevaluacions.seccion_id', $this->selectedSeccionId);
         }
         if ($this->selectedPestudioId) {
             $query->where('pensums.pestudio_id', $this->selectedPestudioId);
@@ -566,8 +632,8 @@ class IndicatorDashboard extends Component
             ->groupBy('activities.finicial')
             ->orderBy('activities.finicial');
 
-        if ($this->selectedProfesorId) {
-            $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        if ($this->selectedSeccionId) {
+            $query->where('pevaluacions.seccion_id', $this->selectedSeccionId);
         }
         if ($this->selectedPestudioId) {
             $query->where('pensums.pestudio_id', $this->selectedPestudioId);
@@ -665,7 +731,7 @@ class IndicatorDashboard extends Component
             ->groupByRaw('DATE(lms_activity_publications.publish_at)')
             ->orderBy('pub_date');
 
-        if ($this->selectedProfesorId) $query->where('pevaluacions.profesor_id', $this->selectedProfesorId);
+        if ($this->selectedSeccionId) $query->where('pevaluacions.seccion_id', $this->selectedSeccionId);
         if ($this->selectedPestudioId) $query->where('pensums.pestudio_id', $this->selectedPestudioId);
         elseif ($this->selectedPeducativoId) {
             $pestudioIds = $this->pestudios->where('peducativo_id', $this->selectedPeducativoId)->pluck('id');
