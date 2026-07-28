@@ -3,7 +3,7 @@
 namespace Tests\Feature\Leadership;
 
 use App\Models\User;
-use App\Services\Planning\LeadershipService;
+use App\Services\Leadership\LeadershipService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 

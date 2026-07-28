@@ -58,6 +58,8 @@
     </div>
 
 </div>
+
+@include('profesors.help-activities')
 @endsection
 
 @section('script')

@@ -486,90 +486,328 @@
     {{-- ═══ Áreas de Conocimiento XXL Modal ═══ --}}
     <x-modal-card title="Áreas de Conocimiento"
         wire:model="showAreasPensumsModal"
-        width="max-w-[90vw]">
-        <div class="max-h-[80vh] overflow-y-auto space-y-4 px-1">
+        width="max-w-[90vw]"
+        blur="xl">
 
-            @forelse($areasPensumsData as $area)
-                <div class="border border-white/10 rounded-lg overflow-hidden">
-                    {{-- Area header --}}
-                    <div class="flex items-start justify-between gap-3 bg-white/5 px-4 py-3">
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-bold text-white">{{ $area['name'] }}</h3>
-                                @if($area['code'])
-                                    <span class="text-[10px] font-mono text-gray-500 bg-white/5 px-1.5 py-0.5 rounded">{{ $area['code'] }}</span>
-                                @endif
+        <div x-data="{
+            mode: localStorage.getItem('areas-pensums-view-mode') || 'list',
+            search: '',
+            filterPeducativo: '',
+            filterPestudio: '',
+            filterGrado: '',
+            areas: @js($areasPensumsData),
+            get peducativosList() {
+                const seen = new Set();
+                const list = [];
+                this.areas.forEach(a => {
+                    if (a.peducativo && !seen.has(a.peducativo.id)) {
+                        seen.add(a.peducativo.id);
+                        list.push(a.peducativo);
+                    }
+                });
+                return list;
+            },
+            get pestudiosList() {
+                const seen = new Set();
+                const list = [];
+                const scope = this.filterPeducativo
+                    ? this.areas.filter(a => a.peducativo?.id == this.filterPeducativo)
+                    : this.areas;
+                scope.forEach(a => {
+                    (a.campo_conocimientos || []).forEach(cc => {
+                        (cc.asignatura?.pensums || []).forEach(p => {
+                            if (p.pestudio && !seen.has(p.pestudio.id)) {
+                                seen.add(p.pestudio.id);
+                                list.push(p.pestudio);
+                            }
+                        });
+                    });
+                });
+                return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            },
+            get gradosList() {
+                const seen = new Set();
+                const list = [];
+                let scope = this.filterPeducativo
+                    ? this.areas.filter(a => a.peducativo?.id == this.filterPeducativo)
+                    : this.areas;
+                scope.forEach(a => {
+                    (a.campo_conocimientos || []).forEach(cc => {
+                        (cc.asignatura?.pensums || []).forEach(p => {
+                            if (this.filterPestudio && p.pestudio?.id != this.filterPestudio) return;
+                            if (p.grado && !seen.has(p.grado.id)) {
+                                seen.add(p.grado.id);
+                                list.push(p.grado);
+                            }
+                        });
+                    });
+                });
+                return list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            },
+            get filteredAreas() {
+                let result = this.areas;
+                if (this.filterPeducativo) {
+                    result = result.filter(a => a.peducativo?.id == this.filterPeducativo);
+                }
+                if (this.filterPestudio) {
+                    result = result.filter(a =>
+                        (a.campo_conocimientos || []).some(cc =>
+                            (cc.asignatura?.pensums || []).some(p => p.pestudio?.id == this.filterPestudio)
+                        )
+                    );
+                }
+                if (this.filterGrado) {
+                    result = result.filter(a =>
+                        (a.campo_conocimientos || []).some(cc =>
+                            (cc.asignatura?.pensums || []).some(p => p.grado?.id == this.filterGrado)
+                        )
+                    );
+                }
+                if (this.search.trim()) {
+                    const s = this.search.toLowerCase().trim();
+                    result = result.filter(a => {
+                        const areaMatch = (a.name || '').toLowerCase().includes(s)
+                                       || (a.code || '').toLowerCase().includes(s)
+                                       || (a.description || '').toLowerCase().includes(s);
+                        const asignaturaMatch = (a.campo_conocimientos || []).some(cc => {
+                            const asig = cc.asignatura || {};
+                            return (asig.name || '').toLowerCase().includes(s)
+                                || (asig.code || '').toLowerCase().includes(s);
+                        });
+                        return areaMatch || asignaturaMatch;
+                    });
+                }
+                return result;
+            }
+        }" x-init="$watch('mode', val => {
+            localStorage.setItem('areas-pensums-view-mode', val);
+            window.dispatchEvent(new CustomEvent('areas-pensums-view-mode-changed', { detail: { mode: val } }));
+        })">
+
+            {{-- Filter & Toggle Bar --}}
+            <div class="flex flex-wrap items-center gap-2 pb-3 mb-3 border-b border-white/10">
+
+                {{-- Grid/List Toggle --}}
+                <div class="flex items-center bg-gray-800/50 rounded-lg border border-white/5 p-0.5">
+                    <button @click="mode = 'list'"
+                        :class="mode === 'list' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-300'"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all duration-200 text-[10px] font-bold min-h-[32px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                        </svg>
+                        <span class="hidden sm:inline">Lista</span>
+                    </button>
+                    <button @click="mode = 'grid'"
+                        :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-300'"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all duration-200 text-[10px] font-bold min-h-[32px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Grid</span>
+                    </button>
+                </div>
+
+                {{-- PEducativo Filter (cascada raíz) --}}
+                <select x-model="filterPeducativo" @change="filterPestudio = ''; filterGrado = ''"
+                    class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[32px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none appearance-none cursor-pointer w-auto">
+                    <option value="">P.Educativo: Todos</option>
+                    <template x-for="ped in peducativosList" :key="ped.id">
+                        <option :value="ped.id" x-text="ped.name"></option>
+                    </template>
+                </select>
+
+                {{-- PEstudio Filter (depende de P.Educativo) --}}
+                <select x-model="filterPestudio" @change="filterGrado = ''"
+                    class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[32px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none appearance-none cursor-pointer w-auto">
+                    <option value="">P.Estudio: Todos</option>
+                    <template x-for="pest in pestudiosList" :key="pest.id">
+                        <option :value="pest.id" x-text="pest.name"></option>
+                    </template>
+                </select>
+
+                {{-- Grado Filter (depende de P.Estudio) --}}
+                <select x-model="filterGrado"
+                    class="bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 px-2 py-1.5 min-h-[32px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none appearance-none cursor-pointer w-auto">
+                    <option value="">Grado: Todos</option>
+                    <template x-for="grd in gradosList" :key="grd.id">
+                        <option :value="grd.id" x-text="grd.name"></option>
+                    </template>
+                </select>
+
+                {{-- Search Input --}}
+                <div class="relative flex-1 min-w-[160px]">
+                    <svg class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input x-model="search" type="text" placeholder="Buscar área o asignatura..."
+                        class="w-full bg-gray-800 text-gray-200 text-[11px] rounded-lg border border-white/5 pl-8 pr-2 py-1.5 min-h-[32px] focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 outline-none placeholder:text-gray-600">
+                </div>
+            </div>
+
+            {{-- ═══ GRID VIEW ═══ --}}
+            <div x-show="mode === 'grid'" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 class="max-h-[65vh] overflow-y-auto px-1"
+                 style="scrollbar-width: thin;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <template x-for="area in filteredAreas" :key="area.id">
+                        <div class="border border-white/10 rounded-lg bg-gray-900/40 hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+                            {{-- Area header --}}
+                            <div class="flex items-start justify-between gap-2 bg-white/5 px-3 py-2.5">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <h3 class="text-xs font-bold text-white truncate" x-text="area.name"></h3>
+                                        <template x-if="area.code">
+                                            <span class="text-[9px] font-mono text-gray-500 bg-white/5 px-1 py-0.5 rounded shrink-0" x-text="area.code"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <template x-if="area.peducativo">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider text-amber-400/70 bg-amber-500/10 px-1.5 py-0.5 rounded shrink-0" x-text="area.peducativo.name"></span>
+                                </template>
                             </div>
-                            @if($area['description'])
-                                <p class="text-xs text-gray-400 mt-0.5 line-clamp-2">{{ $area['description'] }}</p>
-                            @endif
-                        </div>
-                        <div class="shrink-0 text-right">
-                            @if($area['peducativo'] ?? false)
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 bg-amber-500/10 px-2 py-1 rounded">
-                                    {{ $area['peducativo']['name'] ?? '' }}
-                                </span>
-                            @endif
-                            <span class="block text-[10px] text-gray-500 mt-0.5">
-                                {{ count($area['campo_conocimientos'] ?? []) }} asignatura(s)
-                            </span>
-                        </div>
-                    </div>
 
-                    {{-- Asignaturas list --}}
-                    @if(!empty($area['campo_conocimientos']))
-                        <div class="divide-y divide-white/5">
-                            @foreach($area['campo_conocimientos'] as $cc)
-                                @php $asignatura = $cc['asignatura'] ?? null; @endphp
-                                @if($asignatura)
-                                    <div class="px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
+                            {{-- Asignaturas --}}
+                            <div class="px-3 py-2 space-y-1.5">
+                                <template x-if="area.campo_conocimientos && area.campo_conocimientos.length > 0">
+                                    <template x-for="cc in area.campo_conocimientos" :key="cc.id">
+                                        <div x-show="cc.asignatura && (!filterPestudio || (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio))" class="group">
+                                            <div class="flex items-center gap-1.5">
+                                                <svg class="w-3 h-3 text-indigo-400/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                                </svg>
+                                                <span class="text-[11px] font-medium text-gray-300 truncate" x-text="cc.asignatura.name"></span>
+                                            </div>
+                                            <template x-if="cc.asignatura.pensums && cc.asignatura.pensums.length > 0">
+                                                <div class="ml-4 mt-0.5 flex flex-wrap gap-1">
+                                                    <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
+                                                        <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                            class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-white/5 text-gray-400 border border-white/5">
+                                                            <svg class="w-2.5 h-2.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                            </svg>
+                                                            <span x-text="pensum.grado?.name || '?'"></span>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template x-if="!area.campo_conocimientos || area.campo_conocimientos.length === 0">
+                                    <p class="text-[10px] text-gray-600 text-center py-2">Sin asignaturas asociadas</p>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Grid empty state --}}
+                <div x-show="filteredAreas.length === 0" class="py-16 text-center">
+                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
+                    <p class="text-gray-500 font-medium">Sin resultados</p>
+                    <p class="text-gray-600 text-xs mt-1">Ningún área coincide con los filtros aplicados.</p>
+                </div>
+            </div>
+
+            {{-- ═══ LIST VIEW ═══ --}}
+            <div x-show="mode === 'list'" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 class="max-h-[65vh] overflow-y-auto space-y-4 px-1"
+                 style="scrollbar-width: thin;">
+                <template x-for="area in filteredAreas" :key="area.id">
+                    <div class="border border-white/10 rounded-lg overflow-hidden">
+                        {{-- Area header --}}
+                        <div class="flex items-start justify-between gap-3 bg-white/5 px-4 py-3">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm font-bold text-white" x-text="area.name"></h3>
+                                    <template x-if="area.code">
+                                        <span class="text-[10px] font-mono text-gray-500 bg-white/5 px-1.5 py-0.5 rounded" x-text="area.code"></span>
+                                    </template>
+                                </div>
+                                <template x-if="area.description">
+                                    <p class="text-xs text-gray-400 mt-0.5 line-clamp-2" x-text="area.description"></p>
+                                </template>
+                            </div>
+                            <div class="shrink-0 text-right">
+                                <template x-if="area.peducativo">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400/70 bg-amber-500/10 px-2 py-1 rounded" x-text="area.peducativo.name"></span>
+                                </template>
+                                <span class="block text-[10px] text-gray-500 mt-0.5" x-text="(area.campo_conocimientos || []).length + ' asignatura(s)'"></span>
+                            </div>
+                        </div>
+
+                        {{-- Asignaturas list --}}
+                        <template x-if="area.campo_conocimientos && area.campo_conocimientos.length > 0">
+                            <div class="divide-y divide-white/5">
+                                <template x-for="cc in area.campo_conocimientos" :key="cc.id">
+                                    <div x-show="cc.asignatura && (!filterPestudio || (cc.asignatura.pensums || []).some(p => p.pestudio?.id == filterPestudio))" class="px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
                                         <div class="flex items-center gap-2 mb-1">
                                             <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                             </svg>
-                                            <span class="text-sm font-medium text-gray-200">{{ $asignatura['name'] }}</span>
-                                            @if($asignatura['code'])
-                                                <span class="text-[10px] font-mono text-gray-500">({{ $asignatura['code'] }})</span>
-                                            @endif
+                                            <span class="text-sm font-medium text-gray-200" x-text="cc.asignatura.name"></span>
+                                            <template x-if="cc.asignatura.code">
+                                                <span class="text-[10px] font-mono text-gray-500" x-text="'(' + cc.asignatura.code + ')'"></span>
+                                            </template>
                                         </div>
 
                                         {{-- Pensums --}}
-                                        @if(!empty($asignatura['pensums']))
+                                        <template x-if="cc.asignatura.pensums && cc.asignatura.pensums.length > 0">
                                             <div class="ml-5 mt-1.5 flex flex-wrap gap-1.5">
-                                                @foreach($asignatura['pensums'] as $pensum)
-                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-300 border border-white/5">
+                                                <template x-for="pensum in cc.asignatura.pensums" :key="pensum.id">
+                                                    <span x-show="(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)"
+                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-300 border border-white/5">
                                                         <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                                         </svg>
-                                                        {{ $pensum['grado']['name'] ?? '?' }}
+                                                        <span x-text="pensum.grado?.name || '?'"></span>
                                                         <span class="text-gray-600">·</span>
-                                                        {{ $pensum['pestudio']['name'] ?? '?' }}
+                                                        <span x-text="pensum.pestudio?.name || '?'"></span>
                                                     </span>
-                                                @endforeach
+                                                </template>
                                             </div>
-                                        @else
+                                        </template>
+                                        <template x-if="!cc.asignatura.pensums || cc.asignatura.pensums.length === 0">
                                             <p class="ml-5 text-[10px] text-gray-600 mt-1">Sin pensums asociados</p>
-                                        @endif
+                                        </template>
                                     </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="px-4 py-3 text-center">
-                            <p class="text-xs text-gray-500">Sin asignaturas asociadas</p>
-                        </div>
-                    @endif
-                </div>
-            @empty
-                <div class="py-16 text-center">
+                                </template>
+                            </div>
+                        </template>
+                        <template x-if="!area.campo_conocimientos || area.campo_conocimientos.length === 0">
+                            <div class="px-4 py-3 text-center">
+                                <p class="text-xs text-gray-500">Sin asignaturas asociadas</p>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                {{-- List empty state --}}
+                <div x-show="filteredAreas.length === 0" class="py-16 text-center">
                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                     </svg>
-                    <p class="text-gray-500 font-medium">No hay áreas de conocimiento asignadas</p>
-                    <p class="text-gray-600 text-sm mt-1">No tienes áreas de conocimiento bajo tu supervisión.</p>
+                    <p class="text-gray-500 font-medium">Sin resultados</p>
+                    <p class="text-gray-600 text-xs mt-1">Ningún área coincide con los filtros aplicados.</p>
                 </div>
-            @endforelse
+            </div>
 
+            {{-- Footer bar inside x-data scope (shows dynamic filtered count) --}}
+            <div class="flex items-center justify-between px-1 pt-3 mt-3 border-t border-white/10">
+                <span class="text-xs text-gray-500">
+                    <span x-text="filteredAreas.length + ' área(s) de conocimiento'"></span>
+                    <span class="text-gray-600"> · </span>
+                    <span x-text="'vista ' + (mode === 'grid' ? 'rejilla' : 'lista')"></span>
+                </span>
+            </div>
         </div>
 
         <x-slot:footer>
@@ -579,6 +817,8 @@
             </div>
         </x-slot:footer>
     </x-modal-card>
+{{-- Help panel (slideover) inside root div --}}
+@include('leadership.help-dashboard')
 </div>
 
 {{-- ═══ ApexCharts scripts ═══ --}}

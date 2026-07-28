@@ -38,6 +38,7 @@ class IndexComponent extends Component
     public $status_activities, $search, $paginate = 10;
     public $filter_observations = false;
     public $filter_revision = false;
+    public $filter_status = '';
 
     // Select lists
     public $list_pestudio, $list_grado, $list_seccion, $list_lapso;
@@ -91,6 +92,7 @@ class IndexComponent extends Component
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
             'filter_revision' => $this->filter_revision ? true : null,
+            'filter_status' => $this->filter_status ?: null,
         ], fn($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);
@@ -163,6 +165,8 @@ class IndexComponent extends Component
 
     public function updatedFilterRevision($value) { $this->resetPage(); }
 
+    public function updatedFilterStatus($value) { $this->resetPage(); }
+
     public function updatedPaginate($value) { $this->resetPage(); }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -178,7 +182,11 @@ class IndexComponent extends Component
             'lapso',
         ])
         ->with('activities')
-        ->withCount('activities')
+        ->withCount([
+            'activities',
+            'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
+            'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
+        ])
         ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
         ->whereNull('pevaluacions.deleted_at');
 
@@ -210,6 +218,15 @@ class IndexComponent extends Component
         }
         if (!empty($filters['filter_revision'])) {
             $query->whereHas('activities', fn($q) => $q->where('status', 0));
+        }
+
+        if (!empty($filters['filter_status'])) {
+            if ($filters['filter_status'] === 'pending') {
+                $query->whereHas('activities', fn($q) => $q->where('status', 0));
+            } elseif ($filters['filter_status'] === 'approved') {
+                $query->has('activities')
+                      ->whereDoesntHave('activities', fn($q) => $q->where('status', 0));
+            }
         }
 
         $query->orderBy('created_at', 'desc');

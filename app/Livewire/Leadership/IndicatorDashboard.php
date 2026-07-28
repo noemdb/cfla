@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Planning\Leadership;
+namespace App\Livewire\Leadership;
 
 use App\Models\User;
 use App\Models\app\Academy\Lapso;
@@ -14,7 +14,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagSession;
-use App\Services\Planning\LeadershipService;
+use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -872,7 +872,7 @@ class IndicatorDashboard extends Component
 
     public function render()
     {
-        return view('livewire.planning.leadership.indicator-dashboard', [
+        return view('livewire.leadership.indicator-dashboard', [
             'asignaturaIds' => $this->asignaturaIds,
             'isAdmin' => $this->isAdmin,
         ]);

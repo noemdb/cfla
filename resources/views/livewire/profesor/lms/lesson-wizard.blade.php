@@ -812,6 +812,7 @@
 
         {{-- @endif --}}
 
+    @include('profesors.help-lesson-wizard')
 </div>
 
 {{-- ═══ Mermaid.js — bundled via Vite (resources/js/app.js) ═══ --}}

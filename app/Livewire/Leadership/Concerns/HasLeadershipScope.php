@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Livewire\Planning\Leadership\Concerns;
+namespace App\Livewire\Leadership\Concerns;
 
-use App\Services\Planning\LeadershipService;
+use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 

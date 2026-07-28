@@ -1176,6 +1176,46 @@ Junto al botón "Refrescar" se agregó un botón "Áreas" (indigo) que abre un m
 | Carga | `loadAreasPensumsData()` | Query con `peducativo`, `campo_conocimientos.asignatura.pensums.grado`, `campo_conocimientos.asignatura.pensums.pestudio` |
 | Apertura | `openAreasPensumsModal()` | Refresca datos + abre modal |
 
+**Mejoras UI del modal (implementado 2026-07-28):**
+
+1. **Backdrop blur** — El modal usa `blur="xl"` (clase `backdrop-blur-xl` de Tailwind) sobre el overlay del WireUI Modal. Cuando el modal está abierto, el fondo detrás aparece con un efecto de desenfoque suave.
+
+2. **CRUD Mode Toggle (Grid/Lista)** — Toggle persistente vía `localStorage` con clave `areas-pensums-view-mode` y evento `areas-pensums-view-mode-changed`. Sigue el patrón definido en `.claude/skills/crud-mode-toggle.md`:
+   - **Vista Lista** (defecto): Árbol vertical expandido por área → asignatura → pensums (formato original).
+   - **Vista Grid**: Cards en grid responsivo (1→2→3 columnas). Cada card muestra el área con sus asignaturas y pensums como chips compactos.
+   - Ambos modos sincronizan vía `localStorage` y evento custom `window.dispatchEvent`.
+
+3. **Filtros client-side en cascada (Alpine.js)** — Sin recarga Livewire, todo dentro del `x-data` del modal:
+   - Tres niveles: `filterPeducativo` → `filterPestudio` → `filterGrado` + búsqueda textual.
+   - `peducativosList` se extrae de las áreas (sin filtro previo).
+   - `pestudiosList` se extrae de los pensums **scoped al `peducativo` seleccionado** — si hay `filterPeducativo`, solo incluye pestudios de áreas que pasen ese filtro; si no, todos.
+   - `gradosList` se extrae de los pensums **scoped al `pestudio` seleccionado** — si hay `filterPestudio`, solo incluye grados cuyos pensums tengan ese pestudio; además hereda el scope de `peducativo`.
+   - `filteredAreas` computado final aplica todos los filtros en secuencia: peducativo → pestudio → grado → búsqueda textual. Filtra a nivel de **área** (oculta áreas sin contenido visible).
+   - **Contenido anidado**: `x-show` adicional en la plantilla filtra a nivel de **asignatura** (oculta `campo_conocimientos` sin pensums que pasen el pestudio) y a nivel de **pensum** (oculta pensums que no pasen pestudio/grado). Esto asegura que el pestudio filter produzca resultados visuales inmediatos, no solo a nivel de área.
+   - `@change` handlers resetean los niveles hijos: `filterPeducativo` → `filterPestudio = ''; filterGrado = ''`; `filterPestudio` → `filterGrado = ''`.
+   - Los selectores se extraen de los datos del modal (no del componente Livewire), asegurando que siempre reflejen los valores realmente disponibles en la data cargada.
+
+**Alpine.js `x-data` structure (resumen):**
+
+```js
+{
+    mode: localStorage.getItem('areas-pensums-view-mode') || 'list',
+    search: '',
+    filterPeducativo: '',
+    filterPestudio: '',
+    filterGrado: '',
+    areas: @js($areasPensumsData),           // datos inyectados desde Livewire
+    get peducativosList() { /* Set-unique extraído de areas */ },
+    get pestudiosList() { /* Set-unique scoped por peducativo */ },
+    get gradosList() { /* Set-unique scoped por peducativo + pestudio */ },
+    get filteredAreas() { /* filtra por peducativo → pestudio → grado → search (nivel área) */ },
+}
+```
+
+**Dual-level filtering:** Además del filtro a nivel de área en `filteredAreas`, la plantilla Blade usa `x-show:`
+- Asignatura: `(!filterPestudio || alguna pensum en cc.asignatura.pensums tiene pestudio == filterPestudio)`
+- Pensum: `(!filterPestudio || pensum.pestudio?.id == filterPestudio) && (!filterGrado || pensum.grado?.id == filterGrado)`
+
 **Eager loading en `loadAreasPensumsData()`:**
 
 ```php

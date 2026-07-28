@@ -133,6 +133,34 @@
                         </svg>
                     </span>
                 </label>
+
+                {{-- Filter: Estado (pendientes / aprobadas) — segmented control --}}
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
+                    <div class="flex rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
+                        <button type="button" wire:click="$set('filter_status', '')"
+                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
+                                {{ $filter_status === '' ? 'bg-emerald-500/15 text-emerald-400 border-r border-r-emerald-500/30 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 border-r border-gray-200 dark:border-white/10' }}">
+                            Todos
+                        </button>
+                        <button type="button" wire:click="$set('filter_status', 'pending')"
+                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
+                                {{ $filter_status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-r border-r-amber-500/30 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 border-r border-gray-200 dark:border-white/10' }}">
+                            <span class="flex items-center justify-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $filter_status === 'pending' ? 'bg-amber-400' : 'bg-gray-400' }}"></span>
+                                Pendientes
+                            </span>
+                        </button>
+                        <button type="button" wire:click="$set('filter_status', 'approved')"
+                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
+                                {{ $filter_status === 'approved' ? 'bg-emerald-500/15 text-emerald-400 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10' }}">
+                            <span class="flex items-center justify-center gap-1.5">
+                                <svg class="w-3 h-3 {{ $filter_status === 'approved' ? 'text-emerald-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Aprobadas
+                            </span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -304,26 +332,28 @@
                                 </div>
                             </div>
 
-                            {{-- Footer Stats: Observaciones count if exists --}}
+                            {{-- Footer Stats: Total · Aprobadas · En revisión --}}
                             <div class="px-4 py-2.5 border-t border-white/5 bg-white/[0.03] flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span @class([
-                                        'inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold',
-                                        'bg-blue-500/12 text-blue-400' => $item->activities_count > 0,
-                                        'bg-gray-500/12 text-gray-500' => $item->activities_count === 0,
-                                    ])>
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold bg-blue-500/12 text-blue-400">
                                         {{ $item->activities_count }}
                                     </span>
-                                    <span class="text-[10px] text-gray-500 font-medium">actividades</span>
+                                    <span class="text-[10px] text-gray-500 font-medium">total</span>
                                 </div>
-                                @if($item->observations)
-                                    <span class="text-[9px] text-blue-400/70 font-medium">
-                                        <svg class="w-3 h-3 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                        Obs.
-                                    </span>
-                                @endif
+                                <div class="flex items-center gap-1.5">
+                                    @if($item->activities_approved_count > 0)
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold bg-emerald-500/12 text-emerald-400 border border-emerald-500/20 rounded-md">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            {{ $item->activities_approved_count }}
+                                        </span>
+                                    @endif
+                                    @if($item->activities_revision_count > 0)
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold bg-amber-500/12 text-amber-400 border border-amber-500/20 rounded-md">
+                                            <span class="w-1 h-1 rounded-full bg-amber-400"></span>
+                                            {{ $item->activities_revision_count }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
 
                             {{-- Actions: btnGroup (bento-grid-modile pattern) --}}
@@ -332,6 +362,7 @@
                                  @click.away="actionsOpen = false">
 
                                 {{-- Primary: Observation (siempre visible) --}}
+                                @unless($this instanceof \App\Livewire\Leadership\ActivityOverview)
                                 <button type="button" wire:click="createObservation({{ $item->id }})"
                                     class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold bg-cyan-500/12 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all duration-200">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,6 +370,7 @@
                                     </svg>
                                     Observación
                                 </button>
+                                @endunless
 
                                 {{-- Desktop group (sm+) --}}
                                 <div class="hidden sm:flex items-center gap-2">
@@ -469,12 +501,24 @@
                         </div>
 
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <!-- Activity count -->
-                            <div class="flex items-center gap-2">
+                            <!-- Activity counts: total · aprobadas · en revisión -->
+                            <div class="flex items-center gap-1.5">
                                 @if($item->activities_count > 0)
-                                    <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-500/20">
-                                        {{ $item->activities_count }} Act.
+                                    <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-lg border border-blue-200 dark:border-blue-500/20">
+                                        {{ $item->activities_count }} total
                                     </span>
+                                    @if($item->activities_approved_count > 0)
+                                        <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-500/20">
+                                            <svg class="w-3 h-3 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            {{ $item->activities_approved_count }} aprob.
+                                        </span>
+                                    @endif
+                                    @if($item->activities_revision_count > 0)
+                                        <span class="px-2 py-1 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-bold rounded-lg border border-amber-200 dark:border-amber-500/20">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>
+                                            {{ $item->activities_revision_count }} revisión
+                                        </span>
+                                    @endif
                                 @else
                                     <span class="px-3 py-1 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg border border-red-200 dark:border-red-500/20">
                                         Sin actividades
@@ -485,6 +529,7 @@
                             <!-- Button Group: Observación + PDFs -->
                             <div class="inline-flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-white/5 divide-x divide-gray-200 dark:divide-white/5" role="group">
                                 <!-- Observation -->
+                                @unless($this instanceof \App\Livewire\Leadership\ActivityOverview)
                                 <button type="button" wire:click="createObservation({{ $item->id }})"
                                     class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-blue-100 dark:hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200"
                                     title="Observaciones del coordinador">
@@ -492,6 +537,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </button>
+                                @endunless
                                 <!-- PDF Resume -->
                                 <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
                                     class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-500/10 text-gray-500 dark:text-gray-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200">
@@ -1103,4 +1149,6 @@
         });
     </script>
     @endscript
+
+    @include('leadership.help-activities')
 </div>

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Planning\Leadership;
+namespace App\Livewire\Leadership;
 
 use App\Livewire\Planning\Activities\IndexComponent;
 use App\Models\app\Academy\Pevaluacion;
-use App\Services\Planning\LeadershipService;
+use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 
 class ActivityOverview extends IndexComponent
@@ -20,7 +20,11 @@ class ActivityOverview extends IndexComponent
             'lapso',
         ])
         ->with('activities')
-        ->withCount('activities')
+        ->withCount([
+            'activities',
+            'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
+            'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
+        ])
         ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
         ->whereNull('pevaluacions.deleted_at');
 
@@ -57,6 +61,15 @@ class ActivityOverview extends IndexComponent
             $query->whereHas('activities', fn($q) => $q->where('status', 0));
         }
 
+        if (!empty($filters['filter_status'])) {
+            if ($filters['filter_status'] === 'pending') {
+                $query->whereHas('activities', fn($q) => $q->where('status', 0));
+            } elseif ($filters['filter_status'] === 'approved') {
+                $query->has('activities')
+                      ->whereDoesntHave('activities', fn($q) => $q->where('status', 0));
+            }
+        }
+
         $query->orderBy('created_at', 'desc');
 
         if ((int) $this->paginate === 9999) {
@@ -81,5 +94,23 @@ class ActivityOverview extends IndexComponent
         );
 
         return parent::saveComent(...$args);
+    }
+
+    /** @codeCoverageIgnore */
+    public function createObservation($id)
+    {
+        abort(403, 'Leadership no tiene permisos para crear observaciones.');
+    }
+
+    /** @codeCoverageIgnore */
+    public function saveObservation()
+    {
+        abort(403, 'Leadership no tiene permisos para guardar observaciones.');
+    }
+
+    /** @codeCoverageIgnore */
+    public function deleteObservation($id)
+    {
+        abort(403, 'Leadership no tiene permisos para eliminar observaciones.');
     }
 }

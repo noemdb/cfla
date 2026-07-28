@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Planning;
+namespace App\Services\Leadership;
 
 use App\Models\User;
 use App\Models\app\Academy\Activity;

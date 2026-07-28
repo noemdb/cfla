@@ -242,19 +242,24 @@ Route::prefix('app')->name('app.')->group(function () {
         ->name('leadership.')
         ->group(function () {
             // Dashboard con KPIs globales
-            Route::get('/dashboard', \App\Livewire\Planning\Leadership\IndicatorDashboard::class)
+            Route::get('/dashboard', \App\Livewire\Leadership\IndicatorDashboard::class)
                 ->name('dashboard');
 
             // Activities (reuso IndexComponent scoped)
-            Route::get('/activities', \App\Livewire\Planning\Leadership\ActivityOverview::class)
+            Route::get('/activities', \App\Livewire\Leadership\ActivityOverview::class)
                 ->name('activities');
 
             // Lecciones LMS por área
-            Route::get('/lessons', \App\Livewire\Planning\Leadership\LessonMonitor::class)
+            Route::get('/lessons', \App\Livewire\Leadership\LessonMonitor::class)
                 ->name('lessons');
 
+            // Vista previa de actividad LMS (independiente del módulo planning)
+            Route::get('/lms/activity/{activity}/preview', function (\App\Models\app\Academy\Activity $activity) {
+                return view('livewire.leadership.lms-activity-preview', compact('activity'));
+            })->name('lms.preview');
+
             // Profesores con KPIs
-            Route::get('/profesores', \App\Livewire\Planning\Leadership\ProfesorIndicators::class)
+            Route::get('/profesores', \App\Livewire\Leadership\ProfesorIndicators::class)
                 ->name('profesores');
         });
 

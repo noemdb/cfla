@@ -88,7 +88,9 @@ class User extends Authenticatable
 
     public function isLeadership(): bool
     {
-        return $this->is_leadership ?? false;
+        // Leer el raw attribute directamente para NO pasar por el accessor
+        // getIsLeadershipAttribute(), que además incluye is_admin.
+        return $this->attributes['is_leadership'] ?? false;
     }
 
     public function getRoleLabelAttribute()
