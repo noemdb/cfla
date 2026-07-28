@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\app\Academy\AreaConocimiento;
+use App\Observers\AreaConocimientoObserver;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
@@ -44,5 +46,11 @@ class AppServiceProvider extends ServiceProvider
             // fallback al default de Laravel
             return 'Database\\Factories\\' . Str::after($modelFqn, 'App\\Models\\') . 'Factory';
         });
+
+        // Observer de invalidación de caché para el scope de liderazgo (ADR-007).
+        // Invalida las claves "leadership:{userId}:{areas|asignaturas}" cuando se
+        // reasigna un leader_id en AreaConocimiento, evitando que un líder saliente
+        // siga viendo datos del área y que un líder nuevo tenga que esperar el TTL.
+        AreaConocimiento::observe(AreaConocimientoObserver::class);
     }
 }

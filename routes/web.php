@@ -236,6 +236,28 @@ Route::prefix('app')->name('app.')->group(function () {
         });
     });  // ← cierra el grupo planning
 
+    // ─── Leadership: Seguimiento Jefes de Área ────────────────────
+    Route::prefix('leadership')
+        ->middleware(['auth', 'isLeadership'])
+        ->name('leadership.')
+        ->group(function () {
+            // Dashboard con KPIs globales
+            Route::get('/dashboard', \App\Livewire\Planning\Leadership\IndicatorDashboard::class)
+                ->name('dashboard');
+
+            // Activities (reuso IndexComponent scoped)
+            Route::get('/activities', \App\Livewire\Planning\Leadership\ActivityOverview::class)
+                ->name('activities');
+
+            // Lecciones LMS por área
+            Route::get('/lessons', \App\Livewire\Planning\Leadership\LessonMonitor::class)
+                ->name('lessons');
+
+            // Profesores con KPIs
+            Route::get('/profesores', \App\Livewire\Planning\Leadership\ProfesorIndicators::class)
+                ->name('profesores');
+        });
+
     // ───────────────────────────────────────────────
     // MÓDULO DE PROFESOR (Dashboard)
     // ───────────────────────────────────────────────

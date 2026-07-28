@@ -28,6 +28,16 @@ class Asignatura extends Model
         return $this->hasMany(Pensum::class, 'asignatura_id');
     }
 
+    public function areasConocimiento()
+    {
+        return $this->belongsToMany(
+            AreaConocimiento::class,
+            'campo_conocimientos',
+            'asignatura_id',
+            'area_conocimiento_id'
+        );
+    }
+
     public function scopeActive($query, $flag = 'true')
     {
         return $query->where('asignaturas.status_active', $flag);

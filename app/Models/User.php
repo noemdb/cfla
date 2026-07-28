@@ -27,6 +27,7 @@ class User extends Authenticatable
         'is_planner',
         'is_diagnostic',
         'is_profesor',
+        'is_leadership',
         'number_id',
     ];
 
@@ -52,6 +53,7 @@ class User extends Authenticatable
         'is_planner' => 'boolean',
         'is_diagnostic' => 'boolean',
         'is_profesor' => 'boolean',
+        'is_leadership' => 'boolean',
     ];
 
     public function profile()
@@ -84,10 +86,19 @@ class User extends Authenticatable
         return $this->is_profesor ?? false;
     }
 
+    public function isLeadership(): bool
+    {
+        return $this->is_leadership ?? false;
+    }
+
     public function getRoleLabelAttribute()
     {
         if ($this->is_admin) {
             return 'Administrador';
+        }
+
+        if ($this->is_leadership) {
+            return 'Jefe de Área';
         }
 
         if ($this->is_diagnostic) {
@@ -108,5 +119,15 @@ class User extends Authenticatable
     public function getIsPlannerAttribute()
     {
         return $this->is_admin || ($this->attributes['is_planner'] ?? false);
+    }
+
+    public function getIsLeadershipAttribute()
+    {
+        return $this->is_admin || ($this->attributes['is_leadership'] ?? false);
+    }
+
+    public function leadershipAreas()
+    {
+        return $this->hasMany(\App\Models\app\Academy\AreaConocimiento::class, 'leader_id');
     }
 }

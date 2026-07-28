@@ -1,3 +1,47 @@
+@if(Auth::user()->is_leadership)
+    <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open" @click.outside="open = false"
+            class="inline-flex items-center gap-1.5 text-sm font-medium rounded-lg px-3 py-1.5 transition-all duration-200 {{ request()->routeIs('app.leadership.*') ? 'bg-amber-500/10 text-amber-400' : 'text-gray-400 hover:text-amber-300 hover:bg-white/5' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            Seguimiento
+            <svg class="w-3 h-3 ml-0.5 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div x-show="open" x-cloak
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-1"
+            class="absolute left-0 mt-1 w-56 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 p-2 z-50">
+            <a href="{{ route('app.leadership.dashboard') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.leadership.dashboard') ? 'text-amber-400 bg-amber-500/5' : '' }}">
+                <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Dashboard
+            </a>
+            <a href="{{ route('app.leadership.activities') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.leadership.activities') ? 'text-amber-400 bg-amber-500/5' : '' }}">
+                <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Actividades
+            </a>
+            <a href="{{ route('app.leadership.lessons') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.leadership.lessons') ? 'text-amber-400 bg-amber-500/5' : '' }}">
+                <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                Lecciones
+            </a>
+            <a href="{{ route('app.leadership.profesores') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-amber-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.leadership.profesores') ? 'text-amber-400 bg-amber-500/5' : '' }}">
+                <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Profesores
+            </a>
+        </div>
+    </div>
+@endif
+
 @if(Auth::user()->is_admin || Auth::user()->is_diagnostic || Auth::user()->is_planner)
     <div x-data="{ open: false }" class="relative">
         <button @click="open = !open" @click.outside="open = false"

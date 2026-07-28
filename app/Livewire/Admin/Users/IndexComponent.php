@@ -31,6 +31,7 @@ class IndexComponent extends Component
     public $is_diagnostic = false;
     public $is_planner = false;
     public $is_profesor = false;
+    public $is_leadership = false;
 
     // Profile fields
     public $firstname;
@@ -63,6 +64,7 @@ class IndexComponent extends Component
             'is_diagnostic' => 'boolean',
             'is_planner'    => 'boolean',
             'is_profesor'   => 'boolean',
+            'is_leadership' => 'boolean',
             'firstname'     => 'nullable|string|max:100',
             'lastname'      => 'nullable|string|max:100',
             'card_number'   => 'nullable|string|max:20',
@@ -80,6 +82,7 @@ class IndexComponent extends Component
         'is_diagnostic' => 'diagnóstico',
         'is_planner'    => 'planificador',
         'is_profesor'   => 'profesor',
+        'is_leadership'  => 'jefe de área',
         'firstname'     => 'nombre',
         'lastname'      => 'apellido',
         'card_number'   => 'cédula',
@@ -110,11 +113,14 @@ class IndexComponent extends Component
             $query->where('is_planner', true);
         } elseif ($this->filter_role === 'profesor') {
             $query->where('is_profesor', true);
+        } elseif ($this->filter_role === 'leadership') {
+            $query->where('is_leadership', true);
         } elseif ($this->filter_role === 'standard') {
             $query->where('is_admin', false)
                   ->where('is_diagnostic', false)
                   ->where('is_planner', false)
-                  ->where('is_profesor', false);
+                  ->where('is_profesor', false)
+                  ->where('is_leadership', false);
         }
 
         if (in_array($this->sortField, ['id', 'username', 'email', 'is_active'])) {
@@ -131,6 +137,7 @@ class IndexComponent extends Component
             'diagnostic' => 'Diagnóstico',
             'planner'    => 'Planificación',
             'profesor'   => 'Profesor',
+            'leadership' => 'Jefe de Área',
             'standard'   => 'Usuario Estándar',
         ];
 
@@ -173,6 +180,7 @@ class IndexComponent extends Component
         $this->is_diagnostic = (bool) $user->is_diagnostic;
         $this->is_planner   = (bool) $user->is_planner;
         $this->is_profesor  = (bool) $user->is_profesor;
+        $this->is_leadership = (bool) ($user->is_leadership ?? false);
 
         if ($user->profile) {
             $this->firstname   = $user->profile->firstname;
@@ -198,6 +206,7 @@ class IndexComponent extends Component
                 'is_diagnostic' => $this->is_diagnostic ? 1 : 0,
                 'is_planner'    => $this->is_planner ? 1 : 0,
                 'is_profesor'   => $this->is_profesor ? 1 : 0,
+                'is_leadership' => $this->is_leadership ? 1 : 0,
                 'is_active'     => $this->is_active,
             ];
 
@@ -284,7 +293,7 @@ class IndexComponent extends Component
     {
         $this->reset([
             'username', 'email', 'password',
-            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor',
+            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_leadership',
             'firstname', 'lastname', 'card_number',
         ]);
         $this->is_active = 'enable';

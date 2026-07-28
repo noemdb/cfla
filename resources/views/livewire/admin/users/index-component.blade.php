@@ -273,6 +273,10 @@
                                 <input type="checkbox" wire:model="is_diagnostic" class="rounded bg-gray-700 border-gray-600 text-purple-500 focus:ring-purple-500/30">
                                 <span class="text-sm text-gray-300">Diagnóstico</span>
                             </label>
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                                <input type="checkbox" wire:model="is_leadership" class="rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500/30">
+                                <span class="text-sm text-gray-300">Jefe de Área</span>
+                            </label>
                         </div>
                     </div>
 
