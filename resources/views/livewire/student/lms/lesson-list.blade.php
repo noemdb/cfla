@@ -23,7 +23,9 @@
         <select wire:model.live="asignaturaId"
                 class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm">
             <option value="">Todas las asignaturas</option>
-            {{-- Las asignaturas se filtran desde el backend con whereHas --}}
+            @foreach($asignaturas as $id => $name)
+                <option value="{{ $id }}">{{ $name }}</option>
+            @endforeach
         </select>
     </div>
 

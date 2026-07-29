@@ -37,13 +37,14 @@ class StudentHome extends Component
             'profesor',
             'lapso',
             'activities' => function ($q) use ($publishedActivityIds) {
-                $q->whereIn('id', $publishedActivityIds)
+                $q->where('status', true)
+                  ->whereIn('id', $publishedActivityIds)
                   ->whereHas('lmsPublication', fn($sq) => $sq->visibleNow())
                   ->with('lmsPublication');
             },
         ])
         ->whereIn('seccion_id', $seccionIds)
-        ->whereHas('activities', fn($q) => $q->whereIn('id', $publishedActivityIds))
+        ->whereHas('activities', fn($q) => $q->where('status', true)->whereIn('id', $publishedActivityIds))
         ->orderBy('created_at', 'desc')
         ->get();
     }

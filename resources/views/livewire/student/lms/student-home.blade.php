@@ -29,62 +29,61 @@
         <section wire:key="pe-{{ $pe->id }}"
                  class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
 
-            <div class="px-5 py-2 border-b border-gray-100 dark:border-gray-700/50">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            {{-- Header --}}
+            <div class="px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 truncate">
                             {{ $pe->pensum?->asignatura?->name ?? 'Sin asignatura' }}
                         </p>
-                        <h2 class="text-lg font-bold text-gray-900 dark:text-white mt-0.5">
-                            {{ $pe->objetivo ?? 'Unidad sin título' }}
-                        </h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-3">
-                            <span>{{ $pe->seccion?->grado?->name }} - Sección {{ $pe->seccion?->name }}</span>
-                            <span>·</span>
-                            <span>{{ $pe->profesor?->lastname }} {{ $pe->profesor?->name }}</span>
-                            <span>·</span>
-                            <span>{{ $pe->lapso?->name }}</span>
-                        </p>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="truncate">{{ $pe->seccion?->grado?->name }} - Secci&oacute;n {{ $pe->seccion?->name }}</span>
+                            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">&middot;</span>
+                            <span class="truncate">{{ $pe->profesor?->lastname }} {{ $pe->profesor?->name }}</span>
+                            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">&middot;</span>
+                            <span class="shrink-0">{{ $pe->lapso?->name }}</span>
+                        </div>
                     </div>
-                    <span class="text-xs text-gray-400 whitespace-nowrap">
-                        {{ $pe->activities->count() }} actividad{{ $pe->activities->count() !== 1 ? 'es' : '' }}
+                    <span class="shrink-0 text-xs text-gray-400 mt-0.5">
+                        {{ $pe->activities->count() }} activ.
                     </span>
                 </div>
             </div>
 
+            {{-- Activity list --}}
+            @if($pe->activities->isNotEmpty())
             <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                 @foreach($pe->activities as $activity)
+                    @php $pub = $activity->lmsPublication; @endphp
                     <a href="{{ route('student.lms.activity', $activity) }}"
-                       class="flex items-center justify-between px-5 py-2.5 hover:bg-gray-50
+                       class="flex items-start gap-3 px-4 sm:px-5 py-3 hover:bg-gray-50
                               dark:hover:bg-gray-700/30 transition-colors group">
-                        <div class="flex items-center gap-3 min-w-0">
-                            @php $pub = $activity->lmsPublication; @endphp
-                            <span @class([
-                                'w-2 h-2 rounded-full shrink-0',
-                                'bg-emerald-500' => $pub?->status === 'PUBLISHED',
-                                'bg-amber-500'   => $pub?->status === 'SCHEDULED',
-                                'bg-gray-400'    => !$pub || $pub->status === 'DRAFT',
-                            ])></span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-800 dark:text-gray-200
-                                          group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
-                                    {{ $activity->topic ?? 'Actividad sin título' }}
-                                </p>
-                                @if($activity->finicial)
-                                <p class="text-xs text-gray-400">
-                                    {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m/Y') }}
-                                    – {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m/Y') }}
-                                </p>
-                                @endif
-                            </div>
+                        <span @class([
+                            'w-2 h-2 rounded-full shrink-0 mt-1.5',
+                            'bg-emerald-500' => $pub?->status === 'PUBLISHED',
+                            'bg-amber-500'   => $pub?->status === 'SCHEDULED',
+                            'bg-gray-400'    => !$pub || $pub->status === 'DRAFT',
+                        ])></span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200
+                                      group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                                {{ $activity->topic ?? 'Actividad sin título' }}
+                            </p>
+                            @if($activity->finicial)
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m/Y') }}
+                                &ndash; {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m/Y') }}
+                            </p>
+                            @endif
                         </div>
-                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 shrink-0 transition-colors"
+                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 shrink-0 mt-1 transition-colors"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </a>
                 @endforeach
             </div>
+            @endif
         </section>
     @empty
         <div class="text-center py-16">
@@ -94,7 +93,7 @@
             </svg>
             <p class="text-gray-500 dark:text-gray-400 font-medium">No hay actividades publicadas</p>
             <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-                Cuando tus profesores publiquen contenido, aparecerá aquí.
+                Cuando tus profesores publiquen contenido, aparecer&aacute; aqu&iacute;.
             </p>
         </div>
     @endforelse

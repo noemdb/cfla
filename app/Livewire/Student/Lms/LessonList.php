@@ -59,9 +59,16 @@ class LessonList extends Component
 
         $lapsos = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
 
+        $asignaturas = \App\Models\app\Academy\Asignatura::whereHas('pensums.pevaluacions', function ($q) use ($seccionIds) {
+            $q->whereIn('seccion_id', $seccionIds);
+        })->whereHas('pensums.pevaluacions.activities.lmsPublication', function ($q) {
+            $q->visibleNow();
+        })->orderBy('name')->pluck('name', 'id');
+
         return view('livewire.student.lms.lesson-list', [
-            'activities' => $activities,
-            'lapsos'     => $lapsos,
+            'activities'  => $activities,
+            'lapsos'      => $lapsos,
+            'asignaturas' => $asignaturas,
         ])->layout('student.layouts.app');
     }
 

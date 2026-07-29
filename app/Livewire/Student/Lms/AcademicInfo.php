@@ -21,6 +21,12 @@ class AcademicInfo extends Component
     public $currentLapsoId;
     public Collection $areaStats;
 
+    public ?int $selectedPevId = null;
+    public $selectedPev = null;
+    public $selectedActivities = null;
+    public $pevLessons = null;
+    public $pevResources = null;
+
     public function mount(): void
     {
         $service = app(StudentScopeService::class, ['user' => Auth::user()]);
@@ -73,6 +79,38 @@ class AcademicInfo extends Component
         }
 
         return collect($stats);
+    }
+
+    public function showDetail(int $pevId): void
+    {
+        $this->selectedPevId = $pevId;
+
+        $this->selectedPev = Pevaluacion::with([
+            'pensum.asignatura',
+            'lapso',
+            'profesor.user.profile',
+            'activities.lmsPublication',
+            'activities.lmsResources',
+        ])->find($pevId);
+
+        $this->selectedActivities = $this->selectedPev?->activities;
+
+        $this->pevLessons = $this->selectedActivities
+            ? $this->selectedActivities->filter(fn($a) => $a->relationLoaded('lmsPublication') && $a->lmsPublication && $a->lmsPublication->is_visible)
+            : collect();
+
+        $this->pevResources = $this->selectedActivities
+            ? $this->selectedActivities->pluck('lmsResources')->flatten()->filter(fn($r) => $r && $r->is_visible)
+            : collect();
+    }
+
+    public function closeDetail(): void
+    {
+        $this->selectedPevId = null;
+        $this->selectedPev = null;
+        $this->selectedActivities = null;
+        $this->pevLessons = null;
+        $this->pevResources = null;
     }
 
     public function render(): \Illuminate\View\View

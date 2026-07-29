@@ -50,12 +50,13 @@ Es un rol reducido respecto a `is_planner`: no tiene capacidad de crear/editar/e
 
 ### Principio de diseño
 
-> **Máximo reuso del módulo Planning existente.** El 80% de las vistas ya existen en `Planning/*`. La estrategia es:
-> 1. Scoping: todo se filtra a `peducativos WHERE manager_id = auth()->id()`
-> 2. Read-only: los CRUDs existentes se reusan en modo consulta (sin botones de crear/editar/eliminar)
-> 3. Una sola acción de escritura: `pevaluacion.observations`
+> **Namespace propio, reuso de lógica.** El módulo `coordinacion` tiene su propio namespace completo (rutas, layout, componentes, vistas, servicios) pero reusa la lógica de negocio del módulo Planning. La estrategia es:
+> 1. Independencia total: layout propio (`coordinacion.layouts.app`), navbar propio, componentes Livewire dedicados en `App\Livewire\Coordinacion\*`
+> 2. Scoping: todo se filtra a `peducativos WHERE manager_id = auth()->id()` vía `CoordinacionScopeService`
+> 3. Read-only: todas las vistas son modo consulta — sin botones de crear/editar/eliminar
+> 4. Una sola acción de escritura: `pevaluacion.observations`
 >
-> El nuevo rol solo necesita: (1) columna + middleware, (2) `CoordinacionScopeService`, (3) wrapper components que reusan los IndexComponent existentes con scoping y modo read-only
+> El nuevo rol necesita: (1) columna + middleware, (2) `CoordinacionScopeService`, (3) 6 componentes Livewire dedicados + layout propio + navbar propio
 
 ---
 
@@ -211,12 +212,14 @@ otros ──► 403
 
 ### Decisión arquitectónica clave
 
-En lugar de crear Livewire components desde cero, el rol `coordinacion` **reusa los componentes existentes de `Planning\*`** pero:
+El rol `coordinacion` es un **módulo completamente independiente** con su propio namespace. Aunque reusa lógica de negocio del módulo Planning, tiene su propia identidad:
 
-1. **A nivel de ruta**: las rutas de coordinación pasan por `IsCoordinacion` middleware
-2. **A nivel de layout**: se reusa `planning.layouts.app` (ya tiene el navbar y estructura)
-3. **A nivel de componente**: se reusan los IndexComponent de Planning pero injectando `CoordinacionScopeService` como filtro y con parámetro `readonly=true`
-4. **Los PDF**: se reusan los controladores existentes `ActivityPdfController`
+1. **A nivel de ruta**: las rutas de coordinación pasan por `IsCoordinacion` middleware, bajo su propio prefix `/app/coordinacion/*`
+2. **A nivel de layout**: layout dedicado `coordinacion.layouts.app` con navbar propio — **no** reusa el layout de planning
+3. **A nivel de componente**: componentes Livewire dedicados en `App\Livewire\Coordinacion\*` que envuelven las queries scoped, separados de los CRUDs de Planning
+4. **A nivel de vistas**: vistas Blade propias en `resources/views/coordinacion/` (layout) y `resources/views/livewire/coordinacion/` (componentes)
+5. **A nivel de servicio**: servicio propio `CoordinacionScopeService`
+6. **Los PDF**: se reusan los controladores existentes `ActivityPdfController` (son read-only y no requieren namespace propio)
 
 ### Orden lógico (bloqueante en cascada)
 
@@ -752,7 +755,7 @@ class Dashboard extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.coordinacion.dashboard')
-            ->layout('planning.layouts.app');
+            ->layout('coordinacion.layouts.app');
     }
 }
 ```
@@ -816,7 +819,7 @@ class PensumList extends Component
         return view('livewire.coordinacion.pensum-list', [
             'pensums'      => $pensums,
             'peducativos'  => $peducativos,
-        ])->layout('planning.layouts.app');
+        ])->layout('coordinacion.layouts.app');
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -888,7 +891,7 @@ class CargaAcademicaList extends Component
             'pevaluacions' => $pevaluacions,
             'lapsos'       => $lapsos,
             'peducativos'  => $peducativos,
-        ])->layout('planning.layouts.app');
+        ])->layout('coordinacion.layouts.app');
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -964,7 +967,7 @@ class ActivityList extends Component
         return view('livewire.coordinacion.activity-list', [
             'activities' => $activities,
             'lapsos'     => $lapsos,
-        ])->layout('planning.layouts.app');
+        ])->layout('coordinacion.layouts.app');
     }
 
     // ─── Edición de observaciones ───
@@ -1070,7 +1073,7 @@ class LessonList extends Component
         return view('livewire.coordinacion.lesson-list', [
             'lessons' => $lessons,
             'lapsos'  => $lapsos,
-        ])->layout('planning.layouts.app');
+        ])->layout('coordinacion.layouts.app');
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -1129,7 +1132,7 @@ class ResourceList extends Component
 
         return view('livewire.coordinacion.resource-list', [
             'resources' => $resources,
-        ])->layout('planning.layouts.app');
+        ])->layout('coordinacion.layouts.app');
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -1200,13 +1203,65 @@ class ResourceList extends Component
 @endif
 ```
 
-#### 6.2 Registrar navbar en layout
+#### 6.2 Layout dedicado de coordinación
+
+Se crea un layout independiente con su propio navbar. El layout debe incluir:
+- Estructura HTML base (doctype, head, scripts)
+- Sidebar o top-nav con los items de coordinación
+- `{{ $slot }}` para el contenido del componente Livewire
 
 ```blade
-{{-- resources/views/planning/layouts/app.blade.php --}}
-{{-- Agregar dentro del role-navbar, junto a los otros includes --}}
-@include('components.navbars.coordinacion-items')
-@include('components.navbars.coordinacion-items-mobile')
+{{-- resources/views/coordinacion/layouts/app.blade.php --}}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Coordinación') — {{ config('app.name') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @wireUiScripts
+    @livewireStyles
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100 antialiased">
+    {{-- Top navbar con los items de coordinación --}}
+    <nav class="sticky top-0 z-50 bg-gray-800/80 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('coordinacion.index') }}" class="text-lg font-semibold text-emerald-400">
+                        Coordinación
+                    </a>
+                    @include('components.navbars.coordinacion-items')
+                </div>
+                {{-- User menu / logout --}}
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-400">{{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-sm text-gray-500 hover:text-red-400 transition-colors">
+                            Salir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {{-- Contenido principal --}}
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{ $slot }}
+    </main>
+
+    @livewireScripts
+    @stack('scripts')
+</body>
+</html>
+```
+
+```blade
+{{-- resources/views/components/navbars/coordinacion-items-mobile.blade.php --}}
+{{-- Menú responsive para mobile (opcional) --}}
 ```
 
 ---
@@ -1314,13 +1369,13 @@ public function coordinacion(): static
 | **Razón** | `manager_id` ya existe en `Peducativo` y `Pestudio`. Es el modelo de datos existente y el user ya puede ser manager de múltiples peducativos | |
 | **Consecuencia** | `CoordinacionScopeService` recorre la cadena `Peducativo → Pestudio → Pensum → Pevaluacion → Activity`. Si un coordinador no tiene peducativos asignados → todo vacío | |
 
-### ADR-003: Reuso del layout `planning.layouts.app`
+### ADR-003: Namespace y layout dedicado para coordinación
 
 | | Decisión | Alternativa |
 |--|----------|-------------|
-| **Selección** | Reusar `planning.layouts.app` | Layout dedicado |
-| **Razón** | El coordinador opera sobre los mismos datos que planning. El navbar de planning ya incluye items útiles. Reducción de código duplicado | |
-| **Consecuencia** | El coordinador ve el navbar de planning completo (limitado por permisos). Solo se agrega un menú "Coordinación" con los items scoped | |
+| **Selección** | Namespace completo propio: layout, componentes, vistas, servicios | Reusar layout de planning |
+| **Razón** | El coordinador tiene un conjunto de permisos diferente y no debe ver los mismos controles de navegación que un planner. Tener namespace propio permite evolucionar el módulo independientemente, sin acoplar cambios a planning. Además, es más seguro: un error en el layout de coordinación no afecta a planning y viceversa | |
+| **Consecuencia** | ~2 archivos adicionales de layout. El navbar de coordinación solo muestra las 6 rutas scoped. Más fácil de testear y mantener a largo plazo | |
 
 ### ADR-004: Componentes Livewire dedicados vs reuso directo
 
@@ -1372,15 +1427,28 @@ NUEVOS:
   resources/views/livewire/coordinacion/resource-list.blade.php
   resources/views/components/navbars/coordinacion-items.blade.php
   resources/views/components/navbars/coordinacion-items-mobile.blade.php
+  resources/views/coordinacion/layouts/app.blade.php
 
 MODIFICADOS:
   app/Models/User.php
   app/Http/Kernel.php
   routes/web.php
-  resources/views/planning/layouts/app.blade.php
   app/Models/app/Academy/Peducativo.php                     (posible: agregar scope para manager)
   app/Http/Controllers/Planning/ActivityPdfController.php   (posible: agregar scope check)
   database/factories/UserFactory.php                        (+ coordinacion state)
+```
+
+### Namespace completo del módulo
+
+```
+Routes:       /app/coordinacion/*        → Route::name('coordinacion.*')
+Middleware:   IsCoordinacion             → app/Http/Middleware/IsCoordinacion.php
+Controllers:  (reusados: ActivityPdfController de Planning)
+Services:     CoordinacionScopeService   → app/Services/Lms/CoordinacionScopeService.php
+Livewire:     App\Livewire\Coordinacion\* → 6 componentes + 1 trait
+Layout:       coordinacion.layouts.app   → resources/views/coordinacion/layouts/app.blade.php
+Views:        livewire.coordinacion.*    → resources/views/livewire/coordinacion/*.blade.php
+Navbar:       components.navbars.coordinacion-items → 2 partials (desktop + mobile)
 ```
 
 ### Timeline estimado
@@ -1397,9 +1465,9 @@ MODIFICADOS:
 | 5d. ActivityList (con observations) | 2 | 45 min |
 | 5e. LessonList | 2 | 30 min |
 | 5f. ResourceList | 2 | 30 min |
-| 6. Navbar | 2 | 20 min |
+| 6. Layout + Navbar | 3 | 30 min |
 | 7. Testing | ~11 tests | 60 min |
-| **Total** | **~23 archivos** | **~7 horas** |
+| **Total** | **~25 archivos** | **~7.5 horas** |
 
 ---
 
@@ -1412,8 +1480,8 @@ MODIFICADOS:
 - [ ] Eliminar `app/Services/Lms/CoordinacionScopeService.php`
 - [ ] Eliminar `app/Livewire/Coordinacion/` (directorio completo)
 - [ ] Eliminar `resources/views/livewire/coordinacion/` (directorio completo)
+- [ ] Eliminar `resources/views/coordinacion/` (directorio completo, layout)
 - [ ] Eliminar `resources/views/components/navbars/coordinacion-items*.blade.php`
-- [ ] Revertir navbar en `resources/views/planning/layouts/app.blade.php`
 - [ ] Revertir rutas en `web.php` (eliminar grupo coordinacion)
 - [ ] Revertir cambios en `ActivityPdfController.php` (si se agregó scope check)
 - [ ] Eliminar `coordinacion()` state en `UserFactory.php` (si se agregó)
