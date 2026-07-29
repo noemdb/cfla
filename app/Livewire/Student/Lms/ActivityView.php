@@ -16,6 +16,7 @@ class ActivityView extends Component
     public $htmlEmbeds = [];
     public $comments;
     public string $newComment = '';
+    public $completed = false;
 
     public function mount(Activity $activity): void
     {
@@ -57,7 +58,23 @@ class ActivityView extends Component
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $this->completed = LmsActivityLog::where('activity_id', $activity->id)
+            ->where('user_id', auth()->id())
+            ->where('event', 'COMPLETE')
+            ->exists();
+
         LmsActivityLog::record($activity->id, auth()->id(), 'VIEW');
+    }
+
+    public function markComplete(): void
+    {
+        LmsActivityLog::record($this->activity->id, auth()->id(), 'COMPLETE');
+        $this->completed = true;
+
+        $this->notification()->success(
+            title: '¡Actividad completada!',
+            description: 'Has marcado esta actividad como completada.'
+        );
     }
 
     public function saveComment(): void
