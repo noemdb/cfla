@@ -523,6 +523,10 @@
                                 <span class="text-gray-200 font-medium font-mono">{{ $e['ci_estudiant'] ?? '—' }}</span>
                             </div>
                             <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                                <span class="text-gray-500 text-xs">Usuario</span>
+                                <span class="text-gray-200 font-medium font-mono">{{ $e['user']['username'] ?? '—' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-2 border-b border-white/5">
                                 <span class="text-gray-500 text-xs">Género</span>
                                 <span class="text-gray-200 font-medium">{{ $e['gender'] ?? '—' }}</span>
                             </div>
@@ -557,6 +561,10 @@
                             <div class="flex justify-between items-center pb-2 border-b border-white/5">
                                 <span class="text-gray-500 text-xs">Correo</span>
                                 <span class="text-gray-200 font-medium text-right break-all max-w-[180px]">{{ $e['email'] ?? '—' }}</span>
+                            </div>
+                            <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                                <span class="text-gray-500 text-xs">Gsemail</span>
+                                <span class="text-gray-200 font-medium text-right break-all max-w-[180px]">{{ $e['gsemail'] ?? '—' }}</span>
                             </div>
                             <div class="flex justify-between items-center pb-2 border-b border-white/5">
                                 <span class="text-gray-500 text-xs">Celular</span>

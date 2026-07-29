@@ -6,9 +6,12 @@ use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use Livewire\Component;
+use WireUi\Traits\WireUiActions;
 
 class ActivityView extends Component
 {
+    use WireUiActions;
+
     public Activity $activity;
     public $sections = [];
     public $resources = [];

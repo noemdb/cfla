@@ -317,6 +317,7 @@ class IndexComponent extends Component
     {
         $inscripcion = Inscripcion::with([
             'estudiant.representant',
+            'estudiant.user',
             'seccion.grado.pestudio',
             'tipo',
             'escolaridad',

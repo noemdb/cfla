@@ -925,10 +925,12 @@ class Profile extends Component
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Lms\StudentScopeService;
-use App\Models\app\Academy\Pensum;
+use App\Services\Estudiant\StudentScopeService;
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Lapso;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -938,6 +940,7 @@ class AcademicInfo extends Component
     public $pensums;
     public $pevaluacions;
     public $currentLapsoId;
+    public Collection $areaStats;
 
     public function mount(): void
     {
@@ -947,11 +950,7 @@ class AcademicInfo extends Component
         $this->currentLapsoId = Lapso::current()?->id;
 
         // Pensums del grado del estudiante
-        $gradoIds = $service->getGradoIds();
-        $this->pensums = Pensum::whereIn('grado_id', $gradoIds)
-            ->with('asignatura')
-            ->orderBy('asignatura_id')
-            ->get();
+        $this->pensums = $service->getPensumsWithAsignatura();
 
         // Pevaluacions del estudiante (actividades de planificación)
         $this->pevaluacions = Pevaluacion::with([
@@ -963,6 +962,38 @@ class AcademicInfo extends Component
         ->when($this->currentLapsoId, fn($q) => $q->where('lapso_id', $this->currentLapsoId))
         ->orderBy('created_at', 'desc')
         ->get();
+
+        // Stats por área de formación
+        $this->areaStats = $this->computeAreaStats($service);
+    }
+
+    protected function computeAreaStats(StudentScopeService $service): Collection
+    {
+        $seccionIds = $service->getSeccionIds();
+        if ($seccionIds->isEmpty() || $this->pensums->isEmpty()) {
+            return collect();
+        }
+
+        $stats = [];
+
+        foreach ($this->pensums as $pensum) {
+            $activityIds = Activity::whereHas('pevaluacion', fn($q) =>
+                $q->whereIn('seccion_id', $seccionIds)
+                  ->where('pensum_id', $pensum->id)
+            )->pluck('id');
+
+            $stats[$pensum->id] = [
+                'activities' => $activityIds->count(),
+                'lessons'    => Activity::whereIn('id', $activityIds)
+                    ->whereHas('lmsPublication', fn($q) => $q->visibleNow())
+                    ->count(),
+                'comments'   => ActivityComment::where('is_approved', true)
+                    ->whereIn('activity_id', $activityIds)
+                    ->count(),
+            ];
+        }
+
+        return collect($stats);
     }
 
     public function render(): \Illuminate\View\View
@@ -971,6 +1002,26 @@ class AcademicInfo extends Component
             ->layout('student.layouts.app');
     }
 }
+```
+
+```blade
+{{-- Cada fila de Planificación Académica muestra los stats del área (pensum) debajo del nombre --}}
+@if($stat)
+<div class="flex items-center gap-3 mt-2">
+    <span class="inline-flex items-center gap-1 text-[10px] text-gray-400">
+        <svg class="w-3 h-3 text-sky-400">...</svg>
+        {{ $stat['activities'] }} activ.
+    </span>
+    <span class="inline-flex items-center gap-1 text-[10px] text-gray-400">
+        <svg class="w-3 h-3 text-emerald-400">...</svg>
+        {{ $stat['lessons'] }} lecc.
+    </span>
+    <span class="inline-flex items-center gap-1 text-[10px] text-gray-400">
+        <svg class="w-3 h-3 text-amber-400">...</svg>
+        {{ $stat['comments'] }} coment.
+    </span>
+</div>
+@endif
 ```
 
 #### 5.3 Listado de Lecciones (NUEVO — mejora sobre StudentHome)
@@ -1051,8 +1102,9 @@ class LessonList extends Component
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Lms\StudentScopeService;
+use App\Services\Estudiant\StudentScopeService;
 use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lapso;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -1063,12 +1115,13 @@ class ResourceList extends Component
 
     public string $search = '';
     public $lapsoId = '';
+    public bool $showPreviewModal = false;
+    public ?array $previewResource = null;
     protected $paginationTheme = 'tailwind';
 
     public function render(): \Illuminate\View\View
     {
         $service = app(StudentScopeService::class, ['user' => Auth::user()]);
-        $seccionIds = $service->getSeccionIds();
 
         $query = LmsActivityResource::with([
             'activity.pevaluacion.pensum.asignatura',
@@ -1093,12 +1146,45 @@ class ResourceList extends Component
 
         $resources = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+        $lapsos = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
 
         return view('livewire.student.lms.resource-list', [
             'resources' => $resources,
             'lapsos'    => $lapsos,
         ])->layout('student.layouts.app');
+    }
+
+    public function preview(int $resourceId): void
+    {
+        $service = app(StudentScopeService::class, ['user' => Auth::user()]);
+
+        $resource = LmsActivityResource::with([
+            'activity',
+            'media',
+            'section',
+        ])->findOrFail($resourceId);
+
+        // Security check: ensure resource belongs to student's section
+        $seccionIds = $service->getSeccionIds();
+        $belongsToStudent = $resource->activity?->pevaluacion
+            && $seccionIds->contains($resource->activity->pevaluacion->seccion_id);
+
+        if (!$belongsToStudent) {
+            $this->notification()->error(
+                title: 'Acceso denegado',
+                description: 'Este recurso no está disponible para tu sección.'
+            );
+            return;
+        }
+
+        $this->previewResource = $resource->toArray();
+        $this->showPreviewModal = true;
+    }
+
+    public function closePreview(): void
+    {
+        $this->showPreviewModal = false;
+        $this->previewResource = null;
     }
 
     public function updatingSearch() { $this->resetPage(); }
@@ -1144,6 +1230,71 @@ public function saveComment(): void
         description: 'Tu comentario será visible una vez aprobado.'
     );
 }
+```
+
+---
+
+#### 5.6 Barra de navegación "Volver" en ActivityView
+
+Se agregó una barra de navegación superior en `activity-view.blade.php` con un enlace para retroceder a la lista de lecciones:
+
+```blade
+{{-- resources/views/livewire/student/lms/activity-view.blade.php --}}
+{{-- Arriba del header, antes del título de la actividad --}}
+<nav class="flex items-center gap-3 px-1">
+    <a href="{{ route('student.lms.lessons') }}"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+              text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400
+              hover:bg-emerald-50 dark:hover:bg-emerald-500/10
+              border border-transparent hover:border-emerald-200 dark:hover:border-emerald-500/20
+              transition-all duration-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver a Lecciones
+    </a>
+    <span class="text-[11px] text-gray-400 dark:text-gray-500 hidden sm:inline">
+        / {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Actividad' }}
+    </span>
+</nav>
+```
+
+**Detalles:**
+- Enlace directo a `route('student.lms.lessons')` como destino principal (origen más común)
+- Indicador contextual de la asignatura actual (hidden en mobile)
+- Estilos consistentes con el layout oscuro del estudiante
+- Transiciones suaves en hover
+
+---
+
+#### 5.7 Vista Previa de Recursos (Modal)
+
+Se agregó un modal de vista previa en `ResourceList` que permite al estudiante visualizar el contenido del recurso sin descargarlo.
+
+**Componente** (`ResourceList.php`):
+- `showPreviewModal` (bool) — controla apertura/cierre del modal
+- `previewResource` (?array) — datos del recurso a previsualizar
+- `preview(int $resourceId)` — carga el recurso con `media` y verifica que pertenezca a la sección del estudiante
+- `closePreview()` — limpia el estado
+
+**Modal** (`resource-list.blade.php`):
+- Detecta el tipo MIME del recurso (vía `$media['mime_type']`) y renderiza:
+  - **Imagen** (`image/*`): `<img>` con `object-contain`, max 60vh
+  - **PDF** (`application/pdf`): `<iframe>` a 65vh con borde
+  - **Video** (`video/*`): `<video controls>` con `<source>`
+  - **Otros**: mensaje "Vista previa no disponible" + metadatos del archivo
+- Botón "Vista previa" (ojo ícono) en cada tarjeta de recurso, al lado de "Descargar"
+- Footer con nombre original, tamaño y botón de descarga directa
+- Backdrop semitransparente con `backdrop-blur-sm`
+
+```
+Tarjeta de recurso:
+┌──────────────────────────────────┐
+│ [icono] display_name             │
+│         actividad_topic          │
+├──────────────────────────────────┤
+│ asignatura   [Vista previa] [Descargar] │
+└──────────────────────────────────┘
 ```
 
 ---

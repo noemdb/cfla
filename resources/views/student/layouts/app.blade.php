@@ -62,6 +62,16 @@
         {{ $slot }}
     </main>
 
+    <x-notifications />
+
     @livewireScripts
+
+    <style>
+        #notifications,
+        .wireui-notifications,
+        [fixed] {
+            z-index: 9999 !important;
+        }
+    </style>
 </body>
 </html>

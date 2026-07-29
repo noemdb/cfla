@@ -1,15 +1,23 @@
 <div class="max-w-4xl mx-auto px-3 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 space-y-6 sm:space-y-8">
 
+    {{-- ═══════════════════════════════════════ BACK NAV ═══════════════════════════════════════ --}}
+    <nav class="flex items-center gap-3 px-1">
+        <a href="{{ route('student.lms.lessons') }}"
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-500/20 transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver a Lecciones
+        </a>
+        <span class="text-[11px] text-gray-400 dark:text-gray-500 hidden sm:inline">
+            / {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Actividad' }}
+        </span>
+    </nav>
+
     {{-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ --}}
     <header class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/60 p-4 sm:p-6">
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
-                {{-- Breadcrumb --}}
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    <a href="{{ route('student.lms.home') }}" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Inicio</a>
-                    <span class="text-gray-300 dark:text-gray-600">/</span>
-                    <span class="text-gray-700 dark:text-gray-300 truncate">{{ $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Actividad' }}</span>
-                </div>
 
                 {{-- Title --}}
                 <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -501,8 +509,8 @@
                            class="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all"
                            maxlength="1000"/>
                     <button type="submit"
-                            class="shrink-0 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50"
-                            wire:loading.attr="disabled">
+                            class="shrink-0 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors"
+                            wire:loading.class="opacity-50 cursor-not-allowed">
                         <span wire:loading.remove wire:target="saveComment">Enviar</span>
                         <span wire:loading wire:target="saveComment">Enviando…</span>
                     </button>
