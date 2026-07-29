@@ -27,6 +27,7 @@ class User extends Authenticatable
         'is_planner',
         'is_diagnostic',
         'is_profesor',
+        'is_coordinacion',
         'is_leadership',
         'is_student',
         'number_id',
@@ -54,6 +55,7 @@ class User extends Authenticatable
         'is_planner' => 'boolean',
         'is_diagnostic' => 'boolean',
         'is_profesor' => 'boolean',
+        'is_coordinacion' => 'boolean',
         'is_leadership' => 'boolean',
         'is_student' => 'boolean',
     ];
@@ -105,6 +107,11 @@ class User extends Authenticatable
         return $this->attributes['is_leadership'] ?? false;
     }
 
+    public function isCoordinacion(): bool
+    {
+        return $this->is_coordinacion ?? false;
+    }
+
     public function getRoleLabelAttribute()
     {
         if ($this->is_admin) {
@@ -117,6 +124,10 @@ class User extends Authenticatable
 
         if ($this->is_diagnostic) {
             return 'Personal de Diagnóstico';
+        }
+
+        if ($this->isCoordinacion()) {
+            return 'Coordinación';
         }
 
         if ($this->is_planner) {

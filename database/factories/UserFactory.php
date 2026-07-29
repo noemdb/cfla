@@ -49,4 +49,11 @@ class UserFactory extends Factory
             'is_leadership' => true,
         ]);
     }
+
+    public function coordinacion(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_coordinacion' => true,
+        ]);
+    }
 }

@@ -130,7 +130,10 @@
                                     @if($user->is_student)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/20">Est.</span>
                                     @endif
-                                    @if(!$user->is_admin && !$user->is_planner && !$user->is_profesor && !$user->is_diagnostic && !$user->is_leadership && !$user->is_student)
+                                    @if($user->is_coordinacion)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/20">Coord.</span>
+                                    @endif
+                                    @if(!$user->is_admin && !$user->is_planner && !$user->is_profesor && !$user->is_diagnostic && !$user->is_leadership && !$user->is_coordinacion && !$user->is_student)
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-gray-500/15 text-gray-400 border border-gray-500/20">Std.</span>
                                     @endif
                                 </div>
@@ -279,6 +282,10 @@
                             <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_leadership" class="rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-500/30">
                                 <span class="text-sm text-gray-300">Jefe de Área</span>
+                            </label>
+                            <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
+                                <input type="checkbox" wire:model="is_coordinacion" class="rounded bg-gray-700 border-gray-600 text-rose-500 focus:ring-rose-500/30">
+                                <span class="text-sm text-gray-300">Coordinación</span>
                             </label>
                             <label class="flex items-center gap-3 px-4 py-2 bg-gray-800/30 border border-white/5 rounded-lg cursor-pointer hover:bg-gray-800/50 transition-colors">
                                 <input type="checkbox" wire:model="is_student" class="rounded bg-gray-700 border-gray-600 text-fuchsia-500 focus:ring-fuchsia-500/30">

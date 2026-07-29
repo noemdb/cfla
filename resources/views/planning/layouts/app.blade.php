@@ -42,10 +42,12 @@
         </x-slot:navbarInfo>
         @include('components.navbars.planning-items')
         @include('components.navbars.profesor-items')
+        @include('components.navbars.coordinacion-items')
         @include('components.navbars.admin-items')
         <x-slot:mobileSlot>
             @include('components.navbars.planning-items-mobile')
             @include('components.navbars.profesor-items-mobile')
+            @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.admin-items-mobile')
         </x-slot:mobileSlot>
     </x-role-navbar>

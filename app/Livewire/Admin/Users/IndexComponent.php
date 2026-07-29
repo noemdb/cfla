@@ -32,6 +32,7 @@ class IndexComponent extends Component
     public $is_planner = false;
     public $is_profesor = false;
     public $is_leadership = false;
+    public $is_coordinacion = false;
     public $is_student = false;
 
     // Profile fields
@@ -66,6 +67,7 @@ class IndexComponent extends Component
             'is_planner'    => 'boolean',
             'is_profesor'   => 'boolean',
             'is_leadership' => 'boolean',
+            'is_coordinacion' => 'boolean',
             'is_student'   => 'boolean',
             'firstname'     => 'nullable|string|max:100',
             'lastname'      => 'nullable|string|max:100',
@@ -85,6 +87,7 @@ class IndexComponent extends Component
         'is_planner'    => 'planificador',
         'is_profesor'   => 'profesor',
         'is_leadership'  => 'jefe de área',
+        'is_coordinacion' => 'coordinación',
         'is_student'    => 'estudiante',
         'firstname'     => 'nombre',
         'lastname'      => 'apellido',
@@ -118,6 +121,8 @@ class IndexComponent extends Component
             $query->where('is_profesor', true);
         } elseif ($this->filter_role === 'leadership') {
             $query->where('is_leadership', true);
+        } elseif ($this->filter_role === 'coordinacion') {
+            $query->where('is_coordinacion', true);
         } elseif ($this->filter_role === 'student') {
             $query->where('is_student', true);
         } elseif ($this->filter_role === 'standard') {
@@ -126,6 +131,7 @@ class IndexComponent extends Component
                   ->where('is_planner', false)
                   ->where('is_profesor', false)
                   ->where('is_leadership', false)
+                  ->where('is_coordinacion', false)
                   ->where('is_student', false);
         }
 
@@ -144,6 +150,7 @@ class IndexComponent extends Component
             'planner'    => 'Planificación',
             'profesor'   => 'Profesor',
             'leadership' => 'Jefe de Área',
+            'coordinacion' => 'Coordinación',
             'student'    => 'Estudiante',
             'standard'   => 'Usuario Estándar',
         ];
@@ -188,6 +195,7 @@ class IndexComponent extends Component
         $this->is_planner   = (bool) $user->is_planner;
         $this->is_profesor  = (bool) $user->is_profesor;
         $this->is_leadership = (bool) ($user->is_leadership ?? false);
+        $this->is_coordinacion = (bool) ($user->is_coordinacion ?? false);
         $this->is_student = (bool) ($user->is_student ?? false);
 
         if ($user->profile) {
@@ -215,6 +223,7 @@ class IndexComponent extends Component
                 'is_planner'    => $this->is_planner ? 1 : 0,
                 'is_profesor'   => $this->is_profesor ? 1 : 0,
                 'is_leadership' => $this->is_leadership ? 1 : 0,
+                'is_coordinacion' => $this->is_coordinacion ? 1 : 0,
                 'is_student'    => $this->is_student ? 1 : 0,
                 'is_active'     => $this->is_active,
             ];
@@ -302,7 +311,7 @@ class IndexComponent extends Component
     {
         $this->reset([
             'username', 'email', 'password',
-            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_leadership', 'is_student',
+            'is_admin', 'is_diagnostic', 'is_planner', 'is_profesor', 'is_leadership', 'is_coordinacion', 'is_student',
             'firstname', 'lastname', 'card_number',
         ]);
         $this->is_active = 'enable';

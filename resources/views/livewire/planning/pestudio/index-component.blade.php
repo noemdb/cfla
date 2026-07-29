@@ -1,6 +1,10 @@
 <div class="fade-in" x-data="{
+    mode: localStorage.getItem('pestudio-view-mode') || 'table',
     modeForm: @entangle('modeForm'),
-}">
+}" x-init="$watch('mode', val => {
+    localStorage.setItem('pestudio-view-mode', val);
+    window.dispatchEvent(new CustomEvent('pestudio-view-mode-changed', { detail: { mode: val } }))
+})">
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -81,8 +85,35 @@
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
+    {{-- Grid/Table Toggle --}}
+    <div class="flex justify-end mb-4">
+        <div class="inline-flex items-center bg-gray-900/40 border border-white/5 rounded-lg p-0.5 gap-0.5">
+            <button @click="mode = 'grid'"
+                :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-gray-500 hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-transparent transition-all duration-200 text-[11px] font-bold"
+                title="Vista Grid">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Grid</span>
+            </button>
+            <button @click="mode = 'table'"
+                :class="mode === 'table' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-transparent text-gray-500 hover:text-gray-300'"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-transparent transition-all duration-200 text-[11px] font-bold"
+                title="Vista Tabla">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Tabla</span>
+            </button>
+        </div>
+    </div>
+
+    {{-- ═══ TABLE VIEW ═══ --}}
+    <div x-cloak x-show="mode === 'table'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -191,9 +222,101 @@
         @if($pestudios->hasPages())
             <x-pagination-wrapper :paginator="$pestudios" />
         @endif
-    </div>
+    </div>{{-- /table view --}}
 
-    <!-- ===== MODAL: Confirmar Eliminación ===== -->
+    {{-- ═══ GRID VIEW ═══ --}}
+    <div x-cloak x-show="mode === 'grid'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
+
+        <style>
+            .pestudio-grid { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+            @media (min-width: 640px)  { .pestudio-grid { grid-template-columns: repeat(2, 1fr); } }
+            @media (min-width: 1024px) { .pestudio-grid { grid-template-columns: repeat(3, 1fr); } }
+            @media (min-width: 1280px) { .pestudio-grid { grid-template-columns: repeat(4, 1fr); } }
+            .pestudio-empty { text-align: center; }
+        </style>
+
+        @forelse($pestudios as $pestudio)
+            @if($loop->first)
+            <div class="pestudio-grid">
+            @endif
+                <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 h-full flex flex-col">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] rounded-full font-bold uppercase tracking-wider">
+                                {{ $pestudio->code }}
+                            </span>
+                        </div>
+                        <h3 class="text-sm font-bold text-white mb-1 leading-snug">{{ $pestudio->name }}</h3>
+                        <p class="text-xs text-gray-400 mb-2">{{ Str::limit($pestudio->description, 60) }}</p>
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            <span class="px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] rounded-full font-medium">{{ $pestudio->peducativo?->name ?? '—' }}</span>
+                            <span class="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[10px] rounded-full font-medium">{{ $pestudio->grados_count }} grado(s)</span>
+                            @if($pestudio->planning_module == 1)
+                                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] rounded-full font-medium border border-emerald-500/20">Planning</span>
+                            @endif
+                        </div>
+                        <div class="mt-auto pt-3 border-t border-white/5 flex items-center justify-between">
+                            <div class="text-[10px] text-gray-500">
+                                @if($pestudio->status_active === 'true' || $pestudio->status_active == 1)
+                                    <span class="text-emerald-400 font-medium">● Activo</span>
+                                @else
+                                    <span class="text-red-400 font-medium">● Inactivo</span>
+                                @endif
+                                @if($pestudio->manager)
+                                    <span class="block text-gray-600">{{ $pestudio->manager->username }}</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button type="button" wire:click="showPreview({{ $pestudio->id }})"
+                                    class="p-1.5 bg-white/5 hover:bg-cyan-500/10 rounded-lg border border-white/5 hover:border-cyan-500/20 text-gray-500 hover:text-cyan-400 transition-all duration-200"
+                                    title="Vista previa">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" wire:click="edit({{ $pestudio->id }})"
+                                    class="p-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-500 hover:text-emerald-400 transition-all duration-200"
+                                    title="Editar">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" wire:click="confirmDelete({{ $pestudio->id }})"
+                                    class="p-1.5 bg-white/5 hover:bg-red-500/10 rounded-lg border border-white/5 hover:border-red-500/20 text-gray-500 hover:text-red-400 transition-all duration-200"
+                                    title="Eliminar">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>{{-- /card --}}
+            @if($loop->last)
+            </div>{{-- /pestudio-grid --}}
+            @endif
+        @empty
+            <div class="text-center py-16 bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg">
+                <svg class="w-14 h-14 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <p class="text-gray-500 font-medium mb-1">No hay planes de estudio registrados</p>
+                <p class="text-gray-600 text-sm">Crea el primer plan de estudio usando el botón "Nuevo Plan".</p>
+            </div>
+        @endforelse
+
+        @if($pestudios->hasPages())
+            <x-pagination-wrapper :paginator="$pestudios" />
+        @endif
+    </div>{{-- /grid view --}}
     <x-modal title="Eliminar Plan de Estudio" blur="lg" wire:model="confirmDeleteId" max-width="md" x-on:close="confirmDeleteId = null" persistent>
         <div class="p-6 text-center">
             <svg class="w-16 h-16 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +427,7 @@
     </x-modal>
 
     <!-- ===== MODAL: Formulario Crear/Editar ===== -->
-    <x-modal-card title="{{ $isEditing ? 'Editar Plan de Estudio' : 'Nuevo Plan de Estudio' }}" blur="lg" wire:model="modeForm" max-width="7xl" persistent>
+    <x-modal-card title="{{ $isEditing ? 'Editar Plan de Estudio' : 'Nuevo Plan de Estudio' }}" blur="lg" wire:model="modeForm" width="4xl" persistent>
         <div class="space-y-8">
 
             {{-- Errores globales de validación --}}

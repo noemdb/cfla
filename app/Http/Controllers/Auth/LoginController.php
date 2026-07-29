@@ -39,6 +39,10 @@ class LoginController extends Controller
                 return redirect()->route('app.planning.index');
             }
 
+            if ($user->isCoordinacion()) {
+                return redirect()->route('app.coordinacion.index');
+            }
+
             if ($user->isProfesor()) {
                 return redirect()->to('/app/profesors/home');
             }

@@ -241,6 +241,37 @@ Route::prefix('app')->name('app.')->group(function () {
         });
     });  // ← cierra el grupo planning
 
+    // ─── MÓDULO DE COORDINACIÓN ──────────────────────────────────
+    Route::prefix('coordinacion')
+        ->middleware(['auth', 'isCoordinacion'])
+        ->name('coordinacion.')
+        ->group(function () {
+
+        Route::get('/', \App\Livewire\Coordinacion\IndicatorDashboard::class)
+            ->name('index');
+
+        Route::get('/pensums', \App\Livewire\Coordinacion\PensumList::class)
+            ->name('pensums');
+
+        Route::get('/carga-academica', \App\Livewire\Coordinacion\CargaAcademicaList::class)
+            ->name('carga-academica');
+
+        Route::get('/activities', \App\Livewire\Coordinacion\ActivityList::class)
+            ->name('activities');
+        Route::get('/activities/format/{pevaluacion}', [
+            \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
+        ])->name('activities.format');
+        Route::get('/activities/resume/{pevaluacion}', [
+            \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
+        ])->name('activities.resume');
+
+        Route::get('/lecciones', \App\Livewire\Coordinacion\LessonList::class)
+            ->name('lessons');
+
+        Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
+            ->name('resources');
+    });
+
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────
     Route::prefix('leadership')
         ->middleware(['auth', 'isLeadership'])
