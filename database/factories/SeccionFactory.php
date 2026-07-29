@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SeccionFactory extends Factory
 {
+    protected $model = \App\Models\app\Academy\Seccion::class;
+
     /**
      * Define the model's default state.
      *

@@ -228,6 +228,11 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/', \App\Livewire\Planning\Profesor\IndexComponent::class)->name('index');
         });
 
+        // Módulo de Inscripciones
+        Route::prefix('inscripcions')->name('inscripcions.')->group(function () {
+            Route::get('/', \App\Livewire\Planning\Inscripcion\IndexComponent::class)->name('index');
+        });
+
         // ─── LMS: Monitor y Auditoría para Coordinadores ──────────────
         Route::prefix('lms')->name('lms.')->group(function () {
             Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
@@ -300,6 +305,8 @@ Route::prefix('app')->name('app.')->group(function () {
                  ->name('lesson.wizard');
             Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
                  ->name('editor');
+            Route::get('/comments', \App\Livewire\Profesor\Lms\CommentModeration::class)
+                 ->name('comments');
         });
     });
 });
@@ -307,6 +314,10 @@ Route::prefix('app')->name('app.')->group(function () {
 // ─── LMS: Rutas de Estudiante ───────────────────────────────────────────────
 Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isStudent'])->group(function () {
     Route::get('/home', \App\Livewire\Student\Lms\StudentHome::class)->name('home');
+    Route::get('/perfil', \App\Livewire\Student\Lms\Profile::class)->name('profile');
+    Route::get('/academica', \App\Livewire\Student\Lms\AcademicInfo::class)->name('academic');
+    Route::get('/lecciones', \App\Livewire\Student\Lms\LessonList::class)->name('lessons');
+    Route::get('/recursos', \App\Livewire\Student\Lms\ResourceList::class)->name('resources');
     Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
     Route::get('/resource/{resource}/download', [
         \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download'

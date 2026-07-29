@@ -3,6 +3,7 @@
 namespace App\Livewire\Student\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use Livewire\Component;
 
@@ -13,6 +14,8 @@ class ActivityView extends Component
     public $resources = [];
     public $links = [];
     public $htmlEmbeds = [];
+    public $comments;
+    public string $newComment = '';
 
     public function mount(Activity $activity): void
     {
@@ -48,7 +51,32 @@ class ActivityView extends Component
                 return $embed;
             });
 
+        $this->comments = ActivityComment::with('user')
+            ->forActivity($activity->id)
+            ->approved()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         LmsActivityLog::record($activity->id, auth()->id(), 'VIEW');
+    }
+
+    public function saveComment(): void
+    {
+        $this->validate(['newComment' => 'required|string|min:1|max:1000']);
+
+        ActivityComment::create([
+            'activity_id' => $this->activity->id,
+            'user_id'     => auth()->id(),
+            'body'        => $this->newComment,
+            'is_approved' => false,
+        ]);
+
+        $this->newComment = '';
+
+        $this->notification()->success(
+            title: 'Comentario enviado',
+            description: 'Tu comentario será visible una vez aprobado.'
+        );
     }
 
     public function render(): \Illuminate\View\View

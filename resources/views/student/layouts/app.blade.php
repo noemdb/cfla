@@ -18,6 +18,33 @@
                 <img src="{{ asset('image/logo/logo1x1.png') }}" alt="Logo" class="w-8 h-8 rounded-lg">
                 <span class="font-bold text-gray-900 dark:text-white text-sm">{{ config('app.name') }}</span>
             </a>
+            <nav class="flex items-center gap-1 ml-6">
+                <a href="{{ route('student.lms.home') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.home') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Inicio
+                </a>
+                <a href="{{ route('student.lms.profile') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.profile') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Perfil
+                </a>
+                <a href="{{ route('student.lms.academic') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.academic') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Académica
+                </a>
+                <a href="{{ route('student.lms.lessons') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.lessons') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Lecciones
+                </a>
+                <a href="{{ route('student.lms.resources') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Recursos
+                </a>
+            </nav>
             <div class="flex items-center gap-3">
                 <span class="text-xs text-gray-400">{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}">

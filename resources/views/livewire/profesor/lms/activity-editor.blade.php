@@ -263,4 +263,99 @@
             {{ $pubStatus === 'PUBLISHED' ? 'Actualizar publicación' : 'Publicar actividad' }}
         </button>
     </section>
+
+    {{-- ─── Comentarios de estudiantes ──────────────────────────────── --}}
+    <section class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-3">
+        <div class="flex items-center gap-4 mb-2">
+            <h2 class="text-sm font-medium text-slate-400 uppercase tracking-wider">
+                Comentarios de estudiantes
+            </h2>
+            <div class="flex gap-1">
+                <button wire:click="$set('commentsTab', 'pending')"
+                        class="px-3 py-1 text-xs font-medium rounded-lg transition-colors
+                               {{ $commentsTab === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-400 hover:text-slate-300' }}">
+                    Pendientes
+                </button>
+                <button wire:click="$set('commentsTab', 'approved')"
+                        class="px-3 py-1 text-xs font-medium rounded-lg transition-colors
+                               {{ $commentsTab === 'approved' ? 'bg-emerald-500/10 text-emerald-400' : 'text-slate-400 hover:text-slate-300' }}">
+                    Aprobados
+                </button>
+            </div>
+        </div>
+
+        @forelse($activityComments as $comment)
+            <div wire:key="ac-{{ $comment->id }}"
+                 class="flex gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
+                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                    <span class="text-xs font-bold text-slate-300">
+                        {{ strtoupper(substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
+                    </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-slate-200">
+                            {{ $comment->user?->profile?->firstname ?? $comment->user?->name ?? '—' }}
+                        </span>
+                        <span class="text-[10px] text-slate-500">{{ $comment->created_at->diffForHumans() }}</span>
+                    </div>
+                    <p class="text-sm text-slate-300 mt-1">{{ $comment->body }}</p>
+                </div>
+                @if($commentsTab === 'pending')
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button wire:click="approveActivityComment({{ $comment->id }})"
+                                class="px-2 py-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded transition-colors"
+                                title="Aprobar">
+                            ✓
+                        </button>
+                        <button wire:click="confirmActivityReject({{ $comment->id }})"
+                                class="px-2 py-1 text-[10px] font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 rounded transition-colors"
+                                title="Rechazar">
+                            ✕
+                        </button>
+                    </div>
+                @endif
+            </div>
+        @empty
+            <p class="text-sm text-slate-500 text-center py-4">
+                @if($commentsTab === 'pending') No hay comentarios pendientes en esta actividad.
+                @else No hay comentarios aprobados en esta actividad.
+                @endif
+            </p>
+        @endforelse
+
+        @if($activityComments && $activityComments->count() > 0 && $commentsTab === 'pending')
+            <a href="{{ route('app.profesors.lms.comments', ['activityFilter' => $activity->id]) }}"
+               class="text-xs text-emerald-400 hover:underline mt-2 inline-block">
+                Ver todos en moderación →
+            </a>
+        @endif
+
+        {{-- Modal de rechazo inline --}}
+        @if($activityRejectCommentId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+             wire:click.self="$set('activityRejectCommentId', null)">
+            <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-md w-full mx-4 p-5 space-y-3"
+                 wire:click.stop>
+                <h3 class="text-sm font-bold text-white">Rechazar comentario</h3>
+                <textarea wire:model="activityRejectReason" rows="3"
+                          placeholder="Motivo del rechazo (opcional)…"
+                          class="w-full bg-slate-900 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm
+                                 placeholder-slate-500 resize-none transition-all"
+                          maxlength="500"></textarea>
+                @error('activityRejectReason') <p class="text-xs text-red-400">{{ $message }}</p> @enderror
+                <div class="flex justify-end gap-2">
+                    <button wire:click="$set('activityRejectCommentId', null)"
+                            class="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-300 transition-colors">
+                        Cancelar
+                    </button>
+                    <button wire:click="rejectActivityComment"
+                            class="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg">
+                        Rechazar
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
+    </section>
 </div>

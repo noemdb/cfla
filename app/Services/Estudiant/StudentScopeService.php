@@ -4,8 +4,10 @@ namespace App\Services\Estudiant;
 
 use App\Models\User;
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Learner\Estudiant;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,11 +18,18 @@ class StudentScopeService
     protected ?Estudiant $estudiant = null;
     protected ?Collection $seccionIds = null;
     protected ?Collection $gradoIds = null;
+    protected ?Inscripcion $inscripcion = null;
+    protected ?Seccion $seccion = null;
 
     public function __construct(
         protected User $user
     ) {
         $this->estudiant = Estudiant::where('user_id', $user->id)->first();
+
+        if ($this->estudiant) {
+            $this->inscripcion = $this->estudiant->inscripcion;
+            $this->seccion = $this->inscripcion?->seccion;
+        }
     }
 
     /**
@@ -29,6 +38,14 @@ class StudentScopeService
     public function getEstudiant(): ?Estudiant
     {
         return $this->estudiant;
+    }
+
+    /**
+     * Obtener la inscripción activa del estudiante.
+     */
+    public function getInscripcion(): ?Inscripcion
+    {
+        return $this->inscripcion;
     }
 
     /**
@@ -41,17 +58,11 @@ class StudentScopeService
             return $this->seccionIds;
         }
 
-        if (!$this->estudiant) {
+        if (!$this->seccion) {
             return $this->seccionIds = collect();
         }
 
-        $inscripcion = $this->estudiant->inscripcion;
-
-        if (!$inscripcion || !$inscripcion->seccion) {
-            return $this->seccionIds = collect();
-        }
-
-        return $this->seccionIds = collect([$inscripcion->seccion_id]);
+        return $this->seccionIds = collect([$this->seccion->id]);
     }
 
     /**
@@ -64,16 +75,19 @@ class StudentScopeService
             return $this->gradoIds;
         }
 
-        $seccionIds = $this->getSeccionIds();
-        if ($seccionIds->isEmpty()) {
+        if (!$this->seccion || !$this->seccion->grado_id) {
             return $this->gradoIds = collect();
         }
 
-        $seccion = \App\Models\app\Academy\Seccion::find($seccionIds->first());
+        return $this->gradoIds = collect([$this->seccion->grado_id]);
+    }
 
-        return $this->gradoIds = $seccion && $seccion->grado_id
-            ? collect([$seccion->grado_id])
-            : collect();
+    /**
+     * ID del grado del estudiante como entero, o null.
+     */
+    public function getGradoId(): ?int
+    {
+        return $this->seccion?->grado_id;
     }
 
     /**
@@ -107,6 +121,21 @@ class StudentScopeService
     }
 
     /**
+     * Verifica si una actividad es visible para este estudiante.
+     */
+    public function isActivityVisible(Activity $activity): bool
+    {
+        $seccionIds = $this->getSeccionIds();
+        if ($seccionIds->isEmpty()) {
+            return false;
+        }
+
+        return $activity->lmsPublication?->isVisibleToStudents()
+            && $activity->pevaluacion
+            && $seccionIds->contains($activity->pevaluacion->seccion_id);
+    }
+
+    /**
      * Query scope para LmsActivityResource visibles.
      * Cuando no hay sección asignada, retorna query que no trae resultados.
      */
@@ -137,32 +166,38 @@ class StudentScopeService
     }
 
     /**
+     * Pensums completos con asignatura del grado del estudiante.
+     */
+    public function getPensumsWithAsignatura(): Collection
+    {
+        $gradoIds = $this->getGradoIds();
+        if ($gradoIds->isEmpty()) {
+            return collect();
+        }
+
+        return Pensum::whereIn('grado_id', $gradoIds)
+            ->with('asignatura')
+            ->orderBy('asignatura_id')
+            ->get();
+    }
+
+    /**
      * Datos completos de inscripción del estudiante.
      * Retorna null si no hay estudiante o inscripción.
      */
     public function getInscripcionData(): ?array
     {
-        if (!$this->estudiant) {
+        if (!$this->estudiant || !$this->seccion) {
             return null;
         }
 
-        $inscripcion = $this->estudiant->inscripcion;
-        if (!$inscripcion) {
-            return null;
-        }
-
-        $seccion = $inscripcion->seccion;
-        if (!$seccion) {
-            return null;
-        }
-
-        $grado = $seccion->grado;
+        $grado = $this->seccion->grado;
         $pestudio = $grado?->pestudio;
 
         return [
             'estudiant'   => $this->estudiant,
-            'inscripcion' => $inscripcion,
-            'seccion'     => $seccion,
+            'inscripcion' => $this->inscripcion,
+            'seccion'     => $this->seccion,
             'grado'       => $grado,
             'pestudio'    => $pestudio,
             'peducativo'  => $pestudio?->peducativo,

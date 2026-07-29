@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\app\Academy\Asignatura;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\app\Academy\Asignatura>
- */
 class AsignaturaFactory extends Factory
 {
+    protected $model = Asignatura::class;
     /**
      * Define the model's default state.
      *

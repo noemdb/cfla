@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\app\Academy\Pensum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\app\Academy\Pensum>
- */
 class PensumFactory extends Factory
 {
+    protected $model = Pensum::class;
     /**
      * Define the model's default state.
      *

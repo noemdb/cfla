@@ -28,6 +28,7 @@ class User extends Authenticatable
         'is_diagnostic',
         'is_profesor',
         'is_leadership',
+        'is_student',
         'number_id',
     ];
 
@@ -54,11 +55,17 @@ class User extends Authenticatable
         'is_diagnostic' => 'boolean',
         'is_profesor' => 'boolean',
         'is_leadership' => 'boolean',
+        'is_student' => 'boolean',
     ];
 
     public function profile()
     {
         return $this->hasOne(\App\Models\sys\Profile::class);
+    }
+
+    public function estudiant()
+    {
+        return $this->hasOne(\App\Models\app\Learner\Estudiant::class, 'user_id');
     }
 
     public function getFullNameAttribute()
@@ -84,6 +91,11 @@ class User extends Authenticatable
     public function isProfesor()
     {
         return $this->is_profesor ?? false;
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->is_student ?? false;
     }
 
     public function isLeadership(): bool
@@ -113,6 +125,10 @@ class User extends Authenticatable
 
         if ($this->isProfesor()) {
             return 'Profesor';
+        }
+
+        if ($this->is_student) {
+            return 'Estudiante';
         }
 
         return 'Usuario Estándar';

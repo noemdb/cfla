@@ -166,6 +166,53 @@
         </div>
     @endif
 
+    {{-- Comentarios --}}
+    @if($activity->lmsPublication?->allow_comments)
+    <section class="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-4">
+        <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+            Comentarios
+        </h2>
+
+        {{-- Formulario de nuevo comentario --}}
+        <form wire:submit="saveComment" class="flex gap-2">
+            <input type="text" wire:model="newComment" placeholder="Escribe un comentario…"
+                   class="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm"
+                   maxlength="1000"/>
+            <button type="submit"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors">
+                Enviar
+            </button>
+        </form>
+        @error('newComment') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+
+        {{-- Lista de comentarios --}}
+        <div class="space-y-3">
+            @forelse($comments as $comment)
+                <div class="flex gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <span class="text-xs font-bold text-emerald-400">
+                            {{ strtoupper(substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
+                        </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-medium text-gray-900 dark:text-white">
+                                {{ $comment->user?->profile?->firstname ?? $comment->user?->name ?? '—' }}
+                            </span>
+                            <span class="text-[10px] text-gray-400">
+                                {{ $comment->created_at->diffForHumans() }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ $comment->body }}</p>
+                    </div>
+                </div>
+            @empty
+                <p class="text-sm text-gray-500 text-center py-4">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+            @endforelse
+        </div>
+    </section>
+    @endif
+
     {{-- Volver --}}
     <div class="pt-4">
         <a href="{{ route('student.lms.home') }}"

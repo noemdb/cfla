@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\app\Academy\Lapso;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\app\Academy\Lapso>
- */
 class LapsoFactory extends Factory
 {
+    protected $model = Lapso::class;
     /**
      * Define the model's default state.
      *

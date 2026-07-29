@@ -3,11 +3,13 @@
 namespace App\Livewire\Profesor\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsActivityLink;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
+use App\Services\Lms\CommentModerationService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
 use Livewire\Attributes\Layout;
@@ -48,6 +50,12 @@ class ActivityEditor extends Component
     public bool $showLinkForm = false;
     public bool $showResourceForm = false;
 
+    // ─── Comentarios inline ──────────────────────────────────────
+    public string $commentsTab = 'pending'; // pending | approved
+    public $activityComments;
+    public string $activityRejectReason = '';
+    public ?int $activityRejectCommentId = null;
+
     protected function rules(): array
     {
         return [
@@ -71,6 +79,7 @@ class ActivityEditor extends Component
         $this->activity = $activity;
         $this->loadSections();
         $this->loadPublication();
+        $this->loadComments();
     }
 
     private function loadSections(): void
@@ -213,6 +222,51 @@ class ActivityEditor extends Component
         );
         $this->dispatch('activity-published');
         $this->loadPublication();
+    }
+
+    // ─── Comentarios inline ──────────────────────────────────────
+
+    private function loadComments(): void
+    {
+        $this->activityComments = ActivityComment::with('user.profile')
+            ->forActivity($this->activity->id)
+            ->when($this->commentsTab === 'pending', fn($q) => $q->pending())
+            ->when($this->commentsTab === 'approved', fn($q) => $q->approved())
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    public function approveActivityComment(int $commentId): void
+    {
+        $comment = ActivityComment::findOrFail($commentId);
+        app(CommentModerationService::class, ['user' => auth()->user()])
+            ->approve($comment);
+        $this->loadComments();
+        $this->notification()->success(title: 'Comentario aprobado');
+    }
+
+    public function confirmActivityReject(int $commentId): void
+    {
+        $this->activityRejectCommentId = $commentId;
+        $this->activityRejectReason = '';
+    }
+
+    public function rejectActivityComment(): void
+    {
+        $this->validate(['activityRejectReason' => 'nullable|string|max:500']);
+
+        $comment = ActivityComment::findOrFail($this->activityRejectCommentId);
+        app(CommentModerationService::class, ['user' => auth()->user()])
+            ->reject($comment, $this->activityRejectReason ?: null);
+        $this->activityRejectCommentId = null;
+        $this->activityRejectReason = '';
+        $this->loadComments();
+        $this->notification()->success(title: 'Comentario rechazado');
+    }
+
+    public function updatedCommentsTab(): void
+    {
+        $this->loadComments();
     }
 
     #[Layout('planning.layouts.app')]

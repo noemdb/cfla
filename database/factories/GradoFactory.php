@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class GradoFactory extends Factory
 {
+    protected $model = \App\Models\app\Academy\Grado::class;
+
     /**
      * Define the model's default state.
      *

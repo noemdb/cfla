@@ -10,9 +10,21 @@ class IsStudent
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->is_student) {
+        if (!auth()->check()) {
             abort(403, 'Acceso restringido a estudiantes.');
         }
+
+        $user = auth()->user();
+
+        // Admin bypass: administradores pueden previsualizar vistas de estudiante
+        if ($user->is_admin) {
+            return $next($request);
+        }
+
+        if (!$user->isStudent()) {
+            abort(403, 'Acceso restringido a estudiantes.');
+        }
+
         return $next($request);
     }
 }

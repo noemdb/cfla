@@ -85,6 +85,16 @@ class Activity extends Model
         return $this->hasMany(LmsActivityLog::class, 'activity_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(\App\Models\app\Academy\Lms\ActivityComment::class, 'activity_id');
+    }
+
+    public function approvedComments()
+    {
+        return $this->comments()->where('is_approved', true);
+    }
+
     public function isLmsPublished(): bool
     {
         return $this->lmsPublication?->isVisibleToStudents() ?? false;

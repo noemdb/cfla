@@ -3,16 +3,29 @@
 namespace App\Livewire\Student\Lms;
 
 use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Livewire\Component;
 
 class StudentHome extends Component
 {
+    use Concerns\HasStudentScope;
+
     public string $search = '';
     public $pevaluacions;
 
     public function mount(): void
     {
-        $publishedActivityIds = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
+        $this->initializeHasStudentScope();
+
+        $service = $this->getStudentService();
+        $seccionIds = $service->getSeccionIds();
+
+        if ($seccionIds->isEmpty()) {
+            $this->pevaluacions = collect();
+            return;
+        }
+
+        $publishedActivityIds = LmsActivityPublication::query()
             ->visibleNow()
             ->pluck('activity_id');
 
@@ -27,6 +40,7 @@ class StudentHome extends Component
                   ->with('lmsPublication');
             },
         ])
+        ->whereIn('seccion_id', $seccionIds)
         ->whereHas('activities', fn($q) => $q->whereIn('id', $publishedActivityIds))
         ->orderBy('created_at', 'desc')
         ->get();
