@@ -43,6 +43,10 @@ class LoginController extends Controller
                 return redirect()->to('/app/profesors/home');
             }
 
+            if ($user->is_student) {
+                return redirect()->to('/app/estudiante/home');
+            }
+
             return redirect()->to('/');
         }
 

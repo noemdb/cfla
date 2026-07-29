@@ -35,7 +35,7 @@
             <p class="text-emerald-400 font-medium">Gestión y organización de actividades académicas institucionales.</p>
         </div>
 
-        <div x-data="{ search: '', filterCategory: '', totalCards: 16, showLegend: false }">
+        <div x-data="{ search: '', filterCategory: '', totalCards: 17, showLegend: false }">
             <h2 class="text-lg font-bold text-white mb-6 flex items-center justify-between">
                 <span class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +158,7 @@
                                     <div class="flex items-center gap-2 mb-0.5">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">Estructura</span>
                                     </div>
-                                    <p class="text-xs text-gray-500 truncate">Programas Educativos · Planes de Estudio · Áreas de Conocimiento · Asignaturas · Grados · Secciones · Pensums</p>
+                                    <p class="text-xs text-gray-500 truncate">Programas Educativos · Planes de Estudio · Áreas de Conocimiento · Asignaturas · Grados · Secciones · Pensums · Inscripciones</p>
                                 </div>
                             </div>
 
@@ -572,6 +572,40 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z">
                                 </path>
+                            </svg>
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inscripciones -->
+            <div data-card
+                x-show="(!search || $el.textContent.toLowerCase().includes(search.toLowerCase())) && (!filterCategory || $el.textContent.toLowerCase().includes(filterCategory.toLowerCase()))"
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 border-t-4 border-fuchsia-500 hover:border-fuchsia-500/30">
+                <a href="{{ route('app.planning.inscripcions.index') }}" class="absolute inset-0 z-0"></a>
+                <div
+                    class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                    <svg class="w-20 h-20 text-fuchsia-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    </svg>
+                </div>
+                <div class="relative z-10 flex flex-col h-full pointer-events-none">
+                    <div
+                        class="w-12 h-12 bg-fuchsia-500/20 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20 mb-3">Estructura</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Inscripciones</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">Gestión de inscripciones de estudiantes en secciones académicas. Registro, edición y seguimiento de matrícula escolar.</p>
+
+                    <div class="mt-auto flex justify-end pointer-events-auto">
+                        <a href="{{ route('app.planning.inscripcions.index') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 rounded-lg border border-fuchsia-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                            <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"/>
                             </svg>
                             Gestionar
                         </a>
