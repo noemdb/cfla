@@ -9,9 +9,11 @@ use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
+use WireUi\Traits\WireUiActions;
 
 class LessonList extends Component
 {
+    use WireUiActions;
     use WithPagination;
 
     public string $search = '';

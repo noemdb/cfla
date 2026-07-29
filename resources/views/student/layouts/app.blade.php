@@ -64,6 +64,7 @@
 
     <x-notifications />
 
+    @wireUiScripts
     @livewireScripts
 
     <style>

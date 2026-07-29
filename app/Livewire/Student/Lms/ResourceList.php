@@ -8,9 +8,11 @@ use App\Models\app\Academy\Lapso;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
+use WireUi\Traits\WireUiActions;
 
 class ResourceList extends Component
 {
+    use WireUiActions;
     use WithPagination;
 
     public string $search = '';

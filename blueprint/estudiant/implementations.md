@@ -2,7 +2,7 @@
 
 **Staff Engineer Blueprint**
 _Autor:_ Claude Architect
-_Última revisión:_ 2026-07-27
+_Última revisión:_ 2026-07-29
 
 ---
 
@@ -67,47 +67,66 @@ Un **Estudiante LMS** es un usuario que accede al sistema para consumir contenid
 | `is_diagnostic` | `IsAdminOrDiagnostic` | `/admin/*` | ✅ |
 | `is_planner` | `IsPlanner` | `/app/planning/*` | ✅ |
 | `is_profesor` | `IsProfesor` | `/app/profesors/*` | ✅ |
-| `is_student` | `IsStudent` | `/app/estudiante/*` | ❌ **No existe en columna** |
+| `is_student` | `IsStudent` | `/app/estudiante/*` | ✅ |
 | `is_leadership` | `IsLeadership` | `/app/leadership/*` | ✅ |
 
-### Problema crítico: `is_student` no existe como columna
+### Nota: `is_student` implementado
 
-Aunque el middleware `IsStudent` (línea 13) y `LmsActivityPolicy` referencian `auth()->user()->is_student`, esta **columna nunca se agregó a la tabla `users`**. El acceso como estudiante funciona actualmente porque:
-- `$user->is_student` retorna `null` (falsy) en PHP dinámico → nunca pasa el middleware
-- El único acceso posible es mediante login como admin + `is_admin` bypass
+La columna `is_student` fue agregada mediante la migración `2026_07_28_000001_add_is_student_to_users_table.php`.
+Ya no es un bug. El middleware `IsStudent` funciona correctamente con admin bypass.
 
-**Esto es un bug y la prioridad #1 del plan.**
-
-### Componentes existentes
+### Componentes implementados
 
 ```
 app/Livewire/Student/Lms/
-├── StudentHome.php         → Vista principal: lista de pevaluacions con actividades publicadas
-└── ActivityView.php        → Vista de una actividad: secciones, recursos, enlaces, embeds
+├── Concerns/
+│   └── HasStudentScope.php   → Trait de scoping por inscripción
+├── StudentHome.php           → Vista principal: lista de pevaluacions con actividades publicadas
+├── ActivityView.php          → Vista de una actividad: secciones, recursos, enlaces, embeds + comentarios
+├── Profile.php               → Perfil del estudiante (datos personales, contacto, representante)
+├── AcademicInfo.php          → Información académica (pensums, áreas de formación)
+├── LessonList.php            → Listado de lecciones con filtros (búsqueda, lapso, asignatura)
+└── ResourceList.php          → Recursos compartidos con modal de vista previa
 
 resources/views/livewire/student/lms/
-├── student-home.blade.php  → Listado de pevaluacions grupado
-└── activity-view.blade.php → Contenido de actividad individual
+├── student-home.blade.php    → Listado de pevaluacions grupado
+├── activity-view.blade.php   → Contenido de actividad individual + comentarios
+├── profile.blade.php         → Perfil completo con stats, contacto, representante
+├── academic-info.blade.php   → Información académica con stats por área
+├── lesson-list.blade.php     → Lecciones con filtros y paginación
+└── resource-list.blade.php   → Recursos con modal de vista previa
 
 resources/views/student/layouts/
-└── app.blade.php           → Layout del estudiante (dark, minimal)
+└── app.blade.php             → Layout del estudiante con navbar completa
+
+app/Services/Estudiant/
+└── StudentScopeService.php   → Scoping por inscripción del estudiante
+
+app/Models/app/Academy/Lms/
+└── ActivityComment.php       → Comentarios en actividades con moderación
+
+app/Policies/
+└── ActivityCommentPolicy.php → Política de autorización para comentarios
 ```
 
-### Lo que existe pero está incompleto
+### Lo que se implementó
 
 | Aspecto | Estado | Detalle |
 |---------|--------|---------|
-| Middleware `IsStudent` | ✅ Creado | Pero nunca pasará porque no hay columna |
-| Grupo de rutas `/app/estudiante/` | ✅ Creado | 3 rutas: home, activity, resource.download |
-| `StudentHome` | ✅ Creado | Muestra pevaluacions con actividades publicadas |
-| `ActivityView` | ✅ Creado | Muestra secciones, recursos, links, embeds de una actividad |
-| `ResourceDownloadController` | ✅ Creado | Controlador para descarga de recursos |
-| Layout `student.layouts.app` | ✅ Creado | Layout dedicado para estudiantes |
-| Columna `is_student` | ❌ **Falta** | Migración pendiente |
-| Vista de datos personales | ❌ Falta | Perfil del estudiante |
-| Vista de inscripción/pensum | ❌ Falta | Información académica |
-| Comentarios de estudiante | ❌ Falta | Modelo + componente nuevo |
-| Navbar estudiante | ❌ Falta | Items de navegación en layout |
+| Middleware `IsStudent` | ✅ | Con admin bypass y helper `isStudent()` |
+| Grupo de rutas `/app/estudiante/` | ✅ | 7 rutas (home, profile, academic, lessons, resources, activity, resource.download) |
+| `StudentHome` | ✅ | Refactorizado con `HasStudentScope` trait |
+| `ActivityView` | ✅ | Comentarios, markComplete y LmsActivityLog |
+| `ResourceDownloadController` | ✅ | Controlador para descarga de recursos |
+| Layout `student.layouts.app` | ✅ | Navbar completa (Inicio, Perfil, Académica, Lecciones, Recursos) |
+| Columna `is_student` | ✅ | Migración completada |
+| `StudentScopeService` | ✅ | Namespace real: `Services\Estudiant\StudentScopeService` |
+| Perfil del estudiante | ✅ | Datos personales, lugar de nacimiento, contacto, representante, stats, enlaces rápidos |
+| Información académica | ✅ | Pensums, áreas de formación, stats por área |
+| Comentarios | ✅ | Modelo + Policy + moderación (approve/reject) |
+| Lecciones | ✅ | Listado con filtros (búsqueda, lapso, asignatura) y paginación |
+| Recursos | ✅ | Grid con modal de vista previa (imagen, PDF, video) |
+| Tests | ✅ | Ver sección de Testing más abajo |
 
 ---
 
@@ -544,7 +563,7 @@ class ActivityCommentPolicy
 
 ```php
 <?php
-// app/Services/Lms/StudentScopeService.php
+// app/Services/Estudiant/StudentScopeService.php
 
 namespace App\Services\Lms;
 
@@ -702,7 +721,7 @@ class StudentScopeService
 
 namespace App\Livewire\Student\Lms\Concerns;
 
-use App\Services\Lms\StudentScopeService;
+use App\Services\Estudiant\StudentScopeService;
 use Illuminate\Support\Facades\Auth;
 
 trait HasStudentScope
@@ -771,7 +790,7 @@ Route::prefix('app/estudiante')
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Lms\StudentScopeService;
+use App\Services\Estudiant\StudentScopeService;
 use App\Models\app\Academy\Pevaluacion;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -820,26 +839,63 @@ class StudentHome extends Component
 }
 ```
 
-#### 5.1 Perfil del Estudiante (NUEVO)
+#### 5.1 Perfil del Estudiante — Implementado con secciones expandidas
 
+**Archivos reales:**
+- `app/Livewire/Student/Lms/Profile.php`
+- `resources/views/livewire/student/lms/profile.blade.php`
+
+**El componente `Profile` fue mejorado para incluir:**
+
+| Sección | Campos |
+|---------|--------|
+| **Stats rápidas** | Total actividades, lecciones, comentarios (tarjetas numéricas) |
+| **Datos Personales** | Nombre completo, cédula con nacionalidad (V/E), género, fecha de nacimiento, edad, nacionalidad |
+| **Lugar de Nacimiento** | Ciudad, Estado, País (oculto si vacío) |
+| **Contacto** | Correo electrónico, correo clases virtuales (gsemail), celular, teléfono, dirección de residencia |
+| **Representante** | Nombre, cédula, celular, correo (oculto si no hay representante vinculado) |
+| **Información Institucional** | Grado, sección, plan de estudio, programa educativo |
+| **Enlaces Rápidos** | Accesos directos a Académica, Lecciones, Recursos, Inicio |
+
+**Componente PHP** (`app/Livewire/Student/Lms/Profile.php`):
 ```php
 <?php
-// app/Livewire/Student/Lms/Profile.php
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Lms\StudentScopeService;
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
+use App\Services\Estudiant\StudentScopeService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Profile extends Component
 {
     public ?array $profileData = null;
+    public ?array $stats = null;
 
     public function mount(): void
     {
         $service = app(StudentScopeService::class, ['user' => Auth::user()]);
         $this->profileData = $service->getInscripcionData();
+
+        $seccionIds = $service->getSeccionIds();
+        if ($seccionIds->isNotEmpty()) {
+            $publishedActivityIds = LmsActivityPublication::query()
+                ->visibleNow()->pluck('activity_id');
+
+            $activities = Activity::whereIn('id', $publishedActivityIds)
+                ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+                ->get();
+
+            $this->stats = [
+                'total_activities' => $activities->count(),
+                'total_lessons'    => $activities->whereHas('lmsPublication', fn($q) => $q->visibleNow())->count(),
+                'total_comments'   => ActivityComment::whereIn('activity_id', $activities->pluck('id'))
+                    ->approved()->count(),
+            ];
+        }
     }
 
     public function render(): \Illuminate\View\View
@@ -850,72 +906,8 @@ class Profile extends Component
 }
 ```
 
-```blade
-{{-- resources/views/livewire/student/lms/profile.blade.php --}}
-<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
-    <h1 class="text-lg font-bold text-gray-900 dark:text-white">Mi Perfil</h1>
-
-    @if($profileData && $profileData['estudiant'])
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 space-y-4">
-            {{-- Datos personales --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Nombre</label>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ $profileData['estudiant']->full_name ?? $profileData['estudiant']->name . ' ' . $profileData['estudiant']->lastname }}
-                    </p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Cédula</label>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ $profileData['estudiant']->ci_estudiant ?? $profileData['estudiant']->ci_estudiant_temp ?? '—' }}
-                    </p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Género</label>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $profileData['estudiant']->gender_sm ?? '—' }}</p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Fecha de Nacimiento</label>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ $profileData['estudiant']->day_birth }}/{{ $profileData['estudiant']->month_birth }}/{{ $profileData['estudiant']->year_birth }}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {{-- Datos institucionales --}}
-        @if($profileData['seccion'])
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 space-y-4">
-            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Información Institucional</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Grado</label>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $profileData['grado']?->name ?? '—' }}</p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Sección</label>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $profileData['seccion']->name ?? '—' }}</p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Plan de Estudio</label>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $profileData['pestudio']?->name ?? '—' }}</p>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Programa Educativo</label>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $profileData['peducativo']?->name ?? '—' }}</p>
-                </div>
-            </div>
-        </div>
-        @endif
-    @else
-        <div class="text-center py-12">
-            <p class="text-gray-500">No se encontraron datos del estudiante.</p>
-            <p class="text-xs text-gray-400 mt-1">Contacta al departamento de control de estudio.</p>
-        </div>
-    @endif
-</div>
-```
+**Vista Blade** — 7 secciones en cards con `divide-y`, etiquetas uppercase tracking-widest, y soporte dark mode.
+Ver archivo completo en `resources/views/livewire/student/lms/profile.blade.php`.
 
 #### 5.2 Información Académica (NUEVO)
 
@@ -1032,7 +1024,7 @@ class AcademicInfo extends Component
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Lms\StudentScopeService;
+use App\Services\Estudiant\StudentScopeService;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lapso;
 use Illuminate\Support\Facades\Auth;
@@ -1572,7 +1564,7 @@ NUEVOS:
   database/migrations/xxxx_create_activity_comments_table.php
   app/Models/app/Academy/Lms/ActivityComment.php
   app/Policies/ActivityCommentPolicy.php
-  app/Services/Lms/StudentScopeService.php
+  app/Services/Estudiant/StudentScopeService.php
   app/Livewire/Student/Lms/Concerns/HasStudentScope.php
   app/Livewire/Student/Lms/Profile.php
   app/Livewire/Student/Lms/AcademicInfo.php
@@ -1619,7 +1611,7 @@ MODIFICADOS:
 - [ ] Remover `is_student` de `$fillable`, `$casts`, `isStudent()`, `getRoleLabelAttribute()` en User model
 - [ ] Eliminar `app/Models/app/Academy/Lms/ActivityComment.php`
 - [ ] Eliminar `app/Policies/ActivityCommentPolicy.php`
-- [ ] Eliminar `app/Services/Lms/StudentScopeService.php`
+- [ ] Eliminar `app/Services/Estudiant/StudentScopeService.php`
 - [ ] Eliminar `app/Livewire/Student/Lms/Concerns/` (directorio completo)
 - [ ] Eliminar `app/Livewire/Student/Lms/Profile.php`
 - [ ] Eliminar `app/Livewire/Student/Lms/AcademicInfo.php`
@@ -1632,3 +1624,17 @@ MODIFICADOS:
 - [ ] Revertir cambios en `StudentHome.php` y `ActivityView.php`
 - [ ] Eliminar tests de estudiante
 - [ ] `php artisan optimize:clear`
+
+---
+
+## 10. Registro de Cambios
+
+| Fecha | Cambio | Archivos modificados |
+|---|---|---|
+| 2026-07-27 | Plan inicial (blueprint) | — |
+| 2026-07-28 | Migración `is_student`, migración `activity_comments`, modelo `ActivityComment`, `StudentScopeService`, todos los componentes Livewire (Profile, AcademicInfo, LessonList, ResourceList), vistas Blade, navbar, rutas, policies. Namespace real: `Services\Estudiant\StudentScopeService` | ~20 archivos |
+| 2026-07-28 | Campo `rejected_by`, `rejected_at`, `rejected_reason` en ActivityComment + migrations. Métodos `approve()`, `reject()`, `scopePending()`, `scopeRejected()`, `scopeApproved()` | 1 migración + ActivityComment.php |
+| 2026-07-28 | Integración `LmsActivityLog` en ActivityView (eventos VIEW y COMPLETE). Método `markComplete()` | ActivityView.php |
+| 2026-07-28 | Suite de tests de estudiante (~50+ tests) | `tests/Unit/Estudiant/`, `tests/Feature/Estudiant/`, `tests/Feature/Lms/` |
+| **2026-07-29** | **Perfil mejorado**: stats cards (actividades, lecciones, comentarios), lugar de nacimiento, sección de contacto, sección de representante, edad, nacionalidad, enlaces rápidos. Documentación actualizada. | `Profile.php`, `profile.blade.php`, `implementations.md` |
+| **2026-07-29** | **Fix WireUI Alpine error**: `@wireUiScripts` faltaba en `student/layouts/app.blade.php`. Sin esta directiva, el JS de WireUI no se cargaba en las páginas de estudiante, causando `wireui_notifications is not defined`. Se agregó antes de `@livewireScripts`. | `resources/views/student/layouts/app.blade.php` |

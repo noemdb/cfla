@@ -10,9 +10,11 @@ use App\Models\app\Academy\Lapso;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use WireUi\Traits\WireUiActions;
 
 class AcademicInfo extends Component
 {
+    use WireUiActions;
     public ?array $inscripcionData = null;
     public $pensums;
     public $pevaluacions;

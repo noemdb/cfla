@@ -5,9 +5,11 @@ namespace App\Livewire\Student\Lms;
 use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Livewire\Component;
+use WireUi\Traits\WireUiActions;
 
 class StudentHome extends Component
 {
+    use WireUiActions;
     use Concerns\HasStudentScope;
 
     public string $search = '';
