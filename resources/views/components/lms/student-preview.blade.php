@@ -918,7 +918,6 @@
             min-height: 0;
         }
         .mermaid-fill-height svg {
-            min-height: 100% !important;
             width: 100% !important;
             flex: 1 !important;
         }

@@ -244,9 +244,18 @@ Alpine.data('mermaidEmbed', () => ({
         svgEl.style.userSelect = 'none';
         svgEl.style.pointerEvents = 'all';
 
+        // Remove the SVG width="100%" attribute — CSS width handles sizing
+        // and leaving the attribute can create edge-case conflicts.
+        svgEl.removeAttribute('width');
+        // SVG elements default to overflow:hidden, which clips content that
+        // extends even slightly beyond the viewBox.  Allow the diagram to
+        // render fully (labels, edge markers, etc.) without clipping.
+        // Pan/zoom clipping is handled by the container, not the SVG.
+        svgEl.style.overflow = 'visible';
+
         const container = svgEl.parentNode;
         container.style.position = 'relative';
-        container.style.overflow = 'hidden';
+        container.style.overflow = 'visible';
         container.style.cursor = 'grab';
         this._container = container;
         this._svg = svgEl;
@@ -333,6 +342,10 @@ Alpine.data('mermaidEmbed', () => ({
         const t = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
         this._svg.style.transform = t;
         this._svg.style.transformOrigin = 'top left';
+        this._container.style.overflow =
+            this.zoom > 1 || this.panX !== 0 || this.panY !== 0
+                ? 'hidden'
+                : 'visible';
         this._container.style.cursor =
             this.zoom > 1 || this.panX !== 0 || this.panY !== 0
                 ? this._isDragging
