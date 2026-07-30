@@ -253,8 +253,7 @@
     <!-- Mensaje de Bienvenida -->
     <div class="invitation-box">
         <div class="invitation-text">
-            Te invitamos cordialmente a visitar nuestro colegio en el día seleccionado a las <strong>2:00
-                PM</strong>.
+            Te invitamos cordialmente a visitar nuestro colegio en el día seleccionado de <strong>8:00 AM a 12:00 M</strong>.
             Esperamos contar con tu presencia para conocernos mejor y acompañarte en este importante proceso académico.
         </div>
         <div class="important-note">

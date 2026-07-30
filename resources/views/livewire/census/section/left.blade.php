@@ -9,7 +9,7 @@
         <div class="text-lg">El primer paso hacia una educación de excelencia.</div>
         @php $jornadaProxima = App\Models\app\Academy\Catchment::getJornadaProxima(); @endphp
         <div class="mb-2 font-semibold text-lg rounded-lg bg-white/10 p-4 backdrop-blur-sm w-full">
-            {{ $jornadaProxima['label'] }}, a las 2pm.
+            {{ $jornadaProxima['label'] }}, de 8am a 12m.
         </div>
 
         <div class="w-full max-full space-y-4">
@@ -81,6 +81,16 @@
                         <x-icon name="information-circle" class="w-5 h-5" />
                     </span>
                     <span class="text-lg font-semibold">Código de Vestimenta</span>
+                </div>
+            </div>
+
+            {{-- Jornadas --}}
+            <div class="rounded-lg bg-white/5 p-4 backdrop-blur-sm hover:bg-white/10 transition">
+                <div class="flex items-center gap-3 cursor-pointer" wire:click="openJornadasInfo">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
+                        <x-icon name="calendar-days" class="w-5 h-5" />
+                    </span>
+                    <span class="text-lg font-semibold">Jornadas del Censo</span>
                 </div>
             </div>
 

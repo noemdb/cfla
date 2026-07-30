@@ -46,7 +46,8 @@ class CatchmentWizard extends Component
     public $status_validate_code_email; // Dia de la cita final
     public $is_regular = false;         // Si es un representante regular (con estudiantes inscritos)
 
-    public bool $modalDressCode = false; // Modal Código de Vestimenta
+    public bool $modalDressCode = false;  // Modal Código de Vestimenta
+    public bool $modalJornadas = false;   // Modal Jornadas
 
     protected $listeners   = ['hideVideo'];
     public bool $showVideo = true; // Estado inicial: mostrar video
@@ -74,6 +75,16 @@ class CatchmentWizard extends Component
     public function closeDressCode(): void
     {
         $this->modalDressCode = false;
+    }
+
+    public function openJornadasInfo(): void
+    {
+        $this->modalJornadas = true;
+    }
+
+    public function closeJornadasInfo(): void
+    {
+        $this->modalJornadas = false;
     }
 
     public function restart()

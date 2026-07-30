@@ -89,6 +89,15 @@
         </div>
     </template>
 
+    {{-- Modal Jornadas del Censo (teleportado al body) --}}
+    <template x-teleport="body">
+        <div>
+            @if ($modalJornadas)
+                @include('livewire.census.section.jornadas-info')
+            @endif
+        </div>
+    </template>
+
 </div>
 
 @section('scripts')

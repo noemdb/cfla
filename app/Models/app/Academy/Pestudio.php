@@ -497,29 +497,17 @@ class Pestudio extends Model
 
             $approvalRate = $activitiesCount > 0 ? round(($approvedActivities / $activitiesCount) * 100, 1) : 0;
 
-            // Real IEE/IEE-CN formulas via Profesor model
-            $iee = $fullProfesor ? $fullProfesor->getProfesorIEE($lapsoId, $this->id) : 0;
-            $ieeCN = $fullProfesor ? $fullProfesor->getProfesorIEECN($lapsoId, $this->id) : 0;
-            $ieePct = $iee !== null ? round(min(100, $iee * 100), 1) : 0;
-            $ieeCNPct = $ieeCN !== null ? round(min(100, $ieeCN * 100), 1) : 0;
-
-            // Real IRE (relative to ieePROM)
-            $boletinsCount = $fullProfesor ? $fullProfesor->getBoletins($lapsoId, $this->id)->count() : 0;
-            $ire = ($ieePROM > 0) ? round(100 * $boletinsCount / $ieePROM, 1) : 0;
+            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->whereIn('activities.pevaluacion_id', $pevIds)
+                ->count(DB::raw('DISTINCT activities.id'));
 
             return (object) [
                 'id' => $profesor->id,
                 'full_name' => trim("{$profesor->lastname} {$profesor->name}"),
                 'ci_profesor' => $profesor->ci_profesor,
-                'profesor' => $fullProfesor,
-                'pevaluacions_count' => $pevCount,
                 'activities_count' => $activitiesCount,
-                'boletins_count' => $boletinsCount,
                 'approval_rate' => $approvalRate,
-                'iee' => $ieePct,
-                'iee_raw' => $iee,
-                'iee_cn' => $ieeCNPct,
-                'ire' => $ire,
+                'lessons_count' => $lessonsCount,
             ];
         });
     }

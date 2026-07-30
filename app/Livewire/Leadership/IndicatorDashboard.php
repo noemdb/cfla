@@ -49,6 +49,9 @@ class IndicatorDashboard extends Component
     // Tab 3: Activity indicators
     public $tab3Data = [];
 
+    // Tab 4: Lesson indicators
+    public $tab4Data = [];
+
     // Global KPI boxes
     public $totalActivities = 0;
     public $totalProfesoresActivos = 0;
@@ -434,6 +437,79 @@ class IndicatorDashboard extends Component
             }
         }
 
+        // ══ TAB 4: Lesson indicators (scoped to leader's asignaturas) ══
+        $this->tab4Data = [];
+        $tab4Lapso = $this->lapsos->firstWhere('id', $this->selectedLapsoId);
+        if ($tab4Lapso) {
+            foreach ($filteredPeducativos as $peducativo) {
+                $pestudios = $this->getPestudiosForPeducativo($peducativo->id);
+                $pestudioIds = $pestudios->pluck('id');
+
+                $pevIds = Pevaluacion::whereNull('pevaluacions.deleted_at')
+                    ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+                    ->whereIn('pensums.pestudio_id', $pestudioIds)
+                    ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
+                    ->where('pevaluacions.lapso_id', $tab4Lapso->id)
+                    ->pluck('pevaluacions.id');
+
+                $totalPevCount = $pevIds->count();
+
+                $lessons = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                    ->whereIn('activities.pevaluacion_id', $pevIds)
+                    ->select(
+                        'activities.*',
+                        'lms_activity_publications.status as pub_status',
+                        'lms_activity_publications.publish_at',
+                        'lms_activity_publications.published_at',
+                        'lms_activity_publications.notes'
+                    )
+                    ->get();
+
+                $totalLessons = $lessons->count();
+                $published = $lessons->filter(fn($l) => $l->pub_status === 'PUBLISHED')->count();
+                $scheduled = $lessons->filter(fn($l) => !is_null($l->publish_at) && $l->pub_status !== 'PUBLISHED')->count();
+                $drafts = $totalLessons - $published - $scheduled;
+
+                $publishedPct = $totalLessons > 0 ? round(($published / $totalLessons) * 100, 1) : 0;
+                $scheduledPct = $totalLessons > 0 ? round(($scheduled / $totalLessons) * 100, 1) : 0;
+                $draftPct = $totalLessons > 0 ? round(($drafts / $totalLessons) * 100, 1) : 0;
+                $avgPerPev = $totalPevCount > 0 ? round($totalLessons / $totalPevCount, 2) : 0;
+
+                $pevIdsWithLessons = $lessons->pluck('pevaluacion_id')->unique();
+                $profIdsWithLessons = Pevaluacion::whereIn('id', $pevIdsWithLessons)
+                    ->whereNotNull('profesor_id')
+                    ->distinct()
+                    ->count('profesor_id');
+
+                $totalTeachers = 0;
+                foreach ($pestudios as $pestudio) {
+                    $totalTeachers += $this->getScopedTeachersCount($pestudio->id, $tab4Lapso->id);
+                }
+                $teachersParticipation = $totalTeachers > 0 ? round(($profIdsWithLessons / $totalTeachers) * 100, 1) : 0;
+
+                $withNotes = $lessons->filter(fn($l) => !empty($l->notes))->count();
+                $supervision = $totalLessons > 0 ? round(($withNotes / $totalLessons) * 100, 1) : 0;
+
+                $this->tab4Data[$tab4Lapso->id][$peducativo->id] = (object) [
+                    'peducativo' => $peducativo,
+                    'lapso' => $tab4Lapso,
+                    'indicators' => (object) [
+                        'total_lessons'          => $totalLessons,
+                        'published_count'        => $published,
+                        'scheduled_count'        => $scheduled,
+                        'draft_count'            => $drafts,
+                        'published_pct'          => $publishedPct,
+                        'scheduled_pct'          => $scheduledPct,
+                        'draft_pct'              => $draftPct,
+                        'avg_lessons_per_pev'    => $avgPerPev,
+                        'teachers_participation' => $teachersParticipation,
+                        'supervision_rate'       => $supervision,
+                    ],
+                    'pevCount' => $totalPevCount,
+                ];
+            }
+        }
+
         // ══ Global: Diagnósticos activos (scoped to leader's pestudios) ══
         $pestudioIds = $this->getBasePestudios()->pluck('id');
         $this->totalDiagActive = DiagMain::where('active', true)
@@ -529,13 +605,9 @@ class IndicatorDashboard extends Component
                 ->count();
             $approvalRate = $activitiesCount > 0 ? round(($approvedActivities / $activitiesCount) * 100, 1) : 0;
 
-            $iee = $fullProfesor ? $fullProfesor->getProfesorIEE($lapsoId, $pestudioId) : 0;
-            $ieeCN = $fullProfesor ? $fullProfesor->getProfesorIEECN($lapsoId, $pestudioId) : 0;
-            $ieePct = $iee !== null ? round(min(100, $iee * 100), 1) : 0;
-            $ieeCNPct = $ieeCN !== null ? round(min(100, $ieeCN * 100), 1) : 0;
-
-            $boletinsCount = $fullProfesor ? $fullProfesor->getBoletins($lapsoId, $pestudioId)->count() : 0;
-            $ire = ($ieePROM > 0) ? round(100 * $boletinsCount / $ieePROM, 1) : 0;
+            $lessonsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->whereIn('activities.pevaluacion_id', $pevIds)
+                ->count(DB::raw('DISTINCT activities.id'));
 
             return (object) [
                 'id' => $profesor->id,
@@ -543,9 +615,7 @@ class IndicatorDashboard extends Component
                 'ci_profesor' => $profesor->ci_profesor ?? '',
                 'activities_count' => $activitiesCount,
                 'approval_rate' => $approvalRate,
-                'iee' => $ieePct,
-                'iee_cn' => $ieeCNPct,
-                'ire' => $ire,
+                'lessons_count' => $lessonsCount,
             ];
         });
     }

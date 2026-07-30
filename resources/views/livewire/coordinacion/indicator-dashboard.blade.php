@@ -171,6 +171,11 @@
                     <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     <span class="hidden sm:inline">Actividades</span>
                 </button>
+                <button @click="activeTab = 4" title="Lecciones" :class="activeTab === 4 ? 'text-sky-400 border-sky-500 bg-sky-500/5' : 'text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-600'"
+                    class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap">
+                    <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <span class="hidden sm:inline">Lecciones</span>
+                </button>
             </nav>
         </div>
 
@@ -317,9 +322,7 @@
                                             <tr class="border-b border-white/5">
                                                 <th class="text-left px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">Profesor</th>
                                                 <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">N. Actividades</th>
-                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas">IEE</th>
-                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Porcentaje de notas cargadas para el corte de notas">IEE-CN</th>
-                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Índice Relativo de Rendimiento en Evaluación">IRE</th>
+                                                <th class="text-center px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500" title="Lecciones publicadas, programadas y borradores">Lecciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
@@ -338,24 +341,8 @@
                                                         </span>
                                                     </td>
                                                     <td class="px-3 py-2 text-center">
-                                                        <div class="flex items-center justify-center gap-2">
-                                                            <div class="w-16 bg-white/5 rounded-full h-1.5">
-                                                                <div class="h-1.5 rounded-full {{ ($teacher->iee ?? 0) >= 70 ? 'bg-emerald-500' : (($teacher->iee ?? 0) >= 40 ? 'bg-amber-500' : 'bg-red-500') }}"
-                                                                     style="width: {{ min(100, $teacher->iee ?? 0) }}%"></div>
-                                                            </div>
-                                                            <span class="text-xs font-mono {{ ($teacher->iee ?? 0) >= 70 ? 'text-emerald-400' : (($teacher->iee ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
-                                                                {{ $teacher->iee }}%
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-3 py-2 text-center">
-                                                        <span class="text-xs font-mono {{ ($teacher->iee_cn ?? 0) >= 70 ? 'text-emerald-400' : (($teacher->iee_cn ?? 0) >= 40 ? 'text-amber-400' : 'text-red-400') }}">
-                                                            {{ $teacher->iee_cn }}%
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-3 py-2 text-center">
-                                                        <span class="text-xs font-mono {{ ($teacher->ire ?? 0) >= 100 ? 'text-emerald-400' : (($teacher->ire ?? 0) >= 70 ? 'text-amber-400' : 'text-red-400') }}">
-                                                            {{ $teacher->ire }}%
+                                                        <span class="text-xs font-mono text-gray-300 px-2 py-1 bg-white/5 rounded-lg">
+                                                            {{ $teacher->lessons_count ?? 0 }}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -445,6 +432,90 @@
                 @else
                     <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
                         <p class="text-gray-500 text-sm">No hay datos de actividades para el período seleccionado en tus programas educativos.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- ═══ TAB 4: Lecciones ═══ --}}
+            <div x-show="activeTab === 4" x-cloak
+                 x-data="{ activePeducativo: {{ $peducativos->first()?->id ?? 0 }} }">
+                @php $lapsoId = $selectedLapsoId; @endphp
+
+                @if(isset($tab4Data[$lapsoId]) && count($tab4Data[$lapsoId]) > 0)
+                    <div class="border-b border-white/5 mb-2">
+                        <nav class="flex overflow-x-auto gap-0.5 snap-x snap-mandatory -mb-px">
+                            @foreach($peducativos as $peducativo)
+                                @php
+                                    $tab4Item = $tab4Data[$lapsoId][$peducativo->id] ?? null;
+                                @endphp
+                                <button @click="activePeducativo = {{ $peducativo->id }}"
+                                    :class="activePeducativo === {{ $peducativo->id }} ? 'text-sky-400 border-sky-500 bg-sky-500/5' : 'text-gray-500 border-transparent hover:text-gray-400'"
+                                    class="shrink-0 sm:flex-1 px-2 sm:px-4 py-2 min-h-[44px] text-xs font-bold transition-all duration-200 border-b-2 whitespace-nowrap">
+                                    {{ $peducativo->name }}
+                                    <span class="block text-[9px] font-normal text-gray-500 normal-case">{{ $tab4Item ? $tab4Item->indicators->total_lessons . ' lec.' : '0 lec.' }}</span>
+                                </button>
+                            @endforeach
+                        </nav>
+                    </div>
+
+                    @foreach($peducativos as $peducativo)
+                        @php
+                            $tab4Item = $tab4Data[$lapsoId][$peducativo->id] ?? null;
+                            $ind = $tab4Item->indicators ?? null;
+                        @endphp
+                        <div x-show="activePeducativo === {{ $peducativo->id }}" x-cloak>
+                            @if($ind && $ind->total_lessons > 0)
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" style="grid-auto-flow: dense;">
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>'
+                                            label="Total de lecciones registradas"
+                                            value="{{ number_format($ind->total_lessons) }}"
+                                            color="sky" />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>'
+                                            label="Lecciones por Plan" subtext="Promedio de lecciones por Plan de Evaluación"
+                                            value="{{ $ind->avg_lessons_per_pev }}" color="sky" />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0"></path></svg>'
+                                            label="Participación" subtext="% Docentes con Lecciones"
+                                            value="{{ $ind->teachers_participation }}%" color="blue" />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+                                            label="Publicadas" subtext="% de Lecciones Publicadas"
+                                            value="{{ $ind->published_pct }}%" color="emerald" />
+                                    </div>
+                                    <div class="col-span-1">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'
+                                            label="Programadas" subtext="% de Lecciones Programadas"
+                                            value="{{ $ind->scheduled_pct }}%" color="amber" />
+                                    </div>
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-indicator-box
+                                            icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>'
+                                            label="Supervisión" subtext="% de Publicaciones con Notas de Seguimiento"
+                                            value="{{ $ind->supervision_rate }}%" color="rose" />
+                                    </div>
+                                </div>
+                            @else
+                                <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
+                                    <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                    <p class="text-gray-500 text-sm mb-1">Sin lecciones registradas</p>
+                                    <p class="text-gray-600 text-xs">No hay lecciones registradas para este período en {{ $peducativo->name }} bajo tu coordinación.</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    <div class="bg-white/5 rounded-lg p-4 sm:p-6 text-center">
+                        <p class="text-gray-500 text-sm">No hay datos de lecciones para el período seleccionado en tus programas educativos.</p>
                     </div>
                 @endif
             </div>
