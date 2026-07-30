@@ -9,6 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @method bool isCoordinacion()
+ * @method bool isLeadership()
+ * @method bool isProfesor()
+ * @method bool isStudent()
+ * @method bool isAdminOrDiagnostic()
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;

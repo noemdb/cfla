@@ -43,6 +43,10 @@ class LoginController extends Controller
                 return redirect()->route('app.coordinacion.index');
             }
 
+            if ($user->isLeadership()) {
+                return redirect()->route('app.leadership.dashboard');
+            }
+
             if ($user->isProfesor()) {
                 return redirect()->to('/app/profesors/home');
             }
