@@ -130,7 +130,8 @@ class StudentScopeService
             return false;
         }
 
-        return $activity->lmsPublication?->isVisibleToStudents()
+        return $activity->status
+            && $activity->lmsPublication?->isVisibleToStudents()
             && $activity->pevaluacion
             && $seccionIds->contains($activity->pevaluacion->seccion_id);
     }

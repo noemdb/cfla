@@ -251,6 +251,13 @@ Alpine.data('mermaidEmbed', () => ({
         this._container = container;
         this._svg = svgEl;
 
+        // The toolbar is appended to the outer div (target.parentNode),
+        // which needs position:relative for the toolbar's absolute positioning.
+        const outer = target.parentNode;
+        if (outer && outer !== container) {
+            outer.style.position = 'relative';
+        }
+
         container.addEventListener('mousedown', (e) => this._startDrag(e));
         document.addEventListener('mousemove', (e) => this._onDrag(e));
         document.addEventListener('mouseup', () => this._stopDrag());

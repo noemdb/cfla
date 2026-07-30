@@ -782,60 +782,103 @@ Route::prefix('app/estudiante')
 
 ### Fase 5: Livewire Components
 
-#### 5.0 Refactor StudentHome existente (mejora con StudentScopeService)
+#### 5.0 StudentHome — Dashboard de Progreso Académico (REFACTOR COMPLETO)
 
+**El Home fue rediseñado como un dashboard de progreso** con 4 secciones, reemplazando la lista agrupada de actividades (que ahora vive en `/lecciones`):
+
+| Sección | Descripción | Datos |
+|---------|-------------|-------|
+| **Stats Cards** | 4 tarjetas numéricas con íconos | Total actividades, completadas, comentarios, descargas |
+| **Continuar Aprendiendo** | Últimas actividades interactuadas | Via `LmsActivityLog` (eventos `VIEW`/`COMPLETE`), deduplicadas por actividad, máx 5 |
+| **Próximas Fechas Límite** | Actividades por vencer con indicador de urgencia | Activities con `ffinal >= now()`, ordenadas ascendente, badges rojo/ámbar/gris |
+| **Distribución por Asignatura** | Barras de progreso por materia | Group by `asignatura.name`, con ratio completadas/totales + barra gradient |
+
+**Componente PHP** (`app/Livewire/Student/Lms/StudentHome.php`):
 ```php
 <?php
-// app/Livewire/Student/Lms/StudentHome.php — REFACTOR
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Estudiant\StudentScopeService;
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Pevaluacion;
-use Illuminate\Support\Facades\Auth;
+use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityLog;
+use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Livewire\Component;
+use WireUi\Traits\WireUiActions;
 
 class StudentHome extends Component
 {
-    use Concerns\HasStudentScope;    // ← NUEVO
-
-    public string $search = '';
-    public $pevaluacions;
+    use WireUiActions;
+    use Concerns\HasStudentScope;
 
     public function mount(): void
     {
         $this->initializeHasStudentScope();
+    }
 
+    public function render(): \Illuminate\View\View
+    {
         $service = $this->getStudentService();
         $seccionIds = $service->getSeccionIds();
 
-        if ($seccionIds->isEmpty()) {
-            $this->pevaluacions = collect();
-            return;
-        }
+        $publishedActivityIds = LmsActivityPublication::query()
+            ->visibleNow()->pluck('activity_id');
 
-        $publishedActivityIds = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
-            ->visibleNow()
-            ->pluck('activity_id');
+        $visibleActivityIds = Activity::whereIn('id', $publishedActivityIds)
+            ->where('status', true)
+            ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+            ->pluck('id');
 
-        $this->pevaluacions = Pevaluacion::with([
-            'pensum.asignatura',
-            'seccion.grado',
-            'profesor',
-            'lapso',
-            'activities' => function ($q) use ($publishedActivityIds) {
-                $q->whereIn('id', $publishedActivityIds)
-                  ->whereHas('lmsPublication', fn($sq) => $sq->visibleNow())
-                  ->with('lmsPublication');
-            },
-        ])
-        ->whereIn('seccion_id', $seccionIds)           // ← MEJORADO con scope
-        ->whereHas('activities', fn($q) => $q->whereIn('id', $publishedActivityIds))
-        ->orderBy('created_at', 'desc')
-        ->get();
+        // 1. Stats
+        $totalActivities = $visibleActivityIds->count();
+        $completedIds = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'COMPLETE')
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->pluck('activity_id')->unique();
+        $stats = [
+            'total'     => $totalActivities,
+            'completed' => $completedIds->count(),
+            'comments'  => ActivityComment::where('user_id', auth()->id())->count(),
+            'downloads' => LmsActivityLog::where('user_id', auth()->id())
+                ->where('event', 'RESOURCE_DOWNLOAD')->count(),
+            'progress_pct' => $totalActivities > 0
+                ? round(($completedIds->count() / $totalActivities) * 100) : 0,
+        ];
+
+        // 2. Continue Learning (últimas 5 actividades únicas interactuadas)
+        $recentLogs = LmsActivityLog::with(['activity.pevaluacion.pensum.asignatura'])
+            ->where('user_id', auth()->id())
+            ->whereIn('event', ['VIEW', 'COMPLETE'])
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->orderBy('created_at', 'desc')->take(10)->get()
+            ->unique('activity_id')->take(5)->values();
+
+        // 3. Próximas fechas límite
+        $upcoming = Activity::with(['pevaluacion.pensum.asignatura', 'pevaluacion.lapso'])
+            ->whereIn('id', $visibleActivityIds)
+            ->whereNotNull('ffinal')->where('ffinal', '>=', now()->subDay())
+            ->orderBy('ffinal', 'asc')->take(5)->get();
+
+        // 4. Distribución por asignatura
+        $activities = Activity::with('pevaluacion.pensum.asignatura')
+            ->whereIn('id', $visibleActivityIds)->get();
+        $completedIdsArray = $completedIds->toArray();
+        $subjectDistribution = $activities
+            ->groupBy(fn($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
+            ->map(fn($acts, $name) => [
+                'name'      => $name,
+                'total'     => $acts->count(),
+                'completed' => $acts->filter(fn($a) => in_array($a->id, $completedIdsArray))->count(),
+            ])->values()->sortByDesc('total')->values();
+
+        return view('livewire.student.lms.student-home', [
+            'stats'              => $stats,
+            'recentLogs'         => $recentLogs,
+            'upcoming'           => $upcoming,
+            'subjectDistribution' => $subjectDistribution,
+        ])->layout('student.layouts.app');
     }
-
-    // ... resto igual ...
 }
 ```
 
@@ -1184,27 +1227,97 @@ class ResourceList extends Component
 }
 ```
 
-#### 5.5 Comentarios en ActivityView (mejora del componente existente)
+#### 5.5 ActivityView — Comentarios, Progreso y Marcar Completada (mejora del componente existente)
 
-Agregar sección de comentarios al `ActivityView` existente:
+Mejora del `ActivityView` existente para incluir comentarios, tracking de progreso (`LmsActivityProgress`) y marcado de completado:
 
+**Scoping:** Si la actividad no es visible para el estudiante, se lanza `abort(404)` — no se usa el patrón `$accessDenied` con render condicional. Esto evita que el componente se renderice con datos incompletos y retorna HTTP 404.
+
+**Propiedades nuevas:**
 ```php
-// app/Livewire/Student/Lms/ActivityView.php — agregar:
-
 use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityProgress;
+use App\Livewire\Student\Lms\Concerns\HasStudentScope;
 
 // Nuevas propiedades:
-public string $newComment = '';
 public $comments;
+public string $newComment = '';
+public $completed = false;
+// NOTA: $accessDenied fue eliminado — se usa abort(404) en su lugar
+```
 
-// En mount(), después de cargar recursos:
-$this->comments = ActivityComment::with('user')
-    ->forActivity($activity->id)
-    ->approved()
-    ->orderBy('created_at', 'desc')
-    ->get();
+**En mount(), se deben inicializar en orden:**
+```php
+public function mount(Activity $activity): void
+{
+    $this->initializeHasStudentScope();  // ← Obligatorio: inicializa StudentScopeService
 
-// Nuevo método:
+    // Gate de visibilidad: abort(404) si no es visible
+    if (!$this->studentService->isActivityVisible($activity)) {
+        abort(404);
+    }
+
+    $this->activity = $activity;
+
+    // Cargar secciones, recursos, enlaces, embeds (filtrados por is_visible)
+    $this->sections = $activity->lmsSections()
+        ->where('is_visible', true)
+        ->with(['visibleContents.media'])->get();
+    // ... resources, links, htmlEmbeds ...
+
+    // Comentarios aprobados
+    $this->comments = ActivityComment::with('user')
+        ->forActivity($activity->id)
+        ->approved()
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // Estado de completado (chequea ambas fuentes por retro-compatibilidad)
+    $this->completed =
+        LmsActivityProgress::where('activity_id', $activity->id)
+            ->where('student_id', auth()->id())
+            ->where('status', 'COMPLETED')->exists()
+        ||
+        LmsActivityLog::where('activity_id', $activity->id)
+            ->where('user_id', auth()->id())
+            ->where('event', 'COMPLETE')->exists();
+
+    // Registrar/actualizar progreso
+    $progress = LmsActivityProgress::firstOrCreate(
+        ['activity_id' => $activity->id, 'student_id' => auth()->id()],
+        ['status' => 'IN_PROGRESS', 'first_access_at' => now(), 'last_access_at' => now()]
+    );
+    if (!$progress->wasRecentlyCreated) {
+        $progress->update(['last_access_at' => now()]);
+    }
+
+    LmsActivityLog::record($activity->id, auth()->id(), 'VIEW');
+}
+```
+
+**Marcar como completada:**
+```php
+public function markComplete(): void
+{
+    LmsActivityLog::record($this->activity->id, auth()->id(), 'COMPLETE');
+
+    LmsActivityProgress::updateOrCreate(
+        ['activity_id' => $this->activity->id, 'student_id' => auth()->id()],
+        ['status' => 'COMPLETED', 'completion_pct' => 100,
+         'completed_at' => now(), 'last_access_at' => now()]
+    );
+
+    $this->completed = true;
+
+    $this->notification()->success(
+        title: '¡Actividad completada!',
+        description: 'Has marcado esta actividad como completada.'
+    );
+}
+```
+
+**Guardar comentario:**
+```php
 public function saveComment(): void
 {
     $this->validate(['newComment' => 'required|string|min:1|max:1000']);
@@ -1222,6 +1335,23 @@ public function saveComment(): void
         description: 'Tu comentario será visible una vez aprobado.'
     );
 }
+```
+
+#### 5.6 Mermaid Diagrams — Fullscreen en ActivityView
+
+Los diagramas Mermaid renderizados en `activity-view.blade.php` incluyen un toolbar con zoom y botón de pantalla completa. El toolbar aparece al hacer hover sobre el diagrama.
+
+**Implementación:**
+- El toolbar se genera automáticamente en `mermaidEmbed._createToolbar()` (`resources/js/lms-student-preview.js`)
+- Incluye: zoom in/out, porcentaje, ajustar al ancho, **pantalla completa**, reset
+- El botón fullscreen usa `element.requestFullscreen()` del Fullscreen API
+
+**Estilos CSS** (al final de `activity-view.blade.php`, dentro del root div, sin `@once`):
+- `[x-data="mermaidEmbed()"]:fullscreen` — fondo, centrado, padding
+- `.mermaid-zoom-toolbar` en fullscreen — `position: fixed`, siempre visible
+- `.mermaid-fill-height` — SVG ocupa todo el alto disponible
+
+> **Nota:** Originalmente el bloque `<style>` estaba envuelto en `@once`, pero esto causaba que Livewire 3 detectara "Multiple root elements" (`@once` fuera del root div en compilaciones anteriores, o interferencia con re-renders). Se eliminó `@once` — CSS es idempotente y no hay penalidad en tenerlo sin envoltorio.
 ```
 
 ---
@@ -1552,6 +1682,14 @@ public function definition(): array
 | **Razón** | Relación directa 1:N con Activity. Simple, sin polymorphic overhead. Fácil de scoping por sección vía join | |
 | **Consecuencia** | Una tabla nueva con migración. Consultas directas sin morph | |
 
+### ADR-007: `abort(404)` en vez de `$accessDenied` flag
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | `abort(404)` cuando la actividad no es visible | `$accessDenied = true` con render condicional |
+| **Razón** | Renderizar el componente con `$accessDenied=true` retorna HTTP 200 con contenido vacío. El consumidor esperado (estudiante) debe recibir un HTTP 404 auténtico si la actividad no existe o no es visible. Además, evita que Livewire procese un template condicional que podría tener problemas de múltiples root elements | |
+| **Consecuencia** | El `mount()` lanza `NotFoundHttpException` si `isActivityVisible()` falla. No se necesita `@if($accessDenied)` en el template. Los tests verifican `assertStatus(404)` |
+
 ---
 
 ## 8. Dependencias y Roadmap
@@ -1638,3 +1776,88 @@ MODIFICADOS:
 | 2026-07-28 | Suite de tests de estudiante (~50+ tests) | `tests/Unit/Estudiant/`, `tests/Feature/Estudiant/`, `tests/Feature/Lms/` |
 | **2026-07-29** | **Perfil mejorado**: stats cards (actividades, lecciones, comentarios), lugar de nacimiento, sección de contacto, sección de representante, edad, nacionalidad, enlaces rápidos. Documentación actualizada. | `Profile.php`, `profile.blade.php`, `implementations.md` |
 | **2026-07-29** | **Fix WireUI Alpine error**: `@wireUiScripts` faltaba en `student/layouts/app.blade.php`. Sin esta directiva, el JS de WireUI no se cargaba en las páginas de estudiante, causando `wireui_notifications is not defined`. Se agregó antes de `@livewireScripts`. | `resources/views/student/layouts/app.blade.php` |
+| **2026-07-30** | **Fix buscador Home**: se movió la carga de datos de `mount()` a `render()` para reactividad. `$search` ahora filtra por topic/thematic/description de activities, name de asignatura, y name/lastname de profesor. Se quitó `public $pevaluacions` (ahora es variable de vista). Se agregó `.debounce.300ms` al input search. | `StudentHome.php`, `student-home.blade.php` |
+| **2026-07-30** | **Dashboard de progreso académico (Opción A)**: Rediseño completo del Home. Se reemplazó la lista agrupada de actividades por un dashboard con 4 secciones: (1) Stats cards (totales, completadas, comentarios, descargas), (2) Continuar Aprendiendo (últimas 5 actividades interactuadas vía LmsActivityLog), (3) Próximas fechas límite (actividades por vencer con indicador de urgencia), (4) Distribución por asignatura (barras de progreso por materia). El buscador se eliminó del Home porque la funcionalidad de búsqueda/filtro vive en Lecciones. | `StudentHome.php`, `student-home.blade.php` |
+| **2026-07-30** | **LmsActivityProgress + COMPLETE event + Fix `@once` + `abort(404)`**: Nuevo modelo para tracking granular de progreso. Migración `add_complete_event_to_lms_activity_logs`. Refactor `ActivityView.mount()` con `firstOrCreate`. Fix `@once` en activity-view.blade.php (causaba "Multiple root elements"). `abort(404)` en lugar de `$accessDenied` (ADR-007). Test de root element único agregado. | `ActivityView.php`, `activity-view.blade.php`, `StudentAccessTest.php`, `implementations.md`, `activity-lifecycle.md` |
+
+---
+
+## 11. Deploy y Verificación en Producción
+
+### Pasos para desplegar cambios en producción
+
+```bash
+# 1. Deployar todos los archivos modificados y nuevos al servidor de producción
+#    (rsync, deploy script, o git pull según el flujo del equipo)
+
+# 2. Ejecutar migraciones pendientes
+php8.2 artisan migrate
+
+# 3. Limpiar vistas compiladas en disco
+php8.2 artisan view:clear
+
+# 4. Resetear OPCache — CRÍTICO si OPCache tiene validate_timestamps=0
+#    (sin este paso, PHP sirve la versión cacheadas en memoria, no los archivos en disco)
+php8.2 artisan opcache:reset
+#    O alternativamente:
+#    sudo systemctl restart php8.2-fpm
+
+# 5. Limpiar cache de rutas y config (si se modificaron)
+php8.2 artisan route:cache
+php8.2 artisan config:cache
+
+# 6. Verificar las URLs clave
+```
+
+### Verificación post-deploy
+
+| URL | Qué verificar |
+|-----|--------------|
+| `http://cfla.local/app/estudiante/activity/{id}` | Actividades problemáticas cargan sin error "Multiple root elements" |
+| `http://cfla.local/app/estudiante/home` | Dashboard de progreso carga correctamente |
+| `http://cfla.local/app/estudiante/lecciones` | Listado de lecciones con filtros funciona |
+| `http://cfla.local/app/estudiante/perfil` | Perfil con stats y datos personales |
+
+### Nota sobre OPCache
+
+La configuración `opcache.validate_timestamps=0` (común en producción) hace que PHP-FPM **no revise si los archivos PHP cambiaron en disco** — sirve la versión compilada en memoria hasta que se reinicie el pool o se llame a `opcache_reset()`. Esto significa que:
+
+- `php8.2 artisan view:clear` borra las vistas compiladas del disco, pero OPCache puede seguir sirviendo la versión anterior de las vistas que Livewire acaba de re-compilar
+- Si una vista Blade se modificó (como `activity-view.blade.php`), el cambio NO se refleja hasta que OPCache se resetee
+- El flujo correcto es: **deploy → `view:clear` → `opcache:reset`** (o restart php-fpm)
+- `php8.2 artisan opcache:reset` requiere el paquete `laravellegends/pt-br-validator-validator` o implementación propia (verificar si está instalado)
+
+### Bug histórico: "Multiple root elements detected"
+
+**Síntoma:** `http://cfla.local/app/estudiante/activity/24` lanza "Multiple root elements detected for component: [student.lms.activity-view]" mientras que `activity/40` funciona correctamente.
+
+**Causa raíz (doble):**
+
+1. **Template:** El bloque `<style>` en `activity-view.blade.php` estaba envuelto en `@once`, lo que en condiciones específicas de re-render de Livewire 3 provocaba que el `@once` se ubicara fuera del root div en la compilación de Blade, resultando en 2+ root elements. En producción, OPCache con `validate_timestamps=0` agravó el problema al no reflejar la corrección hasta que se reseteó manualmente.
+
+2. **Datos (HTML malformado):** El **Content 432** de la actividad 24 contenía un diagrama Mermaid con HTML desbalanceado: **3 `<div>` de apertura pero 4 `</div>` de cierre** (1 extra). Esto causaba que al renderizar `{!! $content->body !!}`, el `</div>` sobrante cerrara prematuramente los wrappers del template (`text-sm` → `bg-gray-50` → `section-content`), dejando las secciones siguientes, recursos, enlaces, comentarios y el bloque `<style>` **fuera del root div** del componente. La actividad 40 no tenía este problema (su Content 1179 tenía 3 aperturas y 3 cierres, balanceado).
+
+**Solución aplicada:**
+1. Eliminar `@once` del bloque `<style>` (CSS es idempotente)
+2. Resetear OPCache post-deploy
+3. **Corregir el HTML del Content 432** — se eliminó el `</div>` extra de la base de datos (`preg_replace("/\s*<\/div>\s*$/", "")`)
+4. Test agregado: `test_published_activity_has_single_root_element` en `StudentAccessTest.php`
+
+**Recomendación a futuro:** Agregar validación de balance de etiquetas HTML al guardar `LmsActivityContent.body` para prevenir este tipo de corrupción de layout. Escanear otros contenidos existentes no encontró más casos de `<div>`s desbalanceados.
+
+**Prueba de regresión:** El test `test_published_activity_has_single_root_element` replica la detección de Livewire (`DOMDocument::loadHTML` + conteo de `XML_ELEMENT_NODE` en `<body>`) y verifica exactamente 1 root element.
+
+---
+
+## 12. Archivos sin seguimiento (para commit)
+
+Los siguientes archivos nuevos deben ser agregados al repositorio:
+
+| Archivo | Propósito |
+|---------|-----------|
+| `app/Models/app/Academy/Lms/LmsActivityProgress.php` | Modelo de progreso individual por estudiante |
+| `database/migrations/2026_07_30_155700_create_lms_activity_progress_table.php` | Migración: tabla `lms_activity_progress` |
+| `database/migrations/2026_07_30_155701_add_complete_event_to_lms_activity_logs.php` | Migración: enum COMPLETE en `lms_activity_logs.event` |
+| `blueprint/estudiant/activity-lifecycle.md` | Documentación del ciclo de vida de actividades |
+| `blueprint/estudiant/progress-dashboard.md` | Documentación del dashboard de progreso |
+

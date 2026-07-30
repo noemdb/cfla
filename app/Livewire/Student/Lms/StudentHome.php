@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Student\Lms;
 
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
@@ -12,46 +15,100 @@ class StudentHome extends Component
     use WireUiActions;
     use Concerns\HasStudentScope;
 
-    public string $search = '';
-    public $pevaluacions;
-
     public function mount(): void
     {
         $this->initializeHasStudentScope();
-
-        $service = $this->getStudentService();
-        $seccionIds = $service->getSeccionIds();
-
-        if ($seccionIds->isEmpty()) {
-            $this->pevaluacions = collect();
-            return;
-        }
-
-        $publishedActivityIds = LmsActivityPublication::query()
-            ->visibleNow()
-            ->pluck('activity_id');
-
-        $this->pevaluacions = Pevaluacion::with([
-            'pensum.asignatura',
-            'seccion.grado',
-            'profesor',
-            'lapso',
-            'activities' => function ($q) use ($publishedActivityIds) {
-                $q->where('status', true)
-                  ->whereIn('id', $publishedActivityIds)
-                  ->whereHas('lmsPublication', fn($sq) => $sq->visibleNow())
-                  ->with('lmsPublication');
-            },
-        ])
-        ->whereIn('seccion_id', $seccionIds)
-        ->whereHas('activities', fn($q) => $q->where('status', true)->whereIn('id', $publishedActivityIds))
-        ->orderBy('created_at', 'desc')
-        ->get();
     }
 
     public function render(): \Illuminate\View\View
     {
-        return view('livewire.student.lms.student-home')
-            ->layout('student.layouts.app');
+        $service = $this->getStudentService();
+        $seccionIds = $service->getSeccionIds();
+
+        // ─── Published activity IDs scoped to student's section ─────
+        $publishedActivityIds = LmsActivityPublication::query()
+            ->visibleNow()
+            ->pluck('activity_id');
+
+        $visibleActivityIds = Activity::whereIn('id', $publishedActivityIds)
+            ->where('status', true)
+            ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+            ->pluck('id');
+
+        // ─── 1. Stats ──────────────────────────────────────────────
+        $totalActivities = $visibleActivityIds->count();
+
+        $completedIds = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'COMPLETE')
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->pluck('activity_id')
+            ->unique();
+
+        $commentsCount = ActivityComment::where('user_id', auth()->id())->count();
+
+        $downloadsCount = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->count();
+
+        $stats = [
+            'total'       => $totalActivities,
+            'completed'   => $completedIds->count(),
+            'comments'    => $commentsCount,
+            'downloads'   => $downloadsCount,
+            'progress_pct' => $totalActivities > 0
+                ? round(($completedIds->count() / $totalActivities) * 100)
+                : 0,
+        ];
+
+        // ─── 2. Continue Learning — recent interaction per activity ─
+        $recentLogs = LmsActivityLog::with([
+            'activity.pevaluacion.pensum.asignatura',
+            'activity.pevaluacion.profesor',
+        ])
+            ->where('user_id', auth()->id())
+            ->whereIn('event', ['VIEW', 'COMPLETE'])
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->unique('activity_id')
+            ->take(5)
+            ->values();
+
+        // ─── 3. Upcoming deadlines ─────────────────────────────────
+        $upcoming = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.lapso',
+        ])
+            ->whereIn('id', $visibleActivityIds)
+            ->whereNotNull('ffinal')
+            ->where('ffinal', '>=', now()->subDay())
+            ->orderBy('ffinal', 'asc')
+            ->take(5)
+            ->get();
+
+        // ─── 4. Subject distribution ───────────────────────────────
+        $activities = Activity::with('pevaluacion.pensum.asignatura')
+            ->whereIn('id', $visibleActivityIds)
+            ->get();
+
+        $completedIdsArray = $completedIds->toArray();
+        $subjectDistribution = $activities
+            ->groupBy(fn($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
+            ->map(fn($acts, $name) => [
+                'name'      => $name,
+                'total'     => $acts->count(),
+                'completed' => $acts->filter(fn($a) => in_array($a->id, $completedIdsArray))->count(),
+            ])
+            ->values()
+            ->sortByDesc('total')
+            ->values();
+
+        return view('livewire.student.lms.student-home', [
+            'stats'              => $stats,
+            'recentLogs'         => $recentLogs,
+            'upcoming'           => $upcoming,
+            'subjectDistribution' => $subjectDistribution,
+        ])->layout('student.layouts.app');
     }
 }

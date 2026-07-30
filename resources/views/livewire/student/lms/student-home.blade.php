@@ -1,100 +1,251 @@
-<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
+<div class="max-w-4xl mx-auto py-8 px-4 space-y-8">
 
     {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-lg font-bold text-gray-900 dark:text-white">Mis Actividades</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Contenido publicado por tus profesores
+    <div>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">Panel de Progreso</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Resumen de tu avance académico
+        </p>
+    </div>
+
+    {{-- 1. Stats Cards --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {{-- Total --}}
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Totales</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Actividades publicadas</p>
+        </div>
+
+        {{-- Completed --}}
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Completadas</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['completed'] }}</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                @if($stats['total'] > 0)
+                    {{ $stats['progress_pct'] }}% del total
+                @else
+                    Sin actividades
+                @endif
             </p>
+        </div>
+
+        {{-- Comments --}}
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Comentarios</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['comments'] }}</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">En actividades</p>
+        </div>
+
+        {{-- Downloads --}}
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Descargas</span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['downloads'] }}</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Recursos descargados</p>
         </div>
     </div>
 
-    {{-- Search --}}
-    <div class="relative">
-        <input wire:model.live="search" type="search"
-               placeholder="Buscar por asignatura, profesor o tema…"
-               class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
-                      rounded-lg px-4 py-2.5 pl-10 text-sm text-gray-900 dark:text-gray-100
-                      placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/50
-                      focus:border-emerald-500 outline-none transition-all"/>
-        <svg class="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-    </div>
+    {{-- 2. Continue Learning --}}
+    @if($recentLogs->isNotEmpty())
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Continuar Aprendiendo</h2>
+        </div>
 
-    {{-- Lista de unidades --}}
-    @forelse($pevaluacions as $pe)
-        <section wire:key="pe-{{ $pe->id }}"
-                 class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-
-            {{-- Header --}}
-            <div class="px-4 sm:px-5 py-3 border-b border-gray-100 dark:border-gray-700/50">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0 flex-1">
-                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 truncate">
-                            {{ $pe->pensum?->asignatura?->name ?? 'Sin asignatura' }}
-                        </p>
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                            <span class="truncate">{{ $pe->seccion?->grado?->name }} - Secci&oacute;n {{ $pe->seccion?->name }}</span>
-                            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">&middot;</span>
-                            <span class="truncate">{{ $pe->profesor?->lastname }} {{ $pe->profesor?->name }}</span>
-                            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">&middot;</span>
-                            <span class="shrink-0">{{ $pe->lapso?->name }}</span>
+        <div class="space-y-2">
+            @foreach($recentLogs as $log)
+                @php $act = $log->activity; @endphp
+                @if(!$act) @continue @endif
+                <a href="{{ route('student.lms.activity', $act) }}"
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-emerald-500/30 transition-all duration-200">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <div @class([
+                                'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+                                'bg-emerald-500/10' => $log->event === 'COMPLETE',
+                                'bg-sky-500/10' => $log->event !== 'COMPLETE',
+                            ])>
+                                @if($log->event === 'COMPLETE')
+                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    </svg>
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                                    {{ $act->topic ?? 'Actividad sin título' }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                    {{ $act->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
+                                    &middot;
+                                    {{ $act->pevaluacion?->profesor?->lastname }} {{ $act->pevaluacion?->profesor?->name }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                                @if($log->event === 'COMPLETE')
+                                    Completado
+                                @else
+                                    {{ $log->created_at->diffForHumans() }}
+                                @endif
+                            </span>
+                            <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
                         </div>
                     </div>
-                    <span class="shrink-0 text-xs text-gray-400 mt-0.5">
-                        {{ $pe->activities->count() }} activ.
-                    </span>
-                </div>
-            </div>
+                </a>
+            @endforeach
+        </div>
+    </section>
+    @endif
 
-            {{-- Activity list --}}
-            @if($pe->activities->isNotEmpty())
-            <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                @foreach($pe->activities as $activity)
-                    @php $pub = $activity->lmsPublication; @endphp
-                    <a href="{{ route('student.lms.activity', $activity) }}"
-                       class="flex items-start gap-3 px-4 sm:px-5 py-3 hover:bg-gray-50
-                              dark:hover:bg-gray-700/30 transition-colors group">
-                        <span @class([
-                            'w-2 h-2 rounded-full shrink-0 mt-1.5',
-                            'bg-emerald-500' => $pub?->status === 'PUBLISHED',
-                            'bg-amber-500'   => $pub?->status === 'SCHEDULED',
-                            'bg-gray-400'    => !$pub || $pub->status === 'DRAFT',
-                        ])></span>
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200
-                                      group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                                {{ $activity->topic ?? 'Actividad sin título' }}
-                            </p>
-                            @if($activity->finicial)
-                            <p class="text-xs text-gray-400 mt-1">
-                                {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m/Y') }}
-                                &ndash; {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m/Y') }}
-                            </p>
+    {{-- 3. Upcoming Deadlines --}}
+    @if($upcoming->isNotEmpty())
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Próximas Fechas Límite</h2>
+        </div>
+
+        <div class="space-y-2">
+            @foreach($upcoming as $activity)
+                @php
+                    $ffinal = \Carbon\Carbon::parse($activity->ffinal);
+                    $daysLeft = now()->startOfDay()->diffInDays($ffinal->startOfDay(), false);
+                @endphp
+                <a href="{{ route('student.lms.activity', $activity) }}"
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-amber-500/30 transition-all duration-200">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3 min-w-0">
+                            <div @class([
+                                'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
+                                'bg-red-500/10' => $daysLeft <= 1,
+                                'bg-amber-500/10' => $daysLeft > 1 && $daysLeft <= 3,
+                                'bg-gray-100 dark:bg-gray-700/50' => $daysLeft > 3,
+                            ])>
+                                <svg @class([
+                                    'w-4 h-4',
+                                    'text-red-400' => $daysLeft <= 1,
+                                    'text-amber-400' => $daysLeft > 1 && $daysLeft <= 3,
+                                    'text-gray-400' => $daysLeft > 3,
+                                ]) fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                                    {{ $activity->topic ?? 'Actividad sin título' }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                    {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
+                                    &middot;
+                                    {{ $activity->pevaluacion?->lapso?->name ?? '' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div @class([
+                            'shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full',
+                            'bg-red-500/10 text-red-400' => $daysLeft <= 1,
+                            'bg-amber-500/10 text-amber-400' => $daysLeft > 1 && $daysLeft <= 3,
+                            'bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400' => $daysLeft > 3,
+                        ])>
+                            @if($daysLeft <= 0)
+                                Vence hoy
+                            @elseif($daysLeft === 1)
+                                1 día restante
+                            @else
+                                {{ $daysLeft }} días rest.
                             @endif
                         </div>
-                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 shrink-0 mt-1 transition-colors"
-                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                @endforeach
-            </div>
-            @endif
-        </section>
-    @empty
-        <div class="text-center py-16">
-            <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
-            <p class="text-gray-500 dark:text-gray-400 font-medium">No hay actividades publicadas</p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
-                Cuando tus profesores publiquen contenido, aparecer&aacute; aqu&iacute;.
-            </p>
+                    </div>
+                </a>
+            @endforeach
         </div>
-    @endforelse
+    </section>
+    @endif
+
+    {{-- 4. Subject Distribution --}}
+    @if($subjectDistribution->isNotEmpty())
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Distribución por Asignatura</h2>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-5">
+            @foreach($subjectDistribution as $subject)
+                @php $pct = $subject['total'] > 0 ? round(($subject['completed'] / $subject['total']) * 100) : 0; @endphp
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $subject['name'] }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ $subject['completed'] }}/{{ $subject['total'] }}
+                            <span class="text-gray-400 dark:text-gray-500 ml-0.5">· {{ $pct }}%</span>
+                        </span>
+                    </div>
+                    <div class="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-500"
+                             style="width: {{ $pct }}%; background: linear-gradient(90deg, #10b981, #34d399);">
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    {{-- Empty state --}}
+    @if($stats['total'] === 0 && $recentLogs->isEmpty() && $upcoming->isEmpty())
+    <div class="text-center py-16">
+        <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <p class="text-gray-500 dark:text-gray-400 font-medium">No hay actividades publicadas</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">
+            Cuando tus profesores publiquen contenido, aparecerá aquí.
+        </p>
+    </div>
+    @endif
 </div>

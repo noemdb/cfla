@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-3 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 space-y-6 sm:space-y-8">
+<div class="max-w-4xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6">
 
     {{-- ═══════════════════════════════════════ BACK NAV ═══════════════════════════════════════ --}}
     <nav class="flex items-center gap-3 px-1">
@@ -26,18 +26,19 @@
 
                 {{-- Meta --}}
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                    @if($activity->finicial)
+                    @php $pub = $activity->lmsPublication; @endphp
+                    @if($pub && $pub->publish_at)
                         <span class="inline-flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
-                            {{ optional($activity->finicial)->format('d/m/Y') }}
-                            @if($activity->ffinal)
-                                – {{ optional($activity->ffinal)->format('d/m/Y') }}
+                            {{ \Carbon\Carbon::parse($pub->publish_at)->format('d/m/Y') }}
+                            @if($pub->unpublish_at)
+                                – {{ \Carbon\Carbon::parse($pub->unpublish_at)->format('d/m/Y') }}
                             @endif
                         </span>
                     @endif
-                    @if($activity->lmsPublication?->status === 'published')
+                    @if($activity->lmsPublication?->status === 'PUBLISHED')
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             Publicada
@@ -103,9 +104,9 @@
                  class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
 
             {{-- Section header --}}
-            <div class="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
-                <span class="w-1 h-7 rounded-full {{ $accentDot }} shrink-0"></span>
-                <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex-1 min-w-0">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+                <span class="w-1 h-6 rounded-full {{ $accentDot }} shrink-0"></span>
+                <h2 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white flex-1 min-w-0">
                     {{ $section->title }}
                 </h2>
                 @if($badgeLabel)
@@ -121,7 +122,7 @@
             </div>
 
             {{-- Section body --}}
-            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div class="p-3 sm:p-5 space-y-3 sm:space-y-4">
                 @foreach($section->visibleContents as $idx => $content)
                     @php
                         $stepNum = $idx + 1;
@@ -129,26 +130,38 @@
                         $isLast = $loop->last;
                     @endphp
 
-                    <div wire:key="content-{{ $content->id }}" class="flex gap-3 sm:gap-4 {{ $isLast ? '' : 'pb-4 sm:pb-6 border-b border-gray-100 dark:border-gray-700/30' }}">
-                        {{-- Step circle --}}
-                        <div class="flex flex-col items-center shrink-0">
-                            <span class="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-xs sm:text-sm font-bold leading-none shadow-sm {{ $accentRing }} {{ $badgeLabel ? 'ring-2' : '' }}">
+                    <div wire:key="content-{{ $content->id }}" class="{{ $isLast ? '' : 'pb-3 sm:pb-4 border-b border-gray-100 dark:border-gray-700/30' }}">
+                        {{-- Step number above content --}}
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <span class="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-[10px] sm:text-xs font-bold leading-none shadow-sm {{ $accentRing }} {{ $badgeLabel ? 'ring-2' : '' }}">
                                 {{ $stepNum }}
                             </span>
-                            @if(!$isLast)
-                                <div class="w-0.5 flex-1 min-h-[1.5rem] bg-gray-200 dark:bg-gray-700/50 mt-1"></div>
+                            @if($content->title)
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white leading-snug">{{ $content->title }}</h3>
                             @endif
                         </div>
 
                         {{-- Content --}}
-                        <div class="flex-1 min-w-0 space-y-2">
-                            @if($content->title)
-                                <h3 class="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-snug">{{ $content->title }}</h3>
-                            @endif
+                        <div class="space-y-1.5">
 
                             @switch($content->type)
                                 @case('TEXT')
                                     @php
+                                        // Detectar Mermaid antes de cualquier conversión
+                                        $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $bodyHtml) === 1;
+                                        if (!$isMermaid) {
+                                            $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($bodyHtml)) === 1;
+                                        }
+
+                                        // Si no es Mermaid: convertir Markdown a HTML
+                                        if (!$isMermaid) {
+                                            $trimmed = trim($bodyHtml);
+                                            if ($trimmed !== '' && !preg_match('/<[a-z\/][^>]*>/i', $trimmed)) {
+                                                $bodyHtml = Str::markdown($bodyHtml);
+                                            }
+                                        }
+
+                                        // Template detection (solo texto/Markdown, no Mermaid)
                                         $plainText = strip_tags($bodyHtml);
                                         $textLen   = mb_strlen(trim($plainText));
                                         $hasUl     = str_contains($bodyHtml, '<ul');
@@ -160,7 +173,9 @@
                                         $isQ       = preg_match('/[¿\?]\s*$/', trim($plainText));
 
                                         $tpl = 'prose';
-                                        if (preg_match('/\b(actividad|ejercicio|resuelve|practica|tarea|completa|investiga|realiza|escribe|dibuja|explica|elabora|construye|crea|diseña)\b/i', $plainText) && $textLen < 600) {
+                                        if ($isMermaid) {
+                                            $tpl = 'mermaid';
+                                        } elseif (preg_match('/\b(actividad|ejercicio|resuelve|practica|tarea|completa|investiga|realiza|escribe|dibuja|explica|elabora|construye|crea|diseña)\b/i', $plainText) && $textLen < 600) {
                                             $tpl = 'activity';
                                         } elseif ($isQ || preg_match('/\b(pregunta|¿qué|¿cómo|¿por qué|¿cuál|¿dónde|¿cuándo)\b/i', $plainText)) {
                                             $tpl = 'question';
@@ -173,46 +188,71 @@
                                         }
                                     @endphp
 
-                                    @if($tpl === 'concept')
-                                        <div class="bg-emerald-50/50 dark:bg-emerald-500/5 border-l-4 border-emerald-400 rounded-r-xl p-3 sm:p-4">
+                                    @if($tpl === 'mermaid')
+                                        @php
+                                            preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $bodyHtml, $m);
+                                            $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                            if (empty($mermaidCode)) {
+                                                $mermaidCode = trim(strip_tags($bodyHtml));
+                                            }
+                                        @endphp
+                                        <div wire:ignore x-data="mermaidEmbed()"
+                                             data-mermaid-code="{{ $mermaidCode }}"
+                                             class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                                            <div x-ref="target" class="w-full min-h-0"></div>
+                                        </div>
+                                    @elseif($tpl === 'concept')
+                                        <div class="bg-emerald-50/50 dark:bg-emerald-500/5 border-l-4 border-emerald-400 rounded-r-xl p-2.5 sm:p-3">
                                             <div class="flex items-start gap-3">
                                                 <span class="text-lg leading-none mt-0.5 shrink-0">💡</span>
-                                                <div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert">{!! $bodyHtml !!}</div>
+                                                <x-lms.math-text
+                                                    :content="$bodyHtml"
+                                                    class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert lms-content" />
                                             </div>
                                         </div>
                                     @elseif($tpl === 'list')
-                                        <div class="bg-white dark:bg-gray-800/30 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/60">
+                                        <div class="bg-white dark:bg-gray-800/30 rounded-xl p-2.5 sm:p-3 border border-gray-200 dark:border-gray-700/60">
                                             <div class="flex items-center gap-2 mb-2">
                                                 <span class="text-base leading-none">📋</span>
                                                 <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Lista</span>
                                             </div>
-                                            <div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-ul:list-disc prose-ol:list-decimal">{!! $bodyHtml !!}</div>
+                                            <x-lms.math-text
+                                                :content="$bodyHtml"
+                                                class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-ul:list-disc prose-ol:list-decimal lms-content" />
                                         </div>
                                     @elseif($tpl === 'quote')
-                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border-l-4 border-amber-400 rounded-r-xl p-3 sm:p-4">
+                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border-l-4 border-amber-400 rounded-r-xl p-2.5 sm:p-3">
                                             <div class="flex items-start gap-3">
                                                 <span class="text-2xl leading-none text-amber-300/60 font-serif shrink-0">"</span>
-                                                <div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert">{!! $bodyHtml !!}</div>
+                                                <x-lms.math-text
+                                                    :content="$bodyHtml"
+                                                    class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert lms-content" />
                                             </div>
                                         </div>
                                     @elseif($tpl === 'question')
-                                        <div class="bg-sky-50/50 dark:bg-sky-500/5 border border-sky-200 dark:border-sky-500/20 rounded-xl p-3 sm:p-4">
+                                        <div class="bg-sky-50/50 dark:bg-sky-500/5 border border-sky-200 dark:border-sky-500/20 rounded-xl p-2.5 sm:p-3">
                                             <div class="flex items-start gap-3">
                                                 <span class="text-base leading-none mt-0.5 shrink-0">💭</span>
-                                                <div class="text-sm text-sky-900 dark:text-sky-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert">{!! $bodyHtml !!}</div>
+                                                <x-lms.math-text
+                                                    :content="$bodyHtml"
+                                                    class="text-sm text-sky-900 dark:text-sky-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert lms-content" />
                                             </div>
                                         </div>
                                     @elseif($tpl === 'activity')
-                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border-2 border-dashed border-amber-300/60 dark:border-amber-500/30 rounded-xl p-3 sm:p-4">
+                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border-2 border-dashed border-amber-300/60 dark:border-amber-500/30 rounded-xl p-2.5 sm:p-3">
                                             <div class="flex items-center gap-2 mb-2">
                                                 <span class="text-base leading-none">✏️</span>
                                                 <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Actividad</span>
                                             </div>
-                                            <div class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert">{!! $bodyHtml !!}</div>
+                                            <x-lms.math-text
+                                                :content="$bodyHtml"
+                                                class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert lms-content" />
                                         </div>
                                     @else
-                                        <div class="bg-white dark:bg-gray-800/20 rounded-xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700/40">
-                                            <div class="text-sm text-gray-700 dark:text-gray-300 leading-loose prose prose-sm max-w-none dark:prose-invert">{!! $bodyHtml !!}</div>
+                                        <div class="bg-white dark:bg-gray-800/20 rounded-xl p-2.5 sm:p-3 border border-gray-100 dark:border-gray-700/40">
+                                            <x-lms.math-text
+                                                :content="$bodyHtml"
+                                                class="text-sm text-gray-700 dark:text-gray-300 leading-loose prose prose-sm max-w-none dark:prose-invert lms-content" />
                                         </div>
                                     @endif
                                     @break
@@ -256,7 +296,7 @@
                                         </div>
                                     @else
                                         {{-- No media — show fallback with body as text if present --}}
-                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 rounded-xl p-3 sm:p-4">
+                                        <div class="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 rounded-xl p-2.5 sm:p-3">
                                             <div class="flex items-center gap-2 mb-2">
                                                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -306,8 +346,8 @@
 
                                 @case('AUDIO')
                                     @if($content->media)
-                                        <div class="bg-gray-50 dark:bg-gray-800/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700/60">
-                                            <div class="flex items-center gap-3 mb-2">
+                                        <div class="bg-gray-50 dark:bg-gray-800/30 rounded-xl p-3 border border-gray-200 dark:border-gray-700/60">
+                                            <div class="flex items-center gap-3 mb-1.5">
                                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                                                 </svg>
@@ -321,14 +361,35 @@
                                     @break
 
                                 @case('HTML')
-                                    <div class="prose dark:prose-invert max-w-none text-sm">
-                                        {!! $content->body !!}
-                                    </div>
+                                    @php
+                                        $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $content->body ?? '') === 1;
+                                        if (!$isMermaid) {
+                                            $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($content->body ?? '')) === 1;
+                                        }
+                                    @endphp
+                                    @if($isMermaid)
+                                        @php
+                                            preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content->body, $m);
+                                            $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                            if (empty($mermaidCode)) {
+                                                $mermaidCode = trim(strip_tags($content->body));
+                                            }
+                                        @endphp
+                                        <div wire:ignore x-data="mermaidEmbed()"
+                                             data-mermaid-code="{{ $mermaidCode }}"
+                                             class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                                            <div x-ref="target" class="w-full min-h-0"></div>
+                                        </div>
+                                    @else
+                                        <div class="bg-white dark:bg-gray-800/20 rounded-xl p-2.5 sm:p-3 border border-gray-100 dark:border-gray-700/40">
+                                            {!! $content->body !!}
+                                        </div>
+                                    @endif
                                     @break
 
                                 @default
                                     @if($content->body)
-                                        <div class="bg-gray-50 dark:bg-gray-800/20 rounded-xl p-3 sm:p-4 border border-gray-100 dark:border-gray-700/40">
+                                        <div class="bg-gray-50 dark:bg-gray-800/20 rounded-xl p-2.5 sm:p-3 border border-gray-100 dark:border-gray-700/40">
                                             <div class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert">{!! $content->body !!}</div>
                                         </div>
                                     @endif
@@ -344,12 +405,16 @@
                 @if($sectionEmbeds->isNotEmpty())
                     <div class="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-700/40">
                         @foreach($sectionEmbeds as $embed)
-                            <div class="bg-white dark:bg-gray-800/20 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-xl p-3 sm:p-4 html-embed-item">
+                            <div class="bg-white dark:bg-gray-800/20 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-xl p-2.5 sm:p-3 html-embed-item">
                                 @if($embed->title)
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2">{{ $embed->title }}</h4>
                                 @endif
                                 @if($embed->is_mermaid ?? false)
-                                    <x-mermaid::component :data="$embed->html_content" class="w-full min-h-[200px]" />
+                                    <div wire:ignore x-data="mermaidEmbed()"
+                                         data-mermaid-code="{{ trim(strip_tags($embed->html_content)) }}"
+                                         class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                                        <div x-ref="target" class="w-full min-h-0"></div>
+                                    </div>
                                 @else
                                     <div class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert html-embed-content">
                                         {!! $embed->html_content !!}
@@ -398,7 +463,7 @@
             </div>
         </section>
     @empty
-        <div class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 p-8 sm:p-12 text-center">
+        <div class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 p-6 sm:p-8 text-center">
             <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
@@ -413,14 +478,14 @@
     @endphp
     @if($unlinkedResources->isNotEmpty())
         <section class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
                 <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Recursos descargables</h2>
                 <span class="ml-auto text-[11px] text-gray-400 dark:text-gray-500">{{ $unlinkedResources->count() }} {{ $unlinkedResources->count() === 1 ? 'archivo' : 'archivos' }}</span>
             </div>
-            <div class="p-4 sm:p-6 space-y-2">
+            <div class="p-3 sm:p-5 space-y-2">
                 @foreach($unlinkedResources as $resource)
                     <x-lms.student-resource-card :resource="$resource" :activity="$activity" />
                 @endforeach
@@ -434,13 +499,13 @@
     @endphp
     @if($unlinkedLinks->isNotEmpty())
         <section class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
                 <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Referencias y enlaces</h2>
             </div>
-            <div class="p-4 sm:p-6 space-y-2">
+            <div class="p-3 sm:p-5 space-y-2">
                 @foreach($unlinkedLinks as $link)
                     <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
                        class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800/20 border border-blue-200 dark:border-blue-500/20 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-colors group">
@@ -468,20 +533,24 @@
     @endphp
     @if($unlinkedEmbeds->isNotEmpty())
         <section class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                 </svg>
                 <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Contenido embebido</h2>
             </div>
-            <div class="p-4 sm:p-6 space-y-3">
+            <div class="p-2.5 sm:p-4 space-y-2">
                 @foreach($unlinkedEmbeds as $embed)
-                    <div class="bg-white dark:bg-gray-800/20 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-xl p-3 sm:p-4 html-embed-item">
+                    <div class="bg-white dark:bg-gray-800/20 border border-fuchsia-200 dark:border-fuchsia-500/20 rounded-xl p-2.5 sm:p-3 html-embed-item">
                         @if($embed->title)
                             <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-2">{{ $embed->title }}</h4>
                         @endif
                         @if($embed->is_mermaid ?? false)
-                            <x-mermaid::component :data="$embed->html_content" class="w-full min-h-[200px]" />
+                            <div wire:ignore x-data="mermaidEmbed()"
+                                 data-mermaid-code="{{ trim(strip_tags($embed->html_content)) }}"
+                                 class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                                <div x-ref="target" class="w-full min-h-0"></div>
+                            </div>
                         @else
                             <div class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert html-embed-content">
                                 {!! $embed->html_content !!}
@@ -496,13 +565,13 @@
     {{-- ═══════════════════════════════════════ COMMENTS ═══════════════════════════════════════ --}}
     @if($activity->lmsPublication?->allow_comments)
         <section class="bg-white dark:bg-gray-800/40 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
-            <div class="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-gray-100 dark:border-gray-700/40 bg-gray-50/50 dark:bg-gray-800/30">
                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
                 <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Comentarios</h2>
             </div>
-            <div class="p-4 sm:p-6 space-y-4">
+            <div class="p-3 sm:p-5 space-y-3">
                 {{-- Form --}}
                 <form wire:submit="saveComment" class="flex gap-2">
                     <input type="text" wire:model="newComment" placeholder="Escribe un comentario…"
@@ -547,22 +616,83 @@
     @endif
 
     {{-- ═══════════════════════════════════════ BACK ═══════════════════════════════════════ --}}
-    <div class="flex items-center justify-between pt-2">
-        <a href="{{ route('student.lms.home') }}"
-           class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all min-h-[44px]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Volver a mis actividades
-        </a>
-        @if($activity->lmsPublication?->status === 'published' && !$completed)
-            <button wire:click="markComplete"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all min-h-[44px]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+    <div class="relative bg-white dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/50 rounded-xl p-4 sm:p-5">
+        {{-- Accent bar --}}
+        <div class="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
+
+        <div class="flex items-center justify-between gap-3">
+            <a href="{{ route('student.lms.lessons') }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/60 rounded-xl hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 hover:border-emerald-200/60 dark:hover:border-emerald-500/20 transition-all duration-200 min-h-[44px] group">
+                <svg class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Marcar como completada
-            </button>
-        @endif
+                Volver a lecciones
+            </a>
+
+            @if($activity->lmsPublication?->status === 'PUBLISHED' && !$completed)
+                <button wire:click="markComplete"
+                        wire:loading.attr="disabled"
+                        wire:target="markComplete"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 shadow-sm shadow-emerald-600/20 hover:shadow-emerald-500/30 rounded-xl transition-all duration-200 min-h-[44px] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100">
+                    <span wire:loading.remove wire:target="markComplete" class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Marcar como completada
+                    </span>
+                    <span wire:loading wire:target="markComplete" class="flex items-center gap-2">
+                        <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Guardando…
+                    </span>
+                </button>
+            @elseif($completed)
+                <div class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl min-h-[44px] select-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Completada
+                </div>
+            @endif
+        </div>
     </div>
+
+    {{-- Estilos para Mermaid fullscreen / zoom toolbar --}}
+    {{-- Sin @once — CSS es idempotente, y Livewire maneja re-renders sin duplicados problemáticos --}}
+    <style>
+        .mermaid-zoom-toolbar {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        [x-data="mermaidEmbed()"]:fullscreen {
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: auto;
+        }
+        [x-data="mermaidEmbed()"]:fullscreen .mermaid-zoom-toolbar {
+            opacity: 1 !important;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+        }
+        .zoom-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Mermaid fill height ── */
+        .mermaid-fill-height {
+            min-height: 0;
+        }
+        .mermaid-fill-height svg {
+            min-height: 100% !important;
+            width: 100% !important;
+            flex: 1 !important;
+        }
+    </style>
 </div>

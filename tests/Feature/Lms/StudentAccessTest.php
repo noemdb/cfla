@@ -4,9 +4,11 @@ namespace Tests\Feature\Lms;
 
 use App\Models\User;
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class StudentAccessTest extends TestCase
@@ -35,10 +37,8 @@ class StudentAccessTest extends TestCase
 
     public function test_student_cannot_access_unpublished_activity(): void
     {
-        $student = User::factory()->create(['is_student' => true]);
-
-        // Create a minimal activity with required FK chain
         $activity = $this->createMinimalActivity();
+        $student = $this->createStudentInSeccion($activity->pevaluacion->seccion_id);
 
         $response = $this->actingAs($student)
             ->get(route('student.lms.activity', $activity));
@@ -48,10 +48,8 @@ class StudentAccessTest extends TestCase
 
     public function test_student_can_access_published_activity(): void
     {
-        $student = User::factory()->create(['is_student' => true]);
-
-        // Create minimal activity
-        $activity = $this->createMinimalActivity();
+        $activity = $this->createMinimalActivity(['status' => true]);
+        $student = $this->createStudentInSeccion($activity->pevaluacion->seccion_id);
 
         LmsActivityPublication::factory()->published()->create([
             'activity_id' => $activity->id,
@@ -64,7 +62,69 @@ class StudentAccessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    private function createMinimalActivity(): Activity
+    public function test_published_activity_has_single_root_element(): void
+    {
+        $activity = $this->createMinimalActivity(['status' => true]);
+        $student = $this->createStudentInSeccion($activity->pevaluacion->seccion_id);
+
+        LmsActivityPublication::factory()->published()->create([
+            'activity_id' => $activity->id,
+            'published_by' => User::factory(),
+        ]);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $activity]);
+
+        $html = $component->html();
+
+        // Replicar la detección de Livewire SupportMultipleRootElementDetection
+        $dom = new \DOMDocument();
+        @$dom->loadHTML($html);
+        $body = $dom->getElementsByTagName('body')->item(0);
+
+        $count = 0;
+        foreach ($body->childNodes as $child) {
+            if ($child->nodeType == XML_ELEMENT_NODE) {
+                if ($child->tagName === 'script') continue;
+                $count++;
+            }
+        }
+
+        $this->assertEquals(1, $count, 'El componente debe tener exactamente un (1) root element HTML');
+    }
+
+    /**
+     * Create a student User with Estudiant + Inscripcion in the given seccion.
+     */
+    private function createStudentInSeccion(int $seccionId): User
+    {
+        $user = User::factory()->create(['is_student' => true]);
+
+        $planpagoId = DB::table('planpagos')->insertGetId([
+            'name' => 'Test Plan',
+            'description' => 'Test plan description',
+            'observations' => 'Test observations',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $estudiant = \App\Models\app\Learner\Estudiant::factory()->create([
+            'user_id' => $user->id,
+            'planpago_id' => $planpagoId,
+        ]);
+
+        Inscripcion::factory()->create([
+            'estudiant_id' => $estudiant->id,
+            'seccion_id' => $seccionId,
+        ]);
+
+        return $user;
+    }
+
+    /**
+     * Create a minimal activity with the entire FK chain.
+     */
+    private function createMinimalActivity(array $overrides = []): Activity
     {
         // Build the FK chain manually since the deep factory chain has missing factories.
         // pevaluacion -> pensum -> pestudio -> peducativo -> pescolar
@@ -188,7 +248,7 @@ class StudentAccessTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        return Activity::create([
+        return Activity::create(array_merge([
             'pevaluacion_id' => $pevaluacionId,
             'finicial' => now(),
             'ffinal' => now()->addDays(7),
@@ -197,6 +257,6 @@ class StudentAccessTest extends TestCase
             'teaching' => 'Teaching',
             'learning' => 'Learning',
             'observations' => 'Obs',
-        ]);
+        ], $overrides));
     }
 }

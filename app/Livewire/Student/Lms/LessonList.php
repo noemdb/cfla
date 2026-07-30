@@ -31,7 +31,8 @@ class LessonList extends Component
             'pevaluacion.profesor',
             'pevaluacion.lapso',
             'lmsPublication',
-        ])->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+        ])->where('status', true)
+          ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
           ->whereHas('lmsPublication', fn($q) => $q->visibleNow());
 
         if ($this->search) {

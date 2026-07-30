@@ -5,12 +5,15 @@ namespace App\Livewire\Student\Lms;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityLog;
+use App\Models\app\Academy\Lms\LmsActivityProgress;
+use App\Livewire\Student\Lms\Concerns\HasStudentScope;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
 class ActivityView extends Component
 {
     use WireUiActions;
+    use HasStudentScope;
 
     public Activity $activity;
     public $sections = [];
@@ -20,14 +23,13 @@ class ActivityView extends Component
     public $comments;
     public string $newComment = '';
     public $completed = false;
-
     public function mount(Activity $activity): void
     {
-        abort_unless(
-            $activity->lmsPublication?->isVisibleToStudents(),
-            404,
-            'Esta actividad no está disponible.'
-        );
+        $this->initializeHasStudentScope();
+
+        if (!$this->studentService->isActivityVisible($activity)) {
+            abort(404);
+        }
 
         $this->activity = $activity;
         $this->sections = $activity->lmsSections()
@@ -61,10 +63,33 @@ class ActivityView extends Component
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $this->completed = LmsActivityLog::where('activity_id', $activity->id)
-            ->where('user_id', auth()->id())
-            ->where('event', 'COMPLETE')
-            ->exists();
+        $this->completed =
+            LmsActivityProgress::where('activity_id', $activity->id)
+                ->where('student_id', auth()->id())
+                ->where('status', 'COMPLETED')
+                ->exists()
+            ||
+            LmsActivityLog::where('activity_id', $activity->id)
+                ->where('user_id', auth()->id())
+                ->where('event', 'COMPLETE')
+                ->exists();
+
+        // Registrar o actualizar progreso
+        $progress = LmsActivityProgress::firstOrCreate(
+            [
+                'activity_id' => $activity->id,
+                'student_id'  => auth()->id(),
+            ],
+            [
+                'status'         => 'IN_PROGRESS',
+                'completion_pct' => 0,
+                'first_access_at' => now(),
+                'last_access_at' => now(),
+            ]
+        );
+        if (!$progress->wasRecentlyCreated) {
+            $progress->update(['last_access_at' => now()]);
+        }
 
         LmsActivityLog::record($activity->id, auth()->id(), 'VIEW');
     }
@@ -72,6 +97,20 @@ class ActivityView extends Component
     public function markComplete(): void
     {
         LmsActivityLog::record($this->activity->id, auth()->id(), 'COMPLETE');
+
+        LmsActivityProgress::updateOrCreate(
+            [
+                'activity_id' => $this->activity->id,
+                'student_id'  => auth()->id(),
+            ],
+            [
+                'status'         => 'COMPLETED',
+                'completion_pct' => 100,
+                'completed_at'   => now(),
+                'last_access_at' => now(),
+            ]
+        );
+
         $this->completed = true;
 
         $this->notification()->success(

@@ -643,30 +643,45 @@
 
                     {{-- ═══════ SLIDE: PREGUNTAS DE REPASO ═══════ --}}
                     @if(!empty($preview['review_questions']))
+                        @php
+                            $rawReview = $preview['review_questions'];
+
+                            // Detectar Mermaid en el contenido
+                            $reviewIsMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawReview) === 1;
+                            if (!$reviewIsMermaid) {
+                                $reviewIsMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawReview)) === 1;
+                            }
+
+                            // Extraer código Mermaid si aplica
+                            $reviewMermaidCode = '';
+                            if ($reviewIsMermaid) {
+                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawReview, $m);
+                                $reviewMermaidCode = trim(strip_tags($m[1] ?? ''));
+                                if (empty($reviewMermaidCode)) {
+                                    $reviewMermaidCode = trim(strip_tags($rawReview));
+                                }
+                            }
+
+                            // Convertir Markdown a HTML (sin pre-procesar **)
+                            $reviewHtml = Str::markdown($rawReview);
+                        @endphp
+
                         <div class="swiper-slide overflow-y-auto w-full h-auto p-4 sm:p-6 md:p-8">
-                            {{--
-                            <div class="flex items-center gap-2 mb-4 shrink-0">
-                                <span class="w-1 h-6 bg-emerald-500 rounded-full shrink-0"></span>
-                                <h2 class="text-lg font-bold text-slate-800">Preguntas de Repaso</h2>
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
-                                    <span>●</span>
-                                    CIERRE
-                                </span>
-                            </div> 
-                            --}}
                             <div class="bg-transparent rounded-xl p-5 border border-stone-200/60">
-                                <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">
-                                    @php
-                                        $reviewHtml = $preview['review_questions'];
-                                        // 1) Convertir **negrita** → <strong> (pares completos)
-                                        $reviewHtml = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $reviewHtml);
-                                        // 2) Eliminar ** huérfanos (sin cierre) que el parser dejaría literales
-                                        $reviewHtml = str_replace('**', '', $reviewHtml);
-                                    @endphp
-                                    <x-lms.math-text
-                                        :content="Str::markdown($reviewHtml)"
-                                        class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
-                                </div>
+                                @if($reviewIsMermaid)
+                                    <div wire:ignore x-data="mermaidEmbed()"
+                                         data-mermaid-code="{{ $reviewMermaidCode }}"
+                                         data-mermaid-delay
+                                         class="w-full bg-transparent rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height">
+                                        <div x-ref="target" class="w-full flex-1 min-h-0"></div>
+                                    </div>
+                                @else
+                                    <div class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content">
+                                        <x-lms.math-text
+                                            :content="$reviewHtml"
+                                            class="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     @endif
