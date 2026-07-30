@@ -51,36 +51,55 @@
             </div>
 
             {{-- Lista de jornadas --}}
-            <div class="rounded-xl border border-gray-200/60 dark:border-gray-700/50 bg-gray-50/80 dark:bg-gray-800/30 p-1 max-h-72 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-track]:bg-transparent">
+            <div class="rounded-xl border border-gray-200/60 dark:border-gray-700/50 bg-gray-50/80 dark:bg-gray-800/30 p-1 max-h-72 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-track]:bg-transparent">
 
                 @php
                     $jornadas = \App\Models\app\Academy\Catchment::JORNADAS;
                     $today = now()->toDateString();
                 @endphp
 
-                <div class="space-y-0.5">
+                <div class="space-y-1">
                     @foreach($jornadas as $jornada)
                         @php
                             $isActive = $today >= $jornada['start'] && $today <= $jornada['end'];
                             $isPast = $today > $jornada['end'];
                         @endphp
-                        <div class="group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                            {{ $isActive ? 'bg-white dark:bg-gray-800/80 ring-1 ring-sky-400/30 shadow-sm' : 'hover:bg-white/50 dark:hover:bg-gray-800/40' }}">
-                            {{-- Indicador visual --}}
-                            <div class="flex-shrink-0 relative">
-                                <div class="w-2.5 h-2.5 rounded-full transition-all duration-300
-                                    {{ $isActive ? 'bg-sky-500 ring-4 ring-sky-500/20' : ($isPast ? 'bg-gray-300 dark:bg-gray-600' : 'bg-amber-400 dark:bg-amber-500') }}">
-                                </div>
-                                {{-- Línea conectora (excepto último) --}}
-                                @if(!$loop->last)
-                                    <div class="absolute top-3.5 left-1.125 w-px h-[calc(100%+8px)] {{ $isActive ? 'bg-sky-200 dark:bg-sky-800' : 'bg-gray-200 dark:bg-gray-700' }}"></div>
+                        <div class="relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                            {{ $isActive
+                                ? 'bg-gradient-to-r from-sky-50 to-white dark:from-sky-950/40 dark:to-gray-800/80 ring-1 ring-sky-400/30 shadow-sm'
+                                : ($isPast
+                                    ? 'opacity-60 hover:opacity-80'
+                                    : 'hover:bg-white/60 dark:hover:bg-gray-800/40') }}">
+                            {{-- Barra indicadora izquierda (solo activa) --}}
+                            @if($isActive)
+                                <div class="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-gradient-to-b from-sky-400 to-sky-600 shadow-sm shadow-sky-500/30"></div>
+                            @endif
+
+                            {{-- Indicador de estado --}}
+                            <div class="flex-shrink-0 flex items-center justify-center w-6">
+                                @if($isActive)
+                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-sky-500 text-white shadow-sm shadow-sky-500/30">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    </span>
+                                @elseif($isPast)
+                                    <span class="flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    </span>
+                                @else
+                                    <span class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-sky-300 dark:border-sky-600 text-sky-500 dark:text-sky-400">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                    </span>
                                 @endif
                             </div>
 
                             {{-- Texto --}}
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm leading-snug truncate
-                                    {{ $isActive ? 'font-semibold text-gray-900 dark:text-white' : ($isPast ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300') }}">
+                                <p class="text-sm leading-snug
+                                    {{ $isActive
+                                        ? 'font-bold text-gray-900 dark:text-white'
+                                        : ($isPast
+                                            ? 'text-gray-400 dark:text-gray-500'
+                                            : 'font-medium text-gray-700 dark:text-gray-300') }}">
                                     {{ $jornada['label'] }}
                                 </p>
                             </div>
@@ -88,16 +107,16 @@
                             {{-- Badge --}}
                             <div class="flex-shrink-0">
                                 @if($isActive)
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/40 px-2.5 py-1 rounded-full border border-sky-200/50 dark:border-sky-700/40">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-white bg-gradient-to-r from-sky-500 to-sky-600 px-2.5 py-1 rounded-full shadow-sm">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                                         Activa
                                     </span>
                                 @elseif(!$isPast)
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1 rounded-full border border-amber-200/50 dark:border-amber-700/30">
+                                    <span class="inline-flex items-center text-[10px] font-semibold text-white bg-sky-500 px-2.5 py-1 rounded-full shadow-sm">
                                         Próxima
                                     </span>
                                 @else
-                                    <span class="text-[10px] font-medium text-gray-400 dark:text-gray-600">Completada</span>
+                                    <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Completada</span>
                                 @endif
                             </div>
                         </div>
