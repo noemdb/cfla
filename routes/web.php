@@ -284,6 +284,12 @@ Route::prefix('app')->name('app.')->group(function () {
             // Activities (reuso IndexComponent scoped)
             Route::get('/activities', \App\Livewire\Leadership\ActivityOverview::class)
                 ->name('activities');
+            Route::get('/activities/format/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
+            ])->name('activities.format');
+            Route::get('/activities/resume/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
+            ])->name('activities.resume');
 
             // Lecciones LMS por área
             Route::get('/lessons', \App\Livewire\Leadership\LessonMonitor::class)

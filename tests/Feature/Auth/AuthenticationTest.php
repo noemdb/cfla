@@ -54,4 +54,121 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/login');
         $this->assertGuest();
     }
+
+    public function test_admin_user_redirects_to_admin(): void
+    {
+        $user = User::factory()->create([
+            'is_admin' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/admin');
+    }
+
+    public function test_diagnostic_user_redirects_to_admin(): void
+    {
+        $user = User::factory()->create([
+            'is_diagnostic' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/admin');
+    }
+
+    public function test_planner_user_redirects_to_planning(): void
+    {
+        $user = User::factory()->create([
+            'is_planner' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('app.planning.index'));
+    }
+
+    public function test_leadership_user_redirects_to_leadership_dashboard(): void
+    {
+        $user = User::factory()->leadership()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('app.leadership.dashboard'));
+    }
+
+    public function test_coordinacion_user_redirects_to_coordinacion(): void
+    {
+        $user = User::factory()->coordinacion()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('app.coordinacion.index'));
+    }
+
+    public function test_profesor_user_redirects_to_profesor_home(): void
+    {
+        $user = User::factory()->create([
+            'is_profesor' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/app/profesors/home');
+    }
+
+    public function test_student_user_redirects_to_estudiante_home(): void
+    {
+        $user = User::factory()->create([
+            'is_student' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/app/estudiante/home');
+    }
+
+    public function test_user_without_role_redirects_to_home(): void
+    {
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->post('/login', [
+            'username' => $user->username,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect('/');
+    }
 }

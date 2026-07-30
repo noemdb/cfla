@@ -1,5 +1,4 @@
 <div class="fade-in" x-data="{
-    modeObservation: @entangle('modeObservation'),
     modeComments: @entangle('modeComments'),
     modePreview: @entangle('modePreview'),
     commentStatus: @entangle('status')
@@ -7,8 +6,8 @@
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-            <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-2">Plan de Actividades</h1>
-            <p class="text-emerald-600 dark:text-emerald-400 font-medium">Revisión y control de calidad pedagógica de los planes de evaluación.</p>
+            <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-2">Revisión de Actividades</h1>
+            <p class="text-emerald-600 dark:text-emerald-400 font-medium">Supervisión y calidad pedagógica de los planes de evaluación.</p>
         </div>
         <div class="flex items-center gap-2">
             <button wire:click="$refresh"
@@ -90,24 +89,7 @@
             </div>
 
             <div class="flex items-end gap-4">
-                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
-                    <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
-                    <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
-                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                        </svg>
-                        Observaciones
-                    </span>
-                    <span wire:loading wire:target="filter_observations" class="w-3 h-3">
-                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                    </span>
-                </label>
-
+                {{-- Toggle En Revisión --}}
                 <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none group">
                     <input type="checkbox" wire:model.live="filter_revision" class="sr-only peer">
                     <div class="relative w-10 h-6 rounded-full transition-all duration-500 peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-lg peer-checked:shadow-amber-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-md after:border after:border-gray-200 dark:after:border-white/10 peer-checked:after:shadow-amber-500/30 group-hover:after:scale-110 peer-checked:group-hover:after:scale-110"></div>
@@ -203,10 +185,10 @@
 
     <!-- ===== VIEW MODE TOGGLE (Grid / Table) ===== -->
     <div class="flex items-center gap-2 mb-4"
-         x-data="{ mode: localStorage.getItem('planning-activities-view-mode') || 'table' }"
+         x-data="{ mode: localStorage.getItem('leadership-activities-view-mode') || 'table' }"
          x-init="$watch('mode', val => {
-             localStorage.setItem('planning-activities-view-mode', val);
-             window.dispatchEvent(new CustomEvent('planning-activities-view-mode-changed', { detail: { mode: val } }))
+             localStorage.setItem('leadership-activities-view-mode', val);
+             window.dispatchEvent(new CustomEvent('leadership-activities-view-mode-changed', { detail: { mode: val } }))
          })">
         <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mr-1">Vista</span>
         <button @click="mode = 'grid'"
@@ -229,18 +211,18 @@
 
     <!-- ===== CONTENT: View container ===== -->
     <div x-cloak
-         x-data="{ mode: localStorage.getItem('planning-activities-view-mode') || 'table' }"
-         x-init="() => { if (!localStorage.getItem('planning-activities-view-mode')) localStorage.setItem('planning-activities-view-mode', 'table') }"
-         x-on:planning-activities-view-mode-changed.window="mode = $event.detail.mode">
+         x-data="{ mode: localStorage.getItem('leadership-activities-view-mode') || 'table' }"
+         x-init="() => { if (!localStorage.getItem('leadership-activities-view-mode')) localStorage.setItem('leadership-activities-view-mode', 'table') }"
+         x-on:leadership-activities-view-mode-changed.window="mode = $event.detail.mode">
 
         {{-- ═══════════════════════════════════════════════════════════════ --}}
-        {{-- BENTO GRID MODE (bento-grid-modile pattern)                  --}}
+        {{-- BENTO GRID MODE                                                --}}
         {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div x-show="mode === 'grid'"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}">
+             wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $status_activities ?? 'all' }}">
             <div class="bg-gray-900/60 border border-white/5 rounded-2xl p-5">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     @forelse($pevaluacions as $item)
@@ -304,7 +286,7 @@
                                     @endif
                                 </div>
 
-                                {{-- Observations (inline en el card) --}}
+                                {{-- Observations (solo display) --}}
                                 @if($item->observations)
                                     <div class="flex items-start gap-2 text-[11px]">
                                         <svg class="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,24 +331,21 @@
                                 </div>
                             </div>
 
-                            {{-- Actions: btnGroup (bento-grid-modile pattern) --}}
+                            {{-- Actions --}}
                             <div class="px-4 pb-4 pt-2.5 border-t border-white/5 flex items-center gap-2"
                                  x-data="{ actionsOpen: false }"
                                  @click.away="actionsOpen = false">
 
-                                {{-- Primary: Observation (siempre visible) --}}
-
-
                                 {{-- Desktop group (sm+) --}}
                                 <div class="hidden sm:flex items-center gap-2">
-                                    <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank"
+                                    <a href="{{ route('app.leadership.activities.resume', $item->id) }}" target="_blank"
                                         class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-sky-500/12 text-sky-400 hover:bg-sky-500/20 border border-sky-500/20 transition-all duration-200"
                                         title="Resumen PDF">
                                         <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                         </svg>
                                     </a>
-                                    <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank"
+                                    <a href="{{ route('app.leadership.activities.format', $item->id) }}" target="_blank"
                                         class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-xs font-bold bg-purple-500/12 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-all duration-200"
                                         title="Plan Completo PDF">
                                         <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,12 +374,12 @@
                                          x-transition:leave-end="opacity-0 scale-95"
                                          class="absolute right-0 z-50 mt-1 min-w-[180px] bg-gray-800 border border-white/10 rounded-lg shadow-xl py-1"
                                          @click="actionsOpen = false">
-                                        <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank"
+                                        <a href="{{ route('app.leadership.activities.resume', $item->id) }}" target="_blank"
                                             class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
                                             <svg class="w-4 h-4 shrink-0 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                                             Resumen PDF
                                         </a>
-                                        <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank"
+                                        <a href="{{ route('app.leadership.activities.format', $item->id) }}" target="_blank"
                                             class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-300 hover:bg-white/5 transition-colors text-left">
                                             <svg class="w-4 h-4 shrink-0 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             Plan Completo PDF
@@ -415,7 +394,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <p class="text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
-                            <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
+                            <p class="text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación activos en tu área.</p>
                         </div>
                     @endforelse
                 </div>
@@ -428,13 +407,15 @@
             </div>
         </div>
 
-        {{-- TABLE MODE (legacy — unchanged) --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- TABLE MODE                                                     --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div x-show="mode === 'table'"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100">
-            <!-- ===== TABBED CONTENT (Lapso tabs like profesor home) ===== -->
-            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $filter_observations ? 'obs' : 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
+            <!-- ===== TABBED CONTENT (Lapso tabs) ===== -->
+            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200 dark:border-white/5">
@@ -486,7 +467,7 @@
                         </div>
 
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <!-- Activity counts: total · aprobadas · en revisión -->
+                            <!-- Activity counts -->
                             <div class="flex items-center gap-1.5">
                                 @if($item->activities_count > 0)
                                     <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-lg border border-blue-200 dark:border-blue-500/20">
@@ -511,17 +492,17 @@
                                 @endif
                             </div>
 
-                            <!-- Button Group: Observación + PDFs -->
+                            <!-- Button Group -->
                             <div class="inline-flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-white/5 divide-x divide-gray-200 dark:divide-white/5" role="group">
                                 <!-- PDF Resume -->
-                                <a href="{{ route('app.planning.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
+                                <a href="{{ route('app.leadership.activities.resume', $item->id) }}" target="_blank" title="Resumen PDF"
                                     class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-500/10 text-gray-500 dark:text-gray-400 hover:text-sky-600 dark:hover:text-sky-400 transition-all duration-200">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                     </svg>
                                 </a>
                                 <!-- PDF Format -->
-                                <a href="{{ route('app.planning.activities.format', $item->id) }}" target="_blank" title="Plan Completo PDF"
+                                <a href="{{ route('app.leadership.activities.format', $item->id) }}" target="_blank" title="Plan Completo PDF"
                                     class="p-2 min-w-[36px] min-h-[36px] bg-gray-100 dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -699,7 +680,7 @@
                                 </div>
                             @endif
 
-                            <!-- Observations -->
+                            <!-- Observations display (read-only for leadership) -->
                             @if($item->observations)
                                 <div class="mt-3 p-3 bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/10 rounded-lg">
                                     <div class="flex items-start justify-between gap-3">
@@ -707,14 +688,6 @@
                                             <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">Observaciones del Coordinador</p>
                                             <p class="text-xs text-gray-700 dark:text-gray-200">{{ $item->observations }}</p>
                                         </div>
-                                        <button type="button"
-                                            @click="$dispatch('confirm-delete-observation', { id: {{ $item->id }}, message: '¿Eliminar las observaciones de «{{ addslashes($item->pensum->asignatura->name ?? '') }}»?' })"
-                                            class="shrink-0 inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-md border border-red-200 dark:border-red-500/20 transition-all"
-                                            title="Eliminar observaciones">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                        </button>
                                     </div>
                                 </div>
                             @endif
@@ -727,7 +700,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     <p class="text-gray-500 dark:text-gray-500 font-medium mb-2">No se encontraron planes de evaluación</p>
-                    <p class="text-gray-400 dark:text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación con el módulo de planificación activo.</p>
+                    <p class="text-gray-400 dark:text-gray-600 text-sm">Ajusta los filtros o verifica que existan planes de evaluación activos en tu área.</p>
                 </div>
             @endforelse
 
@@ -739,148 +712,6 @@
             @endif
         </div>
     </div>
-        </div>
-    </div>
-
-    <!-- ===== MODAL: Observaciones del Coordinador ===== -->
-    <div x-show="modeObservation" x-cloak
-        x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-150"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-        @keydown.escape.window="modeObservation = false">
-        {{-- Backdrop --}}
-        <div class="absolute inset-0 bg-gray-950/70 backdrop-blur-sm" @click="modeObservation = false"></div>
-
-        {{-- Panel --}}
-        <div x-show="modeObservation" x-cloak
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-            x-transition:leave-end="opacity-0 scale-95 translate-y-4"
-            class="relative w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
-
-            {{-- Top accent bar --}}
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500"></div>
-
-            {{-- Header --}}
-            <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-white/5">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-gray-900 dark:text-white">Observaciones del Coordinador</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Supervisión pedagógica del plan de evaluación</p>
-                    </div>
-                </div>
-                <button type="button" @click="modeObservation = false"
-                    class="p-1.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-all shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            {{-- Body --}}
-            <div class="px-6 py-5 space-y-4">
-                @if($pevaluacion)
-                <div class="bg-gray-50 dark:bg-white/[0.03] p-4 rounded-lg border border-gray-200 dark:border-white/5 space-y-3">
-                    {{-- Section label --}}
-                    <div class="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-500 font-bold uppercase tracking-widest">
-                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Plan de Evaluación
-                    </div>
-                    {{-- Asignatura --}}
-                    <p class="text-sm text-gray-900 dark:text-white font-semibold">{{ $pevaluacion->pensum?->asignatura?->name ?? '—' }}</p>
-                    {{-- Metadata row --}}
-                    <div class="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        <span class="inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
-                            {{ $pevaluacion->seccion?->grado?->name ?? '—' }} · Sección {{ $pevaluacion->seccion?->name ?? '—' }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            {{ $pevaluacion->profesor?->lastname ?? '—' }} {{ $pevaluacion->profesor?->name ?? '—' }}
-                        </span>
-                        <span class="inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            {{ $pevaluacion->lapso?->name ?? '—' }}
-                        </span>
-                    </div>
-                </div>
-                @endif
-
-                {{-- Textarea con contador --}}
-                <div x-data="{ obsCount: {{ strlen($observations ?? '') }} }">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Observaciones</label>
-                        <span class="text-[10px] tabular-nums text-gray-400" x-text="`${obsCount}/65535 caracteres`"></span>
-                    </div>
-                    <textarea wire:model="observations" rows="5" maxlength="65535"
-                        x-on:input="obsCount = $el.value.length"
-                        class="w-full bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none resize-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600 @error('observations') border-red-300 dark:border-red-500/50 focus:ring-red-500/50 focus:border-red-500/50 @enderror"
-                        placeholder="Escribe las observaciones del coordinador de evaluación..."></textarea>
-                    @error('observations')
-                        <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5 font-medium">
-                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
-            </div>
-
-            {{-- Footer --}}
-            <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-white/[0.02] border-t border-gray-100 dark:border-white/5">
-                <div class="flex items-center gap-2">
-                    @if($pevaluacion && $pevaluacion->observations)
-                        <span class="inline-flex items-center gap-1 text-emerald-500 not-italic font-medium text-[10px]">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Tiene observaciones previas
-                        </span>
-                    @else
-                        <span class="text-[10px] text-gray-400 italic">Sin observaciones previas</span>
-                    @endif
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" @click="modeObservation = false"
-                        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-lg border border-gray-200 dark:border-white/5 transition-all">
-                        Cancelar
-                    </button>
-                    <button type="button" wire:click="saveObservation" wire:loading.attr="disabled"
-                        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-white bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 rounded-lg shadow-lg shadow-emerald-500/10 disabled:opacity-50 transition-all">
-                        <span wire:loading.remove wire:target="saveObservation">
-                            <span class="hidden sm:inline">Guardar </span>Observaciones
-                        </span>
-                        <span wire:loading wire:target="saveObservation" class="inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                            </svg>
-                            Guardando...
-                        </span>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1104,16 +935,6 @@
             </div>
         </x-slot>
     </x-modal-card>
-
-    <x-confirm-modal
-        name="delete-observation"
-        title="Eliminar observaciones"
-        message="Esta acción no se puede deshacer."
-        confirm-text="Sí, eliminar"
-        cancel-text="Cancelar"
-        type="danger"
-        action="deleteObservation"
-    />
 
     @script
     <script>

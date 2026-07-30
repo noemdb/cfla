@@ -27,6 +27,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             // Redirigir según el rol, ignorando "intended" para evitar
@@ -39,11 +40,11 @@ class LoginController extends Controller
                 return redirect()->route('app.planning.index');
             }
 
-            if ($user->isCoordinacion()) {
+            if ($user->is_coordinacion) {
                 return redirect()->route('app.coordinacion.index');
             }
 
-            if ($user->isLeadership()) {
+            if ($user->is_leadership) {
                 return redirect()->route('app.leadership.dashboard');
             }
 

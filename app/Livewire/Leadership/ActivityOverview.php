@@ -96,6 +96,36 @@ class ActivityOverview extends IndexComponent
         return parent::saveComent(...$args);
     }
 
+    public function render()
+    {
+        $filters = array_filter([
+            'pestudio_id' => $this->pestudio_id,
+            'grado_id' => $this->grado_id,
+            'seccion_id' => $this->seccion_id,
+            'lapso_id' => $this->lapso_id,
+            'profesor_id' => $this->profesor_id,
+            'status_activities' => $this->status_activities,
+            'filter_observations' => $this->filter_observations ? true : null,
+            'filter_revision' => $this->filter_revision ? true : null,
+            'filter_status' => $this->filter_status ?: null,
+        ], fn($v) => $v !== null && $v !== '');
+
+        $pevaluacions = $this->getPevaluaciones($filters);
+
+        $activeTabIndex = 1;
+        if ($this->tabsLapsos && $this->lapso_id) {
+            $found = $this->tabsLapsos->search(fn($lapso) => $lapso->id == $this->lapso_id);
+            if ($found !== false) {
+                $activeTabIndex = $found + 1;
+            }
+        }
+
+        return view('livewire.leadership.activity-overview', [
+            'pevaluacions' => $pevaluacions,
+            'activeTabIndex' => $activeTabIndex,
+        ]);
+    }
+
     /** @codeCoverageIgnore */
     public function createObservation($id)
     {
