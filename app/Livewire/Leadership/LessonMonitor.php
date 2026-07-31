@@ -70,10 +70,9 @@ class LessonMonitor extends Component
             'pevaluacion.profesor',
             'lmsPublication',
             'lmsSections.contents',
-        ])->whereHas('pevaluacion.pensum', function ($q) use ($service) {
-            $asignaturaIds = $service->getAssignedAsignaturaIds();
-            $q->whereIn('asignatura_id', $asignaturaIds);
-        });
+        ]);
+
+        $service->scopeActivities($query);
 
         if ($this->filter_published) {
             $query->whereHas('lmsPublication', fn($q) => $q->where('status', 'PUBLISHED'));

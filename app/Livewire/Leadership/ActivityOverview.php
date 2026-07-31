@@ -3,12 +3,16 @@
 namespace App\Livewire\Leadership;
 
 use App\Livewire\Planning\Activities\IndexComponent;
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Pevaluacion;
 use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
 
 class ActivityOverview extends IndexComponent
 {
+    public $showLessonPreview = false;
+    public $previewLessonActivity;
+
     protected function getPevaluaciones(array $filters)
     {
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
@@ -19,7 +23,8 @@ class ActivityOverview extends IndexComponent
             'profesor',
             'lapso',
         ])
-        ->with('activities')
+        ->with('activities.lmsPublication')
+        ->with('activities.lmsSections')
         ->withCount([
             'activities',
             'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
@@ -94,6 +99,18 @@ class ActivityOverview extends IndexComponent
         );
 
         return parent::saveComent(...$args);
+    }
+
+    public function previewLesson(int $activityId): void
+    {
+        $this->previewLessonActivity = Activity::findOrFail($activityId);
+        $this->showLessonPreview = true;
+    }
+
+    public function closeLessonPreview(): void
+    {
+        $this->showLessonPreview = false;
+        $this->previewLessonActivity = null;
     }
 
     public function render()

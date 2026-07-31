@@ -173,7 +173,7 @@
 
                     {{-- Actividades — col-span-2 --}}
                     @if($selectedActivities && $selectedActivities->isNotEmpty())
-                    <div class="md:col-span-2 bg-white dark:bg-gray-800/30 rounded-xl border border-sky-200/60 dark:border-sky-800/40 p-4 shadow-sm">
+                    <div class="md:col-span-2 bg-white dark:bg-gray-800/70 rounded-xl border border-sky-200/60 dark:border-sky-800/40 p-4 shadow-sm">
                         <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
@@ -206,7 +206,7 @@
 
                     {{-- Lecciones — col-span-1 --}}
                     @if($pevLessons && $pevLessons->isNotEmpty())
-                    <div class="bg-white dark:bg-gray-800/30 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 p-4 shadow-sm">
+                    <div class="bg-white dark:bg-gray-800/70 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 p-4 shadow-sm">
                         <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
@@ -239,7 +239,7 @@
 
                     {{-- Recursos — full width, 3-column inner grid --}}
                     @if($pevResources && $pevResources->isNotEmpty())
-                    <div class="md:col-span-3 bg-white dark:bg-gray-800/30 rounded-xl border border-amber-200/60 dark:border-amber-800/40 p-4 shadow-sm">
+                    <div class="md:col-span-3 bg-white dark:bg-gray-800/70 rounded-xl border border-amber-200/60 dark:border-amber-800/40 p-4 shadow-sm">
                         <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>

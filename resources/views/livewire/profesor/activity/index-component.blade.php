@@ -201,26 +201,33 @@
                     {{-- Activities --}}
                     <div class="space-y-4">
                         @forelse($activities as $item)
-                    @php $achievements = $item->achievements; @endphp
-                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }}">
+                    @php
+                        $achievements = $item->achievements;
+                        $isApproved = (bool) $item->status;
+                        $statusBorder = $isApproved
+                            ? 'border-t-emerald-500/70'
+                            : 'border-t-amber-500/70';
+                    @endphp
+                    <div class="bg-gray-800/30 border border-white/5 rounded-lg p-4 transition-all hover:border-white/10 {{ $item->id == $activity_id ? 'ring-1 ring-emerald-500/20' : '' }} border-t-4 {{ $statusBorder }}">
 
                         {{-- Activity Header --}}
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex-1 min-w-0">
-                                {{-- Status badge --}}
+                                {{-- Status badges row --}}
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-400">
                                         {{ $activities->firstItem() + $loop->index }}
                                     </span>
-                                    @if($item->status_resume)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                            Act. Evaluación
+                                    {{-- Approval badge --}}
+                                    @if($isApproved)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm shadow-emerald-500/10">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            Aprobada
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                                            Sin actividad de evaluación
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                            En revisión
                                         </span>
                                     @endif
                                     <span class="text-[11px] text-gray-500 font-mono">
@@ -387,9 +394,15 @@
                             </thead>
                             <tbody>
                                 @forelse($activities as $item)
-                                    @php $achievements = $item->achievements; @endphp
+                                    @php
+                                        $achievements = $item->achievements;
+                                        $isApproved = (bool) $item->status;
+                                        $statusBorder = $isApproved
+                                            ? 'border-l-emerald-500/70'
+                                            : 'border-l-amber-500/70';
+                                    @endphp
                                     <tr class="border-b border-white/5 hover:bg-gray-700/20 transition-colors group">
-                                        <td class="px-2 py-2.5 text-gray-500 text-[10px] font-medium">{{ $activities->firstItem() + $loop->index }}</td>
+                                        <td class="px-2 py-2.5 text-gray-500 text-[10px] font-medium border-l-4 {{ $statusBorder }}">{{ $activities->firstItem() + $loop->index }}</td>
                                         <td class="px-2 py-2.5">
                                             <p class="text-xs text-white font-medium leading-tight max-w-[250px] truncate" title="{{ $item->topic }}">{{ $item->topic }}</p>
                                         </td>
@@ -412,7 +425,19 @@
                                             </span>
                                         </td>
                                         <td class="px-2 py-2.5">
-                                            <div class="flex items-center justify-center gap-1">
+                                            <div class="flex flex-col items-center gap-1">
+                                                {{-- Approval badge --}}
+                                                @if($isApproved)
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm shadow-emerald-500/10">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                        Aprobada
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                        En revisión
+                                                    </span>
+                                                @endif
                                                 @if($item->status_resume)
                                                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" title="Tiene actividad evaluativa">
                                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
