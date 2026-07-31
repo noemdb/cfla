@@ -1201,9 +1201,37 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveAndPublish_publica_leccion(): void
+    public function saveAndPublish_profesor_solo_programa(): void
     {
+        // El profesor no publica: solo programa la lección (SCHEDULED).
+        // Debe publicarla un responsable (Jefe de Área, Coordinación o
+        // Planificación) — no hay auto-publicación por cron.
         $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $component->set('newSectionTitle', 'Sección para publicar');
+        $component->call('addWizardSection');
+        $component->set('contentBody', 'Contenido');
+        $component->call('addWizardContent', 0);
+        $component->set('saveAnyway', true);
+        $component->call('saveStep2');
+
+        $component->call('saveAndPublish');
+
+        $activity->refresh();
+        $publication = $activity->lmsPublication;
+        $this->assertNotNull($publication);
+        $this->assertEquals('SCHEDULED', $publication->status);
+    }
+
+    /** @test */
+    public function saveAndPublish_planner_publica(): void
+    {
+        // Planificación (rol autorizado) publica de inmediato (PUBLISHED).
+        $data = $this->createProfesorUser(false, ['is_planner' => true]);
         $activity = $this->createActivity($data['profesor_id']);
 
         $component = Livewire::test(LessonWizard::class);

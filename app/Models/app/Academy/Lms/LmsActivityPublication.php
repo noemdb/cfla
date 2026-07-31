@@ -46,7 +46,7 @@ class LmsActivityPublication extends Model
      * Estado de la publicación desde el punto de vista del estudiante.
      *
      * Solo `PUBLISHED` es visible para los estudiantes; una `SCHEDULED`
-     * (aún programada) queda oculta hasta que el cron la active.
+     * (aún programada, sin publicar por un responsable) queda oculta.
      *
      * - 'hidden'  → no visible (no está publicada, publish_at nulo o expirada).
      * - 'preview' → publicada pero ahora() < publish_at → solo la 1ª sección.
@@ -68,8 +68,8 @@ class LmsActivityPublication extends Model
 
     /**
      * La lección es accesible para los estudiantes (en vista previa o completa).
-     * Solo las PUBLISHED son visibles; una SCHEDULED queda oculta hasta que
-     * `activateScheduled()` la pase a PUBLISHED.
+     * Solo las PUBLISHED son visibles; una SCHEDULED queda oculta hasta que un
+     * responsable (Jefe de Área, Coordinación o Planificación) la publique.
      */
     public function isVisibleToStudents(): bool
     {

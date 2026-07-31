@@ -105,18 +105,117 @@
         </section>
 
         <!-- HEADER GRÁFICO -->
-        <header class="text-center relative">
+        <header class="relative">
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-sage-400/20 rounded-full blur-3xl -z-10"></div>
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4 border border-sage-300">
-                <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
-                Guía Verificada 2026
+            <div class="flex flex-col md:flex-row items-center gap-10 md:gap-12">
+                <div class="text-center md:text-left md:w-3/5 flex-1">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4 border border-sage-300">
+                        <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
+                        Guía Verificada 2026
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sage-500 to-slate-900 mb-4 leading-tight">
+                        Ciclo de Vida de una<br/>Actividad / Lección
+                    </h1>
+                    <p class="text-lg text-slate-500 max-w-2xl mx-auto md:mx-0 font-medium">
+                        El recorrido completo de una actividad o lección: desde su creación hasta que llega al estudiante, con sus 6 candados de seguridad.
+                    </p>
+                </div>
+                <!-- Modelo biológico del ciclo (SVG) -->
+                <div class="w-full md:w-2/5 max-w-[360px] shrink-0">
+                    <svg viewBox="0 0 340 300" class="w-full h-auto drop-shadow-sm" role="img" aria-label="Modelo biológico del ciclo de vida: nace, crece, florece, fructifica y renace" xmlns="http://www.w3.org/2000/svg">
+                        <style>
+                            .cy-spin { transform-origin: 170px 150px; animation: cy-spin 48s linear infinite; }
+                            @keyframes cy-spin { to { transform: rotate(360deg); } }
+                        </style>
+                        <defs>
+                            <radialGradient id="cy-glow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#E6F2DD" stop-opacity="0.9"/>
+                                <stop offset="100%" stop-color="#E6F2DD" stop-opacity="0"/>
+                            </radialGradient>
+                            <marker id="cy-arrow" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M0 1 L8 5 L0 9 z" fill="#88BDA4"/>
+                            </marker>
+                        </defs>
+
+                        <!-- Resplandor central -->
+                        <circle cx="170" cy="150" r="92" fill="url(#cy-glow)"/>
+
+                        <!-- Anillo decorativo exterior (gira lentamente) -->
+                        <g class="cy-spin">
+                            <circle cx="170" cy="150" r="132" fill="none" stroke="#B1D3B9" stroke-width="1.5" stroke-dasharray="2 8" opacity="0.55"/>
+                        </g>
+
+                        <!-- Anillo que une los nodos -->
+                        <circle cx="170" cy="150" r="100" fill="none" stroke="#B1D3B9" stroke-width="1.2" opacity="0.35"/>
+
+                        <!-- Puntos / células interiores -->
+                        <circle cx="170" cy="74" r="2.5" fill="#88BDA4"/>
+                        <circle cx="224" cy="96" r="2.5" fill="#B1D3B9"/>
+                        <circle cx="246" cy="150" r="2.5" fill="#88BDA4"/>
+                        <circle cx="224" cy="204" r="2.5" fill="#B1D3B9"/>
+                        <circle cx="170" cy="226" r="2.5" fill="#88BDA4"/>
+                        <circle cx="116" cy="204" r="2.5" fill="#B1D3B9"/>
+                        <circle cx="94" cy="150" r="2.5" fill="#88BDA4"/>
+                        <circle cx="116" cy="96" r="2.5" fill="#B1D3B9"/>
+
+                        <!-- Flechas del ciclo (sentido horario) -->
+                        <path d="M191 30 A122 122 0 0 1 278 93" fill="none" stroke="#88BDA4" stroke-width="2" stroke-linecap="round" marker-end="url(#cy-arrow)"/>
+                        <path d="M291 133 A122 122 0 0 1 258 235" fill="none" stroke="#88BDA4" stroke-width="2" stroke-linecap="round" marker-end="url(#cy-arrow)"/>
+                        <path d="M224 260 A122 122 0 0 1 117 260" fill="none" stroke="#88BDA4" stroke-width="2" stroke-linecap="round" marker-end="url(#cy-arrow)"/>
+                        <path d="M82 235 A122 122 0 0 1 49 167" fill="none" stroke="#88BDA4" stroke-width="2" stroke-linecap="round" marker-end="url(#cy-arrow)"/>
+                        <path d="M62 93 A122 122 0 0 1 149 30" fill="none" stroke="#88BDA4" stroke-width="2" stroke-linecap="round" marker-end="url(#cy-arrow)"/>
+
+                        <!-- Centro: brote que se renueva (regeneración) -->
+                        <circle cx="170" cy="150" r="34" fill="rgba(255,255,255,0.65)" stroke="#B1D3B9" stroke-width="1.5"/>
+                        <path d="M170 161v-20" stroke="#659287" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M170 152c-1-4-4-7-8-8-1 4 2 7 8 8z" fill="#88BDA4"/>
+                        <path d="M170 152c1-4 4-7 8-8 1 4-2 7-8 8z" fill="#659287"/>
+                        <path d="M170 143c-1-3-3-5-6-6-1 3 1 5 6 6z" fill="#B1D3B9"/>
+                        <path d="M170 143c1-3 3-5 6-6 1 3-1 5-6 6z" fill="#88BDA4"/>
+
+                        <!-- Nodo 1 · Semilla (arriba) -->
+                        <circle cx="170" cy="50" r="19" fill="#E6F2DD" stroke="#88BDA4" stroke-width="1.5"/>
+                        <path d="M170 43c4 0 7 3 7 7s-3 7-7 7-7-3-7-7 3-7 7-7z" fill="#659287"/>
+                        <path d="M166 49c1 1.5 2 2.5 3.5 3.5" stroke="#E6F2DD" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+                        <!-- Nodo 2 · Brote (superior derecha) -->
+                        <circle cx="265" cy="119" r="19" fill="#E6F2DD" stroke="#88BDA4" stroke-width="1.5"/>
+                        <path d="M265 127v-8" stroke="#659287" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M265 118c-3-1-5-3-6-6 3 1 5 3 6 6z" fill="#88BDA4"/>
+                        <path d="M265 118c3-1 5-3 6-6-3 1-5 3-6 6z" fill="#659287"/>
+
+                        <!-- Nodo 3 · Hoja (inferior derecha) -->
+                        <circle cx="229" cy="231" r="19" fill="#E6F2DD" stroke="#88BDA4" stroke-width="1.5"/>
+                        <path d="M229 221c4 2 8 5 8 10s-4 8-8 10c-4-2-8-5-8-10s4-8 8-10z" fill="#88BDA4"/>
+                        <path d="M229 224c-1 4-1 8 0 13" stroke="#E6F2DD" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+                        <!-- Nodo 4 · Flor (inferior izquierda) -->
+                        <circle cx="111" cy="231" r="19" fill="#E6F2DD" stroke="#88BDA4" stroke-width="1.5"/>
+                        <circle cx="111" cy="227" r="2.8" fill="#B1D3B9"/>
+                        <circle cx="115" cy="230" r="2.8" fill="#B1D3B9"/>
+                        <circle cx="113" cy="234.5" r="2.8" fill="#B1D3B9"/>
+                        <circle cx="109" cy="234.5" r="2.8" fill="#B1D3B9"/>
+                        <circle cx="107" cy="230" r="2.8" fill="#B1D3B9"/>
+                        <circle cx="111" cy="231" r="2.6" fill="#659287"/>
+
+                        <!-- Nodo 5 · Fruto (superior izquierda) -->
+                        <circle cx="75" cy="119" r="19" fill="#E6F2DD" stroke="#88BDA4" stroke-width="1.5"/>
+                        <circle cx="75" cy="121" r="6" fill="#659287"/>
+                        <path d="M75 114c1-2 2-3 4-3" stroke="#659287" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                        <path d="M79 111c-2-1-3-1-4 1" stroke="#88BDA4" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+
+                        <!-- Hojas decorativas sueltas -->
+                        <path d="M38 268c2 7 6 11 13 13-1-8-5-12-13-13z" fill="#E6F2DD" stroke="#B1D3B9" stroke-width="1"/>
+                        <path d="M306 48c-2-7-6-11-13-13 1 8 5 12 13 13z" fill="#E6F2DD" stroke="#B1D3B9" stroke-width="1"/>
+
+                        <!-- Texto circular -->
+                        <path id="cy-ring" d="M170 12 A138 138 0 1 1 169.99 12" fill="none"/>
+                        <text font-size="11" font-weight="700" fill="#659287" letter-spacing="2.5">
+                            <textPath href="#cy-ring" startOffset="0">NACE · CRECE · FLORECE · FRUCTIFICA · RENACE</textPath>
+                        </text>
+                    </svg>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sage-500 to-slate-900 mb-4 leading-tight">
-                Ciclo de Vida de una<br/>Actividad / Lección
-            </h1>
-            <p class="text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-                El recorrido completo de una actividad o lección: desde su creación hasta que llega al estudiante, con sus 6 candados de seguridad.
-            </p>
         </header>
 
         <!-- ACTORES (Tarjetas Visuales) -->
@@ -135,7 +234,7 @@
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Planificación</h3>
-                    <p class="text-xs text-slate-500 mt-1">Asigna la carga académica y programa lecciones.</p>
+                    <p class="text-xs text-slate-500 mt-1">Crea la carga académica, aprueba actividades y publica lecciones.</p>
                 </div>
                 <!-- Profesor -->
                 <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-500">
@@ -143,7 +242,7 @@
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Profesor</h3>
-                    <p class="text-xs text-slate-500 mt-1">Registra la actividad y prepara el contenido de la lección.</p>
+                    <p class="text-xs text-slate-500 mt-1">Registra la actividad, monta el contenido y <strong>programa</strong> la lección (no la publica).</p>
                 </div>
                 <!-- Jefe Área -->
                 <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-300">
@@ -151,7 +250,7 @@
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Jefe de Área</h3>
-                    <p class="text-xs text-slate-500 mt-1">Aprueba las actividades y lecciones ya programadas, según su jefatura.</p>
+                    <p class="text-xs text-slate-500 mt-1">Aprueba las actividades y publica las lecciones programadas, según su jefatura.</p>
                 </div>
                 <!-- Coordinación -->
                 <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-400">
@@ -159,7 +258,7 @@
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Coordinación</h3>
-                    <p class="text-xs text-slate-500 mt-1">Monitorea y publica lecciones de sus planes educativos asociados.</p>
+                    <p class="text-xs text-slate-500 mt-1">Supervisa y publica lecciones programadas de sus planes educativos asociados. No aprueba actividades.</p>
                 </div>
                 <!-- Estudiante -->
                 <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-500">
@@ -180,7 +279,7 @@
                     <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                     El Viaje de la Lección
                 </h2>
-                <p class="text-slate-600 max-w-2xl mx-auto">Los <span class="text-sage-500 font-bold">7 pasos</span> que recorre una lección, desde que nace como carga académica hasta que expira.</p>
+                <p class="text-slate-600 max-w-2xl mx-auto">Los <span class="text-sage-500 font-bold">8 pasos</span> que recorre una lección, desde que nace como carga académica hasta que expira.</p>
             </div>
 
             <div class="relative">
@@ -243,7 +342,7 @@
                             </div>
                             <h3 class="text-xl font-bold text-slate-900">3. Aprobación Académica</h3>
                         </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">El <span class="font-semibold text-slate-800">Jefe de Área</span> revisa y aprueba la actividad, según su jefatura. Sin esto, la actividad es <strong>invisible</strong> para el estudiante, sin importar cómo esté publicada.</p>
+                        <p class="text-slate-600 text-sm leading-relaxed">El <span class="font-semibold text-slate-800">Jefe de Área</span> (responsable primario) o <span class="font-semibold text-slate-800">Planificación</span> revisan y aprueban la actividad, según la jefatura. Sin esta aprobación —el <strong>Candado 1</strong>— la actividad es <strong>invisible</strong> para el estudiante, sin importar cómo esté publicada.</p>
                     </div>
                 </div>
                 <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-rose-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">3</div>
@@ -280,15 +379,15 @@
                 <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0 pl-12 md:pl-0">
                     <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-sage-300 inline-block text-left md:text-right w-full">
                         <div class="flex items-center gap-2 md:justify-end mb-2">
-                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Publicación</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Programación</span>
                         </div>
                         <div class="flex items-center gap-3 mb-2 md:justify-end">
                             <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold text-slate-900">5. Programación y Publicación</h3>
+                            <h3 class="text-xl font-bold text-slate-900">5. Programación</h3>
                         </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">Se elige la <span class="font-semibold text-slate-800">fecha de publicación</span> y, opcionalmente, cuándo dejar de mostrarla. Si la fecha es futura, la lección queda <strong>programada</strong> y se publica sola cuando llega el momento. Si la fecha es ahora o pasada, está disponible de inmediato.</p>
+                        <p class="text-slate-600 text-sm leading-relaxed">El profesor <span class="font-semibold text-slate-800">programa</span> la lección: elige la fecha de publicación y, opcionalmente, cuándo dejar de mostrarla. Queda en estado <strong>Programada</strong> y aún <strong>no es visible</strong> para el estudiante. Espera la acción de un responsable.</p>
                     </div>
                 </div>
                 <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-300 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">5</div>
@@ -302,38 +401,74 @@
                 <div class="md:w-1/2 md:pl-12 pl-12 w-full">
                     <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-sage-400 inline-block w-full">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Acceso del Estudiante</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Publicación</span>
                         </div>
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold text-slate-900">6. Acceso y Consumo</h3>
+                            <h3 class="text-xl font-bold text-slate-900">6. Publicación</h3>
                         </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">El estudiante ve únicamente las lecciones de su propia sección. Al entrar, revisa el contenido (textos, videos y recursos) y el sistema registra lo que vio y lo que completó.</p>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-3">Publicar es un acto manual: solo lo hace un responsable (el <span class="font-semibold text-slate-800">Jefe de Área</span>, el <span class="font-semibold text-slate-800">Coordinador</span> o <span class="font-semibold text-slate-800">Planificación</span>). Nada se publica solo. Según la fecha que elija, el estudiante verá:</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2.5 rounded-xl border border-sage-300 bg-sage-100 px-3 py-2">
+                                <svg class="w-4 h-4 text-sage-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div>
+                                    <p class="text-xs font-bold text-sage-700 leading-tight">Hoy o ya pasada</p>
+                                    <p class="text-[11px] text-sage-600/80 mt-0.5 leading-snug">Ve la lección completa de inmediato</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2">
+                                <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div>
+                                    <p class="text-xs font-bold text-amber-800 leading-tight">Con fecha futura</p>
+                                    <p class="text-[11px] text-amber-700/80 mt-0.5 leading-snug">Solo la 1ª sección (Vista Previa) · al llegar la fecha, se habilita completa</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-             <!-- Paso 7 -->
-             <div class="relative flex flex-col md:flex-row items-center group">
+            <!-- Paso 7 -->
+            <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0 pl-12 md:pl-0">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-slate-500 inline-block text-left md:text-right w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-sage-300 inline-block text-left md:text-right w-full">
                         <div class="flex items-center gap-2 md:justify-end mb-2">
-                            <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Expiración</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Acceso del Estudiante</span>
                         </div>
                         <div class="flex items-center gap-3 mb-2 md:justify-end">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">7. Acceso y Consumo</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">El estudiante ve únicamente las lecciones de su propia sección. Al entrar, revisa el contenido (textos, videos y recursos) y el sistema registra lo que vio y lo que completó.</p>
+                    </div>
+                </div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-300 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">7</div>
+                <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
+            </div>
+
+            <!-- Paso 8 -->
+            <div class="relative flex flex-col md:flex-row items-center group">
+                <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">8</div>
+                <div class="md:w-1/2 md:pl-12 pl-12 w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-slate-500 inline-block w-full">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Expiración</span>
+                        </div>
+                        <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shadow-inner shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14M5 8a2 2 0 1 1 0-4h14a2 2 0 1 1 0 4M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8m-9 4h4"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold text-slate-900">7. Expiración / Archivo</h3>
+                            <h3 class="text-xl font-bold text-slate-900">8. Expiración / Archivo</h3>
                         </div>
                         <p class="text-slate-600 text-sm leading-relaxed">Cuando llega la fecha de cierre (o se archiva manualmente), la lección desaparece de las listas y ya no se puede abrir.</p>
                     </div>
                 </div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">7</div>
-                <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
-                </div>
+            </div>
             </div> <!-- cierra el wrapper relativo de la línea de tiempo -->
         </section>
 
@@ -358,7 +493,7 @@
                         <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">1</div>
                         <h4 class="font-bold text-slate-800">Aprobación</h4>
                     </div>
-                    <p class="text-xs text-slate-600">La actividad fue <span class="font-semibold text-sage-500">aprobada</span> por el Jefe de Área.</p>
+                    <p class="text-xs text-slate-600">La actividad fue <span class="font-semibold text-sage-500">aprobada</span> por el Jefe de Área o por Planificación.</p>
                 </div>
 
                 <!-- Gate 2 -->
@@ -376,7 +511,7 @@
                         <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">3</div>
                         <h4 class="font-bold text-slate-800">Publicada</h4>
                     </div>
-                    <p class="text-xs text-slate-600">La lección está <span class="font-semibold text-sage-500">publicada</span>; una programada aún no se muestra.</p>
+                    <p class="text-xs text-slate-600">La lección está <span class="font-semibold text-sage-500">publicada</span> por un responsable (Jefe de Área, Coordinación o Planificación); una programada aún no se muestra.</p>
                 </div>
 
                 <!-- Gate 4 -->
@@ -413,7 +548,7 @@
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-extrabold text-slate-900 mb-3 flex items-center justify-center gap-3">
                     <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                    Los 3 Estados de la Lección
+                    Los 4 Estados de la Lección
                 </h2>
                 <p class="text-slate-600 max-w-2xl mx-auto">Cada estado define <span class="text-sage-500 font-bold">qué ve el estudiante</span>, desde que se crea como borrador hasta que se publica.</p>
             </div>
@@ -442,7 +577,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900 text-lg">Programada</h3>
-                    <p class="text-xs text-slate-500 mt-1 mb-3">Fecha futura: el estudiante aún no la ve</p>
+                    <p class="text-xs text-slate-500 mt-1 mb-3">El profesor fijó una fecha; espera la publicación de un responsable (Jefe de Área, Coordinación o Planificación)</p>
                     <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">❌ Oculta para el estudiante</span>
                 </div>
 
@@ -497,12 +632,43 @@
         </section>
 
         <!-- FOOTER -->
-        <footer class="text-center border-t border-slate-200 pt-8 mt-12">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Regla Absoluta: una lección solo se muestra si cumple todas las condiciones de visibilidad. La aprobación de actividades y lecciones corresponde al <strong>Jefe de Área</strong>; la Coordinación supervisa y publica lecciones programadas, pero no aprueba actividades.
+        <footer class="text-center border-t border-slate-200 pt-10 mt-12">
+            <div class="max-w-3xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 border border-sage-300 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Regla Absoluta
+                </div>
+                <p class="text-sm text-slate-500 mb-6">
+                    Una lección solo llega al estudiante si cumple <strong class="text-slate-800">todas</strong> las condiciones de visibilidad: la actividad debe estar aprobada, programada y publicada por quien corresponde.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+                    <div class="rounded-2xl border border-sage-300 bg-sage-100 p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-sage-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span class="text-xs font-bold text-sage-700 uppercase tracking-wide">Aprueba</span>
+                        </div>
+                        <p class="text-[13px] text-sage-800 font-semibold leading-snug">Planificación y Jefe de Área (según su jefatura)</p>
+                        <p class="text-xs text-sage-700/90 mt-1.5 leading-relaxed">Son los únicos responsables de validar que la actividad cumpla los criterios académicos. Sin su aprobación, la lección permanece en borrador y no puede programarse.</p>
+                    </div>
+                    <div class="rounded-2xl border border-sage-300 bg-sage-100 p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-sage-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>
+                            <span class="text-xs font-bold text-sage-700 uppercase tracking-wide">Publica</span>
+                        </div>
+                        <p class="text-[13px] text-sage-800 font-semibold leading-snug">Jefe de Área (responsable primario), Coordinador (según su ámbito) o Planificación</p>
+                        <p class="text-xs text-sage-700/90 mt-1.5 leading-relaxed">Publicar es un acto manual, nunca automático: el profesor solo programa la lección y queda a la espera. Cada publicación exige la decisión deliberada de uno de estos responsables.</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <span class="text-xs font-bold text-amber-800 uppercase tracking-wide">Coordinación</span>
+                        </div>
+                        <p class="text-[13px] text-amber-800 font-semibold leading-snug">No aprueba actividades</p>
+                        <p class="text-xs text-amber-700/90 mt-1.5 leading-relaxed">Su rol es operativo: coordina y publica dentro de su ámbito, pero no evalúa la pertinencia académica. La aprobación recae exclusivamente en Planificación y el Jefe de Área.</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-xs mt-6">Documento informativo para la comunidad educativa • Última revisión: 2026-07-31</p>
             </div>
-            <p class="text-slate-400 text-xs mt-4">Documento informativo para la comunidad educativa • Última revisión: 2026-07-31</p>
         </footer>
 
     </main>

@@ -4275,17 +4275,17 @@ PROMPT;
         // 6. Guardar preguntas de repaso
         $this->saveReviewQuestionsSection($activityId);
 
-        // 7. Publicar
+        // 7. Publicar. Los planners/admins publican de inmediato (PUBLISHED);
+        //    el profesor solo programa (SCHEDULED) y lo notifica a planning.
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
                 'publish_at' => $this->publishAt,
                 'allow_downloads' => $this->allowDownloads,
             ],
-            auth()->id()
+            auth()->id(),
+            $this->isCurrentUserPlanner()
         );
-
-        LmsActivityLog::record($activityId, auth()->id(), $this->isCurrentUserPlanner() ? 'PUBLISH' : 'SCHEDULE');
 
         // Si el usuario es profesor (no planner), notificar a planning
         if (! $this->isCurrentUserPlanner()) {

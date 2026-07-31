@@ -210,16 +210,49 @@ class ActivityEditor extends Component
         $link->delete();
     }
 
+    /**
+     * Publicar la lección.
+     *
+     * Solo los roles autorizados (Planificación, Jefe de Área o Coordinación)
+     * publican de inmediato. El profesor solo puede PROGRAMAR la lección
+     * (requiere fecha) y queda en SCHEDULED a la espera de que un responsable
+     * la publique — no se activa sola.
+     */
     public function publishActivity(): void
     {
+        $isAuthorized = auth()->user()->is_admin
+            || auth()->user()->is_planner
+            || auth()->user()->isLeadership()
+            || auth()->user()->isCoordinacion();
+
+        if ($this->activity->lmsPublication?->status === 'PUBLISHED') {
+            $this->notification()->warning(
+                title: 'Ya publicada',
+                description: 'Esta lección ya fue publicada por un responsable y no puede ser reprogramada desde aquí.'
+            );
+
+            return;
+        }
+
+        if (! $isAuthorized && blank($this->publishAt)) {
+            $this->notification()->warning(
+                title: 'Fecha requerida',
+                description: 'Como profesor debes establecer una fecha de programación. La lección será revisada y publicada por un responsable.'
+            );
+
+            return;
+        }
+
         app(LmsPublicationService::class)->publish(
             $this->activity,
             [
                 'publish_at'      => $this->publishAt,
                 'allow_downloads' => $this->allowDownloads,
             ],
-            auth()->id()
+            auth()->id(),
+            $isAuthorized
         );
+
         $this->dispatch('activity-published');
         $this->loadPublication();
     }

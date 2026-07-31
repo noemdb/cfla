@@ -15,13 +15,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
 
         $schedule->command('voting-sessions:cleanup')->daily();
-        $schedule->command('lms:publish-scheduled')->everyFiveMinutes();
         $schedule->command('lms:cleanup-media')->weekly();
     }
 
     protected $commands = [
         \App\Console\Commands\CleanupVotingSessions::class,
-        \App\Console\Commands\PublishScheduledLmsContent::class,
         \App\Console\Commands\CleanupLmsMedia::class,
     ];
 

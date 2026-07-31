@@ -75,8 +75,9 @@ class LmsActivityPublicationTest extends TestCase
 
     public function test_is_hidden_when_scheduled_with_future_publish_at(): void
     {
-        // SCHEDULED queda oculta para el estudiante hasta que el cron la
-        // active a PUBLISHED (aunque la fecha de publicación ya esté fijada).
+        // SCHEDULED queda oculta para el estudiante: el profesor solo la
+        // programa y debe publicarla un responsable (Jefe de Área, Coordinación
+        // o Planificación). No hay auto-publicación por cron.
         $publication = $this->makePublication([
             'status' => 'SCHEDULED',
             'publish_at' => now()->addHour(),

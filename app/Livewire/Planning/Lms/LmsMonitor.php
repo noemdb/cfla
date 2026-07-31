@@ -279,7 +279,8 @@ class LmsMonitor extends Component
         app(LmsPublicationService::class)->publish(
             $activity,
             ['publish_at' => $publishAt, 'allow_comments' => true, 'allow_downloads' => true],
-            auth()->id()
+            auth()->id(),
+            true // Planificación: rol autorizado para publicar
         );
         $this->notification()->success('Publicado', 'El contenido ahora es visible para los estudiantes.');
         $this->resetPage();
@@ -333,7 +334,7 @@ class LmsMonitor extends Component
             'allow_comments'  => $this->scheduleAllowComments,
             'allow_downloads' => $this->scheduleAllowDownloads,
             'notes'           => $this->scheduleNotes,
-        ], auth()->id());
+        ], auth()->id(), true); // Planificación: rol autorizado para publicar
 
         $this->showScheduleModal = false;
         $this->scheduleActivityId = null;
@@ -441,7 +442,8 @@ class LmsMonitor extends Component
                 app(LmsPublicationService::class)->publish(
                     $activity,
                     ['publish_at' => $this->bulkPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
-                    auth()->id()
+                    auth()->id(),
+                    true // Planificación: rol autorizado para publicar
                 );
                 $count++;
             }

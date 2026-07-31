@@ -302,7 +302,8 @@ class LessonList extends Component
         app(LmsPublicationService::class)->publish(
             $activity,
             ['publish_at' => $this->publishPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
-            auth()->id()
+            auth()->id(),
+            true // Coordinación: rol autorizado para publicar
         );
 
         $this->cancelPublish();
