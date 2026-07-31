@@ -3,8 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infografía: Ciclo de Vida LMS</title>
+    <title>Infografía: Ciclo de Vida de una Actividad / Lección</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            100: '#E6F2DD',
+                            300: '#B1D3B9',
+                            400: '#88BDA4',
+                            500: '#659287',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -37,7 +53,6 @@
             top: 0;
             bottom: 0;
             width: 4px;
-            background: linear-gradient(to bottom, #3b82f6, #8b5cf6, #ec4899);
             transform: translateX(-50%);
             border-radius: 2px;
             z-index: 0;
@@ -54,7 +69,7 @@
             .text-white, .text-slate-200, .text-slate-300 { color: black !important; }
             .bg-slate-900 { background: #f1f5f9 !important; }
             .shadow-2xl, .shadow-xl, .shadow-lg { box-shadow: none !important; }
-            .timeline-line { background: #94a3b8 !important; }
+            .timeline-line { background: #B1D3B9 !important; }
         }
     </style>
 </head>
@@ -68,60 +83,87 @@
 
     <main class="max-w-5xl mx-auto px-4 py-12 space-y-16">
 
+        <!-- MEMBRETE INSTITUCIONAL -->
+        <section>
+            <div class="glass rounded-2xl px-6 py-6 md:py-8 text-center relative overflow-hidden shadow-lg">
+                <!-- Barra degradada superior -->
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-sage-500 via-sage-400 to-sage-300"></div>
+
+                <!-- Institución -->
+                <h1 class="text-xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+                    UNIDAD EDUCATIVA COLEGIO FRAY LUIS AMIGÓ
+                </h1>
+
+                <!-- App + Módulo -->
+                <div class="mt-3 flex items-center justify-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-sage-500 via-sage-400 to-sage-300 flex items-center justify-center text-white font-extrabold shadow-md">S</span>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-800">SAEFL</span>
+                    <span class="w-1 h-6 bg-slate-200 rounded"></span>
+                    <span class="text-base font-semibold text-slate-600">Planificación Docente</span>
+                </div>
+            </div>
+        </section>
+
         <!-- HEADER GRÁFICO -->
         <header class="text-center relative">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl -z-10"></div>
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-xs font-bold tracking-wider uppercase mb-4 border border-blue-200">
-                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                Blueprint Verificado 2026
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-sage-400/20 rounded-full blur-3xl -z-10"></div>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4 border border-sage-300">
+                <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
+                Guía Verificada 2026
             </div>
-            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-800 to-slate-900 mb-4 leading-tight">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sage-500 to-slate-900 mb-4 leading-tight">
                 Ciclo de Vida de una<br/>Actividad / Lección
             </h1>
             <p class="text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-                Flujo visual completo: desde la asignación de carga académica hasta el consumo y expiración, con sus 6 gates de seguridad.
+                El recorrido completo de una actividad o lección: desde su creación hasta que llega al estudiante, con sus 6 candados de seguridad.
             </p>
         </header>
 
         <!-- ACTORES (Tarjetas Visuales) -->
         <section>
-            <h2 class="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Actores del Ecosistema</h2>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-3 flex items-center justify-center gap-3">
+                    <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Los 5 Actores del Ecosistema
+                </h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">Cada uno cumple un <span class="text-sage-500 font-bold">rol</span> en el viaje de la lección, desde que se planifica hasta que el estudiante la consume.</p>
+            </div>
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <!-- Planificación -->
-                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-blue-500">
-                    <div class="w-14 h-14 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-3 shadow-inner">
+                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-500">
+                    <div class="w-14 h-14 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center text-sage-500 mb-3 shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900">Planificación / Admin</h3>
-                    <p class="text-xs text-slate-500 mt-1">Asigna carga, aprueba y publica.</p>
+                    <h3 class="font-bold text-slate-900">Planificación</h3>
+                    <p class="text-xs text-slate-500 mt-1">Asigna la carga académica y programa lecciones.</p>
                 </div>
                 <!-- Profesor -->
-                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-emerald-500">
-                    <div class="w-14 h-14 mx-auto bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-3 shadow-inner">
+                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-500">
+                    <div class="w-14 h-14 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center text-sage-500 mb-3 shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Profesor</h3>
-                    <p class="text-xs text-slate-500 mt-1">Registra actividad y monta contenido.</p>
+                    <p class="text-xs text-slate-500 mt-1">Registra la actividad y prepara el contenido de la lección.</p>
                 </div>
                 <!-- Jefe Área -->
-                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-amber-500">
-                    <div class="w-14 h-14 mx-auto bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-3 shadow-inner">
+                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-300">
+                    <div class="w-14 h-14 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center text-sage-500 mb-3 shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Jefe de Área</h3>
-                    <p class="text-xs text-slate-500 mt-1">Activa lecciones ya programadas (SCHEDULED) de sus asignaturas.</p>
+                    <p class="text-xs text-slate-500 mt-1">Aprueba las actividades y lecciones ya programadas, según su jefatura.</p>
                 </div>
                 <!-- Coordinación -->
-                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sky-500">
-                    <div class="w-14 h-14 mx-auto bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 mb-3 shadow-inner">
+                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-400">
+                    <div class="w-14 h-14 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center text-sage-500 mb-3 shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Coordinación</h3>
-                    <p class="text-xs text-slate-500 mt-1">Monitorea y publica lecciones de sus planes educativos.</p>
+                    <p class="text-xs text-slate-500 mt-1">Monitorea y publica lecciones de sus planes educativos asociados.</p>
                 </div>
                 <!-- Estudiante -->
-                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-violet-500">
-                    <div class="w-14 h-14 mx-auto bg-violet-100 rounded-2xl flex items-center justify-center text-violet-600 mb-3 shadow-inner">
+                <div class="glass rounded-2xl p-5 text-center hover:-translate-y-1 transition-transform duration-300 shadow-lg border-t-4 border-sage-500">
+                    <div class="w-14 h-14 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center text-sage-500 mb-3 shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
                     </div>
                     <h3 class="font-bold text-slate-900">Estudiante</h3>
@@ -132,35 +174,55 @@
 
         <!-- LÍNEA DE TIEMPO CENTRAL -->
         <section class="relative py-8">
-            <div class="timeline-line hidden md:block"></div>
-            <div class="timeline-line md:hidden"></div> <!-- Línea móvil a la izquierda -->
+            <!-- Título del diagrama -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-3 flex items-center justify-center gap-3">
+                    <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    El Viaje de la Lección
+                </h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">Los <span class="text-sage-500 font-bold">7 pasos</span> que recorre una lección, desde que nace como carga académica hasta que expira.</p>
+            </div>
 
-            <!-- Paso 1 -->
+            <div class="relative">
+                <div class="timeline-line hidden md:block bg-gradient-to-b from-sage-500 via-sage-400 to-sage-300"></div>
+                <div class="timeline-line md:hidden bg-gradient-to-b from-sage-500 via-sage-400 to-sage-300"></div> <!-- Línea móvil a la izquierda -->
+
+                <!-- Paso 1 -->
             <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0 pl-12 md:pl-0">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-blue-500 inline-block text-left md:text-right w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-sage-500 inline-block text-left md:text-right w-full">
                         <div class="flex items-center gap-2 md:justify-end mb-2">
-                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Modelo: Pevaluacion</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Carga Académica</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">1. Asignación de Carga</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Planificación crea la <span class="font-semibold text-slate-800">carga académica</span> (modelo <code class="bg-slate-100 px-1 rounded font-mono">Pevaluacion</code>), el ancla que vincula: <span class="font-semibold text-slate-800">Profesor + Sección + Asignatura + Lapso</span>. El profesor no puede crearla.</p>
+                        <div class="flex items-center gap-3 mb-2 md:justify-end">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13.828 10.172a4 4 0 0 1 0 5.656l-4 4a4 4 0 0 1-5.656-5.656l1.5-1.5"></path><path d="M10.172 13.828a4 4 0 0 1 0-5.656l4-4a4 4 0 0 1 5.656 5.656l-1.5 1.5"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">1. Asignación de Carga</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">Planificación crea la <span class="font-semibold text-slate-800">carga académica</span>, el ancla que vincula: <span class="font-semibold text-slate-800">Profesor + Sección + Asignatura + Lapso</span>. El profesor no puede crearla.</p>
                     </div>
                 </div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-blue-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">1</div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">1</div>
                 <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
             </div>
 
             <!-- Paso 2 -->
             <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-emerald-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">2</div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">2</div>
                 <div class="md:w-1/2 md:pl-12 pl-12 md:pl-12 w-full">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-emerald-500 inline-block w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-sage-500 inline-block w-full">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Modelo: Activity</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Actividad</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">2. Registro de Actividad</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">El profesor define tema, descripción y estructura (Inicio, Desarrollo, Cierre). Nace con <span class="font-mono bg-slate-100 px-1 rounded text-amber-600 font-bold">status = false</span> (En revisión).</p>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">2. Registro de Actividad</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">El profesor define tema, descripción y estructura (Inicio, Desarrollo, Cierre). Nace en estado <span class="bg-amber-100 text-amber-700 px-1 rounded font-bold">En revisión</span>, pendiente de aprobación.</p>
                     </div>
                 </div>
             </div>
@@ -172,11 +234,16 @@
                         <div class="flex items-center gap-2 md:justify-end mb-2">
                             <span class="bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                GATE 1
+                                Candado 1
                             </span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">3. Aprobación Académica</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Planificación cambia a <span class="font-mono bg-rose-50 text-rose-600 px-1 rounded font-bold">status = true</span>. Sin esto, la actividad es <strong>invisible</strong> para el estudiante, sin importar el estado LMS.</p>
+                        <div class="flex items-center gap-3 mb-2 md:justify-end">
+                            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">3. Aprobación Académica</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">El <span class="font-semibold text-slate-800">Jefe de Área</span> revisa y aprueba la actividad, según su jefatura. Sin esto, la actividad es <strong>invisible</strong> para el estudiante, sin importar cómo esté publicada.</p>
                     </div>
                 </div>
                 <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-rose-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">3</div>
@@ -186,17 +253,23 @@
             <!-- Paso 4 -->
             <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-indigo-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">4</div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-400 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">4</div>
                 <div class="md:w-1/2 md:pl-12 pl-12 w-full">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-indigo-500 inline-block w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-sage-400 inline-block w-full">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Lesson Wizard</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Editor de Contenido</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">4. Montaje del Contenido</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed mb-3">El profesor agrega secciones, textos, videos y recursos. Cada elemento tiene su propio interruptor:</p>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">4. Montaje del Contenido</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-3">El profesor agrega secciones, textos, videos y recursos, con <span class="font-semibold text-sage-500">asistencia de herramientas de IA</span> para generar y mejorar el contenido. Cada elemento tiene su propio interruptor:</p>
                         <div class="flex flex-wrap gap-2 justify-start">
-                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md border border-slate-200 font-mono">is_visible: true</span>
-                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md border border-slate-200 font-mono">is_required: true</span>
+                            <span class="bg-sage-100 text-sage-600 text-xs px-2 py-1 rounded-md border border-sage-300 font-semibold">👁 Visible</span>
+                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md border border-slate-200 font-semibold">✓ Obligatorio</span>
+                            <span class="bg-sage-100 text-sage-500 text-xs px-2 py-1 rounded-md border border-sage-300 font-semibold">⚡ Asistencia IA</span>
                         </div>
                     </div>
                 </div>
@@ -205,29 +278,39 @@
             <!-- Paso 5 -->
             <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0 pl-12 md:pl-0">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-amber-500 inline-block text-left md:text-right w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 md:border-l-0 md:border-r-4 border-sage-300 inline-block text-left md:text-right w-full">
                         <div class="flex items-center gap-2 md:justify-end mb-2">
-                            <span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">LmsActivityPublication</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Publicación</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">5. Programación y Publicación</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Se define <code class="bg-slate-100 px-1 rounded font-mono">publish_at</code> (y opcionalmente <code class="bg-slate-100 px-1 rounded font-mono">unpublish_at</code>). El sistema lo compara con <code class="bg-slate-100 px-1 rounded font-mono">now()</code>: si es futura queda <strong>SCHEDULED</strong> y se activa sola cuando llega el momento (cron <code class="bg-slate-100 px-1 rounded font-mono">lms:publish-scheduled</code> cada 5 min).</p>
+                        <div class="flex items-center gap-3 mb-2 md:justify-end">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">5. Programación y Publicación</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">Se elige la <span class="font-semibold text-slate-800">fecha de publicación</span> y, opcionalmente, cuándo dejar de mostrarla. Si la fecha es futura, la lección queda <strong>programada</strong> y se publica sola cuando llega el momento. Si la fecha es ahora o pasada, está disponible de inmediato.</p>
                     </div>
                 </div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-amber-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">5</div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-300 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">5</div>
                 <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
             </div>
 
             <!-- Paso 6 -->
             <div class="relative flex flex-col md:flex-row items-center mb-12 group">
                 <div class="md:w-1/2 md:pr-12 hidden md:block"></div>
-                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-violet-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">6</div>
+                <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-sage-400 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">6</div>
                 <div class="md:w-1/2 md:pl-12 pl-12 w-full">
-                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-violet-500 inline-block w-full">
+                    <div class="glass p-6 rounded-2xl shadow-xl border-l-4 border-sage-400 inline-block w-full">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-violet-100 text-violet-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">StudentScopeService</span>
+                            <span class="bg-sage-100 text-sage-500 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Acceso del Estudiante</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">6. Scoping y Consumo</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">El sistema valida que la <code class="bg-slate-100 px-1 rounded font-mono">seccion_id</code> coincida con la inscripción del estudiante. Si pasa, accede al Dashboard, consume y genera logs (VIEW, COMPLETE).</p>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">6. Acceso y Consumo</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">El estudiante ve únicamente las lecciones de su propia sección. Al entrar, revisa el contenido (textos, videos y recursos) y el sistema registra lo que vio y lo que completó.</p>
                     </div>
                 </div>
             </div>
@@ -239,89 +322,101 @@
                         <div class="flex items-center gap-2 md:justify-end mb-2">
                             <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">Expiración</span>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-2">7. Expiración / Archivo</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed">Al llegar <code class="bg-slate-100 px-1 rounded font-mono">unpublish_at</code> o por acción manual (ARCHIVED), desaparece de los listados. Enlaces directos retornan <strong class="text-red-500">404</strong>.</p>
+                        <div class="flex items-center gap-3 mb-2 md:justify-end">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shadow-inner shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14M5 8a2 2 0 1 1 0-4h14a2 2 0 1 1 0 4M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8m-9 4h4"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-900">7. Expiración / Archivo</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">Cuando llega la fecha de cierre (o se archiva manualmente), la lección desaparece de las listas y ya no se puede abrir.</p>
                     </div>
                 </div>
                 <div class="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-slate-500 border-4 border-white shadow-lg flex items-center justify-center text-white font-bold z-10 group-hover:scale-125 transition-transform">7</div>
                 <div class="md:w-1/2 md:pl-12 hidden md:block"></div>
-            </div>
+                </div>
+            </div> <!-- cierra el wrapper relativo de la línea de tiempo -->
         </section>
 
         <!-- SECCIÓN DE LOS 6 CANDADOS (Alto Contraste) -->
-        <section class="relative rounded-3xl bg-slate-900 p-8 md:p-12 overflow-hidden shadow-2xl">
+        <section class="relative rounded-3xl bg-sage-100 p-8 md:p-12 overflow-hidden shadow-2xl border border-sage-300">
             <!-- Decoración de fondo -->
-            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-            
+            <div class="absolute top-0 right-0 w-96 h-96 bg-sage-500/10 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-sage-400/10 rounded-full blur-3xl"></div>
+
             <div class="relative z-10 text-center mb-10">
-                <h2 class="text-3xl font-extrabold text-white mb-3 flex items-center justify-center gap-3">
-                    <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-3 flex items-center justify-center gap-3">
+                    <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                     Los 6 Candados de Visibilidad
                 </h2>
-                <p class="text-slate-400 max-w-2xl mx-auto">Para que un estudiante vea una lección, <span class="text-emerald-400 font-bold">TODAS</span> estas condiciones deben ser verdaderas simultáneamente.</p>
+                <p class="text-slate-600 max-w-2xl mx-auto">Para que un estudiante vea una lección, deben cumplirse <span class="text-sage-500 font-bold">TODAS</span> estas condiciones a la vez.</p>
             </div>
 
             <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Gate 1 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">1</div>
-                        <h4 class="font-bold text-slate-200">Aprobación</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">1</div>
+                        <h4 class="font-bold text-slate-800">Aprobación</h4>
                     </div>
-                    <code class="text-xs text-emerald-400 bg-slate-950/50 p-2 rounded block border border-slate-800">Activity.status == true</code>
+                    <p class="text-xs text-slate-600">La actividad fue <span class="font-semibold text-sage-500">aprobada</span> por el Jefe de Área.</p>
                 </div>
 
                 <!-- Gate 2 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">2</div>
-                        <h4 class="font-bold text-slate-200">Contenido Visible</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">2</div>
+                        <h4 class="font-bold text-slate-800">Contenido Visible</h4>
                     </div>
-                    <p class="text-xs text-slate-400">A nivel de contenido: secciones, contenidos y recursos se filtran con <code class="text-emerald-400">is_visible == true</code></p>
+                    <p class="text-xs text-slate-600">Los textos, videos y recursos de la lección están marcados como <span class="font-semibold text-sage-500">visibles</span>.</p>
                 </div>
 
                 <!-- Gate 3 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">3</div>
-                        <h4 class="font-bold text-slate-200">Estado Activo</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">3</div>
+                        <h4 class="font-bold text-slate-800">Publicada</h4>
                     </div>
-                    <code class="text-xs text-emerald-400 bg-slate-950/50 p-2 rounded block border border-slate-800">status IN ('PUBLISHED', 'SCHEDULED')</code>
+                    <p class="text-xs text-slate-600">La lección está <span class="font-semibold text-sage-500">publicada</span>; una programada aún no se muestra.</p>
                 </div>
 
                 <!-- Gate 4 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">4</div>
-                        <h4 class="font-bold text-slate-200">Fecha Válida</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">4</div>
+                        <h4 class="font-bold text-slate-800">Fecha de Publicación</h4>
                     </div>
-                    <p class="text-xs text-slate-400"><code class="text-emerald-400">publish_at</code> no es nulo. Define si es Vista Previa o Completa.</p>
+                    <p class="text-xs text-slate-600">Tiene una <span class="font-semibold text-sage-500">fecha de publicación</span> definida. Según esa fecha se muestra en Vista Previa o Completa.</p>
                 </div>
 
                 <!-- Gate 5 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">5</div>
-                        <h4 class="font-bold text-slate-200">No Expirada</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">5</div>
+                        <h4 class="font-bold text-slate-800">No ha Expirado</h4>
                     </div>
-                    <code class="text-xs text-emerald-400 bg-slate-950/50 p-2 rounded block border border-slate-800">unpublish_at >= now() OR null</code>
+                    <p class="text-xs text-slate-600">Aún no llega la <span class="font-semibold text-sage-500">fecha de cierre</span> (o no tiene fecha de cierre).</p>
                 </div>
 
                 <!-- Gate 6 -->
-                <div class="glass-dark p-5 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-colors group">
+                <div class="glass p-5 rounded-xl border border-sage-300 hover:border-sage-500/50 transition-colors group">
                     <div class="flex items-center gap-3 mb-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors">6</div>
-                        <h4 class="font-bold text-slate-200">Scoping de Sección</h4>
+                        <div class="w-8 h-8 rounded-lg bg-sage-500/20 flex items-center justify-center text-sage-500 font-bold group-hover:bg-sage-500 group-hover:text-white transition-colors">6</div>
+                        <h4 class="font-bold text-slate-800">Es de su Sección</h4>
                     </div>
-                    <p class="text-xs text-slate-400"><code class="text-emerald-400">Pevaluacion.seccion_id</code> coincide con la inscripción del estudiante.</p>
+                    <p class="text-xs text-slate-600">La lección pertenece a la <span class="font-semibold text-sage-500">sección del estudiante</span>.</p>
                 </div>
             </div>
         </section>
 
         <!-- MATRIZ DE ESTADOS VISUAL -->
         <section>
-            <h2 class="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-8">Matriz de Estados de Publicación</h2>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-3 flex items-center justify-center gap-3">
+                    <svg class="w-8 h-8 text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    Los 3 Estados de la Lección
+                </h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">Cada estado define <span class="text-sage-500 font-bold">qué ve el estudiante</span>, desde que se crea como borrador hasta que se publica.</p>
+            </div>
             <div class="flex flex-col md:flex-row gap-4 justify-center items-stretch">
                 
                 <!-- Estado 1 -->
@@ -330,7 +425,7 @@
                     <div class="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-lg">DRAFT</h3>
+                    <h3 class="font-bold text-slate-900 text-lg">Borrador</h3>
                     <p class="text-xs text-slate-500 mt-1 mb-3">Nunca publicada</p>
                     <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">❌ Oculta</span>
                 </div>
@@ -342,13 +437,13 @@
 
                 <!-- Estado 2 -->
                 <div class="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-slate-200 text-center relative overflow-hidden group hover:shadow-xl transition-all">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-amber-400"></div>
-                    <div class="w-12 h-12 mx-auto bg-amber-50 rounded-full flex items-center justify-center text-amber-500 mb-3">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-300"></div>
+                    <div class="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-500 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-lg">SCHEDULED</h3>
-                    <p class="text-xs text-slate-500 mt-1 mb-3"><code class="bg-slate-100 px-1 rounded">publish_at</code> > now()</p>
-                    <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">🟡 Vista Previa (1ª sección)</span>
+                    <h3 class="font-bold text-slate-900 text-lg">Programada</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-3">Fecha futura: el estudiante aún no la ve</p>
+                    <span class="inline-block bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">❌ Oculta para el estudiante</span>
                 </div>
 
                 <!-- Flecha -->
@@ -358,13 +453,28 @@
 
                 <!-- Estado 3 -->
                 <div class="flex-1 bg-white rounded-2xl p-6 shadow-lg border border-slate-200 text-center relative overflow-hidden group hover:shadow-xl transition-all">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                    <div class="w-12 h-12 mx-auto bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-3">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-sage-500"></div>
+                    <div class="w-12 h-12 mx-auto bg-sage-100 rounded-full flex items-center justify-center text-sage-500 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-lg">PUBLISHED</h3>
-                    <p class="text-xs text-slate-500 mt-1 mb-3"><code class="bg-slate-100 px-1 rounded">publish_at</code> <= now()</p>
-                    <span class="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">🟢 Visible Completa</span>
+                    <h3 class="font-bold text-slate-900 text-lg">Publicada</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">Visible para el estudiante</p>
+                    <div class="space-y-2 text-left">
+                        <div class="flex items-center gap-2.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div>
+                                <p class="text-xs font-bold text-amber-800 leading-tight">Vista Previa</p>
+                                <p class="text-[11px] text-amber-700/80 mt-0.5 leading-snug">Antes de su fecha · solo la 1ª sección</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2.5 rounded-xl border border-sage-300 bg-sage-100 px-3 py-2">
+                            <svg class="w-4 h-4 text-sage-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <div>
+                                <p class="text-xs font-bold text-sage-700 leading-tight">Visible Completa</p>
+                                <p class="text-[11px] text-sage-600/80 mt-0.5 leading-snug">Desde su fecha · todo el contenido</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Flecha -->
@@ -378,9 +488,9 @@
                     <div class="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-slate-600 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
                     </div>
-                    <h3 class="font-bold text-slate-900 text-lg">ARCHIVED</h3>
+                    <h3 class="font-bold text-slate-900 text-lg">Archivada</h3>
                     <p class="text-xs text-slate-500 mt-1 mb-3">Manual o expirada</p>
-                    <span class="inline-block bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">⚫ Desaparece (404)</span>
+                    <span class="inline-block bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">⚫ Ya no está disponible</span>
                 </div>
 
             </div>
@@ -390,9 +500,9 @@
         <footer class="text-center border-t border-slate-200 pt-8 mt-12">
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Regla Absoluta: La visibilidad se verifica contra el código fuente. Coordinación (<code class="bg-slate-200 px-1 rounded">is_coordinacion</code>) monitorea y publica lecciones programadas (SCHEDULED); no aprueba actividades.
+                Regla Absoluta: una lección solo se muestra si cumple todas las condiciones de visibilidad. La aprobación de actividades y lecciones corresponde al <strong>Jefe de Área</strong>; la Coordinación supervisa y publica lecciones programadas, pero no aprueba actividades.
             </div>
-            <p class="text-slate-400 text-xs mt-4">Generado para documentación técnica LMS • Última revisión: 2026-07-31</p>
+            <p class="text-slate-400 text-xs mt-4">Documento informativo para la comunidad educativa • Última revisión: 2026-07-31</p>
         </footer>
 
     </main>

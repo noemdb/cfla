@@ -239,6 +239,12 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
             Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
         });
+
+        // Infografía: flujo de una actividad/lección LMS (documento estático).
+        // Protegida por el middleware del grupo planning (auth + isPlanner).
+        Route::get('/diagram/flow/activity-lesson', function () {
+            return response()->file(base_path('docs/infografia/flujoActivityLesson.html'));
+        })->name('diagram.flow.activity-lesson');
     });  // ← cierra el grupo planning
 
     // ─── MÓDULO DE COORDINACIÓN ──────────────────────────────────

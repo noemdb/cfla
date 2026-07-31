@@ -45,13 +45,16 @@ class LmsActivityPublication extends Model
     /**
      * Estado de la publicación desde el punto de vista del estudiante.
      *
-     * - 'hidden'  → no visible (status no activo, publish_at nulo o despublicada).
-     * - 'preview' → visible solo la 1ª sección (now() < publish_at).
-     * - 'full'    → visible completa (now() >= publish_at).
+     * Solo `PUBLISHED` es visible para los estudiantes; una `SCHEDULED`
+     * (aún programada) queda oculta hasta que el cron la active.
+     *
+     * - 'hidden'  → no visible (no está publicada, publish_at nulo o expirada).
+     * - 'preview' → publicada pero ahora() < publish_at → solo la 1ª sección.
+     * - 'full'    → publicada y ahora() >= publish_at → visible completa.
      */
     public function studentVisibility(): string
     {
-        if (! in_array($this->status, ['PUBLISHED', 'SCHEDULED'], true)) {
+        if ($this->status !== 'PUBLISHED') {
             return 'hidden';
         }
         if ($this->publish_at === null) {
@@ -65,7 +68,8 @@ class LmsActivityPublication extends Model
 
     /**
      * La lección es accesible para los estudiantes (en vista previa o completa).
-     * Una SCHEDULED con publish_at futuro es visible como vista previa (1ª sección).
+     * Solo las PUBLISHED son visibles; una SCHEDULED queda oculta hasta que
+     * `activateScheduled()` la pase a PUBLISHED.
      */
     public function isVisibleToStudents(): bool
     {
@@ -73,7 +77,7 @@ class LmsActivityPublication extends Model
     }
 
     /**
-     * Solo la primera sección es visible (now() < publish_at).
+     * Solo la primera sección es visible (PUBLISHED y now() < publish_at).
      */
     public function isPreviewToStudents(): bool
     {
@@ -81,7 +85,7 @@ class LmsActivityPublication extends Model
     }
 
     /**
-     * La lección es visible completa (now() >= publish_at).
+     * La lección es visible completa (PUBLISHED y now() >= publish_at).
      */
     public function isFullVisibleToStudents(): bool
     {
@@ -90,7 +94,7 @@ class LmsActivityPublication extends Model
 
     public function scopeVisibleNow($query)
     {
-        return $query->whereIn('status', ['PUBLISHED', 'SCHEDULED'])
+        return $query->where('status', 'PUBLISHED')
             ->whereNotNull('publish_at')
             ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
     }

@@ -12,8 +12,8 @@ class LmsPublicationService
     {
         // publish_at nunca queda nulo: si no llega fecha, se usa now()
         // (publicación inmediata). Una fecha futura queda como SCHEDULED
-        // (visible en vista previa para los estudiantes) y se activa sola
-        // cuando llega la fecha vía lms:publish-scheduled.
+        // (oculta para los estudiantes) y se activa sola cuando llega la
+        // fecha vía lms:publish-scheduled (ahí recién se vuelve visible).
         // El input llega como string (datetime-local) o puede faltar.
         $publishAt = $data['publish_at'] ?? now();
         if (! $publishAt instanceof \Carbon\CarbonInterface) {
