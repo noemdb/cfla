@@ -226,7 +226,8 @@
                                 </button>
                                 @if($lesson->lmsPublication && $lesson->lmsPublication->status === 'SCHEDULED')
                                     <button type="button" wire:click="confirmPublishLesson({{ $lesson->id }})"
-                                        class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+                                        @if(!$lesson->status) disabled title="La actividad debe estar aprobada para poder publicarla" @endif
+                                        class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all duration-200 @if($lesson->status) bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 @else bg-gray-500/10 text-gray-400 cursor-not-allowed border border-gray-500/20 @endif">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
@@ -322,7 +323,8 @@
                                             </button>
                                             @if($lesson->lmsPublication && $lesson->lmsPublication->status === 'SCHEDULED')
                                                 <button type="button" wire:click="confirmPublishLesson({{ $lesson->id }})"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all duration-200">
+                                                    @if(!$lesson->status) disabled title="La actividad debe estar aprobada para poder publicarla" @endif
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200 @if($lesson->status) bg-emerald-500/12 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 @else bg-gray-500/10 text-gray-400 cursor-not-allowed border border-gray-500/20 @endif">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                     </svg>
@@ -380,13 +382,22 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="px-6 py-5">
+                    <div class="px-6 py-5 space-y-4">
                         <p class="text-sm text-gray-600 dark:text-slate-300">
                             ¿Publicar la lección <strong class="text-gray-900 dark:text-white">{{ $publishActivityTitle }}</strong>?
                         </p>
                         <p class="text-xs text-gray-400 dark:text-slate-500 mt-2">
                             Será visible inmediatamente para los estudiantes en su aula virtual.
                         </p>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Fecha de publicación</label>
+                            <input type="datetime-local" wire:model="publishPublishAt"
+                                   class="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                            @error('publishPublishAt') <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p> @enderror
+                            <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
+                                Se conserva la fecha programada. Vacío: visible de inmediato. Con fecha futura: queda en vista previa (1ª sección) hasta esa fecha.
+                            </p>
+                        </div>
                     </div>
                     <div class="px-6 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700/50 flex items-center justify-end gap-2">
                         <button wire:click="cancelPublishLesson"

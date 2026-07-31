@@ -42,25 +42,56 @@ class LmsActivityPublication extends Model
         return $this->belongsTo(User::class, 'published_by');
     }
 
+    /**
+     * Estado de la publicación desde el punto de vista del estudiante.
+     *
+     * - 'hidden'  → no visible (status no activo, publish_at nulo o despublicada).
+     * - 'preview' → visible solo la 1ª sección (now() < publish_at).
+     * - 'full'    → visible completa (now() >= publish_at).
+     */
+    public function studentVisibility(): string
+    {
+        if (! in_array($this->status, ['PUBLISHED', 'SCHEDULED'], true)) {
+            return 'hidden';
+        }
+        if ($this->publish_at === null) {
+            return 'hidden';
+        }
+        if ($this->unpublish_at && now()->gt($this->unpublish_at)) {
+            return 'hidden';
+        }
+        return now()->lt($this->publish_at) ? 'preview' : 'full';
+    }
+
+    /**
+     * La lección es accesible para los estudiantes (en vista previa o completa).
+     * Una SCHEDULED con publish_at futuro es visible como vista previa (1ª sección).
+     */
     public function isVisibleToStudents(): bool
     {
-        if ($this->status !== 'PUBLISHED') {
-            return false;
-        }
-        $now = now();
-        if ($this->publish_at && $now->lt($this->publish_at)) {
-            return false;
-        }
-        if ($this->unpublish_at && $now->gt($this->unpublish_at)) {
-            return false;
-        }
-        return true;
+        return $this->studentVisibility() !== 'hidden';
+    }
+
+    /**
+     * Solo la primera sección es visible (now() < publish_at).
+     */
+    public function isPreviewToStudents(): bool
+    {
+        return $this->studentVisibility() === 'preview';
+    }
+
+    /**
+     * La lección es visible completa (now() >= publish_at).
+     */
+    public function isFullVisibleToStudents(): bool
+    {
+        return $this->studentVisibility() === 'full';
     }
 
     public function scopeVisibleNow($query)
     {
-        return $query->where('status', 'PUBLISHED')
-            ->where(fn($q) => $q->whereNull('publish_at')->orWhere('publish_at', '<=', now()))
+        return $query->whereIn('status', ['PUBLISHED', 'SCHEDULED'])
+            ->whereNotNull('publish_at')
             ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
     }
 }

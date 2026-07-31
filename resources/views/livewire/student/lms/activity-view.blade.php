@@ -38,7 +38,12 @@
                             @endif
                         </span>
                     @endif
-                    @if($activity->lmsPublication?->status === 'PUBLISHED')
+                    @if($isPreview)
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Vista previa
+                        </span>
+                    @elseif($activity->lmsPublication?->status === 'PUBLISHED')
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-mint-100 dark:bg-mint-500/10 text-mint-800 dark:text-mint-300 border border-mint-200 dark:border-mint-500/30">
                             <span class="w-1.5 h-1.5 rounded-full bg-mint-500"></span>
                             Publicada
@@ -65,6 +70,25 @@
             </p>
         @endif
     </header>
+
+    {{-- ═══════════════════════════════════════ PREVIEW BANNER ═══════════════════════════════════════ --}}
+    @if($isPreview)
+        <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div class="min-w-0">
+                <p class="text-sm font-bold text-amber-900 dark:text-amber-300">Vista previa de la lección</p>
+                <p class="text-xs sm:text-[13px] text-amber-700 dark:text-amber-400 leading-relaxed mt-0.5">
+                    @if($activity->lmsPublication?->publish_at)
+                        Esta lección se publicará el <strong>{{ \Carbon\Carbon::parse($activity->lmsPublication->publish_at)->format('d/m/Y \a \l\a\s H:i') }}</strong> y por ahora solo puedes ver la primera sección.
+                    @else
+                        Esta lección aún no está publicada por completo. Solo puedes ver la primera sección.
+                    @endif
+                </p>
+            </div>
+        </div>
+    @endif
 
     {{-- ═══════════════════════════════════════ SECTIONS ═══════════════════════════════════════ --}}
     @forelse($sections as $section)
@@ -629,7 +653,7 @@
                 Volver a lecciones
             </a>
 
-            @if($activity->lmsPublication?->status === 'PUBLISHED' && !$completed)
+            @if(!$isPreview && $activity->lmsPublication?->status === 'PUBLISHED' && !$completed)
                 <button wire:click="markComplete"
                         wire:loading.attr="disabled"
                         wire:target="markComplete"

@@ -64,6 +64,7 @@ class StudentHome extends Component
         $recentLogs = LmsActivityLog::with([
             'activity.pevaluacion.pensum.asignatura',
             'activity.pevaluacion.profesor',
+            'activity.lmsPublication',
         ])
             ->where('user_id', auth()->id())
             ->whereIn('event', ['VIEW', 'COMPLETE'])
@@ -79,6 +80,7 @@ class StudentHome extends Component
         $upcoming = Activity::with([
             'pevaluacion.pensum.asignatura',
             'pevaluacion.lapso',
+            'lmsPublication',
         ])
             ->whereIn('id', $visibleActivityIds)
             ->whereNotNull('ffinal')

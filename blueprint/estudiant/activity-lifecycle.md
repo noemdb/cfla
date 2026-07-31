@@ -45,7 +45,7 @@ Carga Académica → Registro Actividades → Aprobación → Preparación LMS �
 | Estudiante | `is_student` | `IsStudent` (admin bypass) | Consume contenido |
 | Admin | `is_admin` | bypass en casi todos | Todo |
 
-> **Aclaración de nomenclatura:** El documento histórico hablaba de "Sub Dirección" y "Jefe de Área/Coordinador" como actores únicos de publicación. En el código real la publicación efectiva de lecciones la ejercen **Planning** (`is_planner`) vía `LmsMonitor`, **Jefe de Área** (`is_leadership`) vía `LessonMonitor`, y **Admin**. Coordinación (`is_coordinacion`) **no publica** LMS.
+> **Aclaración de nomenclatura:** El documento histórico hablaba de "Sub Dirección" y "Jefe de Área/Coordinador" como actores únicos de publicación. En el código real la publicación efectiva de lecciones la ejercen **Planning** (`is_planner`) vía `LmsMonitor`, **Jefe de Área** (`is_leadership`) vía `ActivityOverview` (`/activities`) y `LessonMonitor` (`/lessons`), y **Admin**. Coordinación (`is_coordinacion`) **no publica** LMS.
 
 ---
 
@@ -119,6 +119,7 @@ User (rol: is_admin | is_planner | is_leadership | is_coordinacion | is_profesor
 ```
 
 > **Correcciones verificadas:**
+> - `LmsActivityPublication` expone `studentVisibility()` que devuelve `'hidden'` / `'preview'` / `'full'` según la relación de `now()` con `publish_at` (ver Fase 6). El modelo **nunca** persiste `publish_at` nulo desde el servicio (ver Fase 4a).
 > - `LmsMediaLibrary` **NO es polimórfica**: las relaciones `contents()` / `resources()` son `hasMany` planas (no `morphMany`). La columna de discriminación es `provider` ('LOCAL' = archivo local) vía `isLocal()`, no `media_type`.
 > - `Activity` **NO tiene relación `lmsProgress`**. El progreso se lee/escribe consultando `LmsActivityProgress` directamente por `activity_id` + `student_id`.
 > - `LmsActivityLog` sí tiene las columnas `context_id`/`context_type` y `ip_address`, pero el modelo no define una relación `morphTo`; son columnas informativas para asociar el log a un recurso concreto (p. ej. `RESOURCE_DOWNLOAD` de un `LmsActivityResource`).
@@ -213,7 +214,7 @@ public function saveComent()
 | Rol | Crea Pevaluacion | Registra Activities | Aprueba Activity (status) | Programa LMS | Publica LMS |
 |-----|:---:|:---:|:---:|:---:|:---:|
 | **Planning** (`is_planner`/admin/diagnostic) | ✅ (carga académica) | ❌ | ✅ (vía `saveComent`) | ✅ | ✅ (vía `LmsMonitor`) |
-| **Jefe de Área** (`is_leadership`) | ❌ | ❌ | ❌ (solo visualiza) | ❌ | ✅ (vía `LessonMonitor`, solo SCHEDULED) |
+| **Jefe de Área** (`is_leadership`) | ❌ | ❌ | ❌ (solo visualiza) | ❌ | ✅ (vía `ActivityOverview` / `LessonMonitor`, solo SCHEDULED) |
 | **Coordinación** (`is_coordinacion`) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Profesor** (`is_profesor`) | ❌ | ✅ (dentro de su carga) | ❌ | ✅ (vía LessonWizard) | ⚠️ vía `saveAndPublish` (ver Fase 4) |
 | **Admin** (`is_admin`) | ✅ (bypass) | ✅ | ✅ | ✅ | ✅ |
@@ -291,11 +292,16 @@ Antes de publicar, se configuran:
 
 | Parámetro | Campo en LmsActivityPublication | Efecto |
 |-----------|--------------------------------|--------|
-| Publicación inmediata | `publish_at = null`, `status = PUBLISHED` | Visible al instante |
-| Publicación programada | `publish_at = future_date`, `status = SCHEDULED` | Se activa automáticamente |
+| Publicación inmediata | `publish_at = now()`, `status = PUBLISHED` | Visible **completa** al instante |
+| Publicación programada | `publish_at = future_date`, `status = SCHEDULED` | Visible en **vista previa** (solo 1ª sección) hasta la fecha; luego se activa sola |
+| Publicación con fecha pasada | `publish_at = past/now`, `status = PUBLISHED` | Visible **completa** |
 | Expiración | `unpublish_at = future_date` | Se oculta automáticamente |
 | Comentarios | `allow_comments` | Habilita/deshabilita comentarios |
 | Descargas | `allow_downloads` | Habilita/deshabilita descarga de recursos |
+
+> **⚠️ Invariante:** `publish_at` **nunca queda nulo**. Los botones "Publicar ahora" (LmsMonitor, Coordinación `LessonList`, Leadership `ActivityOverview`) abren un modal con `datetime-local` (fecha opcional; vacía → `now()`) y el servicio `LmsPublicationService::publish()` aplica el mismo default. Un registro PUBLISHED/SCHEDULED con `publish_at` nulo se considera **oculto** (`studentVisibility() = 'hidden'`).
+>
+> **Nota:** `LessonMonitor` (`/app/leadership/lessons`) usa el **mismo patrón** que `ActivityOverview`: modal con `datetime-local` pre-cargado con `publish_at`, guardia de `Activity.status = true` y `publish_at` nunca nulo. Todas las vías de publicación cumplen el invariante.
 
 ---
 
@@ -310,14 +316,19 @@ El profesor ejecuta "Guardar y Programar" en el LessonWizard. Internamente se in
 ```php
 public function publish(Activity $activity, array $data, int $publisherId): LmsActivityPublication
 {
+    $publishAt = $data['publish_at'] ?? now();
+    if (! $publishAt instanceof \Carbon\CarbonInterface) {
+        $publishAt = $publishAt ? \Carbon\Carbon::parse($publishAt) : now();
+    }
+    $isFuture = $publishAt->gt(now());
     $pub = LmsActivityPublication::updateOrCreate(
         ['activity_id' => $activity->id],
         [
             'published_by'    => $publisherId,
-            'status'          => isset($data['publish_at']) ? 'SCHEDULED' : 'PUBLISHED',
-            'publish_at'      => $data['publish_at'] ?? null,
+            'status'          => $isFuture ? 'SCHEDULED' : 'PUBLISHED',
+            'publish_at'      => $publishAt,                 // nunca nulo (default now())
             'unpublish_at'    => $data['unpublish_at'] ?? null,
-            'published_at'    => isset($data['publish_at']) ? null : now(),
+            'published_at'    => $isFuture ? null : now(),
             'allow_comments'  => $data['allow_comments'] ?? true,
             'allow_downloads' => $data['allow_downloads'] ?? true,
             'notes'           => $data['notes'] ?? null,
@@ -328,6 +339,11 @@ public function publish(Activity $activity, array $data, int $publisherId): LmsA
     return $pub;
 }
 ```
+
+**Diferencias clave con la versión previa (verificadas):**
+- `publish_at` **nunca queda nulo**: si no llega en `$data`, se normaliza a `now()` (acepta tanto `CarbonInterface` como strings de inputs `datetime-local`).
+- El `status` ya **no** depende de que exista `publish_at` (antes: "si hay fecha → SCHEDULED"), sino de la relación con `now()`: fecha **futura → SCHEDULED** (vista previa hasta activar), fecha **ahora/pasada → PUBLISHED** (visible completa).
+- `published_at` se escribe solo cuando no es futuro.
 
 **Nota:** `publish()` registra siempre `PUBLISH`. Además, el LessonWizard registra un segundo evento discriminado por rol (línea 4288):
 
@@ -348,7 +364,7 @@ if (! $this->isCurrentUserPlanner()) {
 2. Presiona "Guardar y Programar"
 3. El sistema registra el evento `SCHEDULE` en `LmsActivityLog` (además del `PUBLISH` que registra `publish()`)
 4. Se envía una **notificación** a todos los usuarios con `is_planner = true` o `is_admin = true`
-5. La lección queda en estado `SCHEDULED` (si tiene `publish_at`) o `PUBLISHED` (si no tiene fecha, queda visible inmediatamente)
+5. La lección queda en estado `SCHEDULED` (si `publish_at` es futuro → vista previa para estudiantes) o `PUBLISHED` (si `publish_at` es ahora/pasado → visible completa). `publish_at` nunca queda nulo (el servicio usa `now()` por defecto)
 
 > **⚠️ Bypass verificado:** `saveAndPublish()` **no** discrimina por rol. Un profesor no-planner puede publicar directamente una lección en estado `PUBLISHED` (confirmado por el test de caracterización `LessonWizardCharacterizationTest::test_saveAndPublish_publica_leccion`). Es decir, el gate de "profesor solo programa" se aplica en `confirmPublish()` pero NO en `saveAndPublish()`.
 
@@ -379,7 +395,8 @@ Hay **tres vías reales** de publicar una lección:
 |-----|-----------|-----|-----------|
 | **Monitor LMS** | `app/Livewire/Planning/Lms/LmsMonitor.php` | Planning (`is_planner`/admin/diagnostic) | `publish()` / `unpublish()` / `setDraft()`, acciones masivas, modal de programación, modal de ajustes (registra `EDIT`) |
 | **LessonWizard** | `app/Livewire/Profesor/Lms/LessonWizard.php` | Planner/Admin → `PUBLISH`; Profesor → `SCHEDULE` | `confirmPublish()`; pero `saveAndPublish()` no discrimina |
-| **LessonMonitor (Jefatura)** | `app/Livewire/Leadership/LessonMonitor.php` | Jefe de Área (`is_leadership` solo) | Solo puede publicar si `lmsPublication.status === 'SCHEDULED'`; verifica acceso a la asignatura con `assertCanAccessAsignatura()` (LeadershipService); actualiza directo a `PUBLISHED` + `published_at` + `published_by` |
+| **ActivityOverview (Jefatura, `/activities`)** | `app/Livewire/Leadership/ActivityOverview.php` | Jefe de Área (`is_leadership` solo) | Botón "Publicar" **activo solo si `Activity.status = true`** (Gate 1); modal con `datetime-local` **pre-cargado con `publish_at`** (o `now()` si no hay); verifica `assertCanAccessAsignatura()` (LeadershipService); actualiza a `PUBLISHED` + `publish_at` (nunca nulo; vacío → `now()`) + `published_at` condicional |
+| **LessonMonitor (Jefatura, `/lessons`)** | `app/Livewire/Leadership/LessonMonitor.php` | Jefe de Área (`is_leadership` solo) | Igual que `ActivityOverview`: botón "Publicar" **activo solo si `Activity.status = true`**; modal con `datetime-local` **pre-cargado con `publish_at`** (o `now()`); verifica `assertCanAccessAsignatura()`; actualiza a `PUBLISHED` + `publish_at` (nunca nulo; vacío → `now()`) + `published_at` condicional |
 
 **Evento registrado:** `LmsActivityLog.event = 'PUBLISH'` (en las vías que llaman `LmsPublicationService::publish()` o lo replican).
 
@@ -388,8 +405,8 @@ Hay **tres vías reales** de publicar una lección:
 | Estado | Quién lo asigna | ¿Visible para estudiantes? |
 |--------|----------------|---------------------------|
 | `DRAFT` | Factory/default; lección nunca publicada | ❌ |
-| `SCHEDULED` | Profesor al programar, o cualquier vía con `publish_at` futuro (`publish()`) | ❌ (hasta que `activateScheduled()` la pase a `PUBLISHED`) |
-| `PUBLISHED` | `publish()` (cualquier vía), `saveAndPublish()`, `activateScheduled()`, LessonMonitor (Jefatura) | ✅ (si cumple fechas) |
+| `SCHEDULED` | Profesor al programar, o cualquier vía con `publish_at` futuro (`publish()`) | 🟡 **vista previa** (solo 1ª sección + adjuntos) hasta que `activateScheduled()` la pase a `PUBLISHED` |
+| `PUBLISHED` | `publish()` (cualquier vía), `saveAndPublish()`, `activateScheduled()`, `ActivityOverview` / `LessonMonitor` (Jefatura) | ✅ **completa** si `publish_at <= now()`; 🟡 vista previa si `publish_at` futuro; ❌ si `publish_at` nulo |
 | `ARCHIVED` | `unpublish()` / `setDraft()` (Planning) | ❌ |
 
 > **Nota:** la aseveración histórica "PUBLISHED solo lo asignan Jefe de Área/Coordinador/Sub Dirección" es **incorrecta**: un profesor puede publicar vía `saveAndPublish()` y un planner vía `LmsMonitor`. Coordinación (`is_coordinacion`) no publica.
@@ -408,6 +425,8 @@ public function activateScheduled(): int
 ```
 
 **⚠️ Corrección verificada:** `activateScheduled()` **NO registra ningún `LmsActivityLog`** en la transición (la aseveración previa "Evento registrado: PUBLISH en la transición" es falsa). El `LmsActivityLog::record(..., 'PUBLISH')` solo ocurre dentro de `LmsPublicationService::publish()` y en el LessonWizard.
+
+**Importante (visibilidad en vista previa):** mientras la lección está `SCHEDULED` (antes de que `activateScheduled()` la active), **sí es visible para los estudiantes** como vista previa (`now() < publish_at` → `studentVisibility() = 'preview'`). Es el único estado pre-activación que aparece en listados, con badge "Vista previa" y limitado a la 1ª sección.
 
 ---
 
@@ -479,62 +498,45 @@ Para que una actividad sea visible a un estudiante, TODOS estos gates deben pasa
 ```
 Gate 1: Activity.status = true (aprobada — por Planning, no por el profesor)
 Gate 2: Los contenidos LMS tienen is_visible = true (individualmente)
-Gate 3: LmsActivityPublication.status = 'PUBLISHED'
-Gate 4: publish_at <= now (o null)   ⚠️
+Gate 3: LmsActivityPublication.status IN ('PUBLISHED', 'SCHEDULED')
+Gate 4: publish_at no nulo; now() < publish_at → VISTA PREVIA (solo 1ª sección);
+        now() >= publish_at → COMPLETO
 Gate 5: unpublish_at >= now (o null)
 Gate 6: Pevaluacion.seccion_id IN (secciones del estudiante)
 ```
 
-> **⚠️ BUG VERIFICADO — Gate 4 NO está implementado en el código actual.** El commit `75ae93f2` eliminó la comprobación de `publish_at` de `isVisibleToStudents()` y del scope `visibleNow()`. Dos pruebas unitarias fallan confirmándolo (`tests/Unit/Models/LmsActivityPublicationTest`): `test_is_not_visible_before_publish_at` y `test_scope_visible_now_filters_correctly`. El comportamiento **intendido** (documentado abajo) no coincide con el código. Ver task pendiente de restauración.
+> **Nota de verificación:** el Gate 4 quedó **restaurado e implementado** como lógica de 3 niveles (`hidden` / `preview` / `full`) en `studentVisibility()`. `publish_at` nulo se considera oculto (invariante: el servicio nunca persiste nulo).
 
 ### 8.2 visibleNow — El scope clave
 
-El scope `visibleNow()` en `LmsActivityPublication` condensa los gates 3, 4 y 5. **Versión actual en el código (SIN el gate 4):**
+El scope `visibleNow()` en `LmsActivityPublication` condensa los gates 3, 4 y 5. **Código real verificado** (tras la restauración del Gate 4):
 
 ```php
 public function scopeVisibleNow($query)
 {
-    return $query->where('status', 'PUBLISHED')
-        ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
-    // ⚠️ Falta: whereNull('publish_at')->orWhere('publish_at', '<=', now())
+    return $query->whereIn('status', ['PUBLISHED', 'SCHEDULED'])   // Gate 3
+        ->whereNotNull('publish_at')                               // Gate 4: nulo = oculto
+        ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now())); // Gate 5
 }
 ```
 
-Equivalente a nivel de instancia (estado actual):
+La visibilidad a nivel de instancia se resuelve con `studentVisibility()` (3 niveles) más sus helpers:
 
 ```php
-public function isVisibleToStudents(): bool
+public function studentVisibility(): string
 {
-    if ($this->status !== 'PUBLISHED')                     // Gate 3
-        return false;
-    if ($this->unpublish_at && $now->gt($this->unpublish_at)) // Gate 5
-        return false;
-    return true;
-    // ⚠️ Falta: if ($this->publish_at && $now->lt($this->publish_at)) return false;  // Gate 4
+    if (! in_array($this->status, ['PUBLISHED', 'SCHEDULED'], true)) return 'hidden'; // Gate 3
+    if ($this->publish_at === null) return 'hidden';                                  // Gate 4
+    if ($this->unpublish_at && now()->gt($this->unpublish_at)) return 'hidden';       // Gate 5
+    return now()->lt($this->publish_at) ? 'preview' : 'full';   // Gate 4: preview vs full
 }
+
+public function isVisibleToStudents(): bool      { return $this->studentVisibility() !== 'hidden'; }
+public function isPreviewToStudents(): bool      { return $this->studentVisibility() === 'preview'; }
+public function isFullVisibleToStudents(): bool  { return $this->studentVisibility() === 'full'; }
 ```
 
-**Versión intendida** (la que el blueprint documentaba y la que deben recuperar las pruebas):
-
-```php
-public function scopeVisibleNow($query)
-{
-    return $query->where('status', 'PUBLISHED')
-        ->where(fn($q) => $q->whereNull('publish_at')->orWhere('publish_at', '<=', now()))
-        ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
-}
-
-public function isVisibleToStudents(): bool
-{
-    if ($this->status !== 'PUBLISHED')                     // Gate 3
-        return false;
-    if ($this->publish_at && now()->lt($this->publish_at))  // Gate 4
-        return false;
-    if ($this->unpublish_at && now()->gt($this->unpublish_at)) // Gate 5
-        return false;
-    return true;
-}
-```
+> **Gates 3-5 se condesan así:** `visibleNow()` (lista) y `studentVisibility()` (instancia) cubren `PUBLISHED`/`SCHEDULED`, `publish_at` no nulo, y `unpublish_at` no vencido. La distinción `preview`/`full` la da solo la comparación `now()` vs `publish_at`.
 
 ### 8.3 Query Completa en StudentHome (Dashboard)
 
@@ -583,6 +585,23 @@ $this->comments = ActivityComment::forActivity($activity->id)
     ->orderBy('created_at', 'desc')
     ->get();
 ```
+
+**Límite de vista previa (verificado en `ActivityView::mount()`):** si la publicación está en vista previa (`now() < publish_at`), la actividad se reduce a la **1ª sección** (`lmsSections()` está ordenada por `sort_order`) y a los adjuntos vinculados a esa sección (`section_id` = id de la 1ª sección). Los adjuntos globales (sin `section_id`) y el resto de secciones quedan ocultos:
+
+```php
+$this->isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
+// ...
+if ($this->isPreview) {
+    $firstSection    = $this->sections->first();
+    $firstSectionId  = $firstSection?->id;
+    $this->sections  = $firstSection ? collect([$firstSection]) : collect();
+    $this->resources = $this->resources->filter(fn($r) => $r->section_id === $firstSectionId);
+    $this->links     = $this->links->filter(fn($l) => $l->section_id === $firstSectionId);
+    $this->htmlEmbeds = $this->htmlEmbeds->filter(fn($e) => $e->section_id === $firstSectionId);
+}
+```
+
+> El botón "Marcar como completada" queda deshabilitado en vista previa (solo se permite cuando `status === 'PUBLISHED'` y no está completada). La vista muestra un banner ámbar con la fecha de publicación programada.
 
 ---
 
@@ -687,10 +706,12 @@ public function mount(Activity $activity): void
 `isActivityVisible()` verifica (código real, `StudentScopeService`):
 ```php
 return $activity->status                                              // Gate 1
-    && $activity->lmsPublication?->isVisibleToStudents()       // Gates 3-5
+    && $activity->lmsPublication?->isVisibleToStudents()       // Gates 3-5 (oculto/preview/full)
     && $activity->pevaluacion                                  // Existe
     && $seccionIds->contains($activity->pevaluacion->seccion_id); // Gate 6
 ```
+
+> **Ojo:** `isActivityVisible()` devuelve `true` tanto para vista previa como para completo (ambos pasan `isVisibleToStudents()`). La distinción de qué se muestra (1ª sección vs. completo) la aplica luego `ActivityView::mount()` según `isPreviewToStudents()`.
 
 Esto previene acceso directo por URL a actividades no publicadas, expiradas, en revisión, o de otra sección (responde HTTP 404).
 
@@ -710,7 +731,7 @@ $q->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=',
 
 La actividad desaparece automáticamente de todos los listados del estudiante.
 
-> **⚠️ Nota:** como el Gate 4 (`publish_at`) está roto en el código actual (ver 8.1), la expiración por `unpublish_at` funciona, pero las lecciones programadas con `publish_at` futuro **son visibles antes de tiempo** (regresión del commit `75ae93f2`).
+> **Nota:** el Gate 4 (`publish_at`) está implementado (ver 8.1-8.2). Las lecciones programadas con `publish_at` futuro son visibles **como vista previa** (1ª sección), no como contenido completo: no hay regresión de "contenido visible antes de tiempo".
 
 ### 10.2 Despublicación Manual
 
@@ -773,9 +794,9 @@ PLANNING              PROFESOR                JEFATURA/PLANNING         ESTUDIAN
                  └────────┬──────────┘
                           │
                           │      Revisar y Publicar
-                          ├─────>│  status = 'PUBLISHED' ← Gate 3
-                                 │  (LmsMonitor / LessonMonitor / saveAndPublish)
-                                 │  publish_at <= now    ← Gate 4
+                          ├─────>│  status IN ('PUBLISHED','SCHEDULED') ← Gate 3
+                                 │  (LmsMonitor / ActivityOverview / LessonMonitor / saveAndPublish)
+                                 │  now() vs publish_at  ← Gate 4 (preview/full)
                                  └────────┬──────────┘
                                           │            ┌─ Autenticarse ───┐
                                           │            │  is_student       │
@@ -793,7 +814,8 @@ PLANNING              PROFESOR                JEFATURA/PLANNING         ESTUDIAN
                                      ┌──────────────────────────────────┐
                                      │  ¿Actividad visible?             │
                                      │  1. status = true                │
-                                     │  2. PUBLISHED & fechas ok        │
+                                     │  2. PUBLISHED/SCHEDULED &        │
+                                     │     fechas ok (preview si futura)│
                                      │  3. seccion_id coincide          │
                                      └──────────────────────────────────┘
                                           │              │
@@ -830,12 +852,14 @@ PLANNING              PROFESOR                JEFATURA/PLANNING         ESTUDIAN
 |:---:|:---:|:---:|:---:|:---:|:---:|
 | false | — | ❌ | ✅ | ✅ | ✅ |
 | true | DRAFT | ❌ | ✅ | ✅ | ✅ |
-| true | SCHEDULED (futuro) | ❌ | ✅ | ✅ | ✅ |
-| true | PUBLISHED (vigente) | ✅ | ✅ | ✅ | ✅ |
+| true | SCHEDULED (publish_at futuro) | 🟡 **vista previa** (1ª sección) | ✅ | ✅ | ✅ |
+| true | PUBLISHED (publish_at futuro) | 🟡 **vista previa** (1ª sección) | ✅ | ✅ | ✅ |
+| true | PUBLISHED (publish_at pasado/now) | ✅ **completa** | ✅ | ✅ | ✅ |
+| true | PUBLISHED (publish_at nulo) | ❌ (oculto) | ✅ | ✅ | ✅ |
 | true | PUBLISHED (expirado) | ❌ | ✅ | ✅ | ✅ |
 | true | ARCHIVED | ❌ | ✅ | ✅ | ✅ |
 
-> ¹ El profesor ve las actividades de sus Pevaluacions (su carga). Planning/Jefatura ven todo su alcance. **⚠️ En el código actual** un `SCHEDULED` con `publish_at` futuro aparece al estudiante como visible (Gate 4 roto).
+> ¹ El profesor ve las actividades de sus Pevaluacions (su carga). Planning/Jefatura ven todo su alcance. **Verificado:** en la vista previa (futuro) el estudiante ve la lección con badge "Vista previa", solo la 1ª sección y sus adjuntos vinculados.
 
 ### 12.2 Por sección del estudiante
 
@@ -859,13 +883,13 @@ PLANNING              PROFESOR                JEFATURA/PLANNING         ESTUDIAN
 ### 13.1 Scope para listados de actividades visibles
 
 ```sql
--- Todos los gates aplicados (VERSIÓN INTENDIDA; Gate 4 roto en código actual)
+-- Todos los gates aplicados (código real verificado)
 SELECT a.* FROM activities a
 JOIN pevaluacions p ON p.id = a.pevaluacion_id
 JOIN lms_activity_publications pub ON pub.activity_id = a.id
 WHERE a.status = 1                                                  -- Gate 1
-  AND pub.status = 'PUBLISHED'                                      -- Gate 3
-  AND (pub.publish_at IS NULL OR pub.publish_at <= NOW())            -- Gate 4 ⚠️ NO está en el código
+  AND pub.status IN ('PUBLISHED', 'SCHEDULED')                      -- Gate 3
+  AND pub.publish_at IS NOT NULL                                    -- Gate 4: nulo = oculto
   AND (pub.unpublish_at IS NULL OR pub.unpublish_at >= NOW())        -- Gate 5
   AND p.seccion_id IN (                                              -- Gate 6
       SELECT s.id FROM seccions s
@@ -873,6 +897,8 @@ WHERE a.status = 1                                                  -- Gate 1
       JOIN estudiants e ON e.id = i.estudiant_id
       WHERE e.user_id = {userId}
   );
+-- Nota: la distinción preview (1ª sección) vs full se decide en PHP
+-- comparando NOW() con pub.publish_at (studentVisibility()).
 ```
 
 ### 13.2 Scope para dashboard (StudentHome)
@@ -923,7 +949,7 @@ WHERE status = 'SCHEDULED'
 |---------|-----------|
 | `app/Models/app/Academy/Activity.php` | Modelo de actividad, relaciones con LMS, COLUMN_COMMENTS |
 | `app/Models/app/Academy/Pevaluacion.php` | Plan de evaluación, ancla de scoping, SoftDeletes |
-| `app/Models/app/Academy/Lms/LmsActivityPublication.php` | Publicación, visibilidad, scope visibleNow (⚠️ bug Gate 4) |
+| `app/Models/app/Academy/Lms/LmsActivityPublication.php` | Publicación, `studentVisibility()` (hidden/preview/full), scope `visibleNow` |
 | `app/Models/app/Academy/Lms/LmsActivitySection.php` | Sección de actividad LMS (contents/visibleContents) |
 | `app/Models/app/Academy/Lms/LmsActivityContent.php` | Contenido de sección (8 tipos + is_required) |
 | `app/Models/app/Academy/Lms/LmsActivityResource.php` | Recurso descargable (incrementDownload) |
@@ -935,13 +961,14 @@ WHERE status = 'SCHEDULED'
 | `app/Models/app/Learner/Estudiant.php` | Estudiante, inscripción, sección |
 | `app/Models/app/Academy/Inscripcion.php` | Inscripción (estudiant → sección) |
 | `app/Services/Estudiant/StudentScopeService.php` | Scoping centralizado por inscripción |
-| `app/Services/Lms/LmsPublicationService.php` | Publicación/despublicación/activateScheduled |
+| `app/Services/Lms/LmsPublicationService.php` | Publicación (publish_at nunca nulo; futuro → SCHEDULED), despublicación, activateScheduled |
 | `app/Livewire/Planning/Pevaluacion/IndexComponent.php` | Fase 1: creación de carga académica |
 | `app/Livewire/Planning/Activities/IndexComponent.php` | Fase 2: aprobación de actividades (saveComent) |
 | `app/Livewire/Profesor/Activity/IndexComponent.php` | Fase 2: registro de actividades por el profesor |
 | `app/Livewire/Profesor/Lms/LessonWizard.php` | Fase 3-4: preparación y publicación LMS |
 | `app/Livewire/Planning/Lms/LmsMonitor.php` | Fase 4b: monitor de publicación (Planning) |
-| `app/Livewire/Leadership/LessonMonitor.php` | Fase 4b: publicación por Jefatura (solo SCHEDULED) |
+| `app/Livewire/Leadership/ActivityOverview.php` | Fase 4b: publicación por Jefatura con modal de fecha (solo SCHEDULED y actividad aprobada) |
+| `app/Livewire/Leadership/LessonMonitor.php` | Fase 4b: publicación por Jefatura con modal de fecha (solo SCHEDULED y actividad aprobada) |
 | `app/Livewire/Student/Lms/StudentHome.php` | Dashboard de progreso (consumo) |
 | `app/Livewire/Student/Lms/LessonList.php` | Catálogo de lecciones (consumo) |
 | `app/Livewire/Student/Lms/ActivityView.php` | Vista de actividad (consumo) |

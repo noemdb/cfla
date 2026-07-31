@@ -27,47 +27,79 @@ class LmsActivityPublicationTest extends TestCase
         return new LmsActivityPublication($attrs);
     }
 
-    public function test_is_visible_to_students_returns_true_when_published_without_dates(): void
+    // ─── studentVisibility() / helpers ────────────────────────────
+
+    public function test_is_hidden_when_published_without_publish_at(): void
     {
+        // El ciclo de vida garantiza publish_at (los botones "Publicar ahora"
+        // ahora pasan por un modal con fecha). Si igualmente llega un registro
+        // PUBLISHED con publish_at nulo, NO se muestra al estudiante.
         $publication = $this->makePublication([
             'status' => 'PUBLISHED',
             'publish_at' => null,
             'unpublish_at' => null,
         ]);
 
+        $this->assertSame('hidden', $publication->studentVisibility());
+        $this->assertFalse($publication->isVisibleToStudents());
+    }
+
+    public function test_is_full_visible_when_publish_at_is_in_the_past(): void
+    {
+        $publication = $this->makePublication([
+            'status' => 'PUBLISHED',
+            'publish_at' => now()->subHour(),
+            'unpublish_at' => null,
+        ]);
+
+        $this->assertSame('full', $publication->studentVisibility());
         $this->assertTrue($publication->isVisibleToStudents());
+        $this->assertFalse($publication->isPreviewToStudents());
+        $this->assertTrue($publication->isFullVisibleToStudents());
+    }
+
+    public function test_is_preview_when_publish_at_is_in_the_future(): void
+    {
+        // now() < publish_at → solo la 1ª sección visible.
+        $publication = $this->makePublication([
+            'status' => 'PUBLISHED',
+            'publish_at' => now()->addDay(),
+            'unpublish_at' => null,
+        ]);
+
+        $this->assertSame('preview', $publication->studentVisibility());
+        $this->assertTrue($publication->isVisibleToStudents());
+        $this->assertTrue($publication->isPreviewToStudents());
+        $this->assertFalse($publication->isFullVisibleToStudents());
+    }
+
+    public function test_is_preview_when_scheduled_with_future_publish_at(): void
+    {
+        // SCHEDULED con fecha futura es visible como vista previa hasta la fecha.
+        $publication = $this->makePublication([
+            'status' => 'SCHEDULED',
+            'publish_at' => now()->addHour(),
+            'unpublish_at' => null,
+        ]);
+
+        $this->assertSame('preview', $publication->studentVisibility());
+        $this->assertTrue($publication->isVisibleToStudents());
+    }
+
+    public function test_is_hidden_when_scheduled_without_publish_at(): void
+    {
+        $publication = $this->makePublication([
+            'status' => 'SCHEDULED',
+            'publish_at' => null,
+        ]);
+
+        $this->assertSame('hidden', $publication->studentVisibility());
+        $this->assertFalse($publication->isVisibleToStudents());
     }
 
     public function test_is_not_visible_when_draft(): void
     {
         $publication = $this->makePublication(['status' => 'DRAFT']);
-
-        $this->assertFalse($publication->isVisibleToStudents());
-    }
-
-    public function test_is_not_visible_when_scheduled(): void
-    {
-        $publication = $this->makePublication(['status' => 'SCHEDULED']);
-
-        $this->assertFalse($publication->isVisibleToStudents());
-    }
-
-    public function test_is_not_visible_before_publish_at(): void
-    {
-        $publication = $this->makePublication([
-            'status' => 'PUBLISHED',
-            'publish_at' => now()->addDay(),
-        ]);
-
-        $this->assertFalse($publication->isVisibleToStudents());
-    }
-
-    public function test_is_not_visible_after_unpublish_at(): void
-    {
-        $publication = $this->makePublication([
-            'status' => 'PUBLISHED',
-            'unpublish_at' => now()->subDay(),
-        ]);
 
         $this->assertFalse($publication->isVisibleToStudents());
     }
@@ -78,6 +110,32 @@ class LmsActivityPublicationTest extends TestCase
 
         $this->assertFalse($publication->isVisibleToStudents());
     }
+
+    public function test_is_not_visible_after_unpublish_at(): void
+    {
+        $publication = $this->makePublication([
+            'status' => 'PUBLISHED',
+            'publish_at' => now()->subDay(),
+            'unpublish_at' => now()->subHour(),
+        ]);
+
+        $this->assertSame('hidden', $publication->studentVisibility());
+        $this->assertFalse($publication->isVisibleToStudents());
+    }
+
+    public function test_is_visible_when_unpublish_at_is_in_the_future(): void
+    {
+        $publication = $this->makePublication([
+            'status' => 'PUBLISHED',
+            'publish_at' => now()->subHour(),
+            'unpublish_at' => now()->addDay(),
+        ]);
+
+        $this->assertSame('full', $publication->studentVisibility());
+        $this->assertTrue($publication->isVisibleToStudents());
+    }
+
+    // ─── scopeVisibleNow() ────────────────────────────────────────
 
     public function test_scope_visible_now_filters_correctly(): void
     {
@@ -165,14 +223,6 @@ class LmsActivityPublicationTest extends TestCase
             'is_active' => 'enable',
             'created_at' => now(), 'updated_at' => now(),
         ]);
-        $activityId = DB::table('activities')->insertGetId([
-            'pevaluacion_id' => $pevaluacionId,
-            'finicial' => now(), 'ffinal' => now()->addDays(7),
-            'topic' => 'Test', 'references' => 'Ref',
-            'teaching' => 'T', 'learning' => 'L',
-            'observations' => 'O',
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
 
         // Helper para crear una activity rápidamente
         $makeActivity = function () use ($pevaluacionId) {
@@ -202,8 +252,8 @@ class LmsActivityPublicationTest extends TestCase
 
         $visible = LmsActivityPublication::visibleNow()->get();
 
-        // Solo la fila 1 (PUBLISHED sin fechas) debe sumarse al baseline:
-        // la fila 3 (PUBLISHED con publish_at futuro) NO es visible (Gate 4).
+        // Solo la fila 3 (PUBLISHED con publish_at futuro) debe sumarse al baseline:
+        // la fila 1 (PUBLISHED con publish_at nulo) NO es visible (whereNotNull publish_at).
         $this->assertCount($baseline + 1, $visible);
     }
 }

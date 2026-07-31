@@ -163,8 +163,7 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg">
             <span class="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{{ count($selectedIds) }} seleccionado(s)</span>
             <div class="flex items-center gap-2 flex-wrap sm:ml-auto">
-                <button wire:click="bulkPublish"
-                        wire:confirm="¿Publicar {{ count($selectedIds) }} contenido(s)?"
+                <button wire:click="openBulkPublishModal"
                         class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 border border-emerald-200 dark:border-emerald-500/30 transition-colors">
                     Publicar
                 </button>
@@ -358,8 +357,7 @@
                                         @endif
                                         {{-- Publicar / Programar --}}
                                         @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
-                                            <button wire:click="publish({{ $pub->id }})"
-                                                    wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                            <button wire:click="confirmPublish({{ $pub->id }})"
                                                     class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
                                                 <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
@@ -581,8 +579,7 @@
                             </a>
                             {{-- Publicar / Programar --}}
                             @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
-                                <button wire:click="publish({{ $pub->id }})"
-                                        wire:confirm="¿Publicar esta lección? Será visible para los estudiantes."
+                                <button wire:click="confirmPublish({{ $pub->id }})"
                                         class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
                                     <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                                     Publicar ahora
@@ -795,13 +792,19 @@
                         </svg>
                     </button>
                 </div>
-                <div class="px-6 py-5">
+                <div class="px-6 py-5 space-y-4">
                     <p class="text-sm text-gray-600 dark:text-slate-300">
                         ¿Publicar la lección <strong class="text-gray-900 dark:text-white">{{ $publishActivityTitle }}</strong>?
                     </p>
-                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-2">
-                        Será visible inmediatamente para los estudiantes en su aula virtual.
-                    </p>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Fecha de publicación (opcional)</label>
+                        <input type="datetime-local" wire:model="publishPublishAt"
+                               class="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        @error('publishPublishAt') <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p> @enderror
+                        <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
+                            Vacío: visible de inmediato. Con fecha futura: queda en vista previa (1ª sección) hasta esa fecha.
+                        </p>
+                    </div>
                 </div>
                 <div class="px-6 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700/50 flex items-center justify-end gap-2">
                     <button wire:click="cancelPublish"
@@ -809,6 +812,53 @@
                         Cancelar
                     </button>
                     <button wire:click="doPublish"
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                        </svg>
+                        Publicar ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- MODAL: Publicación masiva                                      --}}
+    {{-- ============================================================ --}}
+    @if($showBulkPublishModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" wire:key="bulk-publish-confirm">
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700/50 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                        </svg>
+                        Publicar {{ count($selectedIds) }} contenido(s)
+                    </h3>
+                    <button wire:click="cancelBulkPublish" class="p-2 min-w-[44px] min-h-[44px] rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">Fecha de publicación (opcional)</label>
+                        <input type="datetime-local" wire:model="bulkPublishAt"
+                               class="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 text-gray-800 dark:text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        @error('bulkPublishAt') <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p> @enderror
+                        <p class="text-[11px] text-gray-400 dark:text-slate-500 mt-1">
+                            Vacío: visible de inmediato. Con fecha futura: queda en vista previa (1ª sección) hasta esa fecha.
+                        </p>
+                    </div>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700/50 flex items-center justify-end gap-2">
+                    <button wire:click="cancelBulkPublish"
+                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
+                        Cancelar
+                    </button>
+                    <button wire:click="bulkPublish"
                             class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>

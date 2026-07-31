@@ -32,6 +32,12 @@ class LessonList extends Component
     public ?array $previewData = null;
     public bool $showLessonPreview = false;
 
+    // ─── Publish modal ───────────────────────────────────────────
+    public bool $showPublishModal = false;
+    public ?int $publishLessonId = null;
+    public string $publishLessonTitle = '';
+    public ?string $publishPublishAt = null;
+
     public function mount(): void
     {
         $this->initializeHasCoordinacionScope();
@@ -215,11 +221,35 @@ class LessonList extends Component
     public function confirmPublish(int $activityId): void
     {
         $activity = Activity::findOrFail($activityId);
+        $this->publishLessonId = $activityId;
+        $this->publishLessonTitle = $activity->topic ?? 'Lección';
+        $this->publishPublishAt = null; // vacío → publicar de inmediato
+        $this->showPublishModal = true;
+    }
+
+    public function cancelPublish(): void
+    {
+        $this->showPublishModal = false;
+        $this->publishLessonId = null;
+        $this->publishLessonTitle = '';
+        $this->publishPublishAt = null;
+    }
+
+    public function doPublish(): void
+    {
+        if (!$this->publishLessonId) {
+            return;
+        }
+        $this->validate(['publishPublishAt' => 'nullable|date']);
+
+        $activity = Activity::findOrFail($this->publishLessonId);
         app(LmsPublicationService::class)->publish(
             $activity,
-            ['allow_comments' => true, 'allow_downloads' => true],
+            ['publish_at' => $this->publishPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
             auth()->id()
         );
+
+        $this->cancelPublish();
         $this->notification()->success(
             title: 'Publicada',
             description: 'La lección ahora es visible para los estudiantes.'

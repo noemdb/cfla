@@ -107,9 +107,19 @@
                                 @endif
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
-                                    {{ $act->topic ?? 'Actividad sin título' }}
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                                        {{ $act->topic ?? 'Actividad sin título' }}
+                                    </p>
+                                    @if($act->lmsPublication?->isPreviewToStudents())
+                                        <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Vista previa
+                                        </span>
+                                    @endif
+                                </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                     {{ $act->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                     &middot;
@@ -172,9 +182,19 @@
                                 </svg>
                             </div>
                             <div class="min-w-0">
-                                <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
-                                    {{ $activity->topic ?? 'Actividad sin título' }}
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                                        {{ $activity->topic ?? 'Actividad sin título' }}
+                                    </p>
+                                    @if($activity->lmsPublication?->isPreviewToStudents())
+                                        <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Vista previa
+                                        </span>
+                                    @endif
+                                </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                     {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                     &middot;

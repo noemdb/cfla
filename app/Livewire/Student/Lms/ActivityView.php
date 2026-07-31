@@ -23,6 +23,10 @@ class ActivityView extends Component
     public $comments;
     public string $newComment = '';
     public $completed = false;
+
+    /** true cuando now() < publish_at → solo se muestra la 1ª sección. */
+    public $isPreview = false;
+
     public function mount(Activity $activity): void
     {
         $this->initializeHasStudentScope();
@@ -32,6 +36,8 @@ class ActivityView extends Component
         }
 
         $this->activity = $activity;
+        $this->isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
+
         $this->sections = $activity->lmsSections()
             ->where('is_visible', true)
             ->with(['visibleContents.media'])
@@ -56,6 +62,17 @@ class ActivityView extends Component
                 ) === 1;
                 return $embed;
             });
+
+        // Vista previa (now() < publish_at): solo la 1ª sección y sus adjuntos
+        // vinculados. Los adjuntos globales (section_id vacío) quedan ocultos.
+        if ($this->isPreview) {
+            $firstSection = $this->sections->first();
+            $firstSectionId = $firstSection?->id;
+            $this->sections = $firstSection ? collect([$firstSection]) : collect();
+            $this->resources = $this->resources->filter(fn($r) => $r->section_id === $firstSectionId);
+            $this->links = $this->links->filter(fn($l) => $l->section_id === $firstSectionId);
+            $this->htmlEmbeds = $this->htmlEmbeds->filter(fn($e) => $e->section_id === $firstSectionId);
+        }
 
         $this->comments = ActivityComment::with('user')
             ->forActivity($activity->id)

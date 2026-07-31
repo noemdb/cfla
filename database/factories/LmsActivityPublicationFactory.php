@@ -26,6 +26,7 @@ class LmsActivityPublicationFactory extends Factory
     {
         return $this->state(fn(array $attrs) => [
             'status'       => 'PUBLISHED',
+            'publish_at'   => now(),
             'published_at' => now(),
         ]);
     }

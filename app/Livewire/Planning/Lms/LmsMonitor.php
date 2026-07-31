@@ -66,6 +66,11 @@ class LmsMonitor extends Component
     public bool $showPublishModal = false;
     public ?int $publishActivityId = null;
     public string $publishActivityTitle = '';
+    public ?string $publishPublishAt = null;
+
+    // ─── Bulk publish modal ────────────────────────────────────
+    public bool $showBulkPublishModal = false;
+    public ?string $bulkPublishAt = null;
 
     // ─── Preview modal (student-preview component) ────────────
     public bool $showPreviewModal = false;
@@ -218,6 +223,8 @@ class LmsMonitor extends Component
             'settingsAllowComments'   => 'boolean',
             'settingsAllowDownloads'  => 'boolean',
             'settingsNotes'           => 'nullable|string|max:500',
+            'publishPublishAt'        => 'nullable|date',
+            'bulkPublishAt'           => 'nullable|date',
         ];
     }
 
@@ -235,12 +242,13 @@ class LmsMonitor extends Component
         ];
     }
 
-    // ─── Publicación inmediata ─────────────────────────────────
+    // ─── Publicación ──────────────────────────────────────────
     public function confirmPublish(int $activityId): void
     {
         $activity = Activity::find($activityId);
         $this->publishActivityId = $activityId;
         $this->publishActivityTitle = $activity?->topic ?? 'Lección';
+        $this->publishPublishAt = null; // vacío → publicar de inmediato
         $this->showPublishModal = true;
     }
 
@@ -249,10 +257,12 @@ class LmsMonitor extends Component
         if (!$this->publishActivityId) {
             return;
         }
-        $this->publish($this->publishActivityId);
+        $this->validate(['publishPublishAt' => 'nullable|date']);
+        $this->publish($this->publishActivityId, $this->publishPublishAt);
         $this->showPublishModal = false;
         $this->publishActivityId = null;
         $this->publishActivityTitle = '';
+        $this->publishPublishAt = null;
     }
 
     public function cancelPublish(): void
@@ -260,14 +270,15 @@ class LmsMonitor extends Component
         $this->showPublishModal = false;
         $this->publishActivityId = null;
         $this->publishActivityTitle = '';
+        $this->publishPublishAt = null;
     }
 
-    public function publish(int $activityId): void
+    public function publish(int $activityId, ?string $publishAt = null): void
     {
         $activity = Activity::findOrFail($activityId);
         app(LmsPublicationService::class)->publish(
             $activity,
-            ['allow_comments' => true, 'allow_downloads' => true],
+            ['publish_at' => $publishAt, 'allow_comments' => true, 'allow_downloads' => true],
             auth()->id()
         );
         $this->notification()->success('Publicado', 'El contenido ahora es visible para los estudiantes.');
@@ -404,20 +415,39 @@ class LmsMonitor extends Component
         $this->selectAll = false;
     }
 
+    public function openBulkPublishModal(): void
+    {
+        if (empty($this->selectedIds)) {
+            return;
+        }
+        $this->bulkPublishAt = null; // vacío → publicar de inmediato
+        $this->showBulkPublishModal = true;
+    }
+
+    public function cancelBulkPublish(): void
+    {
+        $this->showBulkPublishModal = false;
+        $this->bulkPublishAt = null;
+    }
+
     public function bulkPublish(): void
     {
+        $this->validate(['bulkPublishAt' => 'nullable|date']);
+
         $count = 0;
         foreach ($this->selectedIds as $id) {
             $activity = Activity::find($id);
             if ($activity) {
                 app(LmsPublicationService::class)->publish(
                     $activity,
-                    ['allow_comments' => true, 'allow_downloads' => true],
+                    ['publish_at' => $this->bulkPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
                     auth()->id()
                 );
                 $count++;
             }
         }
+        $this->showBulkPublishModal = false;
+        $this->bulkPublishAt = null;
         $this->clearSelection();
         $this->notification()->success('Publicación masiva', "$count contenido(s) publicado(s).");
         $this->resetPage();

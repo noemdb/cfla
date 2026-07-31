@@ -13,10 +13,11 @@ class ActivityOverview extends IndexComponent
     public $showLessonPreview = false;
     public $previewLessonActivity;
 
-    // ─── Aprobar lección programada (SCHEDULED → PUBLISHED) ───
+    // ─── Publicar lección programada (SCHEDULED → PUBLISHED) ───
     public bool $showApproveModal = false;
     public ?int $approveActivityId = null;
     public string $approveActivityTitle = '';
+    public ?string $approvePublishAt = null;   // fecha publicada; vacío → ahora
 
     public function confirmApproveLesson(int $activityId): void
     {
@@ -30,6 +31,14 @@ class ActivityOverview extends IndexComponent
 
         $this->approveActivityId = $activityId;
         $this->approveActivityTitle = $activity?->topic ?? 'Lección';
+
+        // Pre-cargar la fecha programada (publish_at) si existe; sino, ahora.
+        // Formato Y-m-d\TH:i para el input datetime-local.
+        $publishAt = $activity?->lmsPublication?->publish_at;
+        $this->approvePublishAt = $publishAt
+            ? \Carbon\Carbon::parse($publishAt)->format('Y-m-d\TH:i')
+            : now()->format('Y-m-d\TH:i');
+
         $this->showApproveModal = true;
     }
 
@@ -38,6 +47,8 @@ class ActivityOverview extends IndexComponent
         if (!$this->approveActivityId) {
             return;
         }
+
+        $this->validate(['approvePublishAt' => 'nullable|date']);
 
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
 
@@ -54,13 +65,24 @@ class ActivityOverview extends IndexComponent
             return;
         }
 
+        if (!$activity->status) {
+            $this->dispatch('notify', message: 'La actividad debe estar aprobada para poder publicarla.', type: 'warning');
+            $this->cancelApproveLesson();
+            return;
+        }
+
+        $publishAt = $this->approvePublishAt
+            ? \Carbon\Carbon::parse($this->approvePublishAt)
+            : now();
+
         $activity->lmsPublication->update([
-            'status' => 'PUBLISHED',
-            'published_at' => now(),
+            'status'       => 'PUBLISHED',
+            'publish_at'   => $publishAt,                 // nunca nulo (default now())
+            'published_at' => $publishAt->gt(now()) ? null : now(),
             'published_by' => Auth::id(),
         ]);
 
-        $this->dispatch('notify', message: 'Lección aprobada y publicada correctamente.', type: 'success');
+        $this->dispatch('notify', message: 'Lección publicada correctamente.', type: 'success');
         $this->cancelApproveLesson();
     }
 
@@ -69,6 +91,7 @@ class ActivityOverview extends IndexComponent
         $this->showApproveModal = false;
         $this->approveActivityId = null;
         $this->approveActivityTitle = '';
+        $this->approvePublishAt = null;
     }
 
     protected function getPevaluaciones(array $filters)

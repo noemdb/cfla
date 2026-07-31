@@ -166,12 +166,21 @@ class LessonMonitor extends Component
     public bool $showPublishModal = false;
     public ?int $publishActivityId = null;
     public string $publishActivityTitle = '';
+    public ?string $publishPublishAt = null;   // fecha de publicación; vacío → ahora
 
     public function confirmPublishLesson(int $lessonId): void
     {
         $activity = Activity::find($lessonId);
         $this->publishActivityId = $lessonId;
         $this->publishActivityTitle = $activity?->topic ?? 'Lección';
+
+        // Pre-cargar la fecha programada (publish_at) si existe; sino, ahora.
+        // Formato Y-m-d\TH:i para el input datetime-local.
+        $publishAt = $activity?->lmsPublication?->publish_at;
+        $this->publishPublishAt = $publishAt
+            ? \Carbon\Carbon::parse($publishAt)->format('Y-m-d\TH:i')
+            : now()->format('Y-m-d\TH:i');
+
         $this->showPublishModal = true;
     }
 
@@ -180,6 +189,8 @@ class LessonMonitor extends Component
         if (!$this->publishActivityId) {
             return;
         }
+
+        $this->validate(['publishPublishAt' => 'nullable|date']);
 
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
 
@@ -197,9 +208,20 @@ class LessonMonitor extends Component
             return;
         }
 
+        if (!$activity->status) {
+            $this->dispatch('notify', message: 'La actividad debe estar aprobada para poder publicarla.', type: 'warning');
+            $this->cancelPublishLesson();
+            return;
+        }
+
+        $publishAt = $this->publishPublishAt
+            ? \Carbon\Carbon::parse($this->publishPublishAt)
+            : now();
+
         $activity->lmsPublication->update([
-            'status' => 'PUBLISHED',
-            'published_at' => now(),
+            'status'       => 'PUBLISHED',
+            'publish_at'   => $publishAt,                 // nunca nulo (default now())
+            'published_at' => $publishAt->gt(now()) ? null : now(),
             'published_by' => Auth::id(),
         ]);
 
@@ -212,6 +234,7 @@ class LessonMonitor extends Component
         $this->showPublishModal = false;
         $this->publishActivityId = null;
         $this->publishActivityTitle = '';
+        $this->publishPublishAt = null;
     }
     public function updatedLapsoId($value) { $this->resetPage(); }
     public function updatingSearch() { $this->resetPage(); }

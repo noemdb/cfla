@@ -16,8 +16,22 @@ class ResourceDownloadController extends Controller
             $resource->activity->lmsPublication?->isVisibleToStudents(),
             404
         );
+
+        // En vista previa (now() < publish_at) solo la 1ª sección es visible:
+        // únicamente los recursos vinculados a esa sección se pueden descargar.
+        $publication = $resource->activity->lmsPublication;
+        if ($publication->isPreviewToStudents()) {
+            $firstSectionId = $resource->activity->lmsSections()
+                ->where('is_visible', true)
+                ->orderBy('sort_order')
+                ->limit(1)
+                ->value('id');
+
+            abort_unless($firstSectionId && $resource->section_id === $firstSectionId, 404);
+        }
+
         abort_unless(
-            $resource->activity->lmsPublication->allow_downloads,
+            $publication->allow_downloads,
             403,
             'Las descargas están deshabilitadas para esta actividad.'
         );

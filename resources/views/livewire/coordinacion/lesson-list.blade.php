@@ -195,4 +195,52 @@
             closeMethod="closeLessonPreview"
             wireKey="coord-lesson-preview" />
     @endif
+
+    {{-- Publish Modal --}}
+    @if($showPublishModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" wire:key="coord-publish-modal">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                        </svg>
+                        Publicar lección
+                    </h3>
+                    <button wire:click="cancelPublish" class="p-2 min-w-[44px] min-h-[44px] rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                        ¿Publicar la lección <strong class="text-gray-900 dark:text-white">{{ $publishLessonTitle }}</strong>?
+                    </p>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha de publicación (opcional)</label>
+                        <input type="datetime-local" wire:model="publishPublishAt"
+                               class="w-full bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                        @error('publishPublishAt') <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p> @enderror
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                            Vacío: visible de inmediato. Con fecha futura: queda en vista previa (1ª sección) hasta esa fecha.
+                        </p>
+                    </div>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-white/10 flex items-center justify-end gap-2">
+                    <button wire:click="cancelPublish"
+                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                        Cancelar
+                    </button>
+                    <button wire:click="doPublish"
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                        </svg>
+                        Publicar ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
