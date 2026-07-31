@@ -119,6 +119,11 @@ class User extends Authenticatable
         return $this->is_coordinacion ?? false;
     }
 
+    public function getRolAttribute()
+    {
+        return $this->role_label;
+    }
+
     public function getRoleLabelAttribute()
     {
         if ($this->is_admin) {

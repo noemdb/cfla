@@ -48,6 +48,9 @@ class LmsActivityPublication extends Model
             return false;
         }
         $now = now();
+        if ($this->publish_at && $now->lt($this->publish_at)) {
+            return false;
+        }
         if ($this->unpublish_at && $now->gt($this->unpublish_at)) {
             return false;
         }
@@ -57,6 +60,7 @@ class LmsActivityPublication extends Model
     public function scopeVisibleNow($query)
     {
         return $query->where('status', 'PUBLISHED')
+            ->where(fn($q) => $q->whereNull('publish_at')->orWhere('publish_at', '<=', now()))
             ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
     }
 }

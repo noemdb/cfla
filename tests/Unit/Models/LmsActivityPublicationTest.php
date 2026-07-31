@@ -188,6 +188,11 @@ class LmsActivityPublicationTest extends TestCase
 
         // Cada publicación usa su propia activity (unique constraint en activity_id)
         $now = now();
+
+        // Baseline: el test puede correr contra una BD que ya tenga datos reales
+        // (phpunit.xml tiene sqlite :memory: comentado → corre contra MySQL de desarrollo).
+        $baseline = LmsActivityPublication::visibleNow()->count();
+
         DB::table('lms_activity_publications')->insert([
             ['activity_id' => $makeActivity(), 'published_by' => $userId, 'status' => 'PUBLISHED', 'publish_at' => null, 'unpublish_at' => null, 'allow_comments' => true, 'allow_downloads' => true, 'created_at' => $now, 'updated_at' => $now],
             ['activity_id' => $makeActivity(), 'published_by' => $userId, 'status' => 'DRAFT', 'publish_at' => null, 'unpublish_at' => null, 'allow_comments' => true, 'allow_downloads' => true, 'created_at' => $now, 'updated_at' => $now],
@@ -197,6 +202,8 @@ class LmsActivityPublicationTest extends TestCase
 
         $visible = LmsActivityPublication::visibleNow()->get();
 
-        $this->assertCount(1, $visible);
+        // Solo la fila 1 (PUBLISHED sin fechas) debe sumarse al baseline:
+        // la fila 3 (PUBLISHED con publish_at futuro) NO es visible (Gate 4).
+        $this->assertCount($baseline + 1, $visible);
     }
 }
