@@ -13,6 +13,64 @@ class ActivityOverview extends IndexComponent
     public $showLessonPreview = false;
     public $previewLessonActivity;
 
+    // ─── Aprobar lección programada (SCHEDULED → PUBLISHED) ───
+    public bool $showApproveModal = false;
+    public ?int $approveActivityId = null;
+    public string $approveActivityTitle = '';
+
+    public function confirmApproveLesson(int $activityId): void
+    {
+        $activity = Activity::find($activityId);
+
+        $service = app(LeadershipService::class, ['user' => Auth::user()]);
+        $asignaturaId = $activity?->pevaluacion?->pensum?->asignatura_id;
+        if ($asignaturaId) {
+            $service->assertCanAccessAsignatura($asignaturaId);
+        }
+
+        $this->approveActivityId = $activityId;
+        $this->approveActivityTitle = $activity?->topic ?? 'Lección';
+        $this->showApproveModal = true;
+    }
+
+    public function doApproveLesson(): void
+    {
+        if (!$this->approveActivityId) {
+            return;
+        }
+
+        $service = app(LeadershipService::class, ['user' => Auth::user()]);
+
+        $activity = Activity::with('lmsPublication')->findOrFail($this->approveActivityId);
+
+        $asignaturaId = $activity->pevaluacion?->pensum?->asignatura_id;
+        if ($asignaturaId) {
+            $service->assertCanAccessAsignatura($asignaturaId);
+        }
+
+        if (!$activity->lmsPublication || $activity->lmsPublication->status !== 'SCHEDULED') {
+            $this->dispatch('notify', message: 'Esta lección ya no está programada.', type: 'warning');
+            $this->cancelApproveLesson();
+            return;
+        }
+
+        $activity->lmsPublication->update([
+            'status' => 'PUBLISHED',
+            'published_at' => now(),
+            'published_by' => Auth::id(),
+        ]);
+
+        $this->dispatch('notify', message: 'Lección aprobada y publicada correctamente.', type: 'success');
+        $this->cancelApproveLesson();
+    }
+
+    public function cancelApproveLesson(): void
+    {
+        $this->showApproveModal = false;
+        $this->approveActivityId = null;
+        $this->approveActivityTitle = '';
+    }
+
     protected function getPevaluaciones(array $filters)
     {
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
@@ -29,6 +87,7 @@ class ActivityOverview extends IndexComponent
             'activities',
             'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
             'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
+            'activities as activities_lessons_count' => fn($q) => $q->whereHas('lmsPublication'),
         ])
         ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
         ->whereNull('pevaluacions.deleted_at');

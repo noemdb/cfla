@@ -4,6 +4,7 @@
     'resources' => null,
     'links' => null,
     'publication' => null,
+    'containerClass' => 'max-w-4xl mx-auto',
 ])
 
 @php
@@ -30,7 +31,7 @@
     }
 @endphp
 
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="{{ $containerClass }} space-y-8">
     {{-- ── Encabezado de la lección ── --}}
     <div class="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-6 sm:p-8">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

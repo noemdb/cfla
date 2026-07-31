@@ -491,6 +491,14 @@
                                         Sin actividades
                                     </span>
                                 @endif
+                                @if($item->activities_lessons_count > 0)
+                                    <span class="px-2.5 py-1 bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 text-[10px] font-bold rounded-lg border border-violet-200 dark:border-violet-500/20">
+                                        <svg class="w-3 h-3 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                        {{ $item->activities_lessons_count }} {{ $item->activities_lessons_count === 1 ? 'lección' : 'lecciones' }}
+                                    </span>
+                                @endif
                             </div>
 
                             <!-- Button Group -->
@@ -632,14 +640,25 @@
                                                                 Lección (LMS)
                                                             </span>
                                                             @if($act->lmsPublication)
-                                                                <button type="button" wire:click="previewLesson({{ $act->id }})"
-                                                                    class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors">
-                                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                                    </svg>
-                                                                    Ver lección
-                                                                </button>
+                                                                <div class="flex items-center gap-3">
+                                                                    <button type="button" wire:click="previewLesson({{ $act->id }})"
+                                                                        class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors">
+                                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                                        </svg>
+                                                                        Ver lección
+                                                                    </button>
+                                                                    @if($act->lmsPublication->status === 'SCHEDULED')
+                                                                        <button type="button" wire:click="confirmApproveLesson({{ $act->id }})"
+                                                                            class="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                                            </svg>
+                                                                            Aprobar
+                                                                        </button>
+                                                                    @endif
+                                                                </div>
                                                             @endif
                                                         </div>
 
@@ -785,9 +804,9 @@
 
     <!-- ===== MODAL: Vista Previa de Lección (LMS) ===== -->
     @if($showLessonPreview && $previewLessonActivity)
-        <x-modal-card title="Vista de Lección" blur="lg" wire:model="showLessonPreview" max-width="7xl">
+        <x-modal-card title="Vista de Lección" blur="lg" wire:model="showLessonPreview" width="4xl">
             <div class="max-h-[70vh] overflow-y-auto pr-1 -mr-1">
-                <x-lms-activity-preview :activity="$previewLessonActivity" />
+                <x-lms-activity-preview :activity="$previewLessonActivity" container-class="w-full" />
             </div>
             <x-slot name="footer">
                 <div class="flex justify-end">
@@ -795,6 +814,48 @@
                 </div>
             </x-slot>
         </x-modal-card>
+    @endif
+
+    <!-- ===== MODAL: Aprobar lección programada ===== -->
+    @if($showApproveModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" wire:key="approve-confirm">
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700/50 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Aprobar lección
+                    </h3>
+                    <button wire:click="cancelApproveLesson" class="p-2 min-w-[44px] min-h-[44px] rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 py-5">
+                    <p class="text-sm text-gray-600 dark:text-slate-300">
+                        ¿Aprobar la lección <strong class="text-gray-900 dark:text-white">{{ $approveActivityTitle }}</strong>?
+                    </p>
+                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-2">
+                        Al aprobarla pasará de <strong>Programada</strong> a <strong>Publicada</strong> y será visible para los estudiantes en su aula virtual.
+                    </p>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700/50 flex items-center justify-end gap-2">
+                    <button wire:click="cancelApproveLesson"
+                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
+                        Cancelar
+                    </button>
+                    <button wire:click="doApproveLesson"
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Aprobar
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
 
     <!-- ===== MODAL: Comentario del Jefe de Área ===== -->
