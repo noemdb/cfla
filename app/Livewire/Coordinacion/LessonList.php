@@ -13,29 +13,44 @@ use WireUi\Traits\WireUiActions;
 
 class LessonList extends Component
 {
-    use WithPagination, WireUiActions, Concerns\HasCoordinacionScope;
+    use Concerns\HasCoordinacionScope, WireUiActions, WithPagination;
 
     public string $search = '';
+
     public $peducativoId = '';
+
     public $lapsoId = '';
+
     public $pestudioId = '';
+
     public $profesorId = '';
+
     public $paginate = 15;
+
     public $lapsos;
+
     public $listPestudio;
+
     public $listProfesores = [];
+
     public $filterStatus = '';
+
     protected $paginationTheme = 'tailwind';
 
     // ─── Preview modal ────────────────────────────────────────────
     public ?int $previewLessonId = null;
+
     public ?array $previewData = null;
+
     public bool $showLessonPreview = false;
 
     // ─── Publish modal ───────────────────────────────────────────
     public bool $showPublishModal = false;
+
     public ?int $publishLessonId = null;
+
     public string $publishLessonTitle = '';
+
     public ?string $publishPublishAt = null;
 
     public function mount(): void
@@ -50,7 +65,7 @@ class LessonList extends Component
             ->pluck('name', 'id');
 
         $this->listProfesores = Profesor::where('status_active', 'true')
-            ->whereHas('pevaluacions.pensum', fn($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
+            ->whereHas('pevaluacions.pensum', fn ($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
             ->orderBy('lastname')
             ->orderBy('name')
             ->get()
@@ -88,21 +103,21 @@ class LessonList extends Component
         $query->whereHas('lmsPublication'); // Solo actividades con publicación LMS
 
         if ($this->lapsoId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('lapso_id', $this->lapsoId));
         }
         if ($this->pestudioId) {
-            $query->whereHas('pevaluacion.pensum', fn($q) => $q->where('pestudio_id', $this->pestudioId));
+            $query->whereHas('pevaluacion.pensum', fn ($q) => $q->where('pestudio_id', $this->pestudioId));
         }
         if ($this->profesorId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('profesor_id', $this->profesorId));
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('profesor_id', $this->profesorId));
         }
         if ($this->filterStatus) {
-            $query->whereHas('lmsPublication', fn($q) => $q->where('status', $this->filterStatus));
+            $query->whereHas('lmsPublication', fn ($q) => $q->where('status', $this->filterStatus));
         }
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('topic', 'like', "%{$this->search}%")
-                  ->orWhere('thematic', 'like', "%{$this->search}%");
+                    ->orWhere('thematic', 'like', "%{$this->search}%");
             });
         }
 
@@ -111,7 +126,7 @@ class LessonList extends Component
 
         return view('livewire.coordinacion.lesson-list', [
             'lessons' => $lessons,
-            'lapsos'  => $this->lapsos,
+            'lapsos' => $this->lapsos,
         ])->layout('coordinacion.layouts.app');
     }
 
@@ -126,81 +141,87 @@ class LessonList extends Component
             'pevaluacion.pensum.asignatura',
             'pevaluacion.pensum.pestudio.peducativo.pescolar.institucion',
             'lmsPublication',
-            'lmsSections' => fn($q) => $q->where('is_visible', true)->orderBy('sort_order'),
-            'lmsSections.contents' => fn($q) => $q->where('is_visible', true),
-            'lmsResources' => fn($q) => $q->where('is_visible', true),
+            'lmsSections' => fn ($q) => $q->where('is_visible', true)->orderBy('sort_order'),
+            'lmsSections.contents' => fn ($q) => $q->where('is_visible', true),
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
             'lmsResources.media',
-            'lmsLinks' => fn($q) => $q->where('is_visible', true),
-            'lmsHtmlEmbeds' => fn($q) => $q->where('is_visible', true),
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
+            'lmsHtmlEmbeds' => fn ($q) => $q->where('is_visible', true),
         ])->findOrFail($activityId);
 
         $this->previewData = [
-            'activity_id'   => $activity->id,
-            'subject'       => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
-            'title'         => $activity->topic ?? 'Lección',
-            'description'   => $activity->description ?? '',
-            'start_date'    => $activity->finicial,
-            'end_date'      => $activity->ffinal,
+            'activity_id' => $activity->id,
+            'subject' => $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Asignatura',
+            'title' => $activity->topic ?? 'Lección',
+            'description' => $activity->description ?? '',
+            'start_date' => $activity->finicial,
+            'end_date' => $activity->ffinal,
             'allow_downloads' => $activity->lmsPublication?->allow_downloads ?? false,
-            'sections'      => $activity->lmsSections->toArray(),
-            'resources'     => $activity->lmsResources->toArray(),
-            'links'         => $activity->lmsLinks->toArray(),
-            'html_embeds'   => $activity->lmsHtmlEmbeds
+            'sections' => $activity->lmsSections->toArray(),
+            'resources' => $activity->lmsResources->toArray(),
+            'links' => $activity->lmsLinks->toArray(),
+            'html_embeds' => $activity->lmsHtmlEmbeds
                 ->map(function ($embed): array {
                     $data = $embed->toArray();
-                    if (!empty($data['is_mermaid'])) return $data;
+                    if (! empty($data['is_mermaid'])) {
+                        return $data;
+                    }
 
                     $content = trim($data['html_content'] ?? '');
 
                     if (preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', $content)) {
                         $data['is_mermaid'] = true;
+
                         return $data;
                     }
                     if (preg_match('/data-mermaid-code="([^"]*)"/', $content)) {
                         $data['is_mermaid'] = true;
+
                         return $data;
                     }
                     if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content, $m)) {
                         $inner = trim(strip_tags($m[1]));
                         if (preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/', $inner)) {
                             $data['is_mermaid'] = true;
+
                             return $data;
                         }
                     }
 
                     $data['is_mermaid'] = false;
+
                     return $data;
                 })
                 ->values()
                 ->toArray(),
-            'institution'          => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->name ?? '',
-            'institution_rif'      => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->rif_institution ?? '',
-            'institution_city'     => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->city ?? '',
-            'periodo'              => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->name ?? '',
-            'periodo_finicial'     => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->finicial ?? '',
-            'periodo_ffinal'       => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->ffinal ?? '',
-            'plan_educativo'       => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->name ?? '',
-            'plan_educativo_desc'  => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->description ?? '',
-            'plan_estudio'         => $activity->pevaluacion?->pensum?->pestudio?->name ?? '',
-            'plan_estudio_code'    => $activity->pevaluacion?->pensum?->pestudio?->code ?? '',
-            'grado'                => $activity->pevaluacion?->pensum?->grado?->name ?? '',
-            'grado_code'           => $activity->pevaluacion?->pensum?->grado?->code ?? '',
-            'seccion'              => $activity->pevaluacion?->seccion?->name ?? '',
-            'seccion_desc'         => $activity->pevaluacion?->seccion?->description ?? '',
-            'seccion_students'     => $activity->pevaluacion?->seccion?->amount_student ?? '',
-            'pensum'               => $activity->pevaluacion?->pensum?->asignatura?->name ?? '',
-            'asignatura_code'      => $activity->pevaluacion?->pensum?->asignatura?->code ?? '',
-            'asignatura_hours'     => $activity->pevaluacion?->pensum?->asignatura?->hour_t_week ?? '',
-            'lapso'                => $activity->pevaluacion?->lapso?->name ?? '',
-            'lapso_finicial'       => $activity->pevaluacion?->lapso?->finicial ?? '',
-            'lapso_ffinal'         => $activity->pevaluacion?->lapso?->ffinal ?? '',
-            'thematic'             => $activity->thematic ?? '',
-            'references'           => $activity->references ?? '',
-            'activity_status'      => $activity->status ?? false,
-            'teaching'             => $activity->teaching ?? '',
+            'institution' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->name ?? '',
+            'institution_rif' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->rif_institution ?? '',
+            'institution_city' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->institucion?->city ?? '',
+            'periodo' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->name ?? '',
+            'periodo_finicial' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->finicial ?? '',
+            'periodo_ffinal' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->pescolar?->ffinal ?? '',
+            'plan_educativo' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->name ?? '',
+            'plan_educativo_desc' => $activity->pevaluacion?->pensum?->pestudio?->peducativo?->description ?? '',
+            'plan_estudio' => $activity->pevaluacion?->pensum?->pestudio?->name ?? '',
+            'plan_estudio_code' => $activity->pevaluacion?->pensum?->pestudio?->code ?? '',
+            'grado' => $activity->pevaluacion?->pensum?->grado?->name ?? '',
+            'grado_code' => $activity->pevaluacion?->pensum?->grado?->code ?? '',
+            'seccion' => $activity->pevaluacion?->seccion?->name ?? '',
+            'seccion_desc' => $activity->pevaluacion?->seccion?->description ?? '',
+            'seccion_students' => $activity->pevaluacion?->seccion?->amount_student ?? '',
+            'pensum' => $activity->pevaluacion?->pensum?->asignatura?->name ?? '',
+            'asignatura_code' => $activity->pevaluacion?->pensum?->asignatura?->code ?? '',
+            'asignatura_hours' => $activity->pevaluacion?->pensum?->asignatura?->hour_t_week ?? '',
+            'lapso' => $activity->pevaluacion?->lapso?->name ?? '',
+            'lapso_finicial' => $activity->pevaluacion?->lapso?->finicial ?? '',
+            'lapso_ffinal' => $activity->pevaluacion?->lapso?->ffinal ?? '',
+            'thematic' => $activity->thematic ?? '',
+            'references' => $activity->references ?? '',
+            'activity_status' => $activity->status ?? false,
+            'teaching' => $activity->teaching ?? '',
             'has_teaching_structure' => $activity->hasTeachingStructure(),
-            'teaching_sections'    => collect($activity->getTeachingSections())
-                ->map(fn($content, $title) => compact('title', 'content'))
+            'teaching_sections' => collect($activity->getTeachingSections())
+                ->map(fn ($content, $title) => compact('title', 'content'))
                 ->values()
                 ->toArray(),
         ];
@@ -221,6 +242,9 @@ class LessonList extends Component
     public function confirmPublish(int $activityId): void
     {
         $activity = Activity::findOrFail($activityId);
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($activity->pevaluacion_id)) {
+            abort(403);
+        }
         $this->publishLessonId = $activityId;
         $this->publishLessonTitle = $activity->topic ?? 'Lección';
         $this->publishPublishAt = null; // vacío → publicar de inmediato
@@ -237,12 +261,44 @@ class LessonList extends Component
 
     public function doPublish(): void
     {
-        if (!$this->publishLessonId) {
+        if (! $this->publishLessonId) {
             return;
         }
         $this->validate(['publishPublishAt' => 'nullable|date']);
 
-        $activity = Activity::findOrFail($this->publishLessonId);
+        $activity = Activity::with('lmsPublication')->findOrFail($this->publishLessonId);
+
+        // Guardas de autorización: mismas reglas que la UI y que el Jefe de Área.
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($activity->pevaluacion_id)) {
+            $this->notification()->warning(
+                title: 'Fuera de alcance',
+                description: 'Esta lección pertenece a un plan educativo que no coordinas.'
+            );
+            $this->cancelPublish();
+
+            return;
+        }
+
+        if (! $activity->lmsPublication || $activity->lmsPublication->status !== 'SCHEDULED') {
+            $this->notification()->warning(
+                title: 'Ya no está programada',
+                description: 'Esta lección ya no está programada.'
+            );
+            $this->cancelPublish();
+
+            return;
+        }
+
+        if (! $activity->status) {
+            $this->notification()->warning(
+                title: 'No aprobada',
+                description: 'La actividad debe estar aprobada para poder publicarla.'
+            );
+            $this->cancelPublish();
+
+            return;
+        }
+
         app(LmsPublicationService::class)->publish(
             $activity,
             ['publish_at' => $this->publishPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
@@ -257,10 +313,33 @@ class LessonList extends Component
         $this->resetPage();
     }
 
-    public function updatingFilterStatus() { $this->resetPage(); }
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingLapsoId() { $this->resetPage(); }
-    public function updatingPestudioId() { $this->resetPage(); }
-    public function updatingProfesorId() { $this->resetPage(); }
-    public function updatingPaginate() { $this->resetPage(); }
+    public function updatingFilterStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingLapsoId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPestudioId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingProfesorId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPaginate()
+    {
+        $this->resetPage();
+    }
 }

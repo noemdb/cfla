@@ -225,7 +225,9 @@ class CommentModerationTest extends TestCase
             'rejected_by' => $this->profesorUser->id,
         ]);
 
-        $pendings = ActivityComment::pending()->get();
+        // Acotado a la actividad del test: el scope pending() es global y la BD
+        // de desarrollo puede tener comentarios pendientes pre-existentes.
+        $pendings = ActivityComment::where('activity_id', $this->activity->id)->pending()->get();
 
         $this->assertCount(1, $pendings);
     }
