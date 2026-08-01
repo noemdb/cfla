@@ -240,11 +240,14 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
         });
 
-        // Infografía: flujo de una actividad/lección LMS (documento estático).
-        // Protegida por el middleware del grupo planning (auth + isPlanner).
-        Route::get('/diagram/flow/activity-lesson', function () {
-            return response()->file(base_path('docs/infografia/flujoActivityLesson.html'));
-        })->name('diagram.flow.activity-lesson');
+        // Diagramas de flujo: hub e infografías (documentos estáticos).
+        // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
+        // /app/planning/diagram/flow/{slug}. Protegido por el middleware del
+        // grupo planning (auth + isPlanner).
+        Route::get('/flow', [\App\Http\Controllers\Planning\FlowDiagramController::class, 'index'])
+            ->name('flow.index');
+        Route::get('/diagram/flow/{diagram}', [\App\Http\Controllers\Planning\FlowDiagramController::class, 'show'])
+            ->name('diagram.flow.show');
     });  // ← cierra el grupo planning
 
     // ─── MÓDULO DE COORDINACIÓN ──────────────────────────────────

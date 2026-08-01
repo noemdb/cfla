@@ -35,7 +35,7 @@
             <p class="text-emerald-400 font-medium">Gestión y organización de actividades académicas institucionales.</p>
         </div>
 
-        <div x-data="{ search: '', filterCategory: '', totalCards: 17, showLegend: false }">
+        <div x-data="{ search: '', filterCategory: '', totalCards: 18, showLegend: false }">
             <h2 class="text-lg font-bold text-white mb-6 flex items-center justify-between">
                 <span class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -818,6 +818,40 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
                             </svg>
                             Gestionar
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagramas de Flujo -->
+            <div data-card
+                x-show="(!search || $el.textContent.toLowerCase().includes(search.toLowerCase())) && (!filterCategory || $el.textContent.toLowerCase().includes(filterCategory.toLowerCase()))"
+                class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 p-6 rounded-lg overflow-hidden transition-all duration-300 border-t-4 border-t-cyan-500 hover:border-cyan-500/30">
+                <a href="{{ route('app.planning.flow.index') }}" class="absolute inset-0 z-0"></a>
+                <div
+                    class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                    <svg class="w-20 h-20 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                </div>
+                <div class="relative z-10 flex flex-col h-full pointer-events-none">
+                    <div
+                        class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mb-3">Monitoreo</span>
+                    <h3 class="text-lg font-bold text-white mb-2">Diagramas de Flujo</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">Infografías que explican los procesos académicos, como el recorrido de una actividad hasta publicarse como lección visible para los estudiantes.</p>
+
+                    <div class="mt-auto flex justify-end pointer-events-auto">
+                        <a href="{{ route('app.planning.flow.index') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/20 transition-all duration-300 text-xs font-bold uppercase tracking-widest group/btn">
+                            <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path>
+                            </svg>
+                            Ver Diagramas
                         </a>
                     </div>
                 </div>
