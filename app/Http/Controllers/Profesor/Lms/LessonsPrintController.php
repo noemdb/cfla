@@ -127,13 +127,15 @@ class LessonsPrintController extends Controller
 
                     // Embeds asociados a la sección (diagramas Mermaid, HTML…).
                     // Misma forma que los contenidos: la detección Mermaid se
-                    // hace en la vista (keyword / div.mermaid) sobre `body`.
+                    // hace en la vista (keyword / div.mermaid) sobre `body`,
+                    // ANTES de llegar al branch HTML. Tipo HTML → sanitizar
+                    // directo (sin markdown), como pide el spec.
                     $embeds = $act->lmsHtmlEmbeds
                         ->where('section_id', $s->id)
                         ->map(fn ($e) => [
                             'title' => $e->title ?? '',
                             'body' => $e->html_content ?? '',
-                            'type' => 'TEXT',
+                            'type' => 'HTML',
                         ]);
 
                     return [

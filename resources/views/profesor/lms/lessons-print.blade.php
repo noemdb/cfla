@@ -61,6 +61,10 @@
         .content-block{padding:6px 8px;border:1px solid #e2e8f0;border-top:none;}
         .content-title{font-weight:700;color:#334155;font-size:8pt;margin-bottom:3px;}
 
+        /* ── Imagen / SVG ── */
+        .content-image{margin:4px 0;text-align:center;}
+        .content-image svg{max-width:100%;height:auto;display:block;margin:0 auto;}
+
         /* ── Contenido (prose) ── */
         .content p{margin:3px 0;line-height:1.5;}
         .content h1,.content h2,.content h3,.content h4{margin:6px 0 3px;color:#0f766e;font-weight:700;}
@@ -197,19 +201,29 @@
                     </div>
                     @forelse($section['contents'] as $content)
                         @php
-                            // Detección Mermaid uniforme (patrón _full-preview-modal):
-                            // 1) <div class="… mermaid …">  o  2) keyword inicial.
                             $rawBody = $content['body'] ?? '';
-                            $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
-                            if (!$isMermaid) {
-                                $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
-                            }
+                            $type = $content['type'] ?? 'TEXT';
+
+                            // ─── IMAGE: SVG/ilustración ("Generar Imagen") — render
+                            //     crudo, sin markdown ni sanitize. El sanitizador
+                            //     elimina <svg>, así que NO puede pasar por él
+                            //     (mismo criterio que slidePreviewContent()).
+                            $isImage = ($type === 'IMAGE') || preg_match('/<svg\b/', $rawBody) === 1;
+
+                            // ─── MERMAID: detectar por clase CSS o keyword inicial ──
+                            $isMermaid = false;
                             $mermaidCode = '';
-                            if ($isMermaid) {
-                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
-                                $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                                if (empty($mermaidCode)) {
-                                    $mermaidCode = trim(strip_tags($rawBody));
+                            if (!$isImage) {
+                                $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                if (!$isMermaid) {
+                                    $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
+                                }
+                                if ($isMermaid) {
+                                    preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                    $mermaidCode = trim(strip_tags($m[1] ?? ''));
+                                    if (empty($mermaidCode)) {
+                                        $mermaidCode = trim(strip_tags($rawBody));
+                                    }
                                 }
                             }
                         @endphp
@@ -217,7 +231,11 @@
                             @if($content['title'])
                                 <div class="content-title">{{ $content['title'] }}</div>
                             @endif
-                            @if($isMermaid)
+
+                            @if($isImage)
+                                {{-- SVG/ilustración: crudo en el DOM (svg no pasa el sanitizador) --}}
+                                <div class="content-image">{!! $rawBody !!}</div>
+                            @elseif($isMermaid)
                                 {{-- Diagrama Mermaid → wrapper Alpine mermaidEmbed() --}}
                                 <div class="mermaid-wrap">
                                     <div wire:ignore x-data="mermaidEmbed()"
@@ -225,9 +243,16 @@
                                         <div x-ref="target" class="w-full"></div>
                                     </div>
                                 </div>
+                            @elseif($type === 'HTML')
+                                {{-- HTML semántico: sanitizar y render directo (sin markdown) --}}
+                                <div class="content">
+                                    {!! app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($rawBody) !!}
+                                </div>
                             @else
+                                {{-- TEXT / MATH: markdown (TEXT) o LaTeX (MATH) → math-text (KaTeX) --}}
                                 @php
-                                    $renderedBody = app(\App\Services\Lms\LmsContentRendererService::class)->renderContentBody($rawBody);
+                                    $renderType = ($type === 'MATH') ? 'MATH' : 'TEXT';
+                                    $renderedBody = app(\App\Services\Lms\LmsContentRendererService::class)->renderContentBody($rawBody, $renderType);
                                 @endphp
                                 <div class="content">
                                     <x-lms.math-text :content="$renderedBody" />
