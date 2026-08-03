@@ -43,7 +43,7 @@ class LessonsPrintController extends Controller
             'pevaluacion.seccion',
             'pevaluacion.lapso',
             'lmsPublication',
-            'lmsSections' => fn ($q) => $q->withCount('contents')->orderBy('sort_order'),
+            'lmsSections' => fn ($q) => $q->orderBy('sort_order'),
             'lmsSections.contents' => fn ($q) => $q->orderBy('sort_order'),
             'lmsHtmlEmbeds' => fn ($q) => $q->where('is_visible', true),
             'lmsResources' => fn ($q) => $q->where('is_visible', true),
@@ -73,11 +73,19 @@ class LessonsPrintController extends Controller
             'search' => $request->input('search'),
         ];
 
+        $filterLabels = [
+            'lapso' => $request->filled('lapso') ? (\App\Models\app\Academy\Lapso::find($request->integer('lapso'))?->name ?? '') : '',
+            'pestudio' => $request->filled('pestudio') ? (\App\Models\app\Academy\Pestudio::find($request->integer('pestudio'))?->name ?? '') : '',
+            'grado' => $request->filled('grado') ? (\App\Models\app\Academy\Grado::find($request->integer('grado'))?->name ?? '') : '',
+            'seccion' => $request->filled('seccion') ? (\App\Models\app\Academy\Seccion::find($request->integer('seccion'))?->name ?? '') : '',
+        ];
+
         return view('profesor.lms.lessons-print', compact(
             'lessons',
             'institucion',
             'filters',
-            'profesor'
+            'profesor',
+            'filterLabels'
         ) + ['fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY')]);
     }
 

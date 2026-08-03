@@ -27,6 +27,7 @@
         .btn-print{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1px solid #10b981;
                    background:#059669;color:#fff;font-size:8.5pt;font-weight:700;cursor:pointer;transition:background .15s;}
         .btn-print:hover{background:#047857;}
+        .btn-print:disabled{opacity:.6;cursor:wait;}
 
         /* ── Cabecera del documento ── */
         .doc-head{text-align:center;padding:14px 16px 10px;border-bottom:2px solid #0d9488;}
@@ -126,16 +127,16 @@
             @if(collect($filters)->filter()->isNotEmpty())
                 <span class="sep">·</span> Filtros:
                 @if($filters['lapso'])
-                    Lapso {{ \App\Models\app\Academy\Lapso::find($filters['lapso'])?->name ?? '' }}
+                    Lapso {{ $filterLabels['lapso'] ?? '' }}
                 @endif
                 @if($filters['pestudio'])
-                    <span class="sep">·</span> P.Estudio {{ \App\Models\app\Academy\Pestudio::find($filters['pestudio'])?->name ?? '' }}
+                    <span class="sep">·</span> P.Estudio {{ $filterLabels['pestudio'] ?? '' }}
                 @endif
                 @if($filters['grado'])
-                    <span class="sep">·</span> Grado {{ \App\Models\app\Academy\Grado::find($filters['grado'])?->name ?? '' }}
+                    <span class="sep">·</span> Grado {{ $filterLabels['grado'] ?? '' }}
                 @endif
                 @if($filters['seccion'])
-                    <span class="sep">·</span> Sección {{ \App\Models\app\Academy\Seccion::find($filters['seccion'])?->name ?? '' }}
+                    <span class="sep">·</span> Sección {{ $filterLabels['seccion'] ?? '' }}
                 @endif
                 @if($filters['search'])
                     <span class="sep">·</span> "{{ $filters['search'] }}"
@@ -274,6 +275,31 @@
         · {{ $lessons->count() }} lección{{ $lessons->count() === 1 ? '' : 'es' }}
         · Elaborado por: {{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}
     </div>
+
+    <script>
+        // Esperar a que todos los diagramas Mermaid estén renderizados antes de
+        // permitir imprimir (si hay diagramas). Con timeout de seguridad.
+        (function () {
+            var btn = document.querySelector('.btn-print');
+            if (!btn) return;
+            var targets = document.querySelectorAll('.mermaid-wrap [x-ref="target"]');
+            if (!targets.length) return; // sin mermaid: botón activo siempre
+            var original = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'Renderizando diagramas…';
+            var started = Date.now();
+            var poll = setInterval(function () {
+                var done = Array.prototype.every.call(targets, function (t) {
+                    return t.querySelector('svg');
+                });
+                if (done || Date.now() - started > 10000) {
+                    clearInterval(poll);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            }, 200);
+        })();
+    </script>
 
 </body>
 </html>
