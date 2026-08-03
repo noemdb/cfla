@@ -50,6 +50,17 @@ class FlowDiagramTest extends TestCase
         $response->assertSee(route('app.planning.diagram.flow.show', 'activity-lesson'), false);
     }
 
+    public function test_flow_hub_lists_consejo_directivo_diagram(): void
+    {
+        $planner = $this->makePlanner();
+
+        $response = $this->actingAs($planner)->get(route('app.planning.flow.index'));
+
+        $response->assertOk();
+        $response->assertSee('Informe al Consejo Directivo · CFLA 2026');
+        $response->assertSee(route('app.planning.diagram.flow.show', 'consejo-directivo'), false);
+    }
+
     public function test_flow_hub_opens_diagram_in_new_tab(): void
     {
         $planner = $this->makePlanner();
@@ -80,6 +91,20 @@ class FlowDiagramTest extends TestCase
         $file = $response->baseResponse->getFile();
         $this->assertNotNull($file);
         $this->assertSame('flujoActivityLesson.html', $file->getFilename());
+    }
+
+    public function test_consejo_directivo_diagram_is_served(): void
+    {
+        $planner = $this->makePlanner();
+
+        $response = $this->actingAs($planner)
+            ->get(route('app.planning.diagram.flow.show', 'consejo-directivo'));
+
+        $response->assertOk();
+
+        $file = $response->baseResponse->getFile();
+        $this->assertNotNull($file);
+        $this->assertSame('flujoConsejoDirectivo.html', $file->getFilename());
     }
 
     public function test_unknown_diagram_returns_404(): void

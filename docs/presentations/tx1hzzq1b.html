@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puntos para el Consejo Directivo · CFLA 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
+        },
+        colors: {
+          ink: {
+            50:  '#f8f9fc',
+            100: '#eef1f6',
+            200: '#d9dfe9',
+            300: '#b3bfce',
+            400: '#7a8aa0',
+            500: '#556378',
+            600: '#3d4a5c',
+            700: '#2d3748',
+            800: '#1e293b',
+            900: '#0f172a',
+          },
+          brand: {
+            50:  '#f0f7f4',
+            100: '#d9ebdf',
+            200: '#b5dcc2',
+            300: '#84c59d',
+            400: '#55a776',
+            500: '#3a8a5d',
+            600: '#2b6d49',
+            700: '#23563b',
+            800: '#1e4531',
+            900: '#193828',
+          },
+          gold: {
+            50:  '#fcf8ed',
+            100: '#f8edcb',
+            200: '#f0d894',
+            300: '#e8bf57',
+            400: '#dfa73a',
+            500: '#c88a24',
+            600: '#a46a1c',
+            700: '#82501b',
+            800: '#6b411b',
+            900: '#5a371b',
+          },
+          accent: {
+            blue: '#2563eb',
+            teal: '#0d9488',
+            rose: '#e11d48',
+          }
+        },
+        boxShadow: {
+          'soft': '0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.06)',
+          'card': '0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08)',
+          'elevated': '0 4px 12px rgba(15, 23, 42, 0.08), 0 20px 40px rgba(15, 23, 42, 0.12)',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body {
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+    background: #f8f9fc;
+    overflow: hidden;
+  }
+  .slide {
+    transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .slide.hidden-slide {
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+  }
+  .slide.active-slide {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .paper {
+    background: #ffffff;
+    border: 1px solid #eef1f6;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .grid-bg {
+    background-image: 
+      linear-gradient(rgba(179, 191, 206, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(179, 191, 206, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .number-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    background: #f0f7f4;
+    color: #2b6d49;
+    border: 1px solid #d9ebdf;
+  }
+  .icon-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #f0f7f4 0%, #d9ebdf 100%);
+    border: 1px solid #b5dcc2;
+  }
+  .icon-tile-md {
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 1.75rem;
+  }
+  .icon-tile-gold {
+    background: linear-gradient(135deg, #fcf8ed 0%, #f8edcb 100%);
+    border: 1px solid #f0d894;
+  }
+  .icon-tile-blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #93c5fd;
+  }
+  .list-bullet {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: #3a8a5d;
+    margin-top: 0.55rem;
+    flex-shrink: 0;
+  }
+  .progress-segment {
+    height: 3px;
+    background: #d9dfe9;
+    border-radius: 999px;
+    transition: background 0.3s ease;
+    flex: 1;
+  }
+  .progress-segment.active { background: #2b6d49; }
+  .progress-segment.past { background: #84c59d; }
+  .reveal > * {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .reveal > *:nth-child(1) { animation-delay: 0.05s; }
+  .reveal > *:nth-child(2) { animation-delay: 0.15s; }
+  .reveal > *:nth-child(3) { animation-delay: 0.25s; }
+  .reveal > *:nth-child(4) { animation-delay: 0.35s; }
+  .reveal > *:nth-child(5) { animation-delay: 0.45s; }
+  .reveal > *:nth-child(6) { animation-delay: 0.55s; }
+  .reveal > *:nth-child(7) { animation-delay: 0.65s; }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .candado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 1rem;
+    border: 1px solid #fcd34d;
+  }
+  .hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 20px 40px rgba(15, 23, 42, 0.12);
+  }
+  .section-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3a8a5d;
+  }
+  .matrix-level {
+    border-left: 3px solid;
+    padding-left: 0.75rem;
+  }
+  .arrow-down {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #b3bfce;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+  .smart-cell {
+    background: #ffffff;
+    border: 1px solid #eef1f6;
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body class="text-ink-800">
+
+<div class="relative w-screen h-screen overflow-hidden">
+
+  <!-- Barra superior institucional -->
+  <div class="absolute top-0 left-0 right-0 z-30 px-8 py-4 flex items-center justify-between bg-white/70 backdrop-blur border-b border-ink-100">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm">FL</div>
+      <div>
+        <div class="text-xs font-bold text-ink-800 leading-tight">UNIDAD EDUCATIVA</div>
+        <div class="text-xs text-ink-500 leading-tight">Colegio Fray Luis Amigó</div>
+      </div>
+    </div>
+    <div class="hidden md:flex items-center gap-2 text-xs text-ink-500">
+      <span class="section-eyebrow">CONSEJO DIRECTIVO</span>
+      <span class="text-ink-300">|</span>
+      <span class="font-medium">Agosto 2026</span>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 0: PORTADA ========== -->
+  <div id="slide-0" class="slide active-slide w-full h-full flex items-center justify-center pt-20 grid-bg">
+    <div class="max-w-5xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center gap-2 mb-6">
+          <span class="tag bg-brand-100 text-brand-700 border border-brand-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+            Informe Tecnológico
+          </span>
+          <span class="tag bg-ink-100 text-ink-600 border border-ink-200">Institucional</span>
+        </div>
+
+        <div class="mb-2 text-sm font-semibold text-brand-600 tracking-wide">PUNTOS PARA LA REUNIÓN</div>
+        <h1 class="text-5xl md:text-6xl font-extrabold text-ink-900 leading-[1.05] tracking-tight mb-5">
+          Consejo Directivo
+          <span class="block text-brand-600">CFLA · 2026</span>
+        </h1>
+        <p class="text-lg text-ink-500 max-w-2xl leading-relaxed mb-10">
+          Informe consolidado sobre iniciativas tecnológicas, continuidad operativa, identidad digital y nuevos proyectos institucionales.
+        </p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl">
+          <div class="paper rounded-xl p-4 hover-lift">
+            <div class="text-2xl font-extrabold text-brand-600">04</div>
+            <div class="text-xs font-semibold text-ink-500 uppercase tracking-wide mt-1">Puntos</div>
+          </div>
+          <div class="paper rounded-xl p-4 hover-lift">
+            <div class="text-2xl font-extrabold text-gold-600">IA</div>
+            <div class="text-xs font-semibold text-ink-500 uppercase tracking-wide mt-1">Equipos + Asistente</div>
+          </div>
+          <div class="paper rounded-xl p-4 hover-lift">
+            <div class="text-2xl font-extrabold text-brand-600">SAEF</div>
+            <div class="text-xs font-semibold text-ink-500 uppercase tracking-wide mt-1">2025 – 2026</div>
+          </div>
+          <div class="paper rounded-xl p-4 hover-lift">
+            <div class="text-2xl font-extrabold text-gold-600">+2</div>
+            <div class="text-xs font-semibold text-ink-500 uppercase tracking-wide mt-1">Nuevos proyectos</div>
+          </div>
+        </div>
+
+        <div class="mt-12 flex items-center gap-4 text-sm text-ink-400">
+          <div class="flex gap-1">
+            <kbd class="px-2 py-1 bg-white border border-ink-200 rounded text-xs font-semibold">←</kbd>
+            <kbd class="px-2 py-1 bg-white border border-ink-200 rounded text-xs font-semibold">→</kbd>
+          </div>
+          <span>Usa las flechas o los botones laterales para navegar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 1: PROPUESTAS TECNOLÓGICAS ========== -->
+  <div id="slide-1" class="slide hidden-slide w-full h-full flex items-center justify-center pt-20">
+    <div class="max-w-6xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="number-badge">01</span>
+          <span class="section-eyebrow">EJE TECNOLÓGICO</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold text-ink-900 tracking-tight mb-3">
+          Presentación de propuestas tecnológicas
+        </h2>
+        <p class="text-ink-500 text-lg mb-8 max-w-3xl">
+          Tres iniciativas estratégicas para fortalecer la infraestructura digital institucional.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-5 mb-5">
+          <div class="paper rounded-2xl p-6 hover-lift">
+            <div class="icon-tile mb-4">🖥️</div>
+            <div class="text-xs font-bold text-brand-600 uppercase tracking-wider mb-2">Adquisición</div>
+            <h3 class="text-lg font-bold text-ink-900 mb-2">Equipos dedicados a IA</h3>
+            <p class="text-sm text-ink-600 leading-relaxed">
+              Propuesta para la adquisición de equipos dedicados a la ejecución de 
+              <span class="font-semibold text-ink-800">Inteligencia Artificial (IA)</span>.
+            </p>
+          </div>
+
+          <div class="paper rounded-2xl p-6 hover-lift">
+            <div class="icon-tile icon-tile-gold mb-4">🧠</div>
+            <div class="text-xs font-bold text-gold-600 uppercase tracking-wider mb-2">Asistente IA</div>
+            <h3 class="text-lg font-bold text-ink-900 mb-2">Registro de lecciones</h3>
+            <p class="text-sm text-ink-600 leading-relaxed">
+              Presentación técnica del asistente y justificación del alto consumo de 
+              <span class="font-semibold text-ink-800">tokens</span> en los modelos de IA a través de OpenRouter.
+            </p>
+          </div>
+
+          <div class="paper rounded-2xl p-6 hover-lift">
+            <div class="icon-tile icon-tile-blue mb-4">🎓</div>
+            <div class="text-xs font-bold text-accent-blue uppercase tracking-wider mb-2">Acceso estudiantil</div>
+            <h3 class="text-lg font-bold text-ink-900 mb-2">Correo institucional</h3>
+            <p class="text-sm text-ink-600 leading-relaxed">
+              Los estudiantes ingresarán mediante su correo institucional para consultar lecciones aprobadas por el 
+              <span class="font-semibold text-ink-800">Jefe de Área</span>.
+            </p>
+          </div>
+        </div>
+
+        <div class="paper rounded-xl p-4 flex items-start gap-3 border-l-4 border-brand-500">
+          <div class="candado flex-shrink-0">🔒</div>
+          <div>
+            <div class="text-sm font-bold text-ink-800 mb-0.5">Candado de control institucional</div>
+            <div class="text-sm text-ink-600">
+              El acceso estudiantil opera bajo el seguimiento y control de la 
+              <span class="font-semibold">Coordinación de Evaluación</span> y la 
+              <span class="font-semibold">Subdirección de Planificación</span>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 2: CONTINUIDAD SAEF ========== -->
+  <div id="slide-2" class="slide hidden-slide w-full h-full flex items-center justify-center pt-20">
+    <div class="max-w-6xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="number-badge">02</span>
+          <span class="section-eyebrow">EJE OPERATIVO</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold text-ink-900 tracking-tight mb-3">
+          Continuidad del sistema <span class="text-brand-600">SAEF 25-26</span>
+        </h2>
+        <p class="text-ink-500 text-lg mb-8 max-w-3xl">
+          Extensión del uso de la plataforma para garantizar la continuidad académica e institucional.
+        </p>
+
+        <div class="grid md:grid-cols-5 gap-5">
+          <div class="md:col-span-3 paper rounded-2xl p-6">
+            <div class="flex items-center gap-2 mb-5">
+              <span class="tag bg-brand-100 text-brand-700 border border-brand-200">📅 Vigencia extendida</span>
+              <span class="font-bold text-ink-800">Hasta el 31/12/2026</span>
+            </div>
+
+            <div class="space-y-4">
+              <div class="flex items-start gap-4 pb-4 border-b border-ink-100">
+                <div class="number-badge">1</div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-brand-600 uppercase tracking-wider">Desde agosto 2026</div>
+                  <div class="font-semibold text-ink-800">Renovación mensual operativa</div>
+                </div>
+              </div>
+              <div class="flex items-start gap-4 pb-4 border-b border-ink-100">
+                <div class="number-badge" style="background:#fcf8ed; color:#92400e; border-color:#fcd34d;">2</div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-gold-600 uppercase tracking-wider">Inversión mensual</div>
+                  <div class="font-semibold text-ink-800">55 USD · mantenimiento y soporte continuo</div>
+                </div>
+              </div>
+              <div class="flex items-start gap-4">
+                <div class="number-badge">3</div>
+                <div class="flex-1">
+                  <div class="text-xs font-bold text-brand-600 uppercase tracking-wider">Cierre del ciclo</div>
+                  <div class="font-semibold text-ink-800">31 de diciembre de 2026</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 paper rounded-2xl p-6 flex flex-col">
+            <div class="text-xs font-bold text-ink-500 uppercase tracking-wider mb-2">Resumen económico</div>
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-6xl font-extrabold text-brand-600">55</span>
+              <span class="text-xl font-bold text-gold-600">USD</span>
+            </div>
+            <div class="text-sm text-ink-500 mb-6">Costo mensual a partir de agosto</div>
+
+            <div class="grid grid-cols-2 gap-3 pt-4 border-t border-ink-100 mb-4">
+              <div>
+                <div class="text-2xl font-extrabold text-ink-900">5</div>
+                <div class="text-xs text-ink-500 uppercase tracking-wider font-semibold">Meses de extensión</div>
+              </div>
+              <div>
+                <div class="text-2xl font-extrabold text-brand-600">100%</div>
+                <div class="text-xs text-ink-500 uppercase tracking-wider font-semibold">Operatividad</div>
+              </div>
+            </div>
+
+            <div class="mt-auto bg-brand-50 border border-brand-200 rounded-lg p-3 flex items-center gap-2">
+              <span class="text-brand-600 text-lg">✓</span>
+              <span class="text-sm text-brand-800 font-medium">Plataforma activa durante todo el año escolar 2025-2026</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 3: DOMINIO WEB ========== -->
+  <div id="slide-3" class="slide hidden-slide w-full h-full flex items-center justify-center pt-20">
+    <div class="max-w-5xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="number-badge">03</span>
+          <span class="section-eyebrow">EJE INSTITUCIONAL</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold text-ink-900 tracking-tight mb-3">
+          Estatus del <span class="text-brand-600">dominio web</span>
+        </h2>
+        <p class="text-ink-500 text-lg mb-8 max-w-3xl">
+          Notificación oficial sobre la renovación exitosa del dominio institucional.
+        </p>
+
+        <div class="paper rounded-2xl p-8 mb-5">
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Renovación exitosa</span>
+              </div>
+              <div class="font-mono text-xl md:text-2xl font-bold text-ink-900 bg-ink-50 border border-ink-200 rounded-lg px-4 py-3 inline-block mb-6">
+                uefrayluisamigosf.com
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 pb-3 border-b border-ink-100">
+                  <div class="icon-tile text-xl">🔒</div>
+                  <div>
+                    <div class="text-xs font-bold text-ink-500 uppercase tracking-wider">Estado</div>
+                    <div class="font-semibold text-ink-800">Activo y renovado</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="icon-tile icon-tile-gold text-xl">⏳</div>
+                  <div>
+                    <div class="text-xs font-bold text-ink-500 uppercase tracking-wider">Vigencia</div>
+                    <div class="font-semibold text-gold-700">Hasta agosto de 2027</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="text-xs font-bold text-ink-500 uppercase tracking-wider mb-4">Línea de tiempo</div>
+              <div class="space-y-5 relative pl-6">
+                <div class="absolute left-2 top-2 bottom-2 w-0.5 bg-gradient-to-b from-brand-300 via-gold-300 to-ink-200"></div>
+                
+                <div class="relative">
+                  <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-brand-400 border-2 border-white shadow"></div>
+                  <div class="text-xs font-bold text-brand-600 uppercase tracking-wider">Año 2025</div>
+                  <div class="font-medium text-ink-800">Registro inicial del dominio institucional</div>
+                </div>
+
+                <div class="relative">
+                  <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-gold-400 border-2 border-white shadow"></div>
+                  <div class="text-xs font-bold text-gold-600 uppercase tracking-wider">Agosto 2026</div>
+                  <div class="font-semibold text-ink-900">Renovación exitosa completada</div>
+                </div>
+
+                <div class="relative">
+                  <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-ink-300 border-2 border-white shadow"></div>
+                  <div class="text-xs font-bold text-ink-500 uppercase tracking-wider">Agosto 2027</div>
+                  <div class="font-medium text-ink-700">Próxima fecha de renovación</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 4: NUEVOS PROYECTOS (Parte 1) ========== -->
+  <div id="slide-4" class="slide hidden-slide w-full h-full flex items-center justify-center pt-20">
+    <div class="max-w-6xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="number-badge">04</span>
+          <span class="section-eyebrow">EJE DE INNOVACIÓN · PROYECTOS</span>
+        </div>
+        <h2 class="text-4xl md:text-5xl font-extrabold text-ink-900 tracking-tight mb-3">
+          Nuevos proyectos <span class="text-brand-600">en desarrollo</span>
+        </h2>
+        <p class="text-ink-500 text-lg mb-8 max-w-3xl">
+          Dos iniciativas estratégicas de alto impacto institucional que pueden ser de interés para el Consejo Directivo.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-5 mb-5">
+          <!-- Proyecto 1 -->
+          <div class="paper rounded-2xl p-6 hover-lift relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div class="relative">
+              <div class="flex items-start justify-between mb-4">
+                <div class="icon-tile icon-tile-md">📊</div>
+                <span class="tag bg-brand-100 text-brand-700 border border-brand-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                  En desarrollo
+                </span>
+              </div>
+              
+              <h3 class="text-xl font-bold text-ink-900 mb-2">Sistema de Indicadores de Gestión</h3>
+              <p class="text-sm text-ink-600 leading-relaxed mb-5">
+                Plataforma para el seguimiento del 
+                <span class="font-semibold text-ink-800">Plan Operativo Anual</span> bajo el enfoque de 
+                <span class="font-semibold text-ink-800">Marco Lógico</span>.
+              </p>
+              
+              <div class="space-y-2.5 pt-4 border-t border-ink-100">
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet"></div>
+                  <span>Seguimiento de objetivos estratégicos</span>
+                </div>
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet"></div>
+                  <span>Métricas y reportes ejecutivos</span>
+                </div>
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet"></div>
+                  <span>Gestión POA y Marco Lógico</span>
+                </div>
+              </div>
+
+              <div class="mt-5 bg-brand-50 border border-brand-200 rounded-lg p-3 flex items-center gap-2">
+                <span class="text-brand-600 text-lg">🎯</span>
+                <span class="text-xs text-brand-800 font-semibold">Sustentado en metodología de estándar internacional</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proyecto 2 -->
+          <div class="paper rounded-2xl p-6 hover-lift relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gold-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div class="relative">
+              <div class="flex items-start justify-between mb-4">
+                <div class="icon-tile icon-tile-md icon-tile-gold">📝</div>
+                <span class="tag bg-gold-100 text-gold-700 border border-gold-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-gold-500"></span>
+                  En desarrollo
+                </span>
+              </div>
+              
+              <h3 class="text-xl font-bold text-ink-900 mb-2">Sistema de Control de Asistencia Escolar</h3>
+              <p class="text-sm text-ink-600 leading-relaxed mb-5">
+                Módulo digital para el registro, seguimiento y control de la 
+                <span class="font-semibold text-ink-800">asistencia estudiantil</span> en tiempo real.
+              </p>
+              
+              <div class="space-y-2.5 pt-4 border-t border-ink-100">
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet" style="background:#c88a24;"></div>
+                  <span>Registro digital diario</span>
+                </div>
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet" style="background:#c88a24;"></div>
+                  <span>Reportes automáticos a representantes</span>
+                </div>
+                <div class="flex items-start gap-2 text-sm text-ink-700">
+                  <div class="list-bullet" style="background:#c88a24;"></div>
+                  <span>Estadísticas y análisis académico</span>
+                </div>
+              </div>
+
+              <div class="mt-5 bg-gold-50 border border-gold-200 rounded-lg p-3 flex items-center gap-2">
+                <span class="text-gold-600 text-lg">⏱️</span>
+                <span class="text-xs text-gold-800 font-semibold">Visibilidad en tiempo real para la comunidad educativa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="paper rounded-xl p-4 flex items-start gap-3 border-l-4 border-gold-400">
+          <div class="candado flex-shrink-0" style="background:#fcf8ed; color:#92400e; border-color:#fcd34d;">💡</div>
+          <div>
+            <div class="text-sm font-bold text-ink-800 mb-0.5">Próximamente</div>
+            <div class="text-sm text-ink-600">
+              Presentación ampliada de ambas iniciativas con cronograma de implementación y alcance institucional.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SLIDE 5: FUNDAMENTO METODOLÓGICO (Parte 2) ========== -->
+  <div id="slide-5" class="slide hidden-slide w-full h-full flex items-center justify-center pt-20">
+    <div class="max-w-6xl px-8 w-full">
+      <div class="reveal">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <span class="number-badge">04</span>
+            <span class="section-eyebrow">EJE DE INNOVACIÓN · FUNDAMENTO METODOLÓGICO</span>
+          </div>
+          <span class="tag bg-gold-100 text-gold-700 border border-gold-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold-500"></span>
+            Estándar Internacional
+          </span>
+        </div>
+
+        <h2 class="text-4xl md:text-5xl font-extrabold text-ink-900 tracking-tight mb-3">
+          Metodología de <span class="text-gold-600">Marco Lógico</span>
+        </h2>
+        <p class="text-ink-500 text-lg mb-8 max-w-4xl">
+          El motor estratégico para la gestión de proyectos educativos: transforma problemas institucionales complejos en intervenciones 
+          <span class="font-semibold text-ink-800">estructuradas, medibles y evaluables</span>.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-5 mb-5">
+          <!-- Columna 1: Matriz 4×4 -->
+          <div class="paper rounded-2xl p-5 hover-lift">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-9 h-9 rounded-lg icon-tile-gold flex items-center justify-center text-lg">🏗️</div>
+              <div>
+                <div class="text-xs font-bold text-gold-600 uppercase tracking-wider">Estructura Central</div>
+                <div class="font-bold text-ink-900">Matriz 4×4</div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="matrix-level border-l-4 border-gold-500 py-1">
+                <div class="text-xs font-bold text-gold-700 uppercase">1 · Fin</div>
+                <div class="text-xs text-ink-600 leading-snug">¿A qué gran meta contribuimos? Impacto institucional a largo plazo.</div>
+              </div>
+              <div class="arrow-down text-center">↓</div>
+              <div class="matrix-level border-l-4 border-brand-500 py-1">
+                <div class="text-xs font-bold text-brand-700 uppercase">2 · Propósito</div>
+                <div class="text-xs text-ink-600 leading-snug">¿Qué cambiará? Resultado directo en la población estudiantil.</div>
+              </div>
+              <div class="arrow-down text-center">↓</div>
+              <div class="matrix-level border-l-4 border-accent-blue py-1" style="border-left-color: #2563eb;">
+                <div class="text-xs font-bold text-accent-blue uppercase">3 · Componentes</div>
+                <div class="text-xs text-ink-600 leading-snug">¿Qué entregaremos? Productos y servicios tangibles.</div>
+              </div>
+              <div class="arrow-down text-center">↓</div>
+              <div class="matrix-level border-l-4 border-ink-400 py-1">
+                <div class="text-xs font-bold text-ink-700 uppercase">4 · Actividades</div>
+                <div class="text-xs text-ink-600 leading-snug">¿Qué haremos? Trabajo diario y asignación de presupuesto.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 2: Lógica Vertical + Horizontal -->
+          <div class="paper rounded-2xl p-5 hover-lift">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-9 h-9 rounded-lg icon-tile flex items-center justify-center text-lg">🔗</div>
+              <div>
+                <div class="text-xs font-bold text-brand-600 uppercase tracking-wider">Coherencia Interna</div>
+                <div class="font-bold text-ink-900">Lógica del Proyecto</div>
+              </div>
+            </div>
+
+            <div class="text-xs font-bold text-ink-700 uppercase tracking-wider mb-2">Lógica Vertical · Causalidad "Si → Entonces"</div>
+            <div class="space-y-2 mb-4">
+              <div class="flex items-start gap-2 text-xs text-ink-700">
+                <span class="font-bold text-brand-600 flex-shrink-0">Si</span>
+                <span>invertimos en las <strong>Actividades</strong>…</span>
+              </div>
+              <div class="flex items-start gap-2 text-xs text-ink-700">
+                <span class="font-bold text-brand-600 flex-shrink-0">→</span>
+                <span>entonces entregamos los <strong>Componentes</strong>…</span>
+              </div>
+              <div class="flex items-start gap-2 text-xs text-ink-700">
+                <span class="font-bold text-brand-600 flex-shrink-0">→</span>
+                <span>logramos el <strong>Propósito</strong>…</span>
+              </div>
+              <div class="flex items-start gap-2 text-xs text-ink-700">
+                <span class="font-bold text-brand-600 flex-shrink-0">→</span>
+                <span>contribuimos al <strong>Fin</strong> institucional.</span>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-ink-100">
+              <div class="text-xs font-bold text-ink-700 uppercase tracking-wider mb-2">Lógica Horizontal · Validación</div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-ink-50 rounded-lg p-2 border border-ink-100">
+                  <div class="text-xs font-bold text-ink-800">Objetivos</div>
+                  <div class="text-[11px] text-ink-500">Qué se busca</div>
+                </div>
+                <div class="bg-ink-50 rounded-lg p-2 border border-ink-100">
+                  <div class="text-xs font-bold text-ink-800">Indicadores</div>
+                  <div class="text-[11px] text-ink-500">Cómo se mide</div>
+                </div>
+                <div class="bg-ink-50 rounded-lg p-2 border border-ink-100">
+                  <div class="text-xs font-bold text-ink-800">Verificación</div>
+                  <div class="text-[11px] text-ink-500">Dónde se evidencia</div>
+                </div>
+                <div class="bg-ink-50 rounded-lg p-2 border border-ink-100">
+                  <div class="text-xs font-bold text-ink-800">Supuestos</div>
+                  <div class="text-[11px] text-ink-500">Riesgos externos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 3: SMART + Valor Estratégico -->
+          <div class="paper rounded-2xl p-5 hover-lift">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-9 h-9 rounded-lg icon-tile-blue flex items-center justify-center text-lg">📐</div>
+              <div>
+                <div class="text-xs font-bold text-accent-blue uppercase tracking-wider">Rendición de Cuentas</div>
+                <div class="font-bold text-ink-900">Indicadores SMART</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-5 gap-1.5 mb-4">
+              <div class="smart-cell">
+                <div class="text-sm font-extrabold text-brand-600">S</div>
+                <div class="text-[10px] text-ink-500 leading-tight mt-0.5">Específicos</div>
+              </div>
+              <div class="smart-cell">
+                <div class="text-sm font-extrabold text-brand-600">M</div>
+                <div class="text-[10px] text-ink-500 leading-tight mt-0.5">Medibles</div>
+              </div>
+              <div class="smart-cell">
+                <div class="text-sm font-extrabold text-brand-600">A</div>
+                <div class="text-[10px] text-ink-500 leading-tight mt-0.5">Alcanzables</div>
+              </div>
+              <div class="smart-cell">
+                <div class="text-sm font-extrabold text-brand-600">R</div>
+                <div class="text-[10px] text-ink-500 leading-tight mt-0.5">Relevantes</div>
+              </div>
+              <div class="smart-cell">
+                <div class="text-sm font-extrabold text-brand-600">T</div>
+                <div class="text-[10px] text-ink-500 leading-tight mt-0.5">Temporales</div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-ink-100">
+              <div class="text-xs font-bold text-ink-700 uppercase tracking-wider mb-3">Valor Estratégico Institucional</div>
+              <div class="space-y-2.5">
+                <div class="flex items-start gap-2">
+                  <span class="text-brand-600 font-bold flex-shrink-0">✓</span>
+                  <div>
+                    <div class="text-xs font-bold text-ink-800">Transparencia y Eficiencia</div>
+                    <div class="text-[11px] text-ink-500 leading-snug">Trazabilidad entre inversión y resultados académicos</div>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-brand-600 font-bold flex-shrink-0">✓</span>
+                  <div>
+                    <div class="text-xs font-bold text-ink-800">Comunicación Efectiva</div>
+                    <div class="text-[11px] text-ink-500 leading-snug">Lenguaje común para toda la comunidad educativa</div>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-brand-600 font-bold flex-shrink-0">✓</span>
+                  <div>
+                    <div class="text-xs font-bold text-ink-800">Gestión de Riesgos</div>
+                    <div class="text-[11px] text-ink-500 leading-snug">Visibilidad anticipada de factores externos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="paper rounded-xl p-4 flex items-center gap-3 border-l-4 border-gold-500">
+          <div class="w-10 h-10 rounded-lg icon-tile-gold flex items-center justify-center text-lg flex-shrink-0">🏆</div>
+          <div class="text-sm text-ink-700">
+            <span class="font-bold text-ink-900">El Marco Lógico no es solo una plantilla:</span> 
+            es el estándar global para transformar problemas institucionales complejos en intervenciones estructuradas, medibles y evaluables.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación lateral -->
+  <button id="prevBtn" class="absolute left-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full paper hover-lift flex items-center justify-center z-30 text-ink-600 hover:text-ink-900">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button id="nextBtn" class="absolute right-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full paper hover-lift flex items-center justify-center z-30 text-ink-600 hover:text-ink-900">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+
+  <!-- Barra inferior: progreso + contador -->
+  <div class="absolute bottom-0 left-0 right-0 z-30 px-8 py-4 bg-white/70 backdrop-blur border-t border-ink-100 flex items-center gap-6">
+    <div class="flex-1 flex gap-1.5" id="progressBar">
+      <div class="progress-segment active" data-slide="0"></div>
+      <div class="progress-segment" data-slide="1"></div>
+      <div class="progress-segment" data-slide="2"></div>
+      <div class="progress-segment" data-slide="3"></div>
+      <div class="progress-segment" data-slide="4"></div>
+      <div class="progress-segment" data-slide="5"></div>
+    </div>
+    <div class="text-xs font-bold text-ink-600 tabular-nums">
+      <span id="currentSlide">01</span> <span class="text-ink-300">/</span> <span class="text-ink-400">06</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const totalSlides = 6;
+  let current = 0;
+
+  function showSlide(n) {
+    if (n < 0) n = 0;
+    if (n >= totalSlides) n = totalSlides - 1;
+    current = n;
+
+    for (let i = 0; i < totalSlides; i++) {
+      const el = document.getElementById('slide-' + i);
+      if (i === current) {
+        el.classList.remove('hidden-slide');
+        el.classList.add('active-slide');
+        const reveal = el.querySelector('.reveal');
+        if (reveal) {
+          reveal.style.animation = 'none';
+          reveal.offsetHeight;
+          reveal.style.animation = null;
+          [...reveal.children].forEach(child => {
+            child.style.animation = 'none';
+            child.offsetHeight;
+            child.style.animation = null;
+          });
+        }
+      } else {
+        el.classList.remove('active-slide');
+        el.classList.add('hidden-slide');
+      }
+    }
+
+    document.getElementById('currentSlide').textContent = String(current + 1).padStart(2, '0');
+
+    const segments = document.querySelectorAll('.progress-segment');
+    segments.forEach((seg, idx) => {
+      seg.classList.remove('active', 'past');
+      if (idx < current) seg.classList.add('past');
+      else if (idx === current) seg.classList.add('active');
+    });
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => showSlide(current + 1));
+  document.getElementById('prevBtn').addEventListener('click', () => showSlide(current - 1));
+
+  document.querySelectorAll('.progress-segment').forEach(seg => {
+    seg.addEventListener('click', () => showSlide(parseInt(seg.dataset.slide)));
+    seg.style.cursor = 'pointer';
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); showSlide(current + 1); }
+    if (e.key === 'ArrowLeft') showSlide(current - 1);
+    if (e.key === 'Home') showSlide(0);
+    if (e.key === 'End') showSlide(totalSlides - 1);
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) showSlide(current + 1);
+      else showSlide(current - 1);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -64,6 +64,11 @@ class FlowDiagramController extends Controller
                 'description' => 'Recorrido completo de una actividad académica hasta convertirse en lección visible para los estudiantes: aprobación, programación y publicación.',
                 'badge'       => 'Actividad → Lección',
             ],
+            'consejo-directivo' => [
+                'title'       => 'Informe al Consejo Directivo · CFLA 2026',
+                'description' => 'Puntos presentados ante el Consejo Directivo: propuestas tecnológicas (IA y correo institucional), continuidad de SAEF 25-26, renovación del dominio web y nuevos proyectos de innovación con el fundamento metodológico de Marco Lógico.',
+                'badge'       => 'Consejo Directivo · 2026',
+            ],
         ];
 
         $fallback = [
