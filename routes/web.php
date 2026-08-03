@@ -353,6 +353,8 @@ Route::prefix('app')->name('app.')->group(function () {
                  ->name('editor');
             Route::get('/comments', \App\Livewire\Profesor\Lms\CommentModeration::class)
                  ->name('comments');
+            Route::get('/lessons/print', [\App\Http\Controllers\Profesor\Lms\LessonsPrintController::class, 'index'])
+                 ->name('lessons.print');
         });
     });
 });
