@@ -139,7 +139,9 @@ class LessonsPrintTest extends TestCase
             ->get('/app/profesors/lms/lessons/print?lapso='.$this->lapsoId)
             ->assertOk()
             // El SVG va crudo al DOM (branch IMAGE) — el sanitizador lo borraría.
-            ->assertSee('<svg', false);
+            // viewBox/circle confirman que el <figure>/<svg> completo sobrevivió.
+            ->assertSee('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">', false)
+            ->assertSee('<circle cx="50" cy="50" r="40"', false);
     }
 
     /** @test */
@@ -164,6 +166,9 @@ class LessonsPrintTest extends TestCase
         // El atributo va escapado por Blade: `-->` → `--&gt;`.
         $this->assertStringContainsString('data-mermaid-code="graph LR', $html);
         $this->assertStringContainsString('A[Inicio] --&gt; B[Fin]', $html);
+
+        // Embed Mermaid (type HTML + keyword) → también debe caer al wrapper.
+        $this->assertStringContainsString('data-mermaid-code="graph TB', $html);
 
         // TEXT → markdown renderizado y entregado a KaTeX vía data-math-content.
         $this->assertStringContainsString('data-math-content="&lt;p&gt;&lt;strong&gt;Hola&lt;/strong&gt; mundo&lt;/p&gt;', $html);
