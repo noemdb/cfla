@@ -97,17 +97,18 @@
         .footer{text-align:center;font-size:6.5pt;color:#6b7280;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;}
 
         @media print {
-            /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MARGENES REDUCIDOS 20% */
+            /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MÁS COMPACTO */
             @page {
                 size: landscape;
-                margin: 1.2cm; /* 1.5cm * 0.8 = 1.2cm */
+                margin: 0.9cm; /* 25% reduction from original 1.2cm for denser layout */
             }
 
             body{
-                font-size:7pt;
-                line-height:1.3;
+                font-size:6pt; /* 8px as requested */
+                line-height:1.2; /* Tighter line height for density */
+                color:#1e293b;
                 column-count: 2;
-                column-gap: 1.2cm; /* 1.5cm * 0.8 = 1.2cm */
+                column-gap: 0.9cm; /* Reduced gap for denser columns */
                 column-fill: balance;
             }
 
@@ -125,31 +126,86 @@
             /* Ocultar barra de acciones */
             .print-bar{display:none;}
 
-            /* Ajustar márgenes y paddings para mejor ajuste en columnas - REDUCCIÓN 20% */
-            .lesson{padding:6px 10px;margin:0 0 5px 0;} /* 8px->6px, 12px->10px, 6px->5px */
-            .doc-head{padding:8px 10px 6px;} /* 10px->8px, 12px->10px, 8px->6px */
-            .footer{padding-top:3px;margin-top:6px;} /* 4px->3px, 8px->6px */
+            /* Ajustar márgenes y paddings para máximo density - tipo libro técnico */
+            .lesson{padding:4px 8px;margin:0 0 6px 0;} /* Further reduced padding */
+            .doc-head{padding:6px 8px 3px;} /* Reduced padding */
+            .footer{padding-top:2px;margin-top:4px;} /* Minimal footer spacing */
 
-            /* Ajustar tamaños de fuente para mejor legibilidad en modo libro */
-            .doc-head h1{font-size:11pt;}
-            .doc-head h2{font-size:8pt;}
-            .doc-head .sub{font-size:6pt;}
-            .lesson-head .nnum{width:18px;height:18px;font-size:8pt;}
-            .lesson-head .topic{font-size:9pt;}
-            .lesson-head .estado{font-size:6pt;padding:1px 6px;}
-            .lesson-meta{font-size:6pt;}
-            .section-head{font-size:7pt;}
-            .content-title{font-size:7pt;}
-            .content p{font-size:6pt;}
-            .content h1{font-size:9pt;}
-            .content h2{font-size:8pt;}
-            .content h3{font-size:7pt;}
-            .content h4{font-size:6pt;}
-            .content table th, .content table td{font-size:6pt;padding:1px 3px;}
-            .content blockquote{padding:0 4px;margin:1px 0;}
-            .mermaid-wrap{padding:4px;margin:3px 0;}
-            .lesson-res{font-size:6pt;padding:3px 6px;}
-            .footer{font-size:5pt;}
+            /* Tipografía precisa según solicitud - tamaño específico para impresión */
+            .doc-head h1{font-size:9.75pt; font-weight:800; letter-spacing:-0.3px; color:#0f766e; margin:0;} /* 13px */
+            .doc-head h2{font-size:6pt; font-weight:600; color:#0f766e; margin:0;} /* 8px */
+            .doc-head .sub{font-size:4.5pt; color:#64748b; margin-top:1px;} /* 6px */
+
+            .lesson-head{display:flex;align-items:center;gap:4px;background:#0f766e;color:#fff;
+                         padding:3px 6px;border-radius:4px 4px 0 0;margin-bottom:6px;}
+            .lesson-head .nnum{width:14px;height:14px;border-radius:4px;background:rgba(255,255,255,.2);
+                               display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;
+                               font-size:4.5pt;flex-shrink:0;} /* 6px */
+            .lesson-head .topic{font-size:7.5pt; font-weight:700; flex:1;} /* 10px */
+            .lesson-head .estado{font-size:4.5pt; font-weight:600; padding:1px 4px;
+                                 border-radius:999px;} /* 6px */
+
+            .lesson-meta{display:flex;flex-wrap:wrap;gap:2px 4px;padding:3px 6px;
+                         background:#f0fdfa;border:1px solid #dcfce7;border-top:none;border-radius:0 0 4px 4px;
+                         font-size:4.5pt; color:#374151;margin-bottom:8px;} /* 6px */
+            .lesson-meta .lbl{color:#0f766e;font-weight:600;}
+            .lesson-meta .dot{color:#dcfce7;}
+
+            .section{margin:8px 0;padding:0 2px;page-break-inside:avoid;break-inside:avoid-page;}
+            .section-head{display:flex;align-items:center;gap:2px;background:#f0fdfa;border:1px solid #ccfbf1;
+                          padding:2px 4px;border-radius:2px;font-size:5.25pt; font-weight:700;
+                          color:#0f766e;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:4px;} /* 7px */
+            .section-head .bar{width:2px;height:8px;background:#0f766e;border-radius:1px;}
+
+            .content-block{margin:6px 0;padding:4px;border:1px solid #e2e8f0;border-top:none;}
+            .content-title{font-weight:600;color:#334155;font-size:9pt;margin:0 0 4px;} /* 12px as requested */
+
+            /* Contenido principal - tamanos especificados */
+            .content p{font-size:6pt; line-height:1.2; margin:3px 0; color:#1e293b;} /* 8px as requested */
+            .content h1{font-size:8.25pt; font-weight:800; color:#0f766e; margin:6px 0 4px;} /* 11px as requested */
+            .content h2{font-size:6pt; font-weight:700; color:#0f766e; margin:4px 0 2px;} /* 8px as requested */
+            .content h3{font-size:4.5pt; font-weight:600; color:#0f766e; margin:3px 0 1px;} /* 6px */
+            .content h4{font-size:4.5pt; font-weight:600; color:#0f766e; margin:3px 0 1px;} /* 6px */
+
+            .content ul,.content ol{margin:4px 0;padding-left:6px;}
+            .content li{margin:2px 0;}
+            .content table{width:100%;border-collapse:collapse;margin:6px 0;font-size:4.5pt;}
+            .content table th{background:#e2e8f0;padding:2px 4px;border:1px solid #cbd5e1;font-size:4.5pt;text-align:left;}
+            .content table td{padding:2px 4px;border:1px solid #e2e8f0;font-size:4.5pt;}
+            .content blockquote{border-left:2px solid #0f766e;margin:4px 0;padding:0 4px;color:#475569;background:#f8fafc;font-style:italic;}
+            .content strong{font-weight:700;}
+            .content a{color:#0f766e;word-wrap:break-word;}
+
+            /* Imagen / SVG */
+            .content-image{margin:6px 0;text-align:center;}
+            .content-image svg,.content-image img{max-width:100%;height:auto;display:block;margin:0 auto;border:1px solid #e2e8f0;border-radius:2px;}
+            .content-image figcaption{font-size:4.5pt; font-weight:600; color:#1e293b; margin-top:3px;} /* 6px */
+
+            /* Mermaid compacto */
+            .mermaid-wrap{margin:6px 0;padding:4px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;}
+            .mermaid-wrap svg{display:block;max-width:100%;height:auto;margin:0 auto;}
+            .mermaid-wrap .mermaid-zoom-toolbar{display:none;}
+
+            /* Recursos / Enlaces */
+            .lesson-res{margin-top:6px;padding:4px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;
+                       font-size:4.5pt; color:#334155;} /* 6px */
+            .lesson-res .lbl{font-weight:600;color:#0f766e;}
+            .lesson-res .link-sep{color:#cbd5e1;margin:0 1px;}
+
+            /* Estados */
+            .estado-pub{background:#dcfce7;color:#166534;}
+            .estado-prog{background:#dbeafe;color:#1e40af;}
+            .estado-draft{background:#fed7aa;color:#9a3412;}
+            .estado-arc{background:#e5e7eb;color:#6b7280;}
+            .estado-npub{background:#f3f4f6;color:#6b7280;}
+
+            /* Sin contenido */
+            .no-content{padding:6px;text-align:center;color:#64748b;font-size:4.5pt;
+                       border:1px dashed #e2e8f0;border-radius:3px;margin-top:6px;}
+
+            /* Footer */
+            .footer{text-align:center;font-size:4.5pt; color:#64748b;margin-top:6px;
+                    padding-top:2px;border-top:1px solid #e2e8f0;} /* 6px as requested */
         }
     </style>
 </head>
@@ -161,7 +217,7 @@
             <div class="title">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
             <div class="subtitle">LECCIONES LMS · CONTENIDO COMPLETO</div>
         </div>
-        <button class="btn-print" type="button" onclick="window.print()">
+        <button id="btn-print" class="btn-print" type="button" onclick="handlePrint()" aria-label="Imprimir o guardar PDF">
             🖨 Imprimir / Guardar PDF
         </button>
     </div>
@@ -274,7 +330,7 @@
                             }
                         @endphp
                         <div class="content-block">
-                            @if($content['title'])
+                            @if($content['title'] && ! $isImage && $type !== 'HTML' && $type !== 'MATH' && trim($content['body'] ?? '') !== '')
                                 <div class="content-title">{{ $content['title'] }}</div>
                             @endif
                             @if($isImage)
@@ -349,11 +405,16 @@
     <script>
         // Esperar a que todos los diagramas Mermaid estén renderizados antes de
         // permitir imprimir (si hay diagramas). Con timeout de seguridad.
-        (function () {
+        function handlePrint() {
             var btn = document.querySelector('.btn-print');
             if (!btn) return;
             var targets = document.querySelectorAll('.mermaid-wrap [x-ref="target"]');
-            if (!targets.length) return; // sin mermaid: botón activo siempre
+            if (!targets.length) {
+                // sin mermaid: imprimir directamente
+                'print' in window && window.print();
+                return;
+            }
+
             var original = btn.innerHTML;
             btn.disabled = true;
             btn.textContent = 'Renderizando diagramas…';
@@ -366,9 +427,10 @@
                     clearInterval(poll);
                     btn.disabled = false;
                     btn.innerHTML = original;
+                    'print' in window && window.print();
                 }
             }, 200);
-        })();
+        }
     </script>
 
 </body>
