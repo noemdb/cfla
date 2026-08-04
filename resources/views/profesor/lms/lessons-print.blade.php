@@ -100,11 +100,37 @@
 
         @media print {
             .print-bar{display:none;}
-            body{font-size:8pt;}
-            .lesson{page-break-before:always;}
+            body{font-size:5pt;line-height:1.0;}
+            .lesson{page-break-before:always;padding:2px 4px;}
             .lesson:first-child{page-break-before:auto;}
             .section-head,.lesson-head{page-break-after:avoid;}
             .content-block{page-break-inside:avoid;}
+            .doc-head{padding:2px 4px 1px;}
+            .doc-head h1{font-size:7pt;}
+            .doc-head h2{font-size:5pt;}
+            .doc-head .sub{font-size:3pt;}
+            .lesson-head{padding:1px 2px;}
+            .lesson-head .nnum{width:10px;height:10px;font-size:5pt;}
+            .lesson-head .topic{font-size:6pt;}
+            .lesson-head .estado{font-size:3pt;padding:1px 2px;}
+            .lesson-meta{padding:1px 2px;font-size:4pt;}
+            .section{margin-top:2px;}
+            .section-head{padding:1px 2px;font-size:4pt;}
+            .section-head .bar{width:1px;height:5px;}
+            .content-block{padding:1px 2px;}
+            .content-title{font-size:4pt;margin-bottom:0.5px;}
+            .content p{margin:0.5px 0;line-height:1.1;}
+            .content h1{font-size:5pt;}
+            .content h2{font-size:4pt;}
+            .content h3{font-size:3pt;}
+            .content h4{font-size:2pt;}
+            .content table th{font-size:3pt;padding:0.5px 1px;}
+            .content table td{font-size:3pt;padding:0.5px 1px;}
+            .content blockquote{padding:0 2px;margin:0.5px 0;}
+            .mermaid-wrap{padding:1px;margin:1px 0;}
+            .lesson-res{padding:1px 2px;font-size:4pt;}
+            .footer{font-size:3pt;margin-top:2px;padding-top:1px;}
+            .no-content{padding:3px;text-align:center;color:#6b7280;font-size:4pt;border:1px dashed #d1d5db;border-radius:3px;margin:3px 0;}
         }
     </style>
 </head>
