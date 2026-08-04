@@ -1,9 +1,9 @@
-{{-- ══════════════════════════════════════════════════════════════════
+{{-- ════════════════════════════════════════════════════════════════════════
      VISTA DE IMPRESIÓN DE LECCIONES LMS (reemplaza el PDF).
      Documento HTML autónomo: Mermaid y KaTeX se renderizan en el
      navegador (mermaidEmbed / x-lms.math-text). Imprimir / Guardar PDF
      con window.print() incluye los diagramas ya dibujados.
-     ══════════════════════════════════════════════════════════════════ --}}
+     ═══════════════════════════════════════════════════════════════════════ --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,7 +27,6 @@
         .btn-print{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1px solid #10b981;
                    background:#059669;color:#fff;font-size:8.5pt;font-weight:700;cursor:pointer;transition:background .15s;}
         .btn-print:hover{background:#047857;}
-        .btn-print:disabled{opacity:.6;cursor:wait;}
 
         /* ── Cabecera del documento ── */
         .doc-head{text-align:center;padding:14px 16px 10px;border-bottom:2px solid #0d9488;}
@@ -37,8 +36,7 @@
         .doc-head .sep{color:#d1d5db;margin:0 4px;}
 
         /* ── Lección ── */
-        .lesson{page-break-before:always;padding:10px 16px;}
-        .lesson:first-child{page-break-before:auto;}
+        .lesson{page-break-inside:avoid;break-inside:avoid-page;padding:10px 16px;margin-bottom:8px;}
         .lesson-head{display:flex;align-items:center;gap:10px;background:#0d9488;color:#fff;
                      padding:5px 10px;border-radius:6px 6px 0 0;}
         .lesson-head .nnum{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.15);
@@ -52,7 +50,7 @@
         .lesson-meta .dot{color:#99f6e4;}
 
         /* ── Secciones ── */
-        .section{margin-top:10px;}
+        .section{margin-top:10px;page-break-inside:avoid;break-inside:avoid-page;}
         .section-head{display:flex;align-items:center;gap:8px;background:#e2e8f0;border:1px solid #cbd5e1;
                       padding:4px 8px;border-radius:4px;font-size:8pt;font-weight:700;color:#0f766e;
                       text-transform:uppercase;letter-spacing:0.3px;}
@@ -99,38 +97,59 @@
         .footer{text-align:center;font-size:6.5pt;color:#6b7280;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;}
 
         @media print {
+            /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MARGENES REDUCIDOS 20% */
+            @page {
+                size: landscape;
+                margin: 1.2cm; /* 1.5cm * 0.8 = 1.2cm */
+            }
+
+            body{
+                font-size:7pt;
+                line-height:1.3;
+                column-count: 2;
+                column-gap: 1.2cm; /* 1.5cm * 0.8 = 1.2cm */
+                column-fill: balance;
+            }
+
+            /* Evitar que los elementos se rompan de manera inapropiada */
+            .lesson, .section, .content-block, .doc-head, .print-bar, .footer {
+                break-inside: avoid-page;
+                break-inside: avoid-column;
+            }
+
+            /* Asegurar que los encabezados de lección y sección no se separen de su contenido */
+            .lesson-head, .lesson-meta, .section-head {
+                break-after: avoid;
+            }
+
+            /* Ocultar barra de acciones */
             .print-bar{display:none;}
-            body{font-size:5pt;line-height:1.0;}
-            .lesson{page-break-before:always;padding:2px 4px;}
-            .lesson:first-child{page-break-before:auto;}
-            .section-head,.lesson-head{page-break-after:avoid;}
-            .content-block{page-break-inside:avoid;}
-            .doc-head{padding:2px 4px 1px;}
-            .doc-head h1{font-size:7pt;}
-            .doc-head h2{font-size:5pt;}
-            .doc-head .sub{font-size:3pt;}
-            .lesson-head{padding:1px 2px;}
-            .lesson-head .nnum{width:10px;height:10px;font-size:5pt;}
-            .lesson-head .topic{font-size:6pt;}
-            .lesson-head .estado{font-size:3pt;padding:1px 2px;}
-            .lesson-meta{padding:1px 2px;font-size:4pt;}
-            .section{margin-top:2px;}
-            .section-head{padding:1px 2px;font-size:4pt;}
-            .section-head .bar{width:1px;height:5px;}
-            .content-block{padding:1px 2px;}
-            .content-title{font-size:4pt;margin-bottom:0.5px;}
-            .content p{margin:0.5px 0;line-height:1.1;}
-            .content h1{font-size:5pt;}
-            .content h2{font-size:4pt;}
-            .content h3{font-size:3pt;}
-            .content h4{font-size:2pt;}
-            .content table th{font-size:3pt;padding:0.5px 1px;}
-            .content table td{font-size:3pt;padding:0.5px 1px;}
-            .content blockquote{padding:0 2px;margin:0.5px 0;}
-            .mermaid-wrap{padding:1px;margin:1px 0;}
-            .lesson-res{padding:1px 2px;font-size:4pt;}
-            .footer{font-size:3pt;margin-top:2px;padding-top:1px;}
-            .no-content{padding:3px;text-align:center;color:#6b7280;font-size:4pt;border:1px dashed #d1d5db;border-radius:3px;margin:3px 0;}
+
+            /* Ajustar márgenes y paddings para mejor ajuste en columnas - REDUCCIÓN 20% */
+            .lesson{padding:6px 10px;margin:0 0 5px 0;} /* 8px->6px, 12px->10px, 6px->5px */
+            .doc-head{padding:8px 10px 6px;} /* 10px->8px, 12px->10px, 8px->6px */
+            .footer{padding-top:3px;margin-top:6px;} /* 4px->3px, 8px->6px */
+
+            /* Ajustar tamaños de fuente para mejor legibilidad en modo libro */
+            .doc-head h1{font-size:11pt;}
+            .doc-head h2{font-size:8pt;}
+            .doc-head .sub{font-size:6pt;}
+            .lesson-head .nnum{width:18px;height:18px;font-size:8pt;}
+            .lesson-head .topic{font-size:9pt;}
+            .lesson-head .estado{font-size:6pt;padding:1px 6px;}
+            .lesson-meta{font-size:6pt;}
+            .section-head{font-size:7pt;}
+            .content-title{font-size:7pt;}
+            .content p{font-size:6pt;}
+            .content h1{font-size:9pt;}
+            .content h2{font-size:8pt;}
+            .content h3{font-size:7pt;}
+            .content h4{font-size:6pt;}
+            .content table th, .content table td{font-size:6pt;padding:1px 3px;}
+            .content blockquote{padding:0 4px;margin:1px 0;}
+            .mermaid-wrap{padding:4px;margin:3px 0;}
+            .lesson-res{font-size:6pt;padding:3px 6px;}
+            .footer{font-size:5pt;}
         }
     </style>
 </head>
@@ -157,16 +176,16 @@
             @if(collect($filters)->filter()->isNotEmpty())
                 <span class="sep">·</span> Filtros:
                 @if($filters['lapso'])
-                    Lapso {{ $filterLabels['lapso'] ?? '' }}
+                    Lapso {{ \App\Models\app\Academy\Lapso::find($filters['lapso'])?->name ?? '' }}
                 @endif
                 @if($filters['pestudio'])
-                    <span class="sep">·</span> P.Estudio {{ $filterLabels['pestudio'] ?? '' }}
+                    <span class="sep">·</span> P.Estudio {{ \App\Models\app\Academy\Pestudio::find($filters['pestudio'])?->name ?? '' }}
                 @endif
                 @if($filters['grado'])
-                    <span class="sep">·</span> Grado {{ $filterLabels['grado'] ?? '' }}
+                    <span class="sep">·</span> Grado {{ \App\Models\app\Academy\Grado::find($filters['grado'])?->name ?? '' }}
                 @endif
                 @if($filters['seccion'])
-                    <span class="sep">·</span> Sección {{ $filterLabels['seccion'] ?? '' }}
+                    <span class="sep">·</span> Sección {{ \App\Models\app\Academy\Seccion::find($filters['seccion'])?->name ?? '' }}
                 @endif
                 @if($filters['search'])
                     <span class="sep">·</span> "{{ $filters['search'] }}"
@@ -227,6 +246,7 @@
                     </div>
                     @forelse($section['contents'] as $content)
                         @php
+                            // Detección de tipo de contenido (idéntico al modal de vista previa completa)
                             $rawBody = $content['body'] ?? '';
                             $type = $content['type'] ?? 'TEXT';
 
@@ -257,7 +277,6 @@
                             @if($content['title'])
                                 <div class="content-title">{{ $content['title'] }}</div>
                             @endif
-
                             @if($isImage)
                                 {{-- SVG/ilustración: crudo en el DOM (svg no pasa el sanitizador) --}}
                                 <div class="content-image">{!! $rawBody !!}</div>
