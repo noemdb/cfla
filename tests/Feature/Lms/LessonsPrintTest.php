@@ -176,4 +176,33 @@ class LessonsPrintTest extends TestCase
         // El embed HTML se conserva (type HTML → sanitizado directo, no markdown).
         $this->assertStringContainsString('Contenido embebido', $html);
     }
+
+    /** @test */
+    public function print_page_has_simple_print_button(): void
+    {
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?lapso='.$this->lapsoId)
+            ->assertOk()
+            ->getContent();
+
+        // Botón de imprimir con id para enganche JS
+        $this->assertStringContainsString('id="btn-print"', $html);
+        $this->assertStringContainsString('btn-print', $html);
+        $this->assertStringContainsString('onclick="handlePrint()"', $html);
+        $this->assertStringContainsString('aria-label="Imprimir o guardar PDF"', $html);
+
+        // Función handlePrint definida
+        $this->assertStringContainsString('function handlePrint()', $html);
+
+        // Clase base del body
+        $this->assertStringContainsString('<body class="lms-print">', $html);
+
+        // NO debe contener elementos eliminados
+        $this->assertStringNotContainsString('x-data="printGraphicsMode()"', $html);
+        $this->assertStringNotContainsString('btn-preview', $html);
+        $this->assertStringNotContainsString('togglePreview', $html);
+        $this->assertStringNotContainsString('print-mode-info', $html);
+        $this->assertStringNotContainsString('scaleGraphicsToMaxHeight', $html);
+        $this->assertStringNotContainsString('body.print-preview', $html);
+    }
 }
