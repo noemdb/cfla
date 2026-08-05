@@ -93,11 +93,12 @@ public function render(): \Illuminate\View\View
         ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
         ->pluck('id');
 
-    // 4-7. Calcular stats, logs recientes, próximos vencimientos, distribución
+    // 4-7. Calcular stats, logs recientes (+ fallback), próximos vencimientos, distribución
 
     return view('livewire.student.lms.student-home', [
         'stats'              => $stats,
         'recentLogs'         => $recentLogs,
+        'suggestedActivities' => $suggestedActivities,
         'upcoming'           => $upcoming,
         'subjectDistribution' => $subjectDistribution,
     ])->layout('student.layouts.app');
@@ -242,6 +243,44 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 ```
 
 Transiciones: `transition-all duration-200`
+
+### Fallback: sin historial de interacción
+
+> **Decisión de diseño:** cuando el estudiante no tiene eventos `VIEW`/`COMPLETE` en `LmsActivityLog` (historial recién limpiado o cuenta nueva), "Continuar Aprendiendo" no debe quedarse vacía. El fallback lista las lecciones **ya publicadas** (`publish_at <= now()`), de la **más recientemente publicada a la más lejana** (`publish_at` DESC), máximo 5. El fallback se muestra bajo el título propio **"Publicaciones Recientes"** (la rama con historial conserva "Continuar Aprendiendo"). Complementa a "Próximas Publicaciones" (que cubre `publish_at` futuro): **sin solapamiento**.
+
+```php
+// Solo se ejecuta cuando no hay logs (evita una query extra con historial)
+$suggestedActivities = $recentLogs->isEmpty()
+    ? Activity::with([
+        'pevaluacion.pensum.asignatura',
+        'pevaluacion.profesor',
+        'lmsPublication',
+    ])
+        ->whereIn('id', $visibleActivityIds)
+        ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+        ->orderBy(
+            LmsActivityPublication::select('publish_at')
+                ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                ->orderByDesc('publish_at')
+                ->limit(1),
+            'desc'
+        )
+        ->take(5)
+        ->get()
+    : collect();
+```
+
+Mismo patrón de subquery que `$upcoming` (sección 5), pero con segundo argumento `'desc'` y filtro `publish_at <= now()`.
+
+**Estructura de cada fila del fallback** (idéntica a las filas de logs, sin etiqueta de estado):
+
+- Título de la sección en el fallback: **"Publicaciones Recientes"** (la rama con historial usa "Continuar Aprendiendo").
+- Ícono **play sky** (`bg-sky-500/10`, `text-sky-400`) — son lecciones para *empezar*, no completadas.
+- Subtítulo de la sección: *"Actividades publicadas más recientes"*.
+- Hint derecho: `$activity->lmsPublication?->publish_at?->diffForHumans()` → "hace 2 días".
+- Sin etiqueta "Vista previa" (la query garantiza `publish_at <= now()`).
+
+El blade usa `@if($recentLogs->isNotEmpty()) ... @elseif($suggestedActivities->isNotEmpty()) <section>...`.
 
 ---
 
@@ -505,6 +544,7 @@ Algunas queries **no** están scoped por sección:
 | `$commentsCount` | ❌ | Cuenta total de comentarios del estudiante |
 | `$downloadsCount` | ❌ | Cuenta total de descargas del estudiante |
 | `$recentLogs` | ✅ | Filtrado por `$visibleActivityIds` |
+| `$suggestedActivities` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at <= now()`, ORDER BY subquery DESC (solo si `$recentLogs` está vacío) |
 | `$upcoming` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at > now()` |
 | `$subjectDistribution` | ✅ | Calculado sobre `$visibleActivityIds` |
 
@@ -587,6 +627,28 @@ LIMIT 10;
 
 Post-procesamiento PHP: `->unique('activity_id')->take(5)->values()`
 
+### Query 3b: Fallback "Publicaciones Recientes" (sin historial)
+
+```sql
+SELECT a.*
+FROM activities a
+WHERE a.id IN (?, ?, ...)  -- visibleActivityIds
+  AND EXISTS (
+      SELECT 1 FROM lms_activity_publications p
+      WHERE p.activity_id = a.id
+        AND p.publish_at <= NOW()
+  )
+ORDER BY (
+    SELECT p.publish_at FROM lms_activity_publications p
+    WHERE p.activity_id = a.id
+    ORDER BY p.publish_at DESC
+    LIMIT 1
+) DESC
+LIMIT 5;
+```
+
+Solo se ejecuta cuando no hay logs recientes (`$recentLogs->isEmpty()`). Complementa a Query 4 sin solapamiento (`publish_at <= now()` vs `publish_at > now()`).
+
 ### Query 4: Próximas publicaciones
 
 ```sql
@@ -626,5 +688,7 @@ Post-procesamiento PHP: `groupBy('asignatura')`, `map(completed/total)`, `sortBy
 
 | Fecha | Cambio | Autor |
 |-------|--------|-------|
+| 2026-08-05 | El fallback de "Continuar Aprendiendo" pasa a titularse **"Publicaciones Recientes"** (la rama con historial conserva "Continuar Aprendiendo"); docs y tests actualizados | — |
+| 2026-08-05 | "Continuar Aprendiendo" gana fallback: sin historial de interacción (`LmsActivityLog` vacío) muestra las lecciones ya publicadas (`publish_at <= now()`), reciente primero (`publish_at` DESC), máx. 5; nueva query `$suggestedActivities`, fila play sky + hint "hace X", subtítulo "Actividades publicadas más recientes" | — |
 | 2026-08-05 | Sección 3 pasa a "Próximas Publicaciones": solo lecciones con `publish_at` futuro, ordenadas por `publish_at`; `ffinal` deja de usarse en el panel; badges a `publish_at` ("Se publica en X días" / "Se publica mañana" / "Se publica hoy a las H:i" / "Se publica el {j M}") | — |
 | 2026-07-30 | Creación inicial del documento | — |

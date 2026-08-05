@@ -16,8 +16,10 @@ class StudentHomeTest extends TestCase
     use DatabaseTransactions;
 
     /**
-     * Solo las lecciones con publish_at futuro aparecen en "Próximas
-     * Publicaciones". Las ya publicadas (publish_at pasado) salen de la sección.
+     * Las lecciones con publish_at futuro aparecen en "Próximas Publicaciones".
+     * Las ya publicadas salen de esa sección, pero al no haber historial de
+     * interacción aparecen en el fallback de "Publicaciones Recientes"
+     * (lecciones publicadas más recientes) — nunca dentro de Próximas.
      */
     public function test_published_activity_is_excluded_and_preview_shows_countdown(): void
     {
@@ -65,8 +67,9 @@ class StudentHomeTest extends TestCase
             ->assertSee('Próximas Publicaciones')
             ->assertSee('Actividad por publicar')
             ->assertSee('Se publica en 2 días')
-            // La publicada ya salió de la sección
-            ->assertDontSee('Actividad ya publicada')
+            // La publicada ya salió de "Próximas": aparece antes del heading,
+            // dentro del fallback de "Continuar Aprendiendo"
+            ->assertSeeInOrder(['Actividad ya publicada', 'Próximas Publicaciones'])
             // El countdown de ffinal desapareció del panel
             ->assertDontSee('días rest.');
     }
@@ -163,6 +166,89 @@ class StudentHomeTest extends TestCase
         Livewire::actingAs($student)
             ->test(\App\Livewire\Student\Lms\StudentHome::class)
             ->assertSee('Se publica el '.$publishAt->translatedFormat('j M'));
+    }
+
+    /**
+     * Sin historial de interacción, el fallback "Publicaciones Recientes"
+     * muestra las lecciones ya publicadas (publish_at <= ahora), de la más
+     * reciente a la más lejana (publish_at DESC), con el hint "hace X".
+     */
+    public function test_no_activity_logs_shows_recently_published_fallback(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $recent = $this->createPublishedActivity($pevaluacionId, 'Reciente hace 2 días', now()->subDays(2));
+        $older = $this->createPublishedActivity($pevaluacionId, 'Reciente hace 6 días', now()->subDays(6));
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->assertSee('Publicaciones Recientes')
+            // Más reciente primero (publish_at DESC)
+            ->assertSeeInOrder([$recent->topic, $older->topic])
+            // Hint derecho con diffForHumans ("hace 2 días")
+            ->assertSee($recent->lmsPublication->publish_at->diffForHumans());
+    }
+
+    /**
+     * Cuando el estudiante tiene historial de interacción, el fallback NO se
+     * muestra: solo las lecciones con logs recientes aparecen en la sección.
+     */
+    public function test_fallback_hidden_when_student_has_history(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Sin historial', now()->subDays(3));
+        $withLog = $this->createPublishedActivity($pevaluacionId, 'Con historial', now()->subDays(1));
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $withLog->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+
+        Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            // Aparece vía el historial reciente
+            ->assertSee('Con historial')
+            // El fallback no se muestra: la publicada sin log queda fuera
+            ->assertDontSee('Sin historial');
+    }
+
+    /**
+     * El fallback solo incluye lecciones YA publicadas (publish_at <= ahora).
+     * Las programadas (preview, publish_at futuro) quedan fuera del fallback
+     * y se ven en "Próximas Publicaciones".
+     */
+    public function test_fallback_excludes_preview_lessons(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Publicada hace 2 días', now()->subDays(2));
+        $preview = $this->createPublishedActivity($pevaluacionId, 'Programada en 3 días', now()->addDays(3));
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Solo la publicada vive dentro de "Publicaciones Recientes"
+        $start = strpos($html, 'Publicaciones Recientes');
+        $end = strpos($html, 'Próximas Publicaciones');
+        $this->assertNotFalse($start);
+        $this->assertNotFalse($end);
+        $fallback = substr($html, $start, $end - $start);
+
+        $this->assertStringContainsString('Publicada hace 2 días', $fallback);
+        $this->assertStringNotContainsString($preview->topic, $fallback);
+
+        // La preview sí aparece en el resto del panel (Próximas Publicaciones)
+        $this->assertStringContainsString($preview->topic, $html);
     }
 
     /**
@@ -316,5 +402,29 @@ class StudentHomeTest extends TestCase
         ]);
 
         return [$seccionId, $pevaluacionId];
+    }
+
+    /**
+     * Create a visible Activity with a PUBLISHED LmsActivityPublication
+     * whose publish_at is the given instant.
+     */
+    private function createPublishedActivity(int $pevaluacionId, string $topic, \Illuminate\Support\Carbon $publishAt): Activity
+    {
+        $activity = Activity::create([
+            'pevaluacion_id' => $pevaluacionId,
+            'finicial' => now()->subDays(2),
+            'ffinal' => now()->addDays(7),
+            'topic' => $topic,
+            'status' => true,
+        ]);
+
+        LmsActivityPublication::create([
+            'activity_id' => $activity->id,
+            'published_by' => User::factory()->create()->id,
+            'status' => 'PUBLISHED',
+            'publish_at' => $publishAt,
+        ]);
+
+        return $activity;
     }
 }

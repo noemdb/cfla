@@ -75,6 +75,29 @@ class StudentHome extends Component
             ->take(5)
             ->values();
 
+        // ─── 2b. Fallback "Continuar Aprendiendo" ───────────────────
+        // Sin historial de interacción, la sección lista las lecciones ya
+        // publicadas (publish_at <= ahora) de la más reciente a la más lejana,
+        // para que el estudiante tenga desde dónde empezar.
+        $suggestedActivities = $recentLogs->isEmpty()
+            ? Activity::with([
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.profesor',
+                'lmsPublication',
+            ])
+                ->whereIn('id', $visibleActivityIds)
+                ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+                ->orderBy(
+                    LmsActivityPublication::select('publish_at')
+                        ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                        ->orderByDesc('publish_at')
+                        ->limit(1),
+                    'desc'
+                )
+                ->take(5)
+                ->get()
+            : collect();
+
         // ─── 3. Próximas publicaciones ─────────────────────────────
         // Para el estudiante, publish_at es la fecha más relevante de la
         // lección: esta sección lista solo las que aún no se han publicado
@@ -115,6 +138,7 @@ class StudentHome extends Component
         return view('livewire.student.lms.student-home', [
             'stats' => $stats,
             'recentLogs' => $recentLogs,
+            'suggestedActivities' => $suggestedActivities,
             'upcoming' => $upcoming,
             'subjectDistribution' => $subjectDistribution,
         ])->layout('student.layouts.app');
