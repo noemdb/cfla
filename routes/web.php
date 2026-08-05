@@ -238,6 +238,14 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/monitor', \App\Livewire\Planning\Lms\LmsMonitor::class)->name('monitor');
             Route::get('/activity/{activity}/logs', \App\Livewire\Planning\Lms\ActivityAudit::class)->name('activity.audit');
             Route::get('/activity/{activity}/preview', \App\Livewire\Planning\Lms\LmsLessonViewer::class)->name('preview');
+
+            // Impresión de lecciones LMS (Mermaid/KaTeX renderizado en el navegador).
+            // Reutiliza el mismo controlador de la Dirección: el botón "Ver / Imprimir"
+            // del monitor lleva los filtros activos como query string (asignatura/status
+            // incluidos) y el membrete se adapta al módulo de origen.
+            Route::get('/print', [
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+            ])->name('print');   // nombre completo: app.planning.lms.print
         });
 
         // Diagramas de flujo: hub e infografías (documentos estáticos).
@@ -345,6 +353,12 @@ Route::prefix('app')->name('app.')->group(function () {
         // Lecciones LMS
         Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
             ->name('lessons');
+
+        // Impresión de lecciones LMS (Mermaid/KaTeX renderizado en el navegador;
+        // misma semántica de filtros que el listado; SOLO LECTURA)
+        Route::get('/lecciones/print', [
+            \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+        ])->name('lessons.print');
 
         // Recursos Compartidos
         Route::get('/recursos', \App\Livewire\Director\ResourceList::class)

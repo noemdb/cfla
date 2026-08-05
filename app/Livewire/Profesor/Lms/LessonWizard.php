@@ -1991,6 +1991,15 @@ REQUISITO ESTRICTO — ORIENTACIÓN VERTICAL TOP-DOWN:
 - Todo el flujo va de arriba hacia abajo, con nodos raíz en la parte superior.
 - Máximo 3 niveles de profundidad desde el nodo raíz.
 
+REQUISITO ESTRICTO — TAMAÑO ACOTADO (C1, se imprime en columnas estrechas):
+- MÁXIMO 12 nodos por diagrama y 11 flechas/aristas. Nada más.
+- Si el contenido tiene más de 12 conceptos, AGRUPA los secundarios en un solo
+  nodo resumen (ej. "Otros: A, B, C") en lugar de un nodo por concepto.
+- IDs de nodo cortos (A, B, C, N1, N2...). Nunca repitas el texto del label como ID.
+- El diagrama se imprime en una columna de ~450px de ancho: cuanto más compacto,
+  mejor. Evita nodos separados que obligan a aristas muy largas.
+- No uses style directives salvo casos imprescindibles; cada style añade líneas.
+
 CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - El diagrama debe visualizarse correctamente en pantallas anchas (1920px+) y estrechas (320px+).
 - El contenedor debe usar max-w-full y overflow-x-auto para evitar desbordamiento.
@@ -2023,23 +2032,14 @@ Requisitos del diagrama:
 1. Máximo 3 niveles de profundidad.
 2. Texto multi-línea dentro de nodos (usa <br/> o arreglos [línea1, línea2]) para evitar truncamiento.
 3. ORIENTACIÓN ESTRICTA: SOLO graph TD (top-down). PROHIBIDO graph LR, RL, BT u otras.
+4. MÁXIMO 12 nodos y 11 flechas. Si hay más conceptos, agrupa los secundarios en un nodo resumen.
+5. IDs de nodo cortos (A, B, C, N1, N2...). Labels máx. 30 caracteres por línea (con <br/>).
 
 **IMPORTANTE:** Responde ÚNICAMENTE el código. Sin textos, explicaciones, introducciones ni despedidas. Solo el código.
 PROMPT;
 
         try {
-            $result = $this->askWithCompaction(
-                $systemPrompt,
-                $userPrompt,
-                ['max_tokens' => 4096, 'temperature' => 0.7, 'timeout' => 300],
-                3500,
-                null,
-                [
-                    ['model' => config('openrouter.model_diagram_primary'),   'label' => 'Diagrama Qwen 3.1 32B primario'],
-                    ['model' => config('openrouter.model_diagram_fallback1'), 'label' => 'Diagrama Mistral Large fallback 1'],
-                    ['model' => config('openrouter.model_diagram_fallback2'), 'label' => 'Diagrama Claude Sonnet 4 fallback 2'],
-                ]
-            );
+            $result = $this->callMermaidModel($systemPrompt, $userPrompt, ['temperature' => 0.7]);
 
             if (! $result['success']) {
                 $this->generationError = $result['error'];
@@ -2051,36 +2051,22 @@ PROMPT;
 
             $raw = trim($result['content'] ?? '');
 
-            // ─── Estrategia 1: extraer código dentro de ``` ``` ───
-            $code = $raw;
-            if (preg_match('/```(?:html|mermaid)?\s*\n?(.*?)```/s', $raw, $m)) {
-                $code = trim($m[1]);
-            } else {
-                // ─── Estrategia 2: sin fences — extraer código Mermaid desde su keyword ───
-                $mermaidKeywords = 'flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline';
-                if (preg_match('/\b('.$mermaidKeywords.')\s+(LR|TD|BT|RL)?/s', $raw, $kwMatch, PREG_OFFSET_CAPTURE)) {
-                    $startPos = $kwMatch[0][1];
-                    // Código desde el keyword hasta el final
-                    $rawCode = substr($raw, $startPos);
-                    // Si hay ``` al final, limpiarlo
-                    $rawCode = preg_replace('/```\s*$/s', '', $rawCode);
-                    $code = trim($rawCode);
+            // ─── Extraer código (fences o keyword) y limpiar wrappers ───
+            $code = $this->extractMermaidCodeFromRaw($raw);
+
+            // ─── D1: validación post-generación + un solo reintento ─────────
+            // Detecta diagramas desbordantes (demasiados nodos/flechas o labels
+            // demasiado largos) y pide una corrección al modelo con feedback.
+            $mermaidSrc = $this->extractMermaidSrc($code);
+            $validation = $this->validateMermaidDiagram($mermaidSrc);
+            if (! $validation['ok']) {
+                $retryPrompt = $userPrompt."\n\n"
+                    .$this->diagramCorrectionBlock($mermaidSrc, $validation);
+                $retry = $this->callMermaidModel($systemPrompt, $retryPrompt, ['temperature' => 0.3]);
+                if ($retry['success']) {
+                    $code = $this->extractMermaidCodeFromRaw(trim($retry['content'] ?? ''));
                 }
             }
-
-            // Limpiar scripts y wrappers de documento completo
-            $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
-            $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*mermaid[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
-            $code = preg_replace('/<script>mermaid\.initialize\(.*?<\/script>\s*/is', '', $code);
-            $code = preg_replace('/<\/?(?:html|head|body)[^>]*>\s*/i', '', $code);
-            $code = preg_replace('/<meta[^>]*>\s*/i', '', $code);
-            $code = preg_replace('/<link\b[^>]*href=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*>\s*/i', '', $code);
-            $code = trim($code);
-
-            // ─── Limpiar trailing HTML tags (sobras de wrappers que la IA incluya) ───
-            $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
-            $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
-            $code = trim($code);
 
             if (empty($code)) {
                 $this->generationError = 'La IA no generó código de diagrama.';
@@ -2090,35 +2076,8 @@ PROMPT;
                 return;
             }
 
-            // ─── Post-procesado: forzar orientación vertical graph TD ────────────
-            $code = preg_replace('/^graph\s+(LR|RL|BT)\b/m', 'graph TD', $code);
-            $code = preg_replace('/^flowchart\s+(LR|RL|BT)\b/m', 'graph TD', $code);
-
-            // ─── Post-procesado: partir etiquetas largas en multi-línea con <br/> ───
-            // Detecta nodos Mermaid con sintaxis label["texto"] o label["texto"][]
-            // y divide textos de más de 30 caracteres en varias líneas.
-            $code = preg_replace_callback('/\["([^"]{35,})"\]/', function ($m) {
-                $text = $m[1];
-                // Dividir por espacios o puntos cada ~25-30 caracteres
-                $words = preg_split('/\s+/', $text);
-                $lines = [];
-                $currentLine = '';
-                foreach ($words as $word) {
-                    $test = $currentLine ? $currentLine.' '.$word : $word;
-                    if (mb_strlen($test) > 28 && $currentLine) {
-                        $lines[] = $currentLine;
-                        $currentLine = $word;
-                    } else {
-                        $currentLine = $test;
-                    }
-                }
-                if ($currentLine) {
-                    $lines[] = $currentLine;
-                }
-                $multiLine = implode('<br/>', $lines);
-
-                return '["'.$multiLine.'"]';
-            }, $code);
+            // ─── Post-procesado: forzar graph TD y partir etiquetas largas ───────
+            $code = $this->postProcessMermaid($code);
 
             // ─── Si es Mermaid puro (sin HTML), envolverlo ───
             $isMermaidRaw = ! str_contains($code, '<div') && ! str_contains($code, '<span')
@@ -3424,6 +3383,7 @@ Tu tarea es generar código HTML autónomo para un diagrama Mermaid enmarcado en
 4. **w-full obligatorio** — el card ocupa el 100% del ancho disponible del contenedor padre. Sin max-w ni mx-auto.
 5. **MOBILE-FIRST** — padding base reducido (p-3), escala con sm:p-4. El contenedor tiene overflow-x-auto para scroll horizontal si el diagrama es ancho.
 6. **Diagrama pedagógico** — el contenido del diagrama debe reflejar fielmente el contenido de la sección. Usa nodos con nombres descriptivos. Si la sección está vacía, genera contenido de muestra coherente con el contexto de la lección.
+   - **TAMAÑO ACOTADO (C1):** MÁXIMO 12 nodos y 11 flechas por diagrama, máximo 3 niveles de profundidad. Si hay más de 12 conceptos, agrupa los secundarios en un nodo resumen (ej. "Otros: A, B, C"). IDs de nodo cortos (A, B, C, N1...), nunca repitas el label como ID. Labels con texto multi-línea: máx. 30 caracteres por línea usando <br/> o arreglos [l1, l2]. Para graph, prefiere graph TD (vertical). El diagrama se imprime en una columna de ~450px: evita aristas largas y style directives innecesarias.
 7. **Sin scripts externos** — no incluyas CDN de mermaid ni de tailwind. Solo el HTML del card con el div.mermaid. Los scripts se cargan globalmente en la página.
 8. **Salida limpia** — NO incluyas ```html ni markdown. Responde SOLO HTML puro desde <div class="w-full...">. No generes solo el código mermaid suelto; el código mermaid SIEMPRE debe ir dentro de <div class="mermaid">...</div>, y este a su vez dentro del card contenedor.
 
@@ -3516,6 +3476,28 @@ PROMPT;
                 $html = trim($m[1]);
             }
 
+            // ─── D1: validación post-generación + un solo reintento ─────────
+            // El card embed admite cualquier tipo de diagrama, así que la
+            // validación se aplica sobre el código Mermaid interno y NO fuerza
+            // graph TD (se respeta el tipo elegido por la IA).
+            $mermaidSrc = $this->extractMermaidSrc($html);
+            $validation = $this->validateMermaidDiagram($mermaidSrc);
+            if (! $validation['ok']) {
+                $retryPrompt = $userPrompt."\n\n"
+                    .$this->diagramCorrectionBlock($mermaidSrc, $validation);
+                $retry = $this->callMermaidModel(
+                    $systemPrompt,
+                    $retryPrompt,
+                    ['max_tokens' => 2048, 'temperature' => 0.3, 'timeout' => 120]
+                );
+                if ($retry['success']) {
+                    $html = trim($retry['content'] ?? '');
+                    if (preg_match('/```(?:html|mermaid)?\s*\n?(.*?)```/s', $html, $m2)) {
+                        $html = trim($m2[1]);
+                    }
+                }
+            }
+
             if (empty($html)) {
                 $this->generationError = 'La IA no generó contenido HTML.';
                 $this->generatingEmbedCard = false;
@@ -3528,7 +3510,8 @@ PROMPT;
             // para que ensureMermaidWrapper() lo detecte como código plano con is_mermaid=true
             // y el renderizado use el package icehouse-ventures/laravel-mermaid (Alpine + wire:ignore)
             if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $html, $m)) {
-                $inner = strip_tags(trim($m[1]));
+                // A1: conservar <br/> de labels multi-línea (ver nota en saveLesson)
+                $inner = trim(html_entity_decode(strip_tags($m[1], '<br><br/>')));
                 $mermaidPattern = '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/';
                 if (preg_match($mermaidPattern, $inner)) {
                     $html = $inner;
@@ -4080,13 +4063,16 @@ PROMPT;
                     if ($isMermaid) {
                         $mermaidCode = $rawBody;
                         if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m)) {
-                            $mermaidCode = trim(strip_tags($m[1]));
+                            // A1: conservar <br/> de labels multi-línea (strip_tags puro los
+                            // eliminaría y concatenaría el texto en una sola línea larga que
+                            // desborda la columna al imprimir).
+                            $mermaidCode = trim(html_entity_decode(strip_tags($m[1], '<br><br/>')));
                         } elseif (! str_contains($rawBody, '<')) {
                             // Raw Mermaid code — usar tal cual
                             $mermaidCode = $this->sanitizeText($rawBody);
                         } else {
                             // <div class="mermaid"> detectado pero no se pudo extraer — sanitizar genérico
-                            $mermaidCode = trim(strip_tags($rawBody));
+                            $mermaidCode = trim(html_entity_decode(strip_tags($rawBody, '<br><br/>')));
                         }
 
                         // Guardar como LmsHtmlEmbed (se renderiza con <x-mermaid::component>)
@@ -4774,6 +4760,168 @@ PROMPT;
         return array_filter($this->wizardSections, fn ($s) => $s['is_visible']);
     }
 
+
+    /**
+     * Extrae el código Mermaid "limpio" desde la respuesta cruda del modelo:
+     * quita fences ```, scripts CDN, wrappers <html/head/body> y divs finales.
+     * Factorizado desde generateSlideDiagram().
+     */
+    private function extractMermaidCodeFromRaw(string $raw): string
+    {
+        $code = $raw;
+        if (preg_match('/```(?:html|mermaid)?\s*\n?(.*?)```/s', $raw, $m)) {
+            $code = trim($m[1]);
+        } else {
+            // Sin fences — extraer Mermaid desde su keyword inicial
+            $mermaidKeywords = 'flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline';
+            if (preg_match('/\b('.$mermaidKeywords.')\s+(LR|TD|BT|RL)?/s', $raw, $kwMatch, PREG_OFFSET_CAPTURE)) {
+                $startPos = $kwMatch[0][1];
+                $rawCode = substr($raw, $startPos);
+                $rawCode = preg_replace('/```\s*$/s', '', $rawCode);
+                $code = trim($rawCode);
+            }
+        }
+
+        // Limpiar scripts y wrappers de documento completo
+        $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
+        $code = preg_replace('/<script\b[^>]*src=["\'][^"\']*mermaid[^"\']*["\'][^>]*><\/script>\s*/i', '', $code);
+        $code = preg_replace('/<script>mermaid\.initialize\(.*?<\/script>\s*/is', '', $code);
+        $code = preg_replace('/<\/?(?:html|head|body)[^>]*>\s*/i', '', $code);
+        $code = preg_replace('/<meta[^>]*>\s*/i', '', $code);
+        $code = preg_replace('/<link\b[^>]*href=["\'][^"\']*cdn\.(?:tailwindcss|jsdelivr)[^"\']*["\'][^>]*>\s*/i', '', $code);
+        $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
+        $code = preg_replace('/\s*<(\/)?div[^>]*>\s*$/s', '', trim($code));
+
+        return trim($code);
+    }
+
+    /**
+     * Post-procesa el código Mermaid: fuerza orientación vertical graph TD y
+     * parte etiquetas largas en multi-línea con <br/>. NO envuelve en card HTML
+     * (eso lo decide cada flujo).
+     */
+    private function postProcessMermaid(string $code, bool $forceGraphTd = true): string
+    {
+        if ($forceGraphTd) {
+            $code = preg_replace('/^graph\s+(LR|RL|BT)\b/m', 'graph TD', $code);
+            $code = preg_replace('/^flowchart\s+(LR|RL|BT)\b/m', 'graph TD', $code);
+        }
+
+        return preg_replace_callback('/\["([^"]{35,})"\]/', function ($m) {
+            $text = $m[1];
+            $words = preg_split('/\s+/', $text);
+            $lines = [];
+            $currentLine = '';
+            foreach ($words as $word) {
+                $test = $currentLine ? $currentLine.' '.$word : $word;
+                if (mb_strlen($test) > 28 && $currentLine) {
+                    $lines[] = $currentLine;
+                    $currentLine = $word;
+                } else {
+                    $currentLine = $test;
+                }
+            }
+            if ($currentLine) {
+                $lines[] = $currentLine;
+            }
+
+            return '["'.implode('<br/>', $lines).'"]';
+        }, $code);
+    }
+
+    /**
+     * Extrae SOLO el código Mermaid interno de un bloque HTML
+     * (<div class="mermaid">...</div>) preservando los <br/> de labels.
+     * Si no hay wrapper, devuelve el código tal cual.
+     */
+    private function extractMermaidSrc(string $code): string
+    {
+        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $code, $m)) {
+            return trim(html_entity_decode(strip_tags($m[1], '<br><br/>')));
+        }
+
+        return trim($code);
+    }
+
+    /**
+     * Valida un diagrama Mermaid para impresión en columnas estrechas (~450px).
+     * Devuelve ['ok', 'issues', 'nodes', 'arrows', 'maxLabel'].
+     */
+    private function validateMermaidDiagram(string $src): array
+    {
+        $issues = [];
+
+        $nodes = preg_match_all('/[A-Za-z_][A-Za-z0-9_]*\s*(?:\[|\[\[|\(|\(\(|\{|%|>)/', $src);
+        if ($nodes > 14) {
+            $issues[] = "demasiados nodos ({$nodes}; máximo recomendado 12)";
+        }
+
+        $arrows = preg_match_all('/--[->]|==>|\.\.->/s', $src);
+        if ($arrows > 16) {
+            $issues[] = "demasiadas flechas ({$arrows}; máximo recomendado 11)";
+        }
+
+        // Label más largo (solo labels quoted ["..."] o arreglos multi-línea)
+        $maxLabel = 0;
+        if (preg_match_all('/\["([^"]*)"/', $src, $mLabels)) {
+            foreach ($mLabels[1] as $label) {
+                $maxLabel = max($maxLabel, mb_strlen($label));
+            }
+        }
+        if ($maxLabel > 30) {
+            $issues[] = "hay etiquetas de {$maxLabel} caracteres en una sola línea (máximo 30 por línea; separa con <br/>)";
+        }
+
+        return [
+            'ok' => empty($issues),
+            'issues' => $issues,
+            'nodes' => $nodes,
+            'arrows' => $arrows,
+            'maxLabel' => $maxLabel,
+        ];
+    }
+
+    /**
+     * Construye el bloque de feedback para el reintento del modelo, citando
+     * los incumplimientos detectados por validateMermaidDiagram().
+     */
+    private function diagramCorrectionBlock(string $src, array $validation): string
+    {
+        $block = "El diagrama anterior incumple las reglas de tamaño para impresión y necesita corrección.\n"
+            ."Problemas detectados:\n";
+        foreach ($validation['issues'] as $issue) {
+            $block .= "- {$issue}\n";
+        }
+        $block .= "\nCorrige el diagrama: reduce el número de nodos (agrupa los secundarios en un nodo resumen), "
+            ."acorta los labels a máximo 30 caracteres por línea usando <br/> o arreglos [l1, l2], "
+            ."usa IDs de nodo cortos y orientación vertical graph TD. "
+            ."Regenera SOLO el código (Mermaid o el card HTML), sin explicaciones.\n\n"
+            ."Diagrama anterior:\n```\n".mb_substr($src, 0, 3000)."\n```";
+
+        return $block;
+    }
+
+    /**
+     * Llama al modelo de diagramas (cadena primario→fallback1→fallback2) con
+     * compactación, reutilizando la misma cadena del flujo de diapositivas.
+     * Los $overrides reemplazan los valores por defecto (max_tokens 4096,
+     * temperature 0.7, timeout 300).
+     */
+    private function callMermaidModel(string $systemPrompt, string $userPrompt, array $overrides = []): array
+    {
+        return $this->askWithCompaction(
+            $systemPrompt,
+            $userPrompt,
+            $overrides + ['max_tokens' => 4096, 'temperature' => 0.7, 'timeout' => 300],
+            3500,
+            null,
+            [
+                ['model' => config('openrouter.model_diagram_primary'),   'label' => 'Diagrama Qwen 3.1 32B primario'],
+                ['model' => config('openrouter.model_diagram_fallback1'), 'label' => 'Diagrama Mistral Large fallback 1'],
+                ['model' => config('openrouter.model_diagram_fallback2'), 'label' => 'Diagrama Claude Sonnet 4 fallback 2'],
+            ]
+        );
+    }
 
     /**
      * Thin wrapper que delega la orquestación IA

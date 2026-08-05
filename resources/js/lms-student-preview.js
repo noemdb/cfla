@@ -32,6 +32,10 @@ window._ensureMermaidReady = function _ensureMermaidReady() {
                     mermaid.initialize({
                         startOnLoad: false,
                         suppressErrorRendering: true,
+                        // B1: usa el ancho natural del SVG como max-width en el
+                        // atributo style (además del max-width:100% de setupUI),
+                        // evitando que el layout interno desborde la columna.
+                        useMaxWidth: true,
                         theme: 'base',
                         themeVariables: { fontFamily: 'inherit', fontSize: '14px' },
                     });
@@ -48,6 +52,10 @@ window._ensureMermaidReady = function _ensureMermaidReady() {
                         mermaid.initialize({
                             startOnLoad: false,
                             suppressErrorRendering: true,
+                            // B1: usa el ancho natural del SVG como max-width en el
+                            // atributo style (además del max-width:100% de setupUI),
+                            // evitando que el layout interno desborde la columna.
+                            useMaxWidth: true,
                             theme: 'base',
                             themeVariables: { fontFamily: 'inherit', fontSize: '14px' },
                         });
@@ -218,15 +226,28 @@ Alpine.data('mermaidEmbed', () => ({
     },
 
     async render(code) {
+        // Estado terminal por diagrama: handlePrint() espera a que TODOS los
+        // wrappers lleguen a 'ok' o 'error' (no a que exista <svg>), de modo
+        // que un diagrama con error no bloquee la impresión ni se imprima
+        // antes de tiempo con diagramas en blanco.
+        this.$el.setAttribute('data-mermaid-state', 'rendering');
         try {
             const id = 'mermaid-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
             const { svg } = await mermaid.render(id, code);
             if (this.$refs.target) {
                 this.$refs.target.innerHTML = svg;
-                this.$nextTick(() => this.setupUI());
+                // Marcar 'ok' DESPUÉS de setupUI(): así handlePrint() no imprime
+                // antes de que el SVG quede escalado a la columna.
+                this.$nextTick(() => {
+                    this.setupUI();
+                    this.$el.setAttribute('data-mermaid-state', 'ok');
+                });
+            } else {
+                this.$el.setAttribute('data-mermaid-state', 'error');
             }
         } catch (e) {
             console.warn('[MERMAID] Render error:', e.message || e);
+            this.$el.setAttribute('data-mermaid-state', 'error');
         }
     },
 

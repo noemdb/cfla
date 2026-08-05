@@ -110,7 +110,30 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 | 7. Seguridad read-only | ✅ | `DirectorReadOnlyTest.php`: reflexión sobre `DirectorScopeService` (sin save/update/store/create/approve/comment/observe...) + auditoría de rutas registradas (sin POST/PUT/PATCH/DELETE) → 2 passed (48 aserciones). Verif post `route:list --name=director`: 9 rutas `GET|HEAD`, cero verbos no-GET. Nota: el grep literal del spec `\sGET\s` no matchea `GET|HEAD` (GET va seguido de `|`), se audita con `grep -iE "POST|PUT|PATCH|DELETE"` → sin salida. | test de reflexión sin métodos save* |
 | 8. Testing | ✅ | Estado `director()` en UserFactory (spec §8.3 verbatim); DirectorMiddlewareTest ×3 (200 / 403 / admin-bypass vía `getIsDirectorAttribute`); DirectorScopeTest ×4 (queryPensums sin filtro, queryProfesores activos-con-carga, factory state, role_label 'Dirección'); DirectorDashboardTest ×3 (KPIs de toda la institución, carga académica, profesores); DirectorReadOnlyTest ×3 (+ vista activity-list sin `<form>` ni `wire:click`). Suite completa: 216 passed, 0 failed, sin SKIP. | 13 tests, suite verde global |
 
-**Siguiente fase a ejecutar:** No hay — las 8 fases del spec están completas y verificadas (216 tests verdes).
+**Siguiente fase a ejecutar:** Mejora de interfaz (onda 2) — toggle Grid/Tabla + paginación aplicados a `carga-academica` (ver §5.3 Vista), `activities` (ver §5.4 Vista) y `lesson-list` (ver §5.5 Vista); panel de filtros ampliado en Actividades con filtros de estado eliminados por decisión del usuario (ver §5.4 Filtros); grupo de botones en la columna Acciones de Actividades (ver §5.4 Vista); columna Estado de la actividad (ver §5.4 Vista); toggle Grid/Tabla + panel de filtros ampliado en Lecciones (ver §5.5 Vista). Pendiente: evaluar el resto de vistas del director (`pensums`, `recursos`, `profesores`, dashboard).
+
+---
+
+### Onda 2 — Mejoras de interfaz
+
+> Trabajo posterior a la implementación funcional (fases 1-8). Cada ajuste se documenta
+> en su sección (`§5.x`) y se registra aquí en el Checkpoint.
+
+| # | Cambio | Estado | Notas |
+|---|--------|--------|-------|
+| 2.1 | Toggle Grid/Tabla en Carga Académica (`carga-academica-list.blade.php`) | ✅ | Key `carga-academica-view-mode`, evento `carga-academica-view-mode-changed`, default `table`. Documentado en §5.3 Vista. |
+| 2.2 | Toggle Grid/Tabla en Lecciones (`lesson-list.blade.php`) | ✅ | Key `lessons-view-mode`, evento `lessons-view-mode-changed`, default `table`. Se incorporó además el panel de filtros ampliado (Búsqueda/Plan Estudio/Profesor/Grado/Sección/Lapso) y el `<x-pagination-wrapper :paginator="$lessons" />` dentro de cada bloque `x-show`. `$paginate = 15` + `updatingPaginate()`. Documentado en §5.5 Vista. |
+| 2.3 | Toggle Grid/Tabla en Actividades (`activity-list.blade.php`) | ✅ | Key `director-activities-view-mode`, evento `director-activities-view-mode-changed`, default `table`. Documentado en §5.4 Vista. |
+| 2.4 | Filtros ampliados en Actividades (`activity-list.blade.php` + `ActivityList.php`) | ✅ | Panel de filtros del módulo Planning adaptado a `Activity` (read-only): Plan Estudio/Profesor/Grado/Sección/Lapso. **Revisión (decisión del usuario):** los filtros de estado (Observaciones, En revisión, Estado segmented) se añadieron en 2.4 y luego se eliminaron — quedan solo los 5 context + Búsqueda + Lapso. PHP limpiado de props/condiciones/hooks de estado. Documentado en §5.4 Filtros. |
+| 2.5 | Grupo de botones en columna Acciones (`activity-list.blade.php`) | ✅ | Enlaces planos Formato/Resumen → botones agrupados (patrón Planning/Leadership: `inline-flex items-center rounded-lg overflow-hidden border divide-x` + `role="group"`). Dos `<a>` GET read-only a `app.director.activities.format` / `app.director.activities.resume` con icono + etiqueta y tint de hover sky/purple. Aplicado igual en Grid y Tabla. Documentado en §5.4 Vista. |
+| 2.6 | Columna Estado de la actividad (`activity-list.blade.php` + `ActivityList.php`) | ✅ | Nueva columna "Estado" (Tabla, entre Lapso y Acciones; `colspan` vacío 6→7) y badges de estado en cada card del Grid. Muestra dos estados independientes renderizados en puro Blade (`@if`/`@elseif`, sin `wire:click`/`<form>`): **Aprobación del Jefe de Área** (`$activity->status` boolean: `true`→Aprobada emerald con check, `false`→En revisión amber con X, guard `!== null`→Sin aprobar gris) y **Lección** (`$activity->lmsPublication->status`: `PUBLISHED`→Lección aprobada emerald, `SCHEDULED`→Lección programada sky, resto/null→Lección pendiente gris). Se agregó `lmsPublication` al eager-load de `ActivityList::render()` (anti N+1). Marcup de badges fiel a `leadership/activity-overview.blade.php`. Documentado en §5.4 Vista. |
+| 2.7 | Ver/Imprimir lecciones LMS (`lesson-list.blade.php` + `LessonsPrintController.php` + `lessons-print.blade.php`) | ✅ | Botón "Ver / Imprimir" en la barra del listado (junto al toggle Grid/Tabla): `<a href>` plano GET (sin `wire:click`, compatible read-only) hacia `app.director.lessons.print` con los filtros activos como query string. Página de impresión HTML autónoma (misma semántica de filtros que LessonList + filtro `profesor`, orden `finicial desc`): la dirección supervisa TODA la institución, muestra el responsable de cada lección, y renderiza Mermaid/KaTeX en el navegador (mismo motor que el profesor, §5.5 del módulo profesor). Ruta nueva `/app/director/lecciones/print` GET-only. Bug fijo: nombre de ruta sin prefijo `app.` en el enlace (`route('director.lessons.print')` → `RouteNotFoundException`, ahora `route('app.director.lessons.print')`). Documentado en §5.5 Impresión; 15 tests en `DirectorLessonsPrintTest`. |
+| 2.7.1 | Bug impresión: tarda + diagramas Mermaid en blanco en el PDF (`lessons-print.blade.php` director y profesor + `resources/js/lms-student-preview.js`) | ✅ | El `handlePrint()` original esperaba a que **cada** `[x-ref="target"]` tuviera `<svg>` (poll 200 ms, cap 10 s): (a) un diagrama con error de render nunca tiene `<svg>` → la espera corría siempre los 10 s completos ("tarda"); (b) con muchos diagramas (`?pestudio=1&grado=5`) el render superaba los 10 s → `window.print()` disparaba prematuro y el PDF salía con SVGs en blanco ("no muestra bien"). **Fix:** `mermaidEmbed.render()` marca estado terminal por wrapper (`data-mermaid-state` = `rendering`/`ok`/`error`, `ok` tras `setupUI()` para que el SVG ya esté escalado); `handlePrint()` espera a que TODOS los `[data-mermaid-code]` lleguen a `ok`/`error` (poll 150 ms, timeout 30 s solo si el chunk Mermaid no carga), con progreso `(done/total)` en el botón. Además `.mermaid-wrap svg` en `@media print` gana con `!important` (`max-width:100%; height:auto; overflow:visible`) al `style="max-width:<naturalWidth>px"` inline del SVG, evitando desbordes de la columna. Aplicado en lockstep a la vista del profesor. Ver §5.5.1; 28 tests de impresión (director+profesor) verdes + build Vite OK. |
+| 2.7.2 | Defensa en profundidad vs. diagramas Mermaid desbordados en el PDF (`LessonWizard.php` + `lessons-print.blade.php` director/profesor + `lms-student-preview.js`) | ✅ | El PDF `LeccionesLMSResult010.pdf` mostraba un diagrama (contenido id 296: `graph TD`, 13 nodos, ~9 niveles, labels de hasta ~48 chars en una sola línea + 3 `style`) que desbordaba la columna de ~450px en las primeras páginas. Tres causas raíz: (1) `strip_tags()` destruía los `<br/>` de los labels multi-línea → el texto se concatenaba en una sola línea larga; (2) los prompts del wizard no limitaban nodos/profundidad/longitud de labels; (3) el CSS de impresión pre-2.7.1 no ganaba al `style` inline del SVG (ya fijo). **6 capas implementadas (todas aprobadas por el usuario):** **A1** conserva `<br/>` con `html_entity_decode(strip_tags($code,'<br><br/>'))` en la extracción de la vista de impresión Y en el flujo de guardado del wizard (`saveLesson` + extracción de embed), porque el `strip_tags` del SAVE ocurría ANTES de imprimir; **B1** `useMaxWidth: true` en ambos `mermaid.initialize()`; **B2** `break-inside:avoid` + `page-break-inside:avoid` en `.mermaid-wrap`; **E1** heurística por diagrama (`nodos≥12 || flechas≥11 || línea>55 chars`) → clase `mermaid-wide` con `column-span:all` para que el diagrama ancho cruce toda la página; **C1** endurece los prompts (sección + embed): máx. 12 nodos / 11 flechas / 3 niveles, IDs cortos, labels ≤30 chars por línea con `<br/>`, agrupar secundarios en nodo resumen, evitar `style`; **D1** validación post-generación (`validateMermaidDiagram()`: >14 nodos, >16 flechas, label >30 chars) con un único reintento a temperatura 0.3 + feedback (`diagramCorrectionBlock()`), vía helper `callMermaidModel()` (misma cadena de 3 modelos del flujo de diagramas), en los DOS flujos del wizard (`generateSlideDiagram()` y `generateEmbedCard()`, sin forzar `graph TD` en embeds). Refactor: extracción limpia en `extractMermaidCodeFromRaw()` y post-procesado unificado en `postProcessMermaid()` (graph TD + split de labels largos). Ver §5.5.2; 63 tests `LessonWizardCharacterizationTest` verdes + invariante read-only director OK. |
+| 2.7.3 | Acotar ALTURA de diagramas Mermaid grandes a una página en el PDF (`lessons-print.blade.php` director/profesor) | ✅ | El PDF `LeccionesLMSResult011.pdf` mostraba el diagrama "El misterio de los símbolos perdidos" (contenido id 296: `graph TD`, 13 nodos, ~9 niveles) que, tras la capa E1 (2.7.2), ya cruzaba todo el ancho de la página como spanner pero era demasiado ALTO: ocupaba más de una página en vertical. **Fix (solo CSS de impresión, aplicado en lockstep a la vista del profesor):** capa de altura **F1** — `max-height` de escala en `.mermaid-wrap svg` dentro de `@media print` que reduce el SVG a la página conservando la proporción del `viewBox` (max-width ya lo anclaba al ancho). Cascada deliberada `pt`/`vh`: se declara `max-height:<n>pt !important` (fallback universal, inambigüo en print) y después `max-height:<m>vh !important` (gana si el motor soporta `vh` en print y se adapta al tamaño real del papel). Dos umbrales: `430pt`/`70vh` para diagramas en columna (no superan la columna de ~453pt) y `515pt`/`83vh` para `.mermaid-wide` (caben en la página de ~561pt de alto de contenido, menos marco/etiqueta). **Enmarcado reforzado:** `overflow:hidden` en `.mermaid-wrap` como red de seguridad (recorta si el escalado no llegara a aplicarse), `border-color:#94a3b8` (marco más visible) y etiqueta `DIAGRAMA · VISTA AMPLIA` vía `::before` en `.mermaid-wide` (barra superior que hace explícito que el diagrama está acotado). El `::before` y el `position:relative`/`overflow:hidden` viven dentro de `@media print`, así que la previsualización en pantalla (zoom/toolbar) no se ve afectada. Ver §5.5.3; 17 tests `DirectorLessonsPrintTest` (incluye el nuevo de regresión `director_print_bounds_tall_mermaid_diagrams_to_one_page`) + 28 `LessonsPrintTest` + 3 `DirectorReadOnlyTest` verdes. |
+| 2.7.4 | Acotar ANCHO de diagramas Mermaid grandes a media página en el PDF (`lessons-print.blade.php` director/profesor) | ✅ | Continuación del bug 2.7.3 (mismo contenido id 296, "El misterio de los símbolos perdidos"): tras acotar la ALTURA, el diagrama cabía en una página pero, como spanner E1 (`column-span:all`), seguía ocupando el ANCHO completo de la página horizontal (~790 pt) — demasiado ancho; el usuario pidió acotarlo a "máximo media página". **Fix (solo CSS de impresión, espejo de F1):** capa de ancho **G1** — `max-width` de escala en `.mermaid-wrap.mermaid-wide` dentro de `@media print` que limita el diagrama amplio a media página y lo centra (`margin-left/right:auto`). Cascada deliberada `pt`/`vw` (mismo patrón que F1): primero `max-width:350pt !important` (fallback universal, inambigüo en print) y después `max-width:50vw !important` (gana si el motor soporta `vw` en print y se adapta al ancho real del papel; 50vw = media página del page box). **Doble tope:** en el marco `.mermaid-wrap.mermaid-wide` Y en el `svg` interno — red de seguridad por si el motor no honrara `max-width` sobre un spanner de `column-span:all`. Los diagramas en columna ya caben en media página (columna ≈383pt < 50vw ≈421pt), así que el tope solo actúa sobre los amplios. Previsualización en pantalla: el `.mermaid-wrap` base gana `max-width:50vw` para mostrar el mismo tope que tendrá la impresión. Ver §5.5.4; 18 tests `DirectorLessonsPrintTest` (incluye el nuevo de regresión `director_print_bounds_mermaid_width_to_half_page`) + 28 `LessonsPrintTest` + 3 `DirectorReadOnlyTest` verdes. |
+| 2.7.5 | Botón "Ver / Imprimir" en el monitor LMS de Planificación + ruta `/app/planning/lms/print` (`monitor.blade.php` + `routes/web.php` + reuso de `LessonsPrintController`) | ✅ | Mismo botón "Ver / Imprimir" que el listado de la Dirección (2.7) en el monitor LMS de Planificación (`/app/planning/lms/monitor`, componente `LmsMonitor`): `<a href>` plano GET (sin `wire:click`, compatible read-only) hacia la ruta nueva `app.planning.lms.print` con los filtros activos del monitor (`pestudio/grado/seccion/profesor/asignatura/status/search`, vacíos descartados con `array_filter`) como query string, `target="_blank"`, misma clase teal e icono de impresora. **Reuso cross-módulo de `Director\LessonsPrintController`** (patrón espejo del ADR-005, que reusa `Planning\ActivityPdfController` en dirección): el mismo controlador sirve `/app/director/lecciones/print` (grupo `isDirector`) y `/app/planning/lms/print` (grupo `isPlanner`). Un planificador NO puede llegar a la ruta de la Dirección (`IsDirector` solo admite `is_director`) y viceversa (`IsPlanner` aborta 403), verificado por tests. El contexto del membrete se deduce del nombre de ruta (`str_contains($request->route()?->getName() ?? '', 'planning')`) → contexto `Planificación · Monitor LMS` y título `PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO`; el filtro `estado` (PUBLISHED/SCHEDULED/ARCHIVED) y el de `asignatura` se añadieron al controlador para el monitor (misma semántica que `LmsMonitor`). Ver §5.5.5 + ADR-006; 8 tests `LmsPrintTest` (acceso + membrete + filtros + botón con filtros activos + `target="_blank"` + read-only) + 33 tests de las suites director verdes. |
+| 2.7.6 | Enmarcar diagramas Mermaid DENTRO de su columna: eliminar el spanner E1 `column-span:all` y la heurística `mermaid-wide` (`lessons-print.blade.php` director/profesor + `DirectorLessonsPrintTest.php`) | ✅ | Bug 2.7.5 (usuario): los diagramas seguían ocupando mucho espacio porque la capa E1 (2.7.2) los sacaba del flujo de 2 columnas con `column-span:all` para cruzar la página como spanner; G1 (2.7.4) solo acotaba su ancho a media página, no los devolvía a la columna. **Fix:** se elimina por completo el mecanismo de diagrama ancho — regla CSS `.mermaid-wrap.mermaid-wide{column-span:all;-webkit-column-span:all}`, etiqueta `DIAGRAMA · VISTA AMPLIA` (::before), tope de altura wide `515pt/83vh`, topes de ancho `350pt/50vw` (marco + svg), la previsualización en pantalla `max-width:50vw` y la heurística Blade `$mermaidWide` (nodos≥12 \|\| flechas≥11 \|\| línea>55 chars). Todo diagrama queda **enmarcado en su columna**: el marco `.mermaid-wrap` (fondo/borde/padding) + `max-width:100% !important; height:auto !important` en el svg limitan el ancho al de la columna (~383pt) y `max-height:430pt/70vh` (J2, 2.7.3) limita el alto — el tope de columna es ahora el ÚNICO tope de altura. Aplicado en lockstep a la vista del profesor. Tests: `director_print_bounds_tall_mermaid_diagrams_to_one_page` recortado (sin 515pt/VISTA AMPLIA) y `director_print_bounds_mermaid_width_to_half_page` **renombrado** a `director_print_frames_mermaid_diagrams_within_column` (afirma marco + `max-width:100%` y ausencia de `column-span:all`/`mermaid-wide`/`VISTA AMPLIA`). Ver §5.5.6; 41 tests de impresión + read-only verdes (18 `DirectorLessonsPrintTest` + 12 `LessonsPrintTest` + 8 `LmsPrintTest` + 3 `DirectorReadOnlyTest`). |
 
 ---
 
@@ -904,6 +927,7 @@ class CargaAcademicaList extends Component
     public string $search = '';
     public $peducativoId = '';
     public $lapsoId = '';
+    public $paginate = 15;
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -934,7 +958,7 @@ class CargaAcademicaList extends Component
             });
         }
 
-        $pevaluacions = $query->orderBy('pevaluacions.created_at', 'desc')->paginate(20);
+        $pevaluacions = $query->orderBy('pevaluacions.created_at', 'desc')->paginate($this->paginate);
         $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
         $peducativos = $service->queryPeducativos()->get();
 
@@ -948,8 +972,20 @@ class CargaAcademicaList extends Component
     public function updatingSearch() { $this->resetPage(); }
     public function updatingLapsoId() { $this->resetPage(); }
     public function updatingPeducativoId() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 }
 ```
+
+**Vista (Blade) — `resources/views/livewire/director/carga-academica-list.blade.php`**
+
+UI con patrón **Grid/Tabla** (`crud-mode-toggle`, ver `.claude/skills/crud-mode-toggle.md`).
+Mantiene la regla de oro del director: 100% solo lectura (sin `<form>`, `wire:submit` ni acciones de mutación).
+
+- **Filtros:** `search` (docente/asignatura/sección), `peducativoId`, `lapsoId` vía `wire:model.live`; reset de página en `updating*()`.
+- **Toggle Grid/Tabla:** clave `carga-academica-view-mode` en `localStorage` + evento `carga-academica-view-mode-changed` (`CustomEvent`); default `'table'`; `x-cloak` en el contenedor de vista para evitar flash.
+- **Grid:** columnas masonry `columns-1 sm:columns-2 lg:columns-3 xl:columns-4`; cada card: asignatura (icono teal), profesor, badges sección/grado (gris), plan (pestudio) y programa (peducativo) (sky), lapso (badge con punto).
+- **Tabla:** columnas Asignatura, Profesor, Sección, Plan, Programa, Lapso; estado vacío con `colspan=6`.
+- **Paginación:** componente `<x-pagination-wrapper :paginator="$pevaluacions" />` al final de cada modo (grid y tabla), con `@if($pevaluacions->hasPages())`. Incluye selector de resultados (15/30/50/100 vía `$paginate`, default 15) y contador `firstItem–lastItem de total`; `updatingPaginate()` resetea la página.
 
 #### 5.4 Actividades de Planificación (SIN observaciones editables)
 
@@ -964,6 +1000,9 @@ class CargaAcademicaList extends Component
 namespace App\Livewire\Director;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Seccion;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -972,20 +1011,50 @@ class ActivityList extends Component
     use WithPagination, Concerns\HasDirectorScope;
 
     public string $search = '';
-    public $peducativoId = '';
-    public $lapsoId = '';
+
+    // Filtros de contexto (snake_case, patrón del módulo Planning)
+    public $pestudio_id = '';
+    public $grado_id = '';
+    public $seccion_id = '';
+    public $profesor_id = '';
+    public $lapso_id = '';
+
+    // Filtros de estado de la actividad
+    public $filter_observations = false;
+    public $filter_revision = false;
+    public $filter_status = '';
+
+    public $paginate = 15;
     protected $paginationTheme = 'tailwind';
+
+    // Listas para los selects del panel de filtros
+    public $list_pestudio;
+    public $list_grado;
+    public $list_seccion;
+    public $list_profesor;
 
     public function mount(): void
     {
         $this->initializeHasDirectorScope();
+        $service = $this->getDirectorService();
+
+        $this->list_pestudio = $service->queryPestudios()
+            ->orderBy('order')
+            ->pluck('name', 'id');
+        $this->list_grado = Grado::active('true')->orderBy('order')->pluck('name', 'id');
+        $this->list_seccion = collect();
+        $this->list_profesor = $service->queryProfesores()
+            ->orderBy('lastname')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(fn($p) => [$p->id => "{$p->lastname}, {$p->name}"]);
     }
 
     public function render(): \Illuminate\View\View
     {
         $service = $this->getDirectorService();
 
-        $query = Activity::with([
+        $query = $service->queryActivities()->with([
             'pevaluacion' => fn($q) => $q->with([
                 'profesor:id,name,lastname',
                 'seccion.grado',
@@ -994,10 +1063,21 @@ class ActivityList extends Component
                 'lapso',
             ]),
         ]);
-        $query = $service->queryActivities();
 
-        if ($this->lapsoId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+        if ($this->pestudio_id) {
+            $query->whereHas('pevaluacion.pensum', fn($q) => $q->where('pestudio_id', $this->pestudio_id));
+        }
+        if ($this->grado_id) {
+            $query->whereHas('pevaluacion.seccion', fn($q) => $q->where('grado_id', $this->grado_id));
+        }
+        if ($this->seccion_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('seccion_id', $this->seccion_id));
+        }
+        if ($this->profesor_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('profesor_id', $this->profesor_id));
+        }
+        if ($this->lapso_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapso_id));
         }
         if ($this->search) {
             $query->where(function ($q) {
@@ -1005,9 +1085,21 @@ class ActivityList extends Component
                   ->orWhere('thematic', 'like', "%{$this->search}%");
             });
         }
+        if ($this->filter_observations) {
+            $query->whereNotNull('activities.observations')
+                  ->where('activities.observations', '!=', '');
+        }
+        if ($this->filter_revision) {
+            $query->where('activities.status', 0);
+        }
+        if ($this->filter_status === 'pending') {
+            $query->where('activities.status', 0);
+        } elseif ($this->filter_status === 'approved') {
+            $query->where('activities.status', 1);
+        }
 
-        $activities = $query->orderBy('activities.created_at', 'desc')->paginate(15);
-        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+        $activities = $query->orderBy('activities.created_at', 'desc')->paginate($this->paginate);
+        $lapsos = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
 
         return view('livewire.director.activity-list', [
             'activities' => $activities,
@@ -1015,10 +1107,62 @@ class ActivityList extends Component
         ])->layout('director.layouts.app');
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingLapsoId() { $this->resetPage(); }
+    // ─── FILTERS CASCADE (patrón del módulo Planning) ──────────
+
+    public function updatedPestudioId($value)
+    {
+        $this->resetPage();
+        $this->list_grado = $value
+            ? Grado::where('pestudio_id', $value)->where('status_active', 'true')->orderBy('order')->pluck('name', 'id')
+            : Grado::active('true')->orderBy('order')->pluck('name', 'id');
+        $this->grado_id = null;
+        $this->seccion_id = null;
+        $this->list_seccion = collect();
+    }
+
+    public function updatedGradoId($value)
+    {
+        $this->resetPage();
+        $this->list_seccion = $value
+            ? Seccion::list_seccion_grado($value)
+            : collect();
+        $this->seccion_id = null;
+    }
+
+    public function updatedSeccionId($value)     { $this->resetPage(); }
+    public function updatedProfesorId($value)    { $this->resetPage(); }
+    public function updatedLapsoId($value)       { $this->resetPage(); }
+    public function updatedFilterObservations($value) { $this->resetPage(); }
+    public function updatedFilterRevision($value)     { $this->resetPage(); }
+    public function updatedFilterStatus($value)       { $this->resetPage(); }
+
+    public function updatingSearch()  { $this->resetPage(); }
+    public function updatingPaginate(){ $this->resetPage(); }
 }
 ```
+
+**Vista (Blade) — `resources/views/livewire/director/activity-list.blade.php`**
+
+UI con patrón **Grid/Tabla** (`crud-mode-toggle`, ver `.claude/skills/crud-mode-toggle.md`).
+Mantiene la regla de oro del director: 100% solo lectura (sin `<form>`, `wire:submit` ni acciones
+de mutación; solo enlaces GET a `Formato` y `Resumen`).
+
+- **Panel de filtros ampliado** (onda 2.4): card `bg-white dark:bg-gray-900/40 backdrop-blur-md border ... rounded-lg mb-8` con grid `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3`, fiel al diseño del módulo Planning. Controles:
+  - **Grid principal** (celdas): Búsqueda (`lg:col-span-2 xl:col-span-2`, `wire:model.live.debounce.300ms="search"`, placeholder "Buscar por tema o temática…"), **Plan Estudio** (`pestudio_id`, `$list_pestudio` de `DirectorScopeService::queryPestudios()`), **Profesor** (`profesor_id`, `$list_profesor` global de `queryProfesores()` — el director supervisa toda la institución, no se cascada), **Grado/Año** (`grado_id`, `$list_grado`), **Sección** (`seccion_id`, `$list_seccion`).
+  - **Fila secundaria** (`sm:col-span-2 lg:col-span-4 xl:col-span-6`): **Lapso** (`lapso_id`, `$lapsos`). Nota: originalmente esta fila incluía también los toggles **Observaciones** (`filter_observations`), **En revisión** (`filter_revision`) y el **segmented Estado** (`filter_status`: Todos / Pendientes / Aprobadas) — añadidos en 2.4 y **eliminados por decisión del usuario** (onda 2.4 revisión) por no aportar valor en una lista de `Activity` read-only. El segmented usaba `@click="$wire.set('filter_status', '')"` (adaptación read-only: `wire:click` está prohibido por `DirectorReadOnlyTest` incluso en comentarios Blade).
+  - **Omitidos del panel Planning:** `status_activities` (SI/NO — no aplica a una lista de `Activity` individuales) y el select `paginate` (conflicta con el selector 15/30/50/100 canónico de `<x-pagination-wrapper>`).
+- **Filtros PHP:** todos aplican vía `whereHas` sobre `pevaluacion` (la lista es de `Activity`, no de `Pevaluacion`): `pestudio_id` → `pevaluacion.pensum`; `grado_id` → `pevaluacion.seccion`; `seccion_id`/`profesor_id`/`lapso_id` → `pevaluacion`. Reset de página en `updating*()`/`updated*()`.
+- **Cascada (patrón Planning):** `updatedPestudioId` recarga `$list_grado` con `Grado::where('pestudio_id', $value)->where('status_active', 'true')` (o `Grado::active('true')` si vacío) y nullea `grado_id`/`seccion_id` + `$list_seccion`; `updatedGradoId` recarga `$list_seccion` con `Seccion::list_seccion_grado($value)` y nullea `seccion_id`.
+- **Toggle Grid/Tabla:** clave `director-activities-view-mode` en `localStorage` + evento `director-activities-view-mode-changed` (`CustomEvent`); default `'table'`; `x-cloak` en el contenedor de vista. La clave lleva prefijo `director-` para no colisionar con `activities-view-mode` (módulo profesor, default `'grid'`).
+- **Grid:** columnas masonry `columns-1 sm:columns-2 lg:columns-3 xl:columns-4`; cada card: tema (icono cyan), asignatura · sección/grado, temática (si existe), badges profesor (gris) y lapso (sky), badges de estado (ver **Columna Estado** abajo), grupo de botones Formato/Resumen.
+- **Tabla:** columnas Tema, Asignatura, Sección, Profesor, Lapso, Estado, Acciones; estado vacío con `colspan=7`.
+- **Columna Estado** (onda 2.6): indica el estado de la actividad con dos badges independientes, renderizados en puro Blade (`@if`/`@elseif` — sin `wire:click`, sin `<form>` → cumple `DirectorReadOnlyTest`):
+  - **Aprobación del Jefe de Área** — `$activity->status` (boolean, columna `boolean('status')->default(false)`): `@if($activity->status !== null)` y `@if($activity->status)` → badge emerald **"Aprobada"** (check `M5 13l4 4L19 7`); `@else` → badge amber **"En revisión"** (X `M6 18L18 6M6 6l12 12`); `@else` (null) → badge gris **"Sin aprobar"** (guion `M20 12H4`). Marcup fiel a `leadership/activity-overview.blade.php`.
+  - **Lección** — `$activity->lmsPublication?->status` (enum `DRAFT|SCHEDULED|PUBLISHED|ARCHIVED`): `'PUBLISHED'` → badge emerald **"Lección aprobada"** (check `M9 12l2 2 4-4`); `'SCHEDULED'` → badge sky **"Lección programada"** (reloj `M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z`); resto/null → badge gris **"Lección pendiente"** (alerta `M12 9v3m0 4h.01M5 3h14...`). Coherente con el flujo de Lecciones LMS (la lección se programa `SCHEDULED` y se aprueba/publica al llegar a `PUBLISHED`, véase `leadership/lesson-monitor.blade.php`).
+  - En la **Tabla** los badges van apilados verticalmente (`flex flex-col gap-1`) en una `<td>` entre Lapso y Acciones; en el **Grid** van en una fila `flex flex-wrap gap-1.5` entre los badges de contexto y el grupo de botones. Badges `text-[10px] font-bold rounded-md border` con color de fondo `*-100`/`*-500/10` y texto/borde del mismo matiz (emerald/amber/sky/gris), icono SVG 12px + etiqueta.
+  - **Anti N+1:** `lmsPublication` se agrega al `->with([...])` de `ActivityList::render()` (relación `hasOne` en `Activity`, junto al closure de `pevaluacion`).
+- **Grupo de botones en Acciones** (onda 2.5): los enlaces planos Formato/Resumen se reemplazan por un grupo de botones unidos (patrón Planning/Leadership, p. ej. `planning/activities/index-component.blade.php`): wrapper `inline-flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-white/5 divide-x divide-gray-200 dark:divide-white/5` con `role="group"`, y dos `<a>` GET read-only — **Formato** (`app.director.activities.format`, icono documento con líneas, hover purple) y **Resumen** (`app.director.activities.resume`, icono documento, hover sky) — cada uno `target="_blank" rel="noopener"`, `title` descriptivo, `bg-gray-100 dark:bg-white/5`, `text-[10px] font-bold uppercase tracking-widest` con icono + etiqueta. Mismo markup en Grid y Tabla para consistencia al alternar vistas. Sin `<form>` ni `wire:click` (solo `<a href>` GET) → cumple `DirectorReadOnlyTest` (grep literales prohibidos: 0).
+- **Paginación:** componente `<x-pagination-wrapper :paginator="$activities" />` al final de cada modo (grid y tabla), con `@if($activities->hasPages())`. Incluye selector de resultados (15/30/50/100 vía `$paginate`, default 15) y contador `firstItem–lastItem de total`; `updatingPaginate()` resetea la página.
 
 #### 5.5 Lecciones LMS (read-only)
 
@@ -1029,6 +1173,9 @@ class ActivityList extends Component
 namespace App\Livewire\Director;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Seccion;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -1037,31 +1184,70 @@ class LessonList extends Component
     use WithPagination, Concerns\HasDirectorScope;
 
     public string $search = '';
-    public $peducativoId = '';
-    public $lapsoId = '';
+
+    // Filtros de contexto (snake_case, patrón del módulo Planning)
+    public $pestudio_id = '';
+    public $grado_id = '';
+    public $seccion_id = '';
+    public $profesor_id = '';
+    public $lapso_id = '';
+
+    public $paginate = 15;
     protected $paginationTheme = 'tailwind';
+
+    // Listas para los selects del panel de filtros
+    public $list_pestudio;
+    public $list_grado;
+    public $list_seccion;
+    public $list_profesor;
 
     public function mount(): void
     {
         $this->initializeHasDirectorScope();
+        $service = $this->getDirectorService();
+
+        $this->list_pestudio = $service->queryPestudios()
+            ->orderBy('order')
+            ->pluck('name', 'id');
+        $this->list_grado = Grado::active('true')->orderBy('order')->pluck('name', 'id');
+        $this->list_seccion = collect();
+        $this->list_profesor = $service->queryProfesores()
+            ->orderBy('lastname')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(fn($p) => [$p->id => "{$p->lastname}, {$p->name}"]);
     }
 
     public function render(): \Illuminate\View\View
     {
         $service = $this->getDirectorService();
 
-        $query = Activity::with([
-            'pevaluacion.pensum.asignatura',
-            'pevaluacion.pensum.pestudio.peducativo',
-            'pevaluacion.profesor',
-            'pevaluacion.lapso',
+        $query = $service->queryActivities()->with([
+            'pevaluacion' => fn($q) => $q->with([
+                'profesor:id,name,lastname',
+                'seccion.grado',
+                'pensum.asignatura',
+                'pensum.pestudio.peducativo',
+                'lapso',
+            ]),
             'lmsPublication',
             'lmsSections.contents',
         ]);
-        $query = $service->queryActivities()->whereHas('lmsPublication');
 
-        if ($this->lapsoId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+        if ($this->pestudio_id) {
+            $query->whereHas('pevaluacion.pensum', fn($q) => $q->where('pestudio_id', $this->pestudio_id));
+        }
+        if ($this->grado_id) {
+            $query->whereHas('pevaluacion.seccion', fn($q) => $q->where('grado_id', $this->grado_id));
+        }
+        if ($this->seccion_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('seccion_id', $this->seccion_id));
+        }
+        if ($this->profesor_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('profesor_id', $this->profesor_id));
+        }
+        if ($this->lapso_id) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapso_id));
         }
         if ($this->search) {
             $query->where(function ($q) {
@@ -1070,8 +1256,8 @@ class LessonList extends Component
             });
         }
 
-        $lessons = $query->orderBy('activities.created_at', 'desc')->paginate(15);
-        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+        $lessons = $query->orderBy('activities.created_at', 'desc')->paginate($this->paginate);
+        $lapsos = Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
 
         return view('livewire.director.lesson-list', [
             'lessons' => $lessons,
@@ -1079,10 +1265,420 @@ class LessonList extends Component
         ])->layout('director.layouts.app');
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingLapsoId() { $this->resetPage(); }
+    // ─── FILTERS CASCADE (patrón del módulo Planning) ──────────
+
+    public function updatedPestudioId($value)
+    {
+        $this->resetPage();
+        $this->list_grado = $value
+            ? Grado::where('pestudio_id', $value)->where('status_active', 'true')->orderBy('order')->pluck('name', 'id')
+            : Grado::active('true')->orderBy('order')->pluck('name', 'id');
+        $this->grado_id = null;
+        $this->seccion_id = null;
+        $this->list_seccion = collect();
+    }
+
+    public function updatedGradoId($value)
+    {
+        $this->resetPage();
+        $this->list_seccion = $value
+            ? Seccion::list_seccion_grado($value)
+            : collect();
+        $this->seccion_id = null;
+    }
+
+    public function updatedSeccionId($value)     { $this->resetPage(); }
+    public function updatedProfesorId($value)    { $this->resetPage(); }
+    public function updatedLapsoId($value)       { $this->resetPage(); }
+
+    public function updatingSearch()  { $this->resetPage(); }
+    public function updatingPaginate(){ $this->resetPage(); }
 }
 ```
+
+**Vista** (`lesson-list.blade.php`) — mejoras de la onda 2:
+
+- **Panel de filtros ampliado** (card `bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 p-2 sm:p-5 rounded-lg mb-8`, grid `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3`): Búsqueda (`search`, `lg:col-span-2 xl:col-span-2`, `wire:model.live.debounce.300ms`, placeholder "Buscar por tema o temática…"), Plan Estudio (`pestudio_id`), Profesor (`profesor_id`), Grado/Año (`grado_id`), Sección (`seccion_id`), Lapso (`lapso_id`, fila completa `sm:col-span-2 lg:col-span-4 xl:col-span-6` con `w-40 sm:w-44`). Cascada vía `updatedPestudioId`/`updatedGradoId`; `whereHas` sobre `pevaluacion`/`pevaluacion.pensum`/`pevaluacion.seccion`. **Idéntico a §5.4 Filtros** (solo cambia la columna `topic`).
+- **Toggle Grid/Tabla** (patrón `crud-mode-toggle`, key `lessons-view-mode`, evento `lessons-view-mode-changed`, default `table`). Botones Alpine `@click="mode = 'grid'/'table'"` con iconos SVG grid/tabla (sin `wire:click`, cumpliendo read-only). Contenedor con `x-cloak` + `x-init` que persiste en `localStorage`.
+- **Botón "Ver / Imprimir"** (barra superior, junto al toggle Grid/Tabla): `<a href>` plano hacia `route('app.director.lessons.print')` con los filtros activos como query string (`array_filter` sobre `lapso/pestudio/grado/seccion/profesor/search`), `target="_blank"`, icono impresora + etiqueta `hidden sm:inline`. Es un enlace GET puro (sin `wire:click`, compatible read-only) que abre la página de impresión con la MISMA vista que el listado (los filtros seleccionados se conservan). Ver §5.5 Impresión. **Ojo de nomenclatura:** el grupo de rutas de la app lleva `->name('app.')` (outer, `Route::prefix('app')` línea 146 de `routes/web.php`), así que el nombre completo es `app.director.lessons.print` — sin el prefijo `app.` `route()` lanza `RouteNotFoundException` (bug real encontrado y corregido en 2.7).
+- **Grid (masonry)**: `columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-2.5`; card = icono libro púrpura + tema + subtítulo "asignatura · sección (· grado)" + temática opcional + badges de profesor/lapso + badge de estado de publicación + footer "N secciones · Publicada d/m/Y" (con `@if` guardando `lmsPublication->published_at`). Estado vacío "Sin lecciones para los filtros seleccionados." `<x-pagination-wrapper :paginator="$lessons" />` dentro del bloque `x-show`, protegido por `@if($lessons->hasPages())`.
+- **Tabla**: columnas Tema/Asignatura/Sección/Profesor/Lapso/Estado/Contenido. Columna Estado con badge de publicación; Contenido = "N secciones · Publicada d/m/Y". Fila vacía `colspan="7"`. `<x-pagination-wrapper :paginator="$lessons" />` protegido por `@if($lessons->hasPages())`.
+- **Badge de estado de publicación** (puro Blade `@if/@elseif/@else`, en ambos modos): `PUBLISHED` → emerald "Publicada" (check `M5 13l4 4L19 7`); `SCHEDULED` → sky "Programada" (reloj `M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z`); `ARCHIVED` → gris "Archivada" (caja `M20 7l-8-4-8 4m16 0l-2 13H6L4 7m16 0l-8 4m0 0L4 7`); `@elseif($lesson->lmsPublication)` → gris "Borrador" (lápiz `M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z`) para `DRAFT`; `@else` (sin registro de publicación) → stone "Sin publicar" (ojo tachado `M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24`), clases `bg-stone-100 dark:bg-stone-500/10 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-500/20` (coherente con el monitor). Clases `inline-flex items-center gap-1 px-2 py-0.5 bg-{color}-100 dark:bg-{color}-500/10 text-{color}-700 dark:text-{color}-400 text-[10px] font-bold rounded-md border border-{color}-200 dark:border-{color}-500/20`.
+
+#### 5.5.1 Impresión de lecciones LMS (Ver / Imprimir)
+
+Página HTML **autónoma** (sin herencia del layout) con TODAS las lecciones que la
+dirección está visualizando, para imprimir / guardar PDF con los diagramas **Mermaid**
+y las matemáticas **KaTeX ya dibujados en el navegador** (el PDF generado por el diálogo
+de impresión del navegador incluye los SVGs renderizados).
+
+**Nueva ruta** (dentro del grupo director, GET-only):
+
+```php
+// routes/web.php (grupo director)
+Route::get('/lecciones/print', [
+    \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+])->name('lessons.print');   // nombre completo: app.director.lessons.print
+```
+
+**Controller** (`app/Http/Controllers/Director/LessonsPrintController.php`):
+
+- `index(Request)` parte de `new DirectorScopeService($request->user())->queryActivities()` —
+  la dirección supervisa TODA la institución, sin filtro por usuario.
+- Eager-load: `pevaluacion` (profesor:id,name,lastname · seccion.grado · pensum.asignatura ·
+  pensum.grado · pensum.pestudio.peducativo · lapso), `lmsPublication`, `lmsSections`
+  (orderBy sort_order), `lmsSections.contents` (orderBy sort_order), `lmsHtmlEmbeds`/
+  `lmsResources`/`lmsLinks` (is_visible).
+- **Filtros** (misma semántica que `LessonList`, ver §5.5): `lapso` → `whereHas('pevaluacion', lapso_id)`;
+  `pestudio` → `whereHas('pevaluacion.pensum', pestudio_id)`; `grado` → `whereHas('pevaluacion.seccion', grado_id)`;
+  `seccion` → `whereHas('pevaluacion', seccion_id)`; **`profesor`** (nuevo respecto al listado:
+  `whereHas('pevaluacion', profesor_id)`); `search` → `topic`/`thematic` `like`. Orden
+  `finicial desc`.
+- `prepareLesson(Activity)` normaliza a arreglo plano: topic, thematic, description,
+  **`profesor`** (`"{$lastname}, {$name}"` del responsable — la dirección no tiene profesor
+  propio), asignatura, `grado` (vía `seccion.grado.name`, coherente con el listado), seccion,
+  lapso, finicial/ffinal, estado/estado_label/estado_class, contadores de secciones/contenidos,
+  `has_lms`, `sections` (contents + embeds concatenados, filtrando vacíos), `resources`
+  (`display_name`), `links` (title+url).
+- `estadoLabel()`: `PUBLISHED`→Publicado, `SCHEDULED`→Programado, `ARCHIVED`→Archivado,
+  `null`→N.PUB, resto→Borrador. `estadoClass()`: `estado-pub|estado-prog|estado-arc|
+  estado-npub|estado-draft`.
+- **No llama** a `assertCanSupervise()` (verificaría `is_director` a secas y bloquearía a los
+  admins legítimos): el middleware `IsDirector` del grupo es la autoridad.
+- `filterLabels` resuelve los nombres legibles de cada filtro (incluido `profesor` como
+  `"{$lastname}, {$name}"`) para el membrete del documento.
+
+**Vista** (`resources/views/director/lessons-print.blade.php`) — documento autónomo:
+
+- `<body class="lms-print">`, `@vite(['resources/css/app.css','resources/js/app.js'])` +
+  `@livewireStyles`/`@livewireScripts` (necesarios para los componentes Alpine de render).
+- `.print-bar` sticky con `<button id="btn-print" onclick="handlePrint()" aria-label="Imprimir o guardar PDF">🖨 Imprimir / Guardar PDF</button>`; oculto en `@media print`.
+- Membrete `.doc-head` DENTRO de `.lessons-columns` (abre la columna 1): "DIRECCIÓN · LECCIONES
+  LMS · CONTENIDO COMPLETO" + fecha + etiquetas de filtros activos (lapso/pestudio/grado/
+  seccion/profesor/search). El `.sub` muestra "Dirección" fijo (la dirección no filtra por
+  profesor propio).
+- Por lección `.lesson`: `.lesson-head` (contador `.nnum`, topic, badge estado), `.lesson-meta`
+  con **Asignatura · Profesor** (`$lesson['profesor']`, entrada condicional `@if`) · grado ·
+  sección · lapso · fechas (`d/m`) · eje/temática · contadores.
+- Secciones `.section` con el MISMO motor de detección de contenidos que el profesor
+  (ver §5.5 del módulo profesor LMS): `IMAGE` (o `<svg\b`) → HTML crudo; **Mermaid** (regex
+  `class="[^"]*\bmermaid\b"` o keyword `flowchart|graph|mindmap|sequenceDiagram|classDiagram|
+  gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline`) → wrapper `mermaidEmbed()`
+  (`wire:ignore x-data` + `data-mermaid-code`); `HTML` → sanitizado directo (`LmsHtmlSanitizerService`);
+  `TEXT`/`MATH` → markdown/LaTeX vía `x-lms.math-text` (`data-math-content`). Embeds `lmsHtmlEmbeds`
+  entran con `type = 'HTML'` (la detección Mermaid corre sobre `body` ANTES del branch HTML).
+- Recursos (`display_name`) y enlaces (title+url) al pie de cada lección en `.lesson-res`.
+- `@media print`: `@page { size: landscape; margin: 0.9cm }`, `.lessons-columns {
+  column-count: 2; column-gap: 0.9cm; column-fill: auto; }`, `body{font-size:6pt}`,
+  `break-inside`/`break-after` para evitar viudas, `.print-bar{display:none}`, badges de estado
+  con fondo de color. `.mermaid-wrap svg{ max-width:100% !important; height:auto !important;
+  overflow:visible !important }` — el `!important` gana al `style="max-width:<naturalWidth>px"`
+  que `mermaid.render()` incrusta inline en el SVG, de modo que un diagrama ancho escala a la
+  columna en lugar de desbordarla (bug 2.7.1, "no muestra bien los diagramas").
+- `handlePrint()` (JS inline): si hay wrappers `[data-mermaid-code]` en el DOM, espera a que
+  TODOS alcancen un **estado terminal** (`data-mermaid-state` = `ok` o `error`, poll 150 ms,
+  timeout de seguridad 30 s solo para el caso de que el chunk de Mermaid no llegue a cargar)
+  antes de `window.print()`; si no hay Mermaid, imprime directo. **Mecánica (bug 2.7.1):**
+  cada wrapper `mermaidEmbed()` marca `data-mermaid-state` = `rendering` al empezar y `ok`
+  (después de `setupUI()`, para que el SVG ya esté escalado a la columna) o `error` al
+  terminar. El botón muestra progreso `Renderizando diagramas… (done/total)`. Con esto se
+  corrige que (a) un diagrama con error bloqueara siempre la espera completa de 10 s y
+  (b) un conjunto grande de diagramas (>10 s) imprimiera prematuro con SVGs en blanco.
+  El mismo `handlePrint()` se aplica en lockstep a la vista del profesor (`profesor/lms/lessons-print.blade.php`).
+- Pie de documento: `{{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}`.
+
+**Read-only:** la vista NO contiene `<form>`, `</form>`, `wire:submit`, `wire:click`,
+`method="post"` ni `@csrf` (invariante verificado por `DirectorLessonsPrintTest::..._has_no_write_controls`
+y cubierto por `DirectorReadOnlyTest::test_all_director_routes_are_get_only`, ya que la nueva
+ruta es GET). Sí usa `wire:ignore` (permitido: no muta estado, solo desactiva la hidratación
+de Livewire sobre el nodo Mermaid).
+
+**Tests** (`tests/Feature/Director/DirectorLessonsPrintTest.php`, 15): visión global (ambos
+profesores visibles + nombre del responsable en el meta), render de SVG/HTML/Mermaid/KaTeX,
+botón de impresión, membrete en columna 1 (orden `lessons-columns` → `doc-head` → `lesson`,
+`column-count: 2`, `column-fill: auto`), vacío cuando no coincide (`lapso=999999`), los 6
+filtros (incluido `profesor`) + combinados, y la ausencia de literales de escritura.
+
+#### 5.5.2 Defensa en profundidad: diagramas Mermaid desbordados (bug 2.7.2)
+
+**Síntoma:** el PDF de impresión (`storage/app/lms/pdf/result/LeccionesLMSResult010.pdf`)
+mostraba un diagrama Mermaid que desbordaba la columna de ~450px en las primeras páginas
+(contenido id 296: `graph TD`, 13 nodos, ~9 niveles de profundidad, labels de hasta ~48
+caracteres en una sola línea, 3 directivas `style`). El diagrama se genera desde el wizard
+del profesor (`app/Livewire/Profesor/Lms/LessonWizard.php`), así que la defensa actúa tanto
+en la **generación** (wizard) como en el **render** (vistas de impresión director/profesor)
+y el **motor JS** de Mermaid.
+
+**Causas raíz (tres):**
+1. **`strip_tags()` destruye `<br/>`** — los labels multi-línea `["Texto<br/>largo"]`
+   quedaban como `"Textolargo"` (una sola línea larga) al persistir/extraer el diagrama.
+2. **Prompts del wizard sin límites de tamaño** — sin tope de nodos/profundidad ni de
+   longitud de labels, la IA producía árboles profundos y anchos incompatibles con una
+   columna de impresión.
+3. **CSS de impresión pre-2.7.1** — sin `!important`, el `style="max-width:<naturalWidth>px"`
+   inline que `mermaid.render()` incrusta en el SVG ganaba al CSS (ya resuelto en 2.7.1).
+
+**Seis capas implementadas (A1, B1, B2, E1, C1, D1 — todas aprobadas por el usuario):**
+
+- **A1 — Conservar `<br/>` en la extracción:** se reemplaza `strip_tags($x)` por
+  `trim(html_entity_decode(strip_tags($x, '<br><br/>')))` en los 4 sitios de extracción:
+  la detección Mermaid de las DOS vistas de impresión (director y profesor) y, sobre todo,
+  el **flujo de guardado del wizard** (`saveLesson()` + extracción de embed), porque el
+  `strip_tags` del SAVE ocurría ANTES de imprimir y ya había concatenado los labels en el
+  momento de abrir la vista de impresión.
+- **B1 — `useMaxWidth: true`:** en ambos `mermaid.initialize()` de
+  `resources/js/lms-student-preview.js` (líneas ~32 y ~48), para que Mermaid use el ancho
+  natural del SVG como `max-width` en su `style` inline (además del `max-width:100%` que
+  aplica `setupUI()`), evitando que el layout interno desborde la columna.
+- **B2 — `break-inside:avoid`:** `.mermaid-wrap { break-inside: avoid; page-break-inside:
+  avoid; }` en el CSS de impresión de ambas vistas, para que un diagrama no se corte entre
+  dos columnas/páginas.
+- **E1 — Heurística de diagrama ancho → `column-span:all`:** por cada contenido Mermaid se
+  calcula `nodos` (regex de declaraciones de nodo), `flechas` (`--[->]|==>|..->`) y la
+  línea más larga; si `nodos ≥ 12 || flechas ≥ 11 || maxLine > 55`, el wrapper recibe la
+  clase `mermaid-wide` que en `@media print` aplica `column-span:all` (y `-webkit-column-
+  span:all`), haciendo que el diagrama cruce TODA la página (spanner) en lugar de apretarse
+  en la columna. La heurística es idéntica en las dos vistas y está alineada con el umbral
+  de validación D1 del wizard.
+  **→ Actualizado en 2.7.6:** el spanner E1 (`column-span:all`) y la heurística
+  `mermaid-wide` se ELIMINARON; todo diagrama queda enmarcado dentro de su columna (ver
+  §5.5.6).
+- **C1 — Endurecer prompts del wizard** (requisitos en `generateSlideDiagram()` y en la
+  regla 6 de `generateEmbedCard()`): MÁXIMO 12 nodos y 11 flechas por diagrama, máximo 3
+  niveles de profundidad; si hay más de 12 conceptos, AGRUPAR los secundarios en un nodo
+  resumen ("Otros: A, B, C"); IDs de nodo cortos (A, B, C, N1...) sin repetir el label;
+  labels ≤30 caracteres por línea separando con `<br/>` (o arreglos `[l1, l2]`); evitar
+  `style` directives salvo casos imprescindibles; recordatorio explícito de que el diagrama
+  se imprime en una columna de ~450px.
+- **D1 — Validación post-generación + un reintento:** el wizard valida el código Mermaid
+  recién generado con `validateMermaidDiagram()` (alerta si `nodos > 14`, `flechas > 16`,
+  o algún label quoted >30 chars). Si falla, construye `diagramCorrectionBlock()` con los
+  problemas detectados y el diagrama completo (truncado a 3000 chars) y hace UN reintento
+  vía `callMermaidModel()` a temperatura 0.3 con la MISMA cadena de 3 modelos del flujo de
+  diagramas (Qwen 3.1 32B → Mistral Large → Claude Sonnet 4). Se aplica en los DOS flujos:
+  `generateSlideDiagram()` (tras extraer con `extractMermaidCodeFromRaw()` y antes del
+  post-procesado) y `generateEmbedCard()` (validando el código Mermaid interno del card,
+  SIN forzar `graph TD` para respetar el tipo de diagrama elegido). Si el reintento fracasa,
+  se conserva el primer resultado (el usuario puede regenerar).
+
+**Refactor asociado (wizard):**
+- `extractMermaidCodeFromRaw(string $raw): string` — extracción unificada (fences ` ```html|
+  mermaid ` o keyword inicial) + limpieza de scripts CDN/`mermaid.initialize`, tags
+  `html/head/body/meta/link` y divs trailing. Reemplaza la lógica inline duplicada de
+  `generateSlideDiagram()`.
+- `postProcessMermaid(string $code, bool $forceGraphTd = true): string` — fuerza `graph TD`
+  (si `$forceGraphTd`) y parte labels largos `["...{35,}"]` en multi-línea con `<br/>`.
+  Reemplaza el post-procesado inline de `generateSlideDiagram()`.
+- `extractMermaidSrc(string $code): string` — extrae SOLO el Mermaid interno de un wrapper
+  `<div class="mermaid">…</div>` preservando `<br/>`; si no hay wrapper, devuelve el código.
+- `validateMermaidDiagram(string $src): array` — devuelve `['ok','issues','nodes','arrows',
+  'maxLabel']` con los umbrales de D1.
+- `diagramCorrectionBlock(string $src, array $validation): string` — feedback para el modelo.
+- `callMermaidModel(string $systemPrompt, string $userPrompt, array $overrides = []): array` —
+  wrapper de `askWithCompaction()` con `['max_tokens'=>4096,'temperature'=>0.7,'timeout'=>300]`,
+  presupuesto 3500 y la cadena de 3 modelos de diagramas (los `$overrides` pasados por el
+  llamador ganan en el merge `+`).
+
+**Nota de encoding:** `LessonWizard.php` contiene mojibake Latin-1 para acentos (`├│` = ó);
+el texto añadido por esta capa es ASCII puro para no mezclar encodings.
+
+**Verificación:** 63 tests de `LessonWizardCharacterizationTest` pasan (sin regresión tras
+el refactor de los dos flujos), `php8.2 -l` OK en el wizard, e invariante read-only del
+director (`DirectorReadOnlyTest`) verde. La capa E1 respeta el invariante read-only: la
+clase `mermaid-wide` es solo CSS (`column-span:all`), sin literales de escritura.
+
+#### 5.5.3 Acotar la altura de diagramas Mermaid grandes a una página (bug 2.7.3)
+
+El PDF `LeccionesLMSResult011.pdf` mostró que el mismo contenido id 296 del bug 2.7.2
+("El misterio de los símbolos perdidos", `graph TD`, 13 nodos, ~9 niveles) ya no
+desbordaba en horizontal (capas 2.7.1/2.7.2), pero tras la capa E1 (spanner
+`column-span:all`) ocupaba **más de una página en vertical**: demasiado alto.
+
+**Síntoma:** un diagrama grande cabe en el ancho de la página pero su altura natural
+supera el alto del área de contenido (~561 pt en horizontal con márgenes de 0.9 cm);
+el bloque se extiende a la página siguiente. El `break-inside:avoid` de B2 no puede
+partirlo en dos, pero tampoco lo reduce.
+
+**Capa F1 — escala por altura (solo CSS de impresión, sin tocar el wizard):**
+- `.mermaid-wrap svg` dentro de `@media print` gana `max-height` (además del
+  `max-width:100% !important` existente). Como el SVG tiene `viewBox` y el CSS ya pone
+  `height:auto`, el motor **escala el SVG a la página conservando la proporción**:
+  respeta simultáneamente `max-width` y `max-height` (elemento con ratio intrínseco).
+- **Cascada deliberada `pt`/`vh`:** se declara primero `max-height:430pt !important`
+  (fallback universal; en print `pt` es inambigüo, 1/72 in) y después
+  `max-height:70vh !important`. En la cascada CSS (misma especificidad e importancia)
+  gana la **última** declaración *válida*: si el motor soporta `vh` en print, el valor
+  en `vh` se adapta al alto real del papel; si no, la declaración `vh` se descarta como
+  inválida y queda el `pt`. El `!important` solo es por consistencia: `mermaid.render()`
+  no incrusta `max-height` inline (solo `max-width`), así que no hay conflicto real.
+- **Dos umbrales:**
+  - `.mermaid-wrap svg` → `430pt`/`70vh`: diagrama en **columna** (ancho ~470 pt). El
+    tope es menor que el alto de columna (~453 pt) para que ningún diagrama se salga
+    del flujo de 2 columnas.
+  - `.mermaid-wrap.mermaid-wide svg` → `515pt`/`83vh`: spanner E1 que cruza toda la
+    página. Cabe en los ~561 pt de alto de contenido menos marco/etiqueta.
+    **→ Actualizado en 2.7.6:** el spanner `mermaid-wide` se eliminó; el tope de
+    columna `430pt/70vh` es ahora el único tope de altura (ver §5.5.6).
+
+**Enmarcado reforzado ("acotados, enmarcados"):**
+- `overflow:hidden` en `.mermaid-wrap` (solo `@media print`): red de seguridad — recorta
+  el exceso si por cualquier motivo el escalado no se aplicara. No afecta a la
+  previsualización en pantalla, donde la regla no existe y el toolbar de zoom funciona.
+- `border-color:#94a3b8` sobre el `#e2e8f0` base: marco más visible que delimita la
+  zona acotada.
+- Etiqueta `DIAGRAMA · VISTA AMPLIA` vía `::before` en `.mermaid-wrap.mermaid-wide`
+  (barra superior verde `#0f766e`, texto blanco 5 pt), con `padding-top:12px` en el
+  wrap para dejarle sitio; `position:relative` en el wrap. Hace explícito en el PDF que
+  el diagrama está enmarcado y acotado.
+
+**Presupuesto de altura (página horizontal, alto 612 pt, márgenes 0.9 cm → contenido
+~561 pt):** wide → margen 9 pt + padding-top 12 px (9 pt) + padding-bottom 4 px (3 pt)
++ bordes 1.5 pt ≈ 24 pt → SVG máx. 515 pt cabe con holgura. Columna → ~453 pt menos
+márgenes/padding/borde ≈ 445 pt disponibles → tope 430 pt. Ningún diagrama supera una
+página.
+
+**Nota de encoding:** la etiqueta usa "·" (U+00B7, punto medio). Las vistas Blade son
+UTF-8 (ya contienen acentos), a diferencia de `LessonWizard.php` (mojibake Latin-1).
+
+**Verificación:** 17 tests de `DirectorLessonsPrintTest` + 28 de `LessonsPrintTest` +
+3 de `DirectorReadOnlyTest` verdes (el invariante read-only sigue intacto: la capa F1
+es solo CSS dentro de `@media print`, sin literales de escritura). El `view:cache`
+falla por un error pre-existente ajeno (componente `heroicon-m::x-mark`), verificado
+con `git stash`.
+
+#### 5.5.4 Acotar el ANCHO de diagramas Mermaid grandes a media página (bug 2.7.4)
+
+Continuación del bug 2.7.3: el mismo contenido id 296 ("El misterio de los símbolos
+perdidos") ya cabía en UNA página tras la capa F1 (2.7.3), pero como spanner E1
+(`column-span:all`) seguía ocupando el **ANCHO completo** de la página horizontal
+(~790 pt de contenido) — demasiado ancho. El usuario pidió que el diagrama quedara
+"acotado" también en ancho: máximo media página.
+
+**Síntoma:** un diagrama ancho (clase `mermaid-wide`, que cruza todo el ancho de la
+página por `column-span:all`) se extiende de borde a borde; en pantalla también
+dominaba la columna.
+
+**Capa G1 — escala por ancho (solo CSS de impresión, espejo de F1):**
+- `.mermaid-wrap.mermaid-wide` dentro de `@media print` gana `max-width` + centrado
+  (`margin-left:auto !important;margin-right:auto !important`). Antes el spanner
+  ocupaba el ancho completo; ahora se limita a media página y se centra.
+- **Cascada deliberada `pt`/`vw`** (mismo patrón que F1): primero
+  `max-width:350pt !important` (fallback universal, inambigüo en print) y después
+  `max-width:50vw !important`. En la cascada CSS gana la **última** declaración
+  *válida*: si el motor soporta `vw` en print, 50vw se adapta al ancho real del papel
+  (media página); si no, queda el `pt`.
+- **Doble tope:** en el marco `.mermaid-wrap.mermaid-wide` (el `margin:auto` lo centra)
+  Y en el `svg` interno (`max-width:350pt !important;max-width:50vw !important`) —
+  red de seguridad por si el motor no honrara `max-width` sobre un spanner de
+  `column-span:all`.
+- **Los diagramas en columna ya caben en media página** (columna ≈383 pt < 50vw ≈421 pt),
+  así que el tope solo actúa sobre los amplios (`mermaid-wide`).
+
+**Previsualización en pantalla:** el `.mermaid-wrap` base (fuera de `@media print`)
+gana `max-width:50vw` para que la previsualización en pantalla (zoom/toolbar) muestre
+el mismo tope de media página que tendrá la impresión.
+
+**Verificación:** 18 tests de `DirectorLessonsPrintTest` (incluye el nuevo
+`director_print_bounds_mermaid_width_to_half_page`, que verifica las dos reglas exactas
+sobre el marco y el svg) + 28 de `LessonsPrintTest` + 3 de `DirectorReadOnlyTest`
+verdes. Invariante read-only intacto: la capa G1 es solo CSS dentro de `@media print`,
+sin literales de escritura.
+
+**→ Actualizado en 2.7.6:** los topes de ancho G1 (`350pt/50vw`) y la previsualización
+en pantalla `max-width:50vw` se ELIMINARON junto con el spanner `column-span:all`; el
+ancho del diagrama lo limita ahora `max-width:100% !important` en el svg dentro del
+marco de su columna (ver §5.5.6).
+
+#### 5.5.5 Impresión de lecciones LMS desde el monitor de Planificación (Ver / Imprimir)
+
+El monitor LMS de Planificación (`/app/planning/lms/monitor`, componente `LmsMonitor`)
+recibe el MISMO botón "Ver / Imprimir" que el listado de la Dirección (5.5.1): un
+`<a href>` plano GET hacia la página de impresión autónoma con los filtros activos del
+monitor como query string, abriendo en `target="_blank"`. No usa `wire:click` — es un
+enlace puro, compatible con el invariante read-only.
+
+**Reuso cross-módulo de `Director\LessonsPrintController`:** el mismo controlador sirve
+las dos rutas y deduce el contexto por el nombre de la ruta:
+
+```php
+Route::prefix('lms')->middleware(['auth', 'isPlanner'])->name('lms.')->group(function () {
+    // ...
+    Route::get('/print', [\App\Http\Controllers\Director\LessonsPrintController::class, 'index'])
+        ->name('print');   // app.planning.lms.print
+});
+```
+
+- **Aislamiento de roles:** `IsPlanner` (permite `is_admin || is_planner || is_diagnostic`,
+  else `abort(403)`) protege la ruta de planificación; `IsDirector` protege la de la
+  Dirección. Un planificador no puede imprimir la ruta de la Dirección ni un director la
+  de planificación (verificado por `lms_print_requires_planner_role` y
+  `director_print_keeps_director_letterhead`). Patrón espejo del ADR-005: allí el director
+  reusaba `Planning\ActivityPdfController`; aquí planning reusa un controlador de la
+  Dirección, manteniendo un único punto de formato de la vista de impresión (ver ADR-006).
+- **Membrete adaptado al módulo:** `$isPlanning = str_contains($request->route()?->getName() ?? '', 'planning')`
+  → `contexto = 'Planificación · Monitor LMS'`, `titulo = 'PLANIFICACIÓN · LECCIONES LMS ·
+  CONTENIDO COMPLETO'`. El membrete de la Dirección queda intacto (test dedicado).
+- **Filtros del monitor:** el enlace mapea `filterPestudio/filterGrado/filterSeccion/
+  filterProfesor/filterAsignatura/filterStatus/search` → query string
+  `pestudio/grado/seccion/profesor/asignatura/status/search` (los vacíos se descartan con
+  `array_filter`). El controlador ganó los filtros `asignatura` (a través del pensum) y
+  `status` (`whereHas('lmsPublication', status=...)`), con sus etiquetas en `filterLabels`
+  vía `estadoLabel()`: PUBLISHED→Publicado, SCHEDULED→Programado, ARCHIVED→Archivado.
+- **Verificación:** 8 tests de `LmsPrintTest` (acceso + membrete + filtros asignatura/
+  status + botón llevando los filtros activos + `target="_blank"` + invariante read-only de
+  la vista) + 33 tests de las suites director verdes. El href del botón se construye en el
+  test con `route('app.planning.lms.print', ...)` y el `&` escapado a `&amp;` — robusto al
+  `APP_URL` del entorno (`localhost` vs `cfla.local`).
+
+#### 5.5.6 Enmarcar diagramas Mermaid dentro de su columna (bug 2.7.5)
+
+El usuario reportó que los diagramas Mermaid **seguían ocupando demasiado espacio**: pese
+al tope de media página de G1 (2.7.4), la capa E1 (2.7.2) los extraía del flujo de
+2 columnas con `column-span:all` para cruzar la página como spanner. La solución
+definitiva no es acotar el spanner, sino **eliminarlo**: ningún diagrama sale ya de su
+columna; todos quedan **enmarcados dentro de una de las columnas**.
+
+**Síntoma:** el spanner E1 (`mermaid-wide` → `column-span:all`) hacía que un diagrama
+ancho ocupara el ancho completo (o media página tras G1) y rompiera la composición de
+libro de 2 columnas; en pantalla dominaba la columna con `max-width:50vw`.
+
+**Capa K1 — eliminar el mecanismo de diagrama ancho (solo vistas de impresión):**
+- **Regla `column-span:all` eliminada:** ya no existe `.mermaid-wrap.mermaid-wide` en el
+  CSS de impresión; ningún diagrama cruza el flujo de 2 columnas.
+- **Heurística Blade `$mermaidWide` eliminada** (`nodos≥12 || flechas≥11 || línea>55`):
+  el wrapper es siempre `<div class="mermaid-wrap">`, sin clase condicional.
+- **Eliminados además:** etiqueta `DIAGRAMA · VISTA AMPLIA` (`::before`), tope de altura
+  wide `515pt/83vh`, topes de ancho `350pt/50vw` (marco + svg) y la previsualización en
+  pantalla `max-width:50vw`.
+
+**Enmarcado dentro de la columna (lo que queda):**
+- El marco `.mermaid-wrap` (`background:#f8fafc`, `border:1px solid #e2e8f0`,
+  `padding:4px`, `border-radius:4px`, `break-inside:avoid` + `page-break-inside:avoid`)
+  enmarca el diagrama y evita que se parta entre columnas/páginas (B2, 2.7.2).
+- `max-width:100% !important; height:auto !important` en `.mermaid-wrap svg` limita el
+  ancho al de la columna (~383pt); el `!important` gana al `style="max-width:<naturalWidth>px"`
+  inline que `mermaid.render()` incrusta.
+- `max-height:430pt !important; max-height:70vh !important` (J2, 2.7.3) limita el alto:
+  el tope de columna es ahora el **único** tope de altura.
+- `overflow:hidden` + `border-color:#94a3b8` en `@media print` (de 2.7.3): red de
+  seguridad que recorta el exceso y marco más visible que delimita la zona acotada.
+
+**Nota de composición:** al desaparecer el spanner, un diagrama muy ancho ya no desborda
+ni sale de su columna: el escalado del `viewBox` (el SVG respeta `max-width` y
+`max-height` simultáneamente, conservando la proporción) lo compacta dentro del ancho de
+columna.
+
+**Aplicado en lockstep** a la vista del profesor (`resources/views/profesor/lms/
+lessons-print.blade.php`), que mantiene idéntico el CSS y el render de Mermaid.
+
+**Verificación:** 41 tests de impresión + read-only verdes (18 `DirectorLessonsPrintTest`
++ 12 `LessonsPrintTest` + 8 `LmsPrintTest` + 3 `DirectorReadOnlyTest` — invariante
+read-only intacto, sin literales de escritura). El test de regresión de 2.7.4
+`director_print_bounds_mermaid_width_to_half_page` se convierte en
+`director_print_frames_mermaid_diagrams_within_column` (afirma el marco + `max-width:100%`
+y la ausencia de `column-span:all`, `mermaid-wide` y `DIAGRAMA · VISTA AMPLIA`);
+`director_print_bounds_tall_mermaid_diagrams_to_one_page` pierde las aserciones del
+spanner wide (`515pt/83vh`) y de la etiqueta.
 
 #### 5.6 Recursos Compartidos (read-only)
 
@@ -1399,6 +1995,8 @@ Ejemplo (esqueleto) de `activity-list.blade.php`:
 | `/app/director/carga-academica` | `IsDirector` | Global | Pevaluacions | ❌ |
 | `/app/director/activities` | `IsDirector` | Global | Actividades + PDF | ❌ |
 | `/app/director/lecciones` | `IsDirector` | Global | Lecciones LMS | ❌ |
+| `/app/director/lecciones/print` | `IsDirector` | Global | Impresión Lecciones LMS (Mermaid/KaTeX en navegador) | ❌ |
+| `/app/planning/lms/print` | `IsPlanner` | Global | Impresión Lecciones LMS — reusa `Director\LessonsPrintController`, membrete Planificación (módulo planning, 2.7.5) | ❌ |
 | `/app/director/recursos` | `IsDirector` | Global | Recursos | ❌ |
 | `/app/director/profesores` | `IsDirector` | Global | KPIs docentes | ❌ |
 
@@ -1557,6 +2155,14 @@ test('todas las rutas de director son de solo lectura (GET)', function () {
 | **Selección** | Las rutas `director.activities.format` y `director.activities.resume` reutilizan el `ActivityPdfController::format()`/`resume()` ya existente | Controlador propio de PDF |
 | **Razón** | El controlador es **read-only** (genera PDF), por lo que no viola el rol. Evita duplicar lógica de generación de PDF y mantiene un único punto de formato. Está protegido por el middleware `IsDirector` del grupo | |
 | **Consecuencia** | El director ve exactamente el mismo PDF que coordinación/leadership. Si el formato cambia, cambia en todos los módulos a la vez (sin merma de aislamiento, porque el PDF no es una acción de escritura) |
+
+### ADR-006: Reuso de `LessonsPrintController` por el monitor LMS de Planificación
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | La ruta `app.planning.lms.print` reutiliza `Director\LessonsPrintController::index()` (el mismo de `/app/director/lecciones/print`) | Controlador propio de impresión para planning |
+| **Razón** | El controlador es **read-only** (renderiza la vista de impresión; Mermaid/KaTeX se dibujan en el navegador) y comparte la MISMA semántica de filtros y el mismo scope global (`DirectorScopeService::queryActivities()`, sin filtro por usuario). Evita duplicar la preparación de lecciones y mantiene un único punto de formato. El contexto del membrete se deduce del nombre de ruta, y el aislamiento de roles se conserva porque cada grupo de rutas exige su propio middleware (`IsDirector` vs `IsPlanner`) | |
+| **Consecuencia** | La planificación ve exactamente la misma vista de impresión que la dirección (con membrete propio). Si el formato cambia, cambia en ambos módulos a la vez. Patrón espejo del ADR-005: allí el director reusaba `ActivityPdfController` de planning; aquí planning reusa un controlador de la Dirección. El rol del director no se diluye: la ruta de planning sigue exigiendo `is_planner` (un director sin `is_planner` no puede imprimirla) |
 
 ---
 

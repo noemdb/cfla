@@ -1,8 +1,9 @@
 {{-- ════════════════════════════════════════════════════════════════════════
-     VISTA DE IMPRESIÓN DE LECCIONES LMS (reemplaza el PDF).
-     Documento HTML autónomo: Mermaid y KaTeX se renderizan en el
-     navegador (mermaidEmbed / x-lms.math-text). Imprimir / Guardar PDF
-     con window.print() incluye los diagramas ya dibujados.
+     VISTA DE IMPRESIÓN DE LECCIONES LMS PARA LA DIRECCIÓN (reemplaza el PDF).
+     Documento HTML autónomo: Mermaid y KaTeX se renderizan en el navegador
+     (mermaidEmbed / x-lms.math-text). Imprimir / Guardar PDF con
+     window.print() incluye los diagramas ya dibujados.
+     SOLO LECTURA: sin formularios ni acciones de escritura.
      ═══════════════════════════════════════════════════════════════════════ --}}
 <!DOCTYPE html>
 <html lang="es">
@@ -249,7 +250,7 @@
     <div class="print-bar">
         <div>
             <div class="title">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
-            <div class="subtitle">LECCIONES LMS · CONTENIDO COMPLETO</div>
+            <div class="subtitle">{{ $titulo ?? 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO' }}</div>
         </div>
         <button id="btn-print" class="btn-print" type="button" onclick="handlePrint()" aria-label="Imprimir o guardar PDF">
             🖨 Imprimir / Guardar PDF
@@ -260,23 +261,32 @@
     {{-- Cabecera del documento (caso sin lecciones) --}}
     <div class="doc-head">
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-        <h2>LECCIONES LMS · CONTENIDO COMPLETO</h2>
+        <h2>{{ $titulo ?? 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO' }}</h2>
         <div class="sub">
-            {{ $profesor?->name ?? '' }} {{ $profesor?->lastname ?? '' }}
+            {{ $contexto ?? 'Dirección' }}
             <span class="sep">·</span> {{ $fecha }}
             @if(collect($filters)->filter()->isNotEmpty())
                 <span class="sep">·</span> Filtros:
                 @if($filters['lapso'])
-                    Lapso {{ \App\Models\app\Academy\Lapso::find($filters['lapso'])?->name ?? '' }}
+                    Lapso {{ $filterLabels['lapso'] }}
                 @endif
                 @if($filters['pestudio'])
-                    <span class="sep">·</span> P.Estudio {{ \App\Models\app\Academy\Pestudio::find($filters['pestudio'])?->name ?? '' }}
+                    <span class="sep">·</span> P.Estudio {{ $filterLabels['pestudio'] }}
                 @endif
                 @if($filters['grado'])
-                    <span class="sep">·</span> Grado {{ \App\Models\app\Academy\Grado::find($filters['grado'])?->name ?? '' }}
+                    <span class="sep">·</span> Grado {{ $filterLabels['grado'] }}
                 @endif
                 @if($filters['seccion'])
-                    <span class="sep">·</span> Sección {{ \App\Models\app\Academy\Seccion::find($filters['seccion'])?->name ?? '' }}
+                    <span class="sep">·</span> Sección {{ $filterLabels['seccion'] }}
+                @endif
+                @if($filters['profesor'])
+                    <span class="sep">·</span> Profesor {{ $filterLabels['profesor'] }}
+                @endif
+                @if($filters['asignatura'])
+                    <span class="sep">·</span> Asignatura {{ $filterLabels['asignatura'] }}
+                @endif
+                @if($filters['status'])
+                    <span class="sep">·</span> Estado {{ $filterLabels['status'] }}
                 @endif
                 @if($filters['search'])
                     <span class="sep">·</span> "{{ $filters['search'] }}"
@@ -294,23 +304,32 @@
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
         <div class="doc-head">
             <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-            <h2>LECCIONES LMS · CONTENIDO COMPLETO</h2>
+            <h2>{{ $titulo ?? 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO' }}</h2>
             <div class="sub">
-                {{ $profesor?->name ?? '' }} {{ $profesor?->lastname ?? '' }}
+                {{ $contexto ?? 'Dirección' }}
                 <span class="sep">·</span> {{ $fecha }}
                 @if(collect($filters)->filter()->isNotEmpty())
                     <span class="sep">·</span> Filtros:
                     @if($filters['lapso'])
-                        Lapso {{ \App\Models\app\Academy\Lapso::find($filters['lapso'])?->name ?? '' }}
+                        Lapso {{ $filterLabels['lapso'] }}
                     @endif
                     @if($filters['pestudio'])
-                        <span class="sep">·</span> P.Estudio {{ \App\Models\app\Academy\Pestudio::find($filters['pestudio'])?->name ?? '' }}
+                        <span class="sep">·</span> P.Estudio {{ $filterLabels['pestudio'] }}
                     @endif
                     @if($filters['grado'])
-                        <span class="sep">·</span> Grado {{ \App\Models\app\Academy\Grado::find($filters['grado'])?->name ?? '' }}
+                        <span class="sep">·</span> Grado {{ $filterLabels['grado'] }}
                     @endif
                     @if($filters['seccion'])
-                        <span class="sep">·</span> Sección {{ \App\Models\app\Academy\Seccion::find($filters['seccion'])?->name ?? '' }}
+                        <span class="sep">·</span> Sección {{ $filterLabels['seccion'] }}
+                    @endif
+                    @if($filters['profesor'])
+                        <span class="sep">·</span> Profesor {{ $filterLabels['profesor'] }}
+                    @endif
+                    @if($filters['asignatura'])
+                        <span class="sep">·</span> Asignatura {{ $filterLabels['asignatura'] }}
+                    @endif
+                    @if($filters['status'])
+                        <span class="sep">·</span> Estado {{ $filterLabels['status'] }}
                     @endif
                     @if($filters['search'])
                         <span class="sep">·</span> "{{ $filters['search'] }}"
@@ -331,6 +350,10 @@
             {{-- Metadatos --}}
             <div class="lesson-meta">
                 <span class="lbl">Asignatura:</span> {{ $lesson['asignatura'] ?: '—' }}
+                @if($lesson['profesor'])
+                    <span class="dot">·</span>
+                    <span class="lbl">Profesor:</span> {{ $lesson['profesor'] }}
+                @endif
                 @if($lesson['grado'])
                     <span class="dot">·</span> {{ $lesson['grado'] }}
                 @endif

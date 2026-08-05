@@ -92,7 +92,7 @@
             <div class="flex items-center gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-0.5">
                 @php $ranges = ['7d' => '7 días', '30d' => '30 días', '3m' => '3 meses', 'all' => 'Todo']; @endphp
                 @foreach($ranges as $val => $label)
-                    <button wire:click="$set('registrationRange', '{{ $val }}')"
+                    <button @click="$wire.set('registrationRange', '{{ $val }}')"
                         class="px-3 py-1.5 min-h-[36px] text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap
                                {{ $registrationRange === $val ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/5' }}">
                         {{ $label }}

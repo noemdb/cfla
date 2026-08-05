@@ -128,8 +128,28 @@
         @endif
     </div>
 
-    {{-- View mode toggle --}}
-    <div class="flex items-center justify-end">
+    {{-- Ver/Imprimir + View mode toggle --}}
+    <div class="flex flex-wrap items-center justify-end gap-2">
+        {{-- Ver/Imprimir: página de impresión de lecciones LMS (Mermaid renderizado
+             en el navegador). Lleva los filtros activos como query string — misma
+             semántica que el botón homólogo del listado de la Dirección. --}}
+        <a href="{{ route('app.planning.lms.print', array_filter([
+                'pestudio'   => $filterPestudio ?: null,
+                'grado'      => $filterGrado ?: null,
+                'seccion'    => $filterSeccion ?: null,
+                'profesor'   => $filterProfesor ?: null,
+                'asignatura' => $filterAsignatura ?: null,
+                'status'     => $filterStatus ?: null,
+                'search'     => $search ?: null,
+            ])) }}"
+            target="_blank"
+            title="Ver todas las lecciones en una página de impresión (Mermaid renderizado en el navegador)"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 text-teal-400 transition-all duration-200 text-[10px] font-bold hover:bg-teal-500/20">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span class="hidden sm:inline">Ver / Imprimir</span>
+        </a>
         <div class="bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-0.5 flex">
             <button wire:click="$set('viewMode', 'table')"
                     @class([

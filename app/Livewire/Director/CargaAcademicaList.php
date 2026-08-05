@@ -14,6 +14,7 @@ class CargaAcademicaList extends Component
     public string $search = '';
     public $peducativoId = '';
     public $lapsoId = '';
+    public $paginate = 15;
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -46,7 +47,7 @@ class CargaAcademicaList extends Component
             });
         }
 
-        $pevaluacions = $query->orderBy('pevaluacions.created_at', 'desc')->paginate(20);
+        $pevaluacions = $query->orderBy('pevaluacions.created_at', 'desc')->paginate($this->paginate);
         $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
         $peducativos = $service->queryPeducativos()->get();
 
@@ -60,4 +61,5 @@ class CargaAcademicaList extends Component
     public function updatingSearch() { $this->resetPage(); }
     public function updatingLapsoId() { $this->resetPage(); }
     public function updatingPeducativoId() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 }

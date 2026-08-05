@@ -97,6 +97,64 @@ Include a `<style>` block inside the Grid view for responsive masonry columns:
 </div>
 ```
 
+### 4. Pagination (shared `pagination-wrapper` component)
+
+For list views, paginate the result set with the shared component
+`resources/views/components/pagination-wrapper.blade.php`. It renders the
+"Ver" items-per-page selector (15/30/50/100), the `firstItem–lastItem de total`
+counter, and the pagination links (`vendor.livewire.custom-tailwind`).
+
+**PHP (Livewire component):** the wrapper's selector binds `wire:model.live="paginate"`,
+so the host component MUST expose a `paginate` property, paginate the query with it, and
+reset to page 1 when it changes:
+
+```php
+use Livewire\WithPagination;
+
+public $paginate = 15;
+protected $paginationTheme = 'tailwind';
+
+// render():
+$rows = $query->orderBy('created_at', 'desc')->paginate($this->paginate);
+
+public function updatingPaginate() { $this->resetPage(); }
+```
+
+**Blade (view):** place the wrapper inside EACH mode container (`x-show="mode === 'grid'"`
+and `x-show="mode === 'table'"`), guarded by `hasPages()` so it only renders when the
+result set spans more than one page. The wrapper follows the currently visible mode:
+
+```blade
+{{-- Grid Mode --}}
+<div x-show="mode === 'grid'"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100">
+    <div class="masonry-grid">
+        {{-- cards here --}}
+    </div>
+
+    @if($rows->hasPages())
+        <x-pagination-wrapper :paginator="$rows" />
+    @endif
+</div>
+
+{{-- Table Mode --}}
+<div x-show="mode === 'table'"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100">
+    {{-- table here --}}
+
+    @if($rows->hasPages())
+        <x-pagination-wrapper :paginator="$rows" />
+    @endif
+</div>
+```
+
+Placement matters: the wrapper goes INSIDE each `x-show` block — not after the view
+container — so the pagination belongs to whichever mode is visible.
+
 ## Key Details
 
 | Concern | How |
@@ -108,6 +166,7 @@ Include a `<style>` block inside the Grid view for responsive masonry columns:
 | **x-transition:enter** | `duration-200` ease-out for smooth mode switching |
 | **Active button style** | `bg-emerald-500/15 text-emerald-400 border-emerald-500/30` |
 | **Inactive button style** | `bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300` |
+| **Pagination** | `<x-pagination-wrapper :paginator="$rows" />` inside each `x-show` block, guarded by `@if($rows->hasPages())`; requires `public $paginate` on the host component (selector binds `wire:model.live="paginate"`) |
 
 ## Common Mistakes
 
@@ -115,6 +174,8 @@ Include a `<style>` block inside the Grid view for responsive masonry columns:
 - **Event name mismatch** — the `CustomEvent` name dispatched by the toggle must match the `x-on:EVENT-NAME.window` listener exactly
 - **Missing `x-cloak`** on the view container — without it, both views flash momentarily before Alpine renders
 - **Forgetting `x-transition:enter` on initial render** — first load won't animate, but subsequent toggles will. This is expected; `x-transition:enter` only fires on DOM insertion, which happens once for `x-show`
+- **Forgetting the `paginate` property on the host component** — the wrapper's selector binds `wire:model.live="paginate"`; without `public $paginate` the binding errors
+- **Placing the pagination wrapper after the view container** instead of inside each `x-show` block — it must follow the currently visible mode
 
 ## Real-World Example
 
@@ -124,3 +185,4 @@ This project uses the pattern in:
 - **View container**: `resources/views/profesors/activities/table/index.blade.php` (lines 1-233)
 - **Event**: `pevaluacions-view-mode-changed`
 - **Key**: `pevaluacions-view-mode`
+- **Toggle + views + pagination**: `resources/views/livewire/director/carga-academica-list.blade.php` (grid/table + `<x-pagination-wrapper>` per mode) with `app/Livewire/Director/CargaAcademicaList.php` (`$paginate = 15`, `updatingPaginate()`, `$paginationTheme = 'tailwind'`)
