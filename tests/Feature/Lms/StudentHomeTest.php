@@ -215,8 +215,10 @@ class StudentHomeTest extends TestCase
             ->test(\App\Livewire\Student\Lms\StudentHome::class)
             // Aparece vía el historial reciente
             ->assertSee('Con historial')
-            // El fallback no se muestra: la publicada sin log queda fuera
-            ->assertDontSee('Sin historial');
+            // El fallback "Publicaciones Recientes" no se muestra (hay historial).
+            // "Sin historial" sí aparece, pero dentro del listado global
+            // "Todas las Lecciones" (sección 4), no en el fallback.
+            ->assertDontSee('Publicaciones Recientes');
     }
 
     /**
@@ -248,6 +250,60 @@ class StudentHomeTest extends TestCase
         $this->assertStringNotContainsString($preview->topic, $fallback);
 
         // La preview sí aparece en el resto del panel (Próximas Publicaciones)
+        $this->assertStringContainsString($preview->topic, $html);
+    }
+
+    /**
+     * El listado "Todas las Lecciones" muestra TODAS las lecciones ya publicadas
+     * (publish_at <= ahora) de la más reciente a la más antigua, sin tope
+     * (a diferencia del fallback de "Continuar Aprendiendo" que usa take(5)),
+     * y es independiente del historial de interacción. Las previews (publicación
+     * futura) no aparecen en el listado: viven en "Próximas Publicaciones".
+     */
+    public function test_all_published_lessons_listed_desc_by_publish_at(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        // 6 lecciones ya publicadas con fechas escalonadas (más de 5 a propósito)
+        $topics = [];
+        for ($i = 0; $i < 6; $i++) {
+            $topics[] = $this->createPublishedActivity($pevaluacionId, "Lección {$i}", now()->subDays($i + 1));
+        }
+        // Publicación futura → solo en "Próximas", nunca en el listado
+        $preview = $this->createPublishedActivity($pevaluacionId, 'Futura en 3 días', now()->addDays(3));
+
+        // Con historial de interacción: el listado NO es el fallback de la sección 2
+        $student = $this->createStudentInSeccion($seccionId);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $topics[0]->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // El listado existe y viene después de "Próximas Publicaciones"
+        $this->assertStringContainsString('Todas las Lecciones', $html);
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+
+        // Todas las publicadas están, sin tope (incluso más de 5)
+        foreach ($topics as $activity) {
+            $this->assertStringContainsString($activity->topic, $section);
+        }
+
+        // Ordenadas por publish_at DESC (la más reciente primero)
+        $positions = array_map(fn ($a) => strpos($section, $a->topic), $topics);
+        $sorted = $positions;
+        sort($sorted);
+        $this->assertSame($sorted, $positions);
+
+        // La futura no está en el listado, pero sí en "Próximas Publicaciones"
+        $this->assertStringNotContainsString($preview->topic, $section);
         $this->assertStringContainsString($preview->topic, $html);
     }
 

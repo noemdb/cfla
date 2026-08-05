@@ -1,7 +1,7 @@
 # Dashboard de Progreso del Estudiante
 
 **Panel de Progreso Académico — `/app/estudiante/home`**
-_Última revisión:_ 2026-07-30
+_Última revisión:_ 2026-08-05
 
 ---
 
@@ -12,24 +12,26 @@ _Última revisión:_ 2026-07-30
 3. [Sección 1: Stats Cards](#3-sección-1-stats-cards)
 4. [Sección 2: Continuar Aprendiendo](#4-sección-2-continuar-aprendiendo)
 5. [Sección 3: Próximas Publicaciones](#5-sección-3-próximas-publicaciones)
-6. [Sección 4: Distribución por Asignatura](#6-sección-4-distribución-por-asignatura)
-7. [Empty State](#7-empty-state)
-8. [Visibilidad y Scoping de Datos](#8-visibilidad-y-scoping-de-datos)
-9. [Estructura de Routes](#9-estructura-de-routes)
-10. [Referencia de Queries](#10-referencia-de-queries)
-11. [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)
+6. [Sección 4: Todas las Lecciones](#6-sección-4-todas-las-lecciones)
+7. [Sección 5: Distribución por Asignatura](#7-sección-5-distribución-por-asignatura)
+8. [Empty State](#8-empty-state)
+9. [Visibilidad y Scoping de Datos](#9-visibilidad-y-scoping-de-datos)
+10. [Estructura de Routes](#10-estructura-de-routes)
+11. [Referencia de Queries](#11-referencia-de-queries)
+12. [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado)
 
 ---
 
 ## 1. Visión General
 
-El Dashboard de Progreso es la página de inicio del área del estudiante (`/app/estudiante/home`). Muestra un resumen visual del avance académico del estudiante en las actividades LMS publicadas, combinando 4 secciones de datos en una sola página.
+El Dashboard de Progreso es la página de inicio del área del estudiante (`/app/estudiante/home`). Muestra un resumen visual del avance académico del estudiante en las actividades LMS publicadas, combinando 5 secciones de datos en una sola página.
 
 ### Propósito
 
 - Dar al estudiante una vista rápida de **cuánto ha avanzado** en sus actividades
 - Mostrar **qué actividades visitó recientemente** para retomarlas
 - Mostrar **próximas publicaciones** (lecciones que aún no se publican, con su fecha `publish_at`)
+- Listar **todas las lecciones publicadas** (catálogo completo, de la más reciente a la más antigua)
 - Visualizar la **distribución de progreso por asignatura**
 
 ### Arquitectura
@@ -40,11 +42,12 @@ StudentHome (Livewire full-page component)
 │   └── GET /home → StudentHome::class → name: 'student.lms.home'
 ├── app/Livewire/Student/Lms/StudentHome.php
 │   ├── mount() → initializeHasStudentScope()
-│   └── render() → 4 queries scoped → compact view data
+│   └── render() → 5 queries scoped → compact view data
 └── resources/views/livewire/student/lms/student-home.blade.php
     ├── Header + Stats Cards (grid 4-col)
     ├── Continue Learning (lista de interacciones)
     ├── Próximas Publicaciones (lecciones por publicarse, badges a publish_at)
+    ├── Todas las Lecciones (listado sutil de lecciones publicadas)
     ├── Subject Distribution (barras de progreso)
     └── Empty State (condicional)
 ```
@@ -94,13 +97,15 @@ public function render(): \Illuminate\View\View
         ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
         ->pluck('id');
 
-    // 4-7. Calcular stats, logs recientes (+ fallback), próximos vencimientos, distribución
+    // 4-8. Calcular stats, logs recientes (+ fallback), próximos vencimientos,
+    //      listado de lecciones publicadas, distribución por asignatura
 
     return view('livewire.student.lms.student-home', [
         'stats'              => $stats,
         'recentLogs'         => $recentLogs,
         'suggestedActivities' => $suggestedActivities,
         'upcoming'           => $upcoming,
+        'publishedLessons'   => $publishedLessons,
         'subjectDistribution' => $subjectDistribution,
     ])->layout('student.layouts.app');
 }
@@ -140,7 +145,7 @@ Cada card es un `div` con:
 - `border border-gray-200 dark:border-gray-700` — borde
 - `rounded-xl` — esquinas redondeadas
 - `p-4 space-y-2 shadow-sm` — padding interior + sombra base
-- Hover **estático** (no clicable): `transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600` — brillo sutil, sin lift (ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado))
+- Hover **estático** (no clicable): `transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600` — brillo sutil, sin lift (ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado))
 
 Contenido interno:
 1. **Ícono** — `w-8 h-8 rounded-lg` con color de fondo semitransparente (opacity 10%) e ícono SVG del mismo color (opacity 100%)
@@ -246,7 +251,7 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 .group:hover .hover:border-emerald-500/40   /* borde de la card */
 ```
 
-Transiciones: `transition-all duration-200` (elevación — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado))
+Transiciones: `transition-all duration-200` (elevación — ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado))
 
 ### Fallback: sin historial de interacción
 
@@ -283,7 +288,7 @@ Mismo patrón de subquery que `$upcoming` (sección 5), pero con segundo argumen
 - Subtítulo de la sección: *"Actividades publicadas más recientes"*.
 - Hint derecho: `$activity->lmsPublication?->publish_at?->diffForHumans()` → "hace 2 días".
 - Sin etiqueta "Vista previa" (la query garantiza `publish_at <= now()`).
-- Acentos 100% sky (header, íconos, título, chevron) y hover de fila en sky (`hover:-translate-y-0.5 hover:shadow-md hover:border-sky-500/40`) — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado).
+- Acentos 100% sky (header, íconos, título, chevron) y hover de fila en sky (`hover:-translate-y-0.5 hover:shadow-md hover:border-sky-500/40`) — ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado).
 
 El blade usa `@if($recentLogs->isNotEmpty()) ... @elseif($suggestedActivities->isNotEmpty()) <section>...`.
 
@@ -359,7 +364,7 @@ $daysLeft = $publishAt
 | `daysLeft > 7` | `Se publica el {j M}` (traducción `es`, ej. "Se publica el 9 ago") |
 | `publish_at` nulo (fallback) | `Próximamente` |
 
-- Badge e ícono siempre en azul cielo; el badge usa la forma de chip unificada (`rounded-full` + borde sky — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)); ya no hay niveles de urgencia.
+- Badge e ícono siempre en azul cielo; el badge usa la forma de chip unificada (`rounded-full` + borde sky — ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado)); ya no hay niveles de urgencia.
 - Junto al título se muestra la etiqueta **"Vista previa"** (sky), igual que en "Continuar Aprendiendo".
 - El countdown es respecto a `publish_at`, **no** a `ffinal`.
 
@@ -375,11 +380,72 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Hover: elevación sutil + borde `hover:border-sky-500/40` (ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)).
+Hover: elevación sutil + borde `hover:border-sky-500/40` (ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado)).
 
 ---
 
-## 6. Sección 4: Distribución por Asignatura
+## 6. Sección 4: Todas las Lecciones
+
+> **Decisión de diseño:** el estudiante necesita el **catálogo completo** de lecciones ya publicadas, no solo las 5 más recientes del fallback. Es un listado compacto y **sutil** (no tarjetas): a diferencia del resto del panel, aquí no hay cajas ni elevación, solo filas `divide-y` con hover de color. Complementa a "Próximas Publicaciones" (que cubre `publish_at` futuro) con todo lo ya publicado (`publish_at <= now()`), de la más reciente a la más antigua. Implementado el 2026-08-05.
+
+### Vista
+
+```
+📚 Todas las Lecciones (N)
+Publicadas, de la más reciente a la más antigua
+
+● Ecuaciones lineales                    Matemática ·  9 ago 2026
+● Análisis sintáctico                    Lenguaje  ·  4 ago 2026
+● Trigonometría                                      · 28 jul 2026
+```
+
+*(Sin tarjetas: filas `divide-y` con punto sky, título truncado, asignatura oculta en mobile, fecha absoluta alineada a la derecha.)*
+
+### Origen de datos
+
+```php
+$publishedLessons = Activity::with([
+    'pevaluacion.pensum.asignatura',   // Nombre de la materia
+    'pevaluacion.lapso',               // Lapso (L1, L2, L3)
+    'lmsPublication',                  // Datos de publicación (publish_at)
+])
+    ->whereIn('id', $visibleActivityIds)   // Solo actividades visibles
+    ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+    ->orderBy(                             // Más reciente primero
+        LmsActivityPublication::select('publish_at')
+            ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+            ->orderByDesc('publish_at')
+            ->limit(1),
+        'desc'
+    )
+    ->get();                               // Sin tope: catálogo completo
+```
+
+- Se ejecuta **siempre** (a diferencia del fallback de la sección 2, que solo corre sin historial).
+- **Sin `take()`**: es el catálogo completo; el fallback y "Próximas" usan `LIMIT 5`.
+- Mismo patrón de subquery que `$suggestedActivities` (sección 2) y `$upcoming` (sección 3), pero con filtro `publish_at <= now()` y sin tope.
+- Las previews (`publish_at` futuro) quedan fuera: viven en "Próximas Publicaciones".
+
+### Estructura de cada fila
+
+Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)`.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ ● título (truncated)          asignatura (hidden sm)        fecha    │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+- Lista `<ul class="divide-y divide-gray-100 dark:divide-gray-800">` — separadores sutiles, **sin** tarjetas ni elevación.
+- Punto `w-1.5 h-1.5 rounded-full bg-sky-400/70`.
+- Título `text-[13px] font-medium` con hover solo de color: `group-hover:text-sky-600 dark:group-hover:text-sky-400`.
+- Asignatura `hidden sm:inline text-[11px]` — no ocupa espacio en mobile.
+- Fecha absoluta `translatedFormat('j M Y')` alineada a la derecha, `text-[11px]` fija.
+- Header "Todas las Lecciones" con ícono de libro sky (igual que el panel) + contador `(N)`.
+
+---
+
+## 7. Sección 5: Distribución por Asignatura
 
 ### Vista
 
@@ -446,11 +512,11 @@ $subjectDistribution = $activities
 </div>
 ```
 
-Misma base que las stats (`p-4 shadow-sm`, hover **estático** sin lift — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)). Se conserva `space-y-5` para el aire interno entre barras.
+Misma base que las stats (`p-4 shadow-sm`, hover **estático** sin lift — ver [Sistema de Tarjetas Unificado](#12-sistema-de-tarjetas-unificado)). Se conserva `space-y-5` para el aire interno entre barras.
 
 ---
 
-## 7. Empty State
+## 8. Empty State
 
 Cuando **no hay actividades visibles** (`$stats['total'] === 0`, `$recentLogs->isEmpty()`, `$upcoming->isEmpty()`):
 
@@ -475,7 +541,7 @@ El ícono es el mismo de "libro" (Totales) pero en gris. Ocupa `py-16` centrado.
 
 ---
 
-## 8. Visibilidad y Scoping de Datos
+## 9. Visibilidad y Scoping de Datos
 
 ### Cadena de visibilidad completa
 
@@ -551,13 +617,14 @@ Algunas queries **no** están scoped por sección:
 | `$recentLogs` | ✅ | Filtrado por `$visibleActivityIds` |
 | `$suggestedActivities` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at <= now()`, ORDER BY subquery DESC (solo si `$recentLogs` está vacío) |
 | `$upcoming` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at > now()` |
+| `$publishedLessons` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at <= now()`, ORDER BY subquery DESC, **sin tope** (catálogo completo) |
 | `$subjectDistribution` | ✅ | Calculado sobre `$visibleActivityIds` |
 
 **Nota:** Comments y Downloads son contadores globales del estudiante, no scoped a las actividades visibles. Esto es intencional — muestran la actividad total del estudiante en el sistema, no solo lo que está actualmente publicado.
 
 ---
 
-## 9. Estructura de Routes
+## 10. Estructura de Routes
 
 **Archivo:** `routes/web.php` (líneas 351-362)
 
@@ -589,7 +656,7 @@ Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isSt
 
 ---
 
-## 10. Referencia de Queries
+## 11. Referencia de Queries
 
 ### Query 1: Actividades visibles (combinada)
 
@@ -654,6 +721,27 @@ LIMIT 5;
 
 Solo se ejecuta cuando no hay logs recientes (`$recentLogs->isEmpty()`). Complementa a Query 4 sin solapamiento (`publish_at <= now()` vs `publish_at > now()`).
 
+### Query 3c: Listado "Todas las Lecciones" (catálogo completo)
+
+```sql
+SELECT a.*
+FROM activities a
+WHERE a.id IN (?, ?, ...)  -- visibleActivityIds
+  AND EXISTS (
+      SELECT 1 FROM lms_activity_publications p
+      WHERE p.activity_id = a.id
+        AND p.publish_at <= NOW()
+  )
+ORDER BY (
+    SELECT p.publish_at FROM lms_activity_publications p
+    WHERE p.activity_id = a.id
+    ORDER BY p.publish_at DESC
+    LIMIT 1
+) DESC;
+```
+
+Idéntica a Query 3b **sin `LIMIT 5`**: se ejecuta siempre (con o sin historial) y lista el catálogo completo de lecciones ya publicadas. Complementa a Query 4 sin solapamiento (`publish_at <= now()` vs `publish_at > now()`).
+
 ### Query 4: Próximas publicaciones
 
 ```sql
@@ -689,7 +777,7 @@ Post-procesamiento PHP: `groupBy('asignatura')`, `map(completed/total)`, `sortBy
 
 ---
 
-## 11. Sistema de Tarjetas Unificado
+## 12. Sistema de Tarjetas Unificado
 
 > **Decisión de diseño:** las cuatro familias de tarjetas del panel (métricas, filas de cursos, panel de asignaturas) comparten una misma base visual para leerse como un solo sistema. La diferenciación se logra por **contenido y acento**, no rompiendo el lenguaje visual. Implementado el 2026-08-05.
 
@@ -734,12 +822,15 @@ Misma forma (pill + borde); la diferencia es de contenido: el countdown lleva te
 
 > **Por qué hover diferenciado:** las métricas y el panel de asignaturas no enlazan a nada; elevarlas implicaría una affordance falsa (sugerir que son clicables). Responden solo con brillo sutil. Las filas sí enlazan a una actividad y se elevan con acento, señalando interactividad.
 
+> **Excepción deliberada:** el listado "Todas las Lecciones" (Sección 4) **no** es parte del sistema de tarjetas. A propósito no lleva caja ni elevación: es una lista compacta (`divide-y`, punto sky, hover solo de color) para que el catálogo completo no compita visualmente con las tarjetas de acción de las secciones 2 y 3.
+
 ---
 
 ## Historial de Cambios
 
 | Fecha | Cambio | Autor |
 |-------|--------|-------|
+| 2026-08-05 | Nueva **Sección 4 "Todas las Lecciones"**: listado compacto y sutil (filas `divide-y`, punto sky, título truncado, asignatura oculta en mobile, fecha absoluta a la derecha) con **todas** las lecciones publicadas (`publish_at <= now()`), ordenadas DESC por `publish_at`, sin tope; nueva query `$publishedLessons` (patrón subquery de 3b sin `LIMIT 5`, se ejecuta siempre); Distribución pasa a Sección 5; docs y tests actualizados (`StudentHomeTest`) | — |
 | 2026-08-05 | **Sistema de tarjetas unificado** en todo el panel: base común `rounded-xl` + `border-gray-200/700` + `p-4` + `shadow-sm`; hover por tipo (estáticas = brillo sutil sin lift; clicables = `-translate-y-0.5` + `shadow-md` + borde acento); fallback "Publicaciones Recientes" corregido a 100% sky; chips unificados `rounded-full` + borde (Vista previa y countdown); panel de asignaturas de `p-5` a `p-4` | — |
 | 2026-08-05 | El fallback de "Continuar Aprendiendo" pasa a titularse **"Publicaciones Recientes"** (la rama con historial conserva "Continuar Aprendiendo"); docs y tests actualizados | — |
 | 2026-08-05 | "Continuar Aprendiendo" gana fallback: sin historial de interacción (`LmsActivityLog` vacío) muestra las lecciones ya publicadas (`publish_at <= now()`), reciente primero (`publish_at` DESC), máx. 5; nueva query `$suggestedActivities`, fila play sky + hint "hace X", subtítulo "Actividades publicadas más recientes" | — |

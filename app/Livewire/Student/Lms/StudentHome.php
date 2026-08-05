@@ -118,7 +118,29 @@ class StudentHome extends Component
             ->take(5)
             ->get();
 
-        // ─── 4. Subject distribution ───────────────────────────────
+        // ─── 4. Todas las lecciones publicadas ───────────────────────
+        // Listado completo (sin tope) de lecciones ya publicadas
+        // (publish_at <= ahora), de la más reciente a la más antigua.
+        // Complementa a "Próximas Publicaciones" (publish_at futuro) con
+        // el catálogo completo disponible. Solo lecciones completables:
+        // las previews (publish_at futuro) pertenecen a la sección 3.
+        $publishedLessons = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.lapso',
+            'lmsPublication',
+        ])
+            ->whereIn('id', $visibleActivityIds)
+            ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+            ->orderBy(
+                LmsActivityPublication::select('publish_at')
+                    ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                    ->orderByDesc('publish_at')
+                    ->limit(1),
+                'desc'
+            )
+            ->get();
+
+        // ─── 5. Subject distribution ────────────────────────────────
         $activities = Activity::with('pevaluacion.pensum.asignatura')
             ->whereIn('id', $visibleActivityIds)
             ->get();
@@ -140,6 +162,7 @@ class StudentHome extends Component
             'recentLogs' => $recentLogs,
             'suggestedActivities' => $suggestedActivities,
             'upcoming' => $upcoming,
+            'publishedLessons' => $publishedLessons,
             'subjectDistribution' => $subjectDistribution,
         ])->layout('student.layouts.app');
     }
