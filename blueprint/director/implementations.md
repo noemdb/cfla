@@ -134,6 +134,7 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 | 2.7.4 | Acotar ANCHO de diagramas Mermaid grandes a media página en el PDF (`lessons-print.blade.php` director/profesor) | ✅ | Continuación del bug 2.7.3 (mismo contenido id 296, "El misterio de los símbolos perdidos"): tras acotar la ALTURA, el diagrama cabía en una página pero, como spanner E1 (`column-span:all`), seguía ocupando el ANCHO completo de la página horizontal (~790 pt) — demasiado ancho; el usuario pidió acotarlo a "máximo media página". **Fix (solo CSS de impresión, espejo de F1):** capa de ancho **G1** — `max-width` de escala en `.mermaid-wrap.mermaid-wide` dentro de `@media print` que limita el diagrama amplio a media página y lo centra (`margin-left/right:auto`). Cascada deliberada `pt`/`vw` (mismo patrón que F1): primero `max-width:350pt !important` (fallback universal, inambigüo en print) y después `max-width:50vw !important` (gana si el motor soporta `vw` en print y se adapta al ancho real del papel; 50vw = media página del page box). **Doble tope:** en el marco `.mermaid-wrap.mermaid-wide` Y en el `svg` interno — red de seguridad por si el motor no honrara `max-width` sobre un spanner de `column-span:all`. Los diagramas en columna ya caben en media página (columna ≈383pt < 50vw ≈421pt), así que el tope solo actúa sobre los amplios. Previsualización en pantalla: el `.mermaid-wrap` base gana `max-width:50vw` para mostrar el mismo tope que tendrá la impresión. Ver §5.5.4; 18 tests `DirectorLessonsPrintTest` (incluye el nuevo de regresión `director_print_bounds_mermaid_width_to_half_page`) + 28 `LessonsPrintTest` + 3 `DirectorReadOnlyTest` verdes. |
 | 2.7.5 | Botón "Ver / Imprimir" en el monitor LMS de Planificación + ruta `/app/planning/lms/print` (`monitor.blade.php` + `routes/web.php` + reuso de `LessonsPrintController`) | ✅ | Mismo botón "Ver / Imprimir" que el listado de la Dirección (2.7) en el monitor LMS de Planificación (`/app/planning/lms/monitor`, componente `LmsMonitor`): `<a href>` plano GET (sin `wire:click`, compatible read-only) hacia la ruta nueva `app.planning.lms.print` con los filtros activos del monitor (`pestudio/grado/seccion/profesor/asignatura/status/search`, vacíos descartados con `array_filter`) como query string, `target="_blank"`, misma clase teal e icono de impresora. **Reuso cross-módulo de `Director\LessonsPrintController`** (patrón espejo del ADR-005, que reusa `Planning\ActivityPdfController` en dirección): el mismo controlador sirve `/app/director/lecciones/print` (grupo `isDirector`) y `/app/planning/lms/print` (grupo `isPlanner`). Un planificador NO puede llegar a la ruta de la Dirección (`IsDirector` solo admite `is_director`) y viceversa (`IsPlanner` aborta 403), verificado por tests. El contexto del membrete se deduce del nombre de ruta (`str_contains($request->route()?->getName() ?? '', 'planning')`) → contexto `Planificación · Monitor LMS` y título `PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO`; el filtro `estado` (PUBLISHED/SCHEDULED/ARCHIVED) y el de `asignatura` se añadieron al controlador para el monitor (misma semántica que `LmsMonitor`). Ver §5.5.5 + ADR-006; 8 tests `LmsPrintTest` (acceso + membrete + filtros + botón con filtros activos + `target="_blank"` + read-only) + 33 tests de las suites director verdes. |
 | 2.7.6 | Enmarcar diagramas Mermaid DENTRO de su columna: eliminar el spanner E1 `column-span:all` y la heurística `mermaid-wide` (`lessons-print.blade.php` director/profesor + `DirectorLessonsPrintTest.php`) | ✅ | Bug 2.7.5 (usuario): los diagramas seguían ocupando mucho espacio porque la capa E1 (2.7.2) los sacaba del flujo de 2 columnas con `column-span:all` para cruzar la página como spanner; G1 (2.7.4) solo acotaba su ancho a media página, no los devolvía a la columna. **Fix:** se elimina por completo el mecanismo de diagrama ancho — regla CSS `.mermaid-wrap.mermaid-wide{column-span:all;-webkit-column-span:all}`, etiqueta `DIAGRAMA · VISTA AMPLIA` (::before), tope de altura wide `515pt/83vh`, topes de ancho `350pt/50vw` (marco + svg), la previsualización en pantalla `max-width:50vw` y la heurística Blade `$mermaidWide` (nodos≥12 \|\| flechas≥11 \|\| línea>55 chars). Todo diagrama queda **enmarcado en su columna**: el marco `.mermaid-wrap` (fondo/borde/padding) + `max-width:100% !important; height:auto !important` en el svg limitan el ancho al de la columna (~383pt) y `max-height:430pt/70vh` (J2, 2.7.3) limita el alto — el tope de columna es ahora el ÚNICO tope de altura. Aplicado en lockstep a la vista del profesor. Tests: `director_print_bounds_tall_mermaid_diagrams_to_one_page` recortado (sin 515pt/VISTA AMPLIA) y `director_print_bounds_mermaid_width_to_half_page` **renombrado** a `director_print_frames_mermaid_diagrams_within_column` (afirma marco + `max-width:100%` y ausencia de `column-span:all`/`mermaid-wide`/`VISTA AMPLIA`). Ver §5.5.6; 41 tests de impresión + read-only verdes (18 `DirectorLessonsPrintTest` + 12 `LessonsPrintTest` + 8 `LmsPrintTest` + 3 `DirectorReadOnlyTest`). |
+| 2.7.7 | Botón "Ver / Imprimir" en Liderazgo y Coordinación — **scope del módulo** (`lesson-monitor.blade.php` + `lesson-list.blade.php` + `LessonsPrintController.php` + `routes/web.php`) | ✅ | Mismo botón "Ver / Imprimir" (2.7) en el monitor de Liderazgo (`/app/leadership/lessons`, componente `LessonMonitor`) y en el listado de Coordinación (`/app/coordinacion/lecciones`, componente `LessonList`), cada uno hacia su ruta nueva de impresión (`app.leadership.lessons.print` / `app.coordinacion.lessons.print`). **Diferencia clave vs. 2.7/2.7.5:** la impresión respeta el **scope del módulo**, NO el global — Liderazgo vía `LeadershipService::scopeActivities()` (solo asignaturas de las áreas con `leader_id` = usuario) y Coordinación vía `CoordinacionScopeService::scopeActivities()` (solo pestudios de peducativos con `manager_id` = usuario y `planning_module=1`) + `whereHas('lmsPublication')` (mismo criterio que `LessonList` en render). El `match` de módulo del controlador pasa de 2 a 4 vías (`leadership`/`coordinacion`/`planning`/`director`); el membrete se adapta (`LIDERAZGO · …` / `COORDINACIÓN · …`). Ambos botones son `<a href>` planos GET (`target="_blank"`, sin `wire:click`): el de liderazgo convive como primer hijo del contenedor del toggle Grid/Tabla, el de coordinación junto al botón "Actualizar". El `status` del botón de liderazgo se deriva de los toggles `$filter_published`/`$filter_scheduled` (solo con EXACTAMENTE uno activo; ambos/ninguno → se omite, caso borde documentado). Ver §5.5.7 + ADR-006; 14 tests nuevos (7 `LeadershipLessonsPrintTest` + 7 `CoordinacionLessonsPrintTest`) + 29 de las suites director + 12 de scope verdes. |
 
 ---
 
@@ -1680,6 +1681,106 @@ y la ausencia de `column-span:all`, `mermaid-wide` y `DIAGRAMA · VISTA AMPLIA`)
 `director_print_bounds_tall_mermaid_diagrams_to_one_page` pierde las aserciones del
 spanner wide (`515pt/83vh`) y de la etiqueta.
 
+#### 5.5.7 Botón Ver/Imprimir en Liderazgo y Coordinación (scope del módulo, 2.7.7)
+
+El usuario pidió llevar el mismo botón "Ver / Imprimir" de la Dirección (2.7) y de la
+Planificación (2.7.5) a dos módulos de seguimiento más, con una **decisión de alcance
+explícita**: a diferencia de dirección/planning (scope global), la impresión de estos
+módulos **respeta el scope del módulo** — no es un subconjunto de la institución al azar,
+sino exactamente lo que cada rol supervisa.
+
+**Reuso cross-módulo de `Director\LessonsPrintController`** (extiende ADR-006): el mismo
+controlador sirve ahora a **cuatro** grupos de rutas y deduce el contexto y el scope por el
+nombre de la ruta:
+
+```php
+$routeName = $request->route()?->getName() ?? '';
+
+$module = match (true) {
+    str_contains($routeName, 'leadership')   => 'leadership',
+    str_contains($routeName, 'coordinacion') => 'coordinacion',
+    str_contains($routeName, 'planning')     => 'planning',
+    default                                  => 'director',
+};
+
+$query = match ($module) {
+    'leadership'   => app(\App\Services\Leadership\LeadershipService::class, ['user' => $request->user()])
+        ->scopeActivities(Activity::query()),
+    'coordinacion' => app(\App\Services\Lms\CoordinacionScopeService::class, ['user' => $request->user()])
+        ->scopeActivities(Activity::query()),
+    default => (new DirectorScopeService($request->user()))->queryActivities(),
+};
+
+// Mismo criterio que Coordinacion\LessonList (render): solo actividades con
+// publicación LMS. El monitor de Liderazgo NO lo aplica (muestra todas).
+if ($module === 'coordinacion') {
+    $query->whereHas('lmsPublication');
+}
+```
+
+- **Scope de liderazgo** (`LeadershipService::scopeActivities`): `whereHas('pevaluacion.pensum',
+  whereIn('asignatura_id', $asignaturaIds))` — sin join, compone trivialmente con los
+  `whereHas` de filtros del controlador. El líder imprime solo las lecciones de las
+  asignaturas de sus **áreas asignadas** (`AreaConocimiento.leader_id` = usuario).
+- **Scope de coordinación** (`CoordinacionScopeService::scopeActivities`): `JOIN pevaluacions +
+  pensums` + `select('activities.*')` + `whereIn('pensums.pestudio_id', $pestudioIds)`. El
+  coordinador imprime solo las lecciones de los pestudios de sus **peducativos gestionados**
+  (`Peducativo.manager_id` = usuario, `status_active` = true, `planning_module` = 1). Los
+  filtros del controlador son `whereHas` (subconsultas correlacionadas), no colisionan con
+  los joins; `finicial` solo existe en `activities`, así que `orderBy('finicial','desc')`
+  sigue siendo inambiguo. Vacíos (`$pestudioIds` = []) → `whereRaw('1 = 0')`.
+- **`whereHas('lmsPublication')` solo en coordinación:** replica el criterio "solo
+  actividades con publicación LMS" que ya aplica `Coordinacion\LessonList` en `render()`.
+  El monitor de Liderazgo muestra todas las actividades (publicadas o no), así que su
+  impresión no lo aplica — misma semántica que el componente de origen.
+- **Membrete 4 vías:** `'contexto'` y `'titulo'` se deducen del módulo →
+  `Liderazgo · Seguimiento de lecciones` / `LIDERAZGO · LECCIONES LMS · CONTENIDO COMPLETO`,
+  `Coordinación · Lecciones LMS` / `COORDINACIÓN · LECCIONES LMS · CONTENIDO COMPLETO` (los
+  de planning/director no cambian, 2.7.5/2.7).
+- **Caché y rol:** ambos scope services cachean 300 s por usuario (`CACHE_DRIVER=array` en
+  tests). El aislamiento de roles se conserva: cada grupo exige su middleware
+  (`IsLeadership` aborta 403 sin `is_leadership`; `IsCoordinacion` aborta 403 sin
+  `is_admin`/`is_coordinacion`).
+
+**Botón en el monitor de Liderazgo** (`leadership/lesson-monitor.blade.php`): `<a href>`
+plano GET (sin `wire:click`, compatible read-only) como **primer hijo del contenedor del
+toggle Grid/Tabla** (el contenedor gana `gap-2`). Lleva los filtros activos como query
+string — props **snake_case** del componente: `lapso`, `pestudio`, `grado`, `seccion`,
+`profesor`, `search` (vacíos descartados con `array_filter`). El `status` se deriva de los
+toggles `$filter_published`/`$filter_scheduled`:
+
+```php
+'status' => $filter_published && !$filter_scheduled ? 'PUBLISHED'
+         : ($filter_scheduled && !$filter_published ? 'SCHEDULED' : null),
+```
+
+**Caso borde del doble toggle (aceptado):** cuando AMBOS toggles están activos (o ninguno),
+el `status` se omite y la impresión muestra todas las lecciones del scope (el controlador
+compartido usa un único valor de status). Es una degradación de filtrado, no de seguridad.
+El botón NO lleva `$area_id` (prop declarada pero sin uso en la consulta de `LessonMonitor`).
+
+**Botón en el listado de Coordinación** (`coordinacion/lesson-list.blade.php`): `<a href>`
+plano GET **junto al botón "Actualizar"** de la cabecera. Lleva los filtros activos como
+query string — props **camelCase** del componente: `lapso`, `pestudio`, `profesor`, `status`
+(`$filterStatus`), `search` (vacíos descartados con `array_filter`). Sin toggles dobles: el
+`status` es un valor único del select.
+
+**Invariante read-only de la Dirección intacto:** la vista compartida
+`director/lessons-print.blade.php` no gana ningún control; ambos botones son `<a>` GET
+puros. `DirectorReadOnlyTest` y los invariantes de `LeadershipLessonsPrintTest`/
+`CoordinacionLessonsPrintTest` (sin `<form`, `wire:click`, `@csrf`…) verifican que el
+cambio no introduce escritura.
+
+**Verificación:** 14 tests nuevos (7 `LeadershipLessonsPrintTest` — acceso + scope por área
++ `asignatura`/`status` filters + botón con filtros activos + `target="_blank"` + invariante
+read-only; 7 `CoordinacionLessonsPrintTest` — acceso + scope por peducativo + exclusión sin
+publicación LMS + `status` filter + botón + `target="_blank"` + invariante) + 29 tests de
+las suites director (18 `DirectorLessonsPrintTest` + 8 `LmsPrintTest` + 3
+`DirectorReadOnlyTest`) + 12 de scope (6 `LeadershipScopeTest` + 6 `CoordinacionScopeTest`)
+verdes. Las lecciones fuera de alcance se crean PUBLICADAS para que el aislamiento quede
+probado por SCOPE y no por publicación; las excluidas por filtro se crean DENTRO del scope
+para que el filtro decida la exclusión.
+
 #### 5.6 Recursos Compartidos (read-only)
 
 ```php
@@ -1997,6 +2098,8 @@ Ejemplo (esqueleto) de `activity-list.blade.php`:
 | `/app/director/lecciones` | `IsDirector` | Global | Lecciones LMS | ❌ |
 | `/app/director/lecciones/print` | `IsDirector` | Global | Impresión Lecciones LMS (Mermaid/KaTeX en navegador) | ❌ |
 | `/app/planning/lms/print` | `IsPlanner` | Global | Impresión Lecciones LMS — reusa `Director\LessonsPrintController`, membrete Planificación (módulo planning, 2.7.5) | ❌ |
+| `/app/leadership/lessons/print` | `IsLeadership` | Áreas asignadas | Impresión Lecciones LMS — reusa `Director\LessonsPrintController`, scope del módulo `LeadershipService::scopeActivities` (2.7.7) | ❌ |
+| `/app/coordinacion/lecciones/print` | `IsCoordinacion` | Peducativos del coordinador | Impresión Lecciones LMS — reusa `Director\LessonsPrintController`, scope del módulo `CoordinacionScopeService::scopeActivities` + `whereHas('lmsPublication')` (2.7.7) | ❌ |
 | `/app/director/recursos` | `IsDirector` | Global | Recursos | ❌ |
 | `/app/director/profesores` | `IsDirector` | Global | KPIs docentes | ❌ |
 
@@ -2156,13 +2259,21 @@ test('todas las rutas de director son de solo lectura (GET)', function () {
 | **Razón** | El controlador es **read-only** (genera PDF), por lo que no viola el rol. Evita duplicar lógica de generación de PDF y mantiene un único punto de formato. Está protegido por el middleware `IsDirector` del grupo | |
 | **Consecuencia** | El director ve exactamente el mismo PDF que coordinación/leadership. Si el formato cambia, cambia en todos los módulos a la vez (sin merma de aislamiento, porque el PDF no es una acción de escritura) |
 
-### ADR-006: Reuso de `LessonsPrintController` por el monitor LMS de Planificación
+### ADR-006: Reuso de `LessonsPrintController` por los módulos de seguimiento (4 grupos de rutas)
+
+> **Actualización (2.7.7):** el controlador pasó de 2 a **4** módulos. Originalmente solo
+> distinguía `planning` de `director` (2.7.5); ahora el `match` tiene 4 vías
+> (`leadership` / `coordinacion` / `planning` / `director`) y, sobre todo, **el scope ya no
+> es siempre global**: dirección y planning supervisan TODA la institución
+> (`DirectorScopeService::queryActivities()`), mientras que liderazgo y coordinación
+> respetan el alcance del módulo (`LeadershipService::scopeActivities` / `CoordinacionScopeService::scopeActivities`),
+> y coordinación añade además `whereHas('lmsPublication')` (mismo criterio que su `LessonList`).
 
 | | Decisión | Alternativa |
 |--|----------|-------------|
-| **Selección** | La ruta `app.planning.lms.print` reutiliza `Director\LessonsPrintController::index()` (el mismo de `/app/director/lecciones/print`) | Controlador propio de impresión para planning |
-| **Razón** | El controlador es **read-only** (renderiza la vista de impresión; Mermaid/KaTeX se dibujan en el navegador) y comparte la MISMA semántica de filtros y el mismo scope global (`DirectorScopeService::queryActivities()`, sin filtro por usuario). Evita duplicar la preparación de lecciones y mantiene un único punto de formato. El contexto del membrete se deduce del nombre de ruta, y el aislamiento de roles se conserva porque cada grupo de rutas exige su propio middleware (`IsDirector` vs `IsPlanner`) | |
-| **Consecuencia** | La planificación ve exactamente la misma vista de impresión que la dirección (con membrete propio). Si el formato cambia, cambia en ambos módulos a la vez. Patrón espejo del ADR-005: allí el director reusaba `ActivityPdfController` de planning; aquí planning reusa un controlador de la Dirección. El rol del director no se diluye: la ruta de planning sigue exigiendo `is_planner` (un director sin `is_planner` no puede imprimirla) |
+| **Selección** | Las rutas `app.planning.lms.print`, `app.leadership.lessons.print` y `app.coordinacion.lecciones/print` reutilizan `Director\LessonsPrintController::index()` (el mismo de `/app/director/lecciones/print`); el módulo de origen, el membrete y el scope se deducen del nombre de ruta | Controlador propio de impresión por módulo |
+| **Razón** | El controlador es **read-only** (renderiza la vista de impresión; Mermaid/KaTeX se dibujan en el navegador) y comparte la MISMA semántica de filtros. Evita duplicar la preparación de lecciones y mantiene un único punto de formato. El scope por módulo se delega a los servicios de alcance ya existentes (`LeadershipService` / `CoordinacionScopeService`, ambos con caché por usuario), que ya son la fuente de verdad del módulo. El aislamiento de roles se conserva porque cada grupo de rutas exige su propio middleware (`IsDirector` vs `IsPlanner` vs `IsLeadership` vs `IsCoordinacion`) | |
+| **Consecuencia** | Los cuatro módulos ven exactamente la misma vista de impresión (con membrete y scope propios). Si el formato cambia, cambia en los cuatro a la vez. Patrón espejo del ADR-005: allí el director reusaba `ActivityPdfController` de planning; aquí planning/liderazgo/coordinación reusan un controlador de la Dirección. El rol del director no se diluye: cada ruta sigue exigiendo su propio rol (un director sin `is_planner`/`is_leadership`/`is_coordinacion` no puede imprimirla). El scope global de dirección/planning es un invariante existente que se preserva: los nuevos grupos (liderazgo/coordinación) aplican scope de módulo, nunca amplían el global |
 
 ---
 

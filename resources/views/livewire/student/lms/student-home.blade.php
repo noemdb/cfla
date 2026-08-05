@@ -146,54 +146,44 @@
     </section>
     @endif
 
-    {{-- 3. Upcoming Deadlines --}}
+    {{-- 3. Próximas publicaciones (publish_at = fecha más relevante para el estudiante) --}}
     @if($upcoming->isNotEmpty())
     <section>
         <div class="flex items-center gap-2 mb-4">
-            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Próximas Fechas Límite</h2>
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Próximas Publicaciones</h2>
         </div>
 
         <div class="space-y-2">
             @foreach($upcoming as $activity)
                 @php
-                    $ffinal = \Carbon\Carbon::parse($activity->ffinal);
-                    $daysLeft = now()->startOfDay()->diffInDays($ffinal->startOfDay(), false);
+                    $publishAt = $activity->lmsPublication?->publish_at;
+                    $daysLeft = $publishAt
+                        ? now()->startOfDay()->diffInDays($publishAt->copy()->startOfDay(), false)
+                        : null;
                 @endphp
                 <a href="{{ route('student.lms.activity', $activity) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-amber-500/30 transition-all duration-200">
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-sky-500/30 transition-all duration-200">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
-                            <div @class([
-                                'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
-                                'bg-red-500/10' => $daysLeft <= 1,
-                                'bg-amber-500/10' => $daysLeft > 1 && $daysLeft <= 3,
-                                'bg-gray-100 dark:bg-gray-700/50' => $daysLeft > 3,
-                            ])>
-                                <svg @class([
-                                    'w-4 h-4',
-                                    'text-red-400' => $daysLeft <= 1,
-                                    'text-amber-400' => $daysLeft > 1 && $daysLeft <= 3,
-                                    'text-gray-400' => $daysLeft > 3,
-                                ]) fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-sky-500/10">
+                                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors truncate">
                                         {{ $activity->topic ?? 'Actividad sin título' }}
                                     </p>
-                                    @if($activity->lmsPublication?->isPreviewToStudents())
-                                        <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30">
-                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                            Vista previa
-                                        </span>
-                                    @endif
+                                    <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Vista previa
+                                    </span>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                                     {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
@@ -202,18 +192,17 @@
                                 </p>
                             </div>
                         </div>
-                        <div @class([
-                            'shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full',
-                            'bg-red-500/10 text-red-400' => $daysLeft <= 1,
-                            'bg-amber-500/10 text-amber-400' => $daysLeft > 1 && $daysLeft <= 3,
-                            'bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400' => $daysLeft > 3,
-                        ])>
-                            @if($daysLeft <= 0)
-                                Vence hoy
+                        <div class="shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400">
+                            @if(!$publishAt)
+                                Próximamente
+                            @elseif($publishAt->isToday())
+                                Se publica hoy a las {{ $publishAt->format('H:i') }}
                             @elseif($daysLeft === 1)
-                                1 día restante
+                                Se publica mañana
+                            @elseif($daysLeft <= 7)
+                                Se publica en {{ $daysLeft }} días
                             @else
-                                {{ $daysLeft }} días rest.
+                                Se publica el {{ $publishAt->translatedFormat('j M') }}
                             @endif
                         </div>
                     </div>

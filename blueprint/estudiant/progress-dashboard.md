@@ -11,7 +11,7 @@ _Última revisión:_ 2026-07-30
 2. [Componente Livewire](#2-componente-livewire)
 3. [Sección 1: Stats Cards](#3-sección-1-stats-cards)
 4. [Sección 2: Continuar Aprendiendo](#4-sección-2-continuar-aprendiendo)
-5. [Sección 3: Próximas Fechas Límite](#5-sección-3-próximas-fechas-límite)
+5. [Sección 3: Próximas Publicaciones](#5-sección-3-próximas-publicaciones)
 6. [Sección 4: Distribución por Asignatura](#6-sección-4-distribución-por-asignatura)
 7. [Empty State](#7-empty-state)
 8. [Visibilidad y Scoping de Datos](#8-visibilidad-y-scoping-de-datos)
@@ -28,7 +28,7 @@ El Dashboard de Progreso es la página de inicio del área del estudiante (`/app
 
 - Dar al estudiante una vista rápida de **cuánto ha avanzado** en sus actividades
 - Mostrar **qué actividades visitó recientemente** para retomarlas
-- Alertar sobre **fechas de entrega próximas** con códigos de urgencia
+- Mostrar **próximas publicaciones** (lecciones que aún no se publican, con su fecha `publish_at`)
 - Visualizar la **distribución de progreso por asignatura**
 
 ### Arquitectura
@@ -43,7 +43,7 @@ StudentHome (Livewire full-page component)
 └── resources/views/livewire/student/lms/student-home.blade.php
     ├── Header + Stats Cards (grid 4-col)
     ├── Continue Learning (lista de interacciones)
-    ├── Upcoming Deadlines (lista con badges de urgencia)
+    ├── Próximas Publicaciones (lecciones por publicarse, badges a publish_at)
     ├── Subject Distribution (barras de progreso)
     └── Empty State (condicional)
 ```
@@ -245,33 +245,34 @@ Transiciones: `transition-all duration-200`
 
 ---
 
-## 5. Sección 3: Próximas Fechas Límite
+## 5. Sección 3: Próximas Publicaciones
+
+> **Decisión de diseño:** para el estudiante, `publish_at` es la fecha más relevante de la lección. `activity.ffinal` (fecha de cierre/corrección) generaba confusión, así que **desaparece de este panel**. La sección lista solo lecciones que aún **no** se han publicado (`publish_at` en el futuro), ordenadas por `publish_at` ascendente (la que se publica antes, primero). Las ya publicadas salen de la sección.
 
 ### Vista
 
 ```
-⏰ Próximas Fechas Límite
+⏰ Próximas Publicaciones
 
 ┌──────────────────────────────────────────────────────────────────────┐
-│ 🔴 [reloj red]    Trigonometría                       Matemática · │
-│                                                       L1          │
-│                                    ┌──────────────────────────────┐ │
-│                                    │ Vence hoy                    │ │
-│                                    └──────────────────────────────┘ │
+│ 🔵 [reloj sky]   Funciones cuadráticas              Matemática · L3 │
+│                                   ┌──────────────────────────────┐ │
+│                                   │ Se publica en 2 días         │ │
+│                                   └──────────────────────────────┘ │
 ├──────────────────────────────────────────────────────────────────────┤
-│ 🟡 [reloj amber]  Comprensión lectora                 Lenguaje ·   │
-│                                                       L2          │
-│                                    ┌──────────────────────────────┐ │
-│                                    │ 3 días rest.                 │ │
-│                                    └──────────────────────────────┘ │
+│ 🔵 [reloj sky]   Ecuaciones                        Matemática · L3 │
+│                                   ┌──────────────────────────────┐ │
+│                                   │ Se publica el 9 ago          │ │
+│                                   └──────────────────────────────┘ │
 ├──────────────────────────────────────────────────────────────────────┤
-│ ⚪ [reloj gray]   Ecuaciones lineares                 Matemática · │
-│                                                       L1          │
-│                                    ┌──────────────────────────────┐ │
-│                                    │ 12 días rest.                │ │
-│                                    └──────────────────────────────┘ │
+│ 🔵 [reloj sky]   Trigonometría                      Matemática · L1 │
+│                                   ┌──────────────────────────────┐ │
+│                                   │ Se publica hoy a las 16:00   │ │
+│                                   └──────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────────────┘
 ```
+
+*(Todas las filas son lecciones en vista previa: `PUBLISHED` con `publish_at` futuro. Ya no hay urgencia roja/ámbar ni countdown en este panel.)*
 
 ### Origen de datos
 
@@ -279,30 +280,44 @@ Transiciones: `transition-all duration-200`
 $upcoming = Activity::with([
     'pevaluacion.pensum.asignatura',   // Nombre de la materia
     'pevaluacion.lapso',               // Lapso (L1, L2, L3)
+    'lmsPublication',                  // Datos de publicación (publish_at)
 ])
-    ->whereIn('id', $visibleActivityIds)  // Solo actividades visibles
-    ->whereNotNull('ffinal')              // Tiene fecha de fin definida
-    ->where('ffinal', '>=', now()->subDay()) // No haya expirado (margen 1 día)
-    ->orderBy('ffinal', 'asc')            // Más urgente primero
-    ->take(5)                             // Máximo 5
+    ->whereIn('id', $visibleActivityIds)   // Solo actividades visibles
+    ->whereHas('lmsPublication', fn($q) => $q->where('publish_at', '>', now()))
+    ->orderBy(                             // Orden: la más próxima primero
+        LmsActivityPublication::select('publish_at')
+            ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+            ->orderByDesc('publish_at')
+            ->limit(1)
+    )
+    ->take(5)                              // Máximo 5
     ->get();
 ```
 
-### Indicador de urgencia (3 niveles)
+> El filtro `publish_at > now()` garantiza que solo aparezcan publicaciones futuras. Cada `activity_id` tiene a lo sumo una fila en `lms_activity_publications`, así que la subquery de orden es estable. Las lecciones ya publicadas (`publish_at <= now()`) siguen visibles en "Continuar Aprendiendo" y en el listado de lecciones, pero ya no aparecen aquí.
+
+### Badge de publicación (1 nivel, azul cielo)
 
 Calculado en el Blade con:
 
 ```php
-$ffinal = \Carbon\Carbon::parse($activity->ffinal);
-$daysLeft = now()->startOfDay()->diffInDays($ffinal->startOfDay(), false);
+$publishAt = $activity->lmsPublication?->publish_at;
+$daysLeft = $publishAt
+    ? now()->startOfDay()->diffInDays($publishAt->copy()->startOfDay(), false)
+    : null;
 ```
 
-| `$daysLeft` | Color del badge | Texto | Color del ícono | Clases del badge |
-|:-----------:|:---------------:|:------|:----------------:|:------------------|
-| ≤ 0 | 🔴 Rojo | "Vence hoy" | `text-red-400` | `bg-red-500/10 text-red-400` |
-| = 1 | 🔴 Rojo | "1 día restante" | `text-red-400` | `bg-red-500/10 text-red-400` |
-| 2-3 | 🟡 Ámbar | "X días rest." | `text-amber-400` | `bg-amber-500/10 text-amber-400` |
-| > 3 | ⚪ Gris | "X días rest." | `text-gray-400` | `bg-gray-100 dark:bg-gray-700/50 text-gray-500` |
+| Condición | Texto del badge |
+|:----------|:----------------|
+| `publish_at` es hoy | `Se publica hoy a las {H:i}` |
+| `daysLeft === 1` | `Se publica mañana` |
+| `daysLeft <= 7` | `Se publica en {X} días` |
+| `daysLeft > 7` | `Se publica el {j M}` (traducción `es`, ej. "Se publica el 9 ago") |
+| `publish_at` nulo (fallback) | `Próximamente` |
+
+- Badge e ícono siempre en azul cielo (`bg-sky-500/10 text-sky-400`); ya no hay niveles de urgencia.
+- Junto al título se muestra la etiqueta **"Vista previa"** (sky), igual que en "Continuar Aprendiendo".
+- El countdown es respecto a `publish_at`, **no** a `ffinal`.
 
 ### Estructura de cada fila
 
@@ -316,7 +331,7 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Hover: el borde cambia a `hover:border-amber-500/30` para todas las cards, independientemente del nivel de urgencia.
+Hover: el borde cambia a `hover:border-sky-500/30`.
 
 ---
 
@@ -490,7 +505,7 @@ Algunas queries **no** están scoped por sección:
 | `$commentsCount` | ❌ | Cuenta total de comentarios del estudiante |
 | `$downloadsCount` | ❌ | Cuenta total de descargas del estudiante |
 | `$recentLogs` | ✅ | Filtrado por `$visibleActivityIds` |
-| `$upcoming` | ✅ | Filtrado por `$visibleActivityIds` |
+| `$upcoming` | ✅ | Filtrado por `$visibleActivityIds` + `publish_at > now()` |
 | `$subjectDistribution` | ✅ | Calculado sobre `$visibleActivityIds` |
 
 **Nota:** Comments y Downloads son contadores globales del estudiante, no scoped a las actividades visibles. Esto es intencional — muestran la actividad total del estudiante en el sistema, no solo lo que está actualmente publicado.
@@ -572,15 +587,23 @@ LIMIT 10;
 
 Post-procesamiento PHP: `->unique('activity_id')->take(5)->values()`
 
-### Query 4: Próximas fechas límite
+### Query 4: Próximas publicaciones
 
 ```sql
 SELECT a.*
 FROM activities a
 WHERE a.id IN (?, ?, ...)
-  AND a.ffinal IS NOT NULL
-  AND a.ffinal >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-ORDER BY a.ffinal ASC
+  AND EXISTS (
+      SELECT 1 FROM lms_activity_publications p
+      WHERE p.activity_id = a.id
+        AND p.publish_at > NOW()
+  )
+ORDER BY (
+    SELECT p.publish_at FROM lms_activity_publications p
+    WHERE p.activity_id = a.id
+    ORDER BY p.publish_at DESC
+    LIMIT 1
+) ASC
 LIMIT 5;
 ```
 
@@ -603,4 +626,5 @@ Post-procesamiento PHP: `groupBy('asignatura')`, `map(completed/total)`, `sortBy
 
 | Fecha | Cambio | Autor |
 |-------|--------|-------|
+| 2026-08-05 | Sección 3 pasa a "Próximas Publicaciones": solo lecciones con `publish_at` futuro, ordenadas por `publish_at`; `ffinal` deja de usarse en el panel; badges a `publish_at` ("Se publica en X días" / "Se publica mañana" / "Se publica hoy a las H:i" / "Se publica el {j M}") | — |
 | 2026-07-30 | Creación inicial del documento | — |

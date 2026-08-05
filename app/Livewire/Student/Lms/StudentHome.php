@@ -3,7 +3,6 @@
 namespace App\Livewire\Student\Lms;
 
 use App\Models\app\Academy\Activity;
-use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
@@ -12,8 +11,8 @@ use WireUi\Traits\WireUiActions;
 
 class StudentHome extends Component
 {
-    use WireUiActions;
     use Concerns\HasStudentScope;
+    use WireUiActions;
 
     public function mount(): void
     {
@@ -32,7 +31,7 @@ class StudentHome extends Component
 
         $visibleActivityIds = Activity::whereIn('id', $publishedActivityIds)
             ->where('status', true)
-            ->whereHas('pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+            ->whereHas('pevaluacion', fn ($q) => $q->whereIn('seccion_id', $seccionIds))
             ->pluck('id');
 
         // ─── 1. Stats ──────────────────────────────────────────────
@@ -51,10 +50,10 @@ class StudentHome extends Component
             ->count();
 
         $stats = [
-            'total'       => $totalActivities,
-            'completed'   => $completedIds->count(),
-            'comments'    => $commentsCount,
-            'downloads'   => $downloadsCount,
+            'total' => $totalActivities,
+            'completed' => $completedIds->count(),
+            'comments' => $commentsCount,
+            'downloads' => $downloadsCount,
             'progress_pct' => $totalActivities > 0
                 ? round(($completedIds->count() / $totalActivities) * 100)
                 : 0,
@@ -76,16 +75,23 @@ class StudentHome extends Component
             ->take(5)
             ->values();
 
-        // ─── 3. Upcoming deadlines ─────────────────────────────────
+        // ─── 3. Próximas publicaciones ─────────────────────────────
+        // Para el estudiante, publish_at es la fecha más relevante de la
+        // lección: esta sección lista solo las que aún no se han publicado
+        // (publish_at futuro), ordenadas por la fecha de publicación.
         $upcoming = Activity::with([
             'pevaluacion.pensum.asignatura',
             'pevaluacion.lapso',
             'lmsPublication',
         ])
             ->whereIn('id', $visibleActivityIds)
-            ->whereNotNull('ffinal')
-            ->where('ffinal', '>=', now()->subDay())
-            ->orderBy('ffinal', 'asc')
+            ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '>', now()))
+            ->orderBy(
+                LmsActivityPublication::select('publish_at')
+                    ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                    ->orderByDesc('publish_at')
+                    ->limit(1)
+            )
             ->take(5)
             ->get();
 
@@ -96,20 +102,20 @@ class StudentHome extends Component
 
         $completedIdsArray = $completedIds->toArray();
         $subjectDistribution = $activities
-            ->groupBy(fn($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
-            ->map(fn($acts, $name) => [
-                'name'      => $name,
-                'total'     => $acts->count(),
-                'completed' => $acts->filter(fn($a) => in_array($a->id, $completedIdsArray))->count(),
+            ->groupBy(fn ($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
+            ->map(fn ($acts, $name) => [
+                'name' => $name,
+                'total' => $acts->count(),
+                'completed' => $acts->filter(fn ($a) => in_array($a->id, $completedIdsArray))->count(),
             ])
             ->values()
             ->sortByDesc('total')
             ->values();
 
         return view('livewire.student.lms.student-home', [
-            'stats'              => $stats,
-            'recentLogs'         => $recentLogs,
-            'upcoming'           => $upcoming,
+            'stats' => $stats,
+            'recentLogs' => $recentLogs,
+            'upcoming' => $upcoming,
             'subjectDistribution' => $subjectDistribution,
         ])->layout('student.layouts.app');
     }
