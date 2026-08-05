@@ -446,3 +446,243 @@
     $wire.$watch('registrationRange', () => { setTimeout(() => initDiagnosticsFlowChart(), 100); });
 </script>
 @endscript
+
+@script
+<script>
+    let activitiesChart = null;
+
+    async function initActivitiesChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('activities-per-day-chart');
+        if (!el) return;
+
+        if (activitiesChart) activitiesChart.destroy();
+
+        const rawData = await $wire.get('chartActivitiesByDay') ?? [];
+
+        activitiesChart = new window.ApexCharts(el, {
+            series: [{ name: 'Actividades', data: rawData }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+            },
+            colors: ['#10b981'],
+            stroke: { curve: 'smooth', width: 2 },
+            markers: {
+                size: 4,
+                colors: ['#10b981'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] },
+            },
+            xaxis: {
+                type: 'category',
+                labels: { style: window.flowChartColors.labelStyle },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: window.flowChartColors.labelStyle },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: { borderColor: window.flowChartColors.gridColor, strokeDashArray: 4 },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                y: { formatter: function(val) { return val + ' actividad(es)'; } },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        activitiesChart.render();
+    }
+
+    initActivitiesChart();
+    $wire.$watch('chartActivitiesByDay', () => initActivitiesChart());
+    $wire.$watch('selectedLapsoId', () => { setTimeout(() => initActivitiesChart(), 100); });
+</script>
+@endscript
+
+@script
+<script>
+    let lessonsChart = null;
+
+    async function initLessonsChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('lessons-per-day-chart');
+        if (!el) return;
+
+        if (lessonsChart) lessonsChart.destroy();
+
+        const rawData = await $wire.get('chartLessonsByDay') ?? [];
+        if (!rawData || !rawData.series) return;
+
+        lessonsChart = new window.ApexCharts(el, {
+            series: rawData.series,
+            chart: {
+                type: 'line',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+                dropShadow: {
+                    enabled: true,
+                    color: '#000',
+                    top: 10,
+                    left: 5,
+                    blur: 8,
+                    opacity: 0.3,
+                },
+            },
+            colors: ['#10b981', '#0ea5e9', '#f59e0b'],
+            dataLabels: {
+                enabled: true,
+                style: {
+                    colors: ['#e2e8f0', '#e2e8f0'],
+                    fontSize: '10px',
+                    fontWeight: 600,
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#0f172a',
+                    padding: 4,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                },
+                dropShadow: { enabled: false },
+            },
+            stroke: { curve: 'smooth', width: 2 },
+            markers: { size: 4, hover: { size: 6 } },
+            xaxis: {
+                categories: rawData.categories,
+                type: 'category',
+                labels: { style: window.flowChartColors.labelStyle },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: window.flowChartColors.labelStyle },
+                tickAmount: 5,
+                forceNiceScale: true,
+                min: 0,
+            },
+            grid: { borderColor: window.flowChartColors.gridColor, strokeDashArray: 4 },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                shared: true,
+                intersect: false,
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right',
+                labels: { colors: window.flowChartColors.labelStyle.colors },
+                fontSize: '11px',
+                markers: { width: 10, height: 10, radius: 2 },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        lessonsChart.render();
+    }
+
+    initLessonsChart();
+    $wire.$watch('chartLessonsByDay', () => initLessonsChart());
+    $wire.$watch('selectedLapsoId', () => { setTimeout(() => initLessonsChart(), 100); });
+</script>
+@endscript
+
+@script
+<script>
+    let scheduledChart = null;
+
+    async function initScheduledChart() {
+        if (window.loadApexCharts) await window.loadApexCharts();
+        if (!window.ApexCharts) return;
+
+        const el = document.getElementById('scheduled-per-day-chart');
+        if (!el) return;
+
+        if (scheduledChart) scheduledChart.destroy();
+
+        const rawData = await $wire.get('chartScheduledByDay') ?? [];
+
+        scheduledChart = new window.ApexCharts(el, {
+            series: [{ name: 'Programadas', data: rawData }],
+            chart: {
+                type: 'area',
+                height: 300,
+                toolbar: { show: false },
+                zoom: { enabled: false },
+                fontFamily: 'Inter, system-ui, sans-serif',
+                background: window.flowChartColors.chartBackground,
+            },
+            colors: ['#8b5cf6'],
+            stroke: { curve: 'smooth', width: 2 },
+            markers: {
+                size: 4,
+                colors: ['#8b5cf6'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: { size: 6 },
+            },
+            dataLabels: { enabled: false },
+            fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, inverseColors: false, opacityFrom: 0.5, opacityTo: 0, stops: [0, 90, 100] },
+            },
+            xaxis: {
+                type: 'category',
+                labels: { style: window.flowChartColors.labelStyle },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: {
+                labels: { style: window.flowChartColors.labelStyle },
+                tickAmount: 5,
+                forceNiceScale: true,
+            },
+            grid: { borderColor: window.flowChartColors.gridColor, strokeDashArray: 4 },
+            tooltip: {
+                theme: window.flowChartColors.tooltip.theme,
+                y: { formatter: function(val) { return val + ' programación(es)'; } },
+            },
+            noData: {
+                text: 'Sin datos para los filtros seleccionados',
+                align: 'center',
+                verticalAlign: 'middle',
+                style: { color: '#6b7280', fontSize: '13px' },
+            },
+        });
+
+        scheduledChart.render();
+    }
+
+    initScheduledChart();
+    $wire.$watch('chartScheduledByDay', () => initScheduledChart());
+    $wire.$watch('selectedLapsoId', () => { setTimeout(() => initScheduledChart(), 100); });
+</script>
+@endscript

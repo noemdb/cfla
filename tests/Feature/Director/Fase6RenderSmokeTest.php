@@ -52,10 +52,24 @@ class Fase6RenderSmokeTest extends TestCase
             ->assertSet('chartLessonsFlow', $component->get('chartLessonsFlow'))
             ->assertSet('chartDiagnosticsFlow', $component->get('chartDiagnosticsFlow'));
 
+        // Los charts por día (filtrados por lapso) también deben cargar.
+        $component->assertSet('chartActivitiesByDay', $component->get('chartActivitiesByDay'))
+            ->assertSet('chartScheduledByDay', $component->get('chartScheduledByDay'));
+        $lessons = $component->get('chartLessonsByDay');
+        $this->assertIsArray($lessons);
+        $this->assertArrayHasKey('categories', $lessons);
+        $this->assertArrayHasKey('series', $lessons);
+
         // Al cambiar el rango, el updated hook recalcula sin errores.
         $component->set('registrationRange', 'all')
             ->assertSet('registrationRange', 'all')
             ->assertOk();
+
+        // Al cambiar el lapso, los charts por día se recalculan sin errores.
+        if ($component->get('lapsos')->isNotEmpty()) {
+            $lapsoId = $component->get('lapsos')->first()->id;
+            $component->set('selectedLapsoId', $lapsoId)->assertOk();
+        }
 
         $this->assertTrue(true);
     }
