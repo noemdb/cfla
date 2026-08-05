@@ -86,12 +86,35 @@
     </div>
 
     {{-- View Mode Toggle (Grid / Table) — seccion pattern --}}
-    <div class="flex items-center justify-end mb-4"
+    <div class="flex items-center justify-end gap-2 mb-4"
          x-data="{ mode: localStorage.getItem('lessons-view-mode') || 'table' }"
          x-init="$watch('mode', val => {
              localStorage.setItem('lessons-view-mode', val);
              window.dispatchEvent(new CustomEvent('lessons-view-mode-changed', { detail: { mode: val } }))
          })">
+
+        {{-- Ver/Imprimir: página de impresión de lecciones LMS (Mermaid renderizado en
+             el navegador). Lleva los filtros activos como query string; el scope del
+             jefe (áreas asignadas) lo aplica el controlador vía nombre de ruta. --}}
+        <a href="{{ route('app.leadership.lessons.print', array_filter([
+                'lapso'    => $lapso_id ?: null,
+                'pestudio' => $pestudio_id ?: null,
+                'grado'    => $grado_id ?: null,
+                'seccion'  => $seccion_id ?: null,
+                'profesor' => $profesor_id ?: null,
+                'status'   => $filter_published && !$filter_scheduled ? 'PUBLISHED'
+                             : ($filter_scheduled && !$filter_published ? 'SCHEDULED' : null),
+                'search'   => $search ?: null,
+            ])) }}"
+            target="_blank"
+            title="Ver todas las lecciones en una página de impresión (Mermaid renderizado en el navegador)"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 text-teal-400 transition-all duration-200 text-[10px] font-bold hover:bg-teal-500/20">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            <span class="hidden sm:inline">Ver / Imprimir</span>
+        </a>
+
         <div class="inline-flex items-center bg-gray-900/40 border border-white/5 rounded-lg p-0.5 gap-0.5">
             <button @click="mode = 'grid'"
                 :class="mode === 'grid' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-transparent text-gray-500 hover:text-gray-300'"

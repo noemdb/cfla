@@ -285,6 +285,13 @@ Route::prefix('app')->name('app.')->group(function () {
         Route::get('/lecciones', \App\Livewire\Coordinacion\LessonList::class)
             ->name('lessons');
 
+        // Impresión de lecciones LMS: reusa Director\LessonsPrintController; el
+        // scope (peducativos del coordinador) lo deduce el controlador por el
+        // nombre de ruta (patrón ADR-006).
+        Route::get('/lecciones/print', [
+            \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+        ])->name('lessons.print');
+
         Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
             ->name('resources');
     });
@@ -311,6 +318,13 @@ Route::prefix('app')->name('app.')->group(function () {
             // Lecciones LMS por área
             Route::get('/lessons', \App\Livewire\Leadership\LessonMonitor::class)
                 ->name('lessons');
+
+            // Impresión de lecciones LMS: reusa Director\LessonsPrintController;
+            // el scope (áreas asignadas al jefe) lo deduce el controlador por el
+            // nombre de ruta (patrón ADR-006).
+            Route::get('/lessons/print', [
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+            ])->name('lessons.print');
 
             // Vista previa de actividad LMS (independiente del módulo planning)
             Route::get('/lms/activity/{activity}/preview', function (\App\Models\app\Academy\Activity $activity) {

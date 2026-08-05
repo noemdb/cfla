@@ -14,6 +14,25 @@
                 </svg>
                 <span class="hidden sm:inline">Actualizar</span>
             </button>
+
+            {{-- Ver/Imprimir: página de impresión de lecciones LMS (Mermaid renderizado en
+                 el navegador). Lleva los filtros activos como query string; el scope del
+                 coordinador (peducativos) lo aplica el controlador vía nombre de ruta. --}}
+            <a href="{{ route('app.coordinacion.lessons.print', array_filter([
+                    'lapso'    => $lapsoId ?: null,
+                    'pestudio' => $pestudioId ?: null,
+                    'profesor' => $profesorId ?: null,
+                    'status'   => $filterStatus ?: null,
+                    'search'   => $search ?: null,
+                ])) }}"
+                target="_blank"
+                title="Ver todas las lecciones en una página de impresión (Mermaid renderizado en el navegador)"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 text-teal-400 transition-all duration-200 text-[10px] font-bold hover:bg-teal-500/20">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                <span class="hidden sm:inline">Ver / Imprimir</span>
+            </a>
         </div>
     </div>
 

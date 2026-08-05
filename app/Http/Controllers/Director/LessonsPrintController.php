@@ -7,6 +7,8 @@ use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Entity\Institucion;
 use App\Services\Director\DirectorScopeService;
+use App\Services\Leadership\LeadershipService;
+use App\Services\Lms\CoordinacionScopeService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,27 +19,57 @@ class LessonsPrintController extends Controller
      * de origen está visualizando, respetando los filtros activos (misma
      * semántica que LessonList / LmsMonitor).
      *
-     * Compartido entre dos módulos read-only de supervisión global:
-     *   - Dirección:  /app/director/lecciones/print   (grupo isDirector)
-     *   - Planificación: /app/planning/lms/print      (grupo isPlanner)
-     * En ambos el scope es DirectorScopeService::queryActivities() (sin filtro
-     * por usuario: se supervisa TODA la institución) y los filtros de profesor,
-     * asignatura y estado son opcionales (donde se decida acotar). El membrete
-     * de la vista se adapta al módulo de origen vía nombre de ruta.
+     * Compartido entre cuatro módulos read-only; el contexto y el scope se
+     * deducen del nombre de ruta (patrón ADR-006):
+     *   - Dirección:  /app/director/lecciones/print        (grupo isDirector)
+     *   - Planificación: /app/planning/lms/print           (grupo isPlanner)
+     *   - Liderazgo:  /app/leadership/lessons/print        (grupo isLeadership)
+     *   - Coordinación: /app/coordinacion/lecciones/print  (grupo isCoordinacion)
+     * Dirección y Planificación supervisan TODA la institución
+     * (DirectorScopeService::queryActivities(), sin filtro por usuario);
+     * Liderazgo y Coordinación respetan el scope del módulo
+     * (LeadershipService::scopeActivities() → áreas asignadas;
+     * CoordinacionScopeService::scopeActivities() → peducativos gestionados
+     * con planning_module, y solo actividades con publicación LMS).
+     * Los filtros de profesor, asignatura y estado son opcionales (donde se
+     * decida acotar). El membrete de la vista se adapta al módulo de origen.
      * Los diagramas Mermaid y las matemáticas se renderizan en el navegador
      * (mermaid.js / KaTeX), por lo que el PDF generado con "Imprimir" los
      * incluye ya dibujados.
      */
     public function index(Request $request): View
     {
-        $service = new DirectorScopeService($request->user());
+        // Módulo de origen (reuso cross-módulo, patrón ADR-006): el controlador
+        // sirve a cuatro grupos de rutas y deduce el contexto/scope por el
+        // nombre de la ruta.
+        $routeName = $request->route()?->getName() ?? '';
+        $module = match (true) {
+            str_contains($routeName, 'leadership')   => 'leadership',
+            str_contains($routeName, 'coordinacion') => 'coordinacion',
+            str_contains($routeName, 'planning')     => 'planning',
+            default                                  => 'director',
+        };
 
-        // Contexto del membrete: el mismo controlador sirve a la Dirección y al
-        // monitor LMS de Planificación (reuso cross-módulo, patrón ya usado con
-        // Planning\ActivityPdfController desde el grupo director).
-        $isPlanning = str_contains($request->route()?->getName() ?? '', 'planning');
+        // Scope: Dirección y Planificación supervisan TODA la institución;
+        // Liderazgo y Coordinación respetan el alcance del módulo (áreas
+        // asignadas / peducativos gestionados). Los `with([...])` de abajo se
+        // encadenan tras el scope.
+        $query = match ($module) {
+            'leadership'   => app(LeadershipService::class, ['user' => $request->user()])
+                ->scopeActivities(Activity::query()),
+            'coordinacion' => app(CoordinacionScopeService::class, ['user' => $request->user()])
+                ->scopeActivities(Activity::query()),
+            default => (new DirectorScopeService($request->user()))->queryActivities(),
+        };
 
-        $query = $service->queryActivities()->with([
+        // Mismo criterio que Coordinacion\LessonList (render): solo actividades
+        // con publicación LMS. El monitor de Liderazgo NO lo aplica (muestra
+        // todas las del scope, con o sin publicación).
+        if ($module === 'coordinacion') {
+            $query->whereHas('lmsPublication');
+        }
+
+        $query->with([
             'pevaluacion' => fn ($q) => $q->with([
                 'profesor:id,name,lastname',
                 'seccion.grado',
@@ -128,11 +160,19 @@ class LessonsPrintController extends Controller
             'filterLabels'
         ) + [
             'fecha'    => now()->isoFormat('DD [de] MMMM [de] YYYY'),
-            // Membrete según el módulo de origen (Dirección vs. Planificación).
-            'contexto' => $isPlanning ? 'Planificación · Monitor LMS' : 'Dirección',
-            'titulo'   => $isPlanning
-                ? 'PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO'
-                : 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+            // Membrete según el módulo de origen (4 vías).
+            'contexto' => match ($module) {
+                'leadership'   => 'Liderazgo · Seguimiento de lecciones',
+                'coordinacion' => 'Coordinación · Lecciones LMS',
+                'planning'     => 'Planificación · Monitor LMS',
+                default        => 'Dirección',
+            },
+            'titulo' => match ($module) {
+                'leadership'   => 'LIDERAZGO · LECCIONES LMS · CONTENIDO COMPLETO',
+                'coordinacion' => 'COORDINACIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+                'planning'     => 'PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+                default        => 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+            },
         ]);
     }
 
