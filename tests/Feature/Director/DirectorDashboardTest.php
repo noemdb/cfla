@@ -5,6 +5,7 @@ namespace Tests\Feature\Director;
 use App\Livewire\Director\CargaAcademicaList;
 use App\Livewire\Director\IndicatorDashboard;
 use App\Livewire\Director\ProfesorIndicators;
+use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
@@ -15,6 +16,7 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -77,6 +79,31 @@ class DirectorDashboardTest extends TestCase
             Profesor::where('status_active', 'true')->whereHas('pevaluacions')->count(),
             (int) $component->get('totalProfesoresActivos')
         );
+    }
+
+    public function test_dashboard_counts_lessons_registered(): void
+    {
+        $user = User::factory()->director()->create();
+        $profesor = $this->makeProfesorConCarga('LESS1');
+
+        $peva = Pevaluacion::where('profesor_id', $profesor->id)->firstOrFail();
+        $lapsoId = $peva->lapso_id;
+
+        // Lección registrada sobre la carga del fixture.
+        Activity::factory()->create(['pevaluacion_id' => $peva->id]);
+
+        $component = Livewire::actingAs($user)->test(IndicatorDashboard::class);
+        $component->set('selectedLapsoId', $lapsoId);
+
+        // El KPI "Lecciones" cuenta actividades del lapso, en toda la institución
+        // (cada actividad cuenta una vez, aunque tenga publicación LMS).
+        $expected = Activity::join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->count(DB::raw('DISTINCT activities.id'));
+
+        $this->assertGreaterThanOrEqual(1, $expected, 'El fixture debe aportar al menos una lección.');
+        $this->assertSame($expected, (int) $component->get('totalLessons'));
     }
 
     public function test_carga_academica_lists_pevaluacions_of_whole_institution(): void

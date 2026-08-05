@@ -22,7 +22,7 @@ class IndicatorDashboard extends Component
     public $totalPensums = 0;
     public $totalActivities = 0;
     public $totalProfesoresActivos = 0;
-    public $totalPevaluacions = 0;
+    public $totalLessons = 0;
     public $totalResources = 0;
 
     // ─── KPIs por Peducativo ───
@@ -64,9 +64,16 @@ class IndicatorDashboard extends Component
         $service = $this->getDirectorService();
 
         $this->totalPensums = $service->queryPensums()->count();
-        $this->totalPevaluacions = $service->queryPevaluacions()
-            ->when($this->selectedLapsoId, fn($q) => $q->where('lapso_id', $this->selectedLapsoId))
-            ->count();
+
+        // Lecciones registradas (actividades) del lapso seleccionado, en toda
+        // la institución. Mismo criterio que los dashboards de coordinación y
+        // liderazgo: cada actividad cuenta una vez aunque tenga publicación LMS.
+        $this->totalLessons = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->when($this->selectedLapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $this->selectedLapsoId))
+            ->whereNull('pevaluacions.deleted_at')
+            ->count(DB::raw('DISTINCT activities.id'));
         $this->totalActivities = $service->queryActivities()->count();
         $this->totalProfesoresActivos = $service->queryProfesores()->count();
         $this->totalResources = $service->queryResources()->count();

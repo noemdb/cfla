@@ -13,6 +13,7 @@ class PensumList extends Component
 
     public string $search = '';
     public $peducativoId = '';
+    public $paginate = 10;
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -41,7 +42,22 @@ class PensumList extends Component
             });
         }
 
-        $pensums = $query->orderBy('pestudio_id')->paginate(20);
+        $query->orderBy('pestudio_id');
+
+        if ((int) $this->paginate === 9999) {
+            // "Todos": entrega todos los registros en una sola página
+            // (mismo comportamiento que el módulo de planificación).
+            $all = $query->get();
+            $pensums = new \Illuminate\Pagination\LengthAwarePaginator(
+                $all,
+                $all->count(),
+                max($all->count(), 1),
+                1,
+                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            );
+        } else {
+            $pensums = $query->paginate($this->paginate);
+        }
         $peducativos = $service->queryPeducativos()->get();
 
         return view('livewire.director.pensum-list', [
@@ -52,4 +68,5 @@ class PensumList extends Component
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingPeducativoId() { $this->resetPage(); }
+    public function updatedPaginate() { $this->resetPage(); }
 }

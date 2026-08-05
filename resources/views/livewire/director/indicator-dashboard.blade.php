@@ -34,8 +34,8 @@
             <p class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">{{ $totalPensums }}</p>
         </div>
         <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/5 dark:bg-gray-900">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Evaluaciones</p>
-            <p class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">{{ $totalPevaluacions }}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Lecciones</p>
+            <p class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">{{ $totalLessons }}</p>
         </div>
         <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/5 dark:bg-gray-900">
             <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Actividades</p>
@@ -48,6 +48,40 @@
         <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/5 dark:bg-gray-900">
             <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Profesores</p>
             <p class="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">{{ $totalProfesoresActivos }}</p>
+        </div>
+    </div>
+
+    {{-- Indicadores por Peducativo --}}
+    <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-white/5 dark:bg-gray-900">
+        <div class="px-5 py-4 border-b border-gray-200 dark:border-white/5">
+            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Indicadores por Peducativo</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Carga, actividades y profesores por unidad educativa</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-200 dark:border-white/5">
+                        <th class="px-5 py-3">Peducativo</th>
+                        <th class="px-5 py-3">Pensums</th>
+                        <th class="px-5 py-3">Actividades</th>
+                        <th class="px-5 py-3">Profesores</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($peducativoIndicators as $item)
+                        <tr class="border-b border-gray-100 last:border-0 dark:border-white/5">
+                            <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $item->peducativo->name }}</td>
+                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->pensums_count }}</td>
+                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->activities_count }}</td>
+                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->profesores_count }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-5 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Sin datos para el lapso seleccionado.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -178,40 +212,6 @@
                     <div id="scheduled-per-day-chart" class="w-full" style="min-height: 250px;"></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    {{-- Indicadores por Peducativo --}}
-    <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-white/5 dark:bg-gray-900">
-        <div class="px-5 py-4 border-b border-gray-200 dark:border-white/5">
-            <h2 class="text-sm font-bold text-gray-900 dark:text-white">Indicadores por Peducativo</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Carga, actividades y profesores por unidad educativa</p>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="text-left text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-200 dark:border-white/5">
-                        <th class="px-5 py-3">Peducativo</th>
-                        <th class="px-5 py-3">Pensums</th>
-                        <th class="px-5 py-3">Actividades</th>
-                        <th class="px-5 py-3">Profesores</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($peducativoIndicators as $item)
-                        <tr class="border-b border-gray-100 last:border-0 dark:border-white/5">
-                            <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $item->peducativo->name }}</td>
-                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->pensums_count }}</td>
-                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->activities_count }}</td>
-                            <td class="px-5 py-3 text-gray-600 dark:text-gray-300">{{ $item->profesores_count }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-5 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Sin datos para el lapso seleccionado.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 
