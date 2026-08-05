@@ -56,4 +56,11 @@ class UserFactory extends Factory
             'is_coordinacion' => true,
         ]);
     }
+
+    public function director(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_director' => true,
+        ]);
+    }
 }

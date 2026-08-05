@@ -53,4 +53,23 @@ class DirectorReadOnlyTest extends TestCase
             $this->assertNotContains('DELETE', $route->methods());
         }
     }
+
+    /**
+     * La vista de actividades del director es de SOLO VISUALIZACIÓN:
+     * no debe contener <form> ni wire:submit (envíos de escritura) ni
+     * wire:click que dispare métodos de mutación del componente.
+     */
+    public function test_activity_list_view_has_no_write_controls(): void
+    {
+        $source = file_get_contents(
+            resource_path('views/livewire/director/activity-list.blade.php')
+        );
+
+        $this->assertStringNotContainsString('<form', $source);
+        $this->assertStringNotContainsString('</form>', $source);
+        $this->assertStringNotContainsString('wire:submit', $source);
+        $this->assertStringNotContainsString('wire:click', $source);
+        $this->assertStringNotContainsString('method="post"', $source);
+        $this->assertStringNotContainsString('@csrf', $source);
+    }
 }

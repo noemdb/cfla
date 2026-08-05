@@ -108,9 +108,9 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 | 5. Livewire Components | ✅ | 7 clases creadas (verbatim spec, líneas 736–1194). `php -l` OK; sin métodos `save*`/`store*`/`editObservations`/`cancelEdit`. Render confirmado por smoke test Fase 6: las 7 rutas → 200. | 7 componentes renderizan sin error |
 | 6. Nav y Vistas | ✅ | Navbar desktop+mobile con prefijo `app.`, layout `director/layouts/app.blade.php`, 7 vistas read-only. Verif post: grep `<form|wire:submit|method="post"` → sin salida. Smoke test 7 rutas GET → 200. Bug fijo: `route()` sin prefijo `app.` en activity-list; `'activity.topic'` removido de `with()` (columna, no relación). | navbar muestra submenú Dirección |
 | 7. Seguridad read-only | ✅ | `DirectorReadOnlyTest.php`: reflexión sobre `DirectorScopeService` (sin save/update/store/create/approve/comment/observe...) + auditoría de rutas registradas (sin POST/PUT/PATCH/DELETE) → 2 passed (48 aserciones). Verif post `route:list --name=director`: 9 rutas `GET|HEAD`, cero verbos no-GET. Nota: el grep literal del spec `\sGET\s` no matchea `GET|HEAD` (GET va seguido de `|`), se audita con `grep -iE "POST|PUT|PATCH|DELETE"` → sin salida. | test de reflexión sin métodos save* |
-| 8. Testing | ⬜ | — | `php artisan test` verde global |
+| 8. Testing | ✅ | Estado `director()` en UserFactory (spec §8.3 verbatim); DirectorMiddlewareTest ×3 (200 / 403 / admin-bypass vía `getIsDirectorAttribute`); DirectorScopeTest ×4 (queryPensums sin filtro, queryProfesores activos-con-carga, factory state, role_label 'Dirección'); DirectorDashboardTest ×3 (KPIs de toda la institución, carga académica, profesores); DirectorReadOnlyTest ×3 (+ vista activity-list sin `<form>` ni `wire:click`). Suite completa: 216 passed, 0 failed, sin SKIP. | 13 tests, suite verde global |
 
-**Siguiente fase a ejecutar:** FASE 8 (Testing). Fases 1–7 verificadas y verdes.
+**Siguiente fase a ejecutar:** No hay — las 8 fases del spec están completas y verificadas (216 tests verdes).
 
 ---
 

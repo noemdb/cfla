@@ -28,6 +28,17 @@ class IndicatorDashboard extends Component
     // ─── KPIs por Peducativo ───
     public $peducativoIndicators = [];
 
+    // ─── Registración flow charts (global, con rango de fechas) ───
+    public $registrationRange = '7d';
+    public $chartActivitiesFlow = [];
+    public $chartLessonsFlow = [];
+    public $chartDiagnosticsFlow = [];
+
+    // ─── Charts por día (filtrados por lapso, alcance institucional) ───
+    public $chartActivitiesByDay = [];
+    public $chartLessonsByDay = [];
+    public $chartScheduledByDay = [];
+
     public function mount(): void
     {
         $this->initializeHasDirectorScope();
@@ -40,6 +51,7 @@ class IndicatorDashboard extends Component
         $this->totalPeducativos = $service->queryPeducativos()->count();
 
         $this->loadIndicators();
+        $this->loadRegistrationFlowCharts();
     }
 
     public function updatedSelectedLapsoId(): void
@@ -79,6 +91,238 @@ class IndicatorDashboard extends Component
                         ->count('profesors.id'),
                 ];
             });
+
+        // Charts por día (filtrados por lapso, alcance institucional)
+        $this->loadChartActivitiesByDay();
+        $this->loadChartLessonsByDay();
+        $this->loadChartScheduledByDay();
+    }
+
+    /**
+     * Actividades registradas por día (agrupadas por activities.finicial),
+     * para el lapso seleccionado y toda la institución (scope global del rol).
+     */
+    private function loadChartActivitiesByDay(): void
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartActivitiesByDay = [];
+            return;
+        }
+
+        $this->chartActivitiesByDay = Activity::selectRaw('activities.finicial, COUNT(*) as total')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->groupBy('activities.finicial')
+            ->orderBy('activities.finicial')
+            ->get()
+            ->map(fn ($row) => [
+                'x' => $row->finicial,
+                'y' => (int) $row->total,
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Lecciones registradas por día. Tres series: Publicadas (por published_at),
+     * Programadas (por publish_at, no publicadas) y Borradores (sin publicación).
+     * Filtrado por lapso y toda la institución.
+     */
+    private function loadChartLessonsByDay(): void
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartLessonsByDay = [];
+            return;
+        }
+
+        $scope = function ($query) use ($lapsoId) {
+            return $query
+                ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+                ->where('pevaluacions.lapso_id', $lapsoId)
+                ->whereNull('pevaluacions.deleted_at');
+        };
+
+        // Serie 1: Publicadas (status = 'PUBLISHED', por published_at)
+        $published = $scope(
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        )
+            ->where('lms_activity_publications.status', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.published_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Serie 2: Programadas (publish_at NOT NULL, status != 'PUBLISHED')
+        $scheduled = $scope(
+            Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        )
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->where('lms_activity_publications.status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.publish_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Serie 3: Borradores (publish_at NULL, status != 'PUBLISHED' O null)
+        $drafts = $scope(
+            Activity::query()->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        )
+            ->whereNull('lms_activity_publications.publish_at')
+            ->where(function ($q) {
+                $q->whereNull('lms_activity_publications.status')
+                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+            })
+            ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $allDates = collect(array_merge(
+            $published->keys()->toArray(),
+            $scheduled->keys()->toArray(),
+            $drafts->keys()->toArray()
+        ))->unique()->sort()->values();
+
+        $this->chartLessonsByDay = [
+            'categories' => $allDates->toArray(),
+            'series'     => [
+                ['name' => 'Publicadas', 'data' => $allDates->map(fn ($d) => (int) ($published[$d]->total ?? 0))->toArray()],
+                ['name' => 'Programadas', 'data' => $allDates->map(fn ($d) => (int) ($scheduled[$d]->total ?? 0))->toArray()],
+                ['name' => 'Borradores', 'data' => $allDates->map(fn ($d) => (int) ($drafts[$d]->total ?? 0))->toArray()],
+            ],
+        ];
+    }
+
+    /**
+     * Publicaciones programadas por día (por publish_at), para el lapso
+     * seleccionado y toda la institución (scope global del rol).
+     */
+    private function loadChartScheduledByDay(): void
+    {
+        $lapsoId = $this->selectedLapsoId;
+        if (!$lapsoId) {
+            $this->chartScheduledByDay = [];
+            return;
+        }
+
+        $this->chartScheduledByDay = DB::query()
+            ->from('lms_activity_publications')
+            ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
+            ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+            ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+            ->where('pevaluacions.lapso_id', $lapsoId)
+            ->whereNull('pevaluacions.deleted_at')
+            ->whereNotNull('lms_activity_publications.publish_at')
+            ->selectRaw('DATE(lms_activity_publications.publish_at) as pub_date, COUNT(*) as total')
+            ->groupByRaw('DATE(lms_activity_publications.publish_at)')
+            ->orderBy('pub_date')
+            ->get()
+            ->map(fn ($row) => [
+                'x' => $row->pub_date,
+                'y' => (int) $row->total,
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Carga los charts de flujo de registros (actividades/lecciones/diagnósticos).
+     * Alcance global de toda la institución (igual que el rol planificación);
+     * no se filtra por lapso. Usa el rango seleccionado en $this->registrationRange.
+     */
+    public function updatedRegistrationRange(): void
+    {
+        $this->loadRegistrationFlowCharts();
+    }
+
+    private function loadRegistrationFlowCharts(): void
+    {
+        $since = match ($this->registrationRange) {
+            '7d'  => now()->subDays(7)->startOfDay(),
+            '30d' => now()->subDays(30)->startOfDay(),
+            '3m'  => now()->subMonths(3)->startOfDay(),
+            'all' => null,
+            default => now()->subDays(7)->startOfDay(),
+        };
+
+        // ── Actividades por fecha de creación ──
+        $query = Activity::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date');
+        if ($since) {
+            $query->where('created_at', '>=', $since);
+        }
+        $this->chartActivitiesFlow = $query->get()->map(fn ($r) => [
+            'x' => $r->date,
+            'y' => (int) $r->total,
+        ])->toArray();
+
+        // ── Lecciones (publicadas / programadas / borradores, por fecha) ──
+        $merged = collect();
+
+        // Publicadas (por published_at)
+        $pubQuery = DB::table('lms_activity_publications')
+            ->where('status', 'PUBLISHED')
+            ->whereNotNull('published_at')
+            ->selectRaw('DATE(published_at) as date, COUNT(*) as total')
+            ->groupBy('date');
+        if ($since) $pubQuery->where('published_at', '>=', $since);
+        foreach ($pubQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        // Programadas (por publish_at, no publicadas)
+        $schQuery = DB::table('lms_activity_publications')
+            ->whereNotNull('publish_at')
+            ->where('status', '!=', 'PUBLISHED')
+            ->selectRaw('DATE(publish_at) as date, COUNT(*) as total')
+            ->groupBy('date');
+        if ($since) $schQuery->where('publish_at', '>=', $since);
+        foreach ($schQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        // Borradores (actividades sin registro de publicación, por fecha de creación)
+        $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+            ->whereNull('lms_activity_publications.publish_at')
+            ->where(function ($q) {
+                $q->whereNull('lms_activity_publications.status')
+                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+            })
+            ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
+            ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
+            ->orderBy('date');
+        if ($since) {
+            $drfQuery->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since]);
+        }
+        foreach ($drfQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
+
+        $this->chartLessonsFlow = $merged
+            ->groupBy('date')
+            ->map(fn ($items, $date) => ['x' => $date, 'y' => $items->sum('total')])
+            ->sortBy('x')
+            ->values()
+            ->toArray();
+
+        // ── Diagnósticos por fecha de creación (sesiones) ──
+        $query = \App\Models\app\Instrument\DiagSession::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date');
+        if ($since) {
+            $query->where('created_at', '>=', $since);
+        }
+        $this->chartDiagnosticsFlow = $query->get()->map(fn ($r) => [
+            'x' => $r->date,
+            'y' => (int) $r->total,
+        ])->toArray();
     }
 
     public function render(): \Illuminate\View\View
