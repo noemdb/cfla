@@ -24,6 +24,9 @@ class LessonsPrintTest extends TestCase
 
     private User $user;
     private int $lapsoId;
+    private int $pestudioId;
+    private int $gradoId;
+    private int $seccionId;
 
     protected function setUp(): void
     {
@@ -41,6 +44,9 @@ class LessonsPrintTest extends TestCase
         $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
         $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
         $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $this->pestudioId = $pestudio->id;
+        $this->gradoId = $grado->id;
+        $this->seccionId = $seccion->id;
         $asignatura = Asignatura::factory()->create();
         $pensum = Pensum::factory()->create([
             'pestudio_id'    => $pestudio->id,
@@ -204,5 +210,176 @@ class LessonsPrintTest extends TestCase
         $this->assertStringNotContainsString('print-mode-info', $html);
         $this->assertStringNotContainsString('scaleGraphicsToMaxHeight', $html);
         $this->assertStringNotContainsString('body.print-preview', $html);
+    }
+
+    /** @test */
+    public function print_page_letterhead_opens_the_first_column_of_the_book_layout(): void
+    {
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?lapso='.$this->lapsoId)
+            ->assertOk()
+            ->getContent();
+
+        // El membrete (.doc-head) vive DENTRO del flujo de columnas (modo libro:
+        // dos "páginas" por hoja horizontal). Debe aparecer después de que abre
+        // .lessons-columns y antes de la primera .lesson.
+        $columnsPos = strpos($html, 'class="lessons-columns"');
+        $docHeadPos = strpos($html, 'class="doc-head"', $columnsPos);
+        $lessonPos = strpos($html, 'class="lesson"', $columnsPos);
+        $this->assertNotFalse($columnsPos, 'El contenedor .lessons-columns debe existir.');
+        $this->assertNotFalse($docHeadPos, 'El membrete debe ir DENTRO de .lessons-columns.');
+        $this->assertNotFalse($lessonPos, 'Debe existir al menos una .lesson.');
+        $this->assertLessThan($lessonPos, $docHeadPos, 'El membrete abre la columna 1, antes de la primera lección.');
+
+        // Configuración de impresión requerida: horizontal + dos páginas por hoja.
+        $this->assertStringContainsString('size: landscape', $html);
+        $this->assertStringContainsString('column-count: 2', $html);
+        $this->assertStringContainsString('column-fill: auto', $html);
+        $this->assertStringNotContainsString('column-fill: balance', $html);
+    }
+
+    /** @test */
+    public function print_page_shows_no_content_when_no_lessons_match(): void
+    {
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?lapso=999999')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('No hay lecciones que coincidan', $html);
+        $this->assertStringNotContainsString('class="lessons-columns"', $html);
+    }
+
+    // ─── Los filtros del listado deben afectar la salida imprimible ──────
+
+    /**
+     * Construye una cadena completa (Pestudio→Grado→Sección→Pensum→Lapso→
+     * Pevaluación→Actividad) para el MISMO profesor pero con contexto distinto
+     * al del setUp, de modo que quede fuera de cualquier filtro del primero.
+     */
+    private function createSecondLesson(string $topic = 'Lección ajena a los filtros'): array
+    {
+        $profesor = Profesor::where('user_id', $this->user->id)->first();
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $asignatura = Asignatura::factory()->create();
+        $pensum = Pensum::factory()->create([
+            'pestudio_id'    => $pestudio->id,
+            'grado_id'       => $grado->id,
+            'asignatura_id'  => $asignatura->id,
+        ]);
+        $lapso = Lapso::factory()->create();
+
+        $pevaluacion = Pevaluacion::create([
+            'profesor_id' => $profesor->id,
+            'pensum_id'   => $pensum->id,
+            'seccion_id'  => $seccion->id,
+            'lapso_id'    => $lapso->id,
+        ]);
+
+        $activity = Activity::factory()->create([
+            'pevaluacion_id' => $pevaluacion->id,
+            'topic'          => $topic,
+        ]);
+
+        return [
+            'lapso'    => $lapso->id,
+            'pestudio' => $pestudio->id,
+            'grado'    => $grado->id,
+            'seccion'  => $seccion->id,
+            'topic'    => $topic,
+        ];
+    }
+
+    /** @test */
+    public function print_page_respects_lapso_filter(): void
+    {
+        $other = $this->createSecondLesson('Lección del otro lapso');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?lapso='.$this->lapsoId)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
+    }
+
+    /** @test */
+    public function print_page_respects_pestudio_filter(): void
+    {
+        $other = $this->createSecondLesson('Lección del otro plan de estudio');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?pestudio='.$this->pestudioId)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
+    }
+
+    /** @test */
+    public function print_page_respects_grado_filter(): void
+    {
+        $other = $this->createSecondLesson('Lección del otro grado');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?grado='.$this->gradoId)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
+    }
+
+    /** @test */
+    public function print_page_respects_seccion_filter(): void
+    {
+        $other = $this->createSecondLesson('Lección de la otra sección');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?seccion='.$this->seccionId)
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
+    }
+
+    /** @test */
+    public function print_page_respects_search_filter(): void
+    {
+        $other = $this->createSecondLesson('Álgebra vectorial avanzada');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?search=Lecci%C3%B3n%20de%20prueba')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
+    }
+
+    /** @test */
+    public function print_page_respects_all_filters_combined(): void
+    {
+        $other = $this->createSecondLesson('Lección excluida por todo');
+
+        $html = $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?'.http_build_query([
+                'lapso'    => $this->lapsoId,
+                'pestudio' => $this->pestudioId,
+                'grado'    => $this->gradoId,
+                'seccion'  => $this->seccionId,
+                'search'   => 'Lección de prueba',
+            ]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Lección de prueba', $html);
+        $this->assertStringNotContainsString($other['topic'], $html);
     }
 }

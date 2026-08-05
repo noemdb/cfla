@@ -2,7 +2,7 @@
         <div wire:key="mode-list">
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
-                <h1 class="text-lg font-bold text-gray-900 dark:text-white">Nueva Lección</h1>
+                <h1 class="text-lg font-bold text-gray-900 dark:text-white">Listado de Lecciones</h1>
                 <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">Selecciona una actividad para crear su contenido LMS</p>
             </div>
             <div class="flex items-center gap-3">

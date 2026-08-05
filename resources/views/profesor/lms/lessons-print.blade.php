@@ -107,15 +107,30 @@
                 font-size:6pt; /* 8px as requested */
                 line-height:1.2; /* Tighter line height for density */
                 color:#1e293b;
-                column-count: 2;
-                column-gap: 0.9cm; /* Reduced gap for denser columns */
-                column-fill: balance;
             }
 
-            /* Evitar que los elementos se rompan de manera inapropiada */
-            .lesson, .section, .content-block, .doc-head, .print-bar, .footer {
-                break-inside: avoid-page;
-                break-inside: avoid-column;
+            /* Modo libro: las dos "páginas" de cada hoja horizontal son las dos
+               columnas. El membrete (.doc-head) abre la columna 1 (primera
+               página) y column-fill:auto llena la columna 1 por completo antes
+               de pasar a la 2, con lo que no queda vacío tras el membrete. */
+            .lessons-columns{
+                column-count: 2;
+                column-gap: 0.9cm; /* Reduced gap for denser columns */
+                column-fill: auto; /* llenar la columna 1 antes de pasar a la 2 */
+            }
+
+            /* Flujo continuo: lecciones/secciones/contenido se parten en el
+               límite entre columnas y páginas sin dejar huecos. Solo los
+               encabezados quedan pegados a su contenido (break-after:avoid) y
+               los bloques atómicos (membrete, footer, diagramas, figuras) no
+               se parten. */
+            .lesson, .section, .content-block {
+                break-inside: auto;
+                page-break-inside: auto;
+            }
+
+            .doc-head, .footer, .mermaid-wrap, .content-image {
+                break-inside: avoid;
             }
 
             /* Asegurar que los encabezados de lección y sección no se separen de su contenido */
@@ -151,7 +166,7 @@
             .lesson-meta .lbl{color:#0f766e;font-weight:600;}
             .lesson-meta .dot{color:#dcfce7;}
 
-            .section{margin:8px 0;padding:0 2px;page-break-inside:avoid;break-inside:avoid-page;}
+            .section{margin:8px 0;padding:0 2px;break-inside:auto;}
             .section-head{display:flex;align-items:center;gap:2px;background:#f0fdfa;border:1px solid #ccfbf1;
                           padding:2px 4px;border-radius:2px;font-size:5.25pt; font-weight:700;
                           color:#0f766e;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:4px;} /* 7px */
@@ -222,7 +237,8 @@
         </button>
     </div>
 
-    {{-- Cabecera del documento --}}
+    @if($lessons->isEmpty())
+    {{-- Cabecera del documento (caso sin lecciones) --}}
     <div class="doc-head">
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
         <h2>LECCIONES LMS · CONTENIDO COMPLETO</h2>
@@ -250,7 +266,41 @@
         </div>
     </div>
 
-    @forelse($lessons as $i => $lesson)
+        <div class="no-content">No hay lecciones que coincidan con los filtros aplicados.</div>
+    @else
+    {{-- Modo libro: el membrete abre la columna 1 (primera "página" de la hoja
+         horizontal) y las lecciones fluyen de forma continua por las dos
+         columnas de cada hoja; el footer cierra la última columna. --}}
+    <div class="lessons-columns">
+        {{-- Cabecera del documento (dentro del flujo de columnas) --}}
+        <div class="doc-head">
+            <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
+            <h2>LECCIONES LMS · CONTENIDO COMPLETO</h2>
+            <div class="sub">
+                {{ $profesor?->name ?? '' }} {{ $profesor?->lastname ?? '' }}
+                <span class="sep">·</span> {{ $fecha }}
+                @if(collect($filters)->filter()->isNotEmpty())
+                    <span class="sep">·</span> Filtros:
+                    @if($filters['lapso'])
+                        Lapso {{ \App\Models\app\Academy\Lapso::find($filters['lapso'])?->name ?? '' }}
+                    @endif
+                    @if($filters['pestudio'])
+                        <span class="sep">·</span> P.Estudio {{ \App\Models\app\Academy\Pestudio::find($filters['pestudio'])?->name ?? '' }}
+                    @endif
+                    @if($filters['grado'])
+                        <span class="sep">·</span> Grado {{ \App\Models\app\Academy\Grado::find($filters['grado'])?->name ?? '' }}
+                    @endif
+                    @if($filters['seccion'])
+                        <span class="sep">·</span> Sección {{ \App\Models\app\Academy\Seccion::find($filters['seccion'])?->name ?? '' }}
+                    @endif
+                    @if($filters['search'])
+                        <span class="sep">·</span> "{{ $filters['search'] }}"
+                    @endif
+                @endif
+            </div>
+        </div>
+
+        @foreach($lessons as $i => $lesson)
         <div class="lesson">
             {{-- Cabecera de la lección --}}
             <div class="lesson-head">
@@ -392,15 +442,15 @@
                 </div>
             @endif
         </div>
-    @empty
-        <div class="no-content">No hay lecciones que coincidan con los filtros aplicados.</div>
-    @endforelse
+        @endforeach
 
-    <div class="footer">
-        {{ $institucion?->name ?? '' }}
-        · {{ $lessons->count() }} lección{{ $lessons->count() === 1 ? '' : 'es' }}
-        · Elaborado por: {{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}
+        <div class="footer">
+            {{ $institucion?->name ?? '' }}
+            · {{ $lessons->count() }} lección{{ $lessons->count() === 1 ? '' : 'es' }}
+            · Elaborado por: {{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}
+        </div>
     </div>
+    @endif
 
     <script>
         // Esperar a que todos los diagramas Mermaid estén renderizados antes de

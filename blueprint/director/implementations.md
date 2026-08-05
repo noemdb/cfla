@@ -1,10 +1,1612 @@
-siguiendo el mismo patron encontrado en: blueprint/coordinacion/implementations.md y blueprint/leadership/implementations.md
+# Plan de Implementación: Rol `is_director` (Dirección / Supervisión Ejecutiva)
 
-se requiere la creacion del rol is_director
+**Staff Engineer Blueprint**
+_Autor:_ Claude Architect
+_Última revisión:_ 2026-08-04
 
-sus funciones son similares a los roles coordinacion y leadership
+> **Nota de arranque:** este documento sigue exactamente el mismo patrón (phases,
+> cadena de modelos, servicios de scope, ADRs, checklist de rollback) empleado en
+> `blueprint/coordinacion/implementations.md` y `blueprint/leadership/implementations.md`.
+> La diferencia esencial es que el rol `is_director` es **100% de solo lectura**:
+> **no aprueba, no rechaza, no registra comentarios ni observaciones** — solo realiza
+> **visualización y seguimiento** en toda la institución.
 
-pero solo de supervision y seguimiento, no aproueba, no registra comentarios etc solo visalizacion y seguimiento
+---
 
-genera el spec driven en:
-blueprint/director/implementations.md
+## Tabla de Contenidos
+
+1. [Resumen Ejecutivo](#1-resumen-ejecutivo)
+2. [Arquitectura Actual (AS-IS)](#2-arquitectura-actual-as-is)
+3. [Cadena de Modelos](#3-cadena-de-modelos)
+4. [Target (TO-BE)](#4-target-to-be)
+5. [Estrategia de Implementación](#5-estrategia-de-implementación)
+6. [Plan Detallado](#6-plan-detallado)
+    - [Fase 1: Base de Datos y Modelo](#fase-1-base-de-datos-y-modelo)
+    - [Fase 2: Middleware y Autorización](#fase-2-middleware-y-autorización)
+    - [Fase 3: Servicios y Scope](#fase-3-servicios-y-scope)
+    - [Fase 4: Rutas](#fase-4-rutas)
+    - [Fase 5: Livewire Components](#fase-5-livewire-components)
+    - [Fase 6: Navegación y Vistas](#fase-6-navegación-y-vistas)
+    - [Fase 7: Seguridad y Validación (Read-Only Enforcement)](#fase-7-seguridad-y-validación-read-only-enforcement)
+    - [Fase 8: Testing](#fase-8-testing)
+7. [ADRs (Architecture Decision Records)](#7-adrs)
+8. [Dependencias y Roadmap](#8-dependencias-y-roadmap)
+9. [Checklist de Rollback](#9-checklist-de-rollback)
+
+---
+
+## ⚙️ Instrucciones de uso en loop de agente IA (LEER PRIMERO)
+
+Este documento es el **plan máquina-ejecutable** para crear el rol `is_director`.
+Un agente IA debe consumirlo de forma **secuencial y verificada**, nunca en paralelo.
+
+### Reglas del loop (contrato de ejecución)
+
+1. **Orden estricto de fases.** Ejecuta las fases en el orden numérico.
+   Cada fase declara sus **prerrequisitos** (`Verif pre`) y su **criterio de meta**
+   (`Verif post`). No avances a la siguiente fase hasta que la anterior pase
+   todos sus checks.
+
+2. **Ruta absoluta de archivos.** Crear/editar SOLO los archivos listados en
+   `Archi` de cada fase. No modifiques nada fuera de la lista. Todas las rutas
+   son relativas a la raíz del repo `/home/nuser/code/cfla/`.
+
+3. **Bucle de verificación (do + check).** Después de escribir (o editar)
+   los archivos de una fase, ejecuta los comandos de `Verif post`. Si algo
+   falla, corrige dentro dela misma fase antes de seguir. Criterio de parada:
+   `php artisan test` debe pasar en verde a nivel global al concluir Fase 8.
+
+4. **No escribas al rodar.** La regla más importante del rol: `is_director` es
+   **de solo lectura**. Si al implementar detectas que una ruta no es `GET`,
+   que un servicio expone un método `save*`/`approve*`/`comment*`, o que una
+   vista contiene un `<form>` de escritura, **PARE** y revierte ese cambio.
+
+5. **Registro de progreso.** Al terminar cada fase, marca la casilla en la
+   sección [Checkpoint de Progreso](#checkpoint-de-progreso) y anota el resultado.
+   Conserva ese bloque (no lo borres en la siguiente iteración).
+
+6. **Handling de fallos.** Si una verificación falla: (a) lee el error,
+   (b) corrige el archivo de la fase, (c) re-ejecuta la verificación,
+   (d) solo entonces sigue. Nunca saltes una verificación roja con un FIXME.
+
+7. **Referencias de código existente (leer antes de copiar).** Para mantener
+   consistencia, lee los archivos espejo antes de crear los del director:
+   - `app/Http/Middleware/IsLeadership.php` (base para `IsDirector.php`)
+   - `app/Services/Lms/CoordinacionScopeService.php` (base para `DirectorScopeService.php`)
+   - `app/Livewire/Leadership/IndicatorDashboard.php` (base para los componentes)
+   - `routes/web.php` (grupo `leadership.*` y `coordinacion.*` para insertar `director.*`)
+   - `app/Models/User.php` (helpers `isLeadership()`, `getIsDirectorAttribute`)
+
+### Anatomía por fase
+
+Cada fase tiene este encabezado, que el agente debe leer como contrato:
+
+```
+### Fase N: <titulo>
+
+> Archivos: <lista de rutas a crear/editar>
+> Accion: <actividad que realiza el agente>
+> Verif pre: <checks previos a la fase>
+> Verif post: <checks de meta de la fase; comandos y/o output esperado>
+```
+
+---
+
+## Checkpoint de Progreso
+
+> Copia este bloque al final del documento y mantenlo actualizado en cada loop.
+> El agente lo lee al inicio para saber desde dónde retomar.
+
+| Fase | Estado | Fallos / Notas | Hito de verificación clave |
+|------|--------|----------------|----------------------------|
+| 1. Migración + Modelo | ⬜ | — | `migrate` OK + `User::factory()->director()` existe |
+| 2. Middleware | ⬜ | — | 200 para director, 403 para no-director |
+| 3. Servicio Scope | ⬜ | — | `DirectorScopeService` sin métodos save*, global |
+| 4. Rutas | ⬜ | — | `director.*` registradas, todas GET |
+| 5. Livewire Components | ⬜ | — | 7 componentes carárgan sin error en `render` |
+| 6. Nav y Vistas | ⬜ | — | navbar muestra submenú Dirección |
+| 7. Seguridad read-only | ⬜ | — | test de reflexión sin métodos save*
+| 8. Testing | ⬜ | — | `php artisan test` verde global |
+
+**Siguiente fase a ejecutar:** FASE 1 (si esta tabla está toda en ⬜).
+
+---
+
+## 1. Resumen Ejecutivo
+
+### ¿Qué es el rol `is_director`?
+
+El **Director** es un rol de **supervisión y seguimiento ejecutivo a nivel institucional**.
+Es un observador **de solo lectura** que puede visualizar la información académica de
+**toda la institución** (todos los `Peducativo`, todas las áreas, todas las cargas académicas,
+todas las actividades y lecciones LMS) para hacer seguimiento, pero **sin ninguna capacidad
+de escritura**: no crea, edita, elimina, aprueba, rechaza, comenta ni registra observaciones.
+
+Es el rol más restringido en cuanto a *escritura* de todos los de seguimiento:
+- `coordinacion` → puede registrar `pevaluacion.observations`.
+- `leadership` → puede comentar y aprobar/rechazar actividades de sus áreas.
+- `is_director` → **ninguna acción de escritura**. Solo lee y hace seguimiento.
+
+### Las responsabilidades del rol (todas read-only)
+
+| # | Responsabilidad | Modelos involucrados | Capacidad |
+|---|----------------|---------------------|-----------|
+| 1 | **Ver sus datos / perfil** | `User` → `Profile` | Perfil visible (sin edición propia del rol) |
+| 2 | **Dashboard institucional** | `Peducativo` → `Pestudio` → KPIs globales | Indicadores de toda la institución (sin filtro de scope) |
+| 3 | **Información académica: Pensums** | `Peducativo` → `Pestudio` → `Pensum` → `Asignatura` | Listar pensums de toda la institución |
+| 4 | **Carga Académica** | `Peducativo` → `Pestudio` → `Pensum` → `Pevaluacion` | Visualizar pevaluacions (año lectivo, profesor, sección) |
+| 5 | **Actividades de Planificación** | `Activity` → `Pevaluacion` | Visualizar formato/resumen (PDF) — sin editar observaciones |
+| 6 | **Lecciones LMS** | `Activity` → `LmsActivityPublication/Section/Resource/Link` | Visualizar contenido publicado |
+| 7 | **Recursos compartidos** | `LmsActivityResource` | Listado de recursos descargables |
+| 8 | **Seguimiento docente (KPIs)** | `Profesor` → KPIs (IEE, IRE) | Visualizar métricas de desempeño docente |
+
+> **Restricción clave (requisito del usuario):** el director **no aprueba, no rechaza,
+> no registra comentarios ni observaciones**. Por tanto el módulo Director **no expone
+> ningún endpoint de escritura** y sus vistas **no contienen formularios** de ninguna clase.
+
+### Principio de diseño
+
+> **Namespace propio, reuso de lógica, alcance global y read-only estricto.** Igual que
+> `coordinacion` y `leadership`, el módulo Director tiene su propio namespace completo
+> (rutas, layout, componentes, vistas, servicio). La diferencia con los otros dos:
+>
+> 1. **Alcance global**: el director ve **todos** los `Peducativo` / `Pensum` / `Pevaluacion` /
+>    `Activity` / `Profesor` de la institución (efectivamente "sin restricción"), porque la
+>    dirección debe supervisar el conjunto, no un subconjunto. Se implementa con el mismo
+>    "bypass" que se usa para `is_admin` dentro de `LeadershipService` (ver ADR-002).
+> 2. **Read-only estricto**: no se registra ningún controlador/acción de escritura, no hay
+>    estados editables en las vistas, y las rutas de PDF se sirven protegidas solo por GET.
+> 3. **Reuso**: el servicio Director reusa la lógica de scope/key de los módulos Planning y
+>    Lms, pero siempre en modo "sin filtro", y nunca invoca métodos de escritura.
+
+---
+
+## 2. Arquitectura Actual (AS-IS)
+
+### Modelo de roles actual (impreso y verificado en el código)
+
+| Columna `users` | Middleware | Rutas que protege |
+|----------------|-----------|-------------------|
+| `is_admin` | `IsAdmin` | `/admin/*` (logs, DB backup) |
+| `is_admin` / `is_diagnostic` | `IsAdminOrDiagnostic` | `/admin/*` (users, voting, educational) |
+| `is_admin` / `is_planner` / `is_diagnostic` | `IsPlanner` | `/app/planning/*` (todos los CRUDs) |
+| `is_coordinacion` (+ admin bypass) | `IsCoordinacion` | `/app/coordinacion/*` (read + observations) |
+| `is_leadership` (+ admin heredado) | `IsLeadership` | `/app/leadership/*` (read + comentar/aprobar) |
+| `is_profesor` / `is_admin` | `IsProfesor` | `/app/profesors/*` |
+| `is_student` | `IsStudent` | `/app/estudiante/*` |
+
+### Relaciones existentes que reusamos
+
+```php
+// Peducativo ya tiene manager_id → User (para los otros roles, NO es ancla aquí)
+class Peducativo extends Model {
+    public function pestudios() { return $this->hasMany(Pestudio::class); }
+}
+
+// Pestudio → Pensum → Pevaluacion → Activity
+class Pestudio extends Model {
+    public function pensums() { return $this->hasMany(Pensum::class); }
+}
+class Pensum extends Model {
+    public function pevaluacions() { return $this->hasMany(Pevaluacion::class); }
+}
+class Pevaluacion extends Model {
+    public function activitys() { return $this->hasMany(Activity::class); }
+    public function lapso() { return $this->belongsTo(Lapso::class); }
+    public function profesor() { return $this->belongsTo(Profesor::class); }
+    public function seccion() { return $this->belongsTo(Seccion::class); }
+    public function pensum() { return $this->belongsTo(Pensum::class); }
+}
+
+// Activity → LMS
+class Activity extends Model {
+    public function lmsPublication() { return $this->hasOne(LmsActivityPublication::class); }
+    public function lmsSections() { return $this->hasMany(LmsActivitySection::class); }
+    public function lmsResources() { return $this->hasMany(LmsActivityResource::class); }
+    public function lmsLogs() { return $this->hasMany(LmsActivityLog::class); }
+}
+
+// AreaConocimiento → CampoConocimiento → Asignatura (para seguimiento docente)
+class AreaConocimiento extends Model {
+    public function campo_conocimientos() { return $this->hasMany(CampoConocimiento::class); }
+}
+```
+
+### Lo que NO existe (necesario para el rol `is_director`)
+
+| Aspecto | Estado | Detalle |
+|---------|--------|---------|
+| Columna `is_director` | ❌ **Falta** | Migración pendiente |
+| Middleware `IsDirector` | ❌ **Falta** | Similar a `IsLeadership` con `is_director` + admin bypass |
+| `getRoleLabelAttribute` → 'Dirección' | ❌ **Falta** | Agregar en User model |
+| `DirectorScopeService` | ❌ **Falta** | Permite visualización global (sin filtros) |
+| Rutas `/app/director/*` | ❌ **Falta** | Grupo nuevo de rutas (GET only) |
+
+> **Nota:** A diferencia de `coordinacion`, NO se requiere un campo tipo `manager_id` como
+> ancla, porque el director supervisa toda la institución (ver ADR-002).
+
+---
+
+## 3. Cadena de Modelos
+
+### Árbol de navegación (alcance global, read-only)
+
+```
+User (is_director = true)
+  │   → sin filtro de scope: ve TODA la institución
+  │
+  ├── Peducativo (todos)
+  │     └── Pestudio (todos, planning_module = 1, status_active)
+  │           ├── Pensum (todos)
+  │           │     └── Pevaluacion (todos)
+  │           │           ├── Activity (todas)
+  │           │           │     ├── Formato/Resumen PDF
+  │           │           │     ├── LmsActivityPublication → Sections/Resources/Links
+  │           │           │     └── LmsActivityResource (is_visible = true)
+  │           │           ├── Lapso
+  │           │           ├── Seccion → Grado
+  │           │           └── Profesor → KPIs (IEE, IRE)
+  │           │
+  ├── AreaConocimiento (todas) → CampoConocimiento → Asignatura → Pensum
+  └── Profesor (todos activos) → KPIs docentes
+```
+
+### Traducción a queries (todas read-only)
+
+```sql
+-- Todo el scope del director es "sin restricción".
+-- Los métodos siguientes existen para mantener simetría con los otros roles,
+-- pero DEVSOLVER siempre en modo "unrestricted".
+
+SELECT * FROM peducativos WHERE status_active = 'true';
+
+SELECT * FROM pestudios
+WHERE status_active = 'true' AND planning_module = 1;
+
+SELECT * FROM pensums (todos);
+
+SELECT * FROM pevaluacions (todas);
+
+SELECT * FROM activities (todas);
+```
+
+---
+
+## 4. Target (TO-BE)
+
+### Nuevo modelo de roles
+
+```
+users.is_director  →  middleware IsDirector  →  /app/director/*
+                                                     ├── /                  → director.index (Dashboard con indicadores globales)
+                                                     ├── /pensums           → director.pensums
+                                                     ├── /carga-academica   → director.carga-academica
+                                                     ├── /activities        → director.activities
+                                                     ├── /activities/format/{pevaluacion} → director.activities.format (PDF GET)
+                                                     ├── /activities/resume/{pevaluacion} → director.activities.resume (PDF GET)
+                                                     ├── /lecciones         → director.lessons
+                                                     ├── /recursos          → director.resources
+                                                     └── /profesores        → director.profesores (KPIs docentes)
+```
+
+### Jerarquía de middleware
+
+```
+is_admin ──► pasa TODOS los middleware (including IsDirector)   [bypass]
+is_director ──► pasa IsDirector                                  [NUEVO, independiente de planner]
+otros ──► 403
+```
+
+### Principio de herencia (patrón existente)
+
+```php
+// Igual que getIsLeadershipAttribute
+public function getIsDirectorAttribute()
+{
+    return $this->is_admin || ($this->attributes['is_director'] ?? false);
+}
+```
+
+---
+
+## 5. Estrategia de Implementación
+
+### Decisión arquitectónica clave
+
+El rol `is_director` es un **módulo completamente independiente** con su propio namespace,
+siguiendo el patrón de `coordinacion`:
+
+1. **Rutas propias** bajo `/app/director/*` con middleware `IsDirector` (solo `GET`).
+2. **Layout dedicado** `director.layouts.app` con navbar propio.
+3. **Componentes Livewire dedicados** en `App\Livewire\Director\*` que envuelven las
+   consultas de solo lectura.
+4. **Vistas Blade propias** en `resources/views/director/` y `resources/views/livewire/director/`.
+5. **Servicio propio** `DirectorScopeService` (métodos `query*()` read-only; sin métodos de escritura).
+6. **PDF reusados** de `ActivityPdfController` existente (es read-only y requiere GET).
+
+### Diferencia clave con `coordinacion`/`leadership`
+
+| Aspecto | `coordinacion` | `leadership` | **`is_director`** |
+|--------|----------------|--------------|-------------------|
+| Alcance/scope | Su `manager_id` | Sus áreas de conocimiento | **Toda la institución** (global) |
+| Observaciones | ✅ edita `pevaluacion.observations` | ve pero no es su acción | ❌ **no aplica** |
+| Comentarios en actividades | ❌ | ✅ comenta | ❌ **no aplica** |
+| Aprobar/rechazar | ❌ | ✅ aprueba/rechaza | ❌ **no aplica** |
+| KPIs docentes | parcial (counts) | ✅ dashboard | ✅ dashboard global |
+
+### Orden lógico (bloqueante en cascada)
+
+```
+Fase 1: Migration (is_director column) + User Model
+    │
+    ▼
+Fase 2: Middleware IsDirector + Kernel
+    │
+    ▼
+Fase 3: DirectorScopeService (global read-only)
+    │
+    ├──► Fase 4a: Rutas (/app/director/* — GET only)
+    ├──► Fase 4b: Dashboard (indicadores globales)
+    ├──► Fase 4c: Pensums (listado global)
+    ├──► Fase 4d: Carga Académica (listado global)
+    ├──► Fase 4e: Actividades (listado global + PDF)
+    ├──► Fase 4f: Lecciones + Recursos (global)
+    └──► Fase 4g: Profesores KPIs (global)
+    │
+    ▼
+Fase 5: Navbar (director-items) + Layout dedicado
+    │
+    ▼
+Fase 6: Testing
+```
+
+---
+
+## 6. Plan Detallado
+
+### Fase 1: Base de Datos y Modelo
+
+#### 1.1 Migration — `add_is_director_to_users_table`
+
+```php
+<?php
+// database/migrations/2026_08_04_000001_add_is_director_to_users_table.php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        if (!Schema::hasColumn('users', 'is_director')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->boolean('is_director')
+                    ->default(false)
+                    ->after('is_leadership')
+                    ->comment('Dirección: supervisión y seguimiento de solo lectura');
+                $table->index('is_director');
+            });
+        }
+    }
+
+    public function down(): void
+    {
+        if (Schema::hasColumn('users', 'is_director')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropIndex(['is_director']);
+                $table->dropColumn('is_director');
+            });
+        }
+    }
+};
+```
+
+**Patrón:** idéntico a la migración de `is_leadership`. Sin índices adicionales: como
+el director ve todo (no filtra por columna propia), no se requieren índices nuevos en
+la cadena de JOINs.
+
+#### 1.2 User Model — cambios
+
+```php
+// app/Models/User.php
+
+// En $fillable (agregar después de 'is_leadership'):
+'is_director',
+
+// En $casts (agregar):
+'is_director' => 'boolean',
+
+// Nuevo helper method (después de isCoordinacion/isLeadership):
+public function isDirector(): bool
+{
+    return $this->is_director ?? false;
+}
+
+// Accessor (herencia admin, mismo patrón que is_leadership):
+public function getIsDirectorAttribute()
+{
+    return $this->is_admin || ($this->attributes['is_director'] ?? false);
+}
+
+// Actualizar getRoleLabelAttribute — 'Dirección' justo después de 'Jefe de Área':
+public function getRoleLabelAttribute()
+{
+    if ($this->is_admin) return 'Administrador';
+    if ($this->is_director) return 'Dirección';
+    if ($this->is_leadership) return 'Jefe de Área';
+    if ($this->is_diagnostic) return 'Personal de Diagnóstico';
+    if ($this->isCoordinacion()) return 'Coordinación';
+    if ($this->is_planner) return 'Planificación';
+    if ($this->isProfesor()) return 'Profesor';
+    return 'Usuario Estándar';
+}
+```
+
+> **Nota de ordenamiento de role_label:** se coloca `Dirección` antes de `Jefe de Área`
+> porque un director no suele ser también jefe de área; en caso de conflicto manda el
+> `is_director` (mayor vertical). Igual que el patrón en `getRoleLabelAttribute` de User.
+
+---
+
+### Fase 2: Middleware y Autorización
+
+#### 2.1 Nuevo middleware `IsDirector`
+
+```php
+<?php
+// app/Http/Middleware/IsDirector.php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class IsDirector
+{
+    /**
+     * Acepta admins y usuarios con is_director. A diferencia de los otros
+     * roles de seguimiento, este módulo es 100% read-only: el middleware
+     * solo protege la VISUALIZACIÓN, nunca acciones de escritura (no existen).
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        if (Auth::check() && Auth::user()->is_director) {
+            return $next($request);
+        }
+
+        abort(403, 'No tienes permiso para acceder al módulo de dirección.');
+    }
+}
+```
+
+**Nota:** `Auth::user()->is_director` usa el accessor con herencia admin
+(`getIsDirectorAttribute`), por lo que `is_admin` pasa automáticamente. No hace falta
+escribir `|| is_admin` explícito, aunque hacerlo es inofensivo y más explícito.
+
+#### 2.2 Registrar en Kernel
+
+```php
+// app/Http/Kernel.php — en $middlewareAliases (junto a los otros):
+'isDirector' => \App\Http\Middleware\IsDirector::class,
+```
+
+#### 2.3 (Sin Policies de escritura)
+
+Como el módulo no expone ninguna acción de escritura, **no** se definen policies
+`update*`/`approve*` para el director. La seguridad se reduce a: middleware + rutas solo GET
++ protección de scope implícita (por ser global no requiere autorización por entidad).
+
+---
+
+### Fase 3: Servicios y Scope
+
+#### 3.1 `DirectorScopeService` — visualización global read-only
+
+A diferencia de `CoordinacionScopeService` (filtrar por `manager_id`) o
+`LeadershipService` (filtrar por áreas), el director **no filtra**: devuelve todas las
+entidades activas de la institución. Se escriben métodos `query*()` *deliberadamente*
+para que la intención "solo lectura global" quede explícita y testeable, y **NO** se
+exponen métodos de mutación (`saveObservations`, `approve`, `comment`, `update`).
+
+```php
+<?php
+// app/Services/Director/DirectorScopeService.php
+
+namespace App\Services\Director;
+
+use App\Models\User;
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * Scope de SOLO LECTURA para el rol Dirección.
+ *
+ * A diferencia de coordinacion (scoped por manager_id) y leadership (scoped
+ * por áreas), la dirección supervisa TODA la institución: estos métodos no
+ * filtran por el usuario, devuelven todas las entidades activas.
+ *
+ * ⚠️ REGLA DE ORO: este servicio NO contiene métodos que muten el estado
+ * (save, update, approve, reject, comment, observe...). Si algún día la
+ * dirección requiere una acción de escritura, se agregará con su propio
+ * ADR y su propia guarda de autorización.
+ */
+class DirectorScopeService
+{
+    public function __construct(
+        protected User $user
+    ) {}
+
+    /**
+     * Todos los Peducativos activos (visión global de la dirección).
+     */
+    public function queryPeducativos()
+    {
+        return Peducativo::where('status_active', 'true')->orderBy('order');
+    }
+
+    /**
+     * Todos los Pestudios activos con planificación habilitada.
+     */
+    public function queryPestudios()
+    {
+        return Pestudio::where('status_active', 'true')
+            ->where('planning_module', 1);
+    }
+
+    /**
+     * Todos los Pensums.
+     */
+    public function queryPensums()
+    {
+        return Pensum::query();
+    }
+
+    /**
+     * Todas las Pevaluacions.
+     */
+    public function queryPevaluacions()
+    {
+        return Pevaluacion::query();
+    }
+
+    /**
+     * Todas las Activities.
+     */
+    public function queryActivities()
+    {
+        return Activity::query();
+    }
+
+    /**
+     * Recursos compartidos visibles.
+     */
+    public function queryResources()
+    {
+        return LmsActivityResource::where('is_visible', true);
+    }
+
+    /**
+     * Profesores activos con carga académica (para KPIs docentes).
+     */
+    public function queryProfesores()
+    {
+        return Profesor::where('status_active', 'true')
+            ->whereHas('pevaluacions');
+    }
+
+    /**
+     * Verifica que un usuario logueado tiene derechos de dirección.
+     * Usado por los componentes como guarda de defensa en profundidad.
+     */
+    public function assertCanSupervise(): void
+    {
+        if (! $this->user->is_director) {
+            abort(403, 'No tienes permisos de dirección para supervisar esta información.');
+        }
+    }
+}
+```
+
+#### 3.2 Trait para Livewire components
+
+```php
+<?php
+// app/Livewire/Director/Concerns/HasDirectorScope.php
+
+namespace App\Livewire\Director\Concerns;
+
+use App\Services\Director\DirectorScopeService;
+use Illuminate\Support\Facades\Auth;
+
+trait HasDirectorScope
+{
+    protected DirectorScopeService $directorService;
+
+    public function initializeHasDirectorScope(): void
+    {
+        $this->directorService = app(DirectorScopeService::class, [
+            'user' => Auth::user()
+        ]);
+    }
+
+    protected function getDirectorService(): DirectorScopeService
+    {
+        return $this->directorService;
+    }
+}
+```
+
+---
+
+### Fase 4: Rutas
+
+#### 4.1 Grupo de rutas (GET only)
+
+```php
+// routes/web.php — DENTRO del grupo `app`, junto a coordinacion y leadership
+
+// ─── Dirección: Supervisión y Seguimiento (READ-ONLY) ─────────
+Route::prefix('director')
+    ->middleware(['auth', 'isDirector'])
+    ->name('director.')
+    ->group(function () {
+
+    // Dashboard con indicadores globales
+    Route::get('/', \App\Livewire\Director\IndicatorDashboard::class)
+        ->name('index');
+
+    // Información Académica: Pensums
+    Route::get('/pensums', \App\Livewire\Director\PensumList::class)
+        ->name('pensums');
+
+    // Carga Académica (Pevaluacions)
+    Route::get('/carga-academica', \App\Livewire\Director\CargaAcademicaList::class)
+        ->name('carga-academica');
+
+    // Actividades de Planificación (SÓLO VISUALIZACIÓN + PDF)
+    Route::get('/activities', \App\Livewire\Director\ActivityList::class)
+        ->name('activities');
+    Route::get('/activities/format/{pevaluacion}', [
+        \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
+    ])->name('activities.format');
+    Route::get('/activities/resume/{pevaluacion}', [
+        \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
+    ])->name('activities.resume');
+
+    // Lecciones LMS
+    Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
+        ->name('lessons');
+
+    // Recursos Compartidos
+    Route::get('/recursos', \App\Livewire\Director\ResourceList::class)
+        ->name('resources');
+
+    // Seguimiento Docente (KPIs)
+    Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
+        ->name('profesores');
+});
+```
+
+> **Seguridad:** todo el grupo es `GET`. No hay ninguna ruta `POST`/`PUT`/`DELETE`/
+> `PATCH` bajo `/app/director/*`. Esto hace imposible una mutación por la interfaz.
+
+---
+
+### Fase 5: Livewire Components
+
+#### 5.1 Dashboard — Indicadores globales
+
+```php
+<?php
+// app/Livewire/Director/IndicatorDashboard.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Pensum;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+
+class IndicatorDashboard extends Component
+{
+    use Concerns\HasDirectorScope;
+
+    public $selectedLapsoId;
+    public $lapsos;
+    public $lapsoActive;
+
+    // ─── KPI globales (toda la institución) ───
+    public $totalPeducativos = 0;
+    public $totalPensums = 0;
+    public $totalActivities = 0;
+    public $totalProfesoresActivos = 0;
+    public $totalPevaluacions = 0;
+    public $totalResources = 0;
+
+    // ─── KPIs por Peducativo ───
+    public $peducativoIndicators = [];
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+        $service = $this->getDirectorService();
+
+        $this->lapsos = \App\Models\app\Academy\Lapso::orderBy('id')->get();
+        $this->lapsoActive = \App\Models\app\Academy\Lapso::current();
+        $this->selectedLapsoId = $this->lapsoActive?->id ?? $this->lapsos->first()?->id;
+
+        $this->totalPeducativos = $service->queryPeducativos()->count();
+
+        $this->loadIndicators();
+    }
+
+    public function updatedSelectedLapsoId(): void
+    {
+        $this->loadIndicators();
+    }
+
+    public function loadIndicators(): void
+    {
+        $service = $this->getDirectorService();
+
+        $this->totalPensums = $service->queryPensums()->count();
+        $this->totalPevaluacions = $service->queryPevaluacions()
+            ->when($this->selectedLapsoId, fn($q) => $q->where('lapso_id', $this->selectedLapsoId))
+            ->count();
+        $this->totalActivities = $service->queryActivities()->count();
+        $this->totalProfesoresActivos = $service->queryProfesores()->count();
+        $this->totalResources = $service->queryResources()->count();
+
+        // Indicadores por Peducativo (seguimiento institucional)
+        $this->peducativoIndicators = $service->queryPeducativos()->get()
+            ->map(function ($peducativo) use ($service) {
+                $pestudioIds = $service->queryPestudios()
+                    ->where('peducativo_id', $peducativo->id)
+                    ->pluck('id');
+
+                return (object) [
+                    'peducativo'       => $peducativo,
+                    'pensums_count'    => Pensum::whereIn('pestudio_id', $pestudioIds)->count(),
+                    'activities_count' => Activity::whereHas('pevaluacion.pensum', fn($q) => $q->whereIn('pestudio_id', $pestudioIds))->count(),
+                    'profesores_count' => DB::table('profesors')
+                        ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
+                        ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
+                        ->whereIn('pensums.pestudio_id', $pestudioIds)
+                        ->whereNull('pevaluacions.deleted_at')
+                        ->distinct('profesors.id')
+                        ->count('profesors.id'),
+                ];
+            });
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        return view('livewire.director.indicator-dashboard')
+            ->layout('director.layouts.app');
+    }
+}
+```
+
+#### 5.2 Listado de Pensums (read-only)
+
+```php
+<?php
+// app/Livewire/Director/PensumList.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Pensum;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class PensumList extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $peducativoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        $query = Pensum::with([
+            'pestudio.peducativo',
+            'asignatura',
+            'grado',
+        ]);
+        $query = $service->queryPensums();
+
+        if ($this->peducativoId) {
+            $query->whereHas('pestudio', fn($q) => $q->where('peducativo_id', $this->peducativoId));
+        }
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->whereHas('asignatura', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"))
+                  ->orWhereHas('grado', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"))
+                  ->orWhereHas('pestudio', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"));
+            });
+        }
+
+        $pensums = $query->orderBy('pestudio_id')->paginate(20);
+        $peducativos = $service->queryPeducativos()->get();
+
+        return view('livewire.director.pensum-list', [
+            'pensums'      => $pensums,
+            'peducativos'  => $peducativos,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingPeducativoId() { $this->resetPage(); }
+}
+```
+
+#### 5.3 Carga Académica (read-only)
+
+```php
+<?php
+// app/Livewire/Director/CargaAcademicaList.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Pevaluacion;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class CargaAcademicaList extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $peducativoId = '';
+    public $lapsoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        $query = Pevaluacion::with([
+            'profesor:id,name,lastname',
+            'seccion:id,name,grado_id',
+            'seccion.grado:id,name',
+            'pensum.asignatura',
+            'pensum.pestudio.peducativo',
+            'lapso',
+        ]);
+        $query = $service->queryPevaluacions();
+
+        if ($this->lapsoId) $query->where('pevaluacions.lapso_id', $this->lapsoId);
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->whereHas('profesor', fn($sq) => $sq->where('lastname', 'like', "%{$this->search}%"))
+                  ->orWhereHas('pensum.asignatura', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"))
+                  ->orWhereHas('seccion', fn($sq) => $sq->where('name', 'like', "%{$this->search}%"));
+            });
+        }
+
+        $pevaluacions = $query->orderBy('pevaluacions.created_at', 'desc')->paginate(20);
+        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+        $peducativos = $service->queryPeducativos()->get();
+
+        return view('livewire.director.carga-academica-list', [
+            'pevaluacions' => $pevaluacions,
+            'lapsos'       => $lapsos,
+            'peducativos'  => $peducativos,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingLapsoId() { $this->resetPage(); }
+    public function updatingPeducativoId() { $this->resetPage(); }
+}
+```
+
+#### 5.4 Actividades de Planificación (SIN observaciones editables)
+
+> **Diferencia crítica vs `coordinacion`:** aquí **NO** hay `editObservations()`,
+> `cancelEdit()` ni `saveObservations()`. Las actividades solo se visualizan y se
+> generan sus PDFs. No hay ningún estado editable.
+
+```php
+<?php
+// app/Livewire/Director/ActivityList.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Activity;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class ActivityList extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $peducativoId = '';
+    public $lapsoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        $query = Activity::with([
+            'pevaluacion' => fn($q) => $q->with([
+                'profesor:id,name,lastname',
+                'seccion.grado',
+                'pensum.asignatura',
+                'pensum.pestudio.peducativo',
+                'lapso',
+            ]),
+        ]);
+        $query = $service->queryActivities();
+
+        if ($this->lapsoId) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+        }
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('topic', 'like', "%{$this->search}%")
+                  ->orWhere('thematic', 'like', "%{$this->search}%");
+            });
+        }
+
+        $activities = $query->orderBy('activities.created_at', 'desc')->paginate(15);
+        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+
+        return view('livewire.director.activity-list', [
+            'activities' => $activities,
+            'lapsos'     => $lapsos,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingLapsoId() { $this->resetPage(); }
+}
+```
+
+#### 5.5 Lecciones LMS (read-only)
+
+```php
+<?php
+// app/Livewire/Director/LessonList.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Activity;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class LessonList extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $peducativoId = '';
+    public $lapsoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        $query = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.pensum.pestudio.peducativo',
+            'pevaluacion.profesor',
+            'pevaluacion.lapso',
+            'lmsPublication',
+            'lmsSections.contents',
+        ]);
+        $query = $service->queryActivities()->whereHas('lmsPublication');
+
+        if ($this->lapsoId) {
+            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+        }
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('topic', 'like', "%{$this->search}%")
+                  ->orWhere('thematic', 'like', "%{$this->search}%");
+            });
+        }
+
+        $lessons = $query->orderBy('activities.created_at', 'desc')->paginate(15);
+        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+
+        return view('livewire.director.lesson-list', [
+            'lessons' => $lessons,
+            'lapsos'  => $lapsos,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingLapsoId() { $this->resetPage(); }
+}
+```
+
+#### 5.6 Recursos Compartidos (read-only)
+
+```php
+<?php
+// app/Livewire/Director/ResourceList.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class ResourceList extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $peducativoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        $query = LmsActivityResource::with([
+            'activity.topic',
+            'activity.pevaluacion.pensum.asignatura',
+            'activity.pevaluacion.pensum.pestudio.peducativo',
+            'activity.pevaluacion.profesor',
+            'media',
+        ]);
+        $query = $service->queryResources();
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('display_name', 'like', "%{$this->search}%")
+                  ->orWhereHas('activity', fn($sq) => $sq->where('topic', 'like', "%{$this->search}%"));
+            });
+        }
+
+        $resources = $query->orderBy('lms_activity_resources.created_at', 'desc')->paginate(20);
+
+        return view('livewire.director.resource-list', [
+            'resources' => $resources,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+}
+```
+
+#### 5.7 Seguimiento Docente — KPIs (read-only)
+
+```php
+<?php
+// app/Livewire/Director/ProfesorIndicators.php
+
+namespace App\Livewire\Director;
+
+use App\Models\app\Academy\Profesor;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class ProfesorIndicators extends Component
+{
+    use WithPagination, Concerns\HasDirectorScope;
+
+    public string $search = '';
+    public $lapsoId = '';
+    protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        $this->initializeHasDirectorScope();
+    }
+
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getDirectorService();
+
+        // Todos los profesores activos con su carga (seguimiento global)
+        $query = Profesor::withCount([
+            'pevaluacions as peva_count' => fn($q) => $q->when($this->lapsoId, fn($qq) => $qq->where('lapso_id', $this->lapsoId)),
+        ]);
+        $query = $service->queryProfesores();
+
+        if ($this->search) {
+            $query->where(fn($q) => $q->where('lastname', 'like', "%{$this->search}%")
+                  ->orWhere('name', 'like', "%{$this->search}%"));
+        }
+
+        $profesores = $query->orderBy('lastname')->paginate(20);
+        $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
+
+        return view('livewire.director.profesor-indicators', [
+            'profesores' => $profesores,
+            'lapsos'     => $lapsos,
+        ])->layout('director.layouts.app');
+    }
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingLapsoId() { $this->resetPage(); }
+}
+```
+
+---
+
+### Fase 6: Navegación y Vistas
+
+#### 6.1 Navbar items para dirección
+
+```blade
+{{-- resources/views/components/navbars/director-items.blade.php --}}
+@if(Auth::user()->is_director)
+    <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open" @click.outside="open = false"
+            class="inline-flex items-center gap-1.5 text-sm font-medium rounded-lg px-3 py-1.5 transition-all duration-200 {{ request()->routeIs('director.*') ? 'bg-sky-500/10 text-sky-400' : 'text-gray-400 hover:text-sky-300 hover:bg-white/5' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+            Dirección
+            <svg class="w-3 h-3 ml-0.5 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div x-show="open" x-cloak
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-1"
+            class="absolute left-0 mt-1 w-56 bg-gray-800/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-black/50 p-2 z-50">
+            <a href="{{ route('director.index') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.index') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                Dashboard
+            </a>
+            <a href="{{ route('director.pensums') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.pensums') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Pensums
+            </a>
+            <a href="{{ route('director.carga-academica') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.carga-academica') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Carga Académica
+            </a>
+            <a href="{{ route('director.activities') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.activities') || request()->routeIs('director.activities.*') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Actividades
+            </a>
+            <a href="{{ route('director.lessons') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.lessons') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                Lecciones
+            </a>
+            <a href="{{ route('director.resources') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.resources') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                Recursos
+            </a>
+            <a href="{{ route('director.profesores') }}"
+                class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300 hover:text-sky-300 hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('director.profesores') ? 'text-sky-400 bg-sky-500/5' : '' }}">
+                <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Profesores
+            </a>
+        </div>
+    </div>
+@endif
+```
+
+#### 6.2 Layout dedicado de dirección
+
+```blade
+{{-- resources/views/director/layouts/app.blade.php --}}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Dirección') — {{ config('app.name') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @wireUiScripts
+    @livewireStyles
+</head>
+<body class="min-h-screen bg-gray-900 text-gray-100 antialiased">
+    <nav class="sticky top-0 z-50 bg-gray-800/80 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('director.index') }}" class="text-lg font-semibold text-sky-400">
+                        Dirección
+                    </a>
+                    @include('components.navbars.director-items')
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-400">{{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-sm text-gray-500 hover:text-red-400 transition-colors">Salir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{ $slot }}
+    </main>
+    @livewireScripts
+    @stack('scripts')
+</body>
+</html>
+```
+
+```blade
+{{-- resources/views/components/navbars/director-items-mobile.blade.php --}}
+{{-- Menú responsive para mobile (mismo set de enlaces que director-items) --}}
+@if(Auth::user()->is_director)
+    <div class="space-y-1">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-sky-400/60 px-3 py-1.5">Dirección · Supervisión</div>
+        <a href="{{ route('director.index') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('director.index') ? 'text-sky-400 bg-sky-500/5' : 'text-gray-300 hover:text-sky-300 hover:bg-white/5' }} transition-colors">Dashboard</a>
+        <a href="{{ route('director.pensums') }}" class="...">Pensums</a>
+        <a href="{{ route('director.carga-academica') }}" class="...">Carga Académica</a>
+        <a href="{{ route('director.activities') }}" class="...">Actividades</a>
+        <a href="{{ route('director.lessons') }}" class="...">Lecciones</a>
+        <a href="{{ route('director.resources') }}" class="...">Recursos</a>
+        <a href="{{ route('director.profesores') }}" class="...">Profesores</a>
+    </div>
+@endif
+```
+
+#### 6.3 Vistas Blade read-only (sin formularios)
+
+Todas las vistas de `livewire/director/*.blade.php` siguen un único patrón:
+- Cabecera con título y filtros de búsqueda (que son lecturas).
+- Tabla/tarjetas de resultados.
+- **Ningún `<form>`, `wire:submit`, botón de guardar, textarea editable ni selector
+  de aprobación.** Los únicos enlaces de acción son: ver PDF (GET), ver detalle.
+
+Ejemplo (esqueleto) de `activity-list.blade.php`:
+
+```blade
+{{-- resources/views/livewire/director/activity-list.blade.php --}}
+<div class="fade-in">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+            <h1 class="text-lg font-extrabold text-gray-900 dark:text-white">Actividades de Planificación</h1>
+            <p class="text-sky-600 dark:text-sky-400 font-medium">Seguimiento · solo lectura</p>
+        </div>
+        {{-- Filtros de lectura --}}
+        <div class="flex flex-wrap gap-3">
+            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Buscar actividad..." class="rounded-lg border-white/10 bg-white/5 px-3 py-2 text-sm" />
+            <select wire:model.live="lapsoId" class="rounded-lg border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-400">
+                <option value="">Lapso: Todos</option>
+                @foreach($lapsos ?? [] as $id => $name)
+                    <option value="{{ $id }}">{{ $name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    {{-- Tabla de resultados (solo lectura, sin acciones de escritura) --}}
+    @foreach($activities as $activity)
+        <div class="rounded-2xl border border-white/5 bg-gray-900 p-5 mb-3 flex items-center justify-between">
+            <div>
+                <h3 class="text-sm font-bold text-white">{{ $activity->topic }}</h3>
+                <p class="text-xs text-gray-500">
+                    {{ $activity->pevaluacion?->profesor?->lastname }},
+                    {{ $activity->pevaluacion?->profesor?->name }} · {{ $activity->pevaluacion?->pensum?->asignatura?->name }}
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('director.activities.format', $activity->pevaluacion_id) }}" target="_blank"
+                    class="text-[11px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300">Formato</a>
+                <a href="{{ route('director.activities.resume', $activity->pevaluacion_id) }}" target="_blank"
+                    class="text-[11px] font-bold uppercase tracking-widest text-sky-400 hover:text-sky-300">Resumen</a>
+            </div>
+        </div>
+    @endforeach
+
+    {{ $activities->links() }}
+</div>
+```
+
+---
+
+### Fase 7: Seguridad y Validación (Read-Only Enforcement)
+
+#### 7.1 Matriz de autorización
+
+| Ruta | Middleware | Scope | Lectura | Escritura |
+|------|-----------|-------|---------|-----------|
+| `/app/director/` | `IsDirector` | Global (toda la institución) | Dashboard indicadores | ❌ |
+| `/app/director/pensums` | `IsDirector` | Global | Lista pensums | ❌ |
+| `/app/director/carga-academica` | `IsDirector` | Global | Pevaluacions | ❌ |
+| `/app/director/activities` | `IsDirector` | Global | Actividades + PDF | ❌ |
+| `/app/director/lecciones` | `IsDirector` | Global | Lecciones LMS | ❌ |
+| `/app/director/recursos` | `IsDirector` | Global | Recursos | ❌ |
+| `/app/director/profesores` | `IsDirector` | Global | KPIs docentes | ❌ |
+
+#### 7.2 Defensa en profundidad (Read-Only)
+
+1. **No existen rutas de escritura**: el grupo de rutas solo define verbos `GET`.
+2. **No se exponen métodos de mutación**: `DirectorScopeService` no tiene `save*`/`approve*`/
+   `comment*`/`observe`. Los componentes Livewire de Director no tienen métodos `store`/
+   `update`/`create`/`save*`.
+3. **Vistas sin formularios**: las vistas read-only no contienen `<form>`, `wire:submit`,
+   `x-on:submit` ni `@csrf` de escritura.
+4. **Guarda de defensa** `assertCanSupervise()` disponible en el servicio por si un futuro
+   endpoint de lectura necesita verificar el rol explícitamente.
+5. **PDF por GET** reusan `ActivityPdfController` (read-only), protegidos por el mismo middleware
+   `IsDirector` del grupo (por ser rutas `GET` dentro del grupo con `middleware(['auth','isDirector'])`).
+
+> **Regla de revisión:** cualquier PR futuro que agregue una acción de escritura bajo
+> `/app/director/*` debe acompañarse de un ADR nuevo y de un test que verifique la guarda
+> de autorización (ver Fase 8). Es una violación de diseño si una vista de director
+> contiene un `wire:click` que muta estado.
+
+---
+
+### Fase 8: Testing
+
+#### 8.1 Pirámide de tests
+
+```
+    ┌──────────────────────────────┐
+    │  Feature: Flujo completo      │  ← 2 tests
+    │  is_director (read-only flow) │
+    ├──────────────────────────────┤
+    │  Feature: Middleware/Acceso   │  ← 3 tests
+    ├──────────────────────────────┤
+    │  Feature: No-write enforcement│  ← 2 tests
+    ├──────────────────────────────┤
+    │  Unit: Model + Service        │  ← 4 tests
+    └──────────────────────────────┘
+```
+
+#### 8.2 Tests críticos
+
+| Test | Tipo | Verifica |
+|------|------|---------|
+| `DirectorMiddlewareTest` | Feature | `is_director = true` → 200 |
+| `DirectorMiddlewareTest` | Feature | `is_director = false` → 403 |
+| `DirectorMiddlewareTest` | Feature | Admin bypass → 200 |
+| `DirectorDashboardTest` | Feature | Dashboard carga indicadores de TODA la institución (no filtrado) |
+| `DirectorScopeTest` | Unit | `queryPensums()` retorna todos los pensums (sin filtro) |
+| `DirectorScopeTest` | Unit | `queryProfesores()` retorna todos los profesores activos con carga |
+| `DirectorReadOnlyTest` | Feature | `DirectorScopeService` NO expone métodos de escritura (reflection test) |
+| `DirectorReadOnlyTest` | Feature | La vista `activity-list` NO contiene `<form>` ni atributos `wire:click` de mutación |
+| `DirectorRouteTest` | Feature | No existe ninguna ruta no-GET bajo `/app/director/*` (se inspeccionan las rutas registradas) |
+| `DirectorCargaAcademicaTest` | Feature | Lista pevaluacions de toda la institución |
+| `DirectorProfesoresTest` | Feature | KPIs de todos los profesores |
+
+#### 8.3 Factory support
+
+```php
+// database/factories/UserFactory.php
+public function director(): static
+{
+    return $this->state(fn (array $attributes) => [
+        'is_director' => true,
+    ]);
+}
+```
+
+#### 8.4 Test de no-escritura (clave para este rol)
+
+```php
+// tests/Feature/Director/DirectorReadOnlyTest.php
+
+use App\Models\User;
+use App\Services\Director\DirectorScopeService;
+use Illuminate\Routing\Route;
+use Illuminate\Support\Facades\Route as RouteFacade;
+
+// 2. El servicio NO expone métodos que muten el modelo (save/update/approve/store...)
+test('DirectorScopeService no expone metodos de escritura', function () {
+    $publicMethods = array_map(
+        fn ($m) => $m->name,
+        (new ReflectionClass(DirectorScopeService::class))->getMethods(ReflectionMethod::IS_PUBLIC)
+    );
+
+    $forbidden = ['save', 'update', 'store', 'create', 'delete', 'destroy',
+                  'approve', 'reject', 'comment', 'observe', 'saveObservation'];
+    foreach ($forbidden as $f) {
+        $this->assertEmpty(
+            array_filter($publicMethods, fn ($m) => str_contains(strtolower($m), $f)),
+            "DirectorScopeService no debe exponer '$f'."
+        );
+    }
+});
+
+// 3. Todas las rutas /app/director/* son GET
+test('todas las rutas de director son de solo lectura (GET)', function () {
+    $directorRoutes = collect(RouteFacade::getRoutes())
+        ->reject(fn (Route $r) => ! str_starts_with((string) ($r->uri ?? ''), 'app/director'));
+
+    foreach ($directorRoutes as $route) {
+        $this->assertNotContains('POST', $route->methods(), 'Ruta no-GET no permitida');
+        $this->assertNotContains('PUT', $route->methods());
+        $this->assertNotContains('PATCH', $route->methods());
+        $this->assertNotContains('DELETE', $route->methods());
+    }
+});
+```
+
+---
+
+## 7. ADRs (Architecture Decision Records)
+
+### ADR-001: `is_director` como columna booleana
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | Columna booleana en `users` | Tabla pivote roles |
+| **Razón** | Consistencia con `is_admin`, `is_leadership`, `is_coordinacion`, `is_planner`, `is_profesor` | |
+| **Consecuencia** | Migración simple. Consistencia con el ecosistema existente | |
+
+### ADR-002: Alcance global (sin scope) para la dirección
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | El director ve TODA la institución (sin filtro por `manager_id`/áreas) | Scoping por `manager_id` (como coordinación) o por áreas (como leadership) |
+| **Razón** | La dirección tiene una visión ejecutiva del conjunto. Supervisor de supervisores: ve lo que ven coordinación y leadership, pero agrega todo a nivel institucional. No tiene sentido restringir a un subconjunto porque su rol es gobernar el todo | |
+| **Consecuencia** | `DirectorScopeService` no filtra por el usuario. Es la misma semántica "unrestricted" que `LeadershipService` usa para `is_admin`, pero aquí es el comportamiento *por defecto* del rol, no un bypass | |
+
+### ADR-003: Namespace y layout dedicado para dirección
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | Namespace completo propio: layout, componentes, vistas, servicio | Reusar el layout de planning/coordinacion |
+| **Razón** | Igual que coordinacion/leadership: permisos y controles de navegación distintos. Evita acoplar el módulo a otro. La cadena de fallos queda aislada | |
+
+| **Consecuencia** | ~2 archivos adicionales de layout. Navbar propia con submenú Dirección. Coste marginal mínimo, aislamiento máximo |
+
+### ADR-004: Read-Only estricto (no-writing role)
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | El módulo director **no expone ninguna acción de escritura** | Heredar la capacidad de comentar/observar de coordinacion o leadership |
+| **Razón** | Es el requisito explícito: "no aprueba, no registra comentarios, solo visualización y seguimiento". La dirección supervisa, pero el que ejecuta y valida es coordinación/leadership. Introducir escritura rompería el principio de separación de responsabilidades de supervisión | |
+| **Consecuencia** | No hay formularios en las vistas, no hay métodos de mutación en el servicio, no hay rutas no-GET. Se agrega un **test de no-escritura** (reflection + inspección de rutas) para evitar que un futuro PR rompa este invariante |
+
+### ADR-005: Reuso de `ActivityPdfController` para los formatos/resumen
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | Las rutas `director.activities.format` y `director.activities.resume` reutilizan el `ActivityPdfController::format()`/`resume()` ya existente | Controlador propio de PDF |
+| **Razón** | El controlador es **read-only** (genera PDF), por lo que no viola el rol. Evita duplicar lógica de generación de PDF y mantiene un único punto de formato. Está protegido por el middleware `IsDirector` del grupo | |
+| **Consecuencia** | El director ve exactamente el mismo PDF que coordinación/leadership. Si el formato cambia, cambia en todos los módulos a la vez (sin merma de aislamiento, porque el PDF no es una acción de escritura) |
+
+---
+
+## 8. Dependencias y Roadmap
+
+### 8.1 Dependencias
+
+| Dependencia | Tipo | Estado |
+|-------------|------|--------|
+| Modelo `User` (columna `is_director`) | Fase 1 | Bloqueante |
+| Middleware `IsDirector` + registro en Kernel | Fase 2 | Bloqueante |
+| `DirectorScopeService` | Fase 3 | Bloqueante |
+| Componentes de `Planning` (Pensum, Pevaluacion, Activity) | Fase 5 (solo lectura) | Existentes |
+| Componentes de `Lms` (publications, sections, resources) | Fase 5 (solo lectura) | Existentes |
+| `ActivityPdfController` | Fase 4-5 (reuso) | Existentes |
+| Clase `Lapso` y `Lapso::current()` | Fase 5 | Existentes |
+
+### 8.2 Roadmap por fases
+
+| Fase | Entregable | Estimación (días) | Dependencia |
+|------|-----------|--------------------|-------------|
+| Fase 1 | Migración + User model (`is_director`, `isDirector()`, role_label) | 0.5 | — |
+| Fase 2 | Middleware `IsDirector` + registro Kernel | 0.5 | Fase 1 |
+| Fase 3 | `DirectorScopeService` + trait `HasDirectorScope` | 1 | Fase 2 |
+| Fase 4 | Rutas `/app/director/*` (GET only) | 0.5 | Fase 3 |
+| Fase 5 | 7 componentes Livewire + vistas | 3 | Fase 4 |
+| Fase 6 | Layout dedicado + navbar items | 1 | Fase 5 |
+| Fase 7 | Seguridad read-only (verificación de no-escritura) | 0.5 | Fase 5 |
+| Fase 8 | Tests (unit + feature + no-escritura) | 1 | Fase 7 |
+| **Total** | | **~8 días** | |
+
+> **Mejora de UX (opcional, dependiente):** para el rol dirección, cada indicador del
+> dashboard filtra por `Peducativo` sin alterar datos. No agrega complejidad de escritura.
+
+---
+
+## 9. Checklist de Rollback
+
+> **Motivo central de rollback:** el requisito más delicado es el **read-only estricto**.
+> Si en cualquier punto se detecta que un director puede escribir datos, el release debe
+> descartarse y revertirse a esta lista.
+
+### 9.1 Rollback de código
+
+```bash
+# Revertir todas las fases de código
+git revert <sha_del_release_director> --no-commit
+
+# Revertir sólo una fase conflictiva (ej. middleware o rutas)
+git checkout <tag_anterior> -- app/Http/Middleware/IsDirector.php
+git checkout <tag_anterior> -- routes/web.php
+git checkout <tag_anterior> -- app/Models/User.php
+```
+
+### 9.2 Rollback de base de datos
+
+```bash
+# Revertir la migración (quita columna is_director + índice)
+php artisan migrate:rollback --step=1
+```
+
+### 9.3 Eliminación de usuarios/privilegios
+
+```sql
+-- Si es necesario quitar el rol a un usuario en concreto tras el rollback:
+UPDATE users SET is_director = 0 WHERE is_director = 1;
+```
+
+> **Nota:** la migración `add_is_director_to_users_table` incluye una guarda
+> `if (!Schema::hasColumn(...))`, por lo que es **idempotente** y segura para
+> aplicar/re-aplicar.
+
+### 9.4 Checklist de verificación post-rollback
+
+- [ ] La vista `admin/users` ya no muestra el toggle/estado "Dirección".
+- [ ] El navbar ya no muestra el submenú "Dirección" para usuarios no admin.
+- [ ] Las rutas `director.*` devuelven 404 (o middleware no registrado).
+- [ ] `User::find($id)->is_director` devuelve `false` para todos los usuarios.
+- [ ] Los tests de `Director*` no se ejecutan en el suite (o pasan vacíos tras revertir rutas).
+- [ ] `php artisan test` en verde a nivel global tras el rollback.
+
+### 9.5 Verificación de invariante read-only (siempre activo)
+
+| Invariante | Verificación |
+|-----------|--------------|
+| No hay rutas no-GET bajo `/app/director/*` | `php artisan route:list --name=director` → solo muestra GET |
+| El servicio no expone métodos de mutación | Test de reflexión `DirectorReadOnlyTest` |
+| Las vistas no contienen formularios de escritura | Revisión de código + test de auditoría `<form>` |
+| Los PDF se sirven vía GET reusando read-only controller | Revisión de `route:list` |
+
+---
+
+_Fin del blueprint del rol `is_director`._ Siguiendo el patrón de
+`blueprint/coordinacion/implementations.md` y `blueprint/leadership/implementations.md`,
+con la restricción explícita de ser **100% visualización y seguimiento, sin escritura.**
