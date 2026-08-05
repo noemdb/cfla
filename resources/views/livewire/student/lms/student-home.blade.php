@@ -11,7 +11,7 @@
     {{-- 1. Stats Cards --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {{-- Total --}}
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
                     <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
         </div>
 
         {{-- Completed --}}
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@
         </div>
 
         {{-- Comments --}}
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@
         </div>
 
         {{-- Downloads --}}
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
                     <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@
                 @php $act = $log->activity; @endphp
                 @if(!$act) @continue @endif
                 <a href="{{ route('student.lms.activity', $act) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-emerald-500/30 transition-all duration-200">
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div @class([
@@ -112,7 +112,7 @@
                                         {{ $act->topic ?? 'Actividad sin título' }}
                                     </p>
                                     @if($act->lmsPublication?->isPreviewToStudents())
-                                        <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30">
+                                        <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30">
                                             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
@@ -147,7 +147,7 @@
     @elseif($suggestedActivities->isNotEmpty())
     <section>
         <div class="flex items-center gap-2 mb-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
             <h2 class="text-sm font-bold text-gray-900 dark:text-white">Publicaciones Recientes</h2>
@@ -156,7 +156,7 @@
         <div class="space-y-2">
             @foreach($suggestedActivities as $activity)
             <a href="{{ route('student.lms.activity', $activity) }}"
-               class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-emerald-500/30 transition-all duration-200">
+               class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-sky-500/40">
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-sky-500/10">
@@ -165,7 +165,7 @@
                             </svg>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors truncate">
                                 {{ $activity->topic ?? 'Actividad sin título' }}
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
@@ -179,7 +179,7 @@
                         <span class="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
                             {{ $activity->lmsPublication?->publish_at?->diffForHumans() }}
                         </span>
-                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 group-hover:text-sky-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </div>
@@ -209,7 +209,7 @@
                         : null;
                 @endphp
                 <a href="{{ route('student.lms.activity', $activity) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-sky-500/30 transition-all duration-200">
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-sky-500/40">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-sky-500/10">
@@ -222,7 +222,7 @@
                                     <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors truncate">
                                         {{ $activity->topic ?? 'Actividad sin título' }}
                                     </p>
-                                    <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30">
+                                    <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-500/10 border border-sky-300 dark:border-sky-500/30">
                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -236,7 +236,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400">
+                        <div class="shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full border bg-sky-100 dark:bg-sky-500/10 border-sky-300 dark:border-sky-500/30 text-sky-700 dark:text-sky-300">
                             @if(!$publishAt)
                                 Próximamente
                             @elseif($publishAt->isToday())
@@ -266,7 +266,7 @@
             <h2 class="text-sm font-bold text-gray-900 dark:text-white">Distribución por Asignatura</h2>
         </div>
 
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-5">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-5 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
             @foreach($subjectDistribution as $subject)
                 @php $pct = $subject['total'] > 0 ? round(($subject['completed'] / $subject['total']) * 100) : 0; @endphp
                 <div>
