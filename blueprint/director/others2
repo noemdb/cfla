@@ -15,14 +15,12 @@ _Última revisión:_ 2026-08-04
 
 ## Tabla de Contenidos
 
-- [⚙️ Instrucciones de uso en loop de agente IA (LEER PRIMERO)](#%ef%b8%8f-instrucciones-de-uso-en-loop-de-agente-ia-leer-primero)
-- [Checkpoint de Progreso](#checkpoint-de-progreso)
-- [Resumen Ejecutivo](#1-resumen-ejecutivo)
-- [Arquitectura Actual (AS-IS)](#2-arquitectura-actual-as-is)
-- [Cadena de Modelos](#3-cadena-de-modelos)
-- [Target (TO-BE)](#4-target-to-be)
-- [Estrategia de Implementación](#5-estrategia-de-implementación)
-- [Plan Detallado](#6-plan-detallado)
+1. [Resumen Ejecutivo](#1-resumen-ejecutivo)
+2. [Arquitectura Actual (AS-IS)](#2-arquitectura-actual-as-is)
+3. [Cadena de Modelos](#3-cadena-de-modelos)
+4. [Target (TO-BE)](#4-target-to-be)
+5. [Estrategia de Implementación](#5-estrategia-de-implementación)
+6. [Plan Detallado](#6-plan-detallado)
     - [Fase 1: Base de Datos y Modelo](#fase-1-base-de-datos-y-modelo)
     - [Fase 2: Middleware y Autorización](#fase-2-middleware-y-autorización)
     - [Fase 3: Servicios y Scope](#fase-3-servicios-y-scope)
@@ -31,86 +29,9 @@ _Última revisión:_ 2026-08-04
     - [Fase 6: Navegación y Vistas](#fase-6-navegación-y-vistas)
     - [Fase 7: Seguridad y Validación (Read-Only Enforcement)](#fase-7-seguridad-y-validación-read-only-enforcement)
     - [Fase 8: Testing](#fase-8-testing)
-- [ADRs (Architecture Decision Records)](#7-adrs)
-- [Dependencias y Roadmap](#8-dependencias-y-roadmap)
-- [Checklist de Rollback](#9-checklist-de-rollback)
-
----
-
-## ⚙️ Instrucciones de uso en loop de agente IA (LEER PRIMERO)
-
-Este documento es el **plan máquina-ejecutable** para crear el rol `is_director`.
-Un agente IA debe consumirlo de forma **secuencial y verificada**, nunca en paralelo.
-
-### Reglas del loop (contrato de ejecución)
-
-1. **Orden estricto de fases.** Ejecuta las fases en el orden numérico.
-   Cada fase declara sus **prerrequisitos** (`Verif pre`) y su **criterio de meta**
-   (`Verif post`). No avances a la siguiente fase hasta que la anterior pase
-   todos sus checks.
-
-2. **Ruta absoluta de archivos.** Crear/editar SOLO los archivos listados en
-   `Archi` de cada fase. No modifiques nada fuera de la lista. Todas las rutas
-   son relativas a la raíz del repo `/home/nuser/code/cfla/`.
-
-3. **Bucle de verificación (do + check).** Después de escribir (o editar)
-   los archivos de una fase, ejecuta los comandos de `Verif post`. Si algo
-   falla, corrige dentro dela misma fase antes de seguir. Criterio de parada:
-   `php artisan test` debe pasar en verde a nivel global al concluir Fase 8.
-
-4. **No escribas al rodar.** La regla más importante del rol: `is_director` es
-   **de solo lectura**. Si al implementar detectas que una ruta no es `GET`,
-   que un servicio expone un método `save*`/`approve*`/`comment*`, o que una
-   vista contiene un `<form>` de escritura, **PARE** y revierte ese cambio.
-
-5. **Registro de progreso.** Al terminar cada fase, marca la casilla en la
-   sección [Checkpoint de Progreso](#checkpoint-de-progreso) y anota el resultado.
-   Conserva ese bloque (no lo borres en la siguiente iteración).
-
-6. **Handling de fallos.** Si una verificación falla: (a) lee el error,
-   (b) corrige el archivo de la fase, (c) re-ejecuta la verificación,
-   (d) solo entonces sigue. Nunca saltes una verificación roja con un FIXME.
-
-7. **Referencias de código existente (leer antes de copiar).** Para mantener
-   consistencia, lee los archivos espejo antes de crear los del director:
-   - `app/Http/Middleware/IsLeadership.php` (base para `IsDirector.php`)
-   - `app/Services/Lms/CoordinacionScopeService.php` (base para `DirectorScopeService.php`)
-   - `app/Livewire/Leadership/IndicatorDashboard.php` (base para los componentes)
-   - `routes/web.php` (grupo `leadership.*` y `coordinacion.*` para insertar `director.*`)
-   - `app/Models/User.php` (helpers `isLeadership()`, `getIsDirectorAttribute`)
-
-### Anatomía por fase
-
-Cada fase tiene este encabezado, que el agente debe leer como contrato:
-
-```
-### Fase N: <titulo>
-
-> Archivos: <lista de rutas a crear/editar>
-> Accion: <actividad que realiza el agente>
-> Verif pre: <checks previos a la fase>
-> Verif post: <checks de meta de la fase; comandos y/o output esperado>
-```
-
----
-
-## Checkpoint de Progreso
-
-> Copia este bloque al final del documento y mantenlo actualizado en cada loop.
-> El agente lo lee al inicio para saber desde dónde retomar.
-
-| Fase | Estado | Fallos / Notas | Hito de verificación clave |
-|------|--------|----------------|----------------------------|
-| 1. Migración + Modelo | ⬜ | — | `migrate` OK + `User::factory()->director()` existe |
-| 2. Middleware | ⬜ | — | 200 para director, 403 para no-director |
-| 3. Servicio Scope | ⬜ | — | `DirectorScopeService` sin métodos save*, global |
-| 4. Rutas | ⬜ | — | `director.*` registradas, todas GET |
-| 5. Livewire Components | ⬜ | — | 7 componentes carárgan sin error en `render` |
-| 6. Nav y Vistas | ⬜ | — | navbar muestra submenú Dirección |
-| 7. Seguridad read-only | ⬜ | — | test de reflexión sin métodos save*
-| 8. Testing | ⬜ | — | `php artisan test` verde global |
-
-**Siguiente fase a ejecutar:** FASE 1 (si esta tabla está toda en ⬜).
+7. [ADRs (Architecture Decision Records)](#7-adrs)
+8. [Dependencias y Roadmap](#8-dependencias-y-roadmap)
+9. [Checklist de Rollback](#9-checklist-de-rollback)
 
 ---
 
@@ -368,11 +289,6 @@ Fase 6: Testing
 
 ### Fase 1: Base de Datos y Modelo
 
-> Archivos: `database/migrations/*add_is_director_to_users_table.php` (nuevo), `app/Models/User.php` (editar)
-> Accion: crear la migración con guarda `hasColumn` y agregar `is_director` a `$fillable`, `$casts`, método `isDirector()` + accessor + `getRoleLabelAttribute`.
-> Verif pre: verificar que `app/Models/User.php` ya tiene `is_leadership` para seguir el patrón.
-> Verif post: `php artisan migrate` OK (columna e índice creados). `php -r "require 'vendor/autoload.php'; \$u = new \App\Models\User; echo property_exists(\$u,'is_director') ? 'ok' : 'missing';"` muestra `ok`.
-
 #### 1.1 Migration — `add_is_director_to_users_table`
 
 ```php
@@ -459,11 +375,6 @@ public function getRoleLabelAttribute()
 
 ### Fase 2: Middleware y Autorización
 
-> Archivos: `app/Http/Middleware/IsDirector.php` (nuevo), `app/Http/Kernel.php` (editar)
-> Accion: crear middleware `IsDirector` (usa `Auth::user()->is_director`) y registrarlo como alias `isDirector`.
-> Verif pre: Fase 1 completo (`is_director` en modelo).
-> Verif post: `php artisan route:list --name=director` aún NO muestra rutas (aún no creadas); pero puedes probar el middleware en el test de Fase 8. Compilar sin error: `php -l app/Http/Middleware/IsDirector.php`.
-
 #### 2.1 Nuevo middleware `IsDirector`
 
 ```php
@@ -514,11 +425,6 @@ Como el módulo no expone ninguna acción de escritura, **no** se definen polici
 ---
 
 ### Fase 3: Servicios y Scope
-
-> Archivos: `app/Services/Director/DirectorScopeService.php` (nuevo), `app/Livewire/Director/Concerns/HasDirectorScope.php` (nuevo)
-> Accion: crear servicio con métodos `queryPeducativos|Pestudios|Pensums|Pevaluacions|Activities|Resources|Profesores` (global, read-only) + `assertCanSupervise()`. Crear trait `HasDirectorScope`.
-> Verif pre: Fase 2 completo (middleware + alias).
-> Verif post: NO debe existir método `save*`, `approve*`, `comment*`, `update*`, `store*`, `delete*`. Comprobación: `grep -nE "function (save|update|store|approve|reject|comment|observe|delete)" app/Services/Director/DirectorScopeService.php` → sin salida.
 
 #### 3.1 `DirectorScopeService` — visualización global read-only
 
@@ -666,11 +572,6 @@ trait HasDirectorScope
 
 ### Fase 4: Rutas
 
-> Archivos: `routes/web.php` (editar — dentro del grupo `app`, junto a `leadership.*`)
-> Accion: agregar grupo `Route::prefix('director')->middleware(['auth','isDirector'])->name('director.')` con 7 rutas GET + 2 PDF (reusar `ActivityPdfController`).
-> Verif pre: Fase 3 completo (service + trait).
-> Verif post: `php artisan route:list --name=director` muestra todas las rutas y TODAS son `GET`. `grep -nE "director/" routes/web.php` muestra el bloque.
-
 #### 4.1 Grupo de rutas (GET only)
 
 ```php
@@ -724,11 +625,6 @@ Route::prefix('director')
 ---
 
 ### Fase 5: Livewire Components
-
-> Archivos (7 nuevos): `app/Livewire/Director/IndicatorDashboard.php`, `PensumList.php`, `CargaAcademicaList.php`, `ActivityList.php`, `LessonList.php`, `ResourceList.php`, `ProfesorIndicators.php`
-> Accion: crear los 7 componentes usando `HasDirectorScope`. **ActivityList NO debe tener métodos de escritura de observaciones**.
-> Verif pre: Fase 4 completo (rutas apuntan a estos FQCN).
-> Verif post: cada componente compila: `for f in app/Livewire/Director/*.php; do php -l $f; done` → `No syntax errors`. Ninguno expone `save*`/`editObservations`/`cancelEdit`.
 
 #### 5.1 Dashboard — Indicadores globales
 
@@ -1198,11 +1094,6 @@ class ProfesorIndicators extends Component
 
 ### Fase 6: Navegación y Vistas
 
-> Archivos: `resources/views/director/layouts/app.blade.php` (nuevo), `resources/views/components/navbars/director-items.blade.php` (nuevo), `resources/views/components/navbars/director-items-mobile.blade.php` (nuevo), `resources/views/livewire/director/*.blade.php` (7 nuevas vistas)
-> Accion: crear el layout dedicado, el submenú de navbar `Dirección` y las 7 vistas read-only (sin formularios de escritura).
-> Verif pre: Fase 5 completo (componentes cargan).
-> Verif post: las vistas no contienen `<form`, `wire:submit`, `x-on:submit`, ni `@csrf`. Comprobación: `grep -rnE "<form|wire:submit|method=\"post\"" resources/views/livewire/director/ resources/views/director/` → sin salida.
-
 #### 6.1 Navbar items para dirección
 
 ```blade
@@ -1385,11 +1276,6 @@ Ejemplo (esqueleto) de `activity-list.blade.php`:
 
 ### Fase 7: Seguridad y Validación (Read-Only Enforcement)
 
-> Archivos: revisión de rutas + servicio + vistas (auditoría) + `tests/Feature/Director/DirectorReadOnlyTest.php` (nuevo)
-> Accion: implementar el esqueleto de test de no-escritura (reflexión sobre `DirectorScopeService` y auditoría de rutas GET-only).
-> Verif pre: Fases 3, 4 y 6 completas.
-> Verif post: `php artisan route:list --name=director | grep -viE "\sGET\s"` → sin salida (todas GET).
-
 #### 7.1 Matriz de autorización
 
 | Ruta | Middleware | Scope | Lectura | Escritura |
@@ -1423,11 +1309,6 @@ Ejemplo (esqueleto) de `activity-list.blade.php`:
 ---
 
 ### Fase 8: Testing
-
-> Archivos: `database/factories/UserFactory.php` (editar — agregar estado `director()`), `tests/Feature/Director/DirectorMiddlewareTest.php` (nuevo), `tests/Feature/Director/DirectorDashboardTest.php`, `tests/Unit/DirectorScopeTest.php`, `tests/Feature/Director/DirectorReadOnlyTest.php` (completar)
-> Accion: completar la pirámide de tests (Fase 7 ya dejó el esqueleto) y correr la suite.
-> Verif pre: Fases 1-7 completas.
-> Verif post: `php artisan test` → **all green** (sin SKIP). Además `php artisan test --filter=DirectorReadOnlyTest` confirma el invariante read-only.
 
 #### 8.1 Pirámide de tests
 
