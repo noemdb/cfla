@@ -17,6 +17,7 @@ _Última revisión:_ 2026-07-30
 8. [Visibilidad y Scoping de Datos](#8-visibilidad-y-scoping-de-datos)
 9. [Estructura de Routes](#9-estructura-de-routes)
 10. [Referencia de Queries](#10-referencia-de-queries)
+11. [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)
 
 ---
 
@@ -138,7 +139,8 @@ Cada card es un `div` con:
 - `bg-white dark:bg-gray-800/50` — fondo
 - `border border-gray-200 dark:border-gray-700` — borde
 - `rounded-xl` — esquinas redondeadas
-- `p-4 space-y-2` — padding interior
+- `p-4 space-y-2 shadow-sm` — padding interior + sombra base
+- Hover **estático** (no clicable): `transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600` — brillo sutil, sin lift (ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado))
 
 Contenido interno:
 1. **Ícono** — `w-8 h-8 rounded-lg` con color de fondo semitransparente (opacity 10%) e ícono SVG del mismo color (opacity 100%)
@@ -239,10 +241,12 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 ```css
 .group:hover .group-hover:text-emerald-600  /* título */
 .group:hover .group-hover:text-emerald-500  /* flecha › */
-.group:hover .hover:border-emerald-500/30   /* borde de la card */
+.group:hover .hover:-translate-y-0.5        /* elevación sutil */
+.group:hover .hover:shadow-md               /* sombra al elevar */
+.group:hover .hover:border-emerald-500/40   /* borde de la card */
 ```
 
-Transiciones: `transition-all duration-200`
+Transiciones: `transition-all duration-200` (elevación — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado))
 
 ### Fallback: sin historial de interacción
 
@@ -279,6 +283,7 @@ Mismo patrón de subquery que `$upcoming` (sección 5), pero con segundo argumen
 - Subtítulo de la sección: *"Actividades publicadas más recientes"*.
 - Hint derecho: `$activity->lmsPublication?->publish_at?->diffForHumans()` → "hace 2 días".
 - Sin etiqueta "Vista previa" (la query garantiza `publish_at <= now()`).
+- Acentos 100% sky (header, íconos, título, chevron) y hover de fila en sky (`hover:-translate-y-0.5 hover:shadow-md hover:border-sky-500/40`) — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado).
 
 El blade usa `@if($recentLogs->isNotEmpty()) ... @elseif($suggestedActivities->isNotEmpty()) <section>...`.
 
@@ -354,7 +359,7 @@ $daysLeft = $publishAt
 | `daysLeft > 7` | `Se publica el {j M}` (traducción `es`, ej. "Se publica el 9 ago") |
 | `publish_at` nulo (fallback) | `Próximamente` |
 
-- Badge e ícono siempre en azul cielo (`bg-sky-500/10 text-sky-400`); ya no hay niveles de urgencia.
+- Badge e ícono siempre en azul cielo; el badge usa la forma de chip unificada (`rounded-full` + borde sky — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)); ya no hay niveles de urgencia.
 - Junto al título se muestra la etiqueta **"Vista previa"** (sky), igual que en "Continuar Aprendiendo".
 - El countdown es respecto a `publish_at`, **no** a `ffinal`.
 
@@ -370,7 +375,7 @@ Cada elemento es un `<a>` que enlaza a `route('student.lms.activity', $activity)
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-Hover: el borde cambia a `hover:border-sky-500/30`.
+Hover: elevación sutil + borde `hover:border-sky-500/40` (ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)).
 
 ---
 
@@ -436,12 +441,12 @@ $subjectDistribution = $activities
 ### Contenedor de la sección
 
 ```html
-<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-5">
+<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-5 shadow-sm transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600">
     <!-- cada asignatura -->
 </div>
 ```
 
-El mismo estilo de card que las stats, pero con `p-5` en lugar de `p-4`.
+Misma base que las stats (`p-4 shadow-sm`, hover **estático** sin lift — ver [Sistema de Tarjetas Unificado](#11-sistema-de-tarjetas-unificado)). Se conserva `space-y-5` para el aire interno entre barras.
 
 ---
 
@@ -684,10 +689,58 @@ Post-procesamiento PHP: `groupBy('asignatura')`, `map(completed/total)`, `sortBy
 
 ---
 
+## 11. Sistema de Tarjetas Unificado
+
+> **Decisión de diseño:** las cuatro familias de tarjetas del panel (métricas, filas de cursos, panel de asignaturas) comparten una misma base visual para leerse como un solo sistema. La diferenciación se logra por **contenido y acento**, no rompiendo el lenguaje visual. Implementado el 2026-08-05.
+
+### Token base (todas las tarjetas)
+
+```
+bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm
+```
+
+- Radio `rounded-xl` y borde gris (`gray-200` / `gray-700`) idénticos en las 4 familias.
+- `shadow-sm` uniforme — profundidad sutil y moderna, sin sombras agresivas.
+- Padding `p-4` en todas (el panel de asignaturas pasó de `p-5` a `p-4`).
+
+### Hover por tipo
+
+| Tipo | Token | Dónde |
+|------|-------|-------|
+| **Estáticas** (métricas ×4, panel de asignaturas) | `transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-gray-300 dark:hover:border-gray-600` | Brillo sutil: borde más visible + fondo +1 nivel. **Sin elevación** ni sombra — no son clicables y no deben ofrecer affordance falsa |
+| **Clicables** (filas Continuar/Recientes/Próximas) | `transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-{accent}-500/40` | Elevación sutil + sombra + borde acento. `emerald` en Continuar Aprendiendo; `sky` en Recientes y Próximas |
+
+Los títulos y chevrons de las filas llevan `group-hover` con su acento (`group-hover:text-emerald-600`/`text-emerald-400`, `group-hover:text-sky-600`/`text-sky-400`; chevron `group-hover:text-emerald-500` / `group-hover:text-sky-500`).
+
+### Chip unificado (etiquetas y countdown)
+
+Un solo lenguaje: `rounded-full` + borde + `bg-{accent}-100 dark:bg-{accent}-500/10 border-{accent}-300 dark:border-{accent}-500/30`:
+
+| Chip | Token |
+|------|-------|
+| "Vista previa" (amber / sky) | `shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider text-{accent}-700 dark:text-{accent}-300 bg-{accent}-100 dark:bg-{accent}-500/10 border border-{accent}-300 dark:border-{accent}-500/30` |
+| Countdown (sky) | `shrink-0 text-[11px] font-medium whitespace-nowrap px-2.5 py-1 rounded-full border bg-sky-100 dark:bg-sky-500/10 border-sky-300 dark:border-sky-500/30 text-sky-700 dark:text-sky-300` |
+
+Misma forma (pill + borde); la diferencia es de contenido: el countdown lleva texto dinámico ("Se publica hoy a las H:i") que no puede ser uppercase de 9px.
+
+### Paleta de acentos
+
+| Acento | Rol | Uso |
+|--------|-----|-----|
+| **emerald** | avance / éxito | stat Completadas, barras de progreso, íconos COMPLETE, sección Continuar Aprendiendo |
+| **sky** | información / publicación | stat Totales, íconos VIEW, Publicaciones Recientes, Próximas Publicaciones, Asignaturas |
+| **amber** | pendiente / aviso | stat Comentarios, etiqueta "Vista previa" (amber) |
+| **purple** | recursos | stat Descargas |
+
+> **Por qué hover diferenciado:** las métricas y el panel de asignaturas no enlazan a nada; elevarlas implicaría una affordance falsa (sugerir que son clicables). Responden solo con brillo sutil. Las filas sí enlazan a una actividad y se elevan con acento, señalando interactividad.
+
+---
+
 ## Historial de Cambios
 
 | Fecha | Cambio | Autor |
 |-------|--------|-------|
+| 2026-08-05 | **Sistema de tarjetas unificado** en todo el panel: base común `rounded-xl` + `border-gray-200/700` + `p-4` + `shadow-sm`; hover por tipo (estáticas = brillo sutil sin lift; clicables = `-translate-y-0.5` + `shadow-md` + borde acento); fallback "Publicaciones Recientes" corregido a 100% sky; chips unificados `rounded-full` + borde (Vista previa y countdown); panel de asignaturas de `p-5` a `p-4` | — |
 | 2026-08-05 | El fallback de "Continuar Aprendiendo" pasa a titularse **"Publicaciones Recientes"** (la rama con historial conserva "Continuar Aprendiendo"); docs y tests actualizados | — |
 | 2026-08-05 | "Continuar Aprendiendo" gana fallback: sin historial de interacción (`LmsActivityLog` vacío) muestra las lecciones ya publicadas (`publish_at <= now()`), reciente primero (`publish_at` DESC), máx. 5; nueva query `$suggestedActivities`, fila play sky + hint "hace X", subtítulo "Actividades publicadas más recientes" | — |
 | 2026-08-05 | Sección 3 pasa a "Próximas Publicaciones": solo lecciones con `publish_at` futuro, ordenadas por `publish_at`; `ffinal` deja de usarse en el panel; badges a `publish_at` ("Se publica en X días" / "Se publica mañana" / "Se publica hoy a las H:i" / "Se publica el {j M}") | — |
