@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @method bool isCoordinacion()
+ * @method bool isDirector()
  * @method bool isLeadership()
  * @method bool isProfesor()
  * @method bool isStudent()
@@ -36,6 +37,7 @@ class User extends Authenticatable
         'is_profesor',
         'is_coordinacion',
         'is_leadership',
+        'is_director',
         'is_student',
         'number_id',
     ];
@@ -64,6 +66,7 @@ class User extends Authenticatable
         'is_profesor' => 'boolean',
         'is_coordinacion' => 'boolean',
         'is_leadership' => 'boolean',
+        'is_director' => 'boolean',
         'is_student' => 'boolean',
     ];
 
@@ -119,6 +122,11 @@ class User extends Authenticatable
         return $this->is_coordinacion ?? false;
     }
 
+    public function isDirector(): bool
+    {
+        return $this->is_director ?? false;
+    }
+
     public function getRolAttribute()
     {
         return $this->role_label;
@@ -128,6 +136,10 @@ class User extends Authenticatable
     {
         if ($this->is_admin) {
             return 'Administrador';
+        }
+
+        if ($this->is_director) {
+            return 'Dirección';
         }
 
         if ($this->is_leadership) {
@@ -165,6 +177,11 @@ class User extends Authenticatable
     public function getIsLeadershipAttribute()
     {
         return $this->is_admin || ($this->attributes['is_leadership'] ?? false);
+    }
+
+    public function getIsDirectorAttribute()
+    {
+        return $this->is_admin || ($this->attributes['is_director'] ?? false);
     }
 
     public function leadershipAreas()

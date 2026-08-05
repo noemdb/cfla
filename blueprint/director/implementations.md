@@ -99,18 +99,18 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 > Copia este bloque al final del documento y mantenlo actualizado en cada loop.
 > El agente lo lee al inicio para saber desde dónde retomar.
 
-| Fase | Estado | Fallos / Notas | Hito de verificación clave |
+| Fase | Estado | Fallos / Notas | Hito de verificación clave |
 |------|--------|----------------|----------------------------|
-| 1. Migración + Modelo | ⬜ | — | `migrate` OK + `User::factory()->director()` existe |
-| 2. Middleware | ⬜ | — | 200 para director, 403 para no-director |
-| 3. Servicio Scope | ⬜ | — | `DirectorScopeService` sin métodos save*, global |
-| 4. Rutas | ⬜ | — | `director.*` registradas, todas GET |
-| 5. Livewire Components | ⬜ | — | 7 componentes carárgan sin error en `render` |
-| 6. Nav y Vistas | ⬜ | — | navbar muestra submenú Dirección |
-| 7. Seguridad read-only | ⬜ | — | test de reflexión sin métodos save*
+| 1. Migración + Modelo | ✅ | Migración `2026_08_04_000001_add_is_director_to_users_table` corrió con `--force`; fillable/casts fieles. `property_exists('is_director')` = `missing` por ser atributo mágico Eloquent (no es fallo). | `migrate` OK + `User::factory()->director()` existe (pendiente Fase 8) |
+| 2. Middleware | ✅ | `php -l` OK; alias `isDirector` en `Kernel.php:82`. Prueba 200/403 queda cubierta por Fase 8. | 200 para director, 403 para no-director (test en Fase 8) |
+| 3. Servicio Scope | ✅ | `DirectorScopeService` (103 líneas) sin métodos `save*`/`store*`/etc. + lint OK; `assertCanSupervise()` aborta 403. | `DirectorScopeService` sin métodos save*, global |
+| 4. Rutas | ✅ | 9 rutas `GET|HEAD` bajo `/app/director` verificadas con `route:list --name=director` (bloque routes/web.php:317–356). Verificación quedó desbloqueada al crear las clases de Fase 5 (dependencia cruzada del spec). Grep literal `director/` sin match: el prefijo usa `prefix('director')`, no path literal. | `director.*` registradas, todas GET |
+| 5. Livewire Components | ✅ | 7 clases creadas (verbatim spec, líneas 736–1194). `php -l` OK; sin métodos `save*`/`store*`/`editObservations`/`cancelEdit`. Render confirmado por smoke test Fase 6: las 7 rutas → 200. | 7 componentes renderizan sin error |
+| 6. Nav y Vistas | ✅ | Navbar desktop+mobile con prefijo `app.`, layout `director/layouts/app.blade.php`, 7 vistas read-only. Verif post: grep `<form|wire:submit|method="post"` → sin salida. Smoke test 7 rutas GET → 200. Bug fijo: `route()` sin prefijo `app.` en activity-list; `'activity.topic'` removido de `with()` (columna, no relación). | navbar muestra submenú Dirección |
+| 7. Seguridad read-only | ✅ | `DirectorReadOnlyTest.php`: reflexión sobre `DirectorScopeService` (sin save/update/store/create/approve/comment/observe...) + auditoría de rutas registradas (sin POST/PUT/PATCH/DELETE) → 2 passed (48 aserciones). Verif post `route:list --name=director`: 9 rutas `GET|HEAD`, cero verbos no-GET. Nota: el grep literal del spec `\sGET\s` no matchea `GET|HEAD` (GET va seguido de `|`), se audita con `grep -iE "POST|PUT|PATCH|DELETE"` → sin salida. | test de reflexión sin métodos save* |
 | 8. Testing | ⬜ | — | `php artisan test` verde global |
 
-**Siguiente fase a ejecutar:** FASE 1 (si esta tabla está toda en ⬜).
+**Siguiente fase a ejecutar:** FASE 8 (Testing). Fases 1–7 verificadas y verdes.
 
 ---
 

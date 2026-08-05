@@ -314,6 +314,47 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('profesores');
         });
 
+    // ─── Dirección: Supervisión y Seguimiento (READ-ONLY) ─────────
+    Route::prefix('director')
+        ->middleware(['auth', 'isDirector'])
+        ->name('director.')
+        ->group(function () {
+
+        // Dashboard con indicadores globales
+        Route::get('/', \App\Livewire\Director\IndicatorDashboard::class)
+            ->name('index');
+
+        // Información Académica: Pensums
+        Route::get('/pensums', \App\Livewire\Director\PensumList::class)
+            ->name('pensums');
+
+        // Carga Académica (Pevaluacions)
+        Route::get('/carga-academica', \App\Livewire\Director\CargaAcademicaList::class)
+            ->name('carga-academica');
+
+        // Actividades de Planificación (SÓLO VISUALIZACIÓN + PDF)
+        Route::get('/activities', \App\Livewire\Director\ActivityList::class)
+            ->name('activities');
+        Route::get('/activities/format/{pevaluacion}', [
+            \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
+        ])->name('activities.format');
+        Route::get('/activities/resume/{pevaluacion}', [
+            \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
+        ])->name('activities.resume');
+
+        // Lecciones LMS
+        Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
+            ->name('lessons');
+
+        // Recursos Compartidos
+        Route::get('/recursos', \App\Livewire\Director\ResourceList::class)
+            ->name('resources');
+
+        // Seguimiento Docente (KPIs)
+        Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
+            ->name('profesores');
+    });
+
     // ───────────────────────────────────────────────
     // MÓDULO DE PROFESOR (Dashboard)
     // ───────────────────────────────────────────────

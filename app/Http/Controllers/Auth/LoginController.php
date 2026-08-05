@@ -48,6 +48,10 @@ class LoginController extends Controller
                 return redirect()->route('app.leadership.dashboard');
             }
 
+            if ($user->isDirector()) {
+                return redirect()->route('app.director.index');
+            }
+
             if ($user->isProfesor()) {
                 return redirect()->to('/app/profesors/home');
             }
