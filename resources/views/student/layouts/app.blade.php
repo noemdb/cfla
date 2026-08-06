@@ -1,3 +1,10 @@
+{{-- F1 · Modo lectura (franja 5–8): el layout aplica tipografía mayor y menos
+     complejidad visual a TODO el área de estudiante cuando el alumno tiene
+     edad 5–8. Criterio = edad (Estudiant::modo_lectura), la misma base que la
+     mascota (C4): si la mascota y la fuente usaran bases distintas, un niño
+     vería la mascota con tipografía adulta (o viceversa). Se lee una vez por
+     render; la relación estudiant suele venir ya cargada del componente. --}}
+@php $__modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false); @endphp
 <!DOCTYPE html>
 <html lang="es" x-data="{ dark: localStorage.getItem('theme') !== 'light' }">
 <head>
@@ -13,7 +20,7 @@
     @livewireStyles
     <style>[x-cloak] { display: none !important; }</style>
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen flex flex-col {{ $__modoLectura ? 'modo-lectura' : '' }}">
 
     {{-- Navbar --}}
     <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30"
@@ -179,9 +186,40 @@
         .animate-mascot-float {
             animation: mascot-float 3s ease-in-out infinite;
         }
+        {{-- "Pop" de la racha al hacer login (C2): un solo disparo por carga. --}}
+        @keyframes streak-pop {
+            0% { transform: scale(0.85); opacity: 0; }
+            60% { transform: scale(1.06); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-streak-pop {
+            animation: streak-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
         @media (prefers-reduced-motion: reduce) {
             .animate-mascot-float { animation: none; }
+            .animate-streak-pop { animation: none; }
         }
+
+        {{-- F1 · Modo lectura (franja 5–8): escala tipográfica mayor para
+             lectores iniciales. Las utilidades de texto de Tailwind son rem,
+             no heredan el font-size del body, así que cada clase se sobrescribe
+             con un selector de mayor especificidad (.modo-lectura .text-xs).
+             Solo aplica cuando <body> lleva la clase modo-lectura. --}}
+        .modo-lectura { font-size: 18px; }
+        .modo-lectura .text-\[10px\] { font-size: 0.8125rem; }
+        .modo-lectura .text-\[11px\] { font-size: 0.875rem; }
+        .modo-lectura .text-\[13px\] { font-size: 0.9375rem; }
+        .modo-lectura .text-\[15px\] { font-size: 1.0625rem; }
+        .modo-lectura .text-xs { font-size: 0.9375rem; }
+        .modo-lectura .text-sm { font-size: 1.0625rem; }
+        .modo-lectura .text-base { font-size: 1.125rem; }
+        .modo-lectura .text-lg { font-size: 1.1875rem; }
+        .modo-lectura .text-xl { font-size: 1.375rem; }
+        .modo-lectura .text-2xl { font-size: 1.75rem; }
+        .modo-lectura .text-3xl { font-size: 2.125rem; }
+        {{-- Cuerpo de la lección: más aire entre líneas y párrafos. --}}
+        .modo-lectura .lms-content { font-size: 1.3125rem; line-height: 1.8; }
+        .modo-lectura .lms-content p, .modo-lectura .lms-content li { margin-bottom: 1.125rem; }
     </style>
 </body>
 </html>

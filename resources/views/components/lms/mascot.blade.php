@@ -1,7 +1,7 @@
 {{-- Mascota del LMS del estudiante (decorativa, aria-hidden). --}}
 {{-- Uso: <x-lms-mascot :variant="'greet'|'celebrate'|'idle'" :size="'lg'|'sm'" :emphasis="bool" /> --}}
-{{-- Variantes: greet = saluda (hero), celebrate = celebra (overlay C3), idle = buscando (empty state C5). --}}
-{{-- emphasis = ojos de estrella brillante (estudiantes 5–8 años). --}}
+{{-- Variantes: greet = saluda (hero), celebrate = celebra (overlay C3), idle = buscando (empty state C4). --}}
+{{-- emphasis = ojos de estrella dorados "oro puro" (estudiantes 5–8 años, C4). --}}
 @props(['variant' => 'greet', 'size' => 'lg', 'emphasis' => false])
 
 @php
@@ -10,7 +10,9 @@
         'sm' => 'w-14 h-14',
     ];
     $sizeClass = $sizes[$size] ?? $sizes['lg'];
-    $float = $variant === 'greet' || $variant === 'celebrate';
+    // Todas las variantes flotan: greet (hero), celebrate (C3) e idle ("anima
+    // en el vacío", C4). Se respeta prefers-reduced-motion en la clase CSS.
+    $float = true;
 @endphp
 
 <svg class="{{ $sizeClass }} shrink-0 {{ $float ? 'animate-mascot-float' : '' }} motion-reduce:animate-none"
@@ -29,10 +31,10 @@
     <circle cx="30" cy="63" r="5" fill="#a7f3d0" opacity="0.85"/>
     <circle cx="70" cy="63" r="5" fill="#a7f3d0" opacity="0.85"/>
 
-    {{-- Ojos: punto (default) o estrella brillante (emphasis, 5–8 años) --}}
+    {{-- Ojos: punto (default) o estrella dorada "oro puro" (emphasis, 5–8 años, C4) --}}
     @if($emphasis)
-        <path d="M 38 44.5 L 39.8 48.2 L 43.5 50 L 39.8 51.8 L 38 55.5 L 36.2 51.8 L 32.5 50 L 36.2 48.2 Z" fill="#064e3b"/>
-        <path d="M 62 44.5 L 63.8 48.2 L 67.5 50 L 63.8 51.8 L 62 55.5 L 60.2 51.8 L 56.5 50 L 60.2 48.2 Z" fill="#064e3b"/>
+        <path d="M 38 44.5 L 39.8 48.2 L 43.5 50 L 39.8 51.8 L 38 55.5 L 36.2 51.8 L 32.5 50 L 36.2 48.2 Z" fill="#fbbf24" stroke="#065f46" stroke-width="1.5"/>
+        <path d="M 62 44.5 L 63.8 48.2 L 67.5 50 L 63.8 51.8 L 62 55.5 L 60.2 51.8 L 56.5 50 L 60.2 48.2 Z" fill="#fbbf24" stroke="#065f46" stroke-width="1.5"/>
     @else
         <circle cx="38" cy="50" r="4" fill="#064e3b"/>
         <circle cx="62" cy="50" r="4" fill="#064e3b"/>

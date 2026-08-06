@@ -105,6 +105,42 @@ class Estudiant extends Model
         return ($this->date_birth <> '0000-00-00') ? Carbon::parse($this->date_birth)->age : '-';
     }
 
+    /**
+     * F1 · Franja etaria de lectura (5–8 / 9–12 / 13–15).
+     *
+     * Se deriva de la edad (getAgeAttribute) y NO del grado/pestudio para
+     * mantener el mismo criterio que la franja de la mascota (C4): si la
+     * mascota y el "modo lectura" usaran bases distintas, un niño de 6 años
+     * vería la mascota pero tipografía adulta (o viceversa). La edad siempre
+     * es derivable de date_birth; pestudio puede faltar si no hay inscripción.
+     * Sin fecha válida (null/'0000-00-00'/'-') → 9–12, la banda intermedia
+     * sin UI especial.
+     */
+    public function getFranjaLecturaAttribute(): string
+    {
+        $age = $this->age;
+        if ($age === null || $age === '-' || $age === '') {
+            return '9-12';
+        }
+
+        return match (true) {
+            (int) $age <= 8 => '5-8',
+            (int) $age <= 12 => '9-12',
+            default => '13-15',
+        };
+    }
+
+    /**
+     * F1 · ¿Modo lectura (franja 5–8)?
+     *
+     * Tipografía más grande y menos opciones por pantalla para lectores
+     * iniciales. false para 9–12 y 13–15 (densidad completa).
+     */
+    public function getModoLecturaAttribute(): bool
+    {
+        return $this->franja_lectura === '5-8';
+    }
+
     public function getAgeDate($dateEnd)
     {
         $date_end = Carbon::parse($dateEnd);

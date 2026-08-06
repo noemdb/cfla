@@ -2,26 +2,33 @@
 
 namespace App\Livewire\Student\Lms;
 
+use App\Livewire\Student\Lms\Concerns\HasStudentScope;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityProgress;
-use App\Livewire\Student\Lms\Concerns\HasStudentScope;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
 class ActivityView extends Component
 {
-    use WireUiActions;
     use HasStudentScope;
+    use WireUiActions;
 
     public Activity $activity;
+
     public $sections = [];
+
     public $resources = [];
+
     public $links = [];
+
     public $htmlEmbeds = [];
+
     public $comments;
+
     public string $newComment = '';
+
     public $completed = false;
 
     /** true cuando now() < publish_at → solo se muestra la 1ª sección. */
@@ -39,6 +46,9 @@ class ActivityView extends Component
     /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
     public bool $mascotEmphasis = false;
 
+    /** ¿Modo lectura (franja 5–8)? (F1) — tipografía mayor y menos opciones. */
+    public bool $modoLectura = false;
+
     /** ¿Disparar la celebración al completar la lección? (C3) */
     public bool $celebrate = false;
 
@@ -46,7 +56,7 @@ class ActivityView extends Component
     {
         $this->initializeHasStudentScope();
 
-        if (!$this->studentService->isActivityVisible($activity)) {
+        if (! $this->studentService->isActivityVisible($activity)) {
             abort(404);
         }
 
@@ -55,6 +65,10 @@ class ActivityView extends Component
         $age = auth()->user()?->estudiant?->age;
         $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
         $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
+
+        // F1: misma base que la mascota (edad, no pestudio). La relación
+        // estudiant ya se cargó en la línea anterior, sin query extra.
+        $this->modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false);
 
         $this->activity = $activity;
         $this->isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
@@ -81,6 +95,7 @@ class ActivityView extends Component
                     '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/',
                     trim($embed->html_content ?? '')
                 ) === 1;
+
                 return $embed;
             });
 
@@ -90,9 +105,9 @@ class ActivityView extends Component
             $firstSection = $this->sections->first();
             $firstSectionId = $firstSection?->id;
             $this->sections = $firstSection ? collect([$firstSection]) : collect();
-            $this->resources = $this->resources->filter(fn($r) => $r->section_id === $firstSectionId);
-            $this->links = $this->links->filter(fn($l) => $l->section_id === $firstSectionId);
-            $this->htmlEmbeds = $this->htmlEmbeds->filter(fn($e) => $e->section_id === $firstSectionId);
+            $this->resources = $this->resources->filter(fn ($r) => $r->section_id === $firstSectionId);
+            $this->links = $this->links->filter(fn ($l) => $l->section_id === $firstSectionId);
+            $this->htmlEmbeds = $this->htmlEmbeds->filter(fn ($e) => $e->section_id === $firstSectionId);
         }
 
         $this->comments = ActivityComment::with('user')
@@ -128,16 +143,16 @@ class ActivityView extends Component
         $progress = LmsActivityProgress::firstOrCreate(
             [
                 'activity_id' => $activity->id,
-                'student_id'  => auth()->id(),
+                'student_id' => auth()->id(),
             ],
             [
-                'status'         => 'IN_PROGRESS',
+                'status' => 'IN_PROGRESS',
                 'completion_pct' => 0,
                 'first_access_at' => now(),
                 'last_access_at' => now(),
             ]
         );
-        if (!$progress->wasRecentlyCreated) {
+        if (! $progress->wasRecentlyCreated) {
             $progress->update(['last_access_at' => now()]);
         }
 
@@ -151,23 +166,18 @@ class ActivityView extends Component
         LmsActivityProgress::updateOrCreate(
             [
                 'activity_id' => $this->activity->id,
-                'student_id'  => auth()->id(),
+                'student_id' => auth()->id(),
             ],
             [
-                'status'         => 'COMPLETED',
+                'status' => 'COMPLETED',
                 'completion_pct' => 100,
-                'completed_at'   => now(),
+                'completed_at' => now(),
                 'last_access_at' => now(),
             ]
         );
 
         $this->completed = true;
         $this->celebrate = true;
-
-        $this->notification()->success(
-            title: '¡Actividad completada!',
-            description: 'Has marcado esta actividad como completada.'
-        );
     }
 
     public function saveComment(): void
@@ -176,8 +186,8 @@ class ActivityView extends Component
 
         ActivityComment::create([
             'activity_id' => $this->activity->id,
-            'user_id'     => auth()->id(),
-            'body'        => $this->newComment,
+            'user_id' => auth()->id(),
+            'body' => $this->newComment,
             'is_approved' => false,
         ]);
 
@@ -192,6 +202,6 @@ class ActivityView extends Component
     public function render(): \Illuminate\View\View
     {
         return view('livewire.student.lms.activity-view')
-               ->layout('student.layouts.app');
+            ->layout('student.layouts.app');
     }
 }

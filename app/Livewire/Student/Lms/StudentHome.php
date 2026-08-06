@@ -29,6 +29,9 @@ class StudentHome extends Component
     /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
     public bool $mascotEmphasis = false;
 
+    /** ¿Modo lectura (franja 5–8)? (F1) — tipografía mayor y menos opciones. */
+    public bool $modoLectura = false;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'subjectFilter' => ['except' => ''],
@@ -44,6 +47,10 @@ class StudentHome extends Component
         $age = auth()->user()?->estudiant?->age;
         $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
         $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
+
+        // F1: misma base que la mascota (edad, no pestudio). La relación
+        // estudiant ya se cargó en la línea anterior, sin query extra.
+        $this->modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false);
     }
 
     public function updatedSearch(): void

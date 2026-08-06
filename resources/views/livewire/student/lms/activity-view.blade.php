@@ -1,3 +1,76 @@
+@php
+// D2 · Color por materia. Paleta literal con clases Tailwind: el JIT escanea
+// .blade.php bajo resources/ (no app/), así que las clases concretas viven aquí
+// y la lógica de asignación en Asignatura::colorKey(). Misma clave → mismo
+// color en claro y oscuro, en todas las vistas del LMS.
+$__sc = [
+    'sky' => [
+        'dot'      => 'bg-sky-400',
+        'badge'    => 'bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 border border-sky-300 dark:border-sky-500/30',
+        'chip'     => 'bg-sky-500/10 text-sky-400',
+        'text'     => 'text-sky-600 dark:text-sky-300',
+        'gradient' => 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+    ],
+    'emerald' => [
+        'dot'      => 'bg-emerald-400',
+        'badge'    => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/30',
+        'chip'     => 'bg-emerald-500/10 text-emerald-400',
+        'text'     => 'text-emerald-600 dark:text-emerald-300',
+        'gradient' => 'linear-gradient(90deg, #10b981, #34d399)',
+    ],
+    'amber' => [
+        'dot'      => 'bg-amber-400',
+        'badge'    => 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300 border border-amber-300 dark:border-amber-500/30',
+        'chip'     => 'bg-amber-500/10 text-amber-400',
+        'text'     => 'text-amber-600 dark:text-amber-300',
+        'gradient' => 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+    ],
+    'indigo' => [
+        'dot'      => 'bg-indigo-400',
+        'badge'    => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-500/30',
+        'chip'     => 'bg-indigo-500/10 text-indigo-400',
+        'text'     => 'text-indigo-600 dark:text-indigo-300',
+        'gradient' => 'linear-gradient(90deg, #6366f1, #818cf8)',
+    ],
+    'purple' => [
+        'dot'      => 'bg-purple-400',
+        'badge'    => 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300 border border-purple-300 dark:border-purple-500/30',
+        'chip'     => 'bg-purple-500/10 text-purple-400',
+        'text'     => 'text-purple-600 dark:text-purple-300',
+        'gradient' => 'linear-gradient(90deg, #a855f7, #c084fc)',
+    ],
+    'orange' => [
+        'dot'      => 'bg-orange-400',
+        'badge'    => 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300 border border-orange-300 dark:border-orange-500/30',
+        'chip'     => 'bg-orange-500/10 text-orange-400',
+        'text'     => 'text-orange-600 dark:text-orange-300',
+        'gradient' => 'linear-gradient(90deg, #f97316, #fb923c)',
+    ],
+    'rose' => [
+        'dot'      => 'bg-rose-400',
+        'badge'    => 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30',
+        'chip'     => 'bg-rose-500/10 text-rose-400',
+        'text'     => 'text-rose-600 dark:text-rose-300',
+        'gradient' => 'linear-gradient(90deg, #f43f5e, #fb7185)',
+    ],
+    'teal' => [
+        'dot'      => 'bg-teal-400',
+        'badge'    => 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300 border border-teal-300 dark:border-teal-500/30',
+        'chip'     => 'bg-teal-500/10 text-teal-400',
+        'text'     => 'text-teal-600 dark:text-teal-300',
+        'gradient' => 'linear-gradient(90deg, #14b8a6, #2dd4bf)',
+    ],
+    'slate' => [
+        'dot'      => 'bg-slate-400',
+        'badge'    => 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30',
+        'chip'     => 'bg-slate-500/10 text-slate-400',
+        'text'     => 'text-slate-600 dark:text-slate-300',
+        'gradient' => 'linear-gradient(90deg, #64748b, #94a3b8)',
+    ],
+];
+$__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatura::colorKey($name);
+@endphp
+
 <div class="max-w-3xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6"
      x-data="readingNav()">
 
@@ -6,6 +79,51 @@
         <div class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
              :style="`width: ${progress}%`"></div>
     </div>
+
+    {{-- ═══════════════════════ BREADCRUMB (D1 · Pan rallado) ═══════════════════════ --}}
+    @php
+        $materia = $activity->pevaluacion?->pensum?->asignatura?->name;
+        $materiaKey = $__scKey($materia);
+    @endphp
+    <nav aria-label="Ruta de navegación" class="px-1">
+        <ol class="flex items-center flex-wrap gap-x-1 gap-y-0.5 text-[11px] sm:text-xs">
+            <li>
+                <a href="{{ route('student.lms.home') }}"
+                   class="rounded font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                    Inicio
+                </a>
+            </li>
+            <li aria-hidden="true" class="flex items-center">
+                <svg class="w-3 h-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li>
+                <a href="{{ route('student.lms.lessons') }}"
+                   class="rounded font-semibold text-gray-500 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                    Lecciones
+                </a>
+            </li>
+            @if($materia)
+            <li aria-hidden="true" class="flex items-center">
+                <svg class="w-3 h-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li>
+                <span class="inline-flex items-center gap-1 {{ $__sc[$materiaKey]['text'] }}"><span class="w-1.5 h-1.5 rounded-full {{ $__sc[$materiaKey]['dot'] }} shrink-0"></span>{{ $materia }}</span>
+            </li>
+            @endif
+            <li aria-hidden="true" class="flex items-center">
+                <svg class="w-3 h-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </li>
+            <li>
+                <span aria-current="page" class="text-gray-900 dark:text-white font-bold">{{ $activity->topic ?? 'Actividad' }}</span>
+            </li>
+        </ol>
+    </nav>
 
     {{-- ═══════════════════════════════════════ BACK NAV ═══════════════════════════════════════ --}}
     <nav class="flex items-center gap-3 px-1">
@@ -16,9 +134,6 @@
             </svg>
             Volver a Lecciones
         </a>
-        <span class="text-[11px] text-gray-500 dark:text-gray-400 hidden sm:inline">
-            / {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? 'Actividad' }}
-        </span>
     </nav>
 
     {{-- ═══════════════════════════════════════ HEADER ═══════════════════════════════════════ --}}
@@ -96,6 +211,25 @@
         @endif
     </header>
 
+    {{-- F3 · Micro-copia infantil: CTA de inicio "Pulsa para empezar" en modo
+         lectura (5–8). Desplaza suavemente a la 1ª sección vía goTo() del
+         componente Alpine readingNav. Solo antes de completar la lección y
+         cuando hay secciones; para 9–12/13–15 no aparece (el TOC ya guía). --}}
+    @if($modoLectura && !$completed && $sections->isNotEmpty())
+        <div class="px-1">
+            <button type="button"
+                    @click.prevent="goTo({{ $sections->first()->id }})"
+                    class="w-full inline-flex items-center justify-center gap-3 px-6 py-4 min-h-[56px] text-lg font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 shadow-md shadow-emerald-600/25 rounded-2xl transition-all duration-200 active:scale-[0.98] focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 group">
+                <span class="sr-only">{{ $sections->first()->title }}</span>
+                <svg class="w-5 h-5 shrink-0 transition-transform duration-200 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Pulsa para empezar</span>
+            </button>
+        </div>
+    @endif
+
     {{-- ═══════════════════════════════════════ PREVIEW BANNER ═══════════════════════════════════════ --}}
     @if($isPreview)
         <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
@@ -119,9 +253,10 @@
     @if($sections->count() > 1)
         <nav class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
             <div class="flex items-center gap-2 px-4 py-2.5 sm:py-3 border-b border-gray-200 dark:border-gray-700/40">
-                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 {{ $__sc[$materiaKey]['text'] }} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/>
                 </svg>
+                <span class="w-1.5 h-1.5 rounded-full {{ $__sc[$materiaKey]['dot'] }} shrink-0"></span>
                 <span class="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-200">Contenido</span>
                 <span class="ml-auto text-[11px] font-medium text-gray-400 dark:text-gray-500 tabular-nums">{{ $sections->count() }} secciones</span>
             </div>
@@ -554,6 +689,23 @@
                 @endif
             </div>
         </section>
+
+        {{-- F3 · Micro-copia infantil: empujón "¡Ya casi terminas!" tras la
+             última sección en modo lectura (5–8), solo si aún no se completa.
+             Check SVG, no emoji (se corrompen en esta base). --}}
+        @if($modoLectura && !$completed && $loop->last)
+            <div class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4 sm:p-5 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-base font-bold text-emerald-900 dark:text-emerald-300">¡Ya casi terminas!</p>
+                    <p class="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed mt-0.5">Pulsa el botón de abajo cuando hayas terminado la lección.</p>
+                </div>
+            </div>
+        @endif
     @empty
         <div class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-6 sm:p-8 text-center">
             <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -730,7 +882,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Marcar como completada
+                        @if($modoLectura)
+                            ¡Lo terminé!
+                        @else
+                            Marcar como completada
+                        @endif
                     </span>
                     <span wire:loading wire:target="markComplete" class="flex items-center gap-2">
                         <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -751,20 +907,22 @@
     </div>
 
     @if($this->celebrate)
-    <div wire:ignore x-data="celebration()" x-init="run()" role="status" aria-live="polite"
-         class="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center px-4" x-cloak>
+    <div wire:ignore x-data="celebration()" x-init="run()" x-show="visible" role="status" aria-live="polite"
+         class="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center px-4" x-cloak
+         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95">
         <div class="relative text-center">
             <div aria-hidden="true" class="confetti-layer absolute inset-0 overflow-hidden">
                 {{-- ~24 piezas generadas por x-init: spans absolutos con left/delay/duración/color/rotación inline; solo si NO prefers-reduced-motion --}}
             </div>
             <div class="px-6 py-6 rounded-2xl bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-500/30
-                        shadow-xl shadow-emerald-500/10"
-                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
-                 x-transition:enter-end="opacity-100 scale-100">
+                        shadow-xl shadow-emerald-500/10">
                 @if($showMascot)
                     <x-lms.mascot :variant="'celebrate'" :size="'lg'" :emphasis="$mascotEmphasis" />
                 @endif
-                <p class="mt-4 text-2xl font-display font-bold text-gray-900 dark:text-white">¡Lo lograste! �� 🎉</p>
+                <p class="mt-4 text-2xl font-display font-bold text-gray-900 dark:text-white">¡Lo lograste! 🎉</p>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Has completado esta lección.</p>
             </div>
         </div>
@@ -1051,35 +1209,44 @@
                 if (Alpine._celebrationRegistered) return;
                 Alpine._celebrationRegistered = true;
                 Alpine.data('celebration', () => ({
+                    visible: false,
                     run() {
-                        const confettiLayer = document.querySelector('.confetti-layer');
-                        if (!confettiLayer) return;
+                        // E2: sin confeti bajo prefers-reduced-motion; el mensaje igual se muestra
+                        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        if (!reduceMotion) {
+                            const confettiLayer = document.querySelector('.confetti-layer');
+                            if (confettiLayer) {
+                                const colors = ['#10b981', '#34d399', '#6ee7b7', '#fbbf24', '#f59e0b', '#f97316'];
+                                const pieceCount = 24;
 
-                        const colors = ['#10b981', '#34d399', '#6ee7b7', '#fbbf24', '#f59e0b', '#f97316'];
-                        const pieceCount = 24;
+                                for (let i = 0; i < pieceCount; i++) {
+                                    const piece = document.createElement('span');
+                                    const size = Math.random() * 8 + 4; // 4-12px
+                                    const left = Math.random() * 100; // 0-100%
+                                    const delay = Math.random() * 3; // 0-3s
+                                    const duration = Math.random() * 2 + 3; // 3-5s
+                                    const rotation = Math.random() * 360; // 0-360deg
+                                    const color = colors[Math.floor(Math.random() * colors.length)];
 
-                        for (let i = 0; i < pieceCount; i++) {
-                            const piece = document.createElement('span');
-                            const size = Math.random() * 8 + 4; // 4-12px
-                            const left = Math.random() * 100; // 0-100%
-                            const delay = Math.random() * 3; // 0-3s
-                            const duration = Math.random() * 2 + 3; // 3-5s
-                            const rotation = Math.random() * 360; // 0-360deg
-                            const color = colors[Math.floor(Math.random() * colors.length)];
+                                    piece.style.position = 'absolute';
+                                    piece.style.width = size + 'px';
+                                    piece.style.height = size + 'px';
+                                    piece.style.backgroundColor = color;
+                                    piece.style.borderRadius = '50%';
+                                    piece.style.left = left + '%';
+                                    piece.style.top = '-10%';
+                                    piece.style.opacity = '0';
+                                    piece.style.animation = `confetti-fall ${duration}s ease-out ${delay}s forwards`;
+                                    piece.style.transform = `rotate(${rotation}deg)`;
 
-                            piece.style.position = 'absolute';
-                            piece.style.width = size + 'px';
-                            piece.style.height = size + 'px';
-                            piece.style.backgroundColor = color;
-                            piece.style.borderRadius = '50%';
-                            piece.style.left = left + '%';
-                            piece.style.top = '-10%';
-                            piece.style.opacity = '0';
-                            piece.style.animation = `confetti-fall ${duration}s ease-out ${delay}s forwards`;
-                            piece.style.transform = `rotate(${rotation}deg)`;
-
-                            confettiLayer.appendChild(piece);
+                                    confettiLayer.appendChild(piece);
+                                }
+                            }
                         }
+
+                        // Mostrar la tarjeta de celebración y auto-ocultarla tras 3.5s
+                        this.visible = true;
+                        setTimeout(() => { this.visible = false; }, 3500);
                     }
                 }));
             });

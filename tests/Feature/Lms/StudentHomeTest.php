@@ -3,6 +3,7 @@
 namespace Tests\Feature\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\User;
@@ -232,6 +233,166 @@ class StudentHomeTest extends TestCase
     }
 
     /**
+     * D2 · Color por materia — el home aplica el color de la asignatura
+     * (punto de materia, badge del hero y barra de distribución), y la
+     * barra de distribución deja de pintarse siempre de esmeralda.
+     */
+    public function test_home_applies_subject_color_dots_badge_and_distribution(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        // Edad fija 14 años: el D2 verifica la variante adulta (barra de
+        // distribución con gradiente de materia). Sin date_birth la fábrica
+        // genera una fecha aleatoria y ~14% de las veces el estudiante cae en
+        // modo lectura (5–8), donde la barra de progreso F2 usa el gradiente
+        // esmeralda fijo y rompería el assert de abajo.
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(14)->subMonths(1)->toDateString(),
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Test Asignatura → rose (ver AsignaturaColorKeyTest). Computamos la
+        // clave desde el modelo para que el test siga siendo autoconsistente.
+        $key = Asignatura::colorKey('Test Asignatura');
+        $this->assertSame('rose', $key);
+
+        // Punto de materia en las tarjetas de lección
+        $this->assertStringContainsString("bg-{$key}-400", $html);
+
+        // Badge del hero (la lección siguiente publicada sin completar)
+        $this->assertStringContainsString("bg-{$key}-100 text-{$key}-700", $html);
+
+        // Distribución: la barra de Test Asignatura usa el gradiente rose,
+        // ya no el esmeralda fijo de antes del D2.
+        $this->assertStringNotContainsString('linear-gradient(90deg, #10b981, #34d399)', $html);
+    }
+
+    /**
+     * D3 · Mini-barra sticky "Próxima lección" — mantiene la siguiente lección
+     * visible al hacer scroll (cuando el hero y su CTA salieron de pantalla).
+     * La barra existe, empieza oculta (x-show + x-cloak), es sticky bajo el
+     * navbar (top-14) y reutiliza el color de materia (D2) para el punto.
+     */
+    public function test_home_renders_sticky_next_lesson_bar(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // La barra existe y enlaza al detalle de la próxima lección
+        $this->assertStringContainsString('Próxima lección', $html);
+        $this->assertStringContainsString(route('student.lms.activity', $activity), $html);
+
+        // Estado Alpine: oculta por defecto (x-show="nextOpen" + x-cloak),
+        // sticky justo debajo del navbar (h-14 = 56px → top-14), y mide el hero
+        $this->assertStringContainsString('x-show="nextOpen"', $html);
+        $this->assertStringContainsString('x-cloak', $html);
+        $this->assertStringContainsString('sticky top-14 z-20', $html);
+        $this->assertStringContainsString('x-ref="heroSection"', $html);
+
+        // Reutiliza el color de materia (D2): el punto lleva la clave rose
+        $key = Asignatura::colorKey('Test Asignatura');
+        $this->assertStringContainsString("bg-{$key}-400", $html);
+
+        // El botón compacto "Continuar" comparte el mismo destino
+        $this->assertStringContainsString('Continuar', $html);
+    }
+
+    /**
+     * F1+F2+F3 · Home en modo lectura (franja 5–8): el <body> lleva la clase
+     * modo-lectura, la sección de estadísticas se reduce a una única barra de
+     * progreso accesible (role="progressbar"), y el CTA del hero usa la
+     * micro-copia infantil "Pulsa para empezar" en vez del tema de la lección.
+     */
+    public function test_home_modo_lectura_shows_progress_bar_and_child_cta(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        // 6 años → modo lectura activo (misma base etaria que la mascota C4)
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(6)->subMonths(1)->toDateString(),
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // F1: el layout aplica la clase modo-lectura al <body>. El html() de
+        // Livewire devuelve solo el componente; la clase del layout se verifica
+        // con una petición HTTP real (GET renderiza layout + componente).
+        $page = $this->actingAs($student)->get(route('student.lms.home'))->getContent();
+        $this->assertStringContainsString('flex flex-col modo-lectura', $page);
+
+        // F2: barra de progreso en lugar de las 4 tarjetas adultas
+        $this->assertStringContainsString('Tu progreso', $html);
+        $this->assertStringContainsString('role="progressbar"', $html);
+        $this->assertStringContainsString('lecciones completadas', $html);
+        $this->assertStringContainsString('linear-gradient(90deg, #10b981, #34d399)', $html);
+        $this->assertStringNotContainsString('Disponibles para ti', $html);
+        $this->assertStringNotContainsString('Que has dejado', $html);
+        $this->assertStringNotContainsString('Recursos descargados', $html);
+
+        // F3: el CTA del hero usa micro-copia infantil
+        $this->assertStringContainsString('Pulsa para empezar', $html);
+
+        // D3: la barra sticky sigue presente en modo lectura
+        $this->assertStringContainsString('Continuar', $html);
+    }
+
+    /**
+     * F1+F2+F3 · Home en modo adulto (13–15): sin clase modo-lectura, se
+     * mantienen las 4 tarjetas de estadísticas y el CTA del hero muestra el
+     * tema de la lección, no la micro-copia infantil.
+     */
+    public function test_home_adult_mode_keeps_full_grid_and_topic_cta(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        // 14 años → modo lectura inactivo
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(14)->subMonths(1)->toDateString(),
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // F1: sin modo lectura — se verifica sobre la página completa (GET),
+        // porque html() de Livewire no incluye el <body> del layout.
+        $page = $this->actingAs($student)->get(route('student.lms.home'))->getContent();
+        $this->assertStringNotContainsString('flex flex-col modo-lectura', $page);
+
+        // F2: las 4 tarjetas adultas, sin la barra de progreso infantil
+        $this->assertStringContainsString('Disponibles para ti', $html);
+        $this->assertStringContainsString('Que has dejado', $html);
+        $this->assertStringContainsString('Recursos descargados', $html);
+        $this->assertStringNotContainsString('Tu progreso', $html);
+        $this->assertStringNotContainsString('role="progressbar"', $html);
+
+        // F3: el CTA adulto muestra el tema de la lección
+        $this->assertStringContainsString('Lección de Test Asignatura', $html);
+        $this->assertStringNotContainsString('Pulsa para empezar', $html);
+
+        // D3: la barra sticky sigue presente
+        $this->assertStringContainsString('Continuar', $html);
+    }
+
+    /**
      * El fallback solo incluye lecciones YA publicadas (publish_at <= ahora).
      * Las programadas (preview, publish_at futuro) quedan fuera del fallback
      * y se ven en "Próximas Publicaciones".
@@ -443,10 +604,333 @@ class StudentHomeTest extends TestCase
         $this->assertStringNotContainsString('Ver todas', $section);
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * C4 · Mascota/avatar compañero — franja etaria (F1) y empty state
+     * ------------------------------------------------------------------
+     * Se muestra ≤12 años y se oculta para 13–15; "oro puro" (ojos de
+     * estrella dorados) solo en la franja 5–8. La variante idle "anima en
+     * el vacío" (flota y aparece en el empty state del listado).
+     */
+
+    public function test_home_mascot_shows_for_5_8_with_gold_emphasis(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(6)->subMonths(1)->toDateString(), // 6 años
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Mascota en el hero (variante greet: brazo alzado) y flota
+        $this->assertStringContainsString('lms-mascot-body', $html);
+        $this->assertStringContainsString('M26 66 Q18 76 20 84', $html);
+        $this->assertStringContainsString('animate-mascot-float', $html);
+        // "Para 5–8 es oro puro": ojos de estrella dorados
+        $this->assertStringContainsString('M 38 44.5 L 39.8 48.2', $html);
+        $this->assertStringContainsString('fill="#fbbf24"', $html);
+    }
+
+    public function test_home_mascot_shows_for_9_12_without_emphasis(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(10)->subMonths(1)->toDateString(), // 10 años
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Mascota presente con ojos de punto (sin énfasis dorado)
+        $this->assertStringContainsString('lms-mascot-body', $html);
+        $this->assertStringContainsString('cx="38" cy="50" r="4"', $html);
+        $this->assertStringNotContainsString('M 38 44.5 L 39.8 48.2', $html);
+    }
+
+    public function test_home_mascot_shown_for_null_age_without_emphasis(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+
+        // date_birth sin cargar ('0000-00-00') → getAgeAttribute() = '-'
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => '0000-00-00',
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        $this->assertStringContainsString('lms-mascot-body', $html);
+        $this->assertStringContainsString('cx="38" cy="50" r="4"', $html);
+        $this->assertStringNotContainsString('M 38 44.5 L 39.8 48.2', $html);
+    }
+
+    public function test_home_mascot_hidden_for_13_15(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(14)->subMonths(1)->toDateString(), // 14 años
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Franja 13–15: la mascota se oculta por completo (ni hero ni empty state)
+        $this->assertStringNotContainsString('lms-mascot-body', $html);
+    }
+
+    public function test_home_mascot_idle_in_empty_state(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(6)->subMonths(1)->toDateString(),
+        ]);
+
+        // La sección "Todas las Lecciones" (con su empty state) solo se
+        // renderiza si hay resultados, búsqueda o filtro activo.
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $component->set('search', 'inexistente');
+        $html = $component->html();
+
+        // Variante idle: lupa de búsqueda en el empty state ("anima en el vacío")
+        $this->assertStringContainsString('lms-mascot-body', $html);
+        $this->assertStringContainsString('M89 28 L96 35', $html);
+        $this->assertStringContainsString('No encontramos lecciones', $html);
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * C5 · Empty state ilustrado — visual + CTA clara
+     * ------------------------------------------------------------------
+     * Sin resultados: ilustración (mascota idle), mensaje contextual con el
+     * término buscado, micro-copia de apoyo y dos CTAs: "Vuelve a intentarlo"
+     * (limpia la búsqueda) y "Ver todas" (restaura el listado completo).
+     */
+
+    public function test_all_lessons_empty_state_illustrated_with_ctas(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección visible', now()->subDay());
+
+        // Franja con mascota (≤12): la ilustración del empty state es la mascota idle
+        $student = $this->createStudentInSeccion($seccionId, [
+            'date_birth' => now()->subYears(6)->subMonths(1)->toDateString(), // 6 años
+        ]);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $component->set('search', 'inexistente');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+
+        // Visual: ilustración (mascota idle con lupa) dentro del empty state
+        $this->assertStringContainsString('lms-mascot-body', $section);
+        $this->assertStringContainsString('M89 28 L96 35', $section);
+
+        // Mensaje contextual con el término (dentro de un <span>) + micro-copia
+        $this->assertStringContainsString('No encontramos lecciones', $section);
+        $this->assertStringContainsString('>inexistente</span>”.', $section);
+        $this->assertStringContainsString('Prueba con otra búsqueda o limpia los filtros.', $section);
+
+        // CTA clara: "Vuelve a intentarlo" (limpia búsqueda) y "Ver todas"
+        $this->assertStringContainsString('Vuelve a intentarlo', $section);
+        $this->assertStringContainsString('Ver todas', $section);
+
+        // "Vuelve a intentarlo" ($set('search','')) restaura el listado
+        $component->set('search', '');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+        $this->assertStringContainsString('Lección visible', $section);
+        $this->assertStringNotContainsString('Vuelve a intentarlo', $section);
+        $this->assertStringNotContainsString('Ver todas', $section);
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * C1 · Progreso por lección con estrellas — filas del catálogo
+     * ------------------------------------------------------------------
+     * Cada lección del catálogo ("Todas las Lecciones") muestra 3 estrellas
+     * de logro (completada / comentario aprobado / recurso descargado) y una
+     * barra de progreso visual. Con los tres logros: 3 estrellas verdes y
+     * barra al 100%. Sin interacción: 3 estrellas grises y barra al 0%.
+     */
+
+    public function test_all_lessons_row_lights_3_stars_with_full_progress(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección con logros', now()->subDay());
+        $student = $this->createStudentInSeccion($seccionId);
+
+        // Los 3 logros de la lección (C1): completada + comentario aprobado + descarga
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'COMPLETE',
+            'created_at' => now(),
+        ]);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'RESOURCE_DOWNLOAD',
+            'created_at' => now(),
+        ]);
+        DB::table('activity_comments')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'body' => 'Me encantó esta lección.',
+            'is_approved' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+
+        // Aislar la única fila del catálogo (una sola lección publicada)
+        $liStart = strpos($section, '<li');
+        $liEnd = strpos($section, '</li>') + strlen('</li>');
+        $row = substr($section, $liStart, $liEnd - $liStart);
+
+        // 3 estrellas verdes (todas ganadas) + barra de progreso al 100%
+        $this->assertStringContainsString('3 de 3 logros', $row);
+        $this->assertSame(3, substr_count($row, 'text-emerald-500'));
+        $this->assertSame(0, substr_count($row, 'text-gray-300 dark:text-gray-600'));
+        $this->assertStringContainsString('style="width: 100%"', $row);
+    }
+
+    public function test_all_lessons_row_shows_gray_stars_without_interaction(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección recién publicada', now()->subDay());
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+
+        $liStart = strpos($section, '<li');
+        $liEnd = strpos($section, '</li>') + strlen('</li>');
+        $row = substr($section, $liStart, $liEnd - $liStart);
+
+        // Sin interacción: 0 estrellas ganadas (3 grises) y barra al 0%
+        $this->assertStringContainsString('0 de 3 logros', $row);
+        $this->assertSame(0, substr_count($row, 'text-emerald-500'));
+        $this->assertSame(3, substr_count($row, 'text-gray-300 dark:text-gray-600'));
+        $this->assertStringContainsString('style="width: 0%"', $row);
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * C2 · Racha de días (streak) — hero del home
+     * ------------------------------------------------------------------
+     * La racha cuenta los días consecutivos con actividad (VIEW/COMPLETE/
+     * RESOURCE_DOWNLOAD) desde hoy (o ayer si hoy aún no hay actividad) y
+     * se muestra como píldora ámbar — la familia del countdown del hero —
+     * con un "pop" de celebración al cargar (login).
+     */
+
+    public function test_hero_lights_streak_badge_in_countdown_family(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección para racha', now()->subDay());
+        $student = $this->createStudentInSeccion($seccionId);
+
+        // Actividad hoy y ayer → racha de 2 días consecutivos
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now()->subDay(),
+        ]);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Contador + micro-copia de racha
+        $this->assertStringContainsString('2 días de racha', $html);
+
+        // Familia del countdown del hero (ámbar) + celebración "pop" al login
+        $this->assertStringContainsString(
+            'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 animate-streak-pop',
+            $html
+        );
+        $this->assertStringNotContainsString('text-orange-700', $html);
+    }
+
+    public function test_hero_hides_streak_badge_without_activity(): void
+    {
+        [$seccionId] = $this->createEvaluacionChain();
+        $student = $this->createStudentInSeccion($seccionId);
+
+        // Sin logs de actividad → sin racha → sin píldora
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        $this->assertStringNotContainsString('de racha', $html);
+        $this->assertStringNotContainsString('animate-streak-pop', $html);
+    }
+
+    public function test_streak_celebration_pop_respects_reduced_motion(): void
+    {
+        $source = file_get_contents(resource_path('views/student/layouts/app.blade.php'));
+
+        // C2: keyframe "pop" definido junto a mascot-float, un solo disparo
+        $this->assertStringContainsString('@keyframes streak-pop', $source);
+        $this->assertStringContainsString('animation: streak-pop 0.5s', $source);
+
+        // C2 + E2: bajo prefers-reduced-motion el "pop" se desactiva
+        $this->assertStringContainsString('.animate-streak-pop { animation: none; }', $source);
+    }
+
     /**
      * Create a student User with Estudiant + Inscripcion in the given seccion.
+     *
+     * $overrides se fusionan en el factory de Estudiant (p. ej. date_birth para
+     * controlar la franja etaria de la mascota, C4).
      */
-    private function createStudentInSeccion(int $seccionId): User
+    private function createStudentInSeccion(int $seccionId, array $overrides = []): User
     {
         $user = User::factory()->create(['is_student' => true]);
 
@@ -458,10 +942,10 @@ class StudentHomeTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $estudiant = \App\Models\app\Learner\Estudiant::factory()->create([
+        $estudiant = \App\Models\app\Learner\Estudiant::factory()->create(array_merge([
             'user_id' => $user->id,
             'planpago_id' => $planpagoId,
-        ]);
+        ], $overrides));
 
         Inscripcion::factory()->create([
             'estudiant_id' => $estudiant->id,
