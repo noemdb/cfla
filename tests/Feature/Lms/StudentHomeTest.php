@@ -249,27 +249,30 @@ class StudentHomeTest extends TestCase
         $this->assertStringContainsString('Publicada hace 2 días', $fallback);
         $this->assertStringNotContainsString($preview->topic, $fallback);
 
-        // La preview sí aparece en el resto del panel (Próximas Publicaciones)
+        // La preview sí aparece en el resto del panel: en "Próximas Publicaciones"
+        // y en el listado global "Todas las Lecciones" (sección 4)
         $this->assertStringContainsString($preview->topic, $html);
     }
 
     /**
-     * El listado "Todas las Lecciones" muestra TODAS las lecciones ya publicadas
-     * (publish_at <= ahora) de la más reciente a la más antigua, sin tope
+     * El listado "Todas las Lecciones" muestra TODAS las lecciones visibles
+     * (publicadas y previews con publish_at futuro) con paginación de 5 por
+     * página, de la más reciente a la más antigua según publish_at DESC
      * (a diferencia del fallback de "Continuar Aprendiendo" que usa take(5)),
-     * y es independiente del historial de interacción. Las previews (publicación
-     * futura) no aparecen en el listado: viven en "Próximas Publicaciones".
+     * e independiente del historial de interacción. La preview (publish_at
+     * futuro) se ordena PRIMERO por tener el publish_at más alto.
      */
-    public function test_all_published_lessons_listed_desc_by_publish_at(): void
+    public function test_all_lessons_listed_desc_by_publish_at(): void
     {
         [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
 
-        // 6 lecciones ya publicadas con fechas escalonadas (más de 5 a propósito)
+        // 6 lecciones ya publicadas con fechas escalonadas (más de 5 a propósito
+        // para verificar la paginación de 5 por página)
         $topics = [];
         for ($i = 0; $i < 6; $i++) {
             $topics[] = $this->createPublishedActivity($pevaluacionId, "Lección {$i}", now()->subDays($i + 1));
         }
-        // Publicación futura → solo en "Próximas", nunca en el listado
+        // Publicación futura → también en el listado, arriba de todo
         $preview = $this->createPublishedActivity($pevaluacionId, 'Futura en 3 días', now()->addDays(3));
 
         // Con historial de interacción: el listado NO es el fallback de la sección 2
@@ -281,30 +284,153 @@ class StudentHomeTest extends TestCase
             'created_at' => now(),
         ]);
 
-        $html = Livewire::actingAs($student)
-            ->test(\App\Livewire\Student\Lms\StudentHome::class)
-            ->html();
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
 
-        // El listado existe y viene después de "Próximas Publicaciones"
+        $expectedOrder = [$preview, ...$topics]; // publish_at DESC
+
+        // Página 1: 5 lecciones visibles (de 7 totales), en orden DESC
+        $html = $component->html();
         $this->assertStringContainsString('Todas las Lecciones', $html);
         $start = strpos($html, 'Todas las Lecciones');
         $this->assertNotFalse($start);
-        $section = substr($html, $start);
+        $page1 = substr($html, $start);
 
-        // Todas las publicadas están, sin tope (incluso más de 5)
-        foreach ($topics as $activity) {
-            $this->assertStringContainsString($activity->topic, $section);
+        $page1Expected = array_slice($expectedOrder, 0, 5);
+        foreach ($page1Expected as $activity) {
+            $this->assertStringContainsString($activity->topic, $page1);
         }
 
-        // Ordenadas por publish_at DESC (la más reciente primero)
-        $positions = array_map(fn ($a) => strpos($section, $a->topic), $topics);
+        $positions = array_map(fn ($a) => strpos($page1, $a->topic), $page1Expected);
         $sorted = $positions;
         sort($sorted);
         $this->assertSame($sorted, $positions);
 
-        // La futura no está en el listado, pero sí en "Próximas Publicaciones"
-        $this->assertStringNotContainsString($preview->topic, $section);
-        $this->assertStringContainsString($preview->topic, $html);
+        // Las dos más antiguas no caben en la página 1 → página 2
+        $page2Expected = array_slice($expectedOrder, 5);
+        foreach ($page2Expected as $activity) {
+            $this->assertStringNotContainsString($activity->topic, $page1);
+        }
+
+        // Página 2: las 2 restantes, también en orden DESC
+        $component->call('gotoPage', 2);
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $page2 = substr($html, $start);
+
+        foreach ($page2Expected as $activity) {
+            $this->assertStringContainsString($activity->topic, $page2);
+        }
+
+        $positions2 = array_map(fn ($a) => strpos($page2, $a->topic), $page2Expected);
+        $sorted2 = $positions2;
+        sort($sorted2);
+        $this->assertSame($sorted2, $positions2);
+    }
+
+    /**
+     * La búsqueda en vivo ("Todas las Lecciones") filtra por texto del topic.
+     */
+    public function test_all_lessons_search_filters_by_topic(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Álgebra lineal', now()->subDays(1));
+        $this->createPublishedActivity($pevaluacionId, 'Historia antigua', now()->subDays(2));
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $component->set('search', 'Álgebra');
+
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+
+        $this->assertStringContainsString('Álgebra lineal', $section);
+        $this->assertStringNotContainsString('Historia antigua', $section);
+    }
+
+    /**
+     * El filtro por asignatura excluye lecciones de otras asignaturas y, si no
+     * hay coincidencias, muestra el estado vacío con "Limpiar filtros".
+     */
+    public function test_all_lessons_subject_filter_excludes_other_subjects(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        $student = $this->createStudentInSeccion($seccionId);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        // Filtro que coincide: la lección sigue en el listado global
+        $component->set('subjectFilter', 'Test Asignatura');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+        $this->assertStringContainsString('Lección de Test Asignatura', $section);
+
+        // Filtro de otra asignatura: sin resultados → estado vacío con limpiar
+        $component->set('subjectFilter', 'Matemática');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+        $this->assertStringNotContainsString('Lección de Test Asignatura', $section);
+        $this->assertStringContainsString('Limpiar filtros', $section);
+    }
+
+    /**
+     * Una búsqueda sin coincidencias muestra el estado vacío y "Limpiar filtros"
+     * restaura el listado completo.
+     */
+    public function test_all_lessons_search_no_results_shows_clear_and_reset(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección de búsqueda', now()->subDay());
+
+        $student = $this->createStudentInSeccion($seccionId);
+        DB::table('lms_activity_logs')->insert([
+            'activity_id' => $activity->id,
+            'user_id' => $student->id,
+            'event' => 'VIEW',
+            'created_at' => now(),
+        ]);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        $component->set('search', 'inexistente');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+        $this->assertStringContainsString('Limpiar filtros', $section);
+        $this->assertStringNotContainsString('Lección de búsqueda', $section);
+
+        // Al limpiar, el listado completo vuelve
+        $component->call('resetFilters');
+        $html = $component->html();
+        $start = strpos($html, 'Todas las Lecciones');
+        $this->assertNotFalse($start);
+        $section = substr($html, $start);
+        $this->assertStringContainsString('Lección de búsqueda', $section);
+        $this->assertStringNotContainsString('Limpiar filtros', $section);
     }
 
     /**
