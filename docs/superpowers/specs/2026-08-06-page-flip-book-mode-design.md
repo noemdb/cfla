@@ -121,23 +121,30 @@ El root `<div x-data="readingNav()">` se mantiene (Livewire exige un solo root).
     {{-- contenido actual: TOC + secciones, sin cambios --}}
 </div>
 
+@if($flipEnabled)
 <div x-show="Alpine.store('lmsView').mode === 'book'" x-cloak>
-    <div wire:ignore>
-        <div x-data="lessonBook()" x-init="init()" data-completed="{{ $completed ? '1' : '0' }}">
-            {{-- Páginas renderizadas en servidor, una por sección (ver §7.1) --}}
+    <div x-data="lessonBook()" data-completed="{{ $completed ? '1' : '0' }}">
+        <div wire:ignore>
             <div id="lms-flipbook-root">
+                {{-- Páginas renderizadas en servidor, una por sección (ver §7.1) --}}
                 @foreach($sections as $section)
                     @include('livewire.student.lms._flipbook-page', ['section' => $section])
                 @endforeach
             </div>
         </div>
-    </div>
-    {{-- Barra final: fuera del wire:ignore → Livewire la re-renderiza tras markComplete() --}}
-    <div class="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
-        {{-- indicador "Página X / N" + CTA (ver §7.2) --}}
+        {{-- Barra final: fuera del wire:ignore → Livewire la re-renderiza tras markComplete() --}}
+        <div class="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
+            {{-- indicador "Página X / N" + CTA (ver §7.2) --}}
+        </div>
     </div>
 </div>
+@endif
 ```
+
+> **Correcciones de implementación (Task 5)** — el bloque aplicado en producción difiere de la primera versión de este §5.1:
+> 1. **Gate `@if($flipEnabled)`** (corrección del NEEDS_CONTEXT de Task 5): sin el gate, el footer "Marcar como completada" se filtraba al HTML de modo lectura infantil (`assertStringNotContainsString` en `StudentAccessTest.php:375`). Ahora `$flipEnabled` es una única fuente de verdad: sin toggle (§5.2) → tampoco hay DOM de libro.
+> 2. **`x-data="lessonBook()"` fuera del `wire:ignore`** (C3): envuelve a la vez el árbol protegido Y la barra final. La barra usa `pageIndex`/`total`/`completed` de `lessonBook` → debe vivir dentro del `x-data`.
+> 3. **Sin `x-init="init()"`** (C2): Alpine 3.15.12 auto-llama a `init()`. Con el atributo se duplicaría el listener `Livewire.on`.
 
 Nota: el `wire:ignore` envuelve **solo** el árbol que StPageFlip muta (`#lms-flipbook-root` y sus hojas). La **barra final** y su botón `wire:click="markComplete"` viven fuera de la zona protegida — Livewire puede re-renderizarlos y el botón sigue disparando `markComplete()` normalmente.
 
