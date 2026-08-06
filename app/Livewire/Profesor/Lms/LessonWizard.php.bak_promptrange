@@ -2391,7 +2391,7 @@ Reglas estrictas:
 - MÍNIMO 5 bloques en //DESARROLLO (más si el contenido lo requiere)
 - Cada bloque de DESARROLLO separado por una línea en blanco
 - Primera línea de cada bloque = título (máx 10 palabras), lenguaje acorde al grado
-- Cada bloque de DESARROLLO: mínimo 100 palabras (3-5 párrafos) — coherente con el umbral mínimo de la validación automática (100 palabras)
+- Cada bloque de DESARROLLO: mínimo 150 palabras (3-5 párrafos)
 - SIN meta-comentarios, explicaciones ni introducciones antes del formato
 - Alineado con los referentes normativos y el contexto de la actividad
 - NO uses temas genéricos — usa EXACTAMENTE el contexto proporcionado

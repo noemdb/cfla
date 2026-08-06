@@ -1440,8 +1440,8 @@ PROMPT;
     // ─── Slide editor: Generar texto HTML para diapositiva actual ──
 
     /**
-     * Genera contenido HTML para la diapositiva (sección) actual usando IA.
-     * Similar a generateSectionContent() pero produce HTML semántico
+     * Genera contenido HTML para la diapositiva (secci├│n) actual usando IA.
+     * Similar a generateSectionContent() pero produce HTML sem├íntico
      * con clases Tailwind en lugar de texto plano.
      */
     public function generateSlideText(): void
@@ -1473,17 +1473,17 @@ PROMPT;
 
         $activityContext = collect([
             'Tema generador' => $activity->topic,
-            'Tejido temático' => $activity->thematic,
+            'Tejido tem├ítico' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Enseñanza' => $activity->teaching,
+            'Ense├▒anza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-            'Referentes teóricos' => $activity->references,
-            'ODS/Sistematización' => $activity->observations,
-        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
+            'Referentes te├│ricos' => $activity->references,
+            'ODS/Sistematizaci├│n' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
 
         $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
         $indicatorsText = $indicators->isNotEmpty()
-            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
+            ? $indicators->map(fn ($n) => "├ó—ó {$n}")->implode("\n")
             : '—';
 
         $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
@@ -1519,7 +1519,7 @@ PROMPT;
 
 **Curso:** {$gradeName} · {$subjectName}
 
-**Actividad pedagógica:
+**Actividad pedag├│gica:
 {$activityContext}
 
 **Indicadores de logro:**
@@ -1566,7 +1566,7 @@ PROMPT;
             $this->dispatch('debug-raw', ['raw' => $content, 'length' => mb_strlen($content), 'model' => $result['model'] ?? '?']);
 
             if (empty($content)) {
-                $this->generationError = 'La IA no generó contenido.';
+                $this->generationError = 'La IA no gener├│ contenido.';
                 $this->generatingSection = null;
 
                 return;
@@ -1915,9 +1915,9 @@ PROMPT;
     // ─── Slide editor: Generar diagrama Mermaid para diapositiva actual ──
 
     /**
-     * Genera código HTML con diagrama Mermaid para la diapositiva actual
-     * usando el contenido de la sección y el contexto de la lección.
-     * Reutiliza la lógica existente de generateEmbedCard() pero inyecta
+     * Genera c├│digo HTML con diagrama Mermaid para la diapositiva actual
+     * usando el contenido de la secci├│n y el contexto de la lecci├│n.
+     * Reutiliza la l├│gica existente de generateEmbedCard() pero inyecta
      * el resultado directamente en el contenido de la diapositiva.
      */
     public function generateSlideDiagram(): void
@@ -1937,7 +1937,7 @@ PROMPT;
         }
 
         $sectionData = $this->wizardSections[$sectionIndex];
-        $sectionTitle = $sectionData['title'] ?? 'Sección';
+        $sectionTitle = $sectionData['title'] ?? 'Secci├│n';
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
 
@@ -1946,13 +1946,13 @@ PROMPT;
         $sectionName = $pevaluacion?->seccion?->name ?? '—';
 
         $activityContext = collect([
-            'Título de la lección' => $this->lessonTitle,
+            'T├¡tulo de la lecci├│n' => $this->lessonTitle,
             'Tema generador' => $activity->topic,
-            'Tejido temático' => $activity->thematic,
+            'Tejido tem├ítico' => $activity->thematic,
             'Actividad evaluativa' => $activity->description,
-            'Enseñanza' => $activity->teaching,
+            'Ense├▒anza' => $activity->teaching,
             'Aprendizaje esperado' => $activity->learning,
-        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
+        ])->filter()->map(fn ($v, $k) => "├ó—ó {$k}: {$v}")->implode("\n");
 
         $sectionContents = collect($sectionData['contents'] ?? [])
             ->map(fn ($c) => ($c['title'] ?? '').($c['title'] ? "\n" : '').($c['body'] ?? ''))
@@ -1961,20 +1961,20 @@ PROMPT;
 
         $sectionContentPreview = ! empty($sectionContents)
             ? $sectionContents
-            : '(La sección no tiene contenido aún.)';
+            : '(La secci├│n no tiene contenido a├║n.)';
 
         $systemPrompt = <<<'PROMPT'
 Eres un Staff Engineer frontend especializado en diagramas Mermaid.js y Tailwind CSS.
-Genera código HTML autónomo para un diagrama Mermaid enmarcado en un card simple.
+Genera c├│digo HTML aut├│nomo para un diagrama Mermaid enmarcado en un card simple.
 
 Reglas:
 1. Solo HTML plano. NO incluyas scripts CDN, etiquetas &lt;script&gt;, &lt;link&gt;, &lt;meta&gt;, &lt;html&gt;, &lt;head&gt; ni &lt;body&gt;. Sin Vue, React, Alpine.js.
 2. El diagrama Mermaid dentro de <div class="mermaid">...</div>
 3. Card contenedor: <div class="w-full max-w-full bg-white rounded-xl shadow-sm border border-gray-200"><div class="p-3 sm:p-4 overflow-x-auto"><div class="mermaid">...
 4. w-full max-w-full, mobile-first (p-3, sm:p-4)
-5. Elige el tipo de diagrama según el contenido (graph, sequenceDiagram, mindmap, etc.)
+5. Elige el tipo de diagrama seg├║n el contenido (graph, sequenceDiagram, mindmap, etc.)
 6. Sin scripts externos. Sin wrappers markdown. Solo HTML puro.
-7. El diagrama debe reflejar fielmente el contenido pedagógico.
+7. El diagrama debe reflejar fielmente el contenido pedag├│gico.
 
 
 REQUISITO ESTRICTO — TEXTO MULTI-LÍNEA EN NODOS:
@@ -2000,7 +2000,7 @@ REQUISITO ESTRICTO — TAMAÑO ACOTADO (C1, se imprime en columnas estrechas):
   mejor. Evita nodos separados que obligan a aristas muy largas.
 - No uses style directives salvo casos imprescindibles; cada style añade líneas.
 
-CONDICIÓN NO NEGOCIABLE — RESPONSIVE DESIGN:
+CONDICI├ôN NO NEGOCIABLE ŌĆö RESPONSIVE DESIGN:
 - El diagrama debe visualizarse correctamente en pantallas anchas (1920px+) y estrechas (320px+).
 - El contenedor debe usar max-w-full y overflow-x-auto para evitar desbordamiento.
 - Mermaid renderiza el SVG con width:100%; height:auto; cuando el contenedor lo permite.
@@ -2016,7 +2016,7 @@ PROMPT;
 ### Contexto educativo
 **Curso:** {$gradeName} · {$subjectName} · Sec. {$sectionName}
 
-### Actividad pedagógica
+### Actividad pedag├│gica
 {$activityContext}
 
 ### Diapositiva destino
@@ -2391,7 +2391,7 @@ Reglas estrictas:
 - MÍNIMO 5 bloques en //DESARROLLO (más si el contenido lo requiere)
 - Cada bloque de DESARROLLO separado por una línea en blanco
 - Primera línea de cada bloque = título (máx 10 palabras), lenguaje acorde al grado
-- Cada bloque de DESARROLLO: mínimo 100 palabras (3-5 párrafos) — coherente con el umbral mínimo de la validación automática (100 palabras)
+- Cada bloque de DESARROLLO: mínimo 150 palabras (3-5 párrafos)
 - SIN meta-comentarios, explicaciones ni introducciones antes del formato
 - Alineado con los referentes normativos y el contexto de la actividad
 - NO uses temas genéricos — usa EXACTAMENTE el contexto proporcionado
@@ -3660,16 +3660,6 @@ PROMPT;
         $activityId = $this->selectedActivityId;
         $sectionIdMap = [];
 
-        //  Variables que se pueblan dentro de la transacción (para notificación)
-        $visibleResourceIds = [];
-        $visibleLinkIds = [];
-        $visibleEmbedIds = [];
-
-        // ─── Persistir todo dentro de una transacción ────────────
-        // Protege el borrado/recreación de contenidos: si algo falla a
-        // mitad del guardado, se revierte en bloque y no se pierden datos.
-        DB::transaction(function () use ($activityId, &$sectionIdMap, &$visibleResourceIds, &$visibleLinkIds, &$visibleEmbedIds) {
-
         // ─── Persistir título y descripción generados (paso 1) ──
         if (! empty($this->lessonTitle) || ! empty($this->lessonDescription)) {
             Activity::where('id', $activityId)->update([
@@ -3722,6 +3712,7 @@ PROMPT;
         $this->saveReviewQuestionsSection($activityId);
 
         // ─── Guardar recursos ──────────────────────────────────
+        $visibleResourceIds = [];
         foreach ($this->wizardResources as $key => $res) {
             if (str_starts_with((string) ($res['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
@@ -3768,6 +3759,7 @@ PROMPT;
             ->update(['is_visible' => false]);
 
         // ─── Guardar enlaces ───────────────────────────────────
+        $visibleLinkIds = [];
         foreach ($this->wizardLinks as $key => $link) {
             if (str_starts_with((string) ($link['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
@@ -3812,6 +3804,7 @@ PROMPT;
             ->update(['is_visible' => false]);
 
         // ─── Guardar HTML embeds ───────────────────────────────
+        $visibleEmbedIds = [];
         foreach ($this->wizardHtmlEmbeds as $key => $embed) {
             if (str_starts_with((string) ($embed['id'] ?? ''), 'temp_')) {
                 $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
@@ -3853,7 +3846,6 @@ PROMPT;
         LmsHtmlEmbed::where('activity_id', $activityId)
             ->whereNotIn('id', $visibleEmbedIds)
             ->update(['is_visible' => false]);
-        });
 
         $this->notification()->success(
             'Guardado',
@@ -4975,7 +4967,7 @@ PROMPT;
     {
         if ($this->mode === 'wizard') {
             return view('livewire.profesor.lms.lesson-wizard', [
-                'totalSteps' => 5,
+                'totalSteps' => 4,
             ]);
         }
 

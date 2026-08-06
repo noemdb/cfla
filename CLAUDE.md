@@ -6,11 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **school management system** (Colegio...) built with Laravel 10, Livewire 3, Tailwind CSS, Alpine.js, and Vite. The application handles student enrollment (censo/catchment), registration (matrícula), payment tracking, academic competitions/debates, anonymous voting/polls, diagnostic assessments, blog/news, and student progression tracking. The app locale is Spanish (`es`).
 
+## ⚠️ REGLA ABSOLUTA: versión de PHP
+
+> **Siempre se usa `php8.2` para cualquier tarea PHP en este proyecto.** El binario por defecto del sistema (`/usr/bin/php`) es **PHP 7.4.33**, que **NO** sirve (falla con `?->` y no cumple el requisito `"php": "^8.2"` de `composer.json`). También existe `php8.3`, pero la versión canónica y exigida es **`php8.2`**. Toda ejecución de lint (`php -l`), comandos Artisan (`artisan`), pruebas (`phpunit`/`pest`) o tarea PHP debe resolverse con `/usr/bin/php8.2`. Nunca usar el `php` plano (7.4).
+
 ## Build & Dev Commands
+
+> Todos los comandos PHP usan `php8.2` (no `php`, que en el CLI del sistema es 7.4):
 
 ```bash
 # Serve the Laravel app
-php artisan serve
+php8.2 artisan serve
 
 # Frontend dev (Vite hot-reload)
 npm run dev
@@ -19,25 +25,25 @@ npm run dev
 npm run build
 
 # Run all PHPUnit tests
-php artisan test
+php8.2 artisan test
 
 # Run a single test class
-php artisan test --filter=TestClassName
+php8.2 artisan test --filter=TestClassName
 
 # Run a specific test method
-php artisan test --filter="test_method_name"
+php8.2 artisan test --filter="test_method_name"
 
 # Laravel Pint (PHP CS fixer)
 ./vendor/bin/pint
 
 # Queue worker
-php artisan queue:work
+php8.2 artisan queue:work
 
 # WebSocket server (Laravel Reverb)
-php artisan reverb:start --host=127.0.0.1 --port=8090
+php8.2 artisan reverb:start --host=127.0.0.1 --port=8090
 
 # Laravel Pulse monitoring dashboard
-php artisan pulse:check
+php8.2 artisan pulse:check
 
 # Database backup (admin route, also accessible via /admin/database/backup)
 ```
@@ -45,7 +51,7 @@ php artisan pulse:check
 ## Architecture
 
 ### Tech Stack
-- **Backend**: Laravel 10, PHP 8.3+
+- **Backend**: Laravel 10, PHP 8.2
 - **Frontend**: Blade + Livewire 3 + Alpine.js + Tailwind CSS 3 + WireUI 2
 - **Build**: Vite + laravel-vite-plugin
 - **Database**: MySQL (primary), SQLite (testing)

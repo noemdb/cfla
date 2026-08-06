@@ -453,7 +453,8 @@ TEXT;
         }
 
         // ─── Todos los modelos fallaron ──────────────────────────
-        $this->logger->error('askWithCompaction: los 3 modelos OpenRouter fallaron', [
+        $this->logger->error('askWithCompaction: todos los modelos de la cadena OpenRouter fallaron', [
+            'attempts' => count($modelChain),
             'last_error' => $lastError,
         ]);
 
