@@ -367,7 +367,7 @@ class StudentHomeTest extends TestCase
 
     /**
      * El filtro por asignatura excluye lecciones de otras asignaturas y, si no
-     * hay coincidencias, muestra el estado vacío con "Limpiar filtros".
+     * hay coincidencias, muestra el estado vacío con "Ver todas".
      */
     public function test_all_lessons_subject_filter_excludes_other_subjects(): void
     {
@@ -394,18 +394,18 @@ class StudentHomeTest extends TestCase
         $section = substr($html, $start);
         $this->assertStringContainsString('Lección de Test Asignatura', $section);
 
-        // Filtro de otra asignatura: sin resultados → estado vacío con limpiar
+        // Filtro de otra asignatura: sin resultados → estado vacío con "Ver todas"
         $component->set('subjectFilter', 'Matemática');
         $html = $component->html();
         $start = strpos($html, 'Todas las Lecciones');
         $this->assertNotFalse($start);
         $section = substr($html, $start);
         $this->assertStringNotContainsString('Lección de Test Asignatura', $section);
-        $this->assertStringContainsString('Limpiar filtros', $section);
+        $this->assertStringContainsString('Ver todas', $section);
     }
 
     /**
-     * Una búsqueda sin coincidencias muestra el estado vacío y "Limpiar filtros"
+     * Una búsqueda sin coincidencias muestra el estado vacío y "Ver todas"
      * restaura el listado completo.
      */
     public function test_all_lessons_search_no_results_shows_clear_and_reset(): void
@@ -430,7 +430,7 @@ class StudentHomeTest extends TestCase
         $start = strpos($html, 'Todas las Lecciones');
         $this->assertNotFalse($start);
         $section = substr($html, $start);
-        $this->assertStringContainsString('Limpiar filtros', $section);
+        $this->assertStringContainsString('Ver todas', $section);
         $this->assertStringNotContainsString('Lección de búsqueda', $section);
 
         // Al limpiar, el listado completo vuelve
@@ -440,7 +440,7 @@ class StudentHomeTest extends TestCase
         $this->assertNotFalse($start);
         $section = substr($html, $start);
         $this->assertStringContainsString('Lección de búsqueda', $section);
-        $this->assertStringNotContainsString('Limpiar filtros', $section);
+        $this->assertStringNotContainsString('Ver todas', $section);
     }
 
     /**

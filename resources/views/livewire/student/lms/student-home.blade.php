@@ -4,8 +4,15 @@
     <section class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 sm:p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center gap-6">
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{{ $greeting }}</p>
-                <h1 class="text-2xl font-display font-bold text-gray-900 dark:text-white mt-1">{{ $firstName }}</h1>
+                <div class="flex items-center gap-3">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{{ $greeting }}</p>
+                        <h1 class="text-2xl font-display font-bold text-gray-900 dark:text-white mt-1">{{ $firstName }}</h1>
+                    </div>
+                    @if($showMascot)
+                    <x-lms.mascot :variant="'greet'" :size="'sm'" :emphasis="$mascotEmphasis" />
+                    @endif
+                </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Tu avance en un vistazo. Sigue aprendiendo sin perder el ritmo.
                 </p>
@@ -385,7 +392,11 @@
         @if($allLessons->isNotEmpty())
         <ul class="divide-y divide-gray-100 dark:divide-gray-800">
             @foreach($allLessons as $activity)
-                @php $isPreview = $activity->lmsPublication?->isPreviewToStudents(); @endphp
+                @php
+                    $isPreview = $activity->lmsPublication?->isPreviewToStudents();
+                    $row = $rowMeta[$activity->id] ?? null;
+                    $earned = $row ? (int) $row['completed'] + (int) $row['commented'] + (int) $row['downloaded'] : 0;
+                @endphp
             <li>
                 <a href="{{ route('student.lms.activity', $activity) }}"
                    class="group flex items-center justify-between gap-3 py-2 min-h-[44px] rounded-lg focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
@@ -407,6 +418,24 @@
                             {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '' }}
                         </span>
                     </span>
+                    {{-- Estrellas de logros (C1): completada / comentario aprobado / descarga --}}
+                    <span class="shrink-0 inline-flex flex-col items-end gap-1" aria-hidden="true">
+                        <span class="flex items-center gap-0.5">
+                            @foreach(['completed', 'commented', 'downloaded'] as $key)
+                            <svg @class([
+                                'w-3.5 h-3.5',
+                                'text-emerald-500' => $row && $row[$key],
+                                'text-gray-300 dark:text-gray-600' => !$row || !$row[$key],
+                            ]) fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            @endforeach
+                        </span>
+                        <span class="w-12 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <span class="block h-full bg-emerald-500 rounded-full" style="width: {{ round($earned / 3 * 100) }}%"></span>
+                        </span>
+                    </span>
+                    <span class="sr-only">{{ $earned }} de 3 logros</span>
                     <span class="shrink-0 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {{ $activity->lmsPublication?->publish_at?->translatedFormat('j M Y') }}
                     </span>
@@ -419,10 +448,12 @@
             {{ $allLessons->links() }}
         </div>
         @else
-        <div class="text-center py-10 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-            <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+        <div class="text-center py-10 px-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+            @if($showMascot)
+                <div class="flex justify-center mb-3">
+                    <x-lms.mascot :variant="'idle'" :size="'sm'" :emphasis="$mascotEmphasis" />
+                </div>
+            @endif
             <p class="text-sm text-gray-600 dark:text-gray-400">
                 @if($this->search !== '' && $this->subjectFilter !== '')
                     No encontramos lecciones para “<span class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->search }}</span>” en {{ $this->subjectFilter }}.
@@ -433,14 +464,26 @@
                 @endif
             </p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Prueba con otra búsqueda o limpia los filtros.</p>
-            <button type="button"
-                    wire:click="resetFilters"
-                    class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
-                <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                Limpiar filtros
-            </button>
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                @if($this->search !== '')
+                <button type="button"
+                        wire:click="$set('search', '')"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                    <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Vuelve a intentarlo
+                </button>
+                @endif
+                <button type="button"
+                        wire:click="resetFilters"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                    <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Ver todas
+                </button>
+            </div>
         </div>
         @endif
     </section>

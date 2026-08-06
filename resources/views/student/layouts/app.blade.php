@@ -171,6 +171,17 @@
         [fixed] {
             z-index: 9999 !important;
         }
+        {{-- Flotación suave de la mascota (C4) --}}
+        @keyframes mascot-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-mascot-float {
+            animation: mascot-float 3s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .animate-mascot-float { animation: none; }
+        }
     </style>
 </body>
 </html>

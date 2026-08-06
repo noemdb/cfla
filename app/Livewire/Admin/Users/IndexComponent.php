@@ -41,9 +41,10 @@ class IndexComponent extends Component
     public $lastname;
     public $card_number;
 
-    // ─── Filters & sorting ─────────────────────────────────────
+    // ─── Filters, pagination & sorting ─────────────────────────
     public $search = '';
     public $filter_role = '';
+    public $paginate = 15;
 
     public $sortField = 'id';
     public $sortDirection = 'desc';
@@ -147,7 +148,7 @@ class IndexComponent extends Component
             $query->orderBy('id', $this->sortDirection);
         }
 
-        $users = $query->paginate(10);
+        $users = $query->paginate($this->paginate);
 
         $roleOptions = [
             ''           => 'Todos los roles',
@@ -170,6 +171,7 @@ class IndexComponent extends Component
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterRole() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 
     public function sortBy($field)
     {

@@ -189,9 +189,7 @@
             </table>
         </div>
 
-        <div class="px-4 py-2 border-t border-white/5">
-            {{ $users->links() }}
-        </div>
+        <x-pagination-wrapper :paginator="$users" />
     </div>
 
     <!-- Create/Edit Modal -->

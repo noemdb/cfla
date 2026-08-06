@@ -59,15 +59,33 @@
                 </div>
             </div>
 
-            {{-- Status badge --}}
-            @if($completed)
-                <span class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            {{-- Status badge + estrellas de logros (C1) --}}
+            <div class="shrink-0 flex flex-col items-end gap-2">
+                @if($completed)
+                    <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Completada
+                    </span>
+                @endif
+                @php
+                    $starFlags = ['completed' => $completed, 'commented' => $isCommented, 'downloaded' => $hasDownload];
+                    $earned = (int) $completed + (int) $isCommented + (int) $hasDownload;
+                @endphp
+                <span class="inline-flex items-center gap-0.5" aria-hidden="true">
+                    @foreach($starFlags as $flag)
+                    <svg @class([
+                        'w-4 h-4',
+                        'text-emerald-500' => $flag,
+                        'text-gray-300 dark:text-gray-600' => !$flag,
+                    ]) fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
-                    Completada
+                    @endforeach
                 </span>
-            @endif
+                <span class="sr-only">{{ $earned }} de 3 logros</span>
+            </div>
         </div>
 
         {{-- Description --}}
@@ -732,6 +750,27 @@
         </div>
     </div>
 
+    @if($this->celebrate)
+    <div wire:ignore x-data="celebration()" x-init="run()" role="status" aria-live="polite"
+         class="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center px-4" x-cloak>
+        <div class="relative text-center">
+            <div aria-hidden="true" class="confetti-layer absolute inset-0 overflow-hidden">
+                {{-- ~24 piezas generadas por x-init: spans absolutos con left/delay/duración/color/rotación inline; solo si NO prefers-reduced-motion --}}
+            </div>
+            <div class="px-6 py-6 rounded-2xl bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-500/30
+                        shadow-xl shadow-emerald-500/10"
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+                 x-transition:enter-end="opacity-100 scale-100">
+                @if($showMascot)
+                    <x-lms.mascot :variant="'celebrate'" :size="'lg'" :emphasis="$mascotEmphasis" />
+                @endif
+                <p class="mt-4 text-2xl font-display font-bold text-gray-900 dark:text-white">¡Lo lograste! �� 🎉</p>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Has completado esta lección.</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Estilos para Mermaid fullscreen / zoom toolbar --}}
     {{-- Sin @once — CSS es idempotente, y Livewire maneja re-renders sin duplicados problemáticos --}}
     <style>
@@ -937,6 +976,21 @@
             scroll-margin-top: 5.5rem;
         }
 
+        /* ── Confeti para celebración C3 ── */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
         /* ── Movimiento reducido: respeta prefers-reduced-motion ── */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -944,6 +998,10 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
                 scroll-behavior: auto !important;
+            }
+
+            .confetti-layer {
+                display: none !important;
             }
         }
     </style>
@@ -988,6 +1046,42 @@
                         },
                     };
                 });
+
+                // Celebration component for C3
+                if (Alpine._celebrationRegistered) return;
+                Alpine._celebrationRegistered = true;
+                Alpine.data('celebration', () => ({
+                    run() {
+                        const confettiLayer = document.querySelector('.confetti-layer');
+                        if (!confettiLayer) return;
+
+                        const colors = ['#10b981', '#34d399', '#6ee7b7', '#fbbf24', '#f59e0b', '#f97316'];
+                        const pieceCount = 24;
+
+                        for (let i = 0; i < pieceCount; i++) {
+                            const piece = document.createElement('span');
+                            const size = Math.random() * 8 + 4; // 4-12px
+                            const left = Math.random() * 100; // 0-100%
+                            const delay = Math.random() * 3; // 0-3s
+                            const duration = Math.random() * 2 + 3; // 3-5s
+                            const rotation = Math.random() * 360; // 0-360deg
+                            const color = colors[Math.floor(Math.random() * colors.length)];
+
+                            piece.style.position = 'absolute';
+                            piece.style.width = size + 'px';
+                            piece.style.height = size + 'px';
+                            piece.style.backgroundColor = color;
+                            piece.style.borderRadius = '50%';
+                            piece.style.left = left + '%';
+                            piece.style.top = '-10%';
+                            piece.style.opacity = '0';
+                            piece.style.animation = `confetti-fall ${duration}s ease-out ${delay}s forwards`;
+                            piece.style.transform = `rotate(${rotation}deg)`;
+
+                            confettiLayer.appendChild(piece);
+                        }
+                    }
+                }));
             });
         </script>
     @endonce

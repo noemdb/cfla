@@ -23,6 +23,12 @@ class StudentHome extends Component
     /** Filtro por asignatura en el listado "Todas las Lecciones". */
     public string $subjectFilter = '';
 
+    /** ¿Mostrar la mascota? (C4) — oculta para 13–15 años. */
+    public bool $showMascot = false;
+
+    /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
+    public bool $mascotEmphasis = false;
+
     protected $queryString = [
         'search' => ['except' => ''],
         'subjectFilter' => ['except' => ''],
@@ -31,6 +37,13 @@ class StudentHome extends Component
     public function mount(): void
     {
         $this->initializeHasStudentScope();
+
+        // La edad se computa en mount() (no en render(), que corre cada 10s
+        // por el wire:poll y causaría N+1). Puede ser null (sin relación
+        // estudiant), '-' (fecha no cargada) o int.
+        $age = auth()->user()?->estudiant?->age;
+        $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
+        $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
     }
 
     public function updatedSearch(): void
@@ -247,6 +260,30 @@ class StudentHome extends Component
             ->sort()
             ->values();
 
+        // ─── 4b. Metadatos por lección para las estrellas (C1) ─────
+        // Limitado a la página actual de $allLessons para no arrastrar
+        // consultas sobre todo el catálogo. Cada fila muestra 3 logros:
+        // lección completada, comentario aprobado y recurso descargado.
+        $pageIds = $allLessons->pluck('id');
+        $completedSet = $completedIds->flip();
+        $commentedSet = ActivityComment::approved()
+            ->where('user_id', auth()->id())
+            ->whereIn('activity_id', $pageIds)
+            ->pluck('activity_id')
+            ->unique()
+            ->flip();
+        $downloadedSet = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->whereIn('activity_id', $pageIds)
+            ->pluck('activity_id')
+            ->unique()
+            ->flip();
+        $rowMeta = $pageIds->mapWithKeys(fn ($id) => [$id => [
+            'completed' => isset($completedSet[$id]),
+            'commented' => isset($commentedSet[$id]),
+            'downloaded' => isset($downloadedSet[$id]),
+        ]])->all();
+
         // ─── 5. Subject distribution ────────────────────────────────
         $activities = Activity::with('pevaluacion.pensum.asignatura')
             ->whereIn('id', $visibleActivityIds)
@@ -299,6 +336,7 @@ class StudentHome extends Component
             'recentComments' => $recentComments,
             'recentDownloads' => $recentDownloads,
             'downloadResources' => $downloadResources,
+            'rowMeta' => $rowMeta,
         ])->layout('student.layouts.app');
     }
 

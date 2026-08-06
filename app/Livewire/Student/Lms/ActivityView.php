@@ -27,6 +27,21 @@ class ActivityView extends Component
     /** true cuando now() < publish_at → solo se muestra la 1ª sección. */
     public $isPreview = false;
 
+    /** ¿Comentario aprobado del usuario en esta lección? (C1) */
+    public $isCommented = false;
+
+    /** ¿El usuario descargó un recurso de esta lección? (C1) */
+    public $hasDownload = false;
+
+    /** ¿Mostrar la mascota? (C4) — oculta para 13–15 años. */
+    public bool $showMascot = false;
+
+    /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
+    public bool $mascotEmphasis = false;
+
+    /** ¿Disparar la celebración al completar la lección? (C3) */
+    public bool $celebrate = false;
+
     public function mount(Activity $activity): void
     {
         $this->initializeHasStudentScope();
@@ -34,6 +49,12 @@ class ActivityView extends Component
         if (!$this->studentService->isActivityVisible($activity)) {
             abort(404);
         }
+
+        // La edad se computa en mount() (no en render()); puede ser null
+        // (sin relación estudiant), '-' (fecha no cargada) o int.
+        $age = auth()->user()?->estudiant?->age;
+        $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
+        $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
 
         $this->activity = $activity;
         $this->isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
@@ -91,6 +112,18 @@ class ActivityView extends Component
                 ->where('event', 'COMPLETE')
                 ->exists();
 
+        // Estrellas del detalle (C1): comentario propio aprobado y descarga
+        // de recursos, además del $completed ya computado.
+        $this->isCommented = ActivityComment::where('activity_id', $activity->id)
+            ->where('user_id', auth()->id())
+            ->approved()
+            ->exists();
+
+        $this->hasDownload = LmsActivityLog::where('activity_id', $activity->id)
+            ->where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->exists();
+
         // Registrar o actualizar progreso
         $progress = LmsActivityProgress::firstOrCreate(
             [
@@ -129,6 +162,7 @@ class ActivityView extends Component
         );
 
         $this->completed = true;
+        $this->celebrate = true;
 
         $this->notification()->success(
             title: '¡Actividad completada!',
