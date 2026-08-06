@@ -49,6 +49,9 @@ class ActivityView extends Component
     /** ¿Modo lectura (franja 5–8)? (F1) — tipografía mayor y menos opciones. */
     public bool $modoLectura = false;
 
+    /** ¿Se ofrece el toggle de modo libro? (≥2 secciones, publicada, no modo lectura). */
+    public bool $flipEnabled = false;
+
     /** ¿Disparar la celebración al completar la lección? (C3) */
     public bool $celebrate = false;
 
@@ -109,6 +112,12 @@ class ActivityView extends Component
             $this->links = $this->links->filter(fn ($l) => $l->section_id === $firstSectionId);
             $this->htmlEmbeds = $this->htmlEmbeds->filter(fn ($e) => $e->section_id === $firstSectionId);
         }
+
+        // Modo libro: requiere ≥2 secciones visibles, publicación completa y
+        // no estar en la franja de lectura asistida (5–8).
+        $this->flipEnabled = $this->sections->count() >= 2
+            && ! $this->isPreview
+            && ! $this->modoLectura;
 
         $this->comments = ActivityComment::with('user')
             ->forActivity($activity->id)
@@ -178,6 +187,8 @@ class ActivityView extends Component
 
         $this->completed = true;
         $this->celebrate = true;
+
+        $this->dispatch('activity-completed');
     }
 
     public function saveComment(): void
