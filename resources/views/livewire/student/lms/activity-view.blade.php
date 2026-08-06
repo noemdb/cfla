@@ -76,7 +76,29 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
 
     {{-- ═══════════════════════ READING PROGRESS ═══════════════════════ --}}
     <div class="sticky top-14 z-20 -mx-3 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8">
-        <div class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
+        @if($flipEnabled)
+        <div class="px-3 sm:px-6 md:px-8 pb-2">
+            <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-1 shadow-sm"
+                 role="group" aria-label="Modo de lectura">
+                <button type="button"
+                        :class="Alpine.store('lmsView').mode === 'scroll' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                        :aria-pressed="Alpine.store('lmsView').mode === 'scroll'"
+                        @click="Alpine.store('lmsView').set('scroll')">
+                    Deslizar
+                </button>
+                <button type="button"
+                        :class="Alpine.store('lmsView').mode === 'book' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                        :aria-pressed="Alpine.store('lmsView').mode === 'book'"
+                        @click="Alpine.store('lmsView').set('book')">
+                    Libro
+                </button>
+            </div>
+        </div>
+        @endif
+        <div x-show="Alpine.store('lmsView').mode === 'scroll'"
+             class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
              :style="`width: ${progress}%`"></div>
     </div>
 
@@ -248,6 +270,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             </div>
         </div>
     @endif
+
+    <div x-show="Alpine.store('lmsView').mode === 'scroll'">
 
     {{-- ═══════════════════════ TABLA DE CONTENIDO ═══════════════════════ --}}
     @if($sections->count() > 1)
@@ -629,6 +653,44 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         </div>
     </div>
 
+    </div>
+
+    {{-- Contenedor libro: GATEADO por $flipEnabled (corrección del diseño §5.1).
+         Cuando $flipEnabled=false no hay toggle (ya gateado en §5.2) → modo libro
+         inalcanzable; renderizar el DOM oculto es peso muerto y filtra la copy
+         adulta ("Marcar como completada") a salidas modoLectura/preview/1-sección.
+         $flipEnabled es fuente única de verdad: sin toggle → sin DOM del libro. --}}
+    @if($flipEnabled)
+    <div x-show="Alpine.store('lmsView').mode === 'book'" x-cloak>
+        <div x-data="lessonBook()" data-completed="{{ $completed ? '1' : '0' }}">
+            <div wire:ignore>
+                <div id="lms-flipbook-root">
+                    @foreach($sections as $section)
+                        @include('livewire.student.lms._flipbook-page', ['section' => $section])
+                    @endforeach
+                </div>
+            </div>
+            {{-- Barra final: FUERA del wire:ignore (Livewire la re-renderiza tras markComplete),
+                 DENTRO del x-data (accede a pageIndex/total/completed de lessonBook). (C3) --}}
+            <div class="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
+                 x-show="Alpine.store('lmsView').mode === 'book'">
+                <p class="text-sm text-gray-600">
+                    Página <span x-text="pageIndex + 1"></span> de <span x-text="total"></span>
+                </p>
+                <button type="button"
+                        x-show="!completed"
+                        wire:click="markComplete"
+                        class="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                    Marcar como completada
+                </button>
+                <span x-show="completed" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
+                    ✓ Completada
+                </span>
+            </div>
+        </div>
+    </div>
+    @endif
+
     @if($this->celebrate)
     <div wire:ignore x-data="celebration()" x-init="run()" x-show="visible" role="status" aria-live="polite"
          class="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center px-4" x-cloak
@@ -927,6 +989,53 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         },
                     };
                 });
+
+                // Store lmsView: modo de lectura de la lección ('scroll' | 'book').
+                // Vive en Alpine.store (fuera del DOM que diffea Livewire) → sobrevive a re-renders.
+                Alpine.store('lmsView', {
+                    mode: 'scroll',
+                    flipbook: null,   // ref a la instancia lessonBook (se registra en su init())
+                    set(v) {
+                        this.mode = v;
+                        if (v === 'book' && this.flipbook) {
+                            // El x-show del contenedor libro aún no se aplicó: difiere la
+                            // inicialización hasta que el contenedor tenga tamaño real.
+                            Alpine.nextTick(() => this.flipbook.ensureFlipbook());
+                        }
+                    },
+                });
+
+                // lessonBook: estado local del modo libro (barra final + sync de completado).
+                if (Alpine._lessonBookRegistered) return;
+                Alpine._lessonBookRegistered = true;
+                Alpine.data('lessonBook', () => ({
+                    pageFlip: null,   // instancia StPageFlip (null hasta la 1ª entrada al libro — Task 6)
+                    pageIndex: 0,     // 0-based, para "Página X / N"
+                    total: 0,         // nº de hojas = nº de secciones visibles
+                    completed: false,
+                    init() {
+                        this.completed = this.$root.dataset.completed === '1';
+                        // Las hojas ya vienen servidas por Blade: el contador hace que la
+                        // barra final muestre "Página X / N" desde el primer paint.
+                        this.total = this.$root.querySelectorAll('#lms-flipbook-root .stf__item').length;
+                        // Hook al store (corrección C1): set('book') dispara ensureFlipbook().
+                        Alpine.store('lmsView').flipbook = this;
+                        Livewire.on('activity-completed', () => { this.completed = true; });
+                    },
+                    // Stub seguro para Task 5. Task 6 implementa aquí la carga diferida de
+                    // StPageFlip (loadPageFlip() → (await loadPageFlip()).default.PageFlip,
+                    // medida del root, construcción del flipbook, total = children.length).
+                    // Con este stub, entrar a modo libro muestra las hojas apiladas (sin flip).
+                    ensureFlipbook() {},
+                    openSection(id) {
+                        // §6.1: un diagrama en modo libro → volver a scroll y saltar a la sección.
+                        Alpine.store('lmsView').set('scroll');
+                        document.getElementById('seccion-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    },
+                    setPage(index) {
+                        this.pageIndex = index;   // el flipbook (Task 6) actualiza el indicador
+                    },
+                }));
 
                 // Celebration component for C3
                 if (Alpine._celebrationRegistered) return;
