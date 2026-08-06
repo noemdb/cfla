@@ -110,7 +110,7 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 | 7. Seguridad read-only | ✅ | `DirectorReadOnlyTest.php`: reflexión sobre `DirectorScopeService` (sin save/update/store/create/approve/comment/observe...) + auditoría de rutas registradas (sin POST/PUT/PATCH/DELETE) → 2 passed (48 aserciones). Verif post `route:list --name=director`: 9 rutas `GET|HEAD`, cero verbos no-GET. Nota: el grep literal del spec `\sGET\s` no matchea `GET|HEAD` (GET va seguido de `|`), se audita con `grep -iE "POST|PUT|PATCH|DELETE"` → sin salida. | test de reflexión sin métodos save* |
 | 8. Testing | ✅ | Estado `director()` en UserFactory (spec §8.3 verbatim); DirectorMiddlewareTest ×3 (200 / 403 / admin-bypass vía `getIsDirectorAttribute`); DirectorScopeTest ×4 (queryPensums sin filtro, queryProfesores activos-con-carga, factory state, role_label 'Dirección'); DirectorDashboardTest ×3 (KPIs de toda la institución, carga académica, profesores); DirectorReadOnlyTest ×3 (+ vista activity-list sin `<form>` ni `wire:click`). Suite completa: 216 passed, 0 failed, sin SKIP. | 13 tests, suite verde global |
 
-**Siguiente fase a ejecutar:** Mejora de interfaz (onda 2) — toggle Grid/Tabla + paginación aplicados a `carga-academica` (ver §5.3 Vista), `activities` (ver §5.4 Vista) y `lesson-list` (ver §5.5 Vista); panel de filtros ampliado en Actividades con filtros de estado eliminados por decisión del usuario (ver §5.4 Filtros); grupo de botones en la columna Acciones de Actividades (ver §5.4 Vista); columna Estado de la actividad (ver §5.4 Vista); toggle Grid/Tabla + panel de filtros ampliado en Lecciones (ver §5.5 Vista). Pendiente: evaluar el resto de vistas del director (`pensums`, `recursos`, `profesores`, dashboard).
+**Siguiente fase a ejecutar:** Mejora de interfaz (onda 2) — toggle Grid/Tabla + paginación aplicados a `carga-academica` (ver §5.3 Vista), `activities` (ver §5.4 Vista) y `lesson-list` (ver §5.5 Vista); panel de filtros ampliado en Actividades con filtros de estado eliminados por decisión del usuario (ver §5.4 Filtros); grupo de botones en la columna Acciones de Actividades (ver §5.4 Vista); columna Estado de la actividad (ver §5.4 Vista); toggle Grid/Tabla + panel de filtros ampliado en Lecciones (ver §5.5 Vista). Ayuda flotante aplicada también a Actividades, Recursos y Profesores (ver §5.5.8.4, §5.5.8.5 y §5.5.8.6). Las vistas del director de listado/supervisión cuentan ya con su panel de ayuda.
 
 ---
 
@@ -135,6 +135,8 @@ Cada fase tiene este encabezado, que el agente debe leer como contrato:
 | 2.7.5 | Botón "Ver / Imprimir" en el monitor LMS de Planificación + ruta `/app/planning/lms/print` (`monitor.blade.php` + `routes/web.php` + reuso de `LessonsPrintController`) | ✅ | Mismo botón "Ver / Imprimir" que el listado de la Dirección (2.7) en el monitor LMS de Planificación (`/app/planning/lms/monitor`, componente `LmsMonitor`): `<a href>` plano GET (sin `wire:click`, compatible read-only) hacia la ruta nueva `app.planning.lms.print` con los filtros activos del monitor (`pestudio/grado/seccion/profesor/asignatura/status/search`, vacíos descartados con `array_filter`) como query string, `target="_blank"`, misma clase teal e icono de impresora. **Reuso cross-módulo de `Director\LessonsPrintController`** (patrón espejo del ADR-005, que reusa `Planning\ActivityPdfController` en dirección): el mismo controlador sirve `/app/director/lecciones/print` (grupo `isDirector`) y `/app/planning/lms/print` (grupo `isPlanner`). Un planificador NO puede llegar a la ruta de la Dirección (`IsDirector` solo admite `is_director`) y viceversa (`IsPlanner` aborta 403), verificado por tests. El contexto del membrete se deduce del nombre de ruta (`str_contains($request->route()?->getName() ?? '', 'planning')`) → contexto `Planificación · Monitor LMS` y título `PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO`; el filtro `estado` (PUBLISHED/SCHEDULED/ARCHIVED) y el de `asignatura` se añadieron al controlador para el monitor (misma semántica que `LmsMonitor`). Ver §5.5.5 + ADR-006; 8 tests `LmsPrintTest` (acceso + membrete + filtros + botón con filtros activos + `target="_blank"` + read-only) + 33 tests de las suites director verdes. |
 | 2.7.6 | Enmarcar diagramas Mermaid DENTRO de su columna: eliminar el spanner E1 `column-span:all` y la heurística `mermaid-wide` (`lessons-print.blade.php` director/profesor + `DirectorLessonsPrintTest.php`) | ✅ | Bug 2.7.5 (usuario): los diagramas seguían ocupando mucho espacio porque la capa E1 (2.7.2) los sacaba del flujo de 2 columnas con `column-span:all` para cruzar la página como spanner; G1 (2.7.4) solo acotaba su ancho a media página, no los devolvía a la columna. **Fix:** se elimina por completo el mecanismo de diagrama ancho — regla CSS `.mermaid-wrap.mermaid-wide{column-span:all;-webkit-column-span:all}`, etiqueta `DIAGRAMA · VISTA AMPLIA` (::before), tope de altura wide `515pt/83vh`, topes de ancho `350pt/50vw` (marco + svg), la previsualización en pantalla `max-width:50vw` y la heurística Blade `$mermaidWide` (nodos≥12 \|\| flechas≥11 \|\| línea>55 chars). Todo diagrama queda **enmarcado en su columna**: el marco `.mermaid-wrap` (fondo/borde/padding) + `max-width:100% !important; height:auto !important` en el svg limitan el ancho al de la columna (~383pt) y `max-height:430pt/70vh` (J2, 2.7.3) limita el alto — el tope de columna es ahora el ÚNICO tope de altura. Aplicado en lockstep a la vista del profesor. Tests: `director_print_bounds_tall_mermaid_diagrams_to_one_page` recortado (sin 515pt/VISTA AMPLIA) y `director_print_bounds_mermaid_width_to_half_page` **renombrado** a `director_print_frames_mermaid_diagrams_within_column` (afirma marco + `max-width:100%` y ausencia de `column-span:all`/`mermaid-wide`/`VISTA AMPLIA`). Ver §5.5.6; 41 tests de impresión + read-only verdes (18 `DirectorLessonsPrintTest` + 12 `LessonsPrintTest` + 8 `LmsPrintTest` + 3 `DirectorReadOnlyTest`). |
 | 2.7.7 | Botón "Ver / Imprimir" en Liderazgo y Coordinación — **scope del módulo** (`lesson-monitor.blade.php` + `lesson-list.blade.php` + `LessonsPrintController.php` + `routes/web.php`) | ✅ | Mismo botón "Ver / Imprimir" (2.7) en el monitor de Liderazgo (`/app/leadership/lessons`, componente `LessonMonitor`) y en el listado de Coordinación (`/app/coordinacion/lecciones`, componente `LessonList`), cada uno hacia su ruta nueva de impresión (`app.leadership.lessons.print` / `app.coordinacion.lessons.print`). **Diferencia clave vs. 2.7/2.7.5:** la impresión respeta el **scope del módulo**, NO el global — Liderazgo vía `LeadershipService::scopeActivities()` (solo asignaturas de las áreas con `leader_id` = usuario) y Coordinación vía `CoordinacionScopeService::scopeActivities()` (solo pestudios de peducativos con `manager_id` = usuario y `planning_module=1`) + `whereHas('lmsPublication')` (mismo criterio que `LessonList` en render). El `match` de módulo del controlador pasa de 2 a 4 vías (`leadership`/`coordinacion`/`planning`/`director`); el membrete se adapta (`LIDERAZGO · …` / `COORDINACIÓN · …`). Ambos botones son `<a href>` planos GET (`target="_blank"`, sin `wire:click`): el de liderazgo convive como primer hijo del contenedor del toggle Grid/Tabla, el de coordinación junto al botón "Actualizar". El `status` del botón de liderazgo se deriva de los toggles `$filter_published`/`$filter_scheduled` (solo con EXACTAMENTE uno activo; ambos/ninguno → se omite, caso borde documentado). Ver §5.5.7 + ADR-006; 14 tests nuevos (7 `LeadershipLessonsPrintTest` + 7 `CoordinacionLessonsPrintTest`) + 29 de las suites director + 12 de scope verdes. |
+| 2.8 | Botón/panel de ayuda flotante en la página del director | ✅ | Réplica del patrón del monitor LMS de Planificación (`monitor.blade.php`), **adaptada a la supervisión read-only** del director. El div raíz `<div class="fade-in">` de cada vista lleva `x-data="{ helpOpen: false }" x-cloak`; al final del div raíz se añadieron el botón circular emerald flotante (`@click="helpOpen = true"`, `x-show="!helpOpen"`), el backdrop (`@click="helpOpen = false"`) y el slide-over `max-w-2xl` (`@keydown.escape.window="helpOpen = false"`). **Contenido asociado a cada página (requisito del usuario):** el `lesson-list.blade.php` conserva la guía de estados de lecciones (4 tabs Publicado/Programado/Borrador/Archivado con sub-árboles `x-data="{ open: … }"`, badges, "no interviene" y ejemplos en el aula), mientras el `indicator-dashboard.blade.php` usa una guía propia del panel (4 tabs **KPIs globales / Por Peducativo / Flujo de registros / Actividad por día** que explican los indicadores y gráficos de la página). Footer «Modo solo lectura» en ambos. También aplicado al listado de Pensums (`pensum-list.blade.php`, ver §5.5.8.2) con contenido propio (3 tabs Qué es un pensum / Vistas / Filtros y lectura). Más recientemente se aplicó a la Carga Académica (`carga-academica-list.blade.php`) con su propio 3 tabs (Qué es / Vistas / Filtros y lectura) sobre el modelo Pevaluación, a las Actividades (`activity-list.blade.php`, ver §5.5.8.4) con guía propia (Qué es / Estados / Vistas y filtros), y a los Recursos (`resource-list.blade.php`, ver §5.5.8.5) con guía propia (Qué es / Contenido / Lectura y filtros), y a los Profesores (`profesor-indicators.blade.php`, ver §5.5.8.6) con guía propia (Qué es / Qué muestra / Filtros y lectura). Solo Alpine.js, sin estado Livewire (no toca `LessonList.php` ni `IndicatorDashboard.php` ni `PensumList.php` ni `CargaAcademicaList.php` ni `ActivityList.php` ni `ResourceList.php` ni `ProfesorIndicators.php`). Paleta `gray`/`white` coherente con el director (no `slate` del monitor). Documentado en §5.5.8, §5.5.8.1, §5.5.8.2, §5.5.8.3, §5.5.8.4, §5.5.8.5 y §5.5.8.6. |
+
 
 ---
 
@@ -1305,6 +1307,250 @@ class LessonList extends Component
 - **Grid (masonry)**: `columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-2.5`; card = icono libro púrpura + tema + subtítulo "asignatura · sección (· grado)" + temática opcional + badges de profesor/lapso + badge de estado de publicación + footer "N secciones · Publicada d/m/Y" (con `@if` guardando `lmsPublication->published_at`). Estado vacío "Sin lecciones para los filtros seleccionados." `<x-pagination-wrapper :paginator="$lessons" />` dentro del bloque `x-show`, protegido por `@if($lessons->hasPages())`.
 - **Tabla**: columnas Tema/Asignatura/Sección/Profesor/Lapso/Estado/Contenido. Columna Estado con badge de publicación; Contenido = "N secciones · Publicada d/m/Y". Fila vacía `colspan="7"`. `<x-pagination-wrapper :paginator="$lessons" />` protegido por `@if($lessons->hasPages())`.
 - **Badge de estado de publicación** (puro Blade `@if/@elseif/@else`, en ambos modos): `PUBLISHED` → emerald "Publicada" (check `M5 13l4 4L19 7`); `SCHEDULED` → sky "Programada" (reloj `M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z`); `ARCHIVED` → gris "Archivada" (caja `M20 7l-8-4-8 4m16 0l-2 13H6L4 7m16 0l-8 4m0 0L4 7`); `@elseif($lesson->lmsPublication)` → gris "Borrador" (lápiz `M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z`) para `DRAFT`; `@else` (sin registro de publicación) → stone "Sin publicar" (ojo tachado `M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24`), clases `bg-stone-100 dark:bg-stone-500/10 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-500/20` (coherente con el monitor). Clases `inline-flex items-center gap-1 px-2 py-0.5 bg-{color}-100 dark:bg-{color}-500/10 text-{color}-700 dark:text-{color}-400 text-[10px] font-bold rounded-md border border-{color}-200 dark:border-{color}-500/20`.
+
+#### 5.5.8 Guía de Estados de Lecciones (botón de ayuda flotante)
+
+Se incorporó un **botón/panel de ayuda flotante** en la página del director, réplica del patrón
+del monitor LMS de Planificación (`/app/planning/lms/monitor`), **adaptado a la perspectiva de
+supervisión read-only** del director. Se aplicó en el **listado de lecciones**
+(`resources/views/livewire/director/lesson-list.blade.php`) y en el **dashboard**
+(`resources/views/livewire/director/indicator-dashboard.blade.php`, raíz `/app/director`).
+
+> **Requisito del usuario (turno 2):** *«traslada la lógica» — el contenido del panel debe estar
+> asociado al contenido de cada página.* Aunque inicialmente se replicaron el mismo bloque
+> (Guía de Estados de Lecciones), cada página mantiene ahora su panel con contenido propio:
+> el `lesson-list` conserva la **guía de estados de lecciones** (visible en
+> `/app/director/lecciones`), y el dashboard usa una **guía propia del panel de dirección** de 4
+> pestañas — KPIs globales / Por Peducativo / Flujo de registros / Actividad por día — que
+> explica los indicadores y gráficos que muestra esa página (ver nota al final de esta sección).
+
+**Cambio en la raíz de la vista:** el div raíz `<div class="fade-in">` de cada vista ahora lleva
+`x-data="{ helpOpen: false }" x-cloak` (antes no tenía estado Alpine), porque a diferencia del
+`monitor.blade.php` (que ya expone `helpOpen` en su raíz), las vistas del director carecían
+de alcance Alpine. En el dashboard, el `x-data` se añadió al div raíz (`</div>` abierto en línea
+2 y cerrado al final del bloque de contenido, **antes** de los bloques `@script` de los charts
+de ApexCharts, que viven fuera del div raíz). El `x-data` del div raíz habilita el estado para
+botón flotante + panel; los acordeones internos usan su PROPIO `x-data="{ open: … }"`
+(sub-árboles anidados), como en el monitor.
+
+**Interfaz (solo Alpine.js, sin estado Livewire — compatible read-only):**
+
+- **Botón flotante** (`fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full`, círculo esmeralda
+  `bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400`, icono info
+  SVG, `hover:scale-110`, `title="Guía de estados de lecciones"`, `x-show="!helpOpen"`
+  con `@click="helpOpen = true"`). Se oculta cuando el panel está abierto.
+- **Backdrop** (`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm`) con `@click="helpOpen = false"`
+  y transición de opacidad 300/200ms.
+- **Slide-over panel** (`fixed top-0 right-0 z-50 h-full w-full max-w-2xl`) con
+  `@keydown.escape.window="helpOpen = false"` y transición de deslizamiento `translate-x-full` →
+  `translate-x-0` (300ms ease-out / 200ms ease-in). Header sticky con título
+  «Guía de Estados de Lecciones» y subtítulo clave: **«Para el director · supervisión de toda la
+  institución (solo lectura)»**.
+
+**Contenido adaptado al director (diferencia clave vs. monitor):**
+
+- **4 tabs** con acordeones: `Publicado` (emerald), `Programado` (ámbar), `Borrador` (gris),
+  `Archivado` (rojo). Estado del tab en el `x-data` del contenedor de contenido
+  (`x-data="{ tab: 'published' }"`).
+- **Intro texto** que enfatiza el alcance institucional global y el modo solo lectura:
+  «…supervisas el contenido publicable de **toda la institución** en **modo solo lectura**…».
+- Cada tab tiene: (1) **¿Qué significa?** (badges de visibilidad/edición); (2) **Significado para
+  la dirección** con bullets *«¿Qué debes observar?»* (auditar volumen publicado, detectar rezago
+  por grado/sección, medir proporción borradores/publicaciones, cuellos de botella en la revisión
+  de Planificación, etc.); (3) **Valoración de la dirección (no interviene)** que deja explícito
+  que el director **no publica ni aprueba** (solo observa — esas tareas son de Planificación y el
+  docente), y que su alcance es global; (4) **Ejemplo en el aula** con tira de pasos.
+- **Footer de cierre** acordeón «Modo solo lectura» — refuerza que el director observa pero **no
+  modifica** estados y que las transiciones (programar/publicar/archivar) las ejecutan el docente
+  y Planificación.
+- **Paleta**: se usaron clases `gray`/`white` (coherentes con el resto de la página del director,
+  `bg-white dark:bg-gray-900`, `border-gray-200 dark:border-white/10`) en lugar del `slate` del
+  monitor, para consistencia visual con el listado de lecciones del director en dark mode.
+
+**Implementación** en cada vista (raíz `x-data` + insertar el bloque —botón + backdrop + slide-over—
+antes del cierre del div raíz). Se verificó Compilador Blade OK, `php -l` sin errores y balance
+balanceado de `<div>` (164/164 antes de la separación de contenidos; 148/148 tras ella). Sin
+cambios en `app/Livewire/Director/LessonList.php` ni en
+`app/Livewire/Director/IndicatorDashboard.php` (no requieren estado Livewire).
+Reporte del usuario: inicialmente *«no se visualiza el btn en /app/director»* porque `/app/director`
+renderiza el **dashboard** (`IndicatorDashboard`), no el listado; el botón sí aparecía en
+`/app/director/lecciones`. Por ello se replicó el bloque en el dashboard y luego (turno 2) se
+separaron los contenidos por página. Ver la Onda 2 ítem 2.8 de la tabla de progreso.
+
+#### 5.5.8.1 Contenido del panel en el dashboard (associado a su página)
+
+El panel flotante del dashboard (`/app/director`) **no mostraría la guía de estados de lecciones**
+que pertenece al listado, sino una **guía del panel de Dirección** — el shell (botón emerald,
+backdrop, slide-over `max-w-2xl`, footer «Modo solo lectura») es idéntico, pero el contenido
+interno usa 4 pestañas que explican exactamente los bloques de `indicator-dashboard.blade.php`:
+
+- **KPIs globales** (esmeralda): explica las 6 tarjetas (Peducativos, Pensums, Lecciones,
+  Actividades, Recursos, Profesores) del lapso activo, con «¿Qué representan?»,
+  «¿Qué debes observar?» (desbalances, cobertura Pensums→Lecciones, crecimiento) y un ejemplo.
+- **Por Peducativo** (celeste): guía la tabla «Indicadores por Peducativo» (Pensums/Actividades/
+  Profesores por unidad educativa), comparativa entre unidades y fila «Sin datos…».
+- **Flujo de registros** (violeta): los 3 charts de series temporales (Actividades/Lecciones/
+  Diagnósticos) y el selector de rango 7d/30d/3m/Todo; lectura de picos, mesetas y comparación
+  de líneas.
+- **Actividad por día** (ámbar): los charts filtrados por lapso (Actividades Registradas,
+  Lecciones Registradas, Publicaciones Programadas por Día) y la constancia / planificación futura.
+
+Verificado con un test HTTP autenticado que `/app/director` renderiza estas 4 pestañas (y YA NO
+la guía de estados: sin `tab='published'`), mientras `/app/director/lecciones` conserva
+«Guía de Estados de Lecciones». Verificación real: Compilador Blade OK, `php -l` sin errores,
+balance 148/148 `<div>` en `indicator-dashboard.blade.php`, y los `@script` de ApexCharts intactos
+(la suite `tests/Feature/Director` — 30 tests — sigue pasando).
+
+#### 5.5.8.2 Botón/panel de ayuda en el listado de Pensums (`app.director.pensums`)
+
+Siguiendo el mismo patrón (turno del usuario: extender el sistema de ayudas a cada página con
+contenido propio), se incorporó el botón/panel flotante en el **listado de pensums**
+(`resources/views/livewire/director/pensum-list.blade.php`), asociado al contenido de ESA página.
+Vista de 144 líneas (listado + toggle Grid/Tabla + paginación); el div raíz ahora es
+`<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>`.
+
+**Contenido propio de pensums** (shell idéntico: botón emerald `title="Guía de consulta de pensums"`,
+backdrop, slide-over `max-w-2xl` con header «Guía de Consulta de Pensums» + subtítulo «Para el
+director · supervisión de toda la institución (solo lectura)»), 3 pestañas:
+
+- **Qué es un pensum** (celeste): el modelo `Pestudio × Grado × Asignatura`, el significado para
+  la dirección (auditar la malla académica, detectar vacíos, verificar coherencia) y un ejemplo.
+- **Vistas** (esmeralda): explica el toggle **Grid** (tarjetas masonry con asignatura/grado/estudio/
+  peducativo) y **Tabla** (columnas Asignatura·Grado·Estudio·Peducativo) y qué conviene usar en cada
+  caso (la vista elegida se recuerda en `localStorage`).
+- **Filtros y lectura** (violeta): buscador, selector de Peducativo, Resultados por página
+  (10/25/50/Todos) + paginación, cómo leer los resultados y un caso práctico.
+
+Footer «Modo solo lectura» cerrado (el director observa y audita la malla, no modifica; la gestión de
+pensums vive en Planificación/Coordinación). Solo Alpine.js (los toggles Grid/Tabla preexistentes
+aportan sus sub-árboles `x-data` anidados); sin tocar `PensumList.php`. Balance 95/95 `<div>` en
+`pensum-list.blade.php`. Verificación: Compilador Blade OK; test HTTP autenticado renderiza el
+panel con las 3 pestañas y NO refiere la guía de lecciones (`Guía de Estados de Lecciones`),
+la del dashboard (`Guía de Indicadores del Panel de Dirección`) ni `tab='published'`/`tab: 'kpis'`.
+
+#### 5.5.8.3 Botón/panel de ayuda en la Carga Académica (`app.director.carga-academica`)
+
+Extensión del mismo sistema a la página de **Carga Académica** del director
+(`resources/views/livewire/director/carga-academica-list.blade.php`), con contenido propio.
+Vista original de 160 líneas (buscador + filtros Peducativo/Lapso + toggle Grid/Tabla + paginación);
+el div raíz ahora es `<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>` (los sub-árboles
+preexistentes `x-data="{ mode: … }"` del toggle y el container Grid/Tabla quedan intactos).
+
+**Contenido propio de la página** (shell idéntico: botón emerald `title="Guía de consulta de carga
+académica"`, backdrop, slide-over `max-w-2xl` con header «Guía de Consulta de Carga Académica» +
+subtítulo «Para el director · supervisión de toda la institución (solo lectura)»), 3 pestañas:
+
+- **Qué es** (celeste): explica que cada registro es una <strong>Pevaluación</strong> — quién imparte
+  qué (asignatura del pensum), a quién (sección/grado), en qué Plan (Pestudio) y Peducativo y en qué
+  lapso. Significado para la dirección (auditar cobertura docente, detectar sobrecarga, verificar
+  coherencia de la malla) + ejemplo en el aula.
+- **Vistas** (esmeralda): el toggle **Grid** (tarjetas masonry — asignatura + docente + insignias
+  sección/grado/plan/peducativo/lapso, 4 columnas en amplias) y **Tabla** (columnas Asignatura ·
+  Profesor · Sección · Plan · Programa · Lapso) + recomendación de cuándo usar cada una (la vista
+  elegida se recuerda en `localStorage`).
+- **Filtros y lectura** (violeta): buscador (docente/asignatura/sección, búsqueda incremental),
+  filtros **Peducativo** y **Lapso** (combinarlos para afinar), paginación de 15 registros y estado
+  vacío «Sin carga académica para los filtros seleccionados».
+
+Footer «Modo solo lectura» (la carga académica la gestiona Planificación y Coordinación · el
+director no modifica). Solo Alpine.js; sin tocar `CargaAcademicaList.php`. Balance 95/95 `<div>` en
+`carga-academica-list.blade.php`. Verificación: Compilador Blade OK; test HTTP autenticado renderiza
+el panel con las 3 pestañas y NO refiere la guía de lecciones, la del dashboard (`Guía de
+Indicadores del Panel de Dirección`) ni la de pensums (`Guía de Consulta de Pensums`).
+
+#### 5.5.8.4 Botón/panel de ayuda en Actividades (`app.director.activities`)
+
+Extensión del mismo sistema a la página de **Actividades** del director
+(`resources/views/livewire/director/activity-list.blade.php`), con contenido propio.
+Vista de 331 líneas (panel de filtros ampliado de contexto + toggle Grid/Tabla persistido en
+`localStorage` + listado con dos badges de estado por fila + PDFs); el div raíz ahora es
+`<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>` (cohíben los sub-árboles preexistentes
+de los contenedores Grid/Tabla).
+
+**Contenido propio de la página** (shell idéntico: botón emerald `title="Guía de consulta de
+actividades"`, backdrop, slide-over `max-w-2xl` con header «Guía de Consulta de Actividades» +
+subtítulo «Para el director · supervisión de toda la institución (solo lectura)»), 3 pestañas:
+
+- **Qué es** (celeste): explica que cada registro es una <strong>actividad académica</strong> — tema y
+  temática que el docente prepara sobre una asignatura del pensum para una sección/grado en un lapso
+  (via su Pevaluación). Significado para la dirección (efectividad, cobertura, avance del lapso) + ejemplo.
+- **Estados** (esmeralda): los <strong>dos badges de estado</strong> por fila — (1) la <strong>Aprobación del
+  Jefe de Área</strong> (Aprobada / En revisión / Sin aprobar) y (2) el <strong>estado de la lección LMS</strong>
+  (Lección aprobada / programada / pendiente) — y cómo leer ambos. Se aclara que el panel <strong>no
+  filtra por estado</strong> (filtros de estado eliminados por decisión del usuario, ver §5.4) y que la
+  aprobación la gestiona el Jefe de Área (el director solo observa).
+- **Vistas y filtros** (violeta): el <strong>panel de filtros</strong> (buscador por tema/temática, Plan
+  Estudio, Profesor, cascada Grado → Sección, Lapso), la vista **Grid** (tarjetas masonry de lectura
+  rápida) y la **Tabla + PDFs** (columnas Tema · Asignatura · Sección · Profesor · Lapso · Estado ·
+  Acciones; botones <strong>Formato</strong> y <strong>Resumen</strong> PDF; toggle Grid/Tabla recordado en
+  `localStorage`).
+
+Footer «Modo solo lectura» (la aprobación y la digitalización las gestionan los Jefes de Área y
+Planificación · el director no modifica). Solo Alpine.js; sin tocar `ActivityList.php`. Balance 95/95
+`<div>` en `activity-list.blade.php` (331 líneas originales + bloque). Verificación: Compilador Blade
+OK; test HTTP autenticado renderiza el panel con las 3 pestañas y NO refiere la guía de lecciones
+(`Guía de Estados de Lecciones`), la del dashboard (`Guía de Indicadores del Panel de Dirección`), la
+de pensums (`Guía de Consulta de Pensums`) ni la de carga académica (`Guía de Consulta de Carga
+Académica`).
+
+#### 5.5.8.5 Botón/panel de ayuda en Recursos (`app.director.recursos`)
+
+Extensión del mismo sistema a la página de **Recursos** del director
+(`resources/views/livewire/director/resource-list.blade.php`), con contenido propio. Vista de 61 líneas
+(título + buscador + listado en tarjetas + paginación); el div raíz ahora es
+`<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>`. El único filtro real es el buscador por
+<strong>nombre del recurso</strong> (`display_name`) o <strong>tema de la actividad</strong> (`topic`); la propiedad
+`$peducativoId` del componente existe pero no se expone como control ni se aplica en la consulta, por lo
+que la guía NO documenta un filtro Peducativo (se documentan solo los controles reales del page).
+
+**Contenido propio de la página** (shell idéntico: botón emerald `title="Guía de consulta de
+recursos"`, backdrop, slide-over `max-w-2xl` con header «Guía de Consulta de Recursos» + subtítulo
+«Para el director · supervisión de toda la institución (solo lectura)»), 3 pestañas:
+
+- **Qué es** (ámbar): cada registro es un <strong>archivo educativo</strong> (recurso del LMS) que un docente
+  comparte vinculado a una <strong>actividad</strong> de una <strong>asignatura</strong> del pensum; significado para la
+  dirección (material disponible, alcance, tipos de archivo) + ejemplo.
+- **Contenido** (esmeralda): qué muestra cada tarjeta — <strong>nombre visible</strong> (`display_name`),
+  <strong>actividad y asignatura</strong> (tema, asignatura, docente), <strong>archivo original y tipo</strong>
+  (`original_name` + `mime_type`) y la insignia **«Recurso»** (ámbar).
+- **Lectura y filtros** (violeta): el <strong>buscador</strong> (por nombre o tema, incremental), el
+  <strong>listado</strong> (20 por página, más recientes primero, vuelve a la 1ª página al buscar) y el
+  <strong>resultado vacío</strong> «Sin recursos para los filtros seleccionados».
+
+Footer «Modo solo lectura» (los recursos los suben los docentes al plan digital · el director no
+modifica). Solo Alpine.js; sin tocar `ResourceList.php`. Balance 81/81 `<div>` en `resource-list.blade.php`
+(61 líneas originales + bloque). Verificación: Compilador Blade OK; test HTTP autenticado renderiza el
+panel con las 3 pestañas y NO refiere las guías de lecciones, dashboard, pensums, carga académica ni
+actividades (`Guía de Consulta de Actividades`).
+
+#### 5.5.8.6 Botón/panel de ayuda en Profesores (`app.director.profesores`)
+
+Extensión del mismo sistema a la página de **Profesores** del director
+(`resources/views/livewire/director/profesor-indicators.blade.php`), con contenido propio. Página de 61
+líneas (título + buscador + select de lapso + listado en tarjetas + paginación); el div raíz ahora es
+`<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>`. Se trata de un **seguimiento de docentes activos y su
+carga de pevaluaciones por lapso**.
+
+**Contenido propio de la página** (shell idéntico: botón emerald `title="Guía de consulta de
+profesores"`, imagen de docente, backdrop, slide-over `max-w-2xl` con header «Guía de Consulta de
+Profesores» + subtítulo «Para el director · supervisión de toda la institución (solo lectura)»),
+3 pestañas:
+
+- **Qué es** (índigo): cada registro es un <strong>docente activo</strong> con su **carga de evaluaciones** (las
+  <strong>pevaluaciones</strong> que tiene asignadas, en todo el periodo o acotadas a un lapso); significado para la
+  dirección (distribución, por lapso, plantilla) + ejemplo de lectura.
+- **Qué muestra** (esmeralda): cada tarjeta — <strong>nombre</strong> (Apellido, Nombre), etiqueta **Docente activo** y
+  el contador **N evaluaciones** (`peva_count`, calculado con `withCount('pevaluacions')` y acotado por lapso).
+- **Filtros y lectura** (violeta): el <strong>buscador</strong> (por apellido o nombre), el <strong>select de Lapso</strong>
+  («Todos los lapsos» por defecto; al elegir uno se recalcula el contador de cada docente, y los lapsos se
+  listan de más recientes a más antiguos), el <strong>listado</strong> (20 por página, alfabético por apellido) y el
+  <strong>resultado vacío</strong> «Sin profesores para los filtros seleccionados».
+
+Footer «Modo solo lectura» (la carga docente la gestiona el personal académico · el director solo
+supervisa). Solo Alpine.js; sin tocar `ProfesorIndicators.php`. Balance 86/86 `<div>` en
+`profesor-indicators.blade.php` (61 líneas originales + bloque). Verificación: Compilador Blade OK; test
+HTTP autenticado renderiza el panel con las 3 pestañas y NO refiere las guías de lecciones, dashboard,
+pensums, carga académica, actividades ni recursos (`Guía de Consulta de Recursos`).
 
 #### 5.5.1 Impresión de lecciones LMS (Ver / Imprimir)
 

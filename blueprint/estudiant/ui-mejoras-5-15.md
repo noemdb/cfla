@@ -47,7 +47,7 @@ Se implementa en lotes. **Orden recomendado:** **A + B + E** primero (impacto in
 
 | Lote | Nombre | Prioridad | Estado |
 |------|--------|-----------|--------|
-| **A** | Lectura y legibilidad | P0 | ⏳ Pendiente |
+| **A** | Lectura y legibilidad | P0 | ✅ Implementado |
 | **B** | Objetivos táctiles y motor fino | P0 | ⏳ Pendiente |
 | **E** | Accesibilidad y seguridad emocional | P0 | ⏳ Pendiente |
 | **C** | Motivación y gamificación | P1 | ⏳ Pendiente |
@@ -101,7 +101,7 @@ Cada ítem marcado con ✅ se registra con los archivos tocados en el [Seguimien
 
 ---
 
-## 4. Lote B · Objetivos táctiles y motor fino (P0)
+## 4. Lote B · Objetivos táctiles y motor fino (P0) — ✅ IMPLEMENTADO
 
 > **Objetivo:** dedos pequeños y tablets. Afecta a botones, enlaces y tarjetas de ambas vistas.
 
@@ -125,7 +125,7 @@ Cada ítem marcado con ✅ se registra con los archivos tocados en el [Seguimien
 
 ---
 
-## 5. Lote E · Accesibilidad y seguridad emocional (P0)
+## 5. Lote E · Accesibilidad y seguridad emocional (P0) — ✅ IMPLEMENTADO
 
 > **Objetivo:** que ningún niño se quede fuera por discapacidad, teclado, o miedo a equivocarse.
 
@@ -156,8 +156,8 @@ Cada ítem marcado con ✅ se registra con los archivos tocados en el [Seguimien
 
 - **Hoy:** el layout fuerza `.dark` en `<html>` (dark-mode-first).
 - **Cambio:** ofrecer **toggle de claro/oscuro** con recuerdo en `localStorage`, manteniendo dark como default. Para niños pequeños el alto contraste de día reduce fatiga y es lo que sus familias esperan.
-- ⚠️ Afecta al layout compartido (`profesor-dashboard` y área estudiante) — requiere decisión de alcance: toggle global del layout o solo en el área estudiante.
-- **Archivos:** layout estudiante (`resources/views/layouts/...`), ver [[profesor-dashboard-module]].
+- ⚠️ Decisión de alcance **2026-08-06:** **solo área estudiante**. El resto de la app (dashboard, profesors, planning, director, coordinación) ya tiene el toggle via `x-role-navbar` compartido; el área estudiante es la única que usaba su propio navbar sin toggle.
+- **Archivos:** `resources/views/student/layouts/app.blade.php` (layout estudiante), ver [[profesor-dashboard-module]] y memoria [[light-mode-rules]].
 
 ---
 
@@ -262,29 +262,33 @@ Cada ítem marcado con ✅ se registra con los archivos tocados en el [Seguimien
 
 | Ítem | Estado | Nota |
 |------|--------|------|
-| A1 · Cuerpo más grande y aireado | ⏳ | |
-| A2 · Tipografía redondeada | ⏳ | |
-| A3 · Líneas cortas (`max-w-3xl`) | ⏳ | |
-| A4 · Número de paso en círculo | ⏳ | |
-| A5 · Etiquetas icono + palabra | ⏳ | |
+| A1 · Cuerpo más grande y aireado | ✅ | `activity-view.blade.php` (contenido `text-[17px] leading-7` en concept/question/quote/activity/lista/IMAGE/default/html-embed + CSS `.lms-content` `font-size:17px`); `student-home.blade.php` (títulos de tarjeta `text-sm`→`text-base`, L179/236/290/395) |
+| A2 · Tipografía redondeada | ✅ | `tailwind.config.js` (`fontFamily.display` → utility `font-display`); `student/layouts/app.blade.php` (Nunito `<link>`); `activity-view.blade.php` (h1/h2/h3); `student-home.blade.php` (h1, CTA, 6× h2, 4× títulos de tarjeta) |
+| A3 · Líneas cortas (`max-w-3xl`) | ✅ | `activity-view.blade.php` (root `max-w-4xl`→`max-w-3xl`) |
+| A4 · Número de paso en círculo | ✅ | `activity-view.blade.php` (círculo `w-8 h-8 rounded-full bg-emerald-600`) |
+| A5 · Etiquetas icono + palabra | ✅ | `activity-view.blade.php` (bloques "Concepto" emerald / "Pregunta" sky) |
+
+> **Validación Lote A:** `php artisan test` → **268 passed (709 assertions)**; `npm run build` → OK (compila `font-display`, `text-[17px]`, `text-base`). Se corrigió además un test intermitente por hora del día (`StudentHomeTest::test_preview_publishing_today_shows_time` fallaba entre ~21:00 y medianoche porque `now()->addHours(3)` cruzaba la medianoche y el badge pasaba a "Se publica mañana"; fix: `travelTo()` congela el reloj, no relacionado con cambios de UI).
 
 ### Lote B · Táctil (P0)
 
 | Ítem | Estado | Nota |
 |------|--------|------|
-| B1 · Mín. 44–48px de toque | ⏳ | |
-| B2 · Tarjetas de lección más altas | ⏳ | |
-| B3 · Botón grande "Marcar como completada" | ⏳ | |
+| B1 · Mín. 44–48px de toque | ✅ | `min-h-[44px]` en `activity-view.blade.php` (back nav, TOC, link cards, botón comentar), `student-home.blade.php` (hero CTA, buscador, select, filas de lección), `student-resource-card.blade.php` (botón Descargar `min-h-[36px]`→`44px`) |
+| B2 · Tarjetas de lección más altas | ✅ | `student-home.blade.php` (tarjetas "Todas las Lecciones" `p-5` + `focus-visible` en el `<a>`) |
+| B3 · Botón grande "Marcar como completada" | ✅ | `activity-view.blade.php` (footer `min-h-[48px]` `w-full sm:w-auto` `text-base font-bold`, gradiente emerald, estados `wire:loading`, `disabled`; contenedor footer `flex-col sm:flex-row`) |
 
 ### Lote E · Accesibilidad (P0)
 
 | Ítem | Estado | Nota |
 |------|--------|------|
-| E1 · Foco visible en teclado | ⏳ | |
-| E2 · `prefers-reduced-motion` | ⏳ | |
-| E3 · Mensajes de error amables | ⏳ | |
-| E4 · Contraste AA (extender al home) | ⏳ | |
-| E5 · Modo light como opción | ⏳ | Requiere decisión de alcance |
+| E1 · Foco visible en teclado | ✅ | `focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2` en botones/enlaces de `activity-view`, `student-home`, `student-resource-card` y el nuevo toggle E5. **Decisión:** inputs/selects conservan `focus:ring-2 focus:ring-emerald-500/30` (evita conflicto de CSS) |
+| E2 · `prefers-reduced-motion` | ✅ | Bloque `@media (prefers-reduced-motion: reduce)` en `activity-view.blade.php` y `student-home.blade.php`; `goTo()` con guard; `motion-reduce:transform-none transition-none` en tarjetas; guard rAF en el anillo de progreso |
+| E3 · Mensajes de error amables | ✅ | Fallback de imagen con "Ups, algo salió mal. Inténtalo de nuevo." + botón **Reintentar** (`retry()` con `data-src`/`x-ref`) en `activity-view.blade.php` (IMAGE) y `student-resource-card.blade.php`; empty state y hero "Aún no hay lecciones" en `student-home.blade.php` |
+| E4 · Contraste AA (extender al home) | ✅ | `student-home.blade.php`: subtítulos/sub-labels `text-gray-500`→`text-gray-600` (10× replace_all), span de materia, fecha como info `text-gray-400` |
+| E5 · Modo light como opción | ✅ | **Alcance decidido: solo área estudiante** (el resto de la app ya lo tiene vía `x-role-navbar`). `student/layouts/app.blade.php`: `x-data="{ dark: ... }"` en `<html>`, script flash-free en `<head>`, toggle sol/luna en navbar (estilo adaptado a `bg-white/dark:bg-gray-800`, anillo E1 con `dark:focus-visible:ring-offset-gray-800`). Dark sigue siendo el default |
+
+> **Validación Lote B + E:** `php artisan test` → **268 passed (709 assertions)**; `npm run build` → OK (compila `min-h-[44px]`, `min-h-[48px]`, `motion-reduce:*`, `focus-visible:ring-offset-*`). **Lotes B y E listos para evaluación del usuario.**
 
 ### Lotes posteriores (tras evaluar A + B + E)
 

@@ -13,6 +13,7 @@ class ProfesorIndicators extends Component
 
     public string $search = '';
     public $lapsoId = '';
+    public $paginate = 15;
     protected $paginationTheme = 'tailwind';
 
     public function mount(): void
@@ -34,7 +35,7 @@ class ProfesorIndicators extends Component
                   ->orWhere('name', 'like', "%{$this->search}%"));
         }
 
-        $profesores = $query->orderBy('lastname')->paginate(20);
+        $profesores = $query->orderBy('lastname')->paginate($this->paginate);
         $lapsos = \App\Models\app\Academy\Lapso::orderBy('finicial', 'desc')->pluck('name', 'id');
 
         return view('livewire.director.profesor-indicators', [
@@ -45,4 +46,5 @@ class ProfesorIndicators extends Component
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingLapsoId() { $this->resetPage(); }
+    public function updatingPaginate() { $this->resetPage(); }
 }

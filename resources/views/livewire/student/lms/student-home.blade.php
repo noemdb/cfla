@@ -5,8 +5,8 @@
         <div class="flex flex-col sm:flex-row sm:items-center gap-6">
             <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{{ $greeting }}</p>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $firstName }}</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h1 class="text-2xl font-display font-bold text-gray-900 dark:text-white mt-1">{{ $firstName }}</h1>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Tu avance en un vistazo. Sigue aprendiendo sin perder el ritmo.
                 </p>
 
@@ -23,13 +23,13 @@
 
                 @if($nextLesson)
                 <a href="{{ route('student.lms.activity', $nextLesson) }}"
-                   class="group mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-sm transition-colors">
+                   class="group mt-4 inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-display font-semibold shadow-sm transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                     <span class="max-w-[16rem] sm:max-w-xs truncate">{{ $nextLesson->topic }}</span>
                     <svg class="w-4 h-4 shrink-0 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
-                <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
                     <span class="inline-flex items-center gap-1.5">
                         <svg class="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -50,7 +50,10 @@
                     @endif
                 </p>
                 @else
-                <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                <p class="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <svg class="w-4 h-4 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                     Aún no hay lecciones disponibles. Tus profesores publicarán contenido pronto.
                 </p>
                 @endif
@@ -58,7 +61,7 @@
 
             <div class="shrink-0 mx-auto sm:mx-0">
                 <div class="relative w-36 h-36" x-data="{ pct: 0, target: {{ $stats['progress_pct'] }} }"
-                     x-init="() => { const start = performance.now(); const dur = 1000; const step = (now) => { const k = Math.min((now - start) / dur, 1); pct = Math.round(target * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }">
+                     x-init="() => { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { pct = target; return; } const start = performance.now(); const dur = 1000; const step = (now) => { const k = Math.min((now - start) / dur, 1); pct = Math.round(target * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }">
                     <svg class="w-36 h-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
                         <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" class="stroke-gray-100 dark:stroke-gray-700/60"></circle>
                         <circle cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round"
@@ -89,7 +92,7 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Lecciones</span>
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Disponibles para ti</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Disponibles para ti</p>
         </div>
 
         {{-- Completadas --}}
@@ -103,7 +106,7 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Completadas</span>
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['completed'] }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
+            <p class="text-xs text-gray-600 dark:text-gray-400">
                 @if($stats['total'] > 0)
                     {{ $stats['progress_pct'] }}% del total
                 @else
@@ -123,7 +126,7 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Comentarios</span>
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['comments'] }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Que has dejado</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Que has dejado</p>
         </div>
 
         {{-- Descargas --}}
@@ -137,7 +140,7 @@
                 <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Descargas</span>
             </div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['downloads'] }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Recursos descargados</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Recursos descargados</p>
         </div>
     </div>
 
@@ -148,7 +151,7 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Continuar Aprendiendo</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Continuar Aprendiendo</h2>
         </div>
 
         <div class="space-y-2">
@@ -156,7 +159,7 @@
                 @php $act = $log->activity; @endphp
                 @if(!$act) @continue @endif
                 <a href="{{ route('student.lms.activity', $act) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40">
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div @class([
@@ -176,7 +179,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                                    <p class="text-base font-display font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                                         {{ $act->topic ?? 'Actividad sin título' }}
                                     </p>
                                     @if($act->lmsPublication?->isPreviewToStudents())
@@ -188,7 +191,7 @@
                                         </span>
                                     @endif
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">
                                     {{ $act->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                     &middot;
                                     {{ $act->pevaluacion?->profesor?->lastname }} {{ $act->pevaluacion?->profesor?->name }}
@@ -218,13 +221,13 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Publicaciones Recientes</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Publicaciones Recientes</h2>
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Actividades publicadas más recientes</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mb-4">Actividades publicadas más recientes</p>
         <div class="space-y-2">
             @foreach($suggestedActivities as $activity)
             <a href="{{ route('student.lms.activity', $activity) }}"
-               class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40">
+               class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
                         <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/10">
@@ -233,10 +236,10 @@
                             </svg>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                            <p class="text-base font-display font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                                 {{ $activity->topic ?? 'Actividad sin título' }}
                             </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">
                                 {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                 &middot;
                                 {{ $activity->pevaluacion?->profesor?->lastname }} {{ $activity->pevaluacion?->profesor?->name }}
@@ -265,7 +268,7 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Próximas Publicaciones</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Próximas Publicaciones</h2>
         </div>
 
         <div class="space-y-2">
@@ -277,7 +280,7 @@
                         : null;
                 @endphp
                 <a href="{{ route('student.lms.activity', $activity) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40">
+                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/10">
@@ -287,7 +290,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
+                                    <p class="text-base font-display font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                                         {{ $activity->topic ?? 'Actividad sin título' }}
                                     </p>
                                     <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30">
@@ -297,7 +300,7 @@
                                         Vista previa
                                     </span>
                                 </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">
                                     {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                     &middot;
                                     {{ $activity->pevaluacion?->lapso?->name ?? '' }}
@@ -331,10 +334,10 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Todas las Lecciones</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Todas las Lecciones</h2>
             <span class="text-xs text-gray-400 dark:text-gray-500">({{ $allLessons->total() }})</span>
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
             Tu catálogo completo, de la más reciente a la más antigua
         </p>
 
@@ -347,7 +350,7 @@
                 <input type="search"
                        wire:model.live.debounce.300ms="search"
                        placeholder="Buscar lección…"
-                       class="w-full pl-9 pr-8 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
+                       class="w-full pl-9 pr-8 py-2 min-h-[44px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
                 @if($this->search !== '')
                 <button type="button"
                         wire:click="$set('search', '')"
@@ -361,7 +364,7 @@
             </div>
 
             <select wire:model.live="subjectFilter"
-                    class="sm:w-52 py-2 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
+                    class="sm:w-52 py-2 px-3 min-h-[44px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500">
                 <option value="">Todas las asignaturas</option>
                 @foreach($subjects as $subject)
                     <option value="{{ $subject }}">{{ $subject }}</option>
@@ -385,14 +388,14 @@
                 @php $isPreview = $activity->lmsPublication?->isPreviewToStudents(); @endphp
             <li>
                 <a href="{{ route('student.lms.activity', $activity) }}"
-                   class="group flex items-center justify-between gap-3 py-2">
+                   class="group flex items-center justify-between gap-3 py-2 min-h-[44px] rounded-lg focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                     <span class="flex items-center gap-2.5 min-w-0">
                         <span @class([
                             'w-1.5 h-1.5 rounded-full shrink-0',
                             'bg-emerald-500' => !$isPreview,
                             'bg-amber-400' => $isPreview,
                         ])></span>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 truncate transition-colors">
+                        <span class="text-base font-display font-medium text-gray-700 dark:text-gray-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 truncate transition-colors">
                             {{ $activity->topic ?? 'Actividad sin título' }}
                         </span>
                         @if($isPreview)
@@ -400,7 +403,7 @@
                                 Vista previa
                             </span>
                         @endif
-                        <span class="hidden md:inline text-xs text-gray-400 dark:text-gray-500 truncate">
+                        <span class="hidden md:inline text-xs text-gray-600 dark:text-gray-400 truncate">
                             {{ $activity->pevaluacion?->pensum?->asignatura?->name ?? '' }}
                         </span>
                     </span>
@@ -417,18 +420,22 @@
         </div>
         @else
         <div class="text-center py-10 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
                 @if($this->search !== '' && $this->subjectFilter !== '')
-                    No se encontraron lecciones para “<span class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->search }}</span>” en {{ $this->subjectFilter }}.
+                    No encontramos lecciones para “<span class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->search }}</span>” en {{ $this->subjectFilter }}.
                 @elseif($this->search !== '')
-                    No se encontraron lecciones para “<span class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->search }}</span>”.
+                    No encontramos lecciones para “<span class="font-semibold text-gray-700 dark:text-gray-300">{{ $this->search }}</span>”.
                 @else
-                    No se encontraron lecciones en {{ $this->subjectFilter }}.
+                    No encontramos lecciones en {{ $this->subjectFilter }}.
                 @endif
             </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Prueba con otra búsqueda o limpia los filtros.</p>
             <button type="button"
                     wire:click="resetFilters"
-                    class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors">
+                    class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                 <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -446,7 +453,7 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Distribución por Asignatura</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Distribución por Asignatura</h2>
         </div>
 
         <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-5 shadow-sm">
@@ -455,7 +462,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $subject['name'] }}</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                        <span class="text-xs text-gray-600 dark:text-gray-400">
                             {{ $subject['completed'] }} de {{ $subject['total'] }}
                             <span class="text-gray-400 dark:text-gray-500 ml-0.5">· {{ $pct }}%</span>
                         </span>
@@ -478,7 +485,7 @@
             <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
-            <h2 class="text-base font-bold text-gray-900 dark:text-white">Tu actividad reciente</h2>
+            <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Tu actividad reciente</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -529,4 +536,16 @@
         </div>
     </section>
     @endif
+
+    {{-- Movimiento reducido --}}
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
 </div>

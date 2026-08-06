@@ -104,6 +104,9 @@ export default {
           900: '#1e3a8a',
         },
       },
+      fontFamily: {
+        display: ['Nunito', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [

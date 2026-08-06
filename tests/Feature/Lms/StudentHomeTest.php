@@ -6,6 +6,7 @@ use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\User;
+use Illuminate\Foundation\Testing\Concerns\InteractsWithTime;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -14,6 +15,7 @@ use Tests\TestCase;
 class StudentHomeTest extends TestCase
 {
     use DatabaseTransactions;
+    use InteractsWithTime;
 
     /**
      * Las lecciones con publish_at futuro aparecen en "Próximas Publicaciones".
@@ -79,31 +81,39 @@ class StudentHomeTest extends TestCase
      */
     public function test_preview_publishing_today_shows_time(): void
     {
-        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+        // Congela el reloj: now()->addHours(3) debe seguir siendo "hoy".
+        // Sin esto, si se ejecuta de noche la suma cruza la medianoche y el
+        // badge pasa a "Se publica mañana" (test intermitente por hora).
+        $this->travelTo('2026-01-15 10:00:00');
+        try {
+            [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
 
-        $publishAt = now()->addHours(3);
+            $publishAt = now()->addHours(3); // 13:00 del mismo día
 
-        $previewActivity = Activity::create([
-            'pevaluacion_id' => $pevaluacionId,
-            'finicial' => now()->subDays(2),
-            'ffinal' => now()->addDays(7),
-            'topic' => 'Se publica hoy',
-            'status' => true,
-        ]);
+            $previewActivity = Activity::create([
+                'pevaluacion_id' => $pevaluacionId,
+                'finicial' => now()->subDays(2),
+                'ffinal' => now()->addDays(7),
+                'topic' => 'Se publica hoy',
+                'status' => true,
+            ]);
 
-        LmsActivityPublication::create([
-            'activity_id' => $previewActivity->id,
-            'published_by' => User::factory()->create()->id,
-            'status' => 'PUBLISHED',
-            'publish_at' => $publishAt,
-        ]);
+            LmsActivityPublication::create([
+                'activity_id' => $previewActivity->id,
+                'published_by' => User::factory()->create()->id,
+                'status' => 'PUBLISHED',
+                'publish_at' => $publishAt,
+            ]);
 
-        $student = $this->createStudentInSeccion($seccionId);
+            $student = $this->createStudentInSeccion($seccionId);
 
-        Livewire::actingAs($student)
-            ->test(\App\Livewire\Student\Lms\StudentHome::class)
-            ->assertSee('Se publica hoy a las '.$publishAt->format('H:i'))
-            ->assertDontSee('días rest.');
+            Livewire::actingAs($student)
+                ->test(\App\Livewire\Student\Lms\StudentHome::class)
+                ->assertSee('Se publica hoy a las '.$publishAt->format('H:i'))
+                ->assertDontSee('días rest.');
+        } finally {
+            $this->travelBack();
+        }
     }
 
     /**

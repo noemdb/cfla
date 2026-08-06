@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6"
+<div class="max-w-3xl mx-auto px-3 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-4 sm:space-y-6"
      x-data="readingNav()">
 
     {{-- ═══════════════════════ READING PROGRESS ═══════════════════════ --}}
@@ -10,7 +10,7 @@
     {{-- ═══════════════════════════════════════ BACK NAV ═══════════════════════════════════════ --}}
     <nav class="flex items-center gap-3 px-1">
         <a href="{{ route('student.lms.lessons') }}"
-           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-500/20 transition-all duration-200">
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-500/20 transition-all duration-200 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -27,7 +27,7 @@
             <div class="min-w-0 flex-1">
 
                 {{-- Title --}}
-                <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                <h1 class="text-lg sm:text-xl md:text-2xl font-display font-bold text-gray-900 dark:text-white leading-tight">
                     {{ $activity->topic ?? 'Actividad' }}
                 </h1>
 
@@ -115,7 +115,7 @@
                            :class="activeId === {{ $section->id }}
                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30'
                                : 'text-gray-600 dark:text-gray-300 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700/40'"
-                           class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[13px] font-medium border transition-colors duration-150">
+                           class="flex items-center gap-2 px-2.5 py-2 min-h-[44px] rounded-lg text-[13px] font-medium border transition-colors duration-150 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                             <span class="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700/60 text-gray-500 dark:text-gray-300 text-[10px] font-bold"
                                   :class="activeId === {{ $section->id }} ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : ''">
                                 {{ $loop->iteration }}
@@ -168,7 +168,7 @@
             {{-- Section header --}}
             <div class="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3.5 border-b border-emerald-200 dark:border-gray-700/40 bg-emerald-50 dark:bg-gray-800/70">
                 <span class="w-1 h-6 rounded-full {{ $accentDot }} shrink-0"></span>
-                <h2 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-white flex-1 min-w-0">
+                <h2 class="text-sm sm:text-[15px] font-display font-bold text-gray-900 dark:text-white flex-1 min-w-0">
                     {{ $section->title }}
                 </h2>
                 @if($badgeLabel)
@@ -195,11 +195,9 @@
                     <div wire:key="content-{{ $content->id }}" class="{{ $isLast ? '' : 'pb-3 sm:pb-4 border-b border-gray-200' }}">
                         {{-- Step number above content --}}
                         <div class="flex items-center justify-center gap-2 mb-2">
-                            <span class="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs font-bold leading-none shadow-sm {{ $accentRing }} {{ $badgeLabel ? 'ring-2' : '' }}">
-                                {{ $stepNum }}
-                            </span>
+                            <span class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm font-bold shrink-0">{{ $stepNum }}</span>
                             @if($content->title)
-                                <h3 class="text-sm font-bold text-gray-900 leading-snug">{{ $content->title }}</h3>
+                                <h3 class="text-sm font-display font-bold text-gray-900 leading-snug">{{ $content->title }}</h3>
                             @endif
                         </div>
 
@@ -265,12 +263,13 @@
                                         </div>
                                     @elseif($tpl === 'concept')
                                         <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-3 sm:p-4">
-                                            <div class="flex items-start gap-3">
-                                                <span class="text-lg leading-none mt-0.5 shrink-0">💡</span>
-                                                <x-lms.math-text
-                                                    :content="$bodyHtml"
-                                                    class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-base leading-none">💡</span>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Concepto</span>
                                             </div>
+                                            <x-lms.math-text
+                                                :content="$bodyHtml"
+                                                class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                                         </div>
                                     @elseif($tpl === 'list')
                                         <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
@@ -280,7 +279,7 @@
                                             </div>
                                             <x-lms.math-text
                                                 :content="$bodyHtml"
-                                                class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
+                                                class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
                                         </div>
                                     @elseif($tpl === 'quote')
                                         <div class="bg-white border-l-4 border-amber-500 rounded-r-xl p-3 sm:p-4">
@@ -288,17 +287,18 @@
                                                 <span class="text-2xl leading-none text-amber-300/70 font-serif shrink-0">"</span>
                                                 <x-lms.math-text
                                                     :content="$bodyHtml"
-                                                    class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                                    class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                                             </div>
                                         </div>
                                     @elseif($tpl === 'question')
                                         <div class="bg-white border border-sky-200 rounded-xl p-3 sm:p-4">
-                                            <div class="flex items-start gap-3">
-                                                <span class="text-base leading-none mt-0.5 shrink-0">💭</span>
-                                                <x-lms.math-text
-                                                    :content="$bodyHtml"
-                                                    class="text-[15px] text-sky-900 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-base leading-none">💭</span>
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700">Pregunta</span>
                                             </div>
+                                            <x-lms.math-text
+                                                :content="$bodyHtml"
+                                                class="text-[17px] text-sky-900 leading-7 prose prose-sm max-w-none lms-content" />
                                         </div>
                                     @elseif($tpl === 'activity')
                                         <div class="bg-white border-2 border-dashed border-amber-300/60 rounded-xl p-3 sm:p-4">
@@ -308,13 +308,13 @@
                                             </div>
                                             <x-lms.math-text
                                                 :content="$bodyHtml"
-                                                class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                                class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                                         </div>
                                     @else
                                         <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
                                             <x-lms.math-text
                                                 :content="$bodyHtml"
-                                                class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none lms-content" />
+                                                class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                                         </div>
                                     @endif
                                     @break
@@ -325,7 +325,7 @@
                                         $imgAlt = $content->title ?? 'Imagen';
                                     @endphp
                                     @if($imgUrl)
-                                        <div x-data="{ loaded: false, failed: false }" class="rounded-xl overflow-hidden border border-gray-200 bg-white">
+                                        <div x-data="{ loaded: false, failed: false, retry() { this.failed = false; this.loaded = false; const img = this.$refs.img; const src = img.getAttribute('data-src'); img.src = ''; requestAnimationFrame(() => img.src = src); } }" class="rounded-xl overflow-hidden border border-gray-200 bg-white">
                                             {{-- Loading skeleton --}}
                                             <div x-show="!loaded && !failed"
                                                  class="flex items-center justify-center h-48 sm:h-64 bg-gray-100 animate-pulse">
@@ -335,14 +335,23 @@
                                             </div>
                                             {{-- Error fallback --}}
                                             <div x-show="failed" x-cloak
-                                                 class="flex flex-col items-center justify-center h-48 sm:h-64 bg-gray-100 text-gray-400">
-                                                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                 class="flex flex-col items-center justify-center h-48 sm:h-64 bg-gray-100 text-gray-500">
+                                                <svg class="w-10 h-10 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                                 </svg>
-                                                <p class="text-xs sm:text-sm">No se pudo cargar la imagen</p>
+                                                <p class="text-xs sm:text-sm font-medium">Ups, algo salió mal. Inténtalo de nuevo.</p>
+                                                <button type="button" x-on:click="retry"
+                                                        class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] text-xs font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                    </svg>
+                                                    Reintentar
+                                                </button>
                                             </div>
                                             {{-- Image --}}
                                             <img src="{{ $imgUrl }}"
+                                                 data-src="{{ $imgUrl }}"
+                                                 x-ref="img"
                                                  alt="{{ $imgAlt }}"
                                                  x-on:load="loaded = true"
                                                  x-on:error="loaded = true; failed = true"
@@ -369,7 +378,7 @@
                                                 </span>
                                             </div>
                                             @if($content->body)
-                                                <div class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none {{ $isSvgBody ? 'lms-svg-diagram overflow-x-auto' : '' }}">{!! $content->body !!}</div>
+                                                <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none {{ $isSvgBody ? 'lms-svg-diagram overflow-x-auto' : '' }}">{!! $content->body !!}</div>
                                             @else
                                                 <p class="text-sm text-gray-500 italic">No hay imagen disponible para este contenido.</p>
                                             @endif
@@ -455,7 +464,7 @@
                                 @default
                                     @if($content->body)
                                         <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-                                            <div class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $content->body !!}</div>
+                                            <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none">{!! $content->body !!}</div>
                                         </div>
                                     @endif
                             @endswitch
@@ -481,7 +490,7 @@
                                         <div x-ref="target" class="w-full min-h-0"></div>
                                     </div>
                                 @else
-                                    <div class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none html-embed-content">
+                                    <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none html-embed-content">
                                         {!! $embed->html_content !!}
                                     </div>
                                 @endif
@@ -510,7 +519,7 @@
                     <div class="space-y-2 pt-2 border-t border-gray-200">
                         @foreach($secLinks as $link)
                             <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
-                               class="flex items-center gap-3 p-3 bg-white border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors group">
+                               class="flex items-center gap-3 p-3 min-h-[44px] bg-white border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors group focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                                 <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -617,7 +626,7 @@
                                 <div x-ref="target" class="w-full min-h-0"></div>
                             </div>
                         @else
-                            <div class="text-[15px] text-gray-900 leading-relaxed prose prose-sm max-w-none html-embed-content">
+                            <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none html-embed-content">
                                 {!! $embed->html_content !!}
                             </div>
                         @endif
@@ -643,7 +652,7 @@
                               class="flex-1 resize-none bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-600 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all"
                               maxlength="1000"></textarea>
                     <button type="submit"
-                            class="shrink-0 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors"
+                            class="shrink-0 px-4 py-2.5 min-h-[44px] bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
                             wire:loading.class="opacity-50 cursor-not-allowed">
                         <span wire:loading.remove wire:target="saveComment">Enviar</span>
                         <span wire:loading wire:target="saveComment">Enviando…</span>
@@ -685,9 +694,9 @@
         {{-- Accent bar --}}
         <div class="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"></div>
 
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <a href="{{ route('student.lms.lessons') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-300 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/5 hover:border-emerald-300/70 dark:hover:border-emerald-500/20 transition-all duration-200 min-h-[44px] group">
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-emerald-700 dark:hover:text-emerald-300 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-500/5 hover:border-emerald-300/70 dark:hover:border-emerald-500/20 transition-all duration-200 min-h-[44px] group focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                 <svg class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -698,7 +707,7 @@
                 <button wire:click="markComplete"
                         wire:loading.attr="disabled"
                         wire:target="markComplete"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 shadow-sm shadow-emerald-600/20 hover:shadow-emerald-500/30 rounded-xl transition-all duration-200 min-h-[44px] active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100">
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[48px] w-full sm:w-auto text-base font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 shadow-sm shadow-emerald-600/20 hover:shadow-emerald-500/30 rounded-xl transition-all duration-200 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
                     <span wire:loading.remove wire:target="markComplete" class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -761,7 +770,7 @@
 
         /* ── lms-content: alto contraste en headings, tablas, blockquotes ── */
         .lms-content {
-            font-size: 15px !important;
+            font-size: 17px !important;
             line-height: 1.75 !important;
             color: #1e293b !important;
         }
@@ -927,6 +936,16 @@
         [id^="seccion-"] {
             scroll-margin-top: 5.5rem;
         }
+
+        /* ── Movimiento reducido: respeta prefers-reduced-motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 
     {{-- ═══════════════════════ READING NAV (progreso + scroll-spy) ═══════════════════════ --}}
@@ -963,7 +982,9 @@
                         },
                         goTo(id) {
                             const el = document.getElementById('seccion-' + id);
-                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            if (!el) return;
+                            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                            el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
                         },
                     };
                 });

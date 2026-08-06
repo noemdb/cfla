@@ -1,5 +1,5 @@
 {{-- resources/views/livewire/director/indicator-dashboard.blade.php --}}
-<div class="fade-in">
+<div class="fade-in" x-data="{ helpOpen: false }" x-cloak>
 
     {{-- Cabecera --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -215,8 +215,433 @@
         </div>
     </div>
 
-</div>
+    {{-- ============================================================ --}}
+    {{-- HELP BUTTON: Guía de estados de lecciones (contexto director) --}}
+    {{-- ============================================================ --}}
+    {{-- Botón flotante --}}
+    <button @click="helpOpen = true"
+            class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30 hover:text-emerald-300 hover:scale-110 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-300 group"
+            title="Guía de indicadores del panel de dirección"
+            x-show="!helpOpen">
+        <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c1.256 0 2.47.202 3.612.586a9.044 9.044 0 012.907 1.895 8.997 8.997 0 011.896 2.908A8.95 8.95 0 0121 12a8.95 8.95 0 01-.585 3.611 8.997 8.997 0 01-1.896 2.908 9.044 9.044 0 01-2.907 1.895A8.98 8.98 0 0112 21a8.98 8.98 0 01-3.612-.586 9.044 9.044 0 01-2.907-1.895 8.997 8.997 0 01-1.896-2.908A8.95 8.95 0 013 12a8.95 8.95 0 01.585-3.611 8.997 8.997 0 011.896-2.908 9.044 9.044 0 012.907-1.895A8.98 8.98 0 0112 3z"/>
+        </svg>
+    </button>
 
+    {{-- Backdrop --}}
+    <div x-show="helpOpen"
+         x-transition:enter="transition-opacity duration-300"
+         x-transition:leave="transition-opacity duration-200"
+         @click="helpOpen = false"
+         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"></div>
+
+    {{-- Slideover panel --}}
+    <div x-show="helpOpen"
+         x-transition:enter="transition-transform duration-300 ease-out"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition-transform duration-200 ease-in"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         @keydown.escape.window="helpOpen = false"
+         class="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-white/10 shadow-2xl overflow-y-auto">
+
+        {{-- Sticky header --}}
+        <div class="sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-white/10 z-10">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c1.256 0 2.47.202 3.612.586a9.044 9.044 0 012.907 1.895 8.997 8.997 0 011.896 2.908A8.95 8.95 0 0121 12a8.95 8.95 0 01-.585 3.611 8.997 8.997 0 01-1.896 2.908 9.044 9.044 0 01-2.907 1.895A8.98 8.98 0 0112 21a8.98 8.98 0 01-3.612-.586 9.044 9.044 0 01-2.907-1.895 8.997 8.997 0 01-1.896-2.908A8.95 8.95 0 013 12a8.95 8.95 0 01.585-3.611 8.997 8.997 0 011.896-2.908 9.044 9.044 0 012.907-1.895A8.98 8.98 0 0112 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 dark:text-white">Guía de Indicadores del Panel de Dirección</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Para el director · supervisión de toda la institución (solo lectura)</p>
+                    </div>
+                </div>
+                <button @click="helpOpen = false"
+                        class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Content --}}
+        <div class="p-6" x-data="{ tab: 'kpis' }">
+            {{-- Intro text --}}
+            <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                    Este <strong class="text-gray-900 dark:text-white">Panel de Dirección</strong> resume en una sola pantalla el
+                    <strong class="text-sky-600 dark:text-sky-400">seguimiento institucional</strong> de <strong class="text-gray-900 dark:text-white">toda la
+                    institución</strong> en <strong class="text-emerald-600 dark:text-emerald-500">modo solo lectura</strong>. Agrega los KPIs globales por
+                    unidad educativa, el flujo de nuevos registros (actividades, lecciones y diagnósticos) en el tiempo y el detalle
+                    diario de actividad por lapso. Usa esta guía para interpretar cada bloque e identificar tendencias, rezagos o
+                    cuellos de botella sin modificar ningún dato.
+                </p>
+            </div>
+
+            {{-- Tabs navigation --}}
+            <div class="flex gap-1 bg-gray-100 dark:bg-white/5 rounded-lg p-1 mb-6 overflow-x-auto" role="tablist">
+                <button @click="tab = 'kpis'"
+                        :class="tab === 'kpis' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30 shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'"
+                        class="flex-1 px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200">
+                    <span class="flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21h4a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m2 4h.01M17 17l4-4m-4 4l4 4"/></svg>
+                        KPIs globales
+                    </span>
+                </button>
+                <button @click="tab = 'peducativos'"
+                        :class="tab === 'peducativos' ? 'bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-500/30 shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'"
+                        class="flex-1 px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200">
+                    <span class="flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Por Peducativo
+                    </span>
+                </button>
+                <button @click="tab = 'flujo'"
+                        :class="tab === 'flujo' ? 'bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-500/30 shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'"
+                        class="flex-1 px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200">
+                    <span class="flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        Flujo de registros
+                    </span>
+                </button>
+                <button @click="tab = 'diario'"
+                        :class="tab === 'diario' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30 shadow-sm' : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-transparent'"
+                        class="flex-1 px-3 py-2.5 text-xs font-bold uppercase tracking-wider rounded-md border transition-all duration-200">
+                    <span class="flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Actividad por día
+                    </span>
+                </button>
+            </div>
+
+            {{-- ─── TAB: KPIs GLOBALES ─────────────────────────── --}}
+            <div x-show="tab === 'kpis'" x-transition:enter="transition-opacity duration-200">
+                <div class="space-y-3">
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: true }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h4a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m2 4h.01M17 17l4-4m-4 4l4 4"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">¿Qué representan las 6 tarjetas superiores?</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Visión global de la institución</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Son los contadores de toda la institución para el lapso seleccionado en la parte superior:</p>
+                                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Peducativos</strong> — total de unidades educativas (escuelas) de la institución.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Pensums</strong> — total de planes de estudio / mallas académicas registradas.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Lecciones</strong> — total de lecciones LMS creadas en la institución.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Actividades</strong> — total de actividades académicas registradas.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Recursos</strong> — total de recursos didácticos cargados al LMS.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Profesores</strong> — total de docentes activos en el periodo.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Significado para la dirección</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">¿Qué debes observar?</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Los KPIs te dan un pulso rápido de cobertura y actividad institucional. Al compararlos con el lapso seleccionado puedes:</p>
+                                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Detectar desbalances</strong>: si hay muchos docentes y pocas lecciones publicadas, quizá hay contenidos sin avanzar.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Verificar cobertura</strong>: cruza Pensums vs. Lecciones para confirmar que cada plan de estudio tenga contenido digital.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Monitorear crecimiento</strong>: los totales deben crecer a lo largo del lapso; variaciones bruscas merecen revisión.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ejemplo de lectura</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Caso práctico</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4">
+                                <div class="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-white/10 p-3 space-y-1.5">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span><strong class="text-gray-800 dark:text-gray-200">3 Peducativos</strong> · <strong class="text-gray-800 dark:text-gray-200">12 Pensums</strong> · <strong class="text-gray-800 dark:text-gray-200">180 Lecciones</strong> → cobertura digital positiva.</span></div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"><span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Si <strong class="text-gray-800 dark:text-gray-200">Profesores</strong> es alto pero <strong class="text-gray-800 dark:text-gray-200">Lecciones</strong> es bajo, indaga si hay docentes sin publicar.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ─── TAB: POR PEDUCATIVO ────────────────────────── --}}
+            <div x-show="tab === 'peducativos'" x-transition:enter="transition-opacity duration-200">
+                <div class="space-y-3">
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: true }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-sky-50 dark:bg-sky-500/15 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">¿Qué muestra la tabla «Indicadores por Peducativo»?</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Desglose por unidad educativa</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Desglosa, para cada unidad educativa, tres métricas del lapso activo: <strong class="text-gray-900 dark:text-white">Pensums</strong>, <strong class="text-gray-900 dark:text-white">Actividades</strong> y <strong class="text-gray-900 dark:text-white">Profesores</strong>.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20">✓ Permite comparar unidades entre sí</span>
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20">✓ Se filtra por lapso seleccionado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Significado para la dirección</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">¿Qué debes observar?</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">La comparación por unidad educativa te permite:</p>
+                                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start gap-2"><span class="text-sky-600 dark:text-sky-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Identificar unidades más/menos activas</strong> y priorizar acompañamiento pedagógico.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-sky-600 dark:text-sky-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Detectar disparidades</strong>: una unidad con muchos profesores y pocas actividades puede tener baja producción.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-sky-600 dark:text-sky-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Detectar unidades sin datos</strong>: la fila «Sin datos para el lapso seleccionado» indica unidad sin actividad registrada.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ejemplo de lectura</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Caso práctico</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4">
+                                <div class="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-white/10 p-3 space-y-1.5">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"><span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Comparas la columna <strong class="text-gray-800 dark:text-gray-200">Profesores</strong> de dos unidades: una concentra el personal — candidata a revisar su plan de trabajo.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ─── TAB: FLUJO DE REGISTROS ────────────────────── --}}
+            <div x-show="tab === 'flujo'" x-transition:enter="transition-opacity duration-200">
+                <div class="space-y-3">
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: true }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">¿Qué muestran los 3 gráficos de «Flujo de Registros»?</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Series de tiempo globales</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Tres líneas/áreas que acumulan los registros nuevos por día: <strong class="text-violet-600 dark:text-violet-400">Actividades</strong> (morado), <strong class="text-sky-600 dark:text-sky-400">Lecciones</strong> (azul) y <strong class="text-emerald-600 dark:text-emerald-400">Diagnósticos</strong> (verde). El selector superior (7 días / 30 días / 3 meses / Todo) define la ventana que se grafica.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20">✓ Rango configurable por el director</span>
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20">✓ No depende del lapso (es temporal)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Significado para la dirección</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">¿Qué debes observar?</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Este bloque es clave para ver el <strong class="text-gray-900 dark:text-white">ritmo de trabajo</strong> de la institución:</p>
+                                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start gap-2"><span class="text-violet-600 dark:text-violet-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Picos inesperados</strong>: un día con mucha actividad acumulada puede indicar actualizaciones masivas o el cierre de lapso.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-violet-600 dark:text-violet-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Mesetas planas</strong>: períodos sin registros nuevos sugieren baja producción y merecen seguimiento.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-violet-600 dark:text-violet-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Comparar líneas</strong>: si lecciones superan ampliamente a diagnósticos, quizá faltan evaluaciones de diagnóstico.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ejemplo de lectura</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Caso práctico</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4">
+                                <div class="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-white/10 p-3 space-y-1.5">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"><span class="w-2 h-2 rounded-full bg-violet-400"></span><span>Seleccionas <strong class="text-gray-800 dark:text-gray-200">30 días</strong> y ves una meseta plana de <strong class="text-gray-800 dark:text-gray-200">Diagnósticos</strong> → señala a la coordinación que no se están aplicando evaluaciones.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ─── TAB: ACTIVIDAD POR DÍA ─────────────────────── --}}
+            <div x-show="tab === 'diario'" x-transition:enter="transition-opacity duration-200">
+                <div class="space-y-3">
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: true }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">¿Qué muestran los gráficos de «Actividad por Día»?</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Detalle diario por lapso</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">Tres gráficos, <strong class="text-gray-900 dark:text-white">filtrados por el lapso seleccionado</strong> en la cabecera: <strong class="text-emerald-600 dark:text-emerald-400">Actividades Registradas por Día</strong>, <strong class="text-sky-600 dark:text-sky-400">Lecciones Registradas por Día</strong> y <strong class="text-violet-600 dark:text-violet-400">Publicaciones Programadas por Día</strong>. Cada barra muestra cuántos registros se produjeron en cada fecha del lapso.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">✓ Respeta el lapso activo</span>
+                                    <span class="px-2 py-1 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">✓ «Programadas» anticipa contenido futuro</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Significado para la dirección</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">¿Qué debes observar?</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4 space-y-3">
+                                <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">En la vista diaria puedes:</p>
+                                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start gap-2"><span class="text-amber-600 dark:text-amber-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Ver la constancia</strong>: días consecutivos con registros indican actividad sostenida; vacíos totales, semanas sin trabajo.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-amber-600 dark:text-amber-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Planificación futura</strong>: «Publicaciones Programadas» muestra el contenido ya agendado, clave para anticipar el calendario.</span></li>
+                                    <li class="flex items-start gap-2"><span class="text-amber-600 dark:text-amber-400 mt-0.5">▸</span><span><strong class="text-gray-800 dark:text-gray-200">Cruzar con el lapso</strong>: al cambiar el lapso, todos los gráficos del bloque se recalculan para ese periodo.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </span>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ejemplo de lectura</h3>
+                                    <p class="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">Caso práctico</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition-all duration-200">
+                            <div class="px-4 pb-4">
+                                <div class="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-white/10 p-3 space-y-1.5">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"><span class="w-2 h-2 rounded-full bg-amber-400"></span><span>En <strong class="text-gray-800 dark:text-gray-200">Publicaciones Programadas</strong> ves alta actividad de programación para la próxima semana → la institución tiene contenido planificado.</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ─── FOOTER: nota read-only ─────────────────────── --}}
+            <div class="mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+                <div class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-white/10 rounded-lg p-4">
+                    <div class="flex items-start gap-2 mb-3">
+                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Modo solo lectura</h3>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed mt-1">
+                                Este panel de la Dirección es de <strong class="text-emerald-600 dark:text-emerald-500">solo lectura</strong>:
+                                observas, supervisas y auditas los indicadores de toda la institución, pero <strong class="text-gray-800 dark:text-gray-200">no modificas</strong> ni registros ni datos.
+                                Los contenidos (lecciones, actividades, diagnósticos) los generan los docentes y Planificación desde sus módulos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 {{-- Light mode support: detect dark class and expose theme-aware chart colors --}}
 <script>
     window.flowChartColors = (function() {
