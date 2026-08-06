@@ -317,7 +317,7 @@ Fuera del `wire:ignore`, dentro del `x-data="lessonBook()"`:
 - **Home / End** → primera / última página.
 - **Esc** → `Alpine.store('lmsView').set('scroll')` (vuelve al modo con TOC, comentarios y footer).
 - Listener de teclado solo activo cuando `mode === 'book'` (se registra en `set()` / se comprueba en el handler).
-- **`prefers-reduced-motion: reduce`** → `flippingTime: 0` (turnos instantáneos) y sin sombra/animación de página. Se detecta en `ensureFlipbook()` con `matchMedia('(prefers-reduced-motion: reduce)')`. Alineado con el bloque CSS existente que ya oculta la confeti bajo esa media query.
+- **`prefers-reduced-motion: reduce`** → `flippingTime: 1` (turnos instantáneos) y sin sombra/animación de página. Se detecta en `ensureFlipbook()` con `matchMedia('(prefers-reduced-motion: reduce)')`. Alineado con el bloque CSS existente que ya oculta la confeti bajo esa media query. *(Corrección C5: el paquete page-flip 1.3.0 valida `flippingTime > 0` — `getSettings` lanza `"Invalid flipping time"` si es `≤ 0`. `0` rompería la inicialización; `1` es el valor mínimo legal y satisface la intención de "turnos instantáneos".)*
 - **`usePortrait` en móvil**: una sola hoja en < `md`, spread de dos en ≥. El tamaño de página se calcula del viewport (`min(ancho, alto × ratio)`).
 - **Rol `region` + `aria-label="Modo libro"`** en el contenedor; el toggle usa `aria-pressed` (ver §5.2).
 
