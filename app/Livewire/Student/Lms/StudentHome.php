@@ -4,9 +4,9 @@ namespace App\Livewire\Student\Lms;
 
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
-use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lms\LmsActivityLog;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -16,6 +16,8 @@ class StudentHome extends Component
     use Concerns\HasStudentScope;
     use WireUiActions;
     use WithPagination;
+    /** Pestaña activa para el sistema de navtab. */
+    public string $activeTab = "continuar";
 
     /** Búsqueda en vivo sobre el listado "Todas las Lecciones". */
     public string $search = '';
@@ -31,10 +33,11 @@ class StudentHome extends Component
 
     /** ¿Modo lectura (franja 5–8)? (F1) — tipografía mayor y menos opciones. */
     public bool $modoLectura = false;
-
+    /** Pestaña activa para el sistema de navtab. */
     protected $queryString = [
         'search' => ['except' => ''],
         'subjectFilter' => ['except' => ''],
+        'activeTab' => ['except' => 'continuar'],
     ];
 
     public function mount(): void
@@ -44,13 +47,19 @@ class StudentHome extends Component
         // La edad se computa en mount() (no en render(), que corre cada 10s
         // por el wire:poll y causaría N+1). Puede ser null (sin relación
         // estudiant), '-' (fecha no cargada) o int.
-        $age = auth()->user()?->estudiant?->age;
+        $age = null;
+        if (auth()->user() && auth()->user()->estudiant) {
+            $age = auth()->user()->estudiant->age;
+        }
         $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
         $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
 
         // F1: misma base que la mascota (edad, no pestudio). La relación
         // estudiant ya se cargó en la línea anterior, sin query extra.
-        $this->modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false);
+        $this->modoLectura = false;
+        if (auth()->user() && auth()->user()->estudiant) {
+            $this->modoLectura = (bool) (auth()->user()->estudiant->modo_lectura ?? false);
+        }
     }
 
     public function updatedSearch(): void
@@ -68,9 +77,11 @@ class StudentHome extends Component
     {
         $this->search = '';
         $this->subjectFilter = '';
-        $this->resetPage();
     }
-
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
     public function render(): \Illuminate\View\View
     {
         $service = $this->getStudentService();
@@ -261,7 +272,7 @@ class StudentHome extends Component
         $subjects = Activity::with('pevaluacion.pensum.asignatura')
             ->whereIn('id', $visibleActivityIds)
             ->get()
-            ->map(fn ($a) => $a->pevaluacion?->pensum?->asignatura?->name)
+            ->map(fn ($a) => optional(optional(optional($a->pevaluacion)->pensum)->asignatura)->name)
             ->filter(fn ($name) => filled($name))
             ->unique()
             ->sort()
@@ -298,7 +309,7 @@ class StudentHome extends Component
 
         $completedIdsArray = $completedIds->toArray();
         $subjectDistribution = $activities
-            ->groupBy(fn ($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
+            ->groupBy(fn ($a) => optional(optional(optional($a->pevaluacion)->pensum)->asignatura)->name ?? 'Sin asignatura')
             ->map(fn ($acts, $name) => [
                 'name' => $name,
                 'total' => $acts->count(),
@@ -352,10 +363,36 @@ class StudentHome extends Component
      */
     private function greetingForHour(int $hour): string
     {
-        return match (true) {
-            $hour >= 5 && $hour < 12 => 'Buenos días',
-            $hour >= 12 && $hour < 20 => 'Buenas tardes',
-            default => 'Buenas noches',
-        };
+        if ($hour >= 5 && $hour < 12) {
+            return 'Buenos días';
+        } elseif ($hour >= 12 && $hour < 20) {
+            return 'Buenas tardes';
+        } else {
+            return 'Buenas noches';
+        }
+    }
+    private function setPreviousTab(): void
+    {
+        $tabs = ['continuar', 'lecciones', 'distribucion', 'actividad'];
+        $currentIndex = array_search($this->activeTab, $tabs);
+        if ($currentIndex === false) {
+            $this->activeTab = $tabs[0];
+            return;
+        }
+        $newIndex = ($currentIndex - 1 + count($tabs)) % count($tabs);
+        $this->activeTab = $tabs[$newIndex];
+    }
+
+    private function setNextTab(): void
+    {
+        $tabs = ['continuar', 'lecciones', 'distribucion', 'actividad'];
+        $currentIndex = array_search($this->activeTab, $tabs);
+        if ($currentIndex === false) {
+            $this->activeTab = $tabs[0];
+            return;
+        }
+        $newIndex = ($currentIndex + 1) % count($tabs);
+        $this->activeTab = $tabs[$newIndex];
     }
 }
+

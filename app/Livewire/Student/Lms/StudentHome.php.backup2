@@ -1,0 +1,362 @@
+<?php
+
+namespace App\Livewire\Student\Lms;
+
+use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityLog;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class StudentHome extends Component
+{
+    use Concerns\HasStudentScope;
+    use WireUiActions;
+    use WithPagination;
+    /** Pestaña activa para el sistema de navtab. */
+    public string $activeTab = "continuar";
+
+    /** Búsqueda en vivo sobre el listado "Todas las Lecciones". */
+    public string $search = '';
+
+    /** Filtro por asignatura en el listado "Todas las Lecciones". */
+    public string $subjectFilter = '';
+
+    /** ¿Mostrar la mascota? (C4) — oculta para 13–15 años. */
+    public bool $showMascot = false;
+
+    /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
+    public bool $mascotEmphasis = false;
+
+    /** ¿Modo lectura (franja 5–8)? (F1) — tipografía mayor y menos opciones. */
+    public bool $modoLectura = false;
+    /** Pestaña activa para el sistema de navtab. */
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'subjectFilter' => ['except' => ''],
+    ];
+
+    public function mount(): void
+    {
+        $this->initializeHasStudentScope();
+
+        // La edad se computa en mount() (no en render(), que corre cada 10s
+        // por el wire:poll y causaría N+1). Puede ser null (sin relación
+        // estudiant), '-' (fecha no cargada) o int.
+        $age = auth()->user()?->estudiant?->age;
+        $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
+        $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
+
+        // F1: misma base que la mascota (edad, no pestudio). La relación
+        // estudiant ya se cargó en la línea anterior, sin query extra.
+        $this->modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false);
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSubjectFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /** Limpia la búsqueda y el filtro de asignatura del listado global. */
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->subjectFilter = '';
+    }
+    public function setActiveTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
+    public function render(): \Illuminate\View\View
+    {
+        $service = $this->getStudentService();
+        $seccionIds = $service->getSeccionIds();
+
+        // ─── Published activity IDs scoped to student's section ─────
+        $publishedActivityIds = LmsActivityPublication::query()
+            ->visibleNow()
+            ->pluck('activity_id');
+
+        $visibleActivityIds = Activity::whereIn('id', $publishedActivityIds)
+            ->where('status', true)
+            ->whereHas('pevaluacion', fn ($q) => $q->whereIn('seccion_id', $seccionIds))
+            ->pluck('id');
+
+        // ─── 0. Hero: saludo, racha y siguiente lección ─────────────
+        $fullName = trim(auth()->user()->full_name ?: '');
+        $firstName = $fullName !== ''
+            ? explode(' ', $fullName)[0]
+            : trim(auth()->user()->name ?: '');
+
+        // Racha de días consecutivos con actividad (VIEW/COMPLETE/descarga),
+        // contando desde hoy; si hoy aún no hay actividad, desde ayer.
+        $activityDates = LmsActivityLog::where('user_id', auth()->id())
+            ->whereIn('event', ['VIEW', 'COMPLETE', 'RESOURCE_DOWNLOAD'])
+            ->pluck('created_at')
+            ->map(fn ($date) => $date->toDateString())
+            ->unique()
+            ->flip();
+
+        $streak = 0;
+        $cursor = now()->startOfDay();
+        if (!$activityDates->has($cursor->toDateString())) {
+            $cursor = $cursor->subDay();
+        }
+        while ($activityDates->has($cursor->toDateString())) {
+            $streak++;
+            $cursor = $cursor->subDay();
+        }
+
+        // Siguiente lección: la publicada más reciente sin completar;
+        // si todas están completas, la preview más próxima.
+        $nextLesson = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.profesor',
+            'lmsPublication',
+        ])
+            ->whereIn('id', $visibleActivityIds)
+            ->whereDoesntHave('lmsLogs', fn ($q) => $q->where('user_id', auth()->id())->where('event', 'COMPLETE'))
+            ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+            ->orderBy(
+                LmsActivityPublication::select('publish_at')
+                    ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                    ->orderByDesc('publish_at')
+                    ->limit(1),
+                'desc'
+            )
+            ->first();
+
+        if (!$nextLesson) {
+            $nextLesson = Activity::with([
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.profesor',
+                'lmsPublication',
+            ])
+                ->whereIn('id', $visibleActivityIds)
+                ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '>', now()))
+                ->orderBy(
+                    LmsActivityPublication::select('publish_at')
+                        ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                        ->orderBy('publish_at')
+                        ->limit(1),
+                    'asc'
+                )
+                ->first();
+        }
+
+        // ─── 1. Stats ──────────────────────────────────────────────
+        $totalActivities = $visibleActivityIds->count();
+
+        $completedIds = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'COMPLETE')
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->pluck('activity_id')
+            ->unique();
+
+        $commentsCount = ActivityComment::where('user_id', auth()->id())->count();
+
+        $downloadsCount = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->count();
+
+        $stats = [
+            'total' => $totalActivities,
+            'completed' => $completedIds->count(),
+            'comments' => $commentsCount,
+            'downloads' => $downloadsCount,
+            'progress_pct' => $totalActivities > 0
+                ? round(($completedIds->count() / $totalActivities) * 100)
+                : 0,
+        ];
+
+        // ─── 2. Continue Learning — recent interaction per activity ─
+        $recentLogs = LmsActivityLog::with([
+            'activity.pevaluacion.pensum.asignatura',
+            'activity.pevaluacion.profesor',
+            'activity.lmsPublication',
+        ])
+            ->where('user_id', auth()->id())
+            ->whereIn('event', ['VIEW', 'COMPLETE'])
+            ->whereIn('activity_id', $visibleActivityIds)
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get()
+            ->unique('activity_id')
+            ->take(5)
+            ->values();
+
+        // ─── 2b. Fallback "Continuar Aprendiendo" ───────────────────
+        // Sin historial de interacción, la sección lista las lecciones ya
+        // publicadas (publish_at <= ahora) de la más reciente a la más lejana,
+        // para que el estudiante tenga desde dónde empezar.
+        $suggestedActivities = $recentLogs->isEmpty()
+            ? Activity::with([
+                'pevaluacion.pensum.asignatura',
+                'pevaluacion.profesor',
+                'lmsPublication',
+            ])
+                ->whereIn('id', $visibleActivityIds)
+                ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '<=', now()))
+                ->orderBy(
+                    LmsActivityPublication::select('publish_at')
+                        ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                        ->orderByDesc('publish_at')
+                        ->limit(1),
+                    'desc'
+                )
+                ->take(5)
+                ->get()
+            : collect();
+
+        // ─── 3. Próximas publicaciones ─────────────────────────────
+        // Para el estudiante, publish_at es la fecha más relevante de la
+        // lección: esta sección lista solo las que aún no se han publicado
+        // (publish_at futuro), ordenadas por la fecha de publicación.
+        $upcoming = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.lapso',
+            'lmsPublication',
+        ])
+            ->whereIn('id', $visibleActivityIds)
+            ->whereHas('lmsPublication', fn ($q) => $q->where('publish_at', '>', now()))
+            ->orderBy(
+                LmsActivityPublication::select('publish_at')
+                    ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                    ->orderByDesc('publish_at')
+                    ->limit(1)
+            )
+            ->take(5)
+            ->get();
+
+        // ─── 4. Todas las lecciones (búsqueda + filtro + paginación) ─
+        // Catálogo completo de las lecciones visibles (publicadas y previews)
+        // de la más reciente a la más antigua según publish_at, filtrable por
+        // texto y por asignatura, con 5 por página.
+        $allLessons = Activity::with([
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.lapso',
+            'lmsPublication',
+        ])
+            ->whereIn('id', $visibleActivityIds)
+            ->when($this->search !== '', fn ($q) => $q->where('topic', 'like', '%'.$this->search.'%'))
+            ->when($this->subjectFilter !== '', fn ($q) => $q->whereHas(
+                'pevaluacion.pensum.asignatura',
+                fn ($q2) => $q2->where('name', $this->subjectFilter)
+            ))
+            ->orderBy(
+                LmsActivityPublication::select('publish_at')
+                    ->whereColumn('lms_activity_publications.activity_id', 'activities.id')
+                    ->orderByDesc('publish_at')
+                    ->limit(1),
+                'desc'
+            )
+            ->paginate(5)
+            ->withQueryString();
+
+        // Asignaturas disponibles (para el filtro desplegable).
+        $subjects = Activity::with('pevaluacion.pensum.asignatura')
+            ->whereIn('id', $visibleActivityIds)
+            ->get()
+            ->map(fn ($a) => $a->pevaluacion?->pensum?->asignatura?->name)
+            ->filter(fn ($name) => filled($name))
+            ->unique()
+            ->sort()
+            ->values();
+
+        // ─── 4b. Metadatos por lección para las estrellas (C1) ─────
+        // Limitado a la página actual de $allLessons para no arrastrar
+        // consultas sobre todo el catálogo. Cada fila muestra 3 logros:
+        // lección completada, comentario aprobado y recurso descargado.
+        $pageIds = $allLessons->pluck('id');
+        $completedSet = $completedIds->flip();
+        $commentedSet = ActivityComment::approved()
+            ->where('user_id', auth()->id())
+            ->whereIn('activity_id', $pageIds)
+            ->pluck('activity_id')
+            ->unique()
+            ->flip();
+        $downloadedSet = LmsActivityLog::where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->whereIn('activity_id', $pageIds)
+            ->pluck('activity_id')
+            ->unique()
+            ->flip();
+        $rowMeta = $pageIds->mapWithKeys(fn ($id) => [$id => [
+            'completed' => isset($completedSet[$id]),
+            'commented' => isset($commentedSet[$id]),
+            'downloaded' => isset($downloadedSet[$id]),
+        ]])->all();
+
+        // ─── 5. Subject distribution ────────────────────────────────
+        $activities = Activity::with('pevaluacion.pensum.asignatura')
+            ->whereIn('id', $visibleActivityIds)
+            ->get();
+
+        $completedIdsArray = $completedIds->toArray();
+        $subjectDistribution = $activities
+            ->groupBy(fn ($a) => $a->pevaluacion?->pensum?->asignatura?->name ?? 'Sin asignatura')
+            ->map(fn ($acts, $name) => [
+                'name' => $name,
+                'total' => $acts->count(),
+                'completed' => $acts->filter(fn ($a) => in_array($a->id, $completedIdsArray))->count(),
+            ])
+            ->values()
+            ->sortByDesc('total')
+            ->values();
+
+        // ─── 6. Mini-listas: comentarios y descargas recientes ──────
+        $recentComments = ActivityComment::with(['activity.pevaluacion.pensum.asignatura'])
+            ->where('user_id', auth()->id())
+            ->approved()
+            ->latest('created_at')
+            ->take(3)
+            ->get();
+
+        $recentDownloads = LmsActivityLog::with(['activity.pevaluacion.pensum.asignatura'])
+            ->where('user_id', auth()->id())
+            ->where('event', 'RESOURCE_DOWNLOAD')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        $downloadResourceIds = $recentDownloads->pluck('context_id')->filter();
+        $downloadResources = $downloadResourceIds->isNotEmpty()
+            ? LmsActivityResource::whereIn('id', $downloadResourceIds)->pluck('display_name', 'id')
+            : collect();
+
+        return view('livewire.student.lms.student-home', [
+            'greeting' => $this->greetingForHour(now()->hour),
+            'firstName' => $firstName ?: 'estudiante',
+            'streak' => $streak,
+            'nextLesson' => $nextLesson,
+            'stats' => $stats,
+            'recentLogs' => $recentLogs,
+            'suggestedActivities' => $suggestedActivities,
+            'upcoming' => $upcoming,
+            'allLessons' => $allLessons,
+            'subjects' => $subjects,
+            'subjectDistribution' => $subjectDistribution,
+            'recentComments' => $recentComments,
+            'recentDownloads' => $recentDownloads,
+            'downloadResources' => $downloadResources,
+            'rowMeta' => $rowMeta,
+        ])->layout('student.layouts.app');
+    }
+
+    /**
+     * Saludo según la hora del día (Buenos días / Buenas tardes / Buenas noches).
+     */
+    private function greetingForHour(int $hour): string
+    {
+        return match (true) {
+            $hour >= 5 && $hour < 12 => 'Buenos días',
+            $hour >= 12 && $hour < 20 => 'Buenas tardes',
+            default => 'Buenas noches',
+        };
+    }
+}

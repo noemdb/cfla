@@ -52,6 +52,9 @@ class ActivityView extends Component
     /** ¿Se ofrece el toggle de modo libro? (≥2 secciones, publicada, no modo lectura). */
     public bool $flipEnabled = false;
 
+    /** ¿Está disponible el modo PDF para impresión? (siempre true si hay actividad válida) */
+    public bool $pdfEnabled = true;
+
     /** ¿Disparar la celebración al completar la lección? (C3) */
     public bool $celebrate = false;
 
@@ -118,6 +121,9 @@ class ActivityView extends Component
         $this->flipEnabled = $this->sections->count() >= 2
             && ! $this->isPreview
             && ! $this->modoLectura;
+
+        // Modo PDF: siempre disponible cuando hay actividad válida
+        $this->pdfEnabled = true;
 
         $this->comments = ActivityComment::with('user')
             ->forActivity($activity->id)

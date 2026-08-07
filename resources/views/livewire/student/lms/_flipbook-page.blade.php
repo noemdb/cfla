@@ -1,4 +1,7 @@
-@props(['section' => null])
+@props([
+    'section' => null,
+    'paginationInfo' => null
+])
 
 @php
     // Variables de acento replicadas de activity-view.blade.php (design §6.3):
@@ -31,6 +34,15 @@
     }
 @endphp
 
+@php
+    // Variables de paginación: extraer información del chunk actual
+    $isFirstChunk = $paginationInfo['isFirstChunk'] ?? true;
+    $isLastChunk = $paginationInfo['isLastChunk'] ?? true;
+    $contents = $paginationInfo['contents'] ?? $section->visibleContents;
+    $chunkIndex = $paginationInfo['chunkIndex'] ?? 0;
+    $totalChunks = $paginationInfo['totalChunks'] ?? 1;
+@endphp
+
 <div class="stf__item">
     @php
         // Página izquierda del pliego → el lomo queda a la derecha; página derecha → lomo a la izquierda.
@@ -47,6 +59,9 @@
             <span class="w-0.5 h-4 rounded-full {{ $accentDot }} shrink-0"></span>
             <h2 class="text-sm sm:text-[13px] font-display font-bold text-gray-900 dark:text-white flex-1 min-w-0 leading-snug">
                 {{ $section->title }}
+                @if(!$isFirstChunk)
+                    <span class="ml-2 continuation-indicator">(Continúa)</span>
+                @endif
             </h2>
             @if($badgeLabel)
                 <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0 rounded-full text-[9px] font-semibold uppercase tracking-wider {{ $badgeClass }}">
@@ -55,9 +70,9 @@
             @endif
         </div>
 
-        {{-- Contenido de la sección, vía partial compartido en mode='book' --}}
+        {{-- Contenido de la sección (paginado), vía partial compartido en mode='book' --}}
         <div class="mt-2 space-y-1 flex-1 min-h-0 overflow-y-auto">
-            @foreach($section->visibleContents as $idx => $content)
+            @foreach($contents as $idx => $content)
                 @include('livewire.student.lms._content-renderer', [
                     'content' => $content,
                     'mode' => 'book',
@@ -70,7 +85,12 @@
 
         {{-- Pie de página: el @include hereda $loop del @foreach($sections) de activity-view --}}
         <div class="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700/40 flex items-center justify-between text-[10px] font-semibold text-gray-400 dark:text-gray-500">
-            <span>Página {{ $loop->iteration }} de {{ $loop->count }}</span>
+            <div class="flex items-center space-x-2">
+                <span>Página {{ $loop->iteration }} de {{ $loop->count }}</span>
+                @if(!$isLastChunk)
+                    <span class="continuation-indicator">(Continúa)</span>
+                @endif
+            </div>
             <span class="uppercase tracking-wider">{{ $accentColor }}</span>
         </div>
     </div>

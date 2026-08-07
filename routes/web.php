@@ -438,6 +438,7 @@ Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isSt
     Route::get('/lecciones', \App\Livewire\Student\Lms\LessonList::class)->name('lessons');
     Route::get('/recursos', \App\Livewire\Student\Lms\ResourceList::class)->name('resources');
     Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
+    Route::get('/activity/{activity}/print', [\App\Http\Controllers\Lms\ActivityPrintController::class, 'show'])->name('activity.print');
     Route::get('/resource/{resource}/download', [
         \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download'
     ])->name('resource.download');

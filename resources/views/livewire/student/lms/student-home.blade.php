@@ -71,6 +71,10 @@ $__sc = [
 $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatura::colorKey($name);
 @endphp
 
+@php
+    $tabs = ['continuar', 'lecciones', 'distribucion', 'actividad'];
+@endphp
+
 {{-- D3: estado Alpine de la mini-barra sticky. updateNext() mide el fin del hero
      (x-ref="heroSection") y muestra la barra sólo cuando el hero — y su CTA de
      próxima lección — queda fuera de pantalla (detrás del navbar de h-14 = 56px).
@@ -78,9 +82,34 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
      del wire:poll.10s. --}}
 <div class="max-w-4xl mx-auto py-8 px-4 space-y-8"
      wire:poll.10s
-     x-data="{ nextOpen: false, updateNext() { const hero = this.$refs.heroSection; this.nextOpen = !!hero && hero.getBoundingClientRect().bottom <= 56; } }"
+     x-data="{
+        nextOpen: false,
+        updateNext() {
+            const hero = this.$refs.heroSection;
+            this.nextOpen = !!hero && hero.getBoundingClientRect().bottom <= 56;
+        },
+        activeTab: @entomb('{{ $activeTab }}'),
+        tabs: ['continuar', 'lecciones', 'distribucion', 'actividad'],
+        setActiveTab(tab) {
+            this.activeTab = tab;
+            @this.setActiveTab(tab)
+        },
+        prevTab() {
+            const index = this.tabs.indexOf(this.activeTab);
+            const newIndex = (index - 1 + this.tabs.length) % this.tabs.length;
+            this.setActiveTab(this.tabs[newIndex]);
+        },
+        nextTab() {
+            const index = this.tabs.indexOf(this.activeTab);
+            const newIndex = (index + 1) % this.tabs.length;
+            this.setActiveTab(this.tabs[newIndex]);
+        },
+        init() {
+            this.activeTab = @entomb('{{ $activeTab }}');
+        }
+     }"
      @scroll.window.passive="updateNext()"
-     x-init="updateNext()">
+     x-init="updateNext(); init()">
 
     {{-- 0. Hero: saludo + progreso + siguiente lección.
          G1: todas las tarjetas del home comparten la misma receta de

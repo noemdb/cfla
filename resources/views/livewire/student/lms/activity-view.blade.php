@@ -96,6 +96,13 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         @click="Alpine.store('lmsView').set('book')">
                     Libro
                 </button>
+                <button type="button"
+                        :class="Alpine.store('lmsView').mode === 'pdf' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                        :aria-pressed="Alpine.store('lmsView').mode === 'pdf'"
+                        @click="Alpine.store('lmsView').set('pdf')">
+                    PDF
+                </button>
             </div>
         </div>
         @endif
@@ -657,6 +664,25 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
 
     </div>
 
+    <!-- PDF Mode Content -->
+    <div x-show="Alpine.store('lmsView').mode === 'pdf'" x-cloak
+         class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/60 p-6 text-center">
+        <!-- Button logic from /app/planning/lms/monitor -->
+        <a href="#" 
+           @click.prevent="Alpine.store('lmsView').openPrintView()"
+           class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 text-teal-400 transition-all duration-200 text-[10px] font-bold hover:bg-teal-500/20 inline-block mx-auto"
+           title="Ver actividad en una página de impresión (Mermaid renderizado en el navegador)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 002-2H5a2 2 0 002-2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 002-2H9a2 2 0 002 2v4h10z"></path>
+            </svg>
+            <span class="hidden sm:inline">Ver / Imprimir</span>
+        </a>
+        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            Haz clic en el botón acima para abrir una versión optimizada para impresión
+            de esta actividad en una nueva pestaña.
+        </p>
+    </div>
+
     {{-- Contenedor libro: GATEADO por $flipEnabled (corrección del diseño §5.1).
          Cuando $flipEnabled=false no hay toggle (ya gateado en §5.2) → modo libro
          inalcanzable; renderizar el DOM oculto es peso muerto y filtra la copy
@@ -687,9 +713,43 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 </div>
             </div>
             <div wire:ignore x-show="!loadError">
+                <?php
+                    // Paginación de contenido para modo libro
+                    // Divide el contenido de cada sección en chunks que quepan en una página de libro
+                    $chunksPerPage = 3; // Número de bloques de contenido por página de libro (ajustable según optimizaciones de espaciado)
+                    $paginatedSections = collect();
+                    
+                    foreach ($sections as $sectionIndex => $section) {
+                        $visibleContents = $section->visibleContents;
+                        $contentCount = $visibleContents->count();
+                        
+                        // Si no hay contenido visible, omitir la sección (evita páginas vacías)
+                        if ($contentCount === 0) {
+                            continue;
+                        }
+                        
+                        // Dividir el contenido en chunks
+                        for ($i = 0; $i < $contentCount; $i += $chunksPerPage) {
+                            $chunk = $visibleContents->slice($i, $chunksPerPage);
+                            
+                            $paginatedSections->push([
+                                'section' => $section,
+                                'contents' => $chunk,
+                                'isFirstChunk' => ($i === 0),
+                                'isLastChunk' => (($i + $chunksPerPage) >= $contentCount),
+                                'originalSectionIndex' => $sectionIndex,
+                                'chunkIndex' => $i / $chunksPerPage,
+                                'totalChunks' => (int)ceil($contentCount / $chunksPerPage),
+                            ]);
+                        }
+                    }
+                ?>
                 <div id="lms-flipbook-root" class="rounded-lg shadow-[0_30px_60px_-20px_rgba(15,23,42,0.35)]">
-                    @foreach($sections as $section)
-                        @include('livewire.student.lms._flipbook-page', ['section' => $section])
+                    @foreach($paginatedSections as $paginatedSection)
+                        @include('livewire.student.lms._flipbook-page', [
+                            'section' => $paginatedSection['section'],
+                            'paginationInfo' => $paginatedSection
+                        ])
                     @endforeach
                 </div>
             </div>
@@ -1026,6 +1086,18 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             scrollbar-width: thin;
             scrollbar-color: rgba(31, 28, 20, 0.15) transparent;
         }
+
+        /* INDICADORES DE CONTINUACIÓN PARA PAGINACIÓN DE CONTENIDO */
+        .book-mode .continuation-indicator {
+            display: inline-block;
+            font-size: 0.75rem; /* text-xs */
+            font-style: italic;
+            color: #6b7280; /* gray-500 */
+            opacity: 0.8;
+        }
+        .book-mode .dark .continuation-indicator {
+            color: #9ca3af; /* gray-400 en oscuro */
+        }
     </style>
 
     {{-- ═══════════════════════ READING NAV (progreso + scroll-spy) ═══════════════════════ --}}
@@ -1069,7 +1141,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     };
                 });
 
-                // Store lmsView: modo de lectura de la lección ('scroll' | 'book').
+                // Store lmsView: modo de lectura de la lección ('scroll' | 'book' | 'pdf').
                 // Vive en Alpine.store (fuera del DOM que diffea Livewire) → sobrevive a re-renders.
                 Alpine.store('lmsView', {
                     mode: 'scroll',
@@ -1082,6 +1154,12 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             Alpine.nextTick(() => this.flipbook.ensureFlipbook());
                         }
                     },
+                    openPrintView() {
+                        // Abrir la vista de impresión en una nueva pestaña
+                        const activityId = {{ $activity->id }};
+                        const url = `/app/estudiante/activity/${activityId}/print`;
+                        window.open(url, '_blank');
+                    }
                 });
 
                 // lessonBook: estado local del modo libro (barra final + sync de completado).
