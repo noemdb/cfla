@@ -38,12 +38,14 @@
         </x-slot:navbarInfo>
         @include('components.navbars.coordinacion-items')
         @include('components.navbars.planning-items')
-        @include('components.navbars.profesor-items')
+        @include('components.navbars.coordinacion-profesor-items')
         @include('components.navbars.admin-items')
+        @include('components.navbars.director-items')
         <x-slot:mobileSlot>
             @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.planning-items-mobile')
-            @include('components.navbars.profesor-items-mobile')
+            @include('components.navbars.coordinacion-profesor-items-mobile')
+            @include('components.navbars.director-items-mobile')
             @include('components.navbars.admin-items-mobile')
         </x-slot:mobileSlot>
     </x-role-navbar>

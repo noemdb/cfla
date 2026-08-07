@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@include('partials.title')</title>
+    {{-- <title>@include('partials.title')</title> --}}
+    <title>U.E. Colegio Fray Luis Amigó</title>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-47HF698FBL"></script>

@@ -48,10 +48,12 @@
         @include('components.navbars.coordinacion-items')
         @include('components.navbars.planning-items')
         @include('components.navbars.profesor-items')
+        @include('components.navbars.director-items')
         <x-slot:mobileSlot>
             @include('components.navbars.admin-items-mobile')
             @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.planning-items-mobile')
+            @include('components.navbars.director-items-mobile')
             @include('components.navbars.profesor-items-mobile')
         </x-slot:mobileSlot>
     </x-role-navbar>

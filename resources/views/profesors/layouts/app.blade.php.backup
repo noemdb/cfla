@@ -38,20 +38,18 @@
     </div>
 
     <!-- Navbar compartido para todos los roles -->
-    <x-role-navbar subtitle="Panel de Dirección">
+    <x-role-navbar subtitle="Panel del Profesor">
         <x-slot:navbarInfo>
             @yield('navbar-info')
         </x-slot:navbarInfo>
-        @include('components.navbars.director-items')
+        @include('components.navbars.profesor-items')
         @include('components.navbars.coordinacion-items')
         @include('components.navbars.admin-items')
         @include('components.navbars.planning-items')
-        @include('components.navbars.profesor-items')
         <x-slot:mobileSlot>
-            @include('components.navbars.director-items-mobile')
+            @include('components.navbars.profesor-items-mobile')
             @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.admin-items-mobile')
-            @include('components.navbars.profesor-items-mobile')
             @include('components.navbars.planning-items-mobile')
         </x-slot:mobileSlot>
     </x-role-navbar>
@@ -70,7 +68,7 @@
                     &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión y Planificación Académica.
                 </p>
                 <div class="flex space-x-6 text-xs text-emerald-500/60 font-medium">
-                    <span>Panel de Dirección</span>
+                    <span>Panel del Profesor</span>
                     <span>Versión 2.0</span>
                 </div>
             </div>

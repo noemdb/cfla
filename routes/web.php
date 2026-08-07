@@ -294,6 +294,8 @@ Route::prefix('app')->name('app.')->group(function () {
 
         Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
             ->name('resources');
+        Route::get('/profesores', \App\Livewire\Coordinacion\ProfesorList::class)
+            ->name('profesores');
     });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────

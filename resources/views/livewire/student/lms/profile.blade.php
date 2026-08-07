@@ -1,13 +1,18 @@
 <div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
     <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-        </div>
+        @if($showMascot)
+            {{-- C4: la mascota hace de avatar del perfil (5–12 años). --}}
+            <x-lms.mascot :variant="'greet'" :size="'sm'" :emphasis="$mascotEmphasis" />
+        @else
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+            </div>
+        @endif
         <div>
-            <h1 class="text-lg font-bold text-gray-900 dark:text-white">Mi Perfil</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Información personal y académica</p>
+            <h1 class="text-lg font-display font-bold text-gray-900 dark:text-white">Mi Perfil</h1>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Información personal y académica</p>
         </div>
     </div>
 
@@ -17,17 +22,17 @@
         {{-- ═══ Stats rápidas ═══ --}}
         @if($stats)
         <div class="grid grid-cols-3 gap-3">
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
-                <p class="text-lg font-bold text-emerald-400">{{ $stats['total_activities'] }}</p>
-                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Actividades</p>
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none">
+                <p class="text-lg font-bold text-emerald-400 tabular-nums">{{ $stats['total_activities'] }}</p>
+                <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-0.5">Actividades</p>
             </div>
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
-                <p class="text-lg font-bold text-sky-400">{{ $stats['total_lessons'] }}</p>
-                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Lecciones</p>
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none">
+                <p class="text-lg font-bold text-sky-400 tabular-nums">{{ $stats['total_lessons'] }}</p>
+                <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-0.5">Lecciones</p>
             </div>
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
-                <p class="text-lg font-bold text-amber-400">{{ $stats['total_comments'] }}</p>
-                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">Comentarios</p>
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none">
+                <p class="text-lg font-bold text-amber-400 tabular-nums">{{ $stats['total_comments'] }}</p>
+                <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 mt-0.5">Comentarios</p>
             </div>
         </div>
         @endif
@@ -186,28 +191,28 @@
         <!-- ═══ Enlaces rápidos ═══ -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <a href="{{ route('student.lms.academic') }}"
-               class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/30 transition-colors">
+               class="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/40 hover:shadow-sm transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                 <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
                 <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Ver Académica</span>
             </a>
             <a href="{{ route('student.lms.lessons') }}"
-               class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/30 transition-colors">
+               class="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/40 hover:shadow-sm transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                 <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Ir a Lecciones</span>
             </a>
             <a href="{{ route('student.lms.resources') }}"
-               class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/30 transition-colors">
+               class="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/40 hover:shadow-sm transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                 <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
                 <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Ver Recursos</span>
             </a>
             <a href="{{ route('student.lms.home') }}"
-               class="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/30 transition-colors">
+               class="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/40 hover:shadow-sm transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                 <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
@@ -216,14 +221,19 @@
         </div>
     @else
         <div class="text-center py-16">
-            <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-            </div>
-            <p class="text-gray-500 font-medium">No se encontraron datos del estudiante</p>
-            <p class="text-xs text-gray-400 mt-1">Verifica que tu usuario esté vinculado a un estudiante activo.</p>
-            <p class="text-xs text-gray-400 mt-3">Si el problema persiste, contacta al departamento de control de estudio.</p>
+            @if($showMascot)
+                {{-- C4: la mascota idle "anima en el vacío" en el empty state. --}}
+                <x-lms.mascot :variant="'idle'" :size="'sm'" :emphasis="$mascotEmphasis" />
+            @else
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+            @endif
+            <p class="text-gray-600 font-medium">No se encontraron datos del estudiante</p>
+            <p class="text-xs text-gray-500 mt-1">Verifica que tu usuario esté vinculado a un estudiante activo.</p>
+            <p class="text-xs text-gray-500 mt-3">Si el problema persiste, contacta al departamento de control de estudio.</p>
         </div>
     @endif
 </div>
