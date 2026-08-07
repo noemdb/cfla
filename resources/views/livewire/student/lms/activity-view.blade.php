@@ -687,7 +687,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 </div>
             </div>
             <div wire:ignore x-show="!loadError">
-                <div id="lms-flipbook-root">
+                <div id="lms-flipbook-root" class="rounded-lg shadow-[0_30px_60px_-20px_rgba(15,23,42,0.35)]">
                     @foreach($sections as $section)
                         @include('livewire.student.lms._flipbook-page', ['section' => $section])
                     @endforeach

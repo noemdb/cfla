@@ -32,7 +32,15 @@
 @endphp
 
 <div class="stf__item">
-    <div class="flex flex-col h-full p-4 sm:p-6 bg-white dark:bg-gray-900">
+    @php
+        // Página izquierda del pliego → el lomo queda a la derecha; página derecha → lomo a la izquierda.
+        $isLeftPage = ($loop->index % 2 === 0);
+    @endphp
+    <div class="relative flex flex-col h-full p-6 sm:p-8 md:p-12 bg-[#fcfaf4] dark:bg-[#23211b]">
+
+        {{-- Sombra del lomo: da profundidad de libro abierto sobre el pliegue central --}}
+        <span aria-hidden="true"
+              class="pointer-events-none absolute inset-y-0 w-1/3 {{ $isLeftPage ? 'right-0 bg-[linear-gradient(to_left,rgba(31,28,20,0.12),transparent_85%)]' : 'left-0 bg-[linear-gradient(to_right,rgba(31,28,20,0.12),transparent_85%)]' }}"></span>
 
         {{-- Section header (misma identidad visual que el scroll) --}}
         <div class="flex items-center gap-2 pb-3 border-b border-emerald-200 dark:border-gray-700/40">
