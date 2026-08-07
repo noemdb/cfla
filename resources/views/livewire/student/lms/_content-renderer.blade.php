@@ -12,6 +12,7 @@
 
 @php
     $bodyHtml = $content->body ?? '';
+    $bookModeClass = $mode === 'book' ? 'book-compact' : '';
 @endphp
 
 @php
@@ -104,7 +105,7 @@
                         </div>
                     @endif
                 @elseif($tpl === 'concept')
-                    <div class="bg-white border-l-4 border-emerald-400 rounded-r-xl p-3 sm:p-4">
+                    <div class="{{ $bookModeClass }} bg-white border-l-4 border-emerald-400 rounded-r-xl p-3 sm:p-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base leading-none">💡</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Concepto</span>
@@ -114,7 +115,7 @@
                             class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                     </div>
                 @elseif($tpl === 'list')
-                    <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base leading-none">📋</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Lista</span>
@@ -124,7 +125,7 @@
                             class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
                     </div>
                 @elseif($tpl === 'quote')
-                    <div class="bg-white border-l-4 border-amber-500 rounded-r-xl p-3 sm:p-4">
+                    <div class="{{ $bookModeClass }} bg-white border-l-4 border-amber-500 rounded-r-xl p-3 sm:p-4">
                         <div class="flex items-start gap-3">
                             <span class="text-2xl leading-none text-amber-300/70 font-serif shrink-0">"</span>
                             <x-lms.math-text
@@ -133,7 +134,7 @@
                         </div>
                     </div>
                 @elseif($tpl === 'question')
-                    <div class="bg-white border border-sky-200 rounded-xl p-3 sm:p-4">
+                    <div class="{{ $bookModeClass }} bg-white border border-sky-200 rounded-xl p-3 sm:p-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base leading-none">💭</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700">Pregunta</span>
@@ -143,7 +144,7 @@
                             class="text-[17px] text-sky-900 leading-7 prose prose-sm max-w-none lms-content" />
                     </div>
                 @elseif($tpl === 'activity')
-                    <div class="bg-white border-2 border-dashed border-amber-300/60 rounded-xl p-3 sm:p-4">
+                    <div class="{{ $bookModeClass }} bg-white border-2 border-dashed border-amber-300/60 rounded-xl p-3 sm:p-4">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-base leading-none">✏️</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Actividad</span>
@@ -153,7 +154,7 @@
                             class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
                     </div>
                 @else
-                    <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
                         <x-lms.math-text
                             :content="$bodyHtml"
                             class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
@@ -167,7 +168,7 @@
                     $imgAlt = $content->title ?? 'Imagen';
                 @endphp
                 @if($imgUrl)
-                    <div x-data="{ loaded: false, failed: false, retry() { this.failed = false; this.loaded = false; const img = this.$refs.img; const src = img.getAttribute('data-src'); img.src = ''; requestAnimationFrame(() => img.src = src); } }" class="rounded-xl overflow-hidden border border-gray-200 bg-white">
+                    <div x-data="{ loaded: false, failed: false, retry() { this.failed = false; this.loaded = false; const img = this.$refs.img; const src = img.getAttribute('data-src'); img.src = ''; requestAnimationFrame(() => img.src = src); } }" class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200 bg-white">
                         {{-- Loading skeleton --}}
                         <div x-show="!loaded && !failed"
                              class="flex items-center justify-center h-48 sm:h-64 bg-gray-100 animate-pulse">
@@ -230,7 +231,7 @@
 
             @case('VIDEO')
                 @if($content->media?->isLocal())
-                    <div class="rounded-xl overflow-hidden border border-gray-200 bg-black">
+                    <div class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200 bg-black">
                         <video controls class="w-full aspect-video" preload="metadata">
                             <source src="{{ $content->media->public_url }}" type="{{ $content->media->mime_type }}">
                         </video>
@@ -238,7 +239,7 @@
                 @elseif($content->media?->provider === 'YOUTUBE')
                     @php preg_match('/[?&]v=([^&]+)/', $content->media->external_url ?? '', $m); $vid = $m[1] ?? ''; @endphp
                     @if($vid)
-                        <div class="aspect-video rounded-xl overflow-hidden border border-gray-200 bg-black">
+                        <div class="{{ $bookModeClass }} aspect-video rounded-xl overflow-hidden border border-gray-200 bg-black">
                             <iframe src="https://www.youtube.com/embed/{{ $vid }}"
                                     class="w-full h-full" allowfullscreen loading="lazy"></iframe>
                         </div>
@@ -247,14 +248,14 @@
                 @break
 
             @case('EMBED')
-                <div class="aspect-video rounded-xl overflow-hidden border border-gray-200 bg-white">
+                <div class="{{ $bookModeClass }} aspect-video rounded-xl overflow-hidden border border-gray-200 bg-white">
                     {!! $content->body !!}
                 </div>
                 @break
 
             @case('FILE_PREVIEW')
                 @if($content->media)
-                    <div class="rounded-xl overflow-hidden border border-gray-200" style="height: min(600px, 80vh);">
+                    <div class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200" style="height: min(600px, 80vh);">
                         <iframe src="{{ $content->media->public_url }}" class="w-full h-full" loading="lazy"></iframe>
                     </div>
                 @endif
@@ -262,10 +263,10 @@
 
             @case('AUDIO')
                 @if($content->media)
-                    <div class="bg-white rounded-xl p-3 border border-gray-200">
+                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 border border-gray-200">
                         <div class="flex items-center gap-3 mb-1.5">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 01-3 3z"/>
                             </svg>
                             <span class="text-xs font-medium text-gray-500">Audio</span>
                         </div>
@@ -307,7 +308,7 @@
                         </div>
                     @endif
                 @else
-                    <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200 text-gray-900">
+                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200 text-gray-900">
                         {!! $content->body !!}
                     </div>
                 @endif
@@ -315,7 +316,7 @@
 
             @default
                 @if($content->body)
-                    <div class="bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
                         <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none">{!! $content->body !!}</div>
                     </div>
                 @endif

@@ -36,27 +36,27 @@
         // Página izquierda del pliego → el lomo queda a la derecha; página derecha → lomo a la izquierda.
         $isLeftPage = ($loop->index % 2 === 0);
     @endphp
-    <div class="relative flex flex-col h-full p-6 sm:p-8 md:p-12 bg-[#fcfaf4] dark:bg-[#23211b]">
+    <div class="relative flex flex-col h-full p-4 sm:p-6 md:p-8 bg-[#fcfaf4] dark:bg-[#23211b]">
 
         {{-- Sombra del lomo: da profundidad de libro abierto sobre el pliegue central --}}
         <span aria-hidden="true"
               class="pointer-events-none absolute inset-y-0 w-1/3 {{ $isLeftPage ? 'right-0 bg-[linear-gradient(to_left,rgba(31,28,20,0.12),transparent_85%)]' : 'left-0 bg-[linear-gradient(to_right,rgba(31,28,20,0.12),transparent_85%)]' }}"></span>
 
         {{-- Section header (misma identidad visual que el scroll) --}}
-        <div class="flex items-center gap-2 pb-3 border-b border-emerald-200 dark:border-gray-700/40">
-            <span class="w-1 h-6 rounded-full {{ $accentDot }} shrink-0"></span>
-            <h2 class="text-sm sm:text-[15px] font-display font-bold text-gray-900 dark:text-white flex-1 min-w-0 leading-snug">
+        <div class="flex items-center gap-1.5 pb-2 border-b border-emerald-200 dark:border-gray-700/40">
+            <span class="w-0.5 h-4 rounded-full {{ $accentDot }} shrink-0"></span>
+            <h2 class="text-sm sm:text-[13px] font-display font-bold text-gray-900 dark:text-white flex-1 min-w-0 leading-snug">
                 {{ $section->title }}
             </h2>
             @if($badgeLabel)
-                <span class="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $badgeClass }}">
+                <span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0 rounded-full text-[9px] font-semibold uppercase tracking-wider {{ $badgeClass }}">
                     {{ $badgeLabel }}
                 </span>
             @endif
         </div>
 
         {{-- Contenido de la sección, vía partial compartido en mode='book' --}}
-        <div class="mt-3 space-y-2 flex-1 min-h-0 overflow-y-auto">
+        <div class="mt-2 space-y-1 flex-1 min-h-0 overflow-y-auto">
             @foreach($section->visibleContents as $idx => $content)
                 @include('livewire.student.lms._content-renderer', [
                     'content' => $content,
@@ -69,7 +69,7 @@
         </div>
 
         {{-- Pie de página: el @include hereda $loop del @foreach($sections) de activity-view --}}
-        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/40 flex items-center justify-between text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+        <div class="mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700/40 flex items-center justify-between text-[10px] font-semibold text-gray-400 dark:text-gray-500">
             <span>Página {{ $loop->iteration }} de {{ $loop->count }}</span>
             <span class="uppercase tracking-wider">{{ $accentColor }}</span>
         </div>

@@ -970,6 +970,62 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 display: none !important;
             }
         }
+
+        /* TIPTOGRAFÍA OPTIMIZADA PARA MODO LIBRO (OPCIÓN 6) */
+        .lms-content.book-mode {
+            font-size: 0.875rem; /* Era ~1.0625rem (17px) */
+            line-height: 1.5;    /* Era 1.75 */
+        }
+        .lms-content.book-mode h2 {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .lms-content.book-mode h3 {
+            font-size: 1.1rem;
+            margin-top: 0.9rem;
+            margin-bottom: 0.6rem;
+        }
+        .lms-content.book-mode p {
+            margin-bottom: 0.75rem;
+        }
+        .lms-content.book-mode ul,
+        .lms-content.book-mode ol {
+            margin-bottom: 0.75rem;
+            padding-left: 1.25rem;
+        }
+        .lms-content.book-mode blockquote {
+            margin: 0.75rem 0;
+            padding-left: 1rem;
+            border-left-width: 3px;
+        }
+
+        /* ESTILOS CONDENSADOS ESPECÍFICOS PARA MODO LIBRO (OPCIÓN 3) */
+        .book-compact p { margin-bottom: 0.75rem; } /* Era 1rem */
+        .book-compact ul, .book-compact ol { padding-left: 1.25rem; } /* Era 1.5rem */
+        .book-compact .prose { font-size: 0.9rem; line-height: 1.5; } /* Ajustar según necesidad */
+        .book-compact blockquote { border-left-width: 3px; padding-left: 1rem; } /* Era 4px/1.25rem */
+        .book-compact { margin-bottom: 0.75rem; } /* Refine spacing between elements */
+
+        /* SCROLLBAR SUTIL PARA MODO LIBRO (MEJORA DE EXPERIENCIA) */
+        .book-mode .overflow-y-auto::-webkit-scrollbar {
+            width: 4px;
+        }
+        .book-mode .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .book-mode .overflow-y-auto::-webkit-scrollbar-thumb {
+            background-color: rgba(31, 28, 20, 0.15);
+            border-radius: 2px;
+        }
+        .book-mode .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(31, 28, 20, 0.25);
+        }
+        /* Firefox */
+        .book-mode .overflow-y-auto {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(31, 28, 20, 0.15) transparent;
+        }
     </style>
 
     {{-- ═══════════════════════ READING NAV (progreso + scroll-spy) ═══════════════════════ --}}
@@ -1052,8 +1108,12 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         this.unwatchMode = Alpine.watch(() => Alpine.store('lmsView').mode, (mode) => {
                             if (mode === 'book') {
                                 this.attachKeyboardListener();
+                                const root = document.getElementById('lms-flipbook-root');
+                                if (root) root.classList.add('book-mode');
                             } else {
                                 this.detachKeyboardListener();
+                                const root = document.getElementById('lms-flipbook-root');
+                                if (root) root.classList.remove('book-mode');
                             }
                         });
                     },
@@ -1064,6 +1124,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             window.removeEventListener('resize', this.resizeListener);
                             this.resizeListener = null;
                         }
+                        const root = document.getElementById('lms-flipbook-root');
+                        if (root) root.classList.remove('book-mode');
                     },
                     // Tamaño numérico del libro (StPageFlip hace aritmética con width/height,
                     // así que NUNCA deben ser strings tipo '100%' — eso produce NaN y rompe
@@ -1072,14 +1134,14 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
                         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
                         const isPortrait = vw < 768; // breakpoint md de Tailwind
-                        const ratio = isPortrait ? 1.5 : 1.2; // alto/ancho
+                        const ratio = isPortrait ? 1.4 : 1.1; // Antes: 1.5 (retrato) / 1.2 (paisaje)
 
                         let width, height;
                         if (isPortrait) {
-                            height = Math.min(vh * 0.8, vw * ratio);
+                            height = Math.min(vh * 0.88, vw * ratio); // Antes: 0.8
                             width = height / ratio;
                         } else {
-                            width = Math.min(vw * 0.8, vh / ratio);
+                            width = Math.min(vw * 0.88, vh / ratio); // Antes: 0.8
                             height = width * ratio;
                         }
                         return { width, height, isPortrait };
