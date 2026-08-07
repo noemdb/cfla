@@ -89,8 +89,10 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 </button>
                 <button type="button"
                         :class="Alpine.store('lmsView').mode === 'book' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                         :aria-pressed="Alpine.store('lmsView').mode === 'book'"
+                        :disabled="Alpine.store('lmsView').flipbook?.loadError"
+                        :title="Alpine.store('lmsView').flipbook?.loadError ? 'No se pudo cargar el modo libro' : ''"
                         @click="Alpine.store('lmsView').set('book')">
                     Libro
                 </button>
@@ -663,7 +665,18 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
     @if($flipEnabled)
     <div x-show="Alpine.store('lmsView').mode === 'book'" x-cloak>
         <div x-data="lessonBook()" data-completed="{{ $completed ? '1' : '0' }}">
-            <div wire:ignore>
+            {{-- Task 6 Step 2: mensaje amigable si StPageFlip no pudo cargarse. --}}
+            <div x-show="loadError" role="alert"
+                 class="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
+                <p class="font-semibold">No se pudo cargar el modo libro</p>
+                <p class="mt-1">El contenido sigue disponible en la vista Deslizar.</p>
+                <button type="button"
+                        @click="Alpine.store('lmsView').set('scroll')"
+                        class="mt-4 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700">
+                    Volver a Deslizar
+                </button>
+            </div>
+            <div wire:ignore x-show="!loadError">
                 <div id="lms-flipbook-root">
                     @foreach($sections as $section)
                         @include('livewire.student.lms._flipbook-page', ['section' => $section])
@@ -673,7 +686,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             {{-- Barra final: FUERA del wire:ignore (Livewire la re-renderiza tras markComplete),
                  DENTRO del x-data (accede a pageIndex/total/completed de lessonBook). (C3) --}}
             <div class="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
-                 x-show="Alpine.store('lmsView').mode === 'book'">
+                 x-show="!loadError">
                 <p class="text-sm text-gray-600">
                     Página <span x-text="pageIndex + 1"></span> de <span x-text="total"></span>
                 </p>
@@ -1009,10 +1022,14 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 if (Alpine._lessonBookRegistered) return;
                 Alpine._lessonBookRegistered = true;
                 Alpine.data('lessonBook', () => ({
-                    pageFlip: null,   // instancia StPageFlip (null hasta la 1ª entrada al libro — Task 6)
-                    pageIndex: 0,     // 0-based, para "Página X / N"
-                    total: 0,         // nº de hojas = nº de secciones visibles
+                    pageFlip: null,      // instancia StPageFlip (null hasta la 1ª entrada al libro)
+                    pageIndex: 0,        // 0-based, para "Página X / N"
+                    total: 0,            // nº de hojas = nº de secciones visibles
                     completed: false,
+                    loadError: false,  // Task 6 Step 2: fallo de carga de StPageFlip → modo libro inutilizable
+                    keyboardListener: null,
+                    resizeListener: null,
+                    unwatchMode: null,
                     init() {
                         this.completed = this.$root.dataset.completed === '1';
                         // Las hojas ya vienen servidas por Blade: el contador hace que la
@@ -1021,19 +1038,139 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         // Hook al store (corrección C1): set('book') dispara ensureFlipbook().
                         Alpine.store('lmsView').flipbook = this;
                         Livewire.on('activity-completed', () => { this.completed = true; });
+                        // El teclado sólo debe intervenir en modo libro: attach/detach según el store.
+                        this.unwatchMode = Alpine.watch(() => Alpine.store('lmsView').mode, (mode) => {
+                            if (mode === 'book') {
+                                this.attachKeyboardListener();
+                            } else {
+                                this.detachKeyboardListener();
+                            }
+                        });
                     },
-                    // Stub seguro para Task 5. Task 6 implementa aquí la carga diferida de
-                    // StPageFlip (loadPageFlip() → (await loadPageFlip()).default.PageFlip,
-                    // medida del root, construcción del flipbook, total = children.length).
-                    // Con este stub, entrar a modo libro muestra las hojas apiladas (sin flip).
-                    ensureFlipbook() {},
+                    destroy() {
+                        if (this.unwatchMode) this.unwatchMode();
+                        this.detachKeyboardListener();
+                        if (this.resizeListener) {
+                            window.removeEventListener('resize', this.resizeListener);
+                            this.resizeListener = null;
+                        }
+                    },
+                    ensureFlipbook() {
+                        if (this.pageFlip) return; // ya inicializado
+
+                        // Carga diferida de StPageFlip (Task 6): sólo se descarga el módulo
+                        // cuando el estudiante entra por primera vez a modo libro.
+                        this.$nextTick(async () => {
+                            const root = document.getElementById('lms-flipbook-root');
+                            if (!root) return;
+
+                            try {
+                                const pageFlipModule = await window.loadPageFlip();
+                                let PageFlip = pageFlipModule.default || pageFlipModule;
+                                if (PageFlip && PageFlip.PageFlip) { PageFlip = PageFlip.PageFlip; }
+
+                                this.total = root.querySelectorAll('.stf__item').length;
+
+                                this.pageFlip = new PageFlip(root, {
+                                    width: '100%',
+                                    height: '100%',
+                                    showCover: false,
+                                });
+
+                                // E2: sin animación de vuelta bajo prefers-reduced-motion
+                                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                                    this.pageFlip.flippingTime(0);
+                                }
+
+                                this.updateContainerSize();
+
+                                this.resizeListener = () => this.updateContainerSize();
+                                window.addEventListener('resize', this.resizeListener);
+
+                                this.pageFlip.turn(this.pageIndex);
+
+                                this.pageFlip.on('turn', (data) => {
+                                    this.pageIndex = data.page;
+                                });
+                            } catch (e) {
+                                // Task 6 Step 2: el fallo de carga no debe romper la página;
+                                // desactiva el toggle y muestra un mensaje amigable en el libro.
+                                console.error('Failed to load page-flip:', e);
+                                this.loadError = true;
+                            }
+                        });
+                    },
+                    updateContainerSize() {
+                        if (!this.pageFlip) return;
+
+                        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                        const isPortrait = vw < 768; // breakpoint md de Tailwind
+                        const ratio = isPortrait ? 1.5 : 1.2; // alto/ancho
+
+                        let width, height;
+                        if (isPortrait) {
+                            height = Math.min(vh * 0.8, vw * ratio);
+                            width = height / ratio;
+                        } else {
+                            width = Math.min(vw * 0.8, vh / ratio);
+                            height = width * ratio;
+                        }
+
+                        const root = document.getElementById('lms-flipbook-root');
+                        if (root) {
+                            root.style.width = width + 'px';
+                            root.style.height = height + 'px';
+                        }
+                    },
                     openSection(id) {
                         // §6.1: un diagrama en modo libro → volver a scroll y saltar a la sección.
                         Alpine.store('lmsView').set('scroll');
-                        document.getElementById('seccion-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        this.$nextTick(() => {
+                            const sectionEl = document.getElementById('seccion-' + id);
+                            if (sectionEl) {
+                                sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        });
                     },
                     setPage(index) {
-                        this.pageIndex = index;   // el flipbook (Task 6) actualiza el indicador
+                        this.pageIndex = index;
+                        if (this.pageFlip) {
+                            this.pageFlip.turn(index);
+                        }
+                    },
+                    attachKeyboardListener() {
+                        this.keyboardListener = (e) => {
+                            switch (e.key) {
+                                case 'ArrowLeft':
+                                    e.preventDefault();
+                                    if (this.pageFlip) this.pageFlip.turnToPrevPage();
+                                    break;
+                                case 'ArrowRight':
+                                    e.preventDefault();
+                                    if (this.pageFlip) this.pageFlip.turnToNextPage();
+                                    break;
+                                case 'Home':
+                                    e.preventDefault();
+                                    if (this.pageFlip) this.pageFlip.turnToPage(0);
+                                    break;
+                                case 'End':
+                                    e.preventDefault();
+                                    if (this.pageFlip) this.pageFlip.turnToPage(this.pageFlip.getPageCount() - 1);
+                                    break;
+                                case 'Escape':
+                                    e.preventDefault();
+                                    Alpine.store('lmsView').set('scroll');
+                                    break;
+                            }
+                        };
+                        document.addEventListener('keydown', this.keyboardListener);
+                    },
+                    detachKeyboardListener() {
+                        if (this.keyboardListener) {
+                            document.removeEventListener('keydown', this.keyboardListener);
+                            this.keyboardListener = null;
+                        }
                     },
                 }));
 
