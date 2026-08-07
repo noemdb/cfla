@@ -670,11 +670,21 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                  class="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
                 <p class="font-semibold">No se pudo cargar el modo libro</p>
                 <p class="mt-1">El contenido sigue disponible en la vista Deslizar.</p>
-                <button type="button"
-                        @click="Alpine.store('lmsView').set('scroll')"
-                        class="mt-4 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-emerald-700">
-                    Volver a Deslizar
-                </button>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <button type="button"
+                            @click="retry()"
+                            class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 min-h-[44px] text-xs font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15m-11 9v-5h.582m15.356-2A8.001 8.001 0 004.582 15m0 0H9"/>
+                        </svg>
+                        Reintentar
+                    </button>
+                    <button type="button"
+                            @click="Alpine.store('lmsView').set('scroll')"
+                            class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 min-h-[44px] text-xs font-semibold text-gray-600 transition-colors hover:bg-emerald-50 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        Volver a Deslizar
+                    </button>
+                </div>
             </div>
             <div wire:ignore x-show="!loadError">
                 <div id="lms-flipbook-root">
@@ -1055,6 +1065,46 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             this.resizeListener = null;
                         }
                     },
+                    // Tamaño numérico del libro (StPageFlip hace aritmética con width/height,
+                    // así que NUNCA deben ser strings tipo '100%' — eso produce NaN y rompe
+                    // el constructor). Portrait en <md, landscape en ≥md.
+                    dimensions() {
+                        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                        const isPortrait = vw < 768; // breakpoint md de Tailwind
+                        const ratio = isPortrait ? 1.5 : 1.2; // alto/ancho
+
+                        let width, height;
+                        if (isPortrait) {
+                            height = Math.min(vh * 0.8, vw * ratio);
+                            width = height / ratio;
+                        } else {
+                            width = Math.min(vw * 0.8, vh / ratio);
+                            height = width * ratio;
+                        }
+                        return { width, height, isPortrait };
+                    },
+                    applySize(dimension) {
+                        const root = document.getElementById('lms-flipbook-root');
+                        if (root) {
+                            root.style.width = dimension.width + 'px';
+                            root.style.height = dimension.height + 'px';
+                        }
+                        if (this.pageFlip) {
+                            // update() de StPageFlip no recibe argumentos: se mutan las
+                            // settings vivas (getSettings() devuelve el objeto real) y
+                            // luego update() re-mide el render y re-muestra la página.
+                            const settings = this.pageFlip.getSettings();
+                            settings.width = dimension.isPortrait ? dimension.width : dimension.width / 2;
+                            settings.height = dimension.height;
+                            this.pageFlip.update();
+                        }
+                    },
+                    resizePage() {
+                        if (this.pageFlip) {
+                            this.applySize(this.dimensions());
+                        }
+                    },
                     ensureFlipbook() {
                         if (this.pageFlip) return; // ya inicializado
 
@@ -1071,27 +1121,50 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
 
                                 this.total = root.querySelectorAll('.stf__item').length;
 
+                                // Tamaño numérico fijado ANTES de construir la instancia.
+                                const dims = this.dimensions();
+                                this.applySize(dims);
+
+                                // E2: flippingTime se fija EN las settings (no existe el método
+                                // flippingTime en v1.3.0 — llamarlo lanza TypeError).
+                                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                                // E5: width de StPageFlip es el ANCHO DE PÁGINA, no del libro.
+                                // El contenedor mide bookW = pageW (portrait) o 2·pageW
+                                // (landscape, vista doble); autoSize:false evita que el 100%
+                                // clobberee el ancho; flippingTime>0 es obligatorio (Settings
+                                // lanza con <= 0) — 1 para prefers-reduced-motion.
+                                const pageW = dims.isPortrait ? dims.width : dims.width / 2;
+
                                 this.pageFlip = new PageFlip(root, {
-                                    width: '100%',
-                                    height: '100%',
+                                    width: pageW,
+                                    height: dims.height,
                                     showCover: false,
+                                    autoSize: false,
+                                    usePortrait: true,
+                                    flippingTime: reduce ? 1 : 1000,
                                 });
 
-                                // E2: sin animación de vuelta bajo prefers-reduced-motion
-                                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                                    this.pageFlip.flippingTime(0);
+                                // OBLIGATORIO en StPageFlip v1.3.0: sin loadFromHTML() this.pages quedan
+                                // null y turnToPage() lanza "Cannot read properties of null (reading 'show')".
+                                // Carga las hojas `.stf__item` ya servidas por Blade en el contenedor.
+                                this.pageFlip.loadFromHTML(root.querySelectorAll('.stf__item'));
+
+                                // Evento 'flip' (payload: {data: pageIndex}); no existe 'turn'.
+                                this.pageFlip.on('flip', ({ data }) => {
+                                    this.pageIndex = data;
+                                });
+
+                                // API real de StPageFlip v1.3.0: turnToPage() (no .turn()).
+                                // loadFromHTML ya disparó un 'flip' síncrono para la página 0
+                                // antes de este handler, así que sólo se restaura un índice
+                                // guardado mayor que 0.
+                                if (this.pageIndex > 0) {
+                                    this.pageFlip.turnToPage(this.pageIndex);
                                 }
 
-                                this.updateContainerSize();
-
-                                this.resizeListener = () => this.updateContainerSize();
+                                this.resizeListener = () => this.resizePage();
                                 window.addEventListener('resize', this.resizeListener);
-
-                                this.pageFlip.turn(this.pageIndex);
-
-                                this.pageFlip.on('turn', (data) => {
-                                    this.pageIndex = data.page;
-                                });
                             } catch (e) {
                                 // Task 6 Step 2: el fallo de carga no debe romper la página;
                                 // desactiva el toggle y muestra un mensaje amigable en el libro.
@@ -1100,28 +1173,13 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             }
                         });
                     },
-                    updateContainerSize() {
-                        if (!this.pageFlip) return;
-
-                        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-                        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-                        const isPortrait = vw < 768; // breakpoint md de Tailwind
-                        const ratio = isPortrait ? 1.5 : 1.2; // alto/ancho
-
-                        let width, height;
-                        if (isPortrait) {
-                            height = Math.min(vh * 0.8, vw * ratio);
-                            width = height / ratio;
-                        } else {
-                            width = Math.min(vw * 0.8, vh / ratio);
-                            height = width * ratio;
-                        }
-
-                        const root = document.getElementById('lms-flipbook-root');
-                        if (root) {
-                            root.style.width = width + 'px';
-                            root.style.height = height + 'px';
-                        }
+                    retry() {
+                        // Reintenta la carga del modo libro tras un fallo transitorio.
+                        // El import ya está cacheado en window._pageFlipPromise (si falló el
+                        // constructor, el módulo sí cargó); se re-mide el contenedor una vez
+                        // que x-show="!loadError" lo hace visible.
+                        this.loadError = false;
+                        this.$nextTick(() => this.ensureFlipbook());
                     },
                     openSection(id) {
                         // §6.1: un diagrama en modo libro → volver a scroll y saltar a la sección.
@@ -1136,7 +1194,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     setPage(index) {
                         this.pageIndex = index;
                         if (this.pageFlip) {
-                            this.pageFlip.turn(index);
+                            this.pageFlip.turnToPage(index);
                         }
                     },
                     attachKeyboardListener() {
