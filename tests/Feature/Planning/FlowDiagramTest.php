@@ -106,8 +106,14 @@ class FlowDiagramTest extends TestCase
         $response->assertOk();
         $html = $response->getContent();
 
-        $activityPos = strpos($html, 'Flujo de Actividad y Lección (LMS)');
-        $consejoPos  = strpos($html, 'Informe al Consejo Directivo');
+        // Se ancla a las cabeceras <h3> de las tarjetas: el título consejo es
+        // ASCII puro y también aparece dentro de la blob JSON `@js($diagrams)`
+        // (x-data de flow.blade.php) al inicio de la página, mientras que el de
+        // activity lleva «ó», que en el JSON de @js queda escapado y el strpos
+        // la salta; solo el título consejo (ASCII) coincide dentro de la blob.
+        // Medir sobre el h3 compara posiciones del mismo contexto (las tarjetas).
+        $activityPos = strpos($html, '>Flujo de Actividad y Lección (LMS)<');
+        $consejoPos  = strpos($html, '>Informe al Consejo Directivo');
 
         $this->assertNotFalse($activityPos, 'El diagrama Activity-Lesson debería estar presente');
         $this->assertNotFalse($consejoPos,  'El diagrama Consejo Directivo debería estar presente');

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flipbook harness</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #e8e4dc;
+    font-family: Georgia, 'Times New Roman', serif;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+  }
+  .stage { padding: 40px; }
+  /* CSS de la librería (copiado de stPageFlip.css) */
+  .stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); -ms-touch-action: pan-y; touch-action: pan-y; }
+  .sft__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+  .stf__parent canvas { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
+  .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2000px; }
+  .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
+  .stf__outerShadow, .stf__innerShadow, .stf__hardShadow, .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
+
+  .stf__item--soft, .stf__item {
+    background: #fdfcf8;
+  }
+  .stf__item > .page-inner {
+    width: 100%; height: 100%;
+    padding: 34px 40px;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.06), transparent 14%);
+    color: #333;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .stf__item > .page-inner h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+    color: #1a1a1a;
+    border-bottom: 2px solid #d8c9a3;
+    padding-bottom: 8px;
+  }
+  .stf__item > .page-inner p { margin: 0 0 10px; text-align: justify; }
+  .page-num { position: absolute; bottom: 14px; right: 18px; font-size: 11px; color: #999; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div id="book-root" style="position:relative;"></div>
+  </div>
+
+  <script src="/node_modules/page-flip/dist/js/page-flip.browser.js"></script>
+  <script>
+    const root = document.getElementById('book-root');
+    const PAGES = 6;
+    for (let i = 0; i < PAGES; i++) {
+      const el = document.createElement('div');
+      el.className = 'stf__item';
+      el.innerHTML =
+        '<div class="page-inner">' +
+          '<h2>Página ' + (i + 1) + '</h2>' +
+          '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>' +
+          '<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>' +
+          '<span class="page-num">' + (i + 1) + '</span>' +
+        '</div>';
+      root.appendChild(el);
+    }
+
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const isPortrait = vw < 768;
+    const ratio = isPortrait ? 1.5 : 1.2;
+    let width, height;
+    if (isPortrait) { height = Math.min(window.innerHeight * 0.8, vw * ratio); width = height / ratio; }
+    else { width = Math.min(vw * 0.8, window.innerHeight / ratio); height = width * ratio; }
+
+    const dims = { width, height, isPortrait };
+    const pageW = isPortrait ? width : width / 2;
+    root.style.width = width + 'px';
+    root.style.height = height + 'px';
+
+    const book = new St.PageFlip(root, {
+      width: pageW,
+      height: height,
+      showCover: false,
+      autoSize: false,
+      usePortrait: true,
+      flippingTime: 1000,
+    });
+    book.loadFromHTML(root.querySelectorAll('.stf__item'));
+    window.__book = book;
+  </script>
+</body>
+</html>

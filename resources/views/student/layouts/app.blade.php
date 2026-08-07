@@ -60,6 +60,13 @@
                           {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
                     Recursos
                 </a>
+                {{-- Items deshabilitados (por implementar) --}}
+                <span class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Diagnóstico
+                </span>
+                <span class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Competiciones
+                </span>
             </nav>
 
             {{-- Right section: user + hamburger --}}
@@ -135,6 +142,13 @@
                       {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                 Recursos
             </a>
+            {{-- Items deshabilitados (por implementar) --}}
+            <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                Diagnóstico
+            </span>
+            <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                Competiciones
+            </span>
             <div class="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
                 <span class="block px-3 py-1.5 text-xs text-gray-400 sm:hidden">{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" class="sm:hidden">

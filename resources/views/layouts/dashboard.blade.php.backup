@@ -11,8 +11,6 @@
 
     <!-- Favicon único SAEFL -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="apple-touch-icon" href="{{ asset('image/brand/512.png') }}" sizes="512x512">
-    <meta name="theme-color" content="#0d9488">
 
     <!-- Flash-free theme (blocking, antes de cualquier render) -->
     <script>if(localStorage.getItem('theme')!=='light'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}</script>
@@ -21,6 +19,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @wireUiScripts
     @livewireStyles
+
+    <!-- Meta tags -->
+    <meta name="description" content="Dashboard administrativo U.E. COLEGIO FRAY LUIS AMIGÓ">
+    <meta name="robots" content="noindex, nofollow">
 
     <style>
         [x-cloak] { display: none !important; }
@@ -38,26 +40,24 @@
     </div>
 
     <!-- Navbar compartido para todos los roles -->
-    <x-role-navbar subtitle="Panel de Dirección">
+    <x-role-navbar subtitle="Panel Administrativo">
         <x-slot:navbarInfo>
             @yield('navbar-info')
         </x-slot:navbarInfo>
-        @include('components.navbars.director-items')
-        @include('components.navbars.coordinacion-items')
         @include('components.navbars.admin-items')
+        @include('components.navbars.coordinacion-items')
         @include('components.navbars.planning-items')
         @include('components.navbars.profesor-items')
         <x-slot:mobileSlot>
-            @include('components.navbars.director-items-mobile')
-            @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.admin-items-mobile')
-            @include('components.navbars.profesor-items-mobile')
+            @include('components.navbars.coordinacion-items-mobile')
             @include('components.navbars.planning-items-mobile')
+            @include('components.navbars.profesor-items-mobile')
         </x-slot:mobileSlot>
     </x-role-navbar>
 
     <!-- Main Content -->
-    <main class="flex-1 container-fluid w-full mx-auto px-2 py-2 sm:px-4 sm:py-8">
+    <main class="flex-1 container mx-auto px-4 py-8">
         {{ $slot ?? '' }}
         @yield('content')
     </main>
@@ -67,10 +67,10 @@
         <div class="container mx-auto px-4 py-6">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
                 <p class="text-xs text-gray-500">
-                    &copy; {{ date('Y') }} <strong>SAEFL</strong> | Sistema de Gestión y Planificación Académica.
+                    © {{ date('Y') }} <strong>SAEFL</strong> @noemdb | Gestión Integral Educativa.
                 </p>
                 <div class="flex space-x-6 text-xs text-emerald-500/60 font-medium">
-                    <span>Panel de Dirección</span>
+                    <span>Sistema Seguro</span>
                     <span>Versión 2.0</span>
                 </div>
             </div>
@@ -79,7 +79,6 @@
 
     @livewireScripts
     @yield('script')
-    @stack('scripts')
 
     <style>
         .diagnostic-card {
@@ -96,30 +95,16 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @media (prefers-reduced-motion: reduce) {
-            .fade-in { animation: none; }
-        }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
-        #notifications,
+        /* Ensure notifications are above sticky navbar */
+        #notifications, 
         .wireui-notifications,
         [fixed] {
             z-index: 9999 !important;
-        }
-
-        .progress-bar-sm {
-            height: 4px;
-            border-radius: 2px;
-            background: rgba(255,255,255,0.06);
-            overflow: hidden;
-        }
-        .progress-bar-sm-fill {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.6s ease;
         }
     </style>
 </body>

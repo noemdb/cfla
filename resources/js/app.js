@@ -6,12 +6,13 @@ import "flowbite";
 // ── Lazy loaders for heavy libraries ──────────────────────────
 // Libraries like Mermaid, Swiper, and Chart.js are dynamically imported
 // only on pages that actually need them, via these loaders.
-import { loadMermaid, loadSwiper, loadChart, loadApexCharts } from './loaders';
+import { loadMermaid, loadSwiper, loadChart, loadApexCharts, loadPageFlip } from './loaders';
 
 window.loadMermaid = loadMermaid;
 window.loadSwiper = loadSwiper;
 window.loadChart = loadChart;
 window.loadApexCharts = loadApexCharts;
+window.loadPageFlip = loadPageFlip;
 
 // ── LMS Student Preview components ───────────────────────────
 // Alpine.data definitions for <x-lms.student-preview> — loaded
