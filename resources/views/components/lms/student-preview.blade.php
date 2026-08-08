@@ -239,6 +239,18 @@
                                     $teachingStyle = ['label' => 'CIERRE', 'symbol' => '●', 'class' => 'bg-amber-50 text-amber-700 border border-amber-200'];
                                 }
                                 $contentCount = count($section['contents'] ?? []);
+                                // Tipo de contenido de la sección (Spec "Campo content_type"):
+                                // badge aditivo; null/mixed → badge neutro o ausente.
+                                $secType = $section['content_type'] ?? null;
+                                $secTypeBadge = $secType ? [
+                                    'mermaid' => ['bg-sky-50 text-sky-700 border-sky-200'],
+                                    'svg'     => ['bg-violet-50 text-violet-700 border-violet-200'],
+                                    'image'   => ['bg-amber-50 text-amber-700 border-amber-200'],
+                                    'math'    => ['bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200'],
+                                    'html'    => ['bg-teal-50 text-teal-700 border-teal-200'],
+                                    'mixed'   => ['bg-indigo-50 text-indigo-700 border-indigo-200'],
+                                    'none'    => ['bg-slate-50 text-slate-400 border-slate-200'],
+                                ][$secType] ?? ['bg-stone-50 text-stone-500 border-stone-200'] : null;
                             @endphp
                             <div class="text-[10px] font-medium text-slate-400 dark:text-slate-500 tracking-wide px-0.5 mb-1 text-right">{{ $preview['title'] }}</div>
                             <div class="flex items-center gap-2 mb-4 shrink-0">
@@ -248,6 +260,12 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 {{ $teachingStyle['class'] }}">
                                         <span>{{ $teachingStyle['symbol'] }}</span>
                                         {{ $teachingStyle['label'] }}
+                                    </span>
+                                @endif
+                                @if($secTypeBadge)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 border {{ $secTypeBadge[0] }}"
+                                          title="Tipo de contenido de la sección">
+                                        {{ \App\Services\Lms\LmsContentClassifier::SECTION_TYPE_LABELS[$secType] ?? ucfirst($secType) }}
                                     </span>
                                 @endif
                                 @if($contentCount > 1)
@@ -265,6 +283,10 @@
 
                                     $isMermaid = app(\App\Services\Lms\LmsContentClassifier::class)->isMermaidBody($rawBody);
                                     $stepNumber = $idx + 1;
+                                    // Tipo fino del contenido (Spec "Campo content_type") para
+                                    // data-content-type (aditivo; sin cambios visuales).
+                                    $stepFineType = app(\App\Services\Lms\LmsContentClassifier::class)
+                                        ->classifyContent($content['type'] ?? 'TEXT', $rawBody, null);
                                 @endphp
                                 @php $isLastWithMermaid = $loop->last && $isMermaid; @endphp
                                 <div class="flex gap-3 {{ $isLastWithMermaid ? 'flex-1 min-h-0 items-stretch' : 'items-start' }} {{ $loop->last ? '' : 'mb-3' }}">
@@ -279,7 +301,7 @@
                                     </div>
 
                                     {{-- Step content --}}
-                                    <div class="flex-1 min-w-0 {{ $isLastWithMermaid ? 'min-h-0 flex flex-col' : '' }} {{ $loop->last ? '' : 'pb-1' }}">
+                                    <div data-content-type="{{ $stepFineType }}" class="flex-1 min-w-0 {{ $isLastWithMermaid ? 'min-h-0 flex flex-col' : '' }} {{ $loop->last ? '' : 'pb-1' }}">
                                         @if(($content['title'] ?? null))
                                             <h3 class="text-sm font-bold text-slate-800 leading-snug mb-1.5 shrink-0">{{ $content['title'] }}</h3>
                                         @endif
