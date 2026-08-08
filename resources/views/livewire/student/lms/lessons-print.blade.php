@@ -45,7 +45,7 @@
         .lesson-head .topic{font-weight:800;font-size:10pt;flex:1;overflow-wrap:break-word;word-break:break-word;min-width:0;}
         .lesson-head .estado{font-size:7pt;font-weight:700;padding:2px 8px;border-radius:999px;background:#f0fdfa;color:#0f766e;flex-shrink:0;}
 
-        .lesson-meta{display:flex;flex-wrap:gap:4px 14px;padding:5px 10px;background:#f0fdfa;
+        .lesson-meta{display:flex;flex-wrap:wrap;gap:4px 14px;padding:5px 10px;background:#f0fdfa;
                      border:1px solid #99f6e4;border-top:none;border-radius:0 0 6px 6px;font-size:7pt;color:#374151;}
         .lesson-meta .lbl{color:#0d9488;font-weight:700;}
         .lesson-meta .dot{color:#99f6e4;}
@@ -58,7 +58,7 @@
         .section-head .bar{width:4px;height:14px;background:#0d9488;border-radius:2px;}
 
         .content-block{padding:6px 8px;border:1px solid #e2e8f0;border-top:none;}
-        .content-title{font-weight:700;color:#334155;fontsize:8pt;margin-bottom:3px;}
+        .content-title{font-weight:700;color:#334155;font-size:8pt;margin-bottom:3px;}
 
         /* ── Imagen / SVG ── */
         .content-image{margin:4px 0;text-align:center;}
@@ -92,10 +92,10 @@
         .estado-arc{color:#6b7280;} .estado-npub{color:#9ca3af;}
 
         /* ── Sin contenido ── */
-        .no-content{padding:14px;text-align:center;color:#9ca3af;fontsize:8pt;border:1px dashed #cbd5e1;border-radius:6px;margin-top:10px;}
+        .no-content{padding:14px;text-align:center;color:#9ca3af;font-size:8pt;border:1px dashed #cbd5e1;border-radius:6px;margin-top:10px;}
 
         /* ── Footer ── */
-        .footer{text-align:center;fontsize:6.5pt;color:#6b7280;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;}
+        .footer{text-align:center;font-size:6.5pt;color:#6b7280;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;}
 
         @media print {
             /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MÁS COMPACTO */
@@ -149,7 +149,7 @@
 
             /* Tipografía precisa según solicitud - tamaño específico para impresión */
             .doc-head h1{font-size:9.75pt; font-weight:800; letter-spacing:-0.3px; color:#0f766e; margin:0;} /* 13px */
-            .doc-head h2{font-size:6pt; font-weight:600; color:#0f766e; margin=0;} /* 8px */
+            .doc-head h2{font-size:6pt; font-weight:600; color:#0f766e; margin:0;} /* 8px */
             .doc-head .sub{font-size:4.5pt; color:#64748b; margin-top:1px;} /* 6px */
 
             .lesson-head{display:flex;align-items:center;gap:4px;background:#0f766e;color:#fff;
@@ -157,7 +157,8 @@
             .lesson-head .nnum{width:14px;height:14px;border-radius:4px;background:rgba(255,255,255,.2);
                                display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;
                                font-size:4.5pt;flex-shrink:0;} /* 6px */
-            .lesson-head .topic{font-size:7.5pt; font-weight:700; flex:1;} /* 10px */
+            .lesson-head .topic{font-size:7.5pt; font-weight:700; flex:1; min-width:0;
+                                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;} /* 10px · máx 2 líneas */
             .lesson-head .estado{font-size:4.5pt; font-weight:600; padding:1px 4px;
                                  border-radius:999px;} /* 6px */
 
@@ -185,7 +186,7 @@
 
             .content ul,.content ol{margin:4px 0;padding-left:6px;}
             .content li{margin:2px 0;}
-            .content table{width=100%;border-collapse:collapse;margin:6px 0;font-size:4.5pt;}
+            .content table{width:100%;border-collapse:collapse;margin:6px 0;font-size:4.5pt;}
             .content table th{background:#e2e8f0;padding:2px 4px;border:1px solid #cbd5e1;font-size:4.5pt;text-align:left;}
             .content table td{padding:2px 4px;border:1px solid #e2e8f0;font-size:4.5pt;}
             .content blockquote{border-left:2px solid #0f766e;margin:4px 0;padding:0 4px;color:#475569;background:#f8fafc;font-style:italic;}
@@ -223,7 +224,7 @@
 
             /* Recursos / Enlaces */
             .lesson-res{margin-top:6px;padding:4px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;
-                       fontsize:4.5pt; color:#334155;} /* 6px */
+                       font-size:4.5pt; color:#334155;} /* 6px */
             .lesson-res .lbl{font-weight:600;color:#0f766e;}
             .lesson-res .link-sep{color:#cbd5e1;margin:0 1px;}
 
@@ -251,6 +252,14 @@
         $__estudiante = auth()->user()?->estudiant?->full_name
             ?? auth()->user()?->name
             ?? 'Estudiante';
+
+        // Footer dinámico (P7): secciones y contenidos visibles reales.
+        $__secciones  = $activity ? $activity->lmsSections->where('is_visible', true)->count() : 0;
+        $__contenidos = $activity
+            ? $activity->lmsSections
+                ->where('is_visible', true)
+                ->sum(fn ($s) => $s->visibleContents->count())
+            : 0;
     @endphp
 
     {{-- Barra de acciones --}}
@@ -353,32 +362,24 @@
                     </div>
                     @forelse($section->visibleContents as $content)
                         @php
-                            // Detección de tipo de contenido (idéntico a la vista
-                            // del director y al modal de previsualización completa).
+                            // Detección de tipo de contenido — clasificador único (P4):
+                            // LmsContentClassifier (misma lógica que director/preview).
                             $rawBody  = $content->body ?? '';
                             $type     = $content->type ?? 'TEXT';
+                            $__cls    = app(\App\Services\Lms\LmsContentClassifier::class);
 
                             // ─── IMAGE: SVG/ilustración ("Generar Imagen") — render
                             //     crudo, sin sanitizar (el sanitizador elimina <svg>).
-                            $isImage  = ($type === 'IMAGE') || preg_match('/<svg\b/', $rawBody) === 1;
+                            $isImage  = $__cls->isImageBody($type, $rawBody);
 
                             // ─── MERMAID: detectar por clase CSS o keyword inicial ──
                             $isMermaid = false;
                             $mermaidCode = '';
                             if (!$isImage) {
-                                $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
-                                if (!$isMermaid) {
-                                    $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
-                                }
+                                $isMermaid = $__cls->isMermaidBody($rawBody);
                                 if ($isMermaid) {
-                                    preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
-                                    // A1: conservar <br/> de labels multi-línea (strip_tags puro
-                                    // los eliminaría y concatenaría el texto en una sola línea
-                                    // larga que desborda la columna al imprimir).
-                                    $mermaidCode = trim(html_entity_decode(strip_tags($m[1] ?? '', '<br><br/>')));
-                                    if (empty($mermaidCode)) {
-                                        $mermaidCode = trim(html_entity_decode(strip_tags($rawBody, '<br><br/>')));
-                                    }
+                                    // A1: conserva <br/> de labels multi-línea.
+                                    $mermaidCode = $__cls->extractMermaidCode($rawBody);
                                 }
                             }
                         @endphp
@@ -456,7 +457,8 @@
 
         <div class="footer">
             {{ $institucion?->name ?? '' }}
-            · 1 lección
+            · {{ $__secciones }} {{ $__secciones === 1 ? 'sección' : 'secciones' }}
+            · {{ $__contenidos }} {{ $__contenidos === 1 ? 'contenido' : 'contenidos' }}
             · Elaborado por: {{ $__estudiante }} · {{ $fecha }}
         </div>
     </div>

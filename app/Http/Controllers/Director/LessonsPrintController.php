@@ -9,6 +9,7 @@ use App\Models\app\Entity\Institucion;
 use App\Services\Director\DirectorScopeService;
 use App\Services\Leadership\LeadershipService;
 use App\Services\Lms\CoordinacionScopeService;
+use App\Services\Lms\LmsPublicationStatus;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -149,7 +150,7 @@ class LessonsPrintController extends Controller
                 ? (\App\Models\app\Academy\Asignatura::find($request->integer('asignatura'))?->name ?? '')
                 : '',
             'status' => $request->filled('status')
-                ? $this->estadoLabel($request->string('status'))
+                ? LmsPublicationStatus::label($request->string('status'))
                 : '',
         ];
 
@@ -200,8 +201,8 @@ class LessonsPrintController extends Controller
             'finicial' => $act->finicial,
             'ffinal' => $act->ffinal,
             'estado' => $estado,
-            'estado_label' => $this->estadoLabel($estado),
-            'estado_class' => $this->estadoClass($estado),
+            'estado_label' => LmsPublicationStatus::label($estado),
+            'estado_class' => LmsPublicationStatus::cssClass($estado),
             'section_count' => $act->lmsSections->count(),
             'content_count' => $act->lmsSections->sum(fn ($s) => $s->contents->count()),
             'has_lms' => $act->lmsSections->isNotEmpty()
@@ -250,30 +251,6 @@ class LessonsPrintController extends Controller
     }
 
     /**
-     * Etiqueta legible para el estado de publicación.
+     * Etiqueta/clase legible del estado — compartido (P5): LmsPublicationStatus.
      */
-    private function estadoLabel(?string $estado): string
-    {
-        return match ($estado) {
-            'PUBLISHED' => 'Publicado',
-            'SCHEDULED' => 'Programado',
-            'ARCHIVED' => 'Archivado',
-            null => 'N.PUB',
-            default => 'Borrador',
-        };
-    }
-
-    /**
-     * Clase CSS del estado para la vista de impresión.
-     */
-    private function estadoClass(?string $estado): string
-    {
-        return match ($estado) {
-            'PUBLISHED' => 'estado-pub',
-            'SCHEDULED' => 'estado-prog',
-            'ARCHIVED' => 'estado-arc',
-            null => 'estado-npub',
-            default => 'estado-draft',
-        };
-    }
 }

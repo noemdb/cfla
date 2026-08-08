@@ -263,10 +263,7 @@
                                     $rawBody  = $content['body'] ?? '';
                                     $bodyHtml = $renderBody($rawBody); // Markdown → HTML si aplica
 
-                                    $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
-                                    if (!$isMermaid) {
-                                        $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
-                                    }
+                                    $isMermaid = app(\App\Services\Lms\LmsContentClassifier::class)->isMermaidBody($rawBody);
                                     $stepNumber = $idx + 1;
                                 @endphp
                                 @php $isLastWithMermaid = $loop->last && $isMermaid; @endphp
@@ -288,11 +285,8 @@
                                         @endif
                                         @if($isMermaid)
                                             @php
-                                                preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $bodyHtml, $m);
-                                                $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                                                if (empty($mermaidCode)) {
-                                                    $mermaidCode = trim(strip_tags($rawBody));
-                                                }
+                                                // A1: conserva <br/> de labels multi-línea (clasificador único P4).
+                                                $mermaidCode = app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($rawBody);
                                             @endphp
                                             <div wire:ignore x-data="mermaidEmbed()"
                                                  data-mermaid-code="{{ $mermaidCode }}"

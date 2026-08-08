@@ -7,6 +7,7 @@ use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Entity\Institucion;
 use App\Services\Estudiant\StudentScopeService;
+use App\Services\Lms\LmsPublicationStatus;
 use Illuminate\Http\Request;
 
 class ActivityPrintController extends Controller
@@ -53,8 +54,8 @@ class ActivityPrintController extends Controller
 
         // Etiqueta/clase legibles para el estado de publicación (ADIR-007).
         $estado = $activity->lmsPublication?->status ?? null;
-        $estadoLabel = $this->estadoLabel($estado);
-        $estadoClass = $this->estadoClass($estado);
+        $estadoLabel = LmsPublicationStatus::label($estado);
+        $estadoClass = LmsPublicationStatus::cssClass($estado);
 
         // Devolver la vista de impresión
         return view('livewire.student.lms.lessons-print', compact(
@@ -71,30 +72,6 @@ class ActivityPrintController extends Controller
     }
 
     /**
-     * Etiqueta legible para el estado de publicación.
+     * Etiqueta/clase legible del estado — compartido (P5): LmsPublicationStatus.
      */
-    private function estadoLabel(?string $estado): string
-    {
-        return match ($estado) {
-            'PUBLISHED' => 'Publicado',
-            'SCHEDULED' => 'Programado',
-            'ARCHIVED' => 'Archivado',
-            null => 'N.PUB',
-            default => 'Borrador',
-        };
-    }
-
-    /**
-     * Clase CSS del estado para la vista de impresión.
-     */
-    private function estadoClass(?string $estado): string
-    {
-        return match ($estado) {
-            'PUBLISHED' => 'estado-pub',
-            'SCHEDULED' => 'estado-prog',
-            'ARCHIVED' => 'estado-arc',
-            null => 'estado-npub',
-            default => 'estado-draft',
-        };
-    }
 }

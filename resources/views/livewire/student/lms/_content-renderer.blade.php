@@ -1,31 +1,24 @@
 {{--
     Renderer compartido de contenido (pasos) de una sección LMS.
-    Se usa en modo desplazamiento (activity-view) y en modo libro (flipbook).
+    Se usa en el modo desplazamiento de activity-view.
     --}}
 @props([
     'content' => null,    // LmsActivityContent
-    'mode' => 'scroll',   // 'scroll' | 'book'
     'stepNum' => 1,
     'isLast' => false,
-    'sectionId' => null,  // id de la sección contenedora (placeholder enlazado, modo libro)
 ])
 
 @php
     $bodyHtml = $content->body ?? '';
-    $bookModeClass = $mode === 'book' ? 'book-compact' : '';
 @endphp
 
 @php
-    $wrapperClasses = $mode === 'scroll'
-        ? ($isLast ? '' : 'pb-3 sm:pb-4 border-b border-gray-200')
-        : 'py-1';
-    $stepCircle = $mode === 'scroll'
-        ? 'w-8 h-8 rounded-full bg-emerald-600 text-white text-sm'
-        : 'w-6 h-6 rounded-full bg-emerald-600/10 text-emerald-700 text-xs';
-    $stepHeader = $mode === 'scroll' ? 'flex items-center justify-center gap-2 mb-2' : 'flex items-center gap-2 mb-2';
+    $wrapperClasses = $isLast ? '' : 'pb-3 sm:pb-4 border-b border-gray-200';
+    $stepCircle = 'w-8 h-8 rounded-full bg-emerald-600 text-white text-sm';
+    $stepHeader = 'flex items-center justify-center gap-2 mb-2';
 @endphp
 
-<div @if($mode === 'scroll') wire:key="content-{{ $content->id }}" @endif class="{{ $wrapperClasses }}">
+<div wire:key="content-{{ $content->id }}" class="{{ $wrapperClasses }}">
     {{-- Step number above content --}}
     <div class="{{ $stepHeader }}">
         <span class="flex items-center justify-center font-bold shrink-0 {{ $stepCircle }}">{{ $stepNum }}</span>
@@ -40,11 +33,8 @@
         @switch($content->type)
             @case('TEXT')
                 @php
-                    // Detectar Mermaid antes de cualquier conversión
-                    $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $bodyHtml) === 1;
-                    if (!$isMermaid) {
-                        $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($bodyHtml)) === 1;
-                    }
+                    // Detectar Mermaid antes de cualquier conversión — clasificador único (P4).
+                    $isMermaid = app(\App\Services\Lms\LmsContentClassifier::class)->isMermaidBody($bodyHtml);
 
                     // Si no es Mermaid: convertir Markdown a HTML
                     if (!$isMermaid) {
@@ -83,82 +73,16 @@
 
                 @if($tpl === 'mermaid')
                     @php
-                        preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $bodyHtml, $m);
-                        $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                        if (empty($mermaidCode)) {
-                            $mermaidCode = trim(strip_tags($bodyHtml));
-                        }
+                        // A1: conserva <br/> de labels multi-línea (clasificador único P4).
+                        $mermaidCode = app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($bodyHtml);
                     @endphp
-                    @if($mode === 'book')
-                        <div class="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-center">
-                            <p class="text-sm text-amber-800">📊 Este diagrama se ve mejor en modo deslizar.</p>
-                            <button type="button" @click="openSection({{ $sectionId }})"
-                                    class="mt-2 text-sm font-semibold text-amber-700 underline hover:text-amber-900">
-                                Ir a la sección
-                            </button>
-                        </div>
-                    @else
-                        <div wire:ignore x-data="mermaidEmbed()"
-                             data-mermaid-code="{{ $mermaidCode }}"
-                             class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
-                            <div x-ref="target" class="w-full min-h-0"></div>
-                        </div>
-                    @endif
-                @elseif($tpl === 'concept')
-                    <div class="{{ $bookModeClass }} bg-white border-l-4 border-emerald-400 rounded-r-xl p-3 sm:p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-base leading-none">💡</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Concepto</span>
-                        </div>
-                        <x-lms.math-text
-                            :content="$bodyHtml"
-                            class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
-                    </div>
-                @elseif($tpl === 'list')
-                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-base leading-none">📋</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Lista</span>
-                        </div>
-                        <x-lms.math-text
-                            :content="$bodyHtml"
-                            class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none prose-ul:list-disc prose-ol:list-decimal lms-content" />
-                    </div>
-                @elseif($tpl === 'quote')
-                    <div class="{{ $bookModeClass }} bg-white border-l-4 border-amber-500 rounded-r-xl p-3 sm:p-4">
-                        <div class="flex items-start gap-3">
-                            <span class="text-2xl leading-none text-amber-300/70 font-serif shrink-0">"</span>
-                            <x-lms.math-text
-                                :content="$bodyHtml"
-                                class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
-                        </div>
-                    </div>
-                @elseif($tpl === 'question')
-                    <div class="{{ $bookModeClass }} bg-white border border-sky-200 rounded-xl p-3 sm:p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-base leading-none">💭</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700">Pregunta</span>
-                        </div>
-                        <x-lms.math-text
-                            :content="$bodyHtml"
-                            class="text-[17px] text-sky-900 leading-7 prose prose-sm max-w-none lms-content" />
-                    </div>
-                @elseif($tpl === 'activity')
-                    <div class="{{ $bookModeClass }} bg-white border-2 border-dashed border-amber-300/60 rounded-xl p-3 sm:p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-base leading-none">✏️</span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Actividad</span>
-                        </div>
-                        <x-lms.math-text
-                            :content="$bodyHtml"
-                            class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
+                    <div wire:ignore x-data="mermaidEmbed()"
+                         data-mermaid-code="{{ $mermaidCode }}"
+                         class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                        <div x-ref="target" class="w-full min-h-0"></div>
                     </div>
                 @else
-                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
-                        <x-lms.math-text
-                            :content="$bodyHtml"
-                            class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
-                    </div>
+                    <x-lms.step-card :type="$tpl" :body="$bodyHtml" />
                 @endif
                 @break
 
@@ -168,9 +92,10 @@
                     $imgAlt = $content->title ?? 'Imagen';
                 @endphp
                 @if($imgUrl)
-                    <div x-data="{ loaded: false, failed: false, retry() { this.failed = false; this.loaded = false; const img = this.$refs.img; const src = img.getAttribute('data-src'); img.src = ''; requestAnimationFrame(() => img.src = src); } }" class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200 bg-white">
+                    <div x-data="{ loaded: false, failed: false, retry() { this.failed = false; this.loaded = false; const img = this.$refs.img; const src = img.getAttribute('data-src'); img.src = ''; requestAnimationFrame(() => img.src = src); } }" class=" rounded-xl overflow-hidden border border-gray-200 bg-white">
                         {{-- Loading skeleton --}}
                         <div x-show="!loaded && !failed"
+                             aria-busy="true"
                              class="flex items-center justify-center h-48 sm:h-64 bg-gray-100 animate-pulse">
                             <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -237,7 +162,7 @@
 
             @case('VIDEO')
                 @if($content->media?->isLocal())
-                    <div class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200 bg-black">
+                    <div class=" rounded-xl overflow-hidden border border-gray-200 bg-black">
                         <video controls class="w-full aspect-video" preload="metadata">
                             <source src="{{ $content->media->public_url }}" type="{{ $content->media->mime_type }}">
                         </video>
@@ -245,7 +170,7 @@
                 @elseif($content->media?->provider === 'YOUTUBE')
                     @php preg_match('/[?&]v=([^&]+)/', $content->media->external_url ?? '', $m); $vid = $m[1] ?? ''; @endphp
                     @if($vid)
-                        <div class="{{ $bookModeClass }} aspect-video rounded-xl overflow-hidden border border-gray-200 bg-black">
+                        <div class=" aspect-video rounded-xl overflow-hidden border border-gray-200 bg-black">
                             <iframe src="https://www.youtube.com/embed/{{ $vid }}"
                                     class="w-full h-full" allowfullscreen loading="lazy"></iframe>
                         </div>
@@ -254,14 +179,14 @@
                 @break
 
             @case('EMBED')
-                <div class="{{ $bookModeClass }} aspect-video rounded-xl overflow-hidden border border-gray-200 bg-white">
+                <div class=" aspect-video rounded-xl overflow-hidden border border-gray-200 bg-white">
                     {!! $content->body !!}
                 </div>
                 @break
 
             @case('FILE_PREVIEW')
                 @if($content->media)
-                    <div class="{{ $bookModeClass }} rounded-xl overflow-hidden border border-gray-200" style="height: min(600px, 80vh);">
+                    <div class=" rounded-xl overflow-hidden border border-gray-200" style="height: min(600px, 80vh);">
                         <iframe src="{{ $content->media->public_url }}" class="w-full h-full" loading="lazy"></iframe>
                     </div>
                 @endif
@@ -269,7 +194,7 @@
 
             @case('AUDIO')
                 @if($content->media)
-                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 border border-gray-200">
+                    <div class=" bg-white rounded-xl p-3 border border-gray-200">
                         <div class="flex items-center gap-3 mb-1.5">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 01-3 3z"/>
@@ -285,36 +210,19 @@
 
             @case('HTML')
                 @php
-                    $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $content->body ?? '') === 1;
-                    if (!$isMermaid) {
-                        $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($content->body ?? '')) === 1;
-                    }
+                    $isMermaid = app(\App\Services\Lms\LmsContentClassifier::class)->isMermaidBody($content->body ?? '');
                 @endphp
                 @if($isMermaid)
                     @php
-                        preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $content->body, $m);
-                        $mermaidCode = trim(strip_tags($m[1] ?? ''));
-                        if (empty($mermaidCode)) {
-                            $mermaidCode = trim(strip_tags($content->body));
-                        }
+                        $mermaidCode = app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($content->body ?? '');
                     @endphp
-                    @if($mode === 'book')
-                        <div class="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4 text-center">
-                            <p class="text-sm text-amber-800">📊 Este diagrama se ve mejor en modo deslizar.</p>
-                            <button type="button" @click="openSection({{ $sectionId }})"
-                                    class="mt-2 text-sm font-semibold text-amber-700 underline hover:text-amber-900">
-                                Ir a la sección
-                            </button>
-                        </div>
-                    @else
-                        <div wire:ignore x-data="mermaidEmbed()"
-                             data-mermaid-code="{{ $mermaidCode }}"
-                             class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
-                            <div x-ref="target" class="w-full min-h-0"></div>
-                        </div>
-                    @endif
+                    <div wire:ignore x-data="mermaidEmbed()"
+                         data-mermaid-code="{{ $mermaidCode }}"
+                         class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                        <div x-ref="target" class="w-full min-h-0"></div>
+                    </div>
                 @else
-                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200 text-gray-900">
+                    <div class=" bg-white rounded-xl p-3 sm:p-4 border border-gray-200 text-gray-900">
                         {!! $content->body !!}
                     </div>
                 @endif
@@ -322,7 +230,7 @@
 
             @default
                 @if($content->body)
-                    <div class="{{ $bookModeClass }} bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
+                    <div class=" bg-white rounded-xl p-3 sm:p-4 border border-gray-200">
                         <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none">{!! $content->body !!}</div>
                     </div>
                 @endif

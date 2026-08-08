@@ -141,6 +141,48 @@ class StudentLessonsPrintTest extends TestCase
         $this->assertStringNotContainsString('tool_call', $html);
     }
 
+    public function test_print_repairs_truncated_svg_content(): void
+    {
+        // P1/P2: un contenido IMAGE cuyo SVG quedó truncado por el generador
+        // (tag de apertura sin '>' que se come el '</svg>') se pintaba como un
+        // rectángulo NEGRO. El render debe repararlo (LmsSvgRepairService).
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publish($activity);
+
+        $section = \App\Models\app\Academy\Lms\LmsActivitySection::create([
+            'activity_id' => $activity->id,
+            'title' => 'Sección con diagrama roto',
+            'description' => null,
+            'sort_order' => 1,
+        ]);
+
+        \App\Models\app\Academy\Lms\LmsActivityContent::create([
+            'section_id' => $section->id,
+            'type' => 'IMAGE',
+            'title' => 'Diagrama truncado',
+            'body' => "<figure class=\"my-6\">\n"
+                . "  <figcaption>Diagrama</figcaption>\n"
+                . "  <div class=\"flex justify-center rounded-xl p-2\">\n"
+                . ' <svg viewBox="0 0 1000 950" xmlns="http://www.w3.org/2000/svg">' . "\n"
+                . "  <rect x=\"560\" y=\"210\" width=\"380\" height=\"170\" rx=\"8\"</svg>\n"
+                . "  </div>\n</figure>",
+            'is_visible' => true,
+        ]);
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        // El tag roto no debe llegar al HTML impreso (se eliminó el elemento).
+        $this->assertStringNotContainsString('<rect x="560"', $html);
+        // El <svg> queda cerrado exactamente una vez (reparación).
+        $this->assertSame(1, substr_count($html, '</svg>'));
+        // El wrapper figure se conserva en la salida.
+        $this->assertStringContainsString('</figure>', $html);
+    }
+
     // ── Helpers (replican el patrón de StudentAccessTest) ─────────────
 
     private function publish(Activity $activity): void

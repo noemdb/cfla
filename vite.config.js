@@ -40,9 +40,6 @@ export default defineConfig({
                     if (id.includes('node_modules/cytoscape') || id.includes('node_modules/katex') || id.includes('node_modules/d3-')) {
                         return 'mermaid';
                     }
-                    if (id.includes('node_modules/page-flip') || id.includes('node_modules/st-page-flip')) {
-                        return 'page-flip';
-                    }
                 },
             },
         },

@@ -90,15 +90,3 @@ export async function loadApexCharts() {
 
     return window._apexChartsPromise;
 }
-
-/**
- * Dynamically import StPageFlip (modo libro / flipbook) — code-split chunk
- * Used only in: student activity-view book mode
- */
-export async function loadPageFlip() {
-    if (window._pageFlipPromise) return window._pageFlipPromise;
-
-    window._pageFlipPromise = import('page-flip');
-
-    return window._pageFlipPromise;
-}

@@ -75,38 +75,34 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
      x-data="readingNav()">
 
     {{-- ═══════════════════════ READING PROGRESS ═══════════════════════ --}}
-    <div class="sticky top-14 z-20 -mx-3 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8">
-        @if($flipEnabled)
+<div class="sticky top-14 z-20 -mx-3 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8">
         <div class="px-3 sm:px-6 md:px-8 pb-2">
             <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-1 shadow-sm"
-                 role="group" aria-label="Modo de lectura">
+                 role="radiogroup" aria-label="Modo de lectura">
                 <button type="button"
+                        role="radio"
+                        :aria-checked="Alpine.store('lmsView').mode === 'scroll'"
                         :class="Alpine.store('lmsView').mode === 'scroll' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
-                        :aria-pressed="Alpine.store('lmsView').mode === 'scroll'"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
                         @click="Alpine.store('lmsView').set('scroll')">
                     Deslizar
                 </button>
                 <button type="button"
-                        :class="Alpine.store('lmsView').mode === 'book' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                        :aria-pressed="Alpine.store('lmsView').mode === 'book'"
-                        :disabled="Alpine.store('lmsView').flipbook?.loadError"
-                        :title="Alpine.store('lmsView').flipbook?.loadError ? 'No se pudo cargar el modo libro' : ''"
-                        @click="Alpine.store('lmsView').set('book')">
-                    Libro
-                </button>
-                <button type="button"
+                        role="radio"
+                        :aria-checked="Alpine.store('lmsView').mode === 'pdf'"
                         :class="Alpine.store('lmsView').mode === 'pdf' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
-                        :aria-pressed="Alpine.store('lmsView').mode === 'pdf'"
+                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
                         @click="Alpine.store('lmsView').set('pdf')">
                     PDF
                 </button>
             </div>
         </div>
-        @endif
         <div x-show="Alpine.store('lmsView').mode === 'scroll'"
+             role="progressbar"
+             aria-label="Progreso de lectura"
+             :aria-valuenow="progress"
+             aria-valuemin="0"
+             aria-valuemax="100"
              class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
              :style="`width: ${progress}%`"></div>
     </div>
@@ -263,7 +259,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
 
     {{-- ═══════════════════════════════════════ PREVIEW BANNER ═══════════════════════════════════════ --}}
     @if($isPreview)
-        <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+        <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 sm:p-4 flex items-start gap-3"
+             role="status">
             <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
@@ -298,6 +295,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     <li>
                         <a href="#seccion-{{ $section->id }}"
                            @click.prevent="goTo({{ $section->id }})"
+                           :aria-current="activeId === {{ $section->id }} ? 'location' : undefined"
                            :class="activeId === {{ $section->id }}
                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30'
                                : 'text-gray-600 dark:text-gray-300 border-transparent hover:bg-gray-50 dark:hover:bg-gray-700/40'"
@@ -349,10 +347,10 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         @endphp
 
         <section id="seccion-{{ $section->id }}" wire:key="section-{{ $section->id }}"
-                 class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                 class="my-1 sm:my-1.5 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/60 overflow-hidden p-1 sm:p-1.5">
 
             {{-- Section header --}}
-            <div class="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3.5 border-b border-emerald-200 dark:border-gray-700/40 bg-emerald-50 dark:bg-gray-800/70">
+            <div class="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3.5 border-b border-emerald-200 dark:border-gray-700/40 bg-emerald-50 dark:bg-gray-800/70 rounded-lg rounded-b-none">
                 <span class="w-1 h-6 rounded-full {{ $accentDot }} shrink-0"></span>
                 <h2 class="text-sm sm:text-[15px] font-display font-bold text-gray-900 dark:text-white flex-1 min-w-0">
                     {{ $section->title }}
@@ -374,10 +372,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 @foreach($section->visibleContents as $idx => $content)
                     @include('livewire.student.lms._content-renderer', [
                         'content' => $content,
-                        'mode' => 'scroll',
                         'stepNum' => $idx + 1,
                         'isLast' => $loop->last,
-                        'sectionId' => $section->id,
                     ])
                 @endforeach
 
@@ -463,13 +459,25 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             </div>
         @endif
     @empty
-        <div class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 p-6 sm:p-8 text-center">
-            <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
+        <section class="bg-white dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700/50 p-6 sm:p-10 text-center"
+                 aria-live="polite">
+            @if($showMascot)
+                <div class="flex justify-center mb-3">
+                    <x-lms.mascot :variant="'idle'" :size="'sm'" :emphasis="$mascotEmphasis" />
+                </div>
+            @endif
             <p class="text-sm font-medium text-gray-700 dark:text-gray-200">No hay contenido disponible</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Esta actividad no tiene secciones visibles.</p>
-        </div>
+            <div class="mt-4">
+                <a href="{{ route('student.lms.lessons') }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 min-h-[44px] rounded-lg text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Volver a las lecciones
+                </a>
+            </div>
+        </section>
     @endforelse
 
     {{-- ═══════════════════════════════════════ RESOURCES (no vinculados) ═══════════════════════════════════════ --}}
@@ -682,97 +690,6 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             de esta actividad en una nueva pestaña.
         </p>
     </div>
-
-    {{-- Contenedor libro: GATEADO por $flipEnabled (corrección del diseño §5.1).
-         Cuando $flipEnabled=false no hay toggle (ya gateado en §5.2) → modo libro
-         inalcanzable; renderizar el DOM oculto es peso muerto y filtra la copy
-         adulta ("Marcar como completada") a salidas modoLectura/preview/1-sección.
-         $flipEnabled es fuente única de verdad: sin toggle → sin DOM del libro. --}}
-    @if($flipEnabled)
-    <div x-show="Alpine.store('lmsView').mode === 'book'" x-cloak>
-        <div x-data="lessonBook()" data-completed="{{ $completed ? '1' : '0' }}">
-            {{-- Task 6 Step 2: mensaje amigable si StPageFlip no pudo cargarse. --}}
-            <div x-show="loadError" role="alert"
-                 class="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200">
-                <p class="font-semibold">No se pudo cargar el modo libro</p>
-                <p class="mt-1">El contenido sigue disponible en la vista Deslizar.</p>
-                <div class="mt-4 flex flex-wrap items-center gap-3">
-                    <button type="button"
-                            @click="retry()"
-                            class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 min-h-[44px] text-xs font-semibold text-white transition-colors hover:bg-emerald-700 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357-2H15m-11 9v-5h.582m15.356-2A8.001 8.001 0 004.582 15m0 0H9"/>
-                        </svg>
-                        Reintentar
-                    </button>
-                    <button type="button"
-                            @click="Alpine.store('lmsView').set('scroll')"
-                            class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 min-h-[44px] text-xs font-semibold text-gray-600 transition-colors hover:bg-emerald-50 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
-                        Volver a Deslizar
-                    </button>
-                </div>
-            </div>
-            <div wire:ignore x-show="!loadError">
-                <?php
-                    // Paginación de contenido para modo libro
-                    // Divide el contenido de cada sección en chunks que quepan en una página de libro
-                    $chunksPerPage = 3; // Número de bloques de contenido por página de libro (ajustable según optimizaciones de espaciado)
-                    $paginatedSections = collect();
-                    
-                    foreach ($sections as $sectionIndex => $section) {
-                        $visibleContents = $section->visibleContents;
-                        $contentCount = $visibleContents->count();
-                        
-                        // Si no hay contenido visible, omitir la sección (evita páginas vacías)
-                        if ($contentCount === 0) {
-                            continue;
-                        }
-                        
-                        // Dividir el contenido en chunks
-                        for ($i = 0; $i < $contentCount; $i += $chunksPerPage) {
-                            $chunk = $visibleContents->slice($i, $chunksPerPage);
-                            
-                            $paginatedSections->push([
-                                'section' => $section,
-                                'contents' => $chunk,
-                                'isFirstChunk' => ($i === 0),
-                                'isLastChunk' => (($i + $chunksPerPage) >= $contentCount),
-                                'originalSectionIndex' => $sectionIndex,
-                                'chunkIndex' => $i / $chunksPerPage,
-                                'totalChunks' => (int)ceil($contentCount / $chunksPerPage),
-                            ]);
-                        }
-                    }
-                ?>
-                <div id="lms-flipbook-root" class="rounded-lg shadow-[0_30px_60px_-20px_rgba(15,23,42,0.35)]">
-                    @foreach($paginatedSections as $paginatedSection)
-                        @include('livewire.student.lms._flipbook-page', [
-                            'section' => $paginatedSection['section'],
-                            'paginationInfo' => $paginatedSection
-                        ])
-                    @endforeach
-                </div>
-            </div>
-            {{-- Barra final: FUERA del wire:ignore (Livewire la re-renderiza tras markComplete),
-                 DENTRO del x-data (accede a pageIndex/total/completed de lessonBook). (C3) --}}
-            <div class="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4"
-                 x-show="!loadError">
-                <p class="text-sm text-gray-600">
-                    Página <span x-text="pageIndex + 1"></span> de <span x-text="total"></span>
-                </p>
-                <button type="button"
-                        x-show="!completed"
-                        wire:click="markComplete"
-                        class="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                    Marcar como completada
-                </button>
-                <span x-show="completed" class="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600">
-                    ✓ Completada
-                </span>
-            </div>
-        </div>
-    </div>
-    @endif
 
     @if($this->celebrate)
     <div wire:ignore x-data="celebration()" x-init="run()" x-show="visible" role="status" aria-live="polite"
@@ -1031,73 +948,6 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             }
         }
 
-        /* TIPTOGRAFÍA OPTIMIZADA PARA MODO LIBRO (OPCIÓN 6) */
-        .lms-content.book-mode {
-            font-size: 0.875rem; /* Era ~1.0625rem (17px) */
-            line-height: 1.5;    /* Era 1.75 */
-        }
-        .lms-content.book-mode h2 {
-            font-size: 1.2rem;
-            margin-top: 1rem;
-            margin-bottom: 0.75rem;
-        }
-        .lms-content.book-mode h3 {
-            font-size: 1.1rem;
-            margin-top: 0.9rem;
-            margin-bottom: 0.6rem;
-        }
-        .lms-content.book-mode p {
-            margin-bottom: 0.75rem;
-        }
-        .lms-content.book-mode ul,
-        .lms-content.book-mode ol {
-            margin-bottom: 0.75rem;
-            padding-left: 1.25rem;
-        }
-        .lms-content.book-mode blockquote {
-            margin: 0.75rem 0;
-            padding-left: 1rem;
-            border-left-width: 3px;
-        }
-
-        /* ESTILOS CONDENSADOS ESPECÍFICOS PARA MODO LIBRO (OPCIÓN 3) */
-        .book-compact p { margin-bottom: 0.75rem; } /* Era 1rem */
-        .book-compact ul, .book-compact ol { padding-left: 1.25rem; } /* Era 1.5rem */
-        .book-compact .prose { font-size: 0.9rem; line-height: 1.5; } /* Ajustar según necesidad */
-        .book-compact blockquote { border-left-width: 3px; padding-left: 1rem; } /* Era 4px/1.25rem */
-        .book-compact { margin-bottom: 0.75rem; } /* Refine spacing between elements */
-
-        /* SCROLLBAR SUTIL PARA MODO LIBRO (MEJORA DE EXPERIENCIA) */
-        .book-mode .overflow-y-auto::-webkit-scrollbar {
-            width: 4px;
-        }
-        .book-mode .overflow-y-auto::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .book-mode .overflow-y-auto::-webkit-scrollbar-thumb {
-            background-color: rgba(31, 28, 20, 0.15);
-            border-radius: 2px;
-        }
-        .book-mode .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(31, 28, 20, 0.25);
-        }
-        /* Firefox */
-        .book-mode .overflow-y-auto {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(31, 28, 20, 0.15) transparent;
-        }
-
-        /* INDICADORES DE CONTINUACIÓN PARA PAGINACIÓN DE CONTENIDO */
-        .book-mode .continuation-indicator {
-            display: inline-block;
-            font-size: 0.75rem; /* text-xs */
-            font-style: italic;
-            color: #6b7280; /* gray-500 */
-            opacity: 0.8;
-        }
-        .book-mode .dark .continuation-indicator {
-            color: #9ca3af; /* gray-400 en oscuro */
-        }
     </style>
 
     {{-- ═══════════════════════ READING NAV (progreso + scroll-spy) ═══════════════════════ --}}
@@ -1111,17 +961,26 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         progress: 0,
                         activeId: null,
                         init() {
-                            this.update();
-                            window.addEventListener('scroll', () => this.update(), { passive: true });
+                            this.updateProgress();
+                            this.setupSpy();
                         },
-                        update() {
-                            // Progreso de lectura: scroll vertical / alto del documento.
+                        destroy() {
+                            // Limpiar listeners/observers al desmontar el componente
+                            // (evita acumulación de handlers en re-renders Livewire).
+                            if (this._spy) this._spy.disconnect();
+                            if (this._onScroll) {
+                                window.removeEventListener('scroll', this._onScroll, { passive: true });
+                            }
+                        },
+                        updateProgress() {
                             const doc = document.documentElement;
                             const scrollTop = window.scrollY || doc.scrollTop;
                             const height = doc.scrollHeight - window.innerHeight;
                             this.progress = height > 0 ? Math.min(100, Math.round((scrollTop / height) * 100)) : 0;
-
-                            // Scroll-spy: última sección cuyo tope pasó la línea de lectura.
+                        },
+                        // Fallback para navegadores sin IntersectionObserver: el
+                        // mismo cálculo por scroll (comportamiento original).
+                        updateActiveLegacy() {
                             const sections = Array.from(document.querySelectorAll('[id^="seccion-"]'));
                             const offset = 120;
                             let current = null;
@@ -1132,6 +991,40 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             }
                             this.activeId = current ?? (sections.length ? Number(sections[0].id.replace('seccion-', '')) : null);
                         },
+                        setupSpy() {
+                            const sections = Array.from(document.querySelectorAll('[id^="seccion-"]'));
+                            if (!sections.length) {
+                                this.activeId = null;
+                                return;
+                            }
+                            // Valor inicial: primera sección (antes de que IO dispare).
+                            this.activeId = Number(sections[0].id.replace('seccion-', ''));
+
+                            if (!('IntersectionObserver' in window)) {
+                                this._onScrollLegacy = () => this.updateActiveLegacy();
+                                window.addEventListener('scroll', this._onScrollLegacy, { passive: true });
+                                this.updateActiveLegacy();
+                                return;
+                            }
+
+                            // Scroll-spy con IntersectionObserver: rootMargin negativo en la
+                            // parte superior (120px) → una sección dispara isIntersecting
+                            // justo cuando su tope pasa la línea de lectura, sin leer el DOM
+                            // del scrollhandler en cada frame.
+                            this._spy = new IntersectionObserver((entries) => {
+                                for (const entry of entries) {
+                                    if (entry.isIntersecting) {
+                                        this.activeId = Number(entry.target.id.replace('seccion-', ''));
+                                    }
+                                }
+                            }, { rootMargin: '-120px 0px 0px 0px', threshold: 0 });
+                            sections.forEach((el) => this._spy.observe(el));
+
+                            // Progreso: sigue necesitando scroll, pero es un cálculo O(1).
+                            this._onScrollProgress = () => this.updateProgress();
+                            window.addEventListener('scroll', this._onScrollProgress, { passive: true });
+                            this.updateProgress();
+                        },
                         goTo(id) {
                             const el = document.getElementById('seccion-' + id);
                             if (!el) return;
@@ -1141,18 +1034,12 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     };
                 });
 
-                // Store lmsView: modo de lectura de la lección ('scroll' | 'book' | 'pdf').
+// Store lmsView: modo de lectura de la lección ('scroll' | 'pdf').
                 // Vive en Alpine.store (fuera del DOM que diffea Livewire) → sobrevive a re-renders.
                 Alpine.store('lmsView', {
                     mode: 'scroll',
-                    flipbook: null,   // ref a la instancia lessonBook (se registra en su init())
                     set(v) {
                         this.mode = v;
-                        if (v === 'book' && this.flipbook) {
-                            // El x-show del contenedor libro aún no se aplicó: difiere la
-                            // inicialización hasta que el contenedor tenga tamaño real.
-                            Alpine.nextTick(() => this.flipbook.ensureFlipbook());
-                        }
                     },
                     openPrintView() {
                         // Abrir la vista de impresión en una nueva pestaña
@@ -1161,216 +1048,6 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         window.open(url, '_blank');
                     }
                 });
-
-                // lessonBook: estado local del modo libro (barra final + sync de completado).
-                if (Alpine._lessonBookRegistered) return;
-                Alpine._lessonBookRegistered = true;
-                Alpine.data('lessonBook', () => ({
-                    pageFlip: null,      // instancia StPageFlip (null hasta la 1ª entrada al libro)
-                    pageIndex: 0,        // 0-based, para "Página X / N"
-                    total: 0,            // nº de hojas = nº de secciones visibles
-                    completed: false,
-                    loadError: false,  // Task 6 Step 2: fallo de carga de StPageFlip → modo libro inutilizable
-                    keyboardListener: null,
-                    resizeListener: null,
-                    unwatchMode: null,
-                    init() {
-                        this.completed = this.$root.dataset.completed === '1';
-                        // Las hojas ya vienen servidas por Blade: el contador hace que la
-                        // barra final muestre "Página X / N" desde el primer paint.
-                        this.total = this.$root.querySelectorAll('#lms-flipbook-root .stf__item').length;
-                        // Hook al store (corrección C1): set('book') dispara ensureFlipbook().
-                        Alpine.store('lmsView').flipbook = this;
-                        Livewire.on('activity-completed', () => { this.completed = true; });
-                        // El teclado sólo debe intervenir en modo libro: attach/detach según el store.
-                        this.unwatchMode = Alpine.watch(() => Alpine.store('lmsView').mode, (mode) => {
-                            if (mode === 'book') {
-                                this.attachKeyboardListener();
-                                const root = document.getElementById('lms-flipbook-root');
-                                if (root) root.classList.add('book-mode');
-                            } else {
-                                this.detachKeyboardListener();
-                                const root = document.getElementById('lms-flipbook-root');
-                                if (root) root.classList.remove('book-mode');
-                            }
-                        });
-                    },
-                    destroy() {
-                        if (this.unwatchMode) this.unwatchMode();
-                        this.detachKeyboardListener();
-                        if (this.resizeListener) {
-                            window.removeEventListener('resize', this.resizeListener);
-                            this.resizeListener = null;
-                        }
-                        const root = document.getElementById('lms-flipbook-root');
-                        if (root) root.classList.remove('book-mode');
-                    },
-                    // Tamaño numérico del libro (StPageFlip hace aritmética con width/height,
-                    // así que NUNCA deben ser strings tipo '100%' — eso produce NaN y rompe
-                    // el constructor). Portrait en <md, landscape en ≥md.
-                    dimensions() {
-                        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-                        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-                        const isPortrait = vw < 768; // breakpoint md de Tailwind
-                        const ratio = isPortrait ? 1.4 : 1.1; // Antes: 1.5 (retrato) / 1.2 (paisaje)
-
-                        let width, height;
-                        if (isPortrait) {
-                            height = Math.min(vh * 0.88, vw * ratio); // Antes: 0.8
-                            width = height / ratio;
-                        } else {
-                            width = Math.min(vw * 0.88, vh / ratio); // Antes: 0.8
-                            height = width * ratio;
-                        }
-                        return { width, height, isPortrait };
-                    },
-                    applySize(dimension) {
-                        const root = document.getElementById('lms-flipbook-root');
-                        if (root) {
-                            root.style.width = dimension.width + 'px';
-                            root.style.height = dimension.height + 'px';
-                        }
-                        if (this.pageFlip) {
-                            // update() de StPageFlip no recibe argumentos: se mutan las
-                            // settings vivas (getSettings() devuelve el objeto real) y
-                            // luego update() re-mide el render y re-muestra la página.
-                            const settings = this.pageFlip.getSettings();
-                            settings.width = dimension.isPortrait ? dimension.width : dimension.width / 2;
-                            settings.height = dimension.height;
-                            this.pageFlip.update();
-                        }
-                    },
-                    resizePage() {
-                        if (this.pageFlip) {
-                            this.applySize(this.dimensions());
-                        }
-                    },
-                    ensureFlipbook() {
-                        if (this.pageFlip) return; // ya inicializado
-
-                        // Carga diferida de StPageFlip (Task 6): sólo se descarga el módulo
-                        // cuando el estudiante entra por primera vez a modo libro.
-                        this.$nextTick(async () => {
-                            const root = document.getElementById('lms-flipbook-root');
-                            if (!root) return;
-
-                            try {
-                                const pageFlipModule = await window.loadPageFlip();
-                                let PageFlip = pageFlipModule.default || pageFlipModule;
-                                if (PageFlip && PageFlip.PageFlip) { PageFlip = PageFlip.PageFlip; }
-
-                                this.total = root.querySelectorAll('.stf__item').length;
-
-                                // Tamaño numérico fijado ANTES de construir la instancia.
-                                const dims = this.dimensions();
-                                this.applySize(dims);
-
-                                // E2: flippingTime se fija EN las settings (no existe el método
-                                // flippingTime en v1.3.0 — llamarlo lanza TypeError).
-                                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-                                // E5: width de StPageFlip es el ANCHO DE PÁGINA, no del libro.
-                                // El contenedor mide bookW = pageW (portrait) o 2·pageW
-                                // (landscape, vista doble); autoSize:false evita que el 100%
-                                // clobberee el ancho; flippingTime>0 es obligatorio (Settings
-                                // lanza con <= 0) — 1 para prefers-reduced-motion.
-                                const pageW = dims.isPortrait ? dims.width : dims.width / 2;
-
-                                this.pageFlip = new PageFlip(root, {
-                                    width: pageW,
-                                    height: dims.height,
-                                    showCover: false,
-                                    autoSize: false,
-                                    usePortrait: true,
-                                    flippingTime: reduce ? 1 : 1000,
-                                });
-
-                                // OBLIGATORIO en StPageFlip v1.3.0: sin loadFromHTML() this.pages quedan
-                                // null y turnToPage() lanza "Cannot read properties of null (reading 'show')".
-                                // Carga las hojas `.stf__item` ya servidas por Blade en el contenedor.
-                                this.pageFlip.loadFromHTML(root.querySelectorAll('.stf__item'));
-
-                                // Evento 'flip' (payload: {data: pageIndex}); no existe 'turn'.
-                                this.pageFlip.on('flip', ({ data }) => {
-                                    this.pageIndex = data;
-                                });
-
-                                // API real de StPageFlip v1.3.0: turnToPage() (no .turn()).
-                                // loadFromHTML ya disparó un 'flip' síncrono para la página 0
-                                // antes de este handler, así que sólo se restaura un índice
-                                // guardado mayor que 0.
-                                if (this.pageIndex > 0) {
-                                    this.pageFlip.turnToPage(this.pageIndex);
-                                }
-
-                                this.resizeListener = () => this.resizePage();
-                                window.addEventListener('resize', this.resizeListener);
-                            } catch (e) {
-                                // Task 6 Step 2: el fallo de carga no debe romper la página;
-                                // desactiva el toggle y muestra un mensaje amigable en el libro.
-                                console.error('Failed to load page-flip:', e);
-                                this.loadError = true;
-                            }
-                        });
-                    },
-                    retry() {
-                        // Reintenta la carga del modo libro tras un fallo transitorio.
-                        // El import ya está cacheado en window._pageFlipPromise (si falló el
-                        // constructor, el módulo sí cargó); se re-mide el contenedor una vez
-                        // que x-show="!loadError" lo hace visible.
-                        this.loadError = false;
-                        this.$nextTick(() => this.ensureFlipbook());
-                    },
-                    openSection(id) {
-                        // §6.1: un diagrama en modo libro → volver a scroll y saltar a la sección.
-                        Alpine.store('lmsView').set('scroll');
-                        this.$nextTick(() => {
-                            const sectionEl = document.getElementById('seccion-' + id);
-                            if (sectionEl) {
-                                sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                        });
-                    },
-                    setPage(index) {
-                        this.pageIndex = index;
-                        if (this.pageFlip) {
-                            this.pageFlip.turnToPage(index);
-                        }
-                    },
-                    attachKeyboardListener() {
-                        this.keyboardListener = (e) => {
-                            switch (e.key) {
-                                case 'ArrowLeft':
-                                    e.preventDefault();
-                                    if (this.pageFlip) this.pageFlip.turnToPrevPage();
-                                    break;
-                                case 'ArrowRight':
-                                    e.preventDefault();
-                                    if (this.pageFlip) this.pageFlip.turnToNextPage();
-                                    break;
-                                case 'Home':
-                                    e.preventDefault();
-                                    if (this.pageFlip) this.pageFlip.turnToPage(0);
-                                    break;
-                                case 'End':
-                                    e.preventDefault();
-                                    if (this.pageFlip) this.pageFlip.turnToPage(this.pageFlip.getPageCount() - 1);
-                                    break;
-                                case 'Escape':
-                                    e.preventDefault();
-                                    Alpine.store('lmsView').set('scroll');
-                                    break;
-                            }
-                        };
-                        document.addEventListener('keydown', this.keyboardListener);
-                    },
-                    detachKeyboardListener() {
-                        if (this.keyboardListener) {
-                            document.removeEventListener('keydown', this.keyboardListener);
-                            this.keyboardListener = null;
-                        }
-                    },
-                }));
 
                 // Celebration component for C3
                 if (Alpine._celebrationRegistered) return;

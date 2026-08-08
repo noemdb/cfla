@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto py-8 px-4 space-y-6">
+<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
     @php
     // R4 · Color por materia (D2). Paleta literal con clases Tailwind — el JIT
     // escanea .blade.php bajo resources/, así que las clases concretas viven aquí
@@ -98,9 +98,9 @@
     <div wire:loading.delay.shorter
          wire:target="search, lapsoId, gotoPage"
          aria-hidden="true"
-         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+         class="flex flex-wrap gap-5">
         @for($i = 0; $i < 3; $i++)
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4">
+            <div class="w-full sm:w-[calc(50%-0.625rem)] grow bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4">
                 <div class="flex items-start gap-3.5">
                     <span class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700/60 animate-pulse shrink-0"></span>
                     <span class="min-w-0 flex-1 space-y-2.5">
@@ -121,7 +121,7 @@
     </div>
 
     {{-- Grid de recursos --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+    <div class="flex flex-wrap gap-5"
          wire:loading.remove
          wire:target="search, lapsoId, gotoPage">
         @forelse($resources as $resource)
@@ -145,7 +145,7 @@
                     'file'  => 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30',
                 ][$typeKey];
             @endphp
-            <article class="group bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4 hover:border-emerald-500/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 ease-out">
+            <article class="group w-full sm:w-[calc(50%-0.625rem)] grow bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4 hover:border-emerald-500/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 ease-out">
                 <div class="flex items-start gap-3.5">
                     <div class="w-12 h-12 rounded-lg {{ $__sc[$scKey]['chip'] }} flex items-center justify-center shrink-0">
                         @if($typeKey === 'image')

@@ -1892,6 +1892,15 @@ PROMPT;
                 return;
             }
 
+            // Recorte del canvas al contenido real: el LLM dibuja sobre un
+            // canvas alto fijo y deja gran parte vacía abajo; al escalar a la
+            // columna de impresión se amplifica el hueco inferior.
+            $svgCode = app(\App\Services\Lms\LmsSvgRepairService::class)->cropToContent($svgCode);
+
+            // Contraste de textos: remapear grises claros de <text>/<tspan> a
+            // tonos oscuros legibles sobre los fondos pastel de los diagramas.
+            $svgCode = app(\App\Services\Lms\LmsSvgRepairService::class)->normalizeContrast($svgCode);
+
             // Envolver el SVG en HTML embed para renderizado
             $svgHtml = app(\App\Services\NapkinAiService::class)->buildEmbedHtml(
                 $svgCode,

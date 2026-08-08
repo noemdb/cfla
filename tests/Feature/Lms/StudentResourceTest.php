@@ -67,7 +67,7 @@ class StudentResourceTest extends TestCase
         $this->assertStringContainsString('Recurso de prueba', $html);
         $this->assertStringContainsString('line-clamp-2', $html);
         // R7 · contenedor más ancho
-        $this->assertStringContainsString('max-w-7xl', $html);
+        $this->assertStringContainsString('max-w-4xl', $html);
     }
 
     public function test_resources_search_empty_state_shows_mascot_and_ctas(): void

@@ -175,11 +175,11 @@ PROMPT;
     /**
      * Genera una ilustración SVG educativa para una sección de lección.
      *
-     * @param  string      $sectionTitle  Título de la sección.
-     * @param  string      $sectionBody   Contenido textual completo de la sección (sin HTML).
-     * @param  string      $gradeName     Nombre del grado (ej. "1er Grado").
-     * @param  string      $subjectName   Nombre de la asignatura (ej. "Ciencias Naturales").
-     * @param  string|null $lessonTitle   Título de la lección completa (opcional, para más contexto).
+     * @param  string  $sectionTitle  Título de la sección.
+     * @param  string  $sectionBody  Contenido textual completo de la sección (sin HTML).
+     * @param  string  $gradeName  Nombre del grado (ej. "1er Grado").
+     * @param  string  $subjectName  Nombre de la asignatura (ej. "Ciencias Naturales").
+     * @param  string|null  $lessonTitle  Título de la lección completa (opcional, para más contexto).
      * @return array{success: bool, svg: ?string, error: ?string}
      */
     public function generate(
@@ -213,17 +213,17 @@ PROMPT;
                 self::SYSTEM_PROMPT,
                 $userPrompt,
                 [
-                    'max_tokens'  => 4096,
+                    'max_tokens' => 4096,
                     'temperature' => 0.4,
-                    'timeout'     => 120,
+                    'timeout' => 120,
                 ]
             );
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return [
                     'success' => false,
-                    'svg'     => null,
-                    'error'   => $result['error'] ?? 'Error al comunicarse con el modelo de IA.',
+                    'svg' => null,
+                    'error' => $result['error'] ?? 'Error al comunicarse con el modelo de IA.',
                 ];
             }
 
@@ -240,8 +240,8 @@ PROMPT;
             } else {
                 return [
                     'success' => false,
-                    'svg'     => null,
-                    'error'   => 'La respuesta no contiene un SVG válido.',
+                    'svg' => null,
+                    'error' => 'La respuesta no contiene un SVG válido.',
                 ];
             }
 
@@ -253,22 +253,31 @@ PROMPT;
             if (! app(LmsSvgRepairService::class)->isWellFormed($rawSvg)) {
                 return [
                     'success' => false,
-                    'svg'     => null,
-                    'error'   => 'El SVG generado está incompleto o malformado. Intenta de nuevo.',
+                    'svg' => null,
+                    'error' => 'El SVG generado está incompleto o malformado. Intenta de nuevo.',
                 ];
             }
 
+            // Recorte del canvas al contenido real: el LLM dibuja sobre un
+            // canvas alto fijo (p.ej. 1000×950) y deja gran parte vacía abajo;
+            // al escalar a la columna de impresión se amplifica el hueco.
+            $rawSvg = app(LmsSvgRepairService::class)->cropToContent($rawSvg);
+
+            // Contraste de textos: remapear grises claros de <text>/<tspan> a
+            // tonos oscuros legibles sobre los fondos pastel de los diagramas.
+            $rawSvg = app(LmsSvgRepairService::class)->normalizeContrast($rawSvg);
+
             return [
                 'success' => true,
-                'svg'     => $rawSvg,
-                'error'   => null,
+                'svg' => $rawSvg,
+                'error' => null,
             ];
 
         } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'svg'     => null,
-                'error'   => 'Error inesperado: ' . $e->getMessage(),
+                'svg' => null,
+                'error' => 'Error inesperado: '.$e->getMessage(),
             ];
         }
     }
