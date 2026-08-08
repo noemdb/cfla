@@ -221,7 +221,13 @@
                             </span>
                         </div>
                         @if($content->body)
-                            <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none {{ $isSvgBody ? 'lms-svg-diagram overflow-x-auto' : '' }}">{!! $content->body !!}</div>
+                            @php
+                                // Defensa P2 (SVG truncados): un tag SVG roto se
+                                // pintaría NEGRO (fill por defecto) y rompería el
+                                // cierre del <svg>. Se repara antes de emitir.
+                                $__svgBody = app(\App\Services\Lms\LmsSvgRepairService::class)->repair($content->body);
+                            @endphp
+                            <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none {{ $isSvgBody ? 'lms-svg-diagram overflow-x-auto' : '' }}">{!! $__svgBody !!}</div>
                         @else
                             <p class="text-sm text-gray-500 italic">No hay imagen disponible para este contenido.</p>
                         @endif

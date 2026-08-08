@@ -245,6 +245,19 @@ PROMPT;
                 ];
             }
 
+            // Validación de bien-formación (P1): el LLM a veces emite un tag
+            // truncado a mitad (p.ej. '<rect ... rx="8"</svg>'). Ese SVG pasa
+            // la extracción por regex pero al renderizar se pinta un rectángulo
+            // NEGRO (fill por defecto) y rompe el cierre del <svg>. Rechazar
+            // aquí en lugar de persistir el bug en BD.
+            if (! app(LmsSvgRepairService::class)->isWellFormed($rawSvg)) {
+                return [
+                    'success' => false,
+                    'svg'     => null,
+                    'error'   => 'El SVG generado está incompleto o malformado. Intenta de nuevo.',
+                ];
+            }
+
             return [
                 'success' => true,
                 'svg'     => $rawSvg,

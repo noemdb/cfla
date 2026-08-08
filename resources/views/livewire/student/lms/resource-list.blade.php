@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto py-8 px-4 space-y-6">
+<div class="max-w-6xl mx-auto py-8 px-4 space-y-6">
     @php
     // R4 · Color por materia (D2). Paleta literal con clases Tailwind — el JIT
     // escanea .blade.php bajo resources/, así que las clases concretas viven aquí

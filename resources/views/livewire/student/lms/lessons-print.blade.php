@@ -40,10 +40,10 @@
         .lesson{page-break-inside:avoid;break-inside:avoid-page;padding:10px 16px;margin-bottom:8px;}
         .lesson-head{display:flex;align-items:center;gap:10px;background:#0d9488;color:#fff;
                      padding:5px 10px;border-radius:6px 6px 0 0;}
-        .lesson-head .nnum{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.15);
+.lesson-head .nnum{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.15);
                            display:flex;align-items:center;justify-content:center;font-weight:800;font-size:9pt;flex-shrink:0;}
-        .lesson-head .topic{font-weight:800;fontsize:10pt;flex:1;}
-        .lesson-head .estado{font-size:7pt;font-weight:700;padding:2px 8px;border-radius:999px;background:#f0fdfa;color:#0f766e;}
+        .lesson-head .topic{font-weight:800;font-size:10pt;flex:1;overflow-wrap:break-word;word-break:break-word;min-width:0;}
+        .lesson-head .estado{font-size:7pt;font-weight:700;padding:2px 8px;border-radius:999px;background:#f0fdfa;color:#0f766e;flex-shrink:0;}
 
         .lesson-meta{display:flex;flex-wrap:gap:4px 14px;padding:5px 10px;background:#f0fdfa;
                      border:1px solid #99f6e4;border-top:none;border-radius:0 0 6px 6px;font-size:7pt;color:#374151;}
@@ -246,6 +246,13 @@
 </head>
 <body class="lms-print">
 
+    @php
+        // Nombre del estudiante para el membrete y el pie de página.
+        $__estudiante = auth()->user()?->estudiant?->full_name
+            ?? auth()->user()?->name
+            ?? 'Estudiante';
+    @endphp
+
     {{-- Barra de acciones --}}
     <div class="print-bar">
         <div>
@@ -263,7 +270,7 @@
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
         <h2>LECCIÓN LMS · CONTENIDO COMPLETO</h2>
         <div class="sub">
-            Estudiante
+            {{ $__estudiante }}
             <span class="sep">·</span> {{ $fecha }}
         </div>
     </div>
@@ -278,7 +285,7 @@
             <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
             <h2>LECCIÓN LMS · CONTENIDO COMPLETO</h2>
             <div class="sub">
-                Estudiante
+                {{ $__estudiante }}
                 <span class="sep">·</span> {{ $fecha }}
                 @if($activity->pevaluacion?->lapso)
                     <span class="sep">·</span> Lapso {{ $activity->pevaluacion?->lapso?->name }}
@@ -303,7 +310,7 @@
             <div class="lesson-head">
                 <span class="nnum">{{ $i + 1 }}</span>
                 <span class="topic">{{ $activity->topic }}</span>
-                <span class="estado {{ $activity->lmsPublication?->status ?? 'draft' }}">{{ __($activity->lmsPublication?->status ?? 'draft') }}</span>
+                <span class="estado {{ $estadoClass }}">{{ $estadoLabel }}</span>
             </div>
 
             {{-- Metadatos --}}
@@ -324,16 +331,16 @@
                 @endif
                 <span class="dot">·</span>
                 <span class="lbl">Fechas:</span>
-                @if($activity->pevaluacion?->fechainicio)
-                    {{ \Carbon\Carbon::parse($activity->pevaluacion?->fechainicio)->format('d/m') }}
+                @if($activity->finicial)
+                    {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m') }}
                 @endif
                 al
-                @if($activity->pevaluacion?->fechafin)
-                    {{ \Carbon\Carbon::parse($activity->pevaluacion?->fechafin)->format('d/m') }}
+                @if($activity->ffinal)
+                    {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m') }}
                 @endif
-@if($activity->pevaluacion?->tema)
+                @if($activity->thematic)
                     <span class="dot">·</span>
-                    <span class="lbl">Eje:</span> {{ $activity->pevaluacion?->tema }}
+                    <span class="lbl">Eje:</span> {{ $activity->thematic }}
                 @endif
             </div>
 
@@ -388,7 +395,7 @@
                                         <img src="{{ $content->media->public_url }}" alt="{{ $content->title ?: 'Imagen' }}">
                                     </div>
                                 @else
-                                    <div class="content-image">{!! $rawBody !!}</div>
+                                    <div class="content-image">{!! app(\App\Services\Lms\LmsSvgRepairService::class)->repair($rawBody) !!}</div>
                                 @endif
                             @elseif($isMermaid)
                                 {{-- Diagrama Mermaid → wrapper Alpine mermaidEmbed() --}}
@@ -450,7 +457,7 @@
         <div class="footer">
             {{ $institucion?->name ?? '' }}
             · 1 lección
-            · Elaborado por: {{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}
+            · Elaborado por: {{ $__estudiante }} · {{ $fecha }}
         </div>
     </div>
     @endif
