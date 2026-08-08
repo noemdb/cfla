@@ -4,7 +4,6 @@ namespace App\Services\Lms;
 
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Reparación de diagramas SVG almacenados en BD usando IA con cadena de
@@ -40,8 +39,7 @@ class LmsSvgAiRepairService
         private readonly LmsAiOrchestrationService $orchestrator,
         private readonly LmsSvgRepairService $repairService,
         private readonly ?\Psr\Log\LoggerInterface $logger = null,
-    ) {
-    }
+    ) {}
 
     // ─── System prompt (nivel Staff Engineer) ────────────────────────────
 
@@ -72,6 +70,7 @@ Estos SVG fueron generados por un LLM y se guardaron tal cual. Los defectos típ
 6. **Contenido autocontenido**: respuesta SOLO con el elemento `<svg>`. Sin `<figure>`, `<div>`, texto explicativo, ni bloques de código Markdown (```).
 7. **Accesibilidad**: conserva `<title>`, `<desc>`, `aria-label` y los comentarios útiles de estructura si ya existen; añádelos si faltan sin cambiar el contenido.
 8. **Multilínea**: usa `<tspan>` con `dy` para textos de más de ~18 caracteres; nunca dejes que un texto se salga de su caja o del viewBox.
+9. **Contraste de texto**: texto sobre fondo claro siempre en `#333333` o `#1a1a1a` (títulos y body) y mínimo `#444444` para subtítulos/etiquetas (≤12px). PROHIBIDOS los grises tenues (`#555555`, `#666666`, `#777777`, `#888888`, `#999999`, `#bbbbbb`, `#cccccc`) en texto, flechas o bordes; usa `stroke` mínimo `#666666` en conectores.
 
 ## Contrato de salida (estricto)
 
@@ -161,9 +160,9 @@ PROMPT;
     /**
      * Repara un bloque SVG aislado (sin tocar BD).
      *
-     * @param  string       $svg      Bloque <svg>…</svg> dañado.
+     * @param  string  $svg  Bloque <svg>…</svg> dañado.
      * @param  string|null  $context  Contexto pedagógico opcional (lección/sección) para completar elementos.
-     * @param  array        $options  Igual que repairContent().
+     * @param  array  $options  Igual que repairContent().
      */
     public function repairSvg(string $svg, ?string $context = null, array $options = []): SvgRepairResult
     {
@@ -228,9 +227,9 @@ PROMPT;
     /**
      * Repara en lote todos los contenidos dañados (o los ids indicados).
      *
-     * @param  array|null  $ids      Solo estos ids de contenido (null = todos los dañados).
-     * @param  int|null    $limit    Máx. contenidos a procesar.
-     * @param  array       $options  Igual que repairContent() (+ 'persist').
+     * @param  array|null  $ids  Solo estos ids de contenido (null = todos los dañados).
+     * @param  int|null  $limit  Máx. contenidos a procesar.
+     * @param  array  $options  Igual que repairContent() (+ 'persist').
      * @return Collection<int, SvgRepairResult>
      */
     public function repairAll(?array $ids = null, ?int $limit = null, array $options = []): Collection
@@ -254,7 +253,7 @@ PROMPT;
         $issues = [];
         $emptyBottom = null;
 
-        $opens  = preg_match_all('/<svg\b/', $svg);
+        $opens = preg_match_all('/<svg\b/', $svg);
         $closes = preg_match_all('#</svg>#', $svg);
         if ($opens > $closes) {
             $issues[] = 'svg_sin_cierre';
@@ -301,9 +300,9 @@ PROMPT;
                 systemPrompt: self::getSystemPrompt(),
                 userPrompt: $userPrompt,
                 overrides: [
-                    'max_tokens'  => 8192,
+                    'max_tokens' => 8192,
                     'temperature' => 0.2,
-                    'timeout'     => 180,
+                    'timeout' => 180,
                 ],
                 tokenBudget: $options['token_budget'] ?? 8000,
                 contentValidator: function (string $content): bool {
@@ -316,7 +315,7 @@ PROMPT;
                 notify: $options['notify'] ?? null,
             );
         } catch (\Throwable $e) {
-            ($this->logger ?? new \Psr\Log\NullLogger())
+            ($this->logger ?? new \Psr\Log\NullLogger)
                 ->warning('[LmsSvgAiRepairService] excepción en cadena de modelos', [
                     'exception' => $e->getMessage(),
                 ]);
@@ -327,9 +326,9 @@ PROMPT;
         if (! $result['success'] || empty($result['content'])) {
             return [
                 'success' => false,
-                'svg'     => null,
-                'model'   => $result['model'] ?? null,
-                'error'   => $result['error'] ?? 'Sin respuesta de la cadena de modelos.',
+                'svg' => null,
+                'model' => $result['model'] ?? null,
+                'error' => $result['error'] ?? 'Sin respuesta de la cadena de modelos.',
             ];
         }
 
@@ -337,14 +336,18 @@ PROMPT;
         if ($repaired === null) {
             return [
                 'success' => false,
-                'svg'     => null,
-                'model'   => $result['model'] ?? null,
-                'error'   => 'La respuesta no contenía un bloque <svg>.',
+                'svg' => null,
+                'model' => $result['model'] ?? null,
+                'error' => 'La respuesta no contenía un bloque <svg>.',
             ];
         }
 
         // Normalización final: recorte del canvas al contenido real.
         $repaired = $this->repairService->cropToContent($repaired);
+
+        // Contraste: oscurece grises claros de textos/flechas para que el
+        // contenido persista ya legible (mejora 1) sin re-procesar en render.
+        $repaired = $this->repairService->normalizeContrast($repaired);
 
         return ['success' => true, 'svg' => $repaired, 'model' => $result['model'] ?? null, 'error' => null];
     }
@@ -429,7 +432,7 @@ PROMPT;
         }
         if ($sectionText && trim($sectionText) !== '') {
             $parts[] = "Texto de la sección (referencia para completar contenido):\n"
-                . \Illuminate\Support\Str::limit(trim($sectionText), 1200);
+                .\Illuminate\Support\Str::limit(trim($sectionText), 1200);
         }
 
         return implode("\n", $parts);
@@ -490,6 +493,6 @@ PROMPT;
 
     private function attr(string $tag, string $name): ?float
     {
-        return preg_match('/' . $name . '="([\d.]+)"/', $tag, $m) ? (float) $m[1] : null;
+        return preg_match('/'.$name.'="([\d.]+)"/', $tag, $m) ? (float) $m[1] : null;
     }
 }

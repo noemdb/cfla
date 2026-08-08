@@ -914,6 +914,23 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             height: auto !important;
         }
 
+        /* Móvil: el canvas SVG (viewBox 1000px+) no debe encogerse hasta
+           ilegible; se deja en ancho natural y se hace scroll horizontal.
+           El ancho se decide inline (width del contenedor) via min-width. */
+        .lms-svg-diagram {
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y;
+        }
+        .lms-svg-diagram svg {
+            min-width: calc(100% - 8px);
+            margin: 0 auto;
+        }
+        @media (max-width: 480px) {
+            .lms-svg-diagram svg {
+                min-width: 600px;
+            }
+        }
+
         /* ── Anclas de sección: dejar espacio bajo el navbar sticky ── */
         [id^="seccion-"] {
             scroll-margin-top: 5.5rem;

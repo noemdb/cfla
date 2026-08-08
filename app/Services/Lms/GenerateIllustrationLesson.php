@@ -67,6 +67,8 @@ La regla base es `fill="var(--ink)"` (oscuro) para **todo** texto. Solo se usa b
 
 Mínimo contraste 4.5:1 para texto ≤18px, 3:1 para texto grande (≥24px o negrita ≥19px). Ante la duda entre blanco y oscuro, elige oscuro.
 
+**PROHIBIDOS** en texto: grises tenues sobre fondo claro (`#555555`–`#cccccc`, `#777777`, `#999999`, `#bbbbbb`, `#666666`) para tamaños ≤16px. Todo texto sobre fondo claro usa `var(--ink)` (#333333) o `#1a1a1a`; los subtítulos (`.subtitle`, `.caption`) mínimo `#444444`. Flechas y bordes: `stroke` mínimo `#666666` (nunca `#bbbbbb`/`#cccccc`).
+
 ---
 
 ## FASE 2 — Accesibilidad (obligatorio, no opcional)

@@ -287,4 +287,103 @@ class LmsSvgRepairServiceTest extends TestCase
         // figure intact
         $this->assertStringContainsString('</figure>', $out);
     }
+
+    public function test_normalize_contrast_darkens_light_gray_strokes_and_markers(): void
+    {
+        // Mejora 6: flechas y bordes tenues (#bbbbbb/#cccccc) deben oscurecerse.
+        $svg = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            .'<defs>'
+            .'<marker id="arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">'
+            .'<path d="M0,0 L0,8 L8,4 z" fill="#cccccc"/>'
+            .'</marker>'
+            .'</defs>'
+            .'<line x1="10" y1="90" x2="90" y2="10" stroke="#bbbbbb" stroke-width="2" marker-end="url(#arrow)"/>'
+            .'<rect x="20" y="20" width="40" height="40" fill="#e3f2fd" stroke="#cccccc"/>'
+            .'</svg>';
+
+        $out = $this->service->normalizeContrast($svg);
+
+        // marker path #cccccc → #4d4d4d ; line stroke #bbbbbb → #444444 ;
+        // rect stroke #cccccc → #4d4d4d. El rect fill pastel no cambia.
+        $this->assertStringContainsString('<path d="M0,0 L0,8 L8,4 z" fill="#4d4d4d"/>', $out);
+        $this->assertStringContainsString('stroke="#444444" stroke-width="2"', $out);
+        $this->assertStringContainsString('fill="#e3f2fd" stroke="#4d4d4d"', $out);
+        $this->assertStringNotContainsString('stroke="#bbbbbb"', $out);
+        $this->assertStringNotContainsString('fill="#cccccc"', $out);
+    }
+
+    public function test_normalize_contrast_keeps_pastel_fills_and_equal_rgb(): void
+    {
+        // Fondos con matiz (pasteles) y gris oscuro nunca se alteran.
+        $svg = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            .'<rect x="0" y="0" width="100" height="100" fill="#f8f9fa"/>'   // casi blanco neutro
+            .'<rect x="10" y="10" width="30" height="30" fill="#fff3e0"/>'  // pastel naranja
+            .'<rect x="50" y="10" width="30" height="30" fill="#1a1a1a"/>'  // oscuro
+            .'</svg>';
+
+        $out = $this->service->normalizeContrast($svg);
+
+        $this->assertStringContainsString('fill="#f8f9fa"', $out);
+        $this->assertStringContainsString('fill="#fff3e0"', $out);
+        $this->assertStringContainsString('fill="#1a1a1a"', $out);
+    }
+
+    public function test_ensure_accessibility_adds_role_and_label_from_figcaption(): void
+    {
+        // Mejora 3: un <figure><figcaption>…</figcaption></figure> sin rol en el
+        // <svg> propaga la etiqueta del diagrama al canvas.
+        $body = $this->figure(
+            '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            ."\n  <text x=\"50\" y=\"50\">PODER</text>"
+            ."\n</svg>"
+        );
+
+        $out = $this->service->ensureAccessibility($body);
+
+        $this->assertMatchesRegularExpression('/<svg[^>]*role="img"[^>]*aria-label="[^"]*Diagrama[^\"]*"[^>]*aria-hidden="true"/', $out);
+        // No duplica los textos internos para lectores de pantalla.
+        $this->assertSame(1, substr_count($out, 'role="img"'));
+    }
+
+    public function test_ensure_accessibility_respects_existing_role(): void
+    {
+        // Si el SVG ya trae role propio con aria-label, no se toca.
+        $svg = '<figure><figcaption>D</figcaption><div><svg viewBox="0 0 10 10" role="img" aria-label="Ya descrito"></svg></div></figure>';
+
+        $out = $this->service->ensureAccessibility($svg);
+
+        $this->assertStringContainsString('aria-label="Ya descrito"', $out);
+        $this->assertStringNotContainsString('aria-hidden="true"', $out);
+    }
+
+    public function test_ensure_accessibility_ignores_bodies_without_label(): void
+    {
+        $plain = '<p>Sin diagramas.</p>';
+        $this->assertSame($plain, $this->service->ensureAccessibility($plain));
+
+        $noLabel = '<figure><div><svg viewBox="0 0 10 10"></svg></div></figure>';
+        $this->assertSame($noLabel, $this->service->ensureAccessibility($noLabel));
+    }
+
+    public function test_render_image_chains_repair_contrast_and_accessibility(): void
+    {
+        // Mejora 4: pipeline único de render (igual en pantalla y print).
+        $body = $this->figure(
+            '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            ."\n  <rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"#f8f9fa\"/>"
+            ."\n  <text x=\"50\" y=\"50\" fill=\"#666666\">Bajo a tipo oscuro</text>"
+            ."\n</svg>"
+        );
+
+        $out = $this->service->renderImage($body);
+
+        // Contraste aplicado.
+        $this->assertStringContainsString('fill="#333333"', $out);
+        $this->assertStringNotContainsString('fill="#666666"', $out);
+        // Accesibilidad aplicada (rol + etiqueta del figcaption).
+        $this->assertStringContainsString('role="img"', $out);
+        $this->assertStringContainsString('aria-hidden="true"', $out);
+        // Estructura intacta.
+        $this->assertStringContainsString('</figure>', $out);
+    }
 }

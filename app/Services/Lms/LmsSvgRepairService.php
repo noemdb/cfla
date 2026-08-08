@@ -59,21 +59,27 @@ class LmsSvgRepairService
     }
 
     /**
-     * Oscurece los textos de los SVG que quedan ilegibles sobre los fondos
-     * pastel (problema informado con el "Diagrama: Dinámicas de poder…").
+     * Oscurece los textos, strokes y fletes de los SVG que quedan ilegibles
+     * sobre los fondos pastel (problema informado con el "Diagrama: Dinámicas
+     * de poder…").
      *
      * Contexto: el generador (LLM) pinta los textos de los diagramas con
-     * grises claros (#555555, #666666 …) y subtítulos en gris medio (#999999,
-     * #cccccc) sobre fondos casi blancos (#f8f9fa) y pastel (#fff3e0, #e3f2fd…).
-     * A 12–14px esos grises tienen contraste insuficiente (≈1.9:1–4.6:1 según
-     * el tono) y resultan difíciles de leer, sobre todo subtítulos y etiquetas.
+     * grises claros (#555555, #666666 …), subtítulos en gris medio (#999999,
+     * #cccccc) y flechas/bordes tenues (#bbbbbb, #cccccc) sobre fondos casi
+     * blancos (#f8f9fa) y pastel (#fff3e0, #e3f2fd…). A 12–14px esos grises
+     * tienen contraste insuficiente (≈1.9:1–4.6:1 según el tono) y resultan
+     * difíciles de leer, sobre todo subtítulos, etiquetas y conectores.
      *
      * Este paso, aplicado en render (vía repair()) y en el generador, remapea
-     * SOLO los fills de <text>/<tspan> que son tonos grisáceos claros a un gris
-     * oscuro equivalente (contraste ≥ 7:1 sobre el fondo blanco). No toca:
-     * - fill/stroke de formas (rect, circle, path…): mantienen el diseño.
+     * SOLO los tonos grisáceos claros (fill de texto/formas y stroke) a un
+     * gris oscuro equivalente (contraste ≥ 7:1 sobre el fondo blanco). No toca:
+     * - fondos ya claros (#f8f9fa, #ffffff, pasteles): el mapa solo afecta
+     *   a tonos neutros cada paraby no a los pasteles con matiz.
      * - textos ya oscuros (#1a1a1a, #333333): ya cumplen AA.
-     * - textos con color con matiz (rojos, azules…): se preservan.
+     * - colores con matiz (rojos, azules…): se preservan.
+     *
+     * Nota: el mapa contempla los tonos reales encontrados en
+     * lms_activity_contents (auditoría 2026-08-08): #555555..#eeeeee.
      */
     public function normalizeContrast(string $svg): string
     {
@@ -81,7 +87,7 @@ class LmsSvgRepairService
             return $svg;
         }
 
-        // Fills grises claros presentes en los diagramas reales → gris oscuro.
+        // Fills/strokes grises claros presentes en los diagramas reales → oscuro.
         $map = [
             '#eeeeee' => '#666666',
             '#dddddd' => '#555555',
@@ -106,16 +112,98 @@ class LmsSvgRepairService
             '#555' => '#333',
         ];
 
-        // Solo en textos: reemplazar el atributo fill de <text …> y <tspan …>.
+        // Textos (tspans y textPath) + flechas (marker path) + strokes:
+        // reemplaza el color en atributos fill/stroke de elementos que usen
+        // alguno de los grises del mapa.
         return preg_replace_callback(
-            '~<(text|tspan|textPath)\b[^>]*\bfill="([^"]+)"~',
+            '~<(text|tspan|textPath)\b[^>]*\bfill="([^"]+)"|<\s*(path|line|polyline|rect|circle|ellipse|marker|polygon)\b[^>]*\b(fill|stroke)="([^"]+)"~i',
             function ($m) use ($map) {
-                $fill = strtolower($m[2]);
+                // Grupo 1-2 → texto con fill; grupo 4-5 → forma con fill/stroke.
+                $value = ($m[2] ?? '') !== '' ? $m[2] : $m[5];
+                $value = trim($value);
+                $attr = ($m[4] ?? '') !== '' ? $m[4] : 'fill';
 
-                return str_replace('fill="'.$m[2].'"', 'fill="'.($map[$fill] ?? $m[2]).'"', $m[0]);
+                $new = $value;
+                // Solo tonos grises neutros (#RRGGBB o #RGB); nunca los
+                // pasteles de matiz (con canales distintos) que dan el diseño.
+                if (preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', $value, $rh)) {
+                    $key = '#'.strtolower($rh[1]);
+                    $new = $map[$key] ?? $value;
+                }
+
+                if ($new === $value) {
+                    return $m[0];
+                }
+
+                $old = $attr.'="'.$value.'"';
+
+                return str_replace($old, $attr.'="'.$new.'"', $m[0]);
             },
             $svg
         );
+    }
+
+    /**
+     * Añade accesibilidad (role="img" + aria-label) al <svg> embebido si aún
+     * no la tiene. Las etiquetas de los diagramas reales viven en el
+     * <figcaption> del wrapper figure; se toman de ahí (p.ej. "Diagrama:
+     * Dinámicas de poder…") y se propagan al canvas para lectores de pantalla.
+     *
+     * No contrario: si el <svg> ya declara role/aria-label, no se toca.
+     */
+    public function ensureAccessibility(string $body): string
+    {
+        if (! str_contains($body, '<svg')) {
+            return $body;
+        }
+
+        // ¿El <svg> raíz ya tiene rol/etiqueta propia?
+        if (preg_match('/<svg\b[^>]*\s(?:role|aria-label)=/i', $body, $before)) {
+            // Un svg con role propio ya anuncia el diagrama; bloquear lectura
+            // de sus textos internos si NO tiene su propio aria-label.
+            if (! preg_match('/<svg\b[^>]*\saria-label=/i', $body)) {
+                $body = preg_replace_callback(
+                    '~(<svg\b[^>]*)(>)~',
+                    fn ($m) => $m[1].' aria-hidden="true"'.$m[2],
+                    $body,
+                    1
+                );
+            }
+
+            return $body;
+        }
+
+        // Derivar la etiqueta del figcaption (o del primer título de SVG).
+        $label = null;
+        if (preg_match('/<figcaption\b[^>]*>(.*?)<\/figcaption>/is', $body, $fc)) {
+            $label = trim(strip_tags($fc[1]));
+        } elseif (preg_match('/<title\b[^>]*>(.*?)<\/title>/is', $body, $title)) {
+            $label = trim($title[1]);
+        }
+        if ($label === null || $label === '') {
+            return $body; // sin etiqueta aprehendible: no añadir accesibilidad
+        }
+
+        $escaped = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+
+        // Insertar role="img" + aria-label + aria-hidden en el <svg> raíz.
+        return preg_replace_callback(
+            '~(<svg\b[^>]*>)~',
+            fn ($m) => substr($m[1], 0, -1).' role="img" aria-label="'.$escaped.'" aria-hidden="true">',
+            $body,
+            1
+        );
+    }
+
+    /**
+     * Pipeline completo de render para un body IMAGE con SVG embebido:
+     * reparación de tags rotos + normalización de contraste + accesibilidad.
+     * Es el uso único de repair()/normalizeContrast()/ensureAccessibility() en
+     * los renders (activity-view y print) para que ambos caminos sean idénticos.
+     */
+    public function renderImage(string $body): string
+    {
+        return $this->ensureAccessibility($this->repair($body));
     }
 
     /**
