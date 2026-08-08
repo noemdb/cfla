@@ -1528,4 +1528,48 @@ class LessonWizardCharacterizationTest extends TestCase
 
         $component->assertSet('mode', 'wizard');
     }
+
+    /** @test */
+    public function saveStep2_invalida_la_caché_content_type_cuando_la_seccion_queda_sin_contenidos(): void
+    {
+        // Spec "Campo content_type": el borrado masivo de contenidos en
+        // saveStep2 (query builder) NO dispara el observer → la caché debe
+        // invalidarse explícitamente para no quedar stale (p.ej. 'svg' en una
+        // sección vacía). Con la caché en null, el accesor calcula 'none'.
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        // 1er guardado: sección temp_ con un contenido TEXT → se crea la
+        // sección y el observer pone content_type='text'.
+        $component->set('wizardSections', [[
+            'id' => 'temp_content_type_test',
+            'title' => 'Sección única',
+            'sort_order' => 1,
+            'is_visible' => true,
+            'contents' => [[
+                'type' => 'TEXT',
+                'title' => 'Contenido',
+                'body' => '<p>Prosa.</p>',
+                'is_visible' => true,
+            ]],
+        ]]);
+        $component->call('saveStep2');
+
+        $section = LmsActivitySection::where('activity_id', $activity->id)->first();
+        $this->assertSame('text', $section->fresh()->content_type);
+
+        // 2º guardado: el usuario elimina el contenido → la sección queda sin
+        // contenidos. La caché debe quedar null (accesor → 'none'), no stale.
+        $sections = $component->get('wizardSections');
+        $sections[0]['contents'] = [];
+        $component->set('wizardSections', $sections);
+        $component->call('saveStep2');
+
+        $fresh = $section->fresh();
+        $this->assertNull($fresh->getAttributes()['content_type'] ?? null);
+        $this->assertSame('none', $fresh->content_type);
+    }
 }

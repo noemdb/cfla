@@ -3724,6 +3724,13 @@ PROMPT;
                     ]);
                     // Limpiar contenidos previos para evitar duplicados
                     LmsActivityContent::where('section_id', $section->id)->delete();
+
+                    // La caché content_type queda obsoleta tras el borrado masivo
+                    // (el delete por query builder NO dispara el observer). Si hay
+                    // creates a continuación, el observer la reescribe; si no los
+                    // hay, queda null y el accesor calcula 'none' en vivo.
+                    $section->content_type = null;
+                    $section->saveQuietly();
                 }
             }
 
