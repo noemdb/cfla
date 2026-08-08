@@ -3,15 +3,50 @@
 namespace App\Models\app\Academy\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Services\Lms\LmsContentClassifier;
 use Illuminate\Database\Eloquent\Model;
 
 class LmsActivitySection extends Model
 {
     protected $table = 'lms_activity_sections';
 
-    protected $fillable = ['activity_id', 'title', 'description', 'sort_order', 'is_visible'];
+    protected $fillable = [
+        'activity_id',
+        'title',
+        'description',
+        'sort_order',
+        'is_visible',
+        'content_type',
+    ];
 
     protected $casts = ['is_visible' => 'boolean'];
+
+    /** Tipos de contenido de sección (Spec "Campo content_type"). */
+    public const CONTENT_TYPES = LmsContentClassifier::SECTION_TYPES;
+
+    /** Etiquetas legibles por tipo (UI, badges). */
+    public const CONTENT_TYPE_LABELS = LmsContentClassifier::SECTION_TYPE_LABELS;
+
+    /**
+     * La columna `content_type` es una caché derivada de los contenidos
+     * visibles. Si está vacía (drift/legacy), se calcula en vivo.
+     */
+    public function getContentTypeAttribute(?string $cached): ?string
+    {
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        return app(LmsContentClassifier::class)->classifySection($this->visibleContents);
+    }
+
+    /** Etiqueta legible del tipo (o null si no hay tipo). */
+    public function getContentTypeLabelAttribute(): ?string
+    {
+        $type = $this->content_type;
+
+        return $type ? (self::CONTENT_TYPE_LABELS[$type] ?? ucfirst($type)) : null;
+    }
 
     public function contents()
     {

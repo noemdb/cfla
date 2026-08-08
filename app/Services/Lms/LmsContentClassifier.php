@@ -60,4 +60,115 @@ class LmsContentClassifier
 
         return $code;
     }
+
+    // ─── Clasificación fina por contenido y agregación por sección (Spec
+    //     "Campo content_type en lms_activity_sections") ───────────────────
+
+    /** Tipos de contenido de sección (valores de lms_activity_sections.content_type). */
+    public const SECTION_TYPES = [
+        'text', 'markdown', 'html', 'mermaid', 'svg', 'image',
+        'math', 'video', 'audio', 'mixed', 'none',
+    ];
+
+    /** Etiquetas legibles por tipo (UI, badges, reportes). */
+    public const SECTION_TYPE_LABELS = [
+        'text'     => 'Texto',
+        'markdown' => 'Markdown',
+        'html'     => 'HTML',
+        'mermaid'  => 'Mermaid',
+        'svg'      => 'SVG',
+        'image'    => 'Imagen',
+        'math'     => 'Math (LaTeX)',
+        'video'    => 'Video',
+        'audio'    => 'Audio',
+        'mixed'    => 'Mixto',
+        'none'     => 'Sin contenido',
+    ];
+
+    /**
+     * Clasifica UN contenido al tipo fino (precedencia deliberada):
+     * mermaid > svg/image > math > video/audio > html > markdown > text.
+     *
+     * @param  string       $type       ENUM del contenido (TEXT/HTML/IMAGE/VIDEO/...).
+     * @param  string       $body       Body crudo (puede contener SVG/mermaid/LaTeX).
+     * @param  string|null  $mediaMime  MIME del media adjunto (para distinguir svg de raster).
+     */
+    public function classifyContent(string $type, string $body, ?string $mediaMime = null): string
+    {
+        if ($this->isMermaidBody($body)) {
+            return 'mermaid';
+        }
+
+        if ($this->isImageBody($type, $body)) {
+            return ($mediaMime !== null && ! str_contains($mediaMime, 'svg'))
+                ? 'image'
+                : 'svg';
+        }
+
+        if ($this->isMathBody($body)) {
+            return 'math';
+        }
+
+        if ($type === 'VIDEO') {
+            return 'video';
+        }
+
+        if ($type === 'AUDIO') {
+            return 'audio';
+        }
+
+        if ($type === 'HTML') {
+            return 'html';
+        }
+
+        if ($this->isMarkdownBody($body)) {
+            return 'markdown';
+        }
+
+        return 'text';
+    }
+
+    /**
+     * Agrega los contenidos visibles de una sección → tipo de sección.
+     *
+     * @param  iterable<int, object>  $contents  Colección de contenidos (necesita type/body/media).
+     */
+    public function classifySection(iterable $contents): ?string
+    {
+        $types = [];
+        foreach ($contents as $content) {
+            $types[$this->classifyContent(
+                (string) ($content->type ?? 'TEXT'),
+                (string) ($content->body ?? ''),
+                $content->media?->mime_type,
+            )] = true;
+        }
+
+        if (count($types) === 0) {
+            return 'none';
+        }
+
+        if (count($types) > 1) {
+            return 'mixed';
+        }
+
+        return array_key_first($types);
+    }
+
+    /**
+     * ¿Body con LaTeX/KaTeX? ($...$, $$...$$, \(...\), \[...\]).
+     */
+    public function isMathBody(string $body): bool
+    {
+        return preg_match('/(?<!\\\\)(\$\$|\\$|\\\\\(|\\\\\[)/', $body) === 1;
+    }
+
+    /**
+     * ¿Markdown estructural (listas, citas, tablas, títulos) en vez de prosa?
+     * Detecta sobre el body ya convertido a HTML (patrones que deja Str::markdown).
+     */
+    public function isMarkdownBody(string $body): bool
+    {
+        return preg_match('/<(ul|ol|blockquote|table|h[2-4])(\s|>)/i', $body) === 1;
+    }
 }

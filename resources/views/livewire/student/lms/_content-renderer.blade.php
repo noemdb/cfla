@@ -10,6 +10,11 @@
 
 @php
     $bodyHtml = $content->body ?? '';
+
+    // Tipo fino del contenido (Spec "Campo content_type"): expuesto como
+    // atributo data para estilado/clasificación aditiva sin cambiar el markup.
+    $contentType = app(\App\Services\Lms\LmsContentClassifier::class)
+        ->classifyContent($content->type ?? 'TEXT', $bodyHtml, $content->media?->mime_type);
 @endphp
 
 @php
@@ -18,7 +23,7 @@
     $stepHeader = 'flex items-center justify-center gap-2 mb-2';
 @endphp
 
-<div wire:key="content-{{ $content->id }}" class="{{ $wrapperClasses }}">
+<div wire:key="content-{{ $content->id }}" data-content-type="{{ $contentType }}" class="{{ $wrapperClasses }}">
     {{-- Step number above content --}}
     <div class="{{ $stepHeader }}">
         <span class="flex items-center justify-center font-bold shrink-0 {{ $stepCircle }}">{{ $stepNum }}</span>
@@ -147,10 +152,9 @@
                         </div>
                         @if($content->body)
                             @php
-                                // Defensa P2 (SVG truncados): un tag SVG roto se
-                                // pintaría NEGRO (fill por defecto) y rompería el
-                                // cierre del <svg>. Se repara antes de emitir.
-                                $__svgBody = app(\App\Services\Lms\LmsSvgRepairService::class)->repair($content->body);
+                                // Defensa P2 (SVG truncados) + contraste + accesibilidad:
+                                // pipeline único (renderImage) compartido con print.
+                                $__svgBody = app(\App\Services\Lms\LmsSvgRepairService::class)->renderImage($content->body);
                             @endphp
                             <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none {{ $isSvgBody ? 'lms-svg-diagram overflow-x-auto' : '' }}">{!! $__svgBody !!}</div>
                         @else

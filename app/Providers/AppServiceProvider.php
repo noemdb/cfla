@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\app\Academy\AreaConocimiento;
+use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Observers\AreaConocimientoObserver;
+use App\Observers\LmsActivityContentObserver;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
@@ -52,5 +54,10 @@ class AppServiceProvider extends ServiceProvider
         // reasigna un leader_id en AreaConocimiento, evitando que un líder saliente
         // siga viendo datos del área y que un líder nuevo tenga que esperar el TTL.
         AreaConocimiento::observe(AreaConocimientoObserver::class);
+
+        // Observer de sincronización de lms_activity_sections.content_type
+        // (Spec "Campo content_type"): cualquier mutación de un contenido
+        // (crear/editar/ocultar/eliminar) recalcula el tipo de su sección.
+        LmsActivityContent::observe(LmsActivityContentObserver::class);
     }
 }

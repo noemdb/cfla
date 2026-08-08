@@ -307,3 +307,18 @@ Verificación canónica: `php8.2 -l` en todo lo tocado, `php8.2 artisan test` (s
 2. **Caché denormalizada + observer** en vez de computar siempre: permite indexar, filtrar y reportear; el accesor defensivo cubre el drift.
 3. **`mixed` como ciudadano de primera clase**: 53/359 secciones ya son mixtas; ocultarlas tras un único tipo sería mentira.
 4. **Precedencia mermaid > svg > math > html > markdown > text**: refleja exactamente el orden con el que las vistas ya deciden hoy (P4), así no hay cambio de comportamiento perceptible.
+5. **El observer cubre el wizard (F4 sin cambios en LessonWizard)**: cuando el wizard persiste contenidos (`generateSectionIllustration`, `generateStep2Sections`), el observer recalcula el tipo de la sección automáticamente. No se escribe el tipo explícitamente en la generación — la fuente de verdad es el contenido, no la intención del generador (evita drift entre "lo que se generó" y "lo que realmente quedó").
+6. **Badge en activity-view diferido a fase 2**: el archivo estaba siendo refactorizado en paralelo (modo libro); el `data-content-type` en `_content-renderer` + clase `section--{tipo}` en print dan la integración aditiva sin riesgo de conflicto.
+
+---
+
+## 14. Estado de implementación (2026-08-08, branch `reclassify`)
+
+- [x] F0 — `LmsContentClassifier::classifyContent/classifySection/isMathBody/isMarkdownBody` + constantes `SECTION_TYPES`/`SECTION_TYPE_LABELS` + 10 tests unitarios nuevos (17 total en la clase).
+- [x] F1 — Migración `2026_08_08_000001_add_content_type_to_lms_activity_sections.php` (columna + índice + backfill en la propia migración). Modelo con fillable, constantes, accesor con fallback en vivo y `content_type_label`.
+- [x] F2 — `LmsActivityContentObserver` (saved/deleted → recálculo con `saveQuietly`) registrado en `AppServiceProvider`; comando `lms:sync-section-types [--dry-run] [--activity=]` (idempotente; compara contra la columna cruda, no el accesor).
+- [x] F3 — `lessons-print`: clase aditiva `section--{content_type}` + 4 reglas CSS (mermaid/svg/math/image); `_content-renderer`: atributo `data-content-type` con el tipo fino. `null`/`mixed` → comportamiento idéntico.
+- [x] F4 — Cubierto por el observer (ADR-5).
+- [x] F5 — `tests/Feature/Lms/SectionContentTypeTest.php` (7 tests: observer en 4 escenarios, accesor, idempotencia del comando, label). Verificación: migración aplicada (backfill: 292 text / 56 mixed / 5 svg / 3 math / 1 mermaid / 1 none / 1 html), `lms:sync-section-types` con 0 cambios (idempotente), 174 tests verdes, `npm run build` ✓.
+
+Pendiente fase 2 (fuera de esta iteración): badge de tipo en `activity-view`, filtros por tipo en listados de Director/Profesor, reporting por tipo.

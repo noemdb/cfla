@@ -169,6 +169,12 @@
             .lesson-meta .dot{color:#dcfce7;}
 
             .section{margin:8px 0;padding:0 2px;break-inside:auto;}
+            /* Tratamiento aditivo por tipo de sección (Spec "Campo content_type").
+               null/mixed → sin clase extra → comportamiento idéntico al anterior. */
+            .section--mermaid{break-inside:avoid;}
+            .section--svg .content-image{page-break-inside:avoid;break-inside:avoid;margin:2px auto;}
+            .section--math .content{font-size:6.25pt;}
+            .section--image .content-image{margin:2px auto;}
             .section-head{display:flex;align-items:center;gap:2px;background:#f0fdfa;border:1px solid #ccfbf1;
                           padding:2px 4px;border-radius:2px;font-size:5.25pt; font-weight:700;
                           color:#0f766e;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:4px;} /* 7px */
@@ -355,7 +361,7 @@
 
             {{-- Secciones --}}
             @forelse($activity->lmsSections->where('is_visible', true) as $section)
-                <div class="section">
+                <div class="section section--{{ $section->content_type ?? 'none' }}">
                     <div class="section-head">
                         <span class="bar"></span>
                         <span>{{ $section->title ?: 'Sección sin título' }}</span>
@@ -396,7 +402,7 @@
                                         <img src="{{ $content->media->public_url }}" alt="{{ $content->title ?: 'Imagen' }}">
                                     </div>
                                 @else
-                                    <div class="content-image">{!! app(\App\Services\Lms\LmsSvgRepairService::class)->repair($rawBody) !!}</div>
+                                    <div class="content-image">{!! app(\App\Services\Lms\LmsSvgRepairService::class)->renderImage($rawBody) !!}</div>
                                 @endif
                             @elseif($isMermaid)
                                 {{-- Diagrama Mermaid → wrapper Alpine mermaidEmbed() --}}
