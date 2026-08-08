@@ -2150,21 +2150,17 @@ PROMPT;
         }
         $sectionIndex = $this->currentSlideIndex;
         $this->saved = false;
-        if (! isset($this->wizardSections[$sectionIndex]['contents'][0])) {
-            $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido para etiquetar. Genera texto primero.');
+        $this->generationError = null;
 
-            return;
-        }
-        if (empty(trim(strip_tags($this->wizardSections[$sectionIndex]['contents'][0]['body'] ?? '')))) {
-            $this->notification()->warning('Contenido vacío', 'El body de esta diapositiva está vacío.');
+        $contents = $this->wizardSections[$sectionIndex]['contents'] ?? [];
+        if (count($contents) === 0) {
+            $this->notification()->warning('Sin contenido', 'Esta diapositiva no tiene contenido para etiquetar. Genera texto primero.');
 
             return;
         }
 
         $this->generatingSection = $sectionIndex;
-        $this->generationError = null;
 
-        $originalBody = $this->wizardSections[$sectionIndex]['contents'][0]['body'];
         $sectionTitle = $this->wizardSections[$sectionIndex]['title'];
 
         $activity = $this->selectedActivity;
@@ -2172,48 +2168,68 @@ PROMPT;
         $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
         $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
 
-        try {
-            /** @var HtmlTaggingService $taggingService */
-            $taggingService = app(HtmlTaggingService::class);
+        /** @var HtmlTaggingService $taggingService */
+        $taggingService = app(HtmlTaggingService::class);
 
-            $result = $taggingService->tag(
-                $originalBody,
-                $sectionTitle,
-                $gradeName,
-                $subjectName,
-                fn (string $systemPrompt, string $userPrompt, array $overrides) => $this->askWithCompaction(
-                    $systemPrompt,
-                    $userPrompt,
-                    $overrides
-                ),
-                activityContext: $activity ? [
-                    'topic' => $activity->topic ?? '',
-                    'teaching' => $activity->teaching ?? '',
-                    'description' => $activity->description ?? '',
-                ] : null,
-            );
+        // Etiquetar TODOS los bloques de la diapositiva (máx 2) — Spec
+        // "Armonía tipográfica generateSlideHtmlTags" (F4): antes solo se
+        // etiquetaba contents[0] y el 2º bloque quedaba en texto plano.
+        $tagged = 0;
+        $errors = [];
 
-            if ($result['success']) {
-                $this->wizardSections[$sectionIndex]['contents'][0]['body'] = $result['html'];
-                $this->wizardSections[$sectionIndex]['contents'][0]['type'] = 'HTML';
+        foreach ($contents as $i => $content) {
+            $originalBody = $content['body'] ?? '';
 
-                $this->notification()->success(
-                    'HTML semántico generado',
-                    'El contenido se etiquetó con HTML5 semántico correctamente.'
+            if (empty(trim(strip_tags($originalBody)))) {
+                continue; // bloque vacío: se salta
+            }
+
+            try {
+                $result = $taggingService->tag(
+                    $originalBody,
+                    $sectionTitle,
+                    $gradeName,
+                    $subjectName,
+                    fn (string $systemPrompt, string $userPrompt, array $overrides) => $this->askWithCompaction(
+                        $systemPrompt,
+                        $userPrompt,
+                        $overrides
+                    ),
+                    activityContext: $activity ? [
+                        'topic' => $activity->topic ?? '',
+                        'teaching' => $activity->teaching ?? '',
+                        'description' => $activity->description ?? '',
+                    ] : null,
                 );
 
-                // Disparar evento para cambiar a pestaña preview y mostrar resultado
-                $this->dispatch('show-preview');
-            } else {
-                $this->generationError = $result['error'];
-                $this->notification()->error('Error de etiquetado', $result['error']);
+                if ($result['success']) {
+                    $this->wizardSections[$sectionIndex]['contents'][$i]['body'] = $result['html'];
+                    $this->wizardSections[$sectionIndex]['contents'][$i]['type'] = 'HTML';
+                    $tagged++;
+                } else {
+                    $errors[] = $result['error'] ?? 'Error desconocido del servicio IA.';
+                }
+            } catch (\Throwable $e) {
+                $errors[] = $e->getMessage();
             }
-        } catch (\Throwable $e) {
-            $this->generationError = $e->getMessage();
-            $this->notification()->error('Error inesperado', $e->getMessage());
-        } finally {
-            $this->generatingSection = null;
         }
+
+        if ($tagged > 0) {
+            $this->notification()->success(
+                'HTML semántico generado',
+                $tagged === 1
+                    ? 'El contenido se etiquetó con HTML5 semántico correctamente.'
+                    : "{$tagged} bloques se etiquetaron con HTML5 semántico correctamente."
+            );
+
+            // Disparar evento para cambiar a pestaña preview y mostrar resultado
+            $this->dispatch('show-preview');
+        } else {
+            $this->generationError = implode(' · ', array_filter($errors)) ?: 'No se pudo etiquetar el contenido de esta diapositiva.';
+            $this->notification()->error('Error de etiquetado', $this->generationError);
+        }
+
+        $this->generatingSection = null;
     }
 
     // ─── Wizard: Matemáticas / LaTeX ─────────────────────────────

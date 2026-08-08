@@ -64,26 +64,17 @@ Aplica AL MENOS 3 de estas estrategias en cada diapositiva. Combínalas para max
 
 ── 1. TIPOGRAFÍA ENRIQUECIDA ──
 
-Para el título principal de la diapositiva, elige UNA de estas variantes:
+Para el título principal de la diapositiva, usa SIEMPRE esta escala (ver
+"ESCALA TIPOGRÁFICA OBLIGATORIA" al final): text-lg como MÁXIMO absoluto.
 
-a) Texto con color de acento (ideal para títulos principales):
-   <h3 class="text-3xl font-bold tracking-tight text-emerald-700">
+a) Título con color de acento (variante estándar):
+   <h3 class="text-lg font-bold tracking-tight text-emerald-700">
    Título destacado
    </h3>
 
-b) Subrayado decorativo (para secciones):
-   <h3 class="text-2xl font-bold text-gray-900 border-b-2 border-emerald-500 pb-2 inline-block">
+b) Subrayado decorativo (variante opcional, mismo tamaño):
+   <h3 class="text-lg font-bold text-gray-900 border-b-2 border-emerald-500 pb-1 inline-block">
    Título con subrayado
-   </h3>
-
-c) Glow suave (para énfasis):
-   <h3 class="text-2xl font-bold text-gray-900 drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-   Título con brillo
-   </h3>
-
-d) Clásico clean (fallback):
-   <h3 class="text-2xl font-bold tracking-tight text-slate-800">
-   Título normal
    </h3>
 
 ── 2. TARJETAS / CARDS INTERNAS ──
@@ -93,21 +84,19 @@ d) Clásico clean (fallback):
     SIN fondo de color — solo bordes y sombras.
 
 a) Card con hover lift (efecto al pasar el cursor):
-   <div class="rounded-xl p-6 shadow-md border border-stone-200 transition transform hover:-translate-y-1 hover:shadow-xl">
+   <div class="rounded-xl p-4 shadow-sm border border-stone-200 transition transform hover:-translate-y-1">
      ...contenido...
    </div>
 
 b) Card con glow en borde:
-   <div class="rounded-xl p-6 border border-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+   <div class="rounded-xl p-4 border border-emerald-200 shadow-sm">
      ...contenido...
    </div>
 
 ── 3. CITAS / BLOCKQUOTE ──
 
 Usa esta variante para frases textuales o reflexiones (sin fondo de color):
-
-a) Cita con borde izquierdo:
-   <blockquote class="relative text-lg italic text-gray-700 rounded-lg p-5 pl-6 border-l-4 border-emerald-500">
+   <blockquote class="relative text-[15px] italic text-gray-700 rounded-lg p-4 pl-5 border-l-4 border-emerald-500">
      "Frase textual o reflexión importante..."
    </blockquote>
 
@@ -160,15 +149,15 @@ b) Badge inline (sin bg, solo borde + texto):
    </span>
 
 c) Stat card CON progress bar (solo si el valor numérico es un porcentaje real 0–100%):
-   <div class="rounded-xl p-5 border border-amber-200 shadow-sm">
-     <p class="text-3xl font-extrabold text-amber-800">95%</p>
+   <div class="rounded-xl p-4 border border-amber-200 shadow-sm">
+     <p class="text-2xl font-extrabold text-amber-800">95%</p>
      <p class="text-sm font-medium text-amber-600">Eficiencia del proceso</p>
      <div class="mt-2 h-1.5 bg-gray-200 rounded-full"><div class="h-1.5 bg-amber-500 rounded-full" style="width:95%"></div></div>
    </div>
 
 d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectáreas, litros, etc. — números que NO son porcentajes):
-   <div class="rounded-xl p-5 border border-amber-200 shadow-sm">
-     <p class="text-3xl font-extrabold text-amber-800">10</p>
+   <div class="rounded-xl p-4 border border-amber-200 shadow-sm">
+     <p class="text-2xl font-extrabold text-amber-800">10</p>
      <p class="text-sm font-medium text-amber-600">Segundos en que el proyectil alcanza máxima altura</p>
    </div>
 
@@ -181,6 +170,7 @@ d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectár
 - ¿Frase textual o reflexión? → Blockquote con border-l-4
 - ¿El contenido cambia de tema? → Separador sutil entre bloques + acordeón &lt;details&gt;
 - ¿Hay sub-contenido que puede expandirse? → Acordeón &lt;details&gt;/&lt;summary&gt; con hover:text transition
+- NO repitas el título de la sección/diapositiva como h3 — la plantilla ya lo muestra; empieza directamente con el primer bloque de contenido (highlight box, lista, etc.)
 - Siempre usa AL MENOS 1 highlight box + 1 lista con viñetas por contenido (salvo que no haya enumeraciones)
 - Siempre aplica hover effects (transitions) en list items y acordeones
 - ❌ NO uses envoltorio/card raíz con fondo, gradiente, borde ni sombra
@@ -193,9 +183,9 @@ d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectár
 - Preserva TODO el significado — no resumas, no parafrasees, no añadas.
 
 ═══ TIPOGRAFÍA ═══
-- Título h3: estrategia tipográfica variada (color acento, subrayado decorativo, o clean)
-- Subtítulo h4: text-lg font-semibold text-emerald-700 o text-sky-700
-- Párrafo:   text-base text-gray-700 leading-relaxed
+- Título h3: text-lg font-bold (color de acento o subrayado decorativo) — NUNCA text-2xl ni text-3xl
+- Subtítulo h4: text-base font-semibold text-emerald-700 o text-sky-700
+- Párrafo:   text-[15px] text-gray-700 leading-relaxed
 - <strong> para palabras clave dentro de párrafos
 - <span class="font-semibold text-emerald-700"> para resaltados inline sin fondo
 
@@ -235,7 +225,7 @@ d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectár
 INPUT: "La fotosíntesis es el proceso mediante el cual las plantas convierten la luz solar en energía química. Este proceso ocurre en los cloroplastos. Las etapas principales son: absorción de luz, fotólisis del agua, fijación de CO2. La eficiencia máxima es de aproximadamente el 6%. La fotosíntesis se divide en fase luminosa (dependiente de luz) y fase oscura (ciclo de Calvin, independiente de luz)."
 
 OUTPUT:
-<h3 class="text-3xl font-bold tracking-tight text-emerald-700 mb-4">
+<h3 class="text-lg font-bold tracking-tight text-emerald-700 mb-4">
   Fotosíntesis
 </h3>
 
@@ -247,7 +237,7 @@ OUTPUT:
   </p>
 </div>
 
-<h4 class="text-lg font-semibold text-emerald-700 border-b border-emerald-200 pb-1 inline-block mb-3">Etapas del proceso</h4>
+<h4 class="text-base font-semibold text-emerald-700 border-b border-emerald-200 pb-1 inline-block mb-3">Etapas del proceso</h4>
 
 <ul class="space-y-2 mb-4">
   <li class="flex items-start gap-3 rounded-lg px-2 py-1.5 transition hover:text-emerald-700">
@@ -283,6 +273,16 @@ OUTPUT:
   </div>
 </div>
 PROMPT;
+
+    /**
+     * Prompt final = base + escala tipográfica obligatoria (design tokens).
+     * Los tokens se generan desde LmsDesignTokens para no duplicar la escala
+     * entre prompt y normalizador (Spec "Armonía tipográfica").
+     */
+    private static function systemPrompt(): string
+    {
+        return self::SYSTEM_PROMPT . "\n\n" . LmsDesignTokens::promptRules();
+    }
 
     /**
      * Etiqueta contenido educativo con HTML semántico usando IA.
@@ -338,6 +338,8 @@ Si se proporcionó "Contexto de la actividad", puedes usarlo ÚNICAMENTE como re
 de contexto temático general, pero sin trasplantar texto de ese contexto al HTML generado.
 
 IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*.
+
+ESCALA TIPOGRÁFICA (obligatoria): títulos máx text-lg (18px), subtítulos text-base (16px), párrafos/listas text-[15px], números de stat card máx text-2xl (24px), padding de cards máx p-4, sombras máx shadow-sm. PROHIBIDO: text-3xl y text-2xl en títulos, p-5/p-6, shadow-lg/shadow-xl. NO repitas el título de la sección como heading — la plantilla ya lo muestra.
 PROMPT;
 
         $overrides = [
@@ -347,7 +349,7 @@ PROMPT;
         ];
 
         try {
-            $aiResult = $aiCallback(self::SYSTEM_PROMPT, $userPrompt, $overrides);
+            $aiResult = $aiCallback(self::systemPrompt(), $userPrompt, $overrides);
 
             if (!$aiResult['success']) {
                 return [
@@ -378,6 +380,11 @@ PROMPT;
                     'error'   => 'El contenido generado está vacío tras la limpieza.',
                 ];
             }
+
+            // Normalización determinista de escala tipográfica (Spec "Armonía
+            // tipográfica"): clampa text-2xl+, p-5+ y shadow-md+ a la escala
+            // del sistema aunque el LLM ignore el prompt.
+            $html = app(LmsTypographyNormalizerService::class)->normalize($html);
 
             return [
                 'success' => true,
