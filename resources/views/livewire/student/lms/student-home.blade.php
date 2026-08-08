@@ -78,21 +78,63 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
 {{-- D3: estado Alpine de la mini-barra sticky. updateNext() mide el fin del hero
      (x-ref="heroSection") y muestra la barra sólo cuando el hero — y su CTA de
      próxima lección — queda fuera de pantalla (detrás del navbar de h-14 = 56px).
-     @scroll.window.passive es declarativo: no re-registra listeners en cada morph
-     del wire:poll.10s. --}}
+     (sin wire:poll en este panel; el refresco en vivo de la próxima lección llegará
+     con Reverb en otra sesión). FIX (1): NO usar this.$refs.heroSection — la raíz
+     x-data persiste entre morphs de Livewire, pero Livewire reemplaza la <section>
+     por un nodo nuevo y Alpine se queda apuntando al viejo (detached → rect 0 → la
+     barra se mostraba sola tras el morph). updateNext() re-consulta el DOM vivo
+     con querySelector.
+     FIX (5): los listeners de scroll/resize van manuales en init() con destroy()
+     (mismo patrón probado en activity-view/readingNav), NO con el decorativo
+     @scroll.window.passive. El decorativo no disparaba de forma fiable entre los
+     remounts de Alpine que hace Livewire (antes lo tapaba el wire:poll.10s, que
+     re-ejecutaba updateNext cada 10s); sin poll, la barra no aparecía al hacer
+     scroll. init() se re-ejecuta en cada setup de Alpine y destroy() limpia los
+     listeners en cada teardown (sin fugas entre morphs).
+     FIX (2): el atributo x-data va delimitado por comillas dobles, así
+     que TODO el JS de dentro DEBE evitar " (también activeTab); el selector usa valor
+     CSS sin comillas [x-ref=heroSection] y los strings JS van con comillas simples.
+     FIX (3): la barra full-bleed usaba 100vw en el -mx-[calc((100vw-100%)/2)], pero
+     100vw incluye el ancho del scrollbar vertical (~15px): al mostrar la barra el
+     exceso desbordaba el viewport y nacía un scrollbar horizontal. Medimos el ancho
+     seguro con document.documentElement.clientWidth (excluye el scrollbar) y lo usamos como
+     CSS var --bar-vw (measureVw + resize del init).
+     FIX (4): la pestaña activa del NavTabs se vincula con @entangle('activeTab').live
+     (binding bidireccional Livewire↔Alpine), NO con una siembra local + @this.set.
+     Con la siembra + llamada manual, tras el morph del cambio de pestaña Alpine
+     volvía a sembrar el valor previo y el :class del tab activo quedaba desfasado
+     un clic (1er clic cambia el contenido, 2º pintaba el borde). Con @entangle el
+     servidor y Alpine quedan en sync en cada morph y el border-b-2 emerald se pinta
+     desde el primer clic; el queryString sigue persistiendo la pestaña. --}}
 <div class="max-w-4xl mx-auto py-8 px-4 space-y-8"
-     wire:poll.10s
      x-data="{
         nextOpen: false,
+        vw: document.documentElement.clientWidth,
+        onScroll: null,
+        onResize: null,
+        measureVw() {
+            this.vw = document.documentElement.clientWidth;
+        },
         updateNext() {
-            const hero = this.$refs.heroSection;
+            const hero = document.querySelector('[x-ref=heroSection]');
             this.nextOpen = !!hero && hero.getBoundingClientRect().bottom <= 56;
         },
-        activeTab: @entomb('{{ $activeTab }}'),
+        init() {
+            this.onScroll = () => this.updateNext();
+            this.onResize = () => { this.measureVw(); this.updateNext(); };
+            window.addEventListener('scroll', this.onScroll, { passive: true });
+            window.addEventListener('resize', this.onResize, { passive: true });
+            this.updateNext();
+            this.measureVw();
+        },
+        destroy() {
+            if (this.onScroll) window.removeEventListener('scroll', this.onScroll);
+            if (this.onResize) window.removeEventListener('resize', this.onResize);
+        },
+        activeTab: @entangle('activeTab').live,
         tabs: ['continuar', 'lecciones', 'distribucion', 'actividad'],
         setActiveTab(tab) {
             this.activeTab = tab;
-            @this.setActiveTab(tab)
         },
         prevTab() {
             const index = this.tabs.indexOf(this.activeTab);
@@ -103,13 +145,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             const index = this.tabs.indexOf(this.activeTab);
             const newIndex = (index + 1) % this.tabs.length;
             this.setActiveTab(this.tabs[newIndex]);
-        },
-        init() {
-            this.activeTab = @entomb('{{ $activeTab }}');
         }
-     }"
-     @scroll.window.passive="updateNext()"
-     x-init="updateNext(); init()">
+     }">
 
     {{-- 0. Hero: saludo + progreso + siguiente lección.
          G1: todas las tarjetas del home comparten la misma receta de
@@ -223,11 +260,12 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
          animación x-transition se anula sola bajo prefers-reduced-motion (bloque
          <style> al final de esta vista). sticky top-14 = justo debajo del navbar
          (h-14). Pulido: flotante full-width con vidrio — rompe fuera del
-         max-w-4xl hacia el ancho real de la página (-mx-[calc((100vw-100%)/2)])
-         como el navbar, con px-[calc((100vw-100%)/2)] que realinea el contenido
-         al mismo eje de la columna; border-y (no border, para no dejar líneas en
-         los bordes de pantalla) + backdrop-blur + shadow-lg, y hueco de vuelo
-         !mt-2 que vence el margin-top del space-y-8 del contenedor. --}}
+         max-w-4xl hacia el ancho real de la página (-mx/px con el pre-calc
+         (var(--bar-vw)-100%)/2) como el navbar; border-y (no border, para no dejar
+         líneas en los bordes de pantalla) + backdrop-blur + shadow-lg, y hueco de
+         vuelo !mt-2 que vence el margin-top del space-y-8 del contenedor. El ancho
+         seguro --bar-vw lo setea Alpine (measureVw) y evita el scrollbar horizontal
+         que causaba el 100vw (ver FIX (3) en la raíz x-data). --}}
     <div x-show="nextOpen"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
@@ -237,7 +275,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-1"
          aria-label="Próxima lección"
-         class="sticky top-14 z-20 !mt-2 -mx-[calc((100vw-100%)/2)] px-[calc((100vw-100%)/2)] py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-y border-gray-200/80 dark:border-gray-700/70 shadow-lg shadow-gray-300/20 dark:shadow-black/20">
+         class="sticky top-14 z-20 !mt-2 -mx-[calc((var(--bar-vw)-100%)/2)] px-[calc((var(--bar-vw)-100%)/2)] py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-y border-gray-200/80 dark:border-gray-700/70 shadow-lg shadow-gray-300/20 dark:shadow-black/20"
+         :style="'--bar-vw: ' + vw + 'px'">
         @php $nextKey = $__scKey($nextLesson->pevaluacion?->pensum?->asignatura?->name); @endphp
         <div class="flex items-center gap-2">
             <a href="{{ route('student.lms.activity', $nextLesson) }}"
@@ -347,6 +386,75 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
     </div>
     @endif
 
+    {{-- 1.5 NavTabs → 4 pestañas del panel. Sigue el mismo patrón reactivo
+         que el listado del profesor (pevaluacion-list): nav con border-b,
+         cada botón flex-1 con border-b-2 para marcar la activa, y el estado
+vive en Alpine (activeTab) sincronizado con Livewire vía el binding
+     bidireccional @entangle('activeTab').live. Los paneles van con x-show para que el contenido de
+         todas las pestañas siga presente en el HTML (los tests del home
+         cortan el bloque por substring). --}}
+    <div class="border-b border-gray-200 dark:border-gray-700" role="tablist" aria-label="Secciones del panel">
+        <nav class="flex overflow-x-auto">
+            <button type="button"
+                    id="tab-continuar"
+                    role="tab"
+                    aria-controls="panel-continuar"
+                    @click="setActiveTab('continuar')"
+                    :aria-selected="activeTab === 'continuar'"
+                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    :class="activeTab === 'continuar' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                <svg class="w-3.5 h-3.5 inline -mt-0.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <span class="hidden sm:inline ml-1">Continuar</span>
+            </button>
+            <button type="button"
+                    id="tab-lecciones"
+                    role="tab"
+                    aria-controls="panel-lecciones"
+                    @click="setActiveTab('lecciones')"
+                    :aria-selected="activeTab === 'lecciones'"
+                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    :class="activeTab === 'lecciones' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                <svg class="w-3.5 h-3.5 inline -mt-0.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                <span class="hidden sm:inline ml-1">Lecciones</span>
+            </button>
+            <button type="button"
+                    id="tab-distribucion"
+                    role="tab"
+                    aria-controls="panel-distribucion"
+                    @click="setActiveTab('distribucion')"
+                    :aria-selected="activeTab === 'distribucion'"
+                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    :class="activeTab === 'distribucion' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                <svg class="w-3.5 h-3.5 inline -mt-0.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                <span class="hidden sm:inline ml-1">Distribución</span>
+            </button>
+            <button type="button"
+                    id="tab-actividad"
+                    role="tab"
+                    aria-controls="panel-actividad"
+                    @click="setActiveTab('actividad')"
+                    :aria-selected="activeTab === 'actividad'"
+                    class="flex-1 px-4 py-2 text-[11px] font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap"
+                    :class="activeTab === 'actividad' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-500/5' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                <svg class="w-3.5 h-3.5 inline -mt-0.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span class="hidden sm:inline ml-1">Actividad</span>
+            </button>
+        </nav>
+    </div>
+
+    {{-- Paneles por pestaña: el contenido de todas las pestañas se mantiene en
+         el DOM (los tests StudentHomeTest cortan el HTML por substring), y cada
+         panel se muestra/oculta con Alpine activeTab. El tab actica por defecto
+         es continuar (desde $activeTab de Livewire). --}}
+    <div id="panel-continuar" role="tabpanel" aria-labelledby="tab-continuar" x-show="activeTab === 'continuar'">
     {{-- 2. Continue Learning --}}
     @if($recentLogs->isNotEmpty())
     <section>
@@ -541,8 +649,10 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         </div>
     </section>
     @endif
+    </div>
 
     {{-- 4. Todas las lecciones (búsqueda + filtro + paginación) --}}
+    <div id="panel-lecciones" role="tabpanel" aria-labelledby="tab-lecciones" x-show="activeTab === 'lecciones'" x-cloak>
     @if($allLessons->total() > 0 || $this->search !== '' || $this->subjectFilter !== '')
     <section>
         <div class="flex items-center gap-2 mb-1">
@@ -603,8 +713,8 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
              (bg-gray-100 animate-pulse). Las filas son <div> (NO <li>): los tests C1
              cortan el HTML crudo por <li>/</li> para leer las estrellas de logros y un
              skeleton con <li> rompería el slice. Tampoco lleva texto real de lecciones.
-             Scoped con wire:target para que el wire:poll.10s del home no lo haga
-             parpadear cada 10s. --}}
+             Scoped con wire:target para que no parpadee con otras actualizaciones del
+             panel (el refresco en vivo llegará con Reverb). --}}
         <div wire:loading.delay.shorter
              wire:target="search, subjectFilter, gotoPage"
              aria-hidden="true"
@@ -729,8 +839,10 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         @endif
     </section>
     @endif
+    </div>
 
     {{-- 5. Subject Distribution --}}
+    <div id="panel-distribucion" role="tabpanel" aria-labelledby="tab-distribucion" x-show="activeTab === 'distribucion'" x-cloak>
     @if($subjectDistribution->isNotEmpty())
     <section>
         <div class="flex items-center gap-2 mb-4">
@@ -767,8 +879,10 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         </div>
     </section>
     @endif
+    </div>
 
     {{-- 6. Tu actividad reciente --}}
+    <div id="panel-actividad" role="tabpanel" aria-labelledby="tab-actividad" x-show="activeTab === 'actividad'" x-cloak>
     @if($recentComments->isNotEmpty() || $recentDownloads->isNotEmpty())
     <section>
         <div class="flex items-center gap-2 mb-4">
@@ -831,6 +945,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
         </div>
     </section>
     @endif
+    </div>
 
     {{-- Movimiento reducido --}}
     <style>

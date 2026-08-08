@@ -301,12 +301,97 @@ class StudentHomeTest extends TestCase
         $this->assertStringContainsString('sticky top-14 z-20', $html);
         $this->assertStringContainsString('x-ref="heroSection"', $html);
 
+        // FIX (5): los listeners de scroll/resize van manuales en init() con
+        // cleanup en destroy() (no se depende del decorativo @scroll.window)
+        $this->assertStringContainsString("addEventListener('scroll',", $html);
+        $this->assertStringContainsString('destroy() {', $html);
+
         // Reutiliza el color de materia (D2): el punto lleva la clave rose
         $key = Asignatura::colorKey('Test Asignatura');
         $this->assertStringContainsString("bg-{$key}-400", $html);
 
         // El botón compacto "Continuar" comparte el mismo destino
         $this->assertStringContainsString('Continuar', $html);
+    }
+
+    /**
+     * NavTabs · El home renderiza 4 pestañas visibles (Continuar, Lecciones,
+     * Distribución, Actividad) siguiendo el patrón del listado del profesor
+     * (nav reactiva con border-b). Cada pestaña enlaza su panel con x-show
+     * sobre activeTab; el estado se vincula a Livewire con el binding
+     * bidireccional @entangle('activeTab').live (la pestaña activa por defecto
+     * es 'continuar').
+     */
+    public function test_home_renders_visible_navtabs_with_four_sections(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $html = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class)
+            ->html();
+
+        // Tablist visible con 4 pestañas (patrón profesor: role="tablist")
+        $this->assertStringContainsString('role="tablist"', $html);
+        $this->assertStringContainsString('id="tab-continuar"', $html);
+        $this->assertStringContainsString('id="tab-lecciones"', $html);
+        $this->assertStringContainsString('id="tab-distribucion"', $html);
+        $this->assertStringContainsString('id="tab-actividad"', $html);
+
+        // Cada pestaña enlaza su panel vía aria-controls
+        $this->assertStringContainsString('aria-controls="panel-continuar"', $html);
+        $this->assertStringContainsString('aria-controls="panel-lecciones"', $html);
+        $this->assertStringContainsString('aria-controls="panel-distribucion"', $html);
+        $this->assertStringContainsString('aria-controls="panel-actividad"', $html);
+
+        // Los 4 paneles existen y se muestran según activeTab (x-show),
+        // conservando el contenido en el DOM (los tests cortan por substring)
+        $this->assertStringContainsString('x-show="activeTab === \'continuar\'"', $html);
+        $this->assertStringContainsString('x-show="activeTab === \'lecciones\'"', $html);
+        $this->assertStringContainsString('x-show="activeTab === \'distribucion\'"', $html);
+        $this->assertStringContainsString('x-show="activeTab === \'actividad\'"', $html);
+
+        // El estado Alpine se vincula a Livewire con @entangle bidireccional
+        // ('.live') y el botón sincroniza vía setActiveTab local
+        $this->assertStringContainsString("entangle('activeTab').live", $html);
+        $this->assertStringContainsString("@click=\"setActiveTab('continuar')\"", $html);
+
+        // La pestaña activa por defecto es 'continuar': su botón lleva el
+        // estado activo via :class (ternario Alpine)
+        $this->assertStringContainsString(":class=\"activeTab === 'continuar'", $html);
+    }
+
+    /**
+     * NavTabs · Cambiar de pestaña actualiza activeTab en el servidor y el
+     * query string lo persiste (deep link / refresh mantienen la sección).
+     */
+    public function test_navtab_set_active_tab_persists_choice(): void
+    {
+        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
+
+        $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        $component = Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+
+        // Por defecto 'continuar'
+        $this->assertSame('continuar', $component->get('activeTab'));
+
+        // Cambiamos a 'lecciones' → se sincroniza en el servidor
+        $component->call('setActiveTab', 'lecciones');
+        $this->assertSame('lecciones', $component->get('activeTab'));
+
+        // El query string lo persiste (configurable en $queryString) — al
+        // recargar con ?activeTab=lecciones, el componente arranca en esa pestaña
+        $refreshed = Livewire::actingAs($student)
+            ->withQueryParams(['activeTab' => 'lecciones'])
+            ->test(\App\Livewire\Student\Lms\StudentHome::class);
+        $this->assertSame('lecciones', $refreshed->get('activeTab'));
     }
 
     /**

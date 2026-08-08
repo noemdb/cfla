@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
+<div class="max-w-4xl mx-auto py-8 px-4 space-y-6 uppercase">
     @php
     // D2 · Color por materia. Misma paleta/clave que home/activity (Tailwind JIT
     // necesita las clases literales aquí). Misma clave → mismo color por asignatura.
@@ -14,6 +14,7 @@
         'slate' => ['dot' => 'bg-slate-400', 'chip' => 'bg-slate-500/10 text-slate-400', 'text' => 'text-slate-600 dark:text-slate-300'],
     ];
     $__scResolve = static fn (?string $name): array => $__sc[\App\Models\app\Academy\Asignatura::colorKey($name)] ?? $__sc['slate'];
+    $__profe = static fn ($pev): string => mb_strtoupper(trim(($pev->profesor?->user?->profile?->firstname ?? '') . ' ' . ($pev->profesor?->user?->profile?->lastname ?? '')));
     @endphp
 
     <div class="flex items-center gap-4">
@@ -56,15 +57,18 @@
         @if($pensums && $pensums->isNotEmpty())
         <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6 space-y-4">
             <h2 class="text-sm font-bold text-gray-900 dark:text-white">Áreas de Formación</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {{-- Grid balanceado: flex-wrap + justify-center para que la última
+                 tarjeta (número impar de áreas) quede centrada y no huérfana. --}}
+            <div class="flex flex-wrap justify-center gap-3">
                 @foreach($pensums as $pensum)
                     @php $sc = $__scResolve($pensum->asignatura?->name); @endphp
-                    <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 motion-reduce:transform-none motion-reduce:transition-none">
+                    <div class="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 motion-reduce:transform-none motion-reduce:transition-none">
                         <div class="w-8 h-8 rounded-full {{ $sc['chip'] }} flex items-center justify-center shrink-0">
-                            <span class="text-xs font-bold">{{ strtoupper(substr($pensum->asignatura?->name ?? '?', 0, 2)) }}</span>
+                            {{-- mb_substr: substr corta bytes y rompe acentos (FÍSICA → F�). --}}
+                            <span class="text-xs font-bold">{{ strtoupper(mb_substr($pensum->asignatura?->name ?? '?', 0, 2)) }}</span>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $pensum->asignatura?->name ?? 'Sin asignatura' }}</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2" title="{{ $pensum->asignatura?->name ?? '' }}">{{ $pensum->asignatura?->name ?? 'Sin asignatura' }}</p>
                             <p class="text-[10px] text-gray-500">{{ $pensum->asignatura?->code ?? '' }}</p>
                         </div>
                     </div>
@@ -99,6 +103,7 @@
                         $pensumId = $pev->pensum?->id;
                         $stat = $pensumId ? ($areaStats[$pensumId] ?? ['activities' => 0, 'lessons' => 0, 'comments' => 0]) : null;
                         $sc = $__scResolve($pev->pensum?->asignatura?->name);
+                        $profe = $__profe($pev);
                     @endphp
                     <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 transition-colors hover:border-emerald-500/30">
                         <div class="min-w-0 flex-1">
@@ -108,8 +113,8 @@
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
                                 {{ $pev->lapso?->name ?? '' }}
-                                @if($pev->profesor)
-                                    · {{ $pev->profesor?->user?->profile?->firstname ?? '' }} {{ $pev->profesor?->user?->profile?->lastname ?? '' }}
+                                @if($profe)
+                                    · {{ $profe }}
                                 @endif
                             </p>
                             @if($stat)
@@ -134,10 +139,14 @@
                                 </span>
                             </div>
                             @endif
+                            {{-- Objetivo: dentro del bloque izquierdo para que el
+                                 texto largo tenga espacio y no se corte a 120px. --}}
+                            @if($pev->objetivo)
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 mt-2" title="{{ $pev->objetivo }}">{{ $pev->objetivo }}</p>
+                            @endif
                         </div>
-                        <span class="text-xs text-gray-500 ml-3 shrink-0 max-w-[120px] truncate">{{ $pev->objetivo ?? '' }}</span>
                         <button type="button" wire:click="showDetail({{ $pev->id }})"
-                                class="shrink-0 inline-flex items-center gap-1 px-3 py-2 min-h-[44px] text-xs font-medium rounded-lg transition-all duration-200 ease-out text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-500/10 ml-2 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                                class="shrink-0 inline-flex items-center gap-1 px-3 py-2 min-h-[44px] text-xs font-medium uppercase rounded-lg transition-all duration-200 ease-out text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-500/10 ml-2 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                             <svg class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -181,7 +190,7 @@
                 dialog?.focus();
                 dialog?.addEventListener('keydown', (e) => {
                     if (e.key !== 'Tab') return;
-                    const f = dialog.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])');
+                    const f = dialog.querySelectorAll('a[href], button:not([disabled]), textarea, input, select');
                     const first = f[0], last = f[f.length - 1];
                     if (!first || !last) return;
                     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -196,14 +205,15 @@
             {{-- Header --}}
             <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
                 <div class="min-w-0 flex-1">
-                    <h3 id="pev-dialog-title" class="text-base font-display font-bold text-gray-900 dark:text-white truncate pr-4 flex items-center gap-2">
+                    <h3 id="pev-dialog-title" class="text-base font-display font-bold text-gray-900 dark:text-white truncate pr-4 flex items-center gap-2"
+                        title="{{ $selectedPev->pensum?->asignatura?->name ?? 'Planificación' }}">
                         <span class="w-2 h-2 {{ $__scResolve($selectedPev->pensum?->asignatura?->name)['dot'] }} rounded-full shrink-0" aria-hidden="true"></span>
                         {{ $selectedPev->pensum?->asignatura?->name ?? 'Planificación' }}
                     </h3>
                     <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                         {{ $selectedPev->lapso?->name ?? '' }}
-                        @if($selectedPev->profesor)
-                            · {{ $selectedPev->profesor?->user?->profile?->firstname ?? '' }} {{ $selectedPev->profesor?->user?->profile?->lastname ?? '' }}
+                        @if($__profe($selectedPev))
+                            · {{ $__profe($selectedPev) }}
                         @endif
                     </p>
                 </div>
@@ -246,6 +256,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             @foreach($selectedActivities as $activity)
                             <a href="{{ route('student.lms.activity', $activity) }}"
+                               title="{{ $activity->name ?? $activity->topic ?? 'Actividad' }}"
                                class="group flex items-start gap-3 p-3 min-h-[44px] rounded-lg bg-white dark:bg-gray-900/40 border border-sky-100 dark:border-sky-900/50 hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-md transition-all duration-200 ease-out focus-visible:ring-2 ring-sky-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                                 <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                     <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,11 +264,11 @@
                                     </svg>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                                         {{ $activity->name ?? $activity->topic ?? 'Actividad' }}
                                     </p>
                                     @if($activity->topic && $activity->name)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ $activity->topic }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5" title="{{ $activity->topic }}">{{ $activity->topic }}</p>
                                     @endif
                                 </div>
                             </a>
@@ -279,6 +290,7 @@
                         <div class="space-y-2">
                             @foreach($pevLessons as $lesson)
                             <a href="{{ route('student.lms.activity', $lesson) }}"
+                               title="{{ $lesson->name ?? $lesson->topic ?? 'Lección' }}"
                                class="group flex items-start gap-3 p-3 min-h-[44px] rounded-lg bg-white dark:bg-gray-900/40 border border-emerald-100 dark:border-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-md transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,11 +298,11 @@
                                     </svg>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                         {{ $lesson->name ?? $lesson->topic ?? 'Lección' }}
                                     </p>
                                     @if($lesson->lmsPublication)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ $lesson->lmsPublication->title ?? '' }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5" title="{{ $lesson->lmsPublication->title ?? '' }}">{{ $lesson->lmsPublication->title ?? '' }}</p>
                                     @endif
                                 </div>
                             </a>
@@ -311,16 +323,17 @@
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                             @foreach($pevResources as $resource)
-                            <div class="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-gray-900/40 border border-amber-100 dark:border-amber-900/50">
+                            <div class="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-gray-900/40 border border-amber-100 dark:border-amber-900/50"
+                                 title="{{ $resource->display_name ?? 'Recurso' }}">
                                 <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                     </svg>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $resource->display_name ?? 'Recurso' }}</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{{ $resource->display_name ?? 'Recurso' }}</p>
                                     @if($resource->description)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ $resource->description }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5" title="{{ $resource->description }}">{{ $resource->description }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -342,7 +355,7 @@
             {{-- Footer --}}
             <div class="flex items-center justify-end px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 shrink-0">
                 <button type="button" wire:click="closeDetail"
-                        class="px-4 py-2 min-h-[44px] text-xs font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        class="px-4 py-2 min-h-[44px] text-xs font-medium uppercase rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                     Cerrar
                 </button>
             </div>

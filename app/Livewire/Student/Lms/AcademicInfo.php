@@ -116,7 +116,7 @@ class AcademicInfo extends Component
         $this->selectedActivities = $this->selectedPev?->activities;
 
         $this->pevLessons = $this->selectedActivities
-            ? $this->selectedActivities->filter(fn ($a) => $a->relationLoaded('lmsPublication') && $a->lmsPublication && $a->lmsPublication->is_visible)
+            ? $this->selectedActivities->filter(fn ($a) => $a->relationLoaded('lmsPublication') && $a->lmsPublication && $a->lmsPublication->isVisibleToStudents())
             : collect();
 
         $this->pevResources = $this->selectedActivities

@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Student\Lms;
 
-use App\Services\Estudiant\StudentScopeService;
-use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Services\Estudiant\StudentScopeService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,10 +16,39 @@ class ResourceList extends Component
     use WithPagination;
 
     public string $search = '';
+
     public $lapsoId = '';
+
     public bool $showPreviewModal = false;
+
     public ?array $previewResource = null;
+
+    /** ¿Mostrar la mascota? (C4) — oculta para 13–15 años. */
+    public bool $showMascot = false;
+
+    /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
+    public bool $mascotEmphasis = false;
+
     protected $paginationTheme = 'tailwind';
+
+    public function mount(): void
+    {
+        // Misma base etaria que la mascota del home/detalle (C4): puede ser
+        // null (sin relación estudiant), '-' (fecha no cargada) o int.
+        $age = null;
+        if (auth()->user() && auth()->user()->estudiant) {
+            $age = auth()->user()->estudiant->age;
+        }
+        $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
+        $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
+    }
+
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->lapsoId = '';
+        $this->resetPage();
+    }
 
     public function render(): \Illuminate\View\View
     {
@@ -38,12 +67,12 @@ class ResourceList extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('display_name', 'like', "%{$this->search}%")
-                  ->orWhereHas('activity', fn($aq) => $aq->where('topic', 'like', "%{$this->search}%"));
+                    ->orWhereHas('activity', fn ($aq) => $aq->where('topic', 'like', "%{$this->search}%"));
             });
         }
 
         if ($this->lapsoId) {
-            $query->whereHas('activity.pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+            $query->whereHas('activity.pevaluacion', fn ($q) => $q->where('lapso_id', $this->lapsoId));
         }
 
         $resources = $query->orderBy('created_at', 'desc')->paginate(15);
@@ -52,7 +81,7 @@ class ResourceList extends Component
 
         return view('livewire.student.lms.resource-list', [
             'resources' => $resources,
-            'lapsos'    => $lapsos,
+            'lapsos' => $lapsos,
         ])->layout('student.layouts.app');
     }
 
@@ -71,11 +100,12 @@ class ResourceList extends Component
         $belongsToStudent = $resource->activity?->pevaluacion
             && $seccionIds->contains($resource->activity->pevaluacion->seccion_id);
 
-        if (!$belongsToStudent) {
+        if (! $belongsToStudent) {
             $this->notification()->error(
                 title: 'Acceso denegado',
                 description: 'Este recurso no está disponible para tu sección.'
             );
+
             return;
         }
 
@@ -89,6 +119,13 @@ class ResourceList extends Component
         $this->previewResource = null;
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingLapsoId() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingLapsoId()
+    {
+        $this->resetPage();
+    }
 }

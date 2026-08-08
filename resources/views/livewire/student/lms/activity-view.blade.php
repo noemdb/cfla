@@ -592,7 +592,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         <div class="flex gap-3 p-3 rounded-xl bg-white dark:bg-gray-800/50">
                             <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
                                 <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                                    {{ strtoupper(substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
+                                    {{ strtoupper(mb_substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
                                 </span>
                             </div>
                             <div class="flex-1 min-w-0">

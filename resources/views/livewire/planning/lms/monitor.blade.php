@@ -47,6 +47,39 @@
     {{-- Filtros --}}
     <div class="bg-gray-50 dark:bg-slate-800/30 border border-gray-200 dark:border-slate-700/50 rounded-lg p-4 space-y-3">
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3">
+
+            <div>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">P.Estudio</label>
+                <select wire:model.live="filterPestudio"
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($pestudios as $p)
+                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Grado</label>
+                <select wire:model.live="filterGrado"
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                    <option value="">Todos</option>
+                    @foreach($grados as $g)
+                        <option value="{{ $g->id }}">{{ $g->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Sección</label>
+                <select wire:model.live="filterSeccion"
+                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
+                    <option value="">Todas</option>
+                    @foreach($secciones as $s)
+                        <option value="{{ $s->id }}">{{ $s->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div>
                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Estado</label>
                 <select wire:model.live="filterStatus"
@@ -68,26 +101,8 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Grado</label>
-                <select wire:model.live="filterGrado"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($grados as $g)
-                        <option value="{{ $g->id }}">{{ $g->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Sección</label>
-                <select wire:model.live="filterSeccion"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
-                    <option value="">Todas</option>
-                    @foreach($secciones as $s)
-                        <option value="{{ $s->id }}">{{ $s->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            
+            
             <div>
                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Asignatura</label>
                 <select wire:model.live="filterAsignatura"
@@ -98,16 +113,7 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">P.Estudio</label>
-                <select wire:model.live="filterPestudio"
-                        class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 rounded-lg px-3 py-3 text-sm focus:ring-emerald-500/50 focus:border-emerald-500 outline-none">
-                    <option value="">Todos</option>
-                    @foreach($pestudios as $p)
-                        <option value="{{ $p->id }}">{{ $p->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            
             <div>
                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-1">Buscar</label>
                 <input wire:model.live.debounce.300ms="search" type="search" placeholder="Título actividad…"

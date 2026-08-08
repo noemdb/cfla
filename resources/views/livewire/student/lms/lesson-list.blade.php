@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto py-8 px-4 space-y-6">
+<div class="max-w-4xl mx-auto py-8 px-4 space-y-6">
     @php
     // D2 · Color por materia. Misma paleta/clave que home/activity/académica
     // (Tailwind JIT necesita las clases literales aquí).

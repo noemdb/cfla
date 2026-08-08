@@ -51,15 +51,15 @@ StudentHome (Livewire full-page component)
 │   └── render() → 14 view vars scoped
 └── resources/views/livewire/student/lms/student-home.blade.php
     ├── 0. Hero (saludo, racha, siguiente lección, donut, countdown)
-    ├── 1. Stats Cards (grid 4-col)
-    ├── 2. Continuar Aprendiendo (o fallback "Publicaciones Recientes")
-    ├── 3. Próximas Publicaciones (lecciones por publicarse, badges a publish_at)
-    ├── 4. Todas las Lecciones (búsqueda + filtro + paginación + dots de estado)
-    ├── 5. Distribución por Asignatura (barras de progreso)
-    └── 6. Tu actividad reciente (comentarios + descargas)
+    ├── 1. Stats Cards (grid 4-col, o barra de progreso en modo lectura)
+    ├── 1.5 NavTabs → 4 pestañas (Continuar / Lecciones / Distribución / Actividad)
+    ├── Panel continuar   ← Secciones 2 (Continuar o fallback) + 3 (Próximas)
+    ├── Panel lecciones   ← Sección 4 (búsqueda + filtro + paginación)
+    ├── Panel distribucion← Sección 5 (barras por asignatura)
+    └── Panel actividad   ← Sección 6 (comentarios + descargas recientes)
 ```
 
-La raíz del blade lleva `wire:poll.10s`, de modo que los datos del hero (especialmente el countdown de la siguiente lección) se refrescan sin recargar la página.
+La raíz del blade ya **no** lleva `wire:poll.10s` (se retiró por fricción con la pestaña activa; el refresco en vivo de los datos del hero — especialmente el countdown de la siguiente lección — llegará con Reverb en otra sesión). El countdown "Comienza en Hh Mm Ss" es autónomo en Alpine (tick de 1 s sobre `publish_at`) y el hero se refresca en cada request de Livewire (cambios de pestaña, búsqueda, paginación).
 
 ### Datos calculados en `render()` — no en `mount()`
 
@@ -173,7 +173,7 @@ public function render(): \Illuminate\View\View
 
 ## 3. Sección 0: Hero
 
-> **Decisión de diseño (2026-08-05):** el panel ahora abre con un hero que personaliza la página por estudiante: saludo según la hora, nombre, racha de días consecutivos, un **donut de progreso** animado y un CTA a la **siguiente lección** con **countdown en vivo** cuando es una preview futura. Refresca vía `wire:poll.10s`.
+> **Decisión de diseño (2026-08-05):** el panel ahora abre con un hero que personaliza la página por estudiante: saludo según la hora, nombre, racha de días consecutivos, un **donut de progreso** animado y un CTA a la **siguiente lección** con **countdown en vivo** cuando es una preview futura. El countdown es autónomo en Alpine (tick 1 s sobre `publish_at`); el refresco de los datos del hero vía `wire:poll.10s` se retiró (2026-08-08) por fricción con el NavTabs — llegará con Reverb.
 
 ### Vista
 
@@ -201,8 +201,29 @@ Tu avance en un vistazo. Sigue aprendiendo sin perder el ritmo.
 
 ### Estructura del blade
 
-- Raíz del panel: `<div ... wire:poll.10s>` — en cada poll Livewire re-renderiza las queries; el morphdom **no toca** los subárboles Alpine byte-idénticos, así el donut y el countdown conservan su estado entre polls.
+- Raíz del panel: `<div ... x-data="...">` **sin** `wire:poll.10s` (se retiró por fricción con la pestaña activa; el refresco en vivo llegará con Reverb). El estado Alpine (donut, countdown, mini-barra) se conserva porque morphdom, al actualizar, re-ejecuta `init()`/`destroy()` y no re-crea los subárboles Alpine byte-idénticos.
 - Contenedor `flex flex-col sm:flex-row sm:items-center gap-6`.
+- **Alpine.js root component** (en el contenedor principal):
+  - `nextOpen`: estado booleano que controla la visibilidad de la mini-barra sticky "Próxima lección".
+  - `updateNext()`: método que verifica si la sección hero ha desplazado fuera de pantalla (debajo del navbar de 56px) para mostrar/ocultar la mini-barra.
+    - **FIX (1)**: Usa `document.querySelector('[x-ref=heroSection]')` en lugar de `this.$refs.heroSection` porque la raíz x-data persiste entre morphs, pero Livewire reemplaza el nodo hero, dejando la referencia antigua détachada.
+    - **FIX (2)**: El atributo x-data usa comillas dobles, así que todo el JS interno debe evitar comillas dobles; el selector usa valor CSS sin comillas `[x-ref=heroSection]` y los strings JS usan comillas simples.
+    - **FIX (5)**: Los listeners de scroll/resize van manuales en `init()` con cleanup en `destroy()` (mismo patrón que `readingNav` en activity-view), NO con el decorativo `@scroll.window.passive`. El decorativo no disparaba de forma fiable entre los remounts de Alpine de Livewire (antes lo tapaba el `wire:poll.10s` re-ejecutando `updateNext` cada 10s); sin poll la barra no aparecía al hacer scroll. `init()` se re-ejecuta en cada setup de Alpine y `destroy()` limpia listeners en cada teardown.
+  - `activeTab`: almacena la pestaña activa ('continuar', 'lecciones', 'distribucion', 'actividad'). Se vincula a Livewire con el binding bidireccional `@entangle('activeTab').live` (ver FIX (4) en 1.5).
+  - `tabs`: array de las pestañas disponibles.
+  - `setActiveTab(tab)`: actualiza la pestaña activa local (el sync con Livewire lo hace `@entangle`).
+  - `prevTab()` / `nextTab()`: navegación cíclica entre pestañas.
+  - **FIX (3)**: la barra sticky full-bleed usaba `100vw` en el `-mx-[calc((100vw-100%)/2)]`, pero `100vw` incluye el ancho del scrollbar vertical (~15px): al mostrar la barra el exceso desbordaba el viewport y nacía un scrollbar horizontal. Se mide el ancho seguro con `document.documentElement.clientWidth` (excluye el scrollbar) y se usa como CSS var `--bar-vw` (re-medido en el `onResize` del `init()`).
+- Contenedor `flex flex-col sm:flex-row sm:items-center gap-6`.
+
+### 1.5 NavTabs (4 pestañas)
+
+- Barra de pestañas visible entre las stats y el primer panel: `nav` con `border-b border-gray-200 dark:border-gray-700`, 4 botones `flex-1` con `border-b-2` que marca la activa (patrón reactivo del listado del profesor, `pevaluacion-list`).
+- Estado en Alpine: `activeTab` ('continuar', 'lecciones', 'distribucion', 'actividad') vinculado a Livewire con el binding bidireccional `@entangle('activeTab').live`. El `$activeTab` inicial llega desde Livewire y se mantiene en el `queryString` (deep-link / refresh conservan la pestaña).
+- **FIX (4)**: la vinculación es `@entangle('activeTab').live` (no "siembra local + `@this.setActiveTab`"). Con la siembra, tras el morph del cambio de pestaña Alpine volvía a sembrar el valor previo y el `:class` del tab activo quedaba desfasado un clic (1er clic cambia el contenido, 2º pintaba el borde). Con `@entangle` servidor y Alpine quedan en sync en cada morph y el borde emerald se pinta desde el primer clic.
+- Cada pestaña es un `<button role="tab" aria-controls="panel-*">`; cada panel un `<div role="tabpanel" x-show="activeTab === '...'">`. Se usa `x-show` (con `x-cloak`) y **no** `@if` para mantener el contenido de todas las pestañas en el DOM (los tests del home cortan el HTML por substring).
+- **Responsive (xs):** cada tab muestra icono SVG (`w-3.5 h-3.5 inline -mt-0.5`) + label `<span class="hidden sm:inline ml-1">`; por debajo de `sm` el label se oculta (`hidden`) y queda solo el icono (los 4 caben en ~4×14px). El `mr-1` del SVG se movió al span (`ml-1`) para que en icon-único no sobre espacio; los tests de substring no se ven afectados porque el texto sigue en el DOM.
+- Mapeo pestaña → secciones: **Continuar** → 2 (Continuar/fallback) + 3 (Próximas); **Lecciones** → 4; **Distribución** → 5; **Actividad** → 6.
 - **Izquierda:**
   - Label saludo: `text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400`.
   - `<h1 class="text-2xl font-bold">` con `$firstName`.

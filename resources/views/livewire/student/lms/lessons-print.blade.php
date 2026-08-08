@@ -331,9 +331,165 @@
                 @if($activity->pevaluacion?->fechafin)
                     {{ \Carbon\Carbon::parse($activity->pevaluacion?->fechafin)->format('d/m') }}
                 @endif
-                @if($activity->pevaluacion?->tema)
+@if($activity->pevaluacion?->tema)
                     <span class="dot">·</span>
                     <span class="lbl">Eje:</span> {{ $activity->pevaluacion?->tema }}
-                @</think>elfassistant: Let me see the rest of the content to make sure I have it all:
-<tool_call>
-<function=read>
+                @endif
+            </div>
+
+            {{-- Secciones --}}
+            @forelse($activity->lmsSections->where('is_visible', true) as $section)
+                <div class="section">
+                    <div class="section-head">
+                        <span class="bar"></span>
+                        <span>{{ $section->title ?: 'Sección sin título' }}</span>
+                    </div>
+                    @forelse($section->visibleContents as $content)
+                        @php
+                            // Detección de tipo de contenido (idéntico a la vista
+                            // del director y al modal de previsualización completa).
+                            $rawBody  = $content->body ?? '';
+                            $type     = $content->type ?? 'TEXT';
+
+                            // ─── IMAGE: SVG/ilustración ("Generar Imagen") — render
+                            //     crudo, sin sanitizar (el sanitizador elimina <svg>).
+                            $isImage  = ($type === 'IMAGE') || preg_match('/<svg\b/', $rawBody) === 1;
+
+                            // ─── MERMAID: detectar por clase CSS o keyword inicial ──
+                            $isMermaid = false;
+                            $mermaidCode = '';
+                            if (!$isImage) {
+                                $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1;
+                                if (!$isMermaid) {
+                                    $isMermaid = preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', trim($rawBody)) === 1;
+                                }
+                                if ($isMermaid) {
+                                    preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>\s*(.*?)\s*<\/div>/s', $rawBody, $m);
+                                    // A1: conservar <br/> de labels multi-línea (strip_tags puro
+                                    // los eliminaría y concatenaría el texto en una sola línea
+                                    // larga que desborda la columna al imprimir).
+                                    $mermaidCode = trim(html_entity_decode(strip_tags($m[1] ?? '', '<br><br/>')));
+                                    if (empty($mermaidCode)) {
+                                        $mermaidCode = trim(html_entity_decode(strip_tags($rawBody, '<br><br/>')));
+                                    }
+                                }
+                            }
+                        @endphp
+                        <div class="content-block">
+                            @if($content->title && ! $isImage && $type !== 'HTML' && $type !== 'MATH' && trim($rawBody) !== '')
+                                <div class="content-title">{{ $content->title }}</div>
+                            @endif
+                            @if($isImage)
+                                {{-- SVG/ilustración: crudo en el DOM. Si el contenido
+                                     IMAGE tiene un media apuntando a un archivo y el
+                                     body no es un svg, se muestra el archivo. --}}
+                                @if($content->media?->public_url && ! Str::contains($rawBody, '<svg'))
+                                    <div class="content-image">
+                                        <img src="{{ $content->media->public_url }}" alt="{{ $content->title ?: 'Imagen' }}">
+                                    </div>
+                                @else
+                                    <div class="content-image">{!! $rawBody !!}</div>
+                                @endif
+                            @elseif($isMermaid)
+                                {{-- Diagrama Mermaid → wrapper Alpine mermaidEmbed() --}}
+                                <div class="mermaid-wrap">
+                                    <div wire:ignore x-data="mermaidEmbed()"
+                                         data-mermaid-code="{{ $mermaidCode }}">
+                                        <div x-ref="target" class="w-full"></div>
+                                    </div>
+                                </div>
+                            @elseif($type === 'HTML')
+                                {{-- HTML semántico: sanitizar y render directo (sin markdown) --}}
+                                <div class="content">
+                                    {!! app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($rawBody) !!}
+                                </div>
+                            @else
+                                {{-- TEXT / MATH: markdown (TEXT) o LaTeX (MATH) → math-text (KaTeX) --}}
+                                @php
+                                    $renderType = ($type === 'MATH') ? 'MATH' : 'TEXT';
+                                    $renderedBody = app(\App\Services\Lms\LmsContentRendererService::class)->renderContentBody($rawBody, $renderType);
+                                @endphp
+                                <div class="content">
+                                    <x-lms.math-text :content="$renderedBody" />
+                                </div>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="content-block" style="color:#9ca3af;font-style:italic;">Sin contenido en esta sección.</div>
+                    @endforelse
+                </div>
+            @empty
+                <div class="no-content">Lección sin contenido LMS.</div>
+            @endforelse
+
+            {{-- Recursos / Enlaces --}}
+            @php
+                $resources = $activity->lmsResources->where('is_visible', true);
+                $links     = $activity->lmsLinks->where('is_visible', true);
+            @endphp
+            @if($resources->isNotEmpty() || $links->isNotEmpty())
+                <div class="lesson-res">
+                    @if($resources->isNotEmpty())
+                        <span class="lbl">Recursos:</span>
+                        {{ $resources->map(fn ($r) => $r->display_name ?: $r->media?->original_name ?: 'Archivo')->join(' · ') }}
+                    @endif
+                    @if($links->isNotEmpty())
+                        @if($resources->isNotEmpty())
+                            <span class="link-sep">|</span>
+                        @endif
+                        <span class="lbl">Enlaces:</span>
+                        @foreach($links as $link)
+                            {{ $link->title ?: $link->url }}
+                            @if(!$loop->last); @endif
+                        @endforeach
+                    @endif
+                </div>
+            @endif
+        </div>
+
+        <div class="footer">
+            {{ $institucion?->name ?? '' }}
+            · 1 lección
+            · Elaborado por: {{ auth()->user()?->username ?? 'Sistema' }} · {{ $fecha }}
+        </div>
+    </div>
+    @endif
+
+    <script>
+        // Esperar a que todos los diagramas Mermaid alcancen un estado terminal
+        // ('ok' o 'error') antes de imprimir. Cada wrapper mermaidEmbed() marca
+        // data-mermaid-state al terminar, de modo que un diagrama con error no
+        // bloquee la espera y un diagrama en render no imprima SVGs en blanco.
+        function handlePrint() {
+            var btn = document.querySelector('.btn-print');
+            if (!btn) return;
+            var roots = document.querySelectorAll('[data-mermaid-code]');
+            if (!roots.length) {
+                // sin mermaid: imprimir directamente
+                'print' in window && window.print();
+                return;
+            }
+
+            var original = btn.innerHTML;
+            btn.disabled = true;
+            var total = roots.length;
+            var started = Date.now();
+            var poll = setInterval(function () {
+                var done = 0;
+                for (var i = 0; i < roots.length; i++) {
+                    var s = roots[i].getAttribute('data-mermaid-state');
+                    if (s === 'ok' || s === 'error') done++;
+                }
+                btn.textContent = 'Renderizando diagramas… (' + done + '/' + total + ')';
+                if (done === total || Date.now() - started > 30000) {
+                    clearInterval(poll);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                    'print' in window && window.print();
+                }
+            }, 150);
+        }
+    </script>
+
+</body>
+</html>

@@ -70,11 +70,11 @@
             </nav>
 
             {{-- Right section: user + hamburger --}}
-            <div class="flex items-center gap-2 ml-auto md:ml-0">
+            <div class="flex items-center gap-2 ml-auto md:ml-0 ">
                 <span class="hidden sm:inline text-xs text-gray-400">{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button class="text-xs text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors hidden sm:inline">
+                    <button class="text-xs text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors hidden sm:inline ">
                         Salir
                     </button>
                 </form>
@@ -116,7 +116,7 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-2"
              @click.outside="mobileOpen = false"
-             class="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 space-y-1 shadow-lg">
+             class="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 space-y-1 shadow-lg ">
             <a href="{{ route('student.lms.home') }}"
                class="block px-3 py-2 text-sm font-medium rounded-lg transition-colors
                       {{ request()->routeIs('student.lms.home') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
@@ -153,7 +153,7 @@
                 <span class="block px-3 py-1.5 text-xs text-gray-400 sm:hidden">{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" class="sm:hidden">
                     @csrf
-                    <button class="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <button class="w-full text-left px-3 py-2 text-sm font-medium  rounded-lg text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         Salir
                     </button>
                 </form>
@@ -169,7 +169,7 @@
     {{-- Footer --}}
     <footer class="bg-gray-100/80 backdrop-blur-md border-t border-gray-200 dark:bg-gray-900/50 dark:border-white/5 mt-auto">
         <div class="max-w-4xl mx-auto px-4 py-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left ">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
                     &copy; {{ date('Y') }} <strong class="text-gray-700 dark:text-gray-300">{{ config('app.name') }}</strong> | Portal Estudiante
                 </p>
