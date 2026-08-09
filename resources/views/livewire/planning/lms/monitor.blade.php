@@ -249,6 +249,9 @@
                         $seccion = $pub->pevaluacion?->seccion?->name ?? '—';
                         $isSelected = in_array($pub->id, $selectedIds);
                         $pubStatus = $pub->lmsPublication?->status;
+                        // Alerta: lección publicada pero la activity asociada
+                        // sigue en revisión (status=0 → no aprobada).
+                        $alertInReview = $pubStatus === 'PUBLISHED' && ! $pub->status;
                         $rowBg = match($pubStatus) {
                             'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
                             'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
@@ -297,6 +300,12 @@
                                     @if($pub->lmsPublication->created_at && $pub->lmsPublication->created_at->gt(now()->subHours(48)))
                                         <span class="inline-block ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/25">🆕 Nueva</span>
                                     @endif
+                                </span>
+                            @endif
+                            @if($alertInReview)
+                                <span class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" title="La lección está publicada pero la activity asociada sigue en revisión (no aprobada)">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Activity en revisión
                                 </span>
                             @endif
                         </td>
@@ -453,6 +462,8 @@
                 $seccion = $pub->pevaluacion?->seccion?->name ?? '—';
                 $pubStatus = $pub->lmsPublication?->status;
                 $isPublished = $pubStatus === 'PUBLISHED';
+                // Alerta: lección publicada pero la activity asociada en revisión.
+                $alertInReview = $pubStatus === 'PUBLISHED' && ! $pub->status;
                 $cardBg = match($pubStatus) {
                     'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
                     'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
@@ -464,6 +475,13 @@
                     <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
                 @elseif($pubStatus === 'SCHEDULED')
                     <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></span>
+                @endif
+
+                @if($alertInReview)
+                    <div class="mx-4 mt-3 px-2.5 py-1.5 rounded-md bg-red-500/10 border border-red-500/25 text-[11px] font-semibold text-red-600 dark:text-red-400 flex items-center gap-1.5" title="La lección está publicada pero la activity asociada sigue en revisión (no aprobada)">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Activity en revisión — lección publicada
+                    </div>
                 @endif
 
                 {{-- Header: estado + fecha --}}
