@@ -543,7 +543,7 @@
                 </div>
             </div>
 
-            <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div>
+            {{-- <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div> --}}
         </div>
 
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
