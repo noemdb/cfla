@@ -446,8 +446,8 @@
                 break-after:column;
             }
             .cover-page .cover-inner{
-                padding:8mm 10mm 10mm;
-                max-height:calc(100vh - 1.8cm);
+                padding:5mm 10mm 6mm;
+                max-height:calc(100vh - 5cm);
                 overflow:hidden;
             }
 
