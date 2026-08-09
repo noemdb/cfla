@@ -435,15 +435,21 @@
             .cover-page{
                 width:100%;
                 height:calc(100vh - 1.8cm);
+                max-height:calc(100vh - 1.8cm);
                 aspect-ratio:auto;
                 margin:0;
                 box-shadow:none;
+                overflow:hidden;
                 page-break-inside:avoid;
                 break-inside:avoid;
                 page-break-after:column;
                 break-after:column;
             }
-            .cover-page .cover-inner{padding:8mm 10mm 10mm;}
+            .cover-page .cover-inner{
+                padding:8mm 10mm 10mm;
+                max-height:calc(100vh - 1.8cm);
+                overflow:hidden;
+            }
 
             /* Membrete redundante en impresión: la portada ya señala la
                institución. Solo aplica al caso con actividad (doc-head dentro
@@ -471,10 +477,6 @@
 
     {{-- Barra de acciones --}}
     <div class="print-bar">
-        <div>
-            <div class="title">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
-            <div class="subtitle">LECCIÓN LMS · CONTENIDO COMPLETO</div>
-        </div>
         <button id="btn-print" class="btn-print" type="button" onclick="handlePrint()" aria-label="Imprimir o guardar PDF">
             �� 🖨 Imprimir / Guardar PDF
         </button>
