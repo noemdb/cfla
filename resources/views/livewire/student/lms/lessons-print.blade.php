@@ -444,6 +444,11 @@
                 break-after:column;
             }
             .cover-page .cover-inner{padding:8mm 10mm 10mm;}
+
+            /* Membrete redundante en impresión: la portada ya señala la
+               institución. Solo aplica al caso con actividad (doc-head dentro
+               de .lessons-columns); el del caso "sin actividad" se mantiene. */
+            .lessons-columns .doc-head{display:none;}
         }
     </style>
 </head>
