@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsHtmlEmbed;
+use App\Services\Lms\LmsMermaidAiRepairService;
 use App\Services\Lms\LmsMermaidRepairService;
 use Illuminate\Console\Command;
 
@@ -24,8 +25,14 @@ use Illuminate\Console\Command;
  *   php8.2 artisan lms:repair-mermaid --only=contents    # solo lms_activity_contents
  *   php8.2 artisan lms:repair-mermaid --ids=12,34,56     # registros concretos (embeds o contents)
  *   php8.2 artisan lms:repair-mermaid --limit=50         # acota el lote
+ *   php8.2 artisan lms:repair-mermaid --ai               # usa IA para los que requieren reestructuración
+ *   php8.2 artisan lms:repair-mermaid --ai --activity=37 # solo de esa actividad
  *
  * Idempotente: un registro ya correcto no se toca ni se reporta como dañado.
+ *
+ * Con --ai: usa IA para reparar diagramas que la reparación determinista
+ * no puede resolver (demasiados nodos, flechas rotas, sintaxis ilegible).
+ * Cadena de modelos: diagram_primary → fallback1 → fallback2.
  */
 class RepairMermaids extends Command
 {
@@ -33,16 +40,26 @@ class RepairMermaids extends Command
                           {--ids=* : Solo estos ids (lms_html_embeds o lms_activity_contents)}
                           {--limit= : Máximo de registros a procesar (0 = sin límite)}
                           {--dry-run : Reportar sin persistir cambios}
-                          {--only= : Filtrar fuente: embeds, contents o all (default: all)}';
+                          {--only= : Filtrar fuente: embeds, contents o all (default: all)}
+                          {--ai : Usar IA para reparar diagramas que la reparación determinista no puede resolver}
+                          {--activity= : Solo contenidos de esta actividad}';
 
-    protected $description = 'Revisa y repara (determinista, sin IA) diagramas Mermaid en la BD: lms_html_embeds.html_content y lms_activity_contents.body';
+    protected $description = 'Repara diagramas Mermaid en la BD. Con --ai: usa IA para diagramas que requieren reestructuración.';
 
-    public function handle(LmsMermaidRepairService $mermaid): int
+    public function handle(LmsMermaidRepairService $mermaid, ?LmsMermaidAiRepairService $aiRepair = null): int
     {
         $dryRun = (bool) $this->option('dry-run');
         $only = strtolower($this->option('only') ?? 'all');
         $limit = (int) ($this->option('limit') ?? 0);
         $ids = array_filter(array_map('intval', $this->option('ids') ?? []));
+        $useAi = (bool) $this->option('ai');
+        $activityFilter = $this->option('activity') ? (int) $this->option('activity') : null;
+
+        if ($useAi && ! $aiRepair) {
+            $this->error('--ai requiere el servicio LmsMermaidAiRepairService. Verifica la configuración.');
+
+            return self::FAILURE;
+        }
 
         if (! in_array($only, ['all', 'embeds', 'contents'], true)) {
             $this->error("--only inválido: {$only} (use all, embeds o contents).");
@@ -50,12 +67,13 @@ class RepairMermaids extends Command
             return self::FAILURE;
         }
 
+        $mode = $useAi ? 'determinista + IA' : 'determinista';
         $this->line($dryRun
             ? '<comment>Modo DRY-RUN</comment>: solo reporte, no se persistirá nada.'
-            : 'Reparando diagramas Mermaid (determinista, sin IA)...');
+            : "Reparando diagramas Mermaid ({$mode})...");
 
         $rows = [];
-        $stats = ['scanned' => 0, 'with_mermaid' => 0, 'fixed' => 0, 'unchanged' => 0, 'skipped' => 0, 'errors' => 0];
+        $stats = ['scanned' => 0, 'with_mermaid' => 0, 'fixed' => 0, 'ai_fixed' => 0, 'unchanged' => 0, 'skipped' => 0, 'errors' => 0];
 
         // ─── lms_html_embeds.html_content ─────────────────────────
         if (in_array($only, ['all', 'embeds'], true)) {
@@ -63,12 +81,15 @@ class RepairMermaids extends Command
             if ($ids) {
                 $query->whereIn('id', $ids);
             }
+            if ($activityFilter) {
+                $query->where('activity_id', $activityFilter);
+            }
             if ($limit > 0) {
                 $query->limit($limit);
             }
             foreach ($query->orderBy('id')->cursor() as $embed) {
                 $stats['scanned']++;
-                $rows[] = $this->processRecord($mermaid, 'embed', $embed->id, $embed->activity_id, $embed->html_content ?? '', $dryRun, $stats);
+                $rows[] = $this->processRecord($mermaid, $aiRepair, 'embed', $embed->id, $embed->activity_id, $embed->html_content ?? '', $dryRun, $useAi, $stats);
             }
         }
 
@@ -78,12 +99,15 @@ class RepairMermaids extends Command
             if ($ids) {
                 $query->whereIn('id', $ids);
             }
+            if ($activityFilter) {
+                $query->whereHas('section', fn ($q) => $q->where('activity_id', $activityFilter));
+            }
             if ($limit > 0) {
                 $query->limit($limit);
             }
             foreach ($query->orderBy('id')->cursor() as $content) {
                 $stats['scanned']++;
-                $rows[] = $this->processRecord($mermaid, 'content', $content->id, $content->section?->activity_id, $content->body ?? '', $dryRun, $stats);
+                $rows[] = $this->processRecord($mermaid, $aiRepair, 'content', $content->id, $content->section?->activity_id, $content->body ?? '', $dryRun, $useAi, $stats);
             }
         }
 
@@ -96,10 +120,11 @@ class RepairMermaids extends Command
 
         $this->newLine();
         $this->line(sprintf(
-            '<info>Escaneados:</info> %d | <info>con Mermaid:</info> %d | <info>reparados:</info> %d | <info>sin cambios:</info> %d | <info>omitidos:</info> %d | <info>errores:</info> %d',
+            '<info>Escaneados:</info> %d | <info>con Mermaid:</info> %d | <info>reparados:</info> %d | <info>IA reparados:</info> %d | <info>sin cambios:</info> %d | <info>omitidos:</info> %d | <info>errores:</info> %d',
             $stats['scanned'],
             $stats['with_mermaid'],
             $stats['fixed'],
+            $stats['ai_fixed'],
             $stats['unchanged'],
             $stats['skipped'],
             $stats['errors']
@@ -118,7 +143,7 @@ class RepairMermaids extends Command
      *
      * @return array{0: string, 1: int, 2: string, 3: string, 4: string}
      */
-    private function processRecord(LmsMermaidRepairService $mermaid, string $source, int $id, ?int $activityId, string $body, bool $dryRun, array &$stats): array
+    private function processRecord(LmsMermaidRepairService $mermaid, ?LmsMermaidAiRepairService $aiRepair, string $source, int $id, ?int $activityId, string $body, bool $dryRun, bool $useAi, array &$stats): array
     {
         $activityLabel = (string) ($activityId ?? '—');
         $body = trim($body ?? '');
@@ -162,6 +187,26 @@ class RepairMermaids extends Command
         }
 
         if ($issues) {
+            // ── Reparación IA (si --ai está activo) ──────────────
+            if ($useAi && $aiRepair && ! $dryRun) {
+                $aiResult = $aiRepair->repairBody($body);
+                if ($aiResult['ok'] && $aiResult['newBody']) {
+                    $newBody = $aiResult['newBody'];
+                    if ($source === 'embed') {
+                        LmsHtmlEmbed::where('id', $id)->update(['html_content' => $newBody]);
+                    } else {
+                        LmsActivityContent::where('id', $id)->update(['body' => $newBody]);
+                    }
+                    $stats['ai_fixed']++;
+
+                    return [$source, $id, $activityLabel, 'IA reparado', $aiResult['message']." ({$aiResult['attempts']} intento(s))"];
+                }
+                // Si la IA falló, reportar como sin cambio con el error
+                $stats['unchanged']++;
+
+                return [$source, $id, $activityLabel, 'sin cambio', implode('; ', $issues)." (IA: {$aiResult['message']})"];
+            }
+
             $stats['unchanged']++;
 
             return [$source, $id, $activityLabel, 'sin cambio', implode('; ', $issues).' (requiere IA/ajuste manual)'];
