@@ -1,7 +1,7 @@
                         <div class="bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-lg p-5 space-y-4">
                             <div class="flex items-center gap-2 pb-3 border-b border-gray-200 dark:border-slate-700">
                                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">5</span>
-                                <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Publicar Lección</h2>
+                                <h2 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Programar Lección</h2>
                             </div>
 
                             {{-- ═══ Estados de publicación ═══ --}}
@@ -10,7 +10,7 @@
                                     <svg class="w-3.5 h-3.5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Estados de publicación</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400">Estados de la lección</span>
                                 </div>
 
                                 <div class="flex items-center gap-1.5 text-[11px]">

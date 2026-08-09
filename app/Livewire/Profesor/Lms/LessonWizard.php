@@ -7,7 +7,6 @@ use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsActivityLink;
-use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
@@ -20,11 +19,10 @@ use App\Models\app\Instrument\DiagReferent;
 use App\Models\User;
 use App\Notifications\LessonScheduledForApproval;
 use App\Services\Lms\HtmlTaggingService;
-use App\Services\Lms\LmsMediaUploadService;
-use App\Services\Lms\LmsPublicationService;
 use App\Services\Lms\LmsAiOrchestrationService;
 use App\Services\Lms\LmsContentRendererService;
-use App\Services\OpenRouterService;
+use App\Services\Lms\LmsMediaUploadService;
+use App\Services\Lms\LmsPublicationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -41,6 +39,7 @@ class LessonWizard extends Component
 
     // ─── Servicios inyectados ──────────────────────────────────
     protected LmsAiOrchestrationService $aiService;
+
     protected LmsContentRendererService $rendererService;
 
     public function boot(): void
@@ -413,7 +412,7 @@ class LessonWizard extends Component
 
     public function toggleAllLessonsModal(): void
     {
-        $this->showAllLessonsModal = !$this->showAllLessonsModal;
+        $this->showAllLessonsModal = ! $this->showAllLessonsModal;
 
         if ($this->showAllLessonsModal) {
             $this->reset([
@@ -457,20 +456,17 @@ class LessonWizard extends Component
         }
 
         if ($this->allLessonsPeducativoId) {
-            $query->whereHas('pevaluacion.pensum.pestudio', fn ($q) =>
-                $q->where('peducativo_id', $this->allLessonsPeducativoId)
+            $query->whereHas('pevaluacion.pensum.pestudio', fn ($q) => $q->where('peducativo_id', $this->allLessonsPeducativoId)
             );
         }
 
         if ($this->allLessonsGradoId) {
-            $query->whereHas('pevaluacion.pensum', fn ($q) =>
-                $q->where('grado_id', $this->allLessonsGradoId)
+            $query->whereHas('pevaluacion.pensum', fn ($q) => $q->where('grado_id', $this->allLessonsGradoId)
             );
         }
 
         if ($this->allLessonsSeccionId) {
-            $query->whereHas('pevaluacion', fn ($q) =>
-                $q->where('seccion_id', $this->allLessonsSeccionId)
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('seccion_id', $this->allLessonsSeccionId)
             );
         }
 
@@ -1622,6 +1618,457 @@ PROMPT;
         }
     }
 
+    // ─── Slide editor: Reparar/mejorar contenido del bloque ────────
+
+    /**
+     * Repara y mejora el contenido de un bloque de la diapositiva actual
+     * usando IA con prompt Staff Engineer. Detecta el tipo real del bloque
+     * (texto/markdown/HTML, ilustración SVG, diagrama Mermaid o notación
+     * matemática) y despacha a la rama de reparación correspondiente,
+     * reuniendo el contexto pedagógico (actividad, lección, sección,
+     * indicadores y referentes normativos). Reemplaza el body del bloque
+     * conservando su tipo.
+     */
+    public function repairSlideBlock(int $sectionIndex, int $contentIndex): void
+    {
+        if ($this->publishedGuard()) {
+            return;
+        }
+        $this->saved = false;
+        if (! isset($this->wizardSections[$sectionIndex]['contents'][$contentIndex])) {
+            return;
+        }
+
+        $block = &$this->wizardSections[$sectionIndex]['contents'][$contentIndex];
+        $rawBody = trim($block['body'] ?? '');
+
+        if (empty($rawBody)) {
+            $this->notification()->warning('Bloque vacío', 'Este bloque no tiene contenido para reparar.');
+
+            return;
+        }
+
+        $this->generatingSection = $sectionIndex;
+        $this->generationError = null;
+
+        $blockType = $block['type'] ?? 'TEXT';
+
+        // ─── Detectar tipo real de contenido y despachar ─────────
+        $isSvg = preg_match('/<svg\b/', $rawBody) === 1;
+        $isMermaid = preg_match('/class="[^"]*\bmermaid\b[^"]*"/', $rawBody) === 1
+            || preg_match('/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/m', $rawBody) === 1;
+        $isMath = $blockType === 'MATH'
+            || preg_match('/(?<!\\\\)(\$\$|\\\$|\\\\\(|\\\\\[)/', $rawBody) === 1;
+
+        try {
+            if ($isSvg) {
+                $result = $this->repairSvgBlock($block, $sectionIndex);
+            } elseif ($isMermaid) {
+                $result = $this->repairMermaidBlock($block, $sectionIndex);
+            } elseif ($isMath) {
+                $result = $this->repairMathBlock($block, $sectionIndex);
+            } else {
+                $result = $this->repairTextBlock($block, $sectionIndex);
+            }
+        } catch (\Throwable $e) {
+            $this->generationError = $e->getMessage();
+            $this->notification()->error('Error', $e->getMessage());
+            $this->generatingSection = null;
+
+            return;
+        }
+
+        if (! empty($result['info'])) {
+            $this->notification()->info($result['title'], $result['message']);
+            $this->generatingSection = null;
+
+            return;
+        }
+
+        if (! $result['ok']) {
+            $this->generationError = $result['message'];
+            $this->notification()->error('No se pudo reparar', $result['message']);
+            $this->generatingSection = null;
+
+            return;
+        }
+
+        $this->dispatch('show-preview');
+        $this->notification()->success($result['title'], $result['message']);
+        $this->generatingSection = null;
+    }
+
+    /**
+     * Contexto pedagógico común para las ramas de reparación de bloques.
+     *
+     * @return array{sectionTitle: string, gradeName: string, subjectName: string, activityContext: string, indicatorsText: string, referentsText: string}
+     */
+    private function repairContext(int $sectionIndex): array
+    {
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'] ?? 'Sección';
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+
+        $activityContext = collect([
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
+            'Actividad evaluativa' => $activity->description,
+            'Enseñanza' => $activity->teaching,
+            'Aprendizaje esperado' => $activity->learning,
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
+
+        $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
+        $indicatorsText = $indicators->isNotEmpty()
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
+            : '—';
+
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+
+        return compact('sectionTitle', 'gradeName', 'subjectName', 'activityContext', 'indicatorsText', 'referentsText');
+    }
+
+    /**
+     * Repara un bloque de texto/markdown/HTML: mejora redacción, estructura
+     * y formato aplicando las reglas de calidad del contenido LMS.
+     *
+     * @return array{ok: bool, info?: bool, title?: string, message: string}
+     */
+    private function repairTextBlock(array &$block, int $sectionIndex): array
+    {
+        $ctx = $this->repairContext($sectionIndex);
+        $rawBody = trim($block['body'] ?? '');
+        $blockType = $block['type'] ?? 'TEXT';
+
+        $systemPrompt = <<<'PROMPT'
+Eres un Staff Engineer frontend y redactor pedagógico senior de una plataforma LMS escolar venezolana.
+Tu tarea es REPARAR y MEJORAR el contenido de un bloque de diapositiva preservando su esencia: el significado, los ejemplos concretos, el tono narrativo y los datos curriculares originales. No reemplaces el contenido por uno genérico: el resultado debe sentirse como una versión pulida del original.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada oración debe aportar valor.
+
+REGLAS ESTRICTAS DE FORMATO (aplica siempre):
+1. PRESERVA la esencia: mismos ejemplos concretos, mismas cifras, mismo tono (primera persona del plural si el original la usa). Prohibido introducir casos genéricos no relacionados.
+2. Corrige errores de redacción, gramática y ortografía. Mejora la estructura: párrafos coherentes, jerarquía clara.
+3. Si el contenido original es HTML: responde HTML5 semántico válido (h2, p, ul/ol, table, blockquote) con clases Tailwind ligeras y fondos SIEMPRE claros (blanco o gris muy claro). NUNCA fondos oscuros ni colores saturados.
+4. Si el contenido original es texto/markdown plano: responde ÚNICAMENTE markdown plano (## títulos, **negritas**, tablas | |, listas -, *cursivas*). PROHIBIDO usar etiquetas HTML de cualquier tipo; el motor convierte el markdown a HTML automáticamente.
+5. EXTENSIÓN OBLIGATORIA: mínimo 500 caracteres. Estructura mínima: título llamativo derivado del contenido, párrafo introductorio, tabla o lista con información clave, párrafo de desarrollo y cierre.
+6. NO uses ``` ni fences. NO incluyas explicaciones, introducciones ni meta-comentarios. Responde ÚNICAMENTE el contenido mejorado.
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto
+**Curso:** {$ctx['gradeName']} · {$ctx['subjectName']}
+**Lección:** {$this->lessonTitle}
+
+**Actividad pedagógica:**
+{$ctx['activityContext']}
+
+**Indicadores de logro:**
+{$ctx['indicatorsText']}
+
+**Referentes normativos:**
+{$ctx['referentsText']}
+
+**Diapositiva:** {$ctx['sectionTitle']}
+
+### Contenido actual del bloque (repáralo y mejóralo)
+{$rawBody}
+
+INSTRUCCIÓN: Repara y mejora este contenido aplicando las reglas establecidas. Preserva los ejemplos, cifras y el tono original. Corrige redacción y estructura. Si es markdown, NO mezcles HTML. Mínimo 500 caracteres obligatorio.
+PROMPT;
+
+        $result = $this->askWithCompaction(
+            $systemPrompt,
+            $userPrompt,
+            ['max_tokens' => 2048, 'timeout' => 120],
+            2000,
+            null,
+            [
+                ['model' => config('openrouter.model_text_primary'),   'label' => 'Texto Ling 2.6 Flash primario'],
+                ['model' => config('openrouter.model_text_fallback1'), 'label' => 'Texto Nemotron 3 Nano fallback 1'],
+                ['model' => config('openrouter.model_text_fallback2'), 'label' => 'Texto Mistral Large fallback 2'],
+            ]
+        );
+
+        if (! $result['success']) {
+            return ['ok' => false, 'message' => $result['error']];
+        }
+
+        $content = trim($result['content'] ?? '');
+        if (empty($content)) {
+            return ['ok' => false, 'message' => 'La IA no generó contenido para reparar el bloque.'];
+        }
+
+        // Limpiar posibles wrappers markdown (```, ```markdown, ```md)
+        $content = preg_replace('/^```(?:markdown|md|html)?\s*\n?/i', '', $content);
+        $content = preg_replace('/\n?```\s*$/s', '', $content);
+        $content = trim($content);
+
+        // Sanitizar y limitar longitud (mismo criterio que generateSlideText)
+        $content = $this->sanitizeText($content, 'basic');
+        $content = $this->limitContentForSlide($content);
+
+        // Reemplazar el body del bloque conservando su tipo
+        $block['body'] = $content;
+        $block['type'] = $blockType;
+
+        return [
+            'ok' => true,
+            'title' => 'Bloque reparado',
+            'message' => "{$ctx['sectionTitle']}: contenido mejorado (".mb_strlen($content).' caracteres).',
+        ];
+    }
+
+    /**
+     * Repara un bloque de ilustración SVG (type IMAGE o <svg> embebido)
+     * usando LmsSvgAiRepairService: IA con cadena de modelos + fallback
+     * determinista, recorte de canvas y normalización de contraste.
+     *
+     * @return array{ok: bool, info?: bool, title?: string, message: string}
+     */
+    private function repairSvgBlock(array &$block, int $sectionIndex): array
+    {
+        $body = $block['body'] ?? '';
+
+        if (! preg_match('/<svg\b[^>]*>.*<\/svg>/is', $body, $m)) {
+            return ['ok' => false, 'message' => 'No se pudo extraer el bloque <svg> del contenido.'];
+        }
+        $svgBlock = $m[0];
+
+        // Contexto pedagógico para que la IA complete elementos faltantes
+        $contextParts = [];
+        $lessonTitle = $this->lessonTitle ?: ($this->selectedActivity?->topic ?? '');
+        if ($lessonTitle !== '') {
+            $contextParts[] = 'Lección: '.$lessonTitle;
+        }
+        $sectionTitle = $this->wizardSections[$sectionIndex]['title'] ?? '';
+        if ($sectionTitle !== '') {
+            $contextParts[] = 'Sección: '.$sectionTitle;
+        }
+        if (! empty($block['title'])) {
+            $contextParts[] = 'Diagrama: '.$block['title'];
+        }
+        $sectionText = collect($this->wizardSections[$sectionIndex]['contents'] ?? [])
+            ->where('id', '!=', $block['id'] ?? null)
+            ->map(fn ($c) => strip_tags($c['body'] ?? ''))
+            ->filter()
+            ->implode("\n");
+        if ($sectionText !== '') {
+            $contextParts[] = "Texto de la sección (referencia para completar contenido):\n".\Illuminate\Support\Str::limit($sectionText, 1200);
+        }
+
+        $result = app(\App\Services\Lms\LmsSvgAiRepairService::class)
+            ->repairSvg($svgBlock, implode("\n", $contextParts), []);
+
+        if ($result->strategy === 'error') {
+            return ['ok' => false, 'message' => $result->error ?? 'No se pudo reparar el SVG.'];
+        }
+        if ($result->strategy === 'no-svg') {
+            return ['ok' => false, 'message' => 'El contenido no embebe un <svg> válido.'];
+        }
+
+        $repaired = $result->svg;
+        if ($repaired === null || $repaired === $svgBlock) {
+            return ['ok' => false, 'info' => true, 'title' => 'Ilustración sin daños', 'message' => 'No se detectaron daños en el diagrama SVG.'];
+        }
+
+        $block['body'] = str_replace($svgBlock, $repaired, $body);
+        $block['type'] = 'IMAGE';
+
+        return [
+            'ok' => true,
+            'title' => 'Ilustración reparada',
+            'message' => 'El diagrama SVG se reparó correctamente ('.($result->strategy === 'ai' ? 'IA' : 'reparación automática').').',
+        ];
+    }
+
+    /**
+     * Repara un bloque de diagrama Mermaid (código plano o envuelto en
+     * div.mermaid/card): corrige sintaxis y aplica las reglas de tamaño
+     * para impresión (≤12 nodos, ≤11 flechas, labels ≤30 chars/línea,
+     * graph TD, máx. 3 niveles) con validación + un solo reintento.
+     *
+     * @return array{ok: bool, info?: bool, title?: string, message: string}
+     */
+    private function repairMermaidBlock(array &$block, int $sectionIndex): array
+    {
+        $body = $block['body'] ?? '';
+        $classifier = app(\App\Services\Lms\LmsContentClassifier::class);
+        $mermaidSrc = $classifier->extractMermaidCode($body);
+        if (empty(trim($mermaidSrc))) {
+            return ['ok' => false, 'message' => 'No se pudo extraer el código Mermaid del bloque.'];
+        }
+
+        $ctx = $this->repairContext($sectionIndex);
+
+        $systemPrompt = <<<'PROMPT'
+Eres un Staff Engineer frontend especializado en diagramas Mermaid.js de una plataforma LMS escolar.
+Tu tarea es REPARAR y MEJORAR un diagrama Mermaid dañado o descuidado, preservando su significado pedagógico y los textos originales.
+
+REGLAS ESTRICTAS (aplica siempre):
+1. Corrige errores de sintaxis Mermaid: nodos sin cerrar, flechas rotas, caracteres sin escapar, ids duplicados.
+2. ORIENTACIÓN: SOLO graph TD (top-down, flujo vertical arriba→abajo). PROHIBIDO graph LR, graph RL, graph BT u otras. Máximo 3 niveles de profundidad.
+3. TAMAÑO ACOTADO: MÁXIMO 12 nodos y 11 flechas. Si hay más conceptos, agrupa los secundarios en un nodo resumen (ej. "Otros: A, B, C").
+4. Labels multi-línea: máximo 30 caracteres POR LÍNEA usando <br/> o arreglos [línea1, línea2]. NUNCA una etiqueta larga en una sola línea.
+5. IDs de nodo cortos (A, B, C, N1, N2...). Nunca repitas el texto del label como ID.
+6. Sin emojis de relleno en labels (🎯, 🌉, 👤, etc.) — solo texto pedagógico limpio.
+7. ESPACIADO DE PALABRAS: CADA palabra conserva SUS espacios. NUNCA concatenes palabras sin espacio (CORRECTO: "Autoconocimiento Vocacional"; INCORRECTO: "AutoconocimientoVocacional"). Español correcto con tildes y puntuación. Al dividir con <br/> o arreglos, divide entre palabras completas.
+8. Preserva el significado y los textos del diagrama original. NO inventes contenido educativo nuevo.
+9. Responde ÚNICAMENTE el código Mermaid (o el HTML con <div class="mermaid"> si el original estaba envuelto). Sin explicaciones, sin markdown.
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto
+**Curso:** {$ctx['gradeName']} · {$ctx['subjectName']}
+**Lección:** {$this->lessonTitle}
+**Diapositiva:** {$ctx['sectionTitle']}
+
+### Diagrama Mermaid actual (repáralo)
+{$mermaidSrc}
+
+Repara y mejora el diagrama aplicando las reglas del Staff Engineer. Responde SOLO el código.
+PROMPT;
+
+        $result = $this->callMermaidModel($systemPrompt, $userPrompt, ['max_tokens' => 4096, 'temperature' => 0.3]);
+
+        if (! $result['success']) {
+            return ['ok' => false, 'message' => $result['error'] ?? 'Error al reparar el diagrama.'];
+        }
+
+        $code = $this->extractMermaidCodeFromRaw($result['content'] ?? '');
+        if (empty($code)) {
+            return ['ok' => false, 'message' => 'La IA no devolvió código Mermaid válido.'];
+        }
+
+        // ─── Validación post-generación + un solo reintento con feedback ───
+        $validation = $this->validateMermaidDiagram($this->extractMermaidSrc($code));
+        if (! $validation['ok']) {
+            $retry = $this->callMermaidModel(
+                $systemPrompt,
+                $userPrompt."\n\n".$this->diagramCorrectionBlock($this->extractMermaidSrc($code), $validation),
+                ['max_tokens' => 4096, 'temperature' => 0.3]
+            );
+            if ($retry['success']) {
+                $code = $this->extractMermaidCodeFromRaw(trim($retry['content'] ?? ''));
+            }
+        }
+
+        if (empty($code)) {
+            return ['ok' => false, 'message' => 'No se pudo obtener un diagrama reparado válido.'];
+        }
+
+        // Post-procesado: forzar graph TD y partir labels largas
+        $code = $this->postProcessMermaid($code);
+        $code = preg_replace('/^```(?:mermaid|markdown|md)?\s*\n?/i', '', $code);
+        $code = preg_replace('/\n?```\s*$/s', '', $code);
+        $code = trim($code);
+
+        // Re-insertar preservando el wrapper HTML original si existía
+        if (preg_match('/<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>/s', $body)) {
+            $block['body'] = preg_replace_callback(
+                '/(<div[^>]*class="[^"]*\bmermaid\b[^"]*"[^>]*>)(.*?)(<\/div>)/s',
+                fn ($m) => $m[1]."\n".$code."\n".$m[3],
+                $body,
+                1
+            );
+        } else {
+            $block['body'] = $code;
+        }
+
+        return [
+            'ok' => true,
+            'title' => 'Diagrama reparado',
+            'message' => "El diagrama Mermaid de \"{$ctx['sectionTitle']}\" se reparó correctamente.",
+        ];
+    }
+
+    /**
+     * Repara un bloque de notación matemática (type MATH o body con LaTeX):
+     * corrige la sintaxis LaTeX y la estructura HTML (div#math-block + <p>)
+     * usando la cadena de modelos de matemáticas.
+     *
+     * @return array{ok: bool, info?: bool, title?: string, message: string}
+     */
+    private function repairMathBlock(array &$block, int $sectionIndex): array
+    {
+        $ctx = $this->repairContext($sectionIndex);
+        $rawBody = trim($block['body'] ?? '');
+
+        $systemPrompt = <<<'PROMPT'
+Eres un asistente experto en LaTeX y contenido educativo. Tu tarea es REPARAR y MEJORAR un bloque de contenido matemático de una lección LMS, corrigiendo la sintaxis LaTeX y la estructura HTML sin cambiar el significado.
+
+REGLAS ESTRICTAS:
+1. Corrige expresiones LaTeX rotas: delimitadores sin cerrar (\(...\), $$...$$, \[...\]), comandos mal escritos, fracciones/raíces/potencias/subíndices malformados.
+2. Estructura HTML obligatoria: <div id="math-block"> envuelve todo, cada párrafo en <p>...</p>, expresiones inline en \(...\) y destacadas en $$...$$.
+3. Preserva EXACTAMENTE el texto no matemático (no lo reescribas salvo errores ortográficos evidentes).
+4. NO agregues explicaciones ni texto fuera del HTML. Responde SOLO el HTML.
+PROMPT;
+
+        $userPrompt = "Repara y mejora el siguiente bloque matemático:\n\n{$rawBody}";
+
+        $result = $this->askWithCompaction(
+            $systemPrompt,
+            $userPrompt,
+            ['max_tokens' => 8192, 'temperature' => 0.05],
+            4000,
+            null,
+            [
+                ['model' => config('openrouter.model_math_primary'),   'label' => 'Math Qwen Coder primario'],
+                ['model' => config('openrouter.model_math_fallback1'), 'label' => 'Math DeepSeek fallback 1'],
+            ]
+        );
+
+        if (! $result['success']) {
+            return ['ok' => false, 'message' => $result['error'] ?? 'Error al reparar las expresiones matemáticas.'];
+        }
+
+        $content = trim($result['content'] ?? '');
+        if (empty($content)) {
+            return ['ok' => false, 'message' => 'La IA no generó contenido matemático reparado.'];
+        }
+
+        $block['body'] = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($content);
+        $block['type'] = 'MATH';
+        $this->dispatch('math-updated');
+
+        return [
+            'ok' => true,
+            'title' => 'Matemáticas reparadas',
+            'message' => "Las expresiones matemáticas de \"{$ctx['sectionTitle']}\" se repararon correctamente.",
+        ];
+    }
+
+    /**
+     * Limita el contenido a 1500 caracteres cortando en el último salto de
+     * párrafo (o línea) dentro de los últimos 300 caracteres, para no partir
+     * tablas ni oraciones. Mismo criterio que generateSlideText().
+     */
+    private function limitContentForSlide(string $content): string
+    {
+        if (mb_strlen($content) <= 1500) {
+            return $content;
+        }
+
+        $truncated = mb_substr($content, 0, 1500);
+        $lastBreak = mb_strrpos($truncated, "\n\n");
+        if ($lastBreak !== false && $lastBreak > 1100) {
+            $content = mb_substr($truncated, 0, $lastBreak);
+        } else {
+            $lastNewline = mb_strrpos($truncated, "\n");
+            if ($lastNewline !== false && $lastNewline > 1100) {
+                $content = mb_substr($truncated, 0, $lastNewline);
+            } else {
+                $content = $truncated;
+            }
+        }
+
+        return trim($content);
+    }
+
     // ─── Slide editor: Generar imagen para diapositiva actual ─────
 
     /**
@@ -2007,6 +2454,13 @@ REQUISITO ESTRICTO — TEXTO MULTI-LÍNEA EN NODOS:
     A["Primera línea<br/>Segunda línea<br/>Tercera línea"] --> B["Línea A<br/>Línea B"]
 - SIN etiquetas de una línea larga. Cada nodo usa <br/> para partir el texto.
 - SIN emojis de relleno en los labels de nodos (🎯, 🌉, 👤, etc.) — solo texto pedagógico limpio.
+
+REQUISITO ESTRICTO — ESPACIADO DE PALABRAS (error recurrente):
+- CADA palabra del label conserva SUS espacios. NUNCA concatenes palabras sin espacio.
+- CORRECTO:  A["Autoconocimiento Vocacional"] --> B["Orientación Profesional"]
+- INCORRECTO: A["AutoconocimientoVocacional"] --> B["OrientaciónProfesional"]  ← PROHIBIDO
+- Escribe en español correcto: tildes, espacios entre palabras y puntuación normal (¿?, ¡!, , . :).
+- Al dividir el texto con <br/> o arreglos [línea1, línea2], divide SIEMPRE entre palabras completas: cada línea empieza y termina con una palabra completa, nunca partas una palabra a la mitad.
 
 REQUISITO ESTRICTO — ORIENTACIÓN VERTICAL TOP-DOWN:
 - El diagrama DEBE usar ÚNICAMENTE graph TD (top-down, flujo vertical arriba→abajo).
@@ -3423,6 +3877,7 @@ Tu tarea es generar código HTML autónomo para un diagrama Mermaid enmarcado en
 5. **MOBILE-FIRST** — padding base reducido (p-3), escala con sm:p-4. El contenedor tiene overflow-x-auto para scroll horizontal si el diagrama es ancho.
 6. **Diagrama pedagógico** — el contenido del diagrama debe reflejar fielmente el contenido de la sección. Usa nodos con nombres descriptivos. Si la sección está vacía, genera contenido de muestra coherente con el contexto de la lección.
    - **TAMAÑO ACOTADO (C1):** MÁXIMO 12 nodos y 11 flechas por diagrama, máximo 3 niveles de profundidad. Si hay más de 12 conceptos, agrupa los secundarios en un nodo resumen (ej. "Otros: A, B, C"). IDs de nodo cortos (A, B, C, N1...), nunca repitas el label como ID. Labels con texto multi-línea: máx. 30 caracteres por línea usando <br/> o arreglos [l1, l2]. Para graph, prefiere graph TD (vertical). El diagrama se imprime en una columna de ~450px: evita aristas largas y style directives innecesarias.
+   - **ESPACIADO DE PALABRAS (error recurrente):** CADA palabra conserva SUS espacios. NUNCA concatenes palabras sin espacio. CORRECTO: `A["Autoconocimiento Vocacional"]` — INCORRECTO: `A["AutoconocimientoVocacional"]`. Español correcto con tildes y puntuación. Al dividir con <br/> o arreglos, divide entre palabras completas; nunca partas una palabra a la mitad.
 7. **Sin scripts externos** — no incluyas CDN de mermaid ni de tailwind. Solo el HTML del card con el div.mermaid. Los scripts se cargan globalmente en la página.
 8. **Salida limpia** — NO incluyas ```html ni markdown. Responde SOLO HTML puro desde <div class="w-full...">. No generes solo el código mermaid suelto; el código mermaid SIEMPRE debe ir dentro de <div class="mermaid">...</div>, y este a su vez dentro del card contenedor.
 
@@ -3709,196 +4164,196 @@ PROMPT;
         // mitad del guardado, se revierte en bloque y no se pierden datos.
         DB::transaction(function () use ($activityId, &$sectionIdMap, &$visibleResourceIds, &$visibleLinkIds, &$visibleEmbedIds) {
 
-        // ─── Persistir título y descripción generados (paso 1) ──
-        if (! empty($this->lessonTitle) || ! empty($this->lessonDescription)) {
-            Activity::where('id', $activityId)->update([
-                'topic' => $this->lessonTitle,
-                'description' => $this->lessonDescription,
-            ]);
-        }
-
-        foreach ($this->wizardSections as $key => $sectionData) {
-            $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
-
-            if (str_starts_with((string) $sectionData['id'], 'temp_')) {
-                $tempId = $sectionData['id'];
-                $section = LmsActivitySection::create([
-                    'activity_id' => $activityId,
-                    'title' => $sectionTitle,
-                    'sort_order' => $sectionData['sort_order'] ?? 1,
-                    'is_visible' => $sectionData['is_visible'] ?? true,
+            // ─── Persistir título y descripción generados (paso 1) ──
+            if (! empty($this->lessonTitle) || ! empty($this->lessonDescription)) {
+                Activity::where('id', $activityId)->update([
+                    'topic' => $this->lessonTitle,
+                    'description' => $this->lessonDescription,
                 ]);
-                $sectionIdMap[$tempId] = $section->id;
-                // Reemplazar el id temporal con el real
-                $this->wizardSections[$key]['id'] = $section->id;
-            } else {
-                $section = LmsActivitySection::find($sectionData['id']);
-                if ($section) {
-                    $section->update([
+            }
+
+            foreach ($this->wizardSections as $key => $sectionData) {
+                $sectionTitle = $this->sanitizeText($sectionData['title'] ?? '');
+
+                if (str_starts_with((string) $sectionData['id'], 'temp_')) {
+                    $tempId = $sectionData['id'];
+                    $section = LmsActivitySection::create([
+                        'activity_id' => $activityId,
                         'title' => $sectionTitle,
+                        'sort_order' => $sectionData['sort_order'] ?? 1,
                         'is_visible' => $sectionData['is_visible'] ?? true,
                     ]);
-                    // Limpiar contenidos previos para evitar duplicados
-                    LmsActivityContent::where('section_id', $section->id)->delete();
+                    $sectionIdMap[$tempId] = $section->id;
+                    // Reemplazar el id temporal con el real
+                    $this->wizardSections[$key]['id'] = $section->id;
+                } else {
+                    $section = LmsActivitySection::find($sectionData['id']);
+                    if ($section) {
+                        $section->update([
+                            'title' => $sectionTitle,
+                            'is_visible' => $sectionData['is_visible'] ?? true,
+                        ]);
+                        // Limpiar contenidos previos para evitar duplicados
+                        LmsActivityContent::where('section_id', $section->id)->delete();
 
-                    // La caché content_type queda obsoleta tras el borrado masivo
-                    // (el delete por query builder NO dispara el observer). Si hay
-                    // creates a continuación, el observer la reescribe; si no los
-                    // hay, queda null y el accesor calcula 'none' en vivo.
-                    $section->content_type = null;
-                    $section->saveQuietly();
+                        // La caché content_type queda obsoleta tras el borrado masivo
+                        // (el delete por query builder NO dispara el observer). Si hay
+                        // creates a continuación, el observer la reescribe; si no los
+                        // hay, queda null y el accesor calcula 'none' en vivo.
+                        $section->content_type = null;
+                        $section->saveQuietly();
+                    }
+                }
+
+                if ($section && ! empty($sectionData['contents'])) {
+                    foreach ($sectionData['contents'] as $i => $contentData) {
+                        LmsActivityContent::create([
+                            'section_id' => $section->id,
+                            'type' => $contentData['type'] ?? 'TEXT',
+                            'title' => $this->sanitizeText($contentData['title'] ?? null),
+                            'body' => $this->sanitizeText($contentData['body'] ?? ''),
+                            'sort_order' => $i + 1,
+                            'is_visible' => $contentData['is_visible'] ?? true,
+                        ]);
+                    }
                 }
             }
 
-            if ($section && ! empty($sectionData['contents'])) {
-                foreach ($sectionData['contents'] as $i => $contentData) {
-                    LmsActivityContent::create([
-                        'section_id' => $section->id,
-                        'type' => $contentData['type'] ?? 'TEXT',
-                        'title' => $this->sanitizeText($contentData['title'] ?? null),
-                        'body' => $this->sanitizeText($contentData['body'] ?? ''),
-                        'sort_order' => $i + 1,
-                        'is_visible' => $contentData['is_visible'] ?? true,
+            // ─── Guardar preguntas de repaso como sección final ────
+            $this->saveReviewQuestionsSection($activityId);
+
+            // ─── Guardar recursos ──────────────────────────────────
+            foreach ($this->wizardResources as $key => $res) {
+                if (str_starts_with((string) ($res['id'] ?? ''), 'temp_')) {
+                    $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                        ? $sectionIdMap[$res['section_id']]
+                        : (! empty($res['section_id']) ? $res['section_id'] : null);
+
+                    $newRes = LmsActivityResource::create([
+                        'activity_id' => $activityId,
+                        'section_id' => $resolvedSectionId,
+                        'media_id' => $res['media_id'],
+                        'uploaded_by' => $res['uploaded_by'] ?? auth()->id(),
+                        'display_name' => $res['display_name'],
+                        'description' => $res['description'] ?? '',
+                        'is_visible' => true,
                     ]);
+                    $this->wizardResources[$key]['id'] = $newRes->id;
+                    $this->wizardResources[$key]['section_id'] = $resolvedSectionId;
+                    $visibleResourceIds[] = $newRes->id;
+                } else {
+                    $resourceId = (int) $res['id'];
+                    $visibleResourceIds[] = $resourceId;
+
+                    // Actualizar campos editables del recurso existente
+                    $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
+                        ? $sectionIdMap[$res['section_id']]
+                        : (! empty($res['section_id']) ? $res['section_id'] : null);
+
+                    $updateData = [
+                        'display_name' => $res['display_name'],
+                        'description' => $res['description'] ?? '',
+                    ];
+                    if ($resolvedSectionId) {
+                        $updateData['section_id'] = $resolvedSectionId;
+                    }
+                    if (! empty($res['media_id'])) {
+                        $updateData['media_id'] = $res['media_id'];
+                    }
+                    LmsActivityResource::where('id', $resourceId)->update($updateData);
+                    $this->wizardResources[$key]['section_id'] = $resolvedSectionId;
                 }
             }
-        }
+            LmsActivityResource::where('activity_id', $activityId)
+                ->whereNotIn('id', $visibleResourceIds)
+                ->update(['is_visible' => false]);
 
-        // ─── Guardar preguntas de repaso como sección final ────
-        $this->saveReviewQuestionsSection($activityId);
+            // ─── Guardar enlaces ───────────────────────────────────
+            foreach ($this->wizardLinks as $key => $link) {
+                if (str_starts_with((string) ($link['id'] ?? ''), 'temp_')) {
+                    $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                        ? $sectionIdMap[$link['section_id']]
+                        : (! empty($link['section_id']) ? $link['section_id'] : null);
 
-        // ─── Guardar recursos ──────────────────────────────────
-        foreach ($this->wizardResources as $key => $res) {
-            if (str_starts_with((string) ($res['id'] ?? ''), 'temp_')) {
-                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
-                    ? $sectionIdMap[$res['section_id']]
-                    : (! empty($res['section_id']) ? $res['section_id'] : null);
+                    $newLink = LmsActivityLink::create([
+                        'activity_id' => $activityId,
+                        'section_id' => $resolvedSectionId,
+                        'added_by' => auth()->id(),
+                        'title' => $link['title'],
+                        'url' => $link['url'],
+                        'link_type' => $link['link_type'] ?? 'REFERENCE',
+                        'sort_order' => $link['sort_order'] ?? 1,
+                        'is_visible' => true,
+                    ]);
+                    $this->wizardLinks[$key]['id'] = $newLink->id;
+                    $this->wizardLinks[$key]['section_id'] = $resolvedSectionId;
+                    $visibleLinkIds[] = $newLink->id;
+                } else {
+                    $linkId = (int) $link['id'];
+                    $visibleLinkIds[] = $linkId;
 
-                $newRes = LmsActivityResource::create([
-                    'activity_id' => $activityId,
-                    'section_id' => $resolvedSectionId,
-                    'media_id' => $res['media_id'],
-                    'uploaded_by' => $res['uploaded_by'] ?? auth()->id(),
-                    'display_name' => $res['display_name'],
-                    'description' => $res['description'] ?? '',
-                    'is_visible' => true,
-                ]);
-                $this->wizardResources[$key]['id'] = $newRes->id;
-                $this->wizardResources[$key]['section_id'] = $resolvedSectionId;
-                $visibleResourceIds[] = $newRes->id;
-            } else {
-                $resourceId = (int) $res['id'];
-                $visibleResourceIds[] = $resourceId;
+                    $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
+                        ? $sectionIdMap[$link['section_id']]
+                        : (! empty($link['section_id']) ? $link['section_id'] : null);
 
-                // Actualizar campos editables del recurso existente
-                $resolvedSectionId = isset($res['section_id']) && isset($sectionIdMap[$res['section_id']])
-                    ? $sectionIdMap[$res['section_id']]
-                    : (! empty($res['section_id']) ? $res['section_id'] : null);
-
-                $updateData = [
-                    'display_name' => $res['display_name'],
-                    'description' => $res['description'] ?? '',
-                ];
-                if ($resolvedSectionId) {
-                    $updateData['section_id'] = $resolvedSectionId;
+                    $updateData = [
+                        'title' => $link['title'],
+                        'url' => $link['url'],
+                        'link_type' => $link['link_type'] ?? 'REFERENCE',
+                    ];
+                    if ($resolvedSectionId) {
+                        $updateData['section_id'] = $resolvedSectionId;
+                    }
+                    LmsActivityLink::where('id', $linkId)->update($updateData);
+                    $this->wizardLinks[$key]['section_id'] = $resolvedSectionId;
                 }
-                if (! empty($res['media_id'])) {
-                    $updateData['media_id'] = $res['media_id'];
-                }
-                LmsActivityResource::where('id', $resourceId)->update($updateData);
-                $this->wizardResources[$key]['section_id'] = $resolvedSectionId;
             }
-        }
-        LmsActivityResource::where('activity_id', $activityId)
-            ->whereNotIn('id', $visibleResourceIds)
-            ->update(['is_visible' => false]);
+            LmsActivityLink::where('activity_id', $activityId)
+                ->whereNotIn('id', $visibleLinkIds)
+                ->update(['is_visible' => false]);
 
-        // ─── Guardar enlaces ───────────────────────────────────
-        foreach ($this->wizardLinks as $key => $link) {
-            if (str_starts_with((string) ($link['id'] ?? ''), 'temp_')) {
-                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
-                    ? $sectionIdMap[$link['section_id']]
-                    : (! empty($link['section_id']) ? $link['section_id'] : null);
+            // ─── Guardar HTML embeds ───────────────────────────────
+            foreach ($this->wizardHtmlEmbeds as $key => $embed) {
+                if (str_starts_with((string) ($embed['id'] ?? ''), 'temp_')) {
+                    $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                        ? $sectionIdMap[$embed['section_id']]
+                        : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
-                $newLink = LmsActivityLink::create([
-                    'activity_id' => $activityId,
-                    'section_id' => $resolvedSectionId,
-                    'added_by' => auth()->id(),
-                    'title' => $link['title'],
-                    'url' => $link['url'],
-                    'link_type' => $link['link_type'] ?? 'REFERENCE',
-                    'sort_order' => $link['sort_order'] ?? 1,
-                    'is_visible' => true,
-                ]);
-                $this->wizardLinks[$key]['id'] = $newLink->id;
-                $this->wizardLinks[$key]['section_id'] = $resolvedSectionId;
-                $visibleLinkIds[] = $newLink->id;
-            } else {
-                $linkId = (int) $link['id'];
-                $visibleLinkIds[] = $linkId;
+                    $newEmbed = LmsHtmlEmbed::create([
+                        'activity_id' => $activityId,
+                        'section_id' => $resolvedSectionId,
+                        'added_by' => auth()->id(),
+                        'title' => $embed['title'] ?? null,
+                        'html_content' => $embed['html_content'],
+                        'render_condition' => 'ALWAYS',
+                        'sort_order' => $embed['sort_order'] ?? 1,
+                        'is_visible' => true,
+                    ]);
+                    $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
+                    $this->wizardHtmlEmbeds[$key]['section_id'] = $resolvedSectionId;
+                    $visibleEmbedIds[] = $newEmbed->id;
+                } else {
+                    $embedId = (int) $embed['id'];
+                    $visibleEmbedIds[] = $embedId;
 
-                $resolvedSectionId = isset($link['section_id']) && isset($sectionIdMap[$link['section_id']])
-                    ? $sectionIdMap[$link['section_id']]
-                    : (! empty($link['section_id']) ? $link['section_id'] : null);
+                    $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
+                        ? $sectionIdMap[$embed['section_id']]
+                        : (! empty($embed['section_id']) ? $embed['section_id'] : null);
 
-                $updateData = [
-                    'title' => $link['title'],
-                    'url' => $link['url'],
-                    'link_type' => $link['link_type'] ?? 'REFERENCE',
-                ];
-                if ($resolvedSectionId) {
-                    $updateData['section_id'] = $resolvedSectionId;
+                    $updateData = [
+                        'title' => $embed['title'] ?? null,
+                        'html_content' => $embed['html_content'],
+                    ];
+                    if ($resolvedSectionId) {
+                        $updateData['section_id'] = $resolvedSectionId;
+                    }
+                    LmsHtmlEmbed::where('id', $embedId)->update($updateData);
+                    $this->wizardHtmlEmbeds[$key]['section_id'] = $resolvedSectionId;
                 }
-                LmsActivityLink::where('id', $linkId)->update($updateData);
-                $this->wizardLinks[$key]['section_id'] = $resolvedSectionId;
             }
-        }
-        LmsActivityLink::where('activity_id', $activityId)
-            ->whereNotIn('id', $visibleLinkIds)
-            ->update(['is_visible' => false]);
-
-        // ─── Guardar HTML embeds ───────────────────────────────
-        foreach ($this->wizardHtmlEmbeds as $key => $embed) {
-            if (str_starts_with((string) ($embed['id'] ?? ''), 'temp_')) {
-                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
-                    ? $sectionIdMap[$embed['section_id']]
-                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
-
-                $newEmbed = LmsHtmlEmbed::create([
-                    'activity_id' => $activityId,
-                    'section_id' => $resolvedSectionId,
-                    'added_by' => auth()->id(),
-                    'title' => $embed['title'] ?? null,
-                    'html_content' => $embed['html_content'],
-                    'render_condition' => 'ALWAYS',
-                    'sort_order' => $embed['sort_order'] ?? 1,
-                    'is_visible' => true,
-                ]);
-                $this->wizardHtmlEmbeds[$key]['id'] = $newEmbed->id;
-                $this->wizardHtmlEmbeds[$key]['section_id'] = $resolvedSectionId;
-                $visibleEmbedIds[] = $newEmbed->id;
-            } else {
-                $embedId = (int) $embed['id'];
-                $visibleEmbedIds[] = $embedId;
-
-                $resolvedSectionId = isset($embed['section_id']) && isset($sectionIdMap[$embed['section_id']])
-                    ? $sectionIdMap[$embed['section_id']]
-                    : (! empty($embed['section_id']) ? $embed['section_id'] : null);
-
-                $updateData = [
-                    'title' => $embed['title'] ?? null,
-                    'html_content' => $embed['html_content'],
-                ];
-                if ($resolvedSectionId) {
-                    $updateData['section_id'] = $resolvedSectionId;
-                }
-                LmsHtmlEmbed::where('id', $embedId)->update($updateData);
-                $this->wizardHtmlEmbeds[$key]['section_id'] = $resolvedSectionId;
-            }
-        }
-        LmsHtmlEmbed::where('activity_id', $activityId)
-            ->whereNotIn('id', $visibleEmbedIds)
-            ->update(['is_visible' => false]);
+            LmsHtmlEmbed::where('activity_id', $activityId)
+                ->whereNotIn('id', $visibleEmbedIds)
+                ->update(['is_visible' => false]);
         });
 
         $this->notification()->success(
@@ -4814,7 +5269,6 @@ PROMPT;
         return array_filter($this->wizardSections, fn ($s) => $s['is_visible']);
     }
 
-
     /**
      * Extrae el código Mermaid "limpio" desde la respuesta cruda del modelo:
      * quita fences ```, scripts CDN, wrappers <html/head/body> y divs finales.
@@ -4856,31 +5310,16 @@ PROMPT;
      */
     private function postProcessMermaid(string $code, bool $forceGraphTd = true): string
     {
-        if ($forceGraphTd) {
-            $code = preg_replace('/^graph\s+(LR|RL|BT)\b/m', 'graph TD', $code);
-            $code = preg_replace('/^flowchart\s+(LR|RL|BT)\b/m', 'graph TD', $code);
-        }
+        return app(\App\Services\Lms\LmsMermaidRepairService::class)->postProcess($code, $forceGraphTd);
+    }
 
-        return preg_replace_callback('/\["([^"]{35,})"\]/', function ($m) {
-            $text = $m[1];
-            $words = preg_split('/\s+/', $text);
-            $lines = [];
-            $currentLine = '';
-            foreach ($words as $word) {
-                $test = $currentLine ? $currentLine.' '.$word : $word;
-                if (mb_strlen($test) > 28 && $currentLine) {
-                    $lines[] = $currentLine;
-                    $currentLine = $word;
-                } else {
-                    $currentLine = $test;
-                }
-            }
-            if ($currentLine) {
-                $lines[] = $currentLine;
-            }
-
-            return '["'.implode('<br/>', $lines).'"]';
-        }, $code);
+    /**
+     * Reinserta espacios en labels Mermaid concatenados (delega en
+     * LmsMermaidRepairService, fuente única de verdad de las reglas).
+     */
+    private function normalizeMermaidLabelSpacing(string $label): string
+    {
+        return app(\App\Services\Lms\LmsMermaidRepairService::class)->normalizeLabelSpacing($label);
     }
 
     /**
@@ -4899,40 +5338,13 @@ PROMPT;
 
     /**
      * Valida un diagrama Mermaid para impresión en columnas estrechas (~450px).
-     * Devuelve ['ok', 'issues', 'nodes', 'arrows', 'maxLabel'].
+     * Delega en LmsMermaidRepairService (fuente única de verdad).
+     *
+     * @return array{ok: bool, issues: array, nodes: int, arrows: int, maxLabel: int}
      */
     private function validateMermaidDiagram(string $src): array
     {
-        $issues = [];
-
-        $nodes = preg_match_all('/[A-Za-z_][A-Za-z0-9_]*\s*(?:\[|\[\[|\(|\(\(|\{|%|>)/', $src);
-        if ($nodes > 14) {
-            $issues[] = "demasiados nodos ({$nodes}; máximo recomendado 12)";
-        }
-
-        $arrows = preg_match_all('/--[->]|==>|\.\.->/s', $src);
-        if ($arrows > 16) {
-            $issues[] = "demasiadas flechas ({$arrows}; máximo recomendado 11)";
-        }
-
-        // Label más largo (solo labels quoted ["..."] o arreglos multi-línea)
-        $maxLabel = 0;
-        if (preg_match_all('/\["([^"]*)"/', $src, $mLabels)) {
-            foreach ($mLabels[1] as $label) {
-                $maxLabel = max($maxLabel, mb_strlen($label));
-            }
-        }
-        if ($maxLabel > 30) {
-            $issues[] = "hay etiquetas de {$maxLabel} caracteres en una sola línea (máximo 30 por línea; separa con <br/>)";
-        }
-
-        return [
-            'ok' => empty($issues),
-            'issues' => $issues,
-            'nodes' => $nodes,
-            'arrows' => $arrows,
-            'maxLabel' => $maxLabel,
-        ];
+        return app(\App\Services\Lms\LmsMermaidRepairService::class)->validate($src);
     }
 
     /**
@@ -4947,8 +5359,8 @@ PROMPT;
             $block .= "- {$issue}\n";
         }
         $block .= "\nCorrige el diagrama: reduce el número de nodos (agrupa los secundarios en un nodo resumen), "
-            ."acorta los labels a máximo 30 caracteres por línea usando <br/> o arreglos [l1, l2], "
-            ."usa IDs de nodo cortos y orientación vertical graph TD. "
+            .'acorta los labels a máximo 30 caracteres por línea usando <br/> o arreglos [l1, l2], '
+            .'usa IDs de nodo cortos y orientación vertical graph TD. '
             ."Regenera SOLO el código (Mermaid o el card HTML), sin explicaciones.\n\n"
             ."Diagrama anterior:\n```\n".mb_substr($src, 0, 3000)."\n```";
 
@@ -4997,8 +5409,8 @@ PROMPT;
             $tokenBudget,
             $contentValidator,
             $customChain,
-            notify: function(string $type, string $title, string $desc) {
-                match($type) {
+            notify: function (string $type, string $title, string $desc) {
+                match ($type) {
                     'info' => $this->notification()->info($title, $desc),
                     'warning' => $this->notification()->warning($title, $desc),
                     'error' => $this->notification()->error($title, $desc),

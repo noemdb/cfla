@@ -287,6 +287,15 @@
                                                                                text-gray-400 dark:text-slate-600 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-600/50">
                                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                                 </button>
+                                                                {{-- Repair: mejora el contenido del bloque con IA (reglas de calidad) --}}
+                                                                <button wire:click="repairSlideBlock({{ $currentSlideIndex }}, {{ $cIdx }})"
+                                                                        wire:loading.attr="disabled"
+                                                                        wire:target="repairSlideBlock"
+                                                                        title="Reparar y mejorar contenido del bloque"
+                                                                        class="p-1.5 rounded-lg transition-all
+                                                                               text-gray-400 dark:text-slate-600 hover:text-amber-400 hover:bg-amber-500/10 disabled:opacity-40 disabled:cursor-not-allowed" @disabled($isPublished)>
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085"/></svg>
+                                                                </button>
                                                                 @if($blockCount > 1)
                                                                     <button wire:click="removeWizardContent({{ $currentSlideIndex }}, {{ $cIdx }})"
                                                                             wire:confirm="Eliminar este bloque de contenido?"
@@ -417,8 +426,8 @@
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/></svg>
                                             Generar Ilustración
                                         </button>
-                                        {{-- <button wire:click="generateSlideDiagram" --}}
-                                        <button wire:click="generateSlideImage"
+                                        <button wire:click="generateSlideDiagram"
+                                        {{-- <button wire:click="generateSlideImage" --}}
                                                 @click="editorTab = 'preview'"
                                                 wire:loading.attr="disabled"
                                                 wire:target="generateSlideImage"

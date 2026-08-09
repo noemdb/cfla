@@ -20,7 +20,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags,generateSlideMath"
+             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags,generateSlideMath,repairSlideBlock"
              class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay"
              x-data="{
@@ -293,8 +293,20 @@
                 <svg class="w-12 h-12 text-emerald-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <h3 class="text-base font-bold text-emerald-400 mb-1">¡Lección publicada exitosamente!</h3>
-                <p class="text-sm text-gray-500 dark:text-slate-400 mb-2">El contenido ya está disponible para los estudiantes.</p>
+                <h3 class="text-base font-bold text-emerald-400 mb-1">
+                    @if(auth()->user()->isPlanner)
+                        ¡Lección publicada exitosamente!
+                    @else
+                        ¡Lección programada exitosamente!
+                    @endif
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-2">
+                    @if(auth()->user()->isPlanner)
+                        El contenido ya está disponible para los estudiantes.
+                    @else
+                        La lección fue enviada a Planificación para su revisión y publicación.
+                    @endif
+                </p>
                 <div class="flex items-center justify-center gap-3">
                     {{-- <button wire:click="openListStudentPreview({{ $selectedActivityId }})"
                             class="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white text-sm rounded-lg font-medium transition-all">
@@ -349,7 +361,7 @@
                 {{-- Barra de progreso --}}
                 <div class="flex-1 flex justify-center min-w-0 px-2 mx-2 py-2">
                     <div class="flex items-center gap-0.5 sm:gap-1 min-w-max" style="overflow: visible;">
-                        @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Publicar']; @endphp
+                        @php $stepLabels = ['', 'Información', 'Secciones', 'Recursos', 'Repaso', 'Programar']; @endphp
                         @foreach(range(1, 5) as $step)
                             <button wire:click="goToStep({{ $step }})" type="button" class="flex items-center gap-1 group shrink-0">
                                 <div class="flex flex-col items-center min-w-0">
@@ -415,7 +427,7 @@
                         @include("livewire.profesor.lms._wizard-step-4")
                     @endif
 
-                    {{-- STEP 5: Publicar --}}
+                    {{-- STEP 5: Programar --}}
                     @if($currentStep === 5)
                         @include("livewire.profesor.lms._wizard-step-5")
                     @endif
@@ -491,9 +503,9 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Sin fecha de publicación</h3>
+                                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Sin fecha de programación</h3>
                                         <p class="text-xs text-slate-400 mt-1">
-                                            No has establecido una fecha de publicación. La lección se guardará como borrador.
+                                            No has establecido una fecha de programación. La lección se guardará como borrador.
                                         </p>
                                     </div>
                                 </div>
