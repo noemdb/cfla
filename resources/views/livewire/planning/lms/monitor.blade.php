@@ -342,6 +342,18 @@
                                     </svg>
                                 </button>
 
+                                {{-- Actividad asociada (revisión / aprobación) — always visible --}}
+                                <button wire:click="openActivityReview({{ $pub->id }})"
+                                        class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg transition-all border
+                                            {{ $pub->status
+                                                ? 'text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 hover:border-emerald-500/40'
+                                                : 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 hover:border-amber-500/40' }}"
+                                        title="{{ $pub->status ? 'Actividad aprobada · ver/comentar' : 'Actividad en revisión: revisar y aprobar' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+
                                 {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                                 @if($pubStatus === 'SCHEDULED')
                                     <button wire:click="confirmPublish({{ $pub->id }})"
@@ -379,6 +391,14 @@
                                             </svg>
                                             Auditar
                                         </a>
+                                        {{-- Actividad asociada (revisión / aprobación) --}}
+                                        <button wire:click="openActivityReview({{ $pub->id }})"
+                                                class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                            <svg class="w-4 h-4 {{ $pub->status ? 'text-emerald-500' : 'text-amber-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                            {{ $pub->status ? 'Actividad aprobada' : 'Revisar actividad' }}
+                                        </button>
                                         {{-- Configuración --}}
                                         @if($pub->lmsPublication && $pubStatus !== 'DRAFT')
                                             <button wire:click="openSettings({{ $pub->id }})"
@@ -585,6 +605,19 @@
                             title="Vista previa">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         Vista
+                    </button>
+
+                    {{-- Actividad asociada (revisión / aprobación) --}}
+                    <button wire:click="openActivityReview({{ $pub->id }})"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border
+                                {{ $pub->status
+                                    ? 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20 hover:border-emerald-500/40'
+                                    : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20 hover:border-amber-500/40' }}"
+                            title="{{ $pub->status ? 'Actividad aprobada · ver/comentar' : 'Actividad en revisión: revisar y aprobar' }}">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        {{ $pub->status ? 'Aprobada' : 'Revisión' }}
                     </button>
 
                     {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
@@ -919,6 +952,112 @@
     {{-- ============================================================ --}}
     @if(($showPreviewModal ?? false) && ($previewData ?? null))
         <x-lms.student-preview :preview="$previewData" closeMethod="closePreview" wire:key="student-preview" />
+    @endif
+    {{-- ============================================================ --}}
+    {{-- MODAL: Actividad asociada (revisión / aprobación)          --}}
+    {{-- ============================================================ --}}
+    @if($showActivityModal && $activity)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" wire:key="activity-review-{{ $activity_id }}">
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-2xl w-full max-w-2xl mx-4 overflow-hidden max-h-[90vh] flex flex-col">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700/50 flex items-center justify-between shrink-0">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 {{ $activity->status ? 'text-emerald-500' : 'text-amber-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Actividad asociada
+                    </h3>
+                    <button wire:click="closeActivityReview" class="p-2 min-w-[44px] min-h-[44px] rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="px-6 py-5 space-y-4 overflow-y-auto">
+                    {{-- Detalle de la actividad --}}
+                    <div class="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-lg border border-gray-200 dark:border-slate-700/50 space-y-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border
+                                {{ $activity->status
+                                    ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
+                                    : 'bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' }}">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $activity->status ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12' }}"/>
+                                </svg>
+                                {{ $activity->status ? 'Aprobada' : 'En revisión' }}
+                            </span>
+                            @if($activity->pevaluacion?->lapso)
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">
+                                    {{ $activity->pevaluacion->lapso->name }}
+                                </span>
+                            @endif
+                            @if($activity->finicial && $activity->ffinal)
+                                <span class="text-[10px] font-mono text-gray-600 dark:text-slate-400">
+                                    {{ \Carbon\Carbon::parse($activity->finicial)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($activity->ffinal)->format('d/m/Y') }}
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $activity->topic }}</p>
+                        @if($activity->pevaluacion?->pensum?->asignatura)
+                            <p class="text-xs text-gray-500 dark:text-slate-400">
+                                {{ $activity->pevaluacion->pensum->asignatura->name }}
+                                @if($activity->pevaluacion?->profesor) · {{ $activity->pevaluacion->profesor->fullname }} @endif
+                            </p>
+                        @endif
+                        @if($activity->description)
+                            <p class="text-xs text-gray-600 dark:text-slate-300 leading-relaxed">{{ $activity->description }}</p>
+                        @endif
+                    </div>
+
+                    {{-- Estado de aprobación --}}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">Estado de Aprobación</label>
+                        <div class="flex items-center gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" wire:model="activity_status" value="1"
+                                    class="w-4 h-4 text-emerald-500 bg-white dark:bg-white/5 border-gray-300 dark:border-white/10 focus:ring-emerald-500/50 focus:ring-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">Aprobado</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" wire:model="activity_status" value="0"
+                                    class="w-4 h-4 text-amber-500 bg-white dark:bg-white/5 border-gray-300 dark:border-white/10 focus:ring-amber-500/50 focus:ring-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">En revisión</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Comentario --}}
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400 mb-2">Comentario</label>
+                        <textarea wire:model="comments" rows="4"
+                            class="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none resize-none transition-all"
+                            placeholder="Escribe tu comentario..."></textarea>
+                        @error('comments') <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    @if($activity->comments)
+                        <div class="p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900/30">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-slate-500 mb-1">Comentario actual</p>
+                            <p class="text-xs text-gray-700 dark:text-slate-200 italic">"{{ $activity->comments }}"</p>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="px-6 py-3 bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700/50 flex items-center justify-end gap-2 shrink-0">
+                    <button wire:click="closeActivityReview"
+                            class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
+                        Cancelar
+                    </button>
+                    <button wire:click="saveActivityReview" wire:loading.attr="disabled"
+                            class="px-4 py-1.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
     @endif
     {{-- ============================================================ --}}
     {{-- HELP BUTTON: Guía de estados de lecciones                  --}}

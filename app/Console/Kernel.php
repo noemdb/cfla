@@ -16,11 +16,16 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('voting-sessions:cleanup')->daily();
         $schedule->command('lms:cleanup-media')->weekly();
+
+        // Mantiene legibles los diagramas SVG recién creados/editados.
+        // Idempotente: solo persiste cuando hay cambios reales.
+        $schedule->command('lms:normalize-svgs --dry-run')->hourly()->withoutOverlapping();
     }
 
     protected $commands = [
         \App\Console\Commands\CleanupVotingSessions::class,
         \App\Console\Commands\CleanupLmsMedia::class,
+        \App\Console\Commands\NormalizeSvgContrast::class,
     ];
 
     /**
