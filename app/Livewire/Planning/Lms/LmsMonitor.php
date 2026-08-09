@@ -368,6 +368,9 @@ class LmsMonitor extends Component
     public function publish(int $activityId, ?string $publishAt = null): void
     {
         $activity = Activity::findOrFail($activityId);
+        if (! $this->ensureActivityApproved($activity)) {
+            return;
+        }
         app(LmsPublicationService::class)->publish(
             $activity,
             ['publish_at' => $publishAt, 'allow_comments' => true, 'allow_downloads' => true],
@@ -376,6 +379,25 @@ class LmsMonitor extends Component
         );
         $this->notification()->success('Publicado', 'El contenido ahora es visible para los estudiantes.');
         $this->resetPage();
+    }
+
+    /**
+     * Prohibición de publicación: no se puede publicar/programar una lección
+     * cuya activity asociada esté en revisión (status=0, no aprobada).
+     * Misma regla que Coordinación/LessonList. Retorna false si bloquea.
+     */
+    private function ensureActivityApproved(Activity $activity): bool
+    {
+        if (! $activity->status) {
+            $this->notification()->warning(
+                title: 'No aprobada',
+                description: 'La activity asociada está en revisión. Apruébala antes de publicar la lección.'
+            );
+
+            return false;
+        }
+
+        return true;
     }
 
     public function unpublish(int $activityId): void
@@ -420,6 +442,12 @@ class LmsMonitor extends Component
         ]);
 
         $activity = Activity::findOrFail($this->scheduleActivityId);
+        if (! $this->ensureActivityApproved($activity)) {
+            $this->showScheduleModal = false;
+            $this->scheduleActivityId = null;
+
+            return;
+        }
         app(LmsPublicationService::class)->publish($activity, [
             'publish_at' => $this->schedulePublishAt,
             'unpublish_at' => $this->scheduleUnpublishAt,
@@ -528,22 +556,34 @@ class LmsMonitor extends Component
         $this->validate(['bulkPublishAt' => 'nullable|date']);
 
         $count = 0;
+        $skipped = 0;
         foreach ($this->selectedIds as $id) {
             $activity = Activity::find($id);
-            if ($activity) {
-                app(LmsPublicationService::class)->publish(
-                    $activity,
-                    ['publish_at' => $this->bulkPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
-                    auth()->id(),
-                    true // Planificación: rol autorizado para publicar
-                );
-                $count++;
+            if (! $activity) {
+                continue;
             }
+            if (! $activity->status) {
+                // Prohibición: activity en revisión → se omite (no se publica).
+                $skipped++;
+
+                continue;
+            }
+            app(LmsPublicationService::class)->publish(
+                $activity,
+                ['publish_at' => $this->bulkPublishAt, 'allow_comments' => true, 'allow_downloads' => true],
+                auth()->id(),
+                true // Planificación: rol autorizado para publicar
+            );
+            $count++;
         }
         $this->showBulkPublishModal = false;
         $this->bulkPublishAt = null;
         $this->clearSelection();
-        $this->notification()->success('Publicación masiva', "$count contenido(s) publicado(s).");
+        if ($count > 0) {
+            $this->notification()->success('Publicación masiva', "$count contenido(s) publicado(s)." . ($skipped ? " $skipped omitido(s) por estar en revisión." : ''));
+        } elseif ($skipped > 0) {
+            $this->notification()->warning('Nada publicado', "$skipped seleccionado(s) tienen la activity en revisión. Apruébalas antes de publicar.");
+        }
         $this->resetPage();
     }
 

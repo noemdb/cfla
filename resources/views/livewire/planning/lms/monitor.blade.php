@@ -252,6 +252,8 @@
                         // Alerta: lección publicada pero la activity asociada
                         // sigue en revisión (status=0 → no aprobada).
                         $alertInReview = $pubStatus === 'PUBLISHED' && ! $pub->status;
+                        // Prohibición de publicar/programar: la activity no está aprobada.
+                        $blockPublishActions = ! $pub->status;
                         $rowBg = match($pubStatus) {
                             'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
                             'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
@@ -357,8 +359,9 @@
                                 {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                                 @if($pubStatus === 'SCHEDULED')
                                     <button wire:click="confirmPublish({{ $pub->id }})"
-                                            class="px-2.5 py-1.5 rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all text-xs font-bold flex items-center gap-1"
-                                            title="Publicar ahora (aprobar)">
+                                            @disabled($blockPublishActions)
+                                            class="px-2.5 py-1.5 rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all text-xs font-bold flex items-center gap-1 {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-emerald-600' : '' }}"
+                                            title="{{ $blockPublishActions ? 'No se puede publicar: la activity asociada está en revisión' : 'Publicar ahora (aprobar)' }}">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                         </svg>
@@ -413,14 +416,18 @@
                                         {{-- Publicar / Programar --}}
                                         @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
                                             <button wire:click="confirmPublish({{ $pub->id }})"
-                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    @disabled($blockPublishActions)
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent' : '' }}"
+                                                    title="{{ $blockPublishActions ? 'No se puede publicar: la activity asociada está en revisión' : '' }}">
                                                 <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                                 </svg>
                                                 Publicar ahora
                                             </button>
                                             <button wire:click="openSchedule({{ $pub->id }})"
-                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                                    @disabled($blockPublishActions)
+                                                    class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent' : '' }}"
+                                                    title="{{ $blockPublishActions ? 'No se puede programar: la activity asociada está en revisión' : '' }}">
                                                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
@@ -484,6 +491,8 @@
                 $isPublished = $pubStatus === 'PUBLISHED';
                 // Alerta: lección publicada pero la activity asociada en revisión.
                 $alertInReview = $pubStatus === 'PUBLISHED' && ! $pub->status;
+                // Prohibición de publicar/programar: la activity no está aprobada.
+                $blockPublishActions = ! $pub->status;
                 $cardBg = match($pubStatus) {
                     'PUBLISHED' => 'bg-emerald-200 dark:bg-emerald-950',
                     'SCHEDULED' => 'bg-amber-200 dark:bg-amber-950',
@@ -623,8 +632,9 @@
                     {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                     @if($pubStatus === 'SCHEDULED')
                         <button wire:click="confirmPublish({{ $pub->id }})"
-                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all"
-                                title="Publicar ahora">
+                                @disabled($blockPublishActions)
+                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm border border-emerald-400/40 transition-all {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-emerald-600' : '' }}"
+                                title="{{ $blockPublishActions ? 'No se puede publicar: la activity asociada está en revisión' : 'Publicar ahora' }}">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                             Publicar
                         </button>
@@ -657,12 +667,16 @@
                             {{-- Publicar / Programar --}}
                             @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')
                                 <button wire:click="confirmPublish({{ $pub->id }})"
-                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                        @disabled($blockPublishActions)
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent' : '' }}"
+                                        title="{{ $blockPublishActions ? 'No se puede publicar: la activity asociada está en revisión' : '' }}">
                                     <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                                     Publicar ahora
                                 </button>
                                 <button wire:click="openSchedule({{ $pub->id }})"
-                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
+                                        @disabled($blockPublishActions)
+                                        class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left {{ $blockPublishActions ? 'opacity-40 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent' : '' }}"
+                                        title="{{ $blockPublishActions ? 'No se puede programar: la activity asociada está en revisión' : '' }}">
                                     <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     Programar
                                 </button>
