@@ -125,9 +125,12 @@
             /* border-radius:3.5mm; */
         }
         .cover-page .cover-frame::after{
-            content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm;
-            border:0.3mm solid #f1f5f9;
-            border-radius:2.5mm;
+            /* Marco interior desactivado junto con .cover-frame: sin el frame
+               exterior el hairline suelto (anclado al borde de la portada)
+               queda huérfano. */
+            /* content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm; */
+            /* border:0.3mm solid #f1f5f9; */
+            /* border-radius:2.5mm; */
         }
         /* Círculos decorativos (esquina inferior derecha, estilo libro) */
         .cover-page .cover-rings{
