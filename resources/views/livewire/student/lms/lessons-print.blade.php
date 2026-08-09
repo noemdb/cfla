@@ -165,8 +165,8 @@
             padding:12mm 16mm;
         }
         .cover-page .cover-crest{
-            margin:0 auto 4mm;
-            width:20mm;height:20mm;
+            margin:0 auto 3mm;
+            width:18mm;height:18mm;
         }
         .cover-page .cover-crest-img{
             width:100%;height:100%;
@@ -175,60 +175,66 @@
         }
         .cover-page .cover-inst{
             text-align:center;
-            font-size:2.7mm;
+            font-size:2.5mm;
             font-weight:600;
-            letter-spacing:1.3mm;
+            letter-spacing:1.1mm;
             text-transform:uppercase;
             color:#64748b;
-            margin-bottom:1.2mm;
+            margin-bottom:1mm;
         }
         .cover-page .cover-kicker{
             text-align:center;
-            font-size:2.1mm;
+            font-size:1.9mm;
             font-weight:500;
-            letter-spacing:2mm;
+            letter-spacing:1.8mm;
             text-transform:uppercase;
             color:#eab308;
-            margin-bottom:6mm;
+            margin-bottom:4mm;
         }
         .cover-page .cover-rule{
-            width:16mm;height:1mm;
-            margin:0 auto 6mm;
+            width:14mm;height:0.9mm;
+            margin:0 auto 4mm;
             background:linear-gradient(90deg,#f5d06a,#eab308);
             border-radius:1mm;
         }
         .cover-page .cover-title{
             text-align:center;
-            font-size:5.2mm;
+            font-size:4.6mm;
             font-weight:800;
             line-height:1.2;
             letter-spacing:-0.02em;
             color:#0f172a;
-            margin:0 auto 2mm;
+            margin:0 auto 1.5mm;
             max-width:150mm;
+            /* Truncate agresivo: el título largo no puede desbordar la columna */
+            display:-webkit-box;
+            -webkit-line-clamp:5;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+            text-overflow:ellipsis;
         }
         .cover-page .cover-thematic{
             text-align:center;
-            font-size:2.6mm;
+            font-size:2.4mm;
             font-weight:500;
             color:#64748b;
-            margin-bottom:6mm;
+            margin-bottom:4mm;
         }
         .cover-page .cover-student-label{
             text-align:center;
-            font-size:2mm;
+            font-size:1.8mm;
             font-weight:500;
-            letter-spacing:1mm;
+            letter-spacing:0.9mm;
             text-transform:uppercase;
             color:#94a3b8;
-            margin-bottom:1mm;
+            margin-bottom:0.8mm;
         }
         .cover-page .cover-student{
             text-align:center;
-            font-size:4mm;
+            font-size:3.6mm;
             font-weight:700;
             color:#334155;
-            margin-bottom:6mm;
+            margin-bottom:4mm;
         }
         .cover-page .cover-meta{
             display:flex;
@@ -236,36 +242,36 @@
             gap:0;
             margin:0 auto;
             flex-wrap:wrap;
-            border-top:0.35mm solid #f1f5f9;
-            padding-top:4mm;
-            width:120mm;
+            border-top:0.3mm solid #f1f5f9;
+            padding-top:3mm;
+            width:112mm;
         }
         .cover-page .cover-meta-item{
             display:flex;
             flex-direction:column;
             align-items:center;
-            padding:0 6mm;
+            padding:0 5mm;
             border-right:0.3mm solid #f1f5f9;
         }
         .cover-page .cover-meta-item:last-child{border-right:none;}
         .cover-page .cover-meta-item .k{
-            font-size:1.8mm;
+            font-size:1.7mm;
             font-weight:600;
-            letter-spacing:0.7mm;
+            letter-spacing:0.6mm;
             text-transform:uppercase;
             color:#94a3b8;
-            margin-bottom:0.8mm;
+            margin-bottom:0.7mm;
         }
         .cover-page .cover-meta-item .v{
-            font-size:2.7mm;
+            font-size:2.5mm;
             font-weight:700;
             color:#1e293b;
         }
         .cover-page .cover-foot{
             position:absolute;
-            left:0;right:0;bottom:5mm;
+            left:0;right:0;bottom:4mm;
             text-align:center;
-            font-size:2.1mm;
+            font-size:2mm;
             color:#94a3b8;
             letter-spacing:0.5mm;
         }
@@ -437,7 +443,7 @@
                 page-break-after:column;
                 break-after:column;
             }
-            .cover-page .cover-inner{padding:10mm 10mm 12mm;}
+            .cover-page .cover-inner{padding:8mm 10mm 10mm;}
         }
     </style>
 </head>
