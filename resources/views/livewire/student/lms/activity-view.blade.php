@@ -75,8 +75,19 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
      x-data="readingNav()">
 
     {{-- ═══════════════════════ READING PROGRESS ═══════════════════════ --}}
-<div class="sticky top-14 z-20 -mx-3 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8">
-        <div class="px-3 sm:px-6 md:px-8 pb-2">
+    {{-- La barra de progreso va PEGADA al navbar global (top-14): primero la
+         barra, después el toggle de modo. Ambos sticky; la barra queda
+         justo debajo del nav header. --}}
+    <div class="sticky top-14 z-20 -mx-3 sm:-mx-6 md:-mx-8 -mt-4 sm:-mt-6 md:-mt-8">
+        <div x-show="Alpine.store('lmsView').mode === 'scroll'"
+             role="progressbar"
+             aria-label="Progreso de lectura"
+             :aria-valuenow="progress"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
+             :style="`width: ${progress}%`"></div>
+        <div class="px-3 sm:px-6 md:px-8 pt-2">
             <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-1 shadow-sm"
                  role="radiogroup" aria-label="Modo de lectura">
                 <button type="button"
@@ -97,14 +108,6 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 </button>
             </div>
         </div>
-        <div x-show="Alpine.store('lmsView').mode === 'scroll'"
-             role="progressbar"
-             aria-label="Progreso de lectura"
-             :aria-valuenow="progress"
-             aria-valuemin="0"
-             aria-valuemax="100"
-             class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
-             :style="`width: ${progress}%`"></div>
     </div>
 
     {{-- ═══════════════════════ BREADCRUMB (D1 · Pan rallado) ═══════════════════════ --}}
@@ -749,6 +752,16 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             width: 100% !important;
             flex: 1 !important;
         }
+        /* Móvil: el viewBox nativo de Mermaid puede ser muy ancho (ej. 2212px).
+           En ≤640px el JS (setupUI) establece width explícita a partir del viewBox
+           (~60% ancho natural, máx. 840px) y max-width:none para que el diagrama
+           quede legible con scroll horizontal. El wrapper mermaid-fill-height ya
+           tiene overflow-x-auto (Tailwind class) que gestiona el scroll.
+           Aquí solo nos aseguramos que el target (contenedor del SVG) permita
+           propagar el overflow al wrapper padre. */
+        .mermaid-fill-height > [x-ref="target"] {
+            min-width: 100%;
+        }
 
         /* ── lms-content: alto contraste en headings, tablas, blockquotes ── */
         .lms-content {
@@ -802,6 +815,31 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             margin: 1.2em 0 !important;
             font-size: 0.9em !important;
             line-height: 1.6 !important;
+        }
+        /* Móvil: tablas markdown anchas → scroll horizontal dentro de la
+           tabla en lugar de desbordar la tarjeta. Se conserva el min-width
+           legible y la tabla se vuelve un contenedor scrollable. */
+        @media (max-width: 640px) {
+            .lms-content table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+                width: max-content;
+                min-width: 100%;
+                max-width: 100%;
+            }
+            .lms-content table thead,
+            .lms-content table tbody,
+            .lms-content table tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+            .lms-content table th,
+            .lms-content table td {
+                white-space: normal;
+            }
         }
         .lms-content table thead {
             border-bottom: 2px solid #B0DB9C !important;
@@ -914,20 +952,22 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             height: auto !important;
         }
 
-        /* Móvil: el canvas SVG (viewBox 1000px+) no debe encogerse hasta
-           ilegible; se deja en ancho natural y se hace scroll horizontal.
-           El ancho se decide inline (width del contenedor) via min-width. */
+        /* Móvil: el canvas SVG (viewBox 1000px+) no encoge hasta ilegible.
+           El SVG escala al ancho del contenedor, pero si su ancho natural
+           lo supera, se conserva legible con scroll horizontal dentro del
+           contenedor (overflow-x-auto en .lms-svg-diagram). */
         .lms-svg-diagram {
+            overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pan-x pan-y;
         }
         .lms-svg-diagram svg {
-            min-width: calc(100% - 8px);
+            min-width: max-content;
             margin: 0 auto;
         }
         @media (max-width: 480px) {
             .lms-svg-diagram svg {
-                min-width: 600px;
+                min-width: 480px;
             }
         }
 

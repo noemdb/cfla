@@ -258,12 +258,25 @@ Alpine.data('mermaidEmbed', () => ({
         if (!svgEl) return;
 
         svgEl.style.display = 'block';
-        svgEl.style.maxWidth = '100%';
         svgEl.style.height = 'auto';
         svgEl.style.margin = '0 auto';
         svgEl.style.cursor = 'grab';
         svgEl.style.userSelect = 'none';
         svgEl.style.pointerEvents = 'all';
+
+        // Móvil (≤640px): el diagrama se conserva a una escala legible (~60% del
+        // ancho natural del viewBox, máx. 840px) y el wrapper mermaid-fill-height
+        // hace scroll horizontal.  En desktop/impresión sigue escalando al ancho
+        // del contenedor (max-width: 100% vía CSS de la vista que lo incluye).
+        // El viewBox es la fuente autoritaria de ancho natural del diagrama.
+        const isNarrow = window.matchMedia('(max-width: 640px)').matches;
+        const vbW = svgEl.viewBox?.baseVal?.width || 0;
+        if (isNarrow && vbW > 0) {
+            svgEl.style.setProperty('width', Math.min(vbW, 840) + 'px', 'important');
+            svgEl.style.setProperty('max-width', 'none', 'important');
+        } else {
+            svgEl.style.maxWidth = '100%';
+        }
 
         // Remove the SVG width="100%" attribute — CSS width handles sizing
         // and leaving the attribute can create edge-case conflicts.

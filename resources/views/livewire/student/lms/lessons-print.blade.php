@@ -112,7 +112,7 @@
             box-shadow:0 1px 4px rgba(15,23,42,0.08);
         }
         .cover-page .cover-band{
-            position:absolute;top:0;left:0;right:0;height:13mm;
+            position:absolute;top:0;left:0;right:0;height:7.8mm;
             background:linear-gradient(90deg,#4ade80 0%,#22c55e 55%,#15803d 100%);
         }
         .cover-page .cover-band::after{

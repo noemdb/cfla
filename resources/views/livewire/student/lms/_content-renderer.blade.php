@@ -19,18 +19,14 @@
 
 @php
     $wrapperClasses = $isLast ? '' : 'pb-3 sm:pb-4 border-b border-gray-200';
-    $stepCircle = 'w-8 h-8 rounded-full bg-emerald-600 text-white text-sm';
-    $stepHeader = 'flex items-center justify-center gap-2 mb-2';
+    // El badge con el número del bloque (círculo verde con stepNum) se omite
+    // por directiva del usuario: el header de la sección ya da contexto.
 @endphp
 
 <div wire:key="content-{{ $content->id }}" data-content-type="{{ $contentType }}" class="{{ $wrapperClasses }}">
-    {{-- Step number above content --}}
-    <div class="{{ $stepHeader }}">
-        <span class="flex items-center justify-center font-bold shrink-0 {{ $stepCircle }}">{{ $stepNum }}</span>
-        @if($content->title)
-            <h3 class="text-sm font-display font-bold text-gray-900 leading-snug">{{ $content->title }}</h3>
-        @endif
-    </div>
+    @if($content->title)
+        <h3 class="text-sm font-display font-bold text-gray-900 leading-snug mb-2">{{ $content->title }}</h3>
+    @endif
 
     {{-- Content --}}
     <div class="space-y-1.5">
