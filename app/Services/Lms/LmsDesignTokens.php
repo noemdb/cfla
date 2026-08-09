@@ -53,6 +53,21 @@ class LmsDesignTokens
             '',
             'PROHIBIDO: text-3xl, text-4xl, text-2xl en títulos, p-5/p-6, shadow-lg/shadow-xl.',
             'NO repitas el título de la sección como heading: la plantilla ya lo muestra.',
+            '',
+            '═══ REGLAS DE IMPRESIÓN (modo libro, 2 columnas) ═══',
+            'El contenido se imprime en orientación horizontal con layout de 2 columnas.',
+            'Cada columna tiene ~350px de ancho. Estas reglas aseguran legibilidad en papel:',
+            '',
+            '- Párrafos: máximo 4-5 oraciones (150-200 palabras). Más = ilegible en columna.',
+            '- Tablas: máximo 3 columnas, celdas ≤40 caracteres. Usar listas si hay más campos.',
+            '- Listas (-) preferidas sobre párrafos cuando hay 3+ elementos enumerables.',
+            '- Diagramas Mermaid: máximo 12 nodos, graph TD, viewBox ≤1200px de ancho.',
+            '- Imágenes: SIEMPRE style="max-width:100%;height:auto;" en <img>.',
+            '- Fondos: solo bg-white o gris claro. NUNCA gradientes, bg-emerald-50, bg-amber-50.',
+            '- Cards: solo border-gray-200 + rounded-lg. Sin gradientes, sin sombras de color.',
+            '- Sin bloques de código (```), sin HTML inline, sin mezcla markdown+HTML.',
+            '- Títulos de sección: máximo 50 caracteres (aparecen en header + portada).',
+            '- Preguntas de repaso: respuestas ≤80 palabras.',
         ]);
     }
 }

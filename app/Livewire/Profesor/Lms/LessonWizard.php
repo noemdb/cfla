@@ -1508,6 +1508,13 @@ si mezclas HTML con markdown, los ## quedan visibles y se rompe el contenido.
 Responde ÚNICAMENTE con markdown plano. NO uses ```, NO incluyas explicaciones.
 
 FONDOS: Si incluyes tablas o elementos con color, usa siempre fondos claros (blanco o gris muy claro). NUNCA fondos oscuros.
+
+═══ REGLAS DE IMPRESIÓN (modo libro, 2 columnas) ═══
+El contenido se imprime en orientación horizontal con layout de 2 columnas (~350px cada una).
+- Párrafos: máximo 4-5 oraciones (150-200 palabras). Más = ilegible en columna.
+- Tablas: máximo 3 columnas, celdas ≤40 caracteres. Usar listas si hay más campos.
+- Listas (-) preferidas sobre párrafos cuando hay 3+ elementos enumerables.
+- Sin bloques de código, sin HTML inline.
 PROMPT;
 
         $userPrompt = <<<PROMPT
@@ -2888,6 +2895,15 @@ Reglas estrictas:
 - SIN meta-comentarios, explicaciones ni introducciones antes del formato
 - Alineado con los referentes normativos y el contexto de la actividad
 - NO uses temas genéricos — usa EXACTAMENTE el contexto proporcionado
+
+═══ REGLAS DE IMPRESIÓN (modo libro, 2 columnas) ═══
+El contenido se imprime en orientación horizontal con layout de 2 columnas (~350px cada una).
+- Párrafos: máximo 4-5 oraciones (150-200 palabras). Más = ilegible en columna.
+- Tablas: máximo 3 columnas, celdas ≤40 caracteres. Usar listas si hay más campos.
+- Listas (-) preferidas sobre párrafos cuando hay 3+ elementos enumerables.
+- Títulos de sección: máximo 50 caracteres (aparecen en header + portada).
+- Diagramas: máximo 12 nodos, graph TD, viewBox ≤1200px.
+- Sin bloques de código, sin HTML inline.
 
 --- EJEMPLO 1 (Matemáticas - 5to grado) ---
 
