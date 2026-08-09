@@ -113,7 +113,7 @@
         }
         .cover-page .cover-band{
             position:absolute;top:0;left:0;right:0;height:13mm;
-            background:linear-gradient(90deg,#f5d06a 0%,#eab308 55%,#ca8a04 100%);
+            background:linear-gradient(90deg,#4ade80 0%,#22c55e 55%,#15803d 100%);
         }
         .cover-page .cover-band::after{
             content:'';position:absolute;bottom:-1.8mm;left:0;right:0;height:1.8mm;
@@ -133,24 +133,24 @@
         .cover-page .cover-rings{
             position:absolute;right:-14mm;bottom:-14mm;width:80mm;height:80mm;
             border-radius:50%;
-            border:0.8mm solid #fef3c7;
+            border:0.8mm solid #dcfce7;
             pointer-events:none;
         }
         .cover-page .cover-rings::before{
             content:'';position:absolute;inset:9mm;
             border-radius:50%;
-            border:0.5mm solid #fde68a;
+            border:0.5mm solid #bbf7d0;
         }
         .cover-page .cover-rings::after{
             content:'';position:absolute;inset:19mm;
             border-radius:50%;
-            background:#fef9c3;
+            background:#ecfdf5;
             opacity:0.55;
         }
         /* Rombo decorativo (esquina superior derecha) */
         .cover-page .cover-diamond{
             position:absolute;top:24mm;right:26mm;width:9mm;height:9mm;
-            background:linear-gradient(135deg,#f5d06a,#eab308);
+            background:linear-gradient(135deg,#4ade80,#22c55e);
             transform:rotate(45deg);
             border-radius:1mm;
         }
@@ -188,13 +188,13 @@
             font-weight:500;
             letter-spacing:1.8mm;
             text-transform:uppercase;
-            color:#eab308;
+            color:#16a34a;
             margin-bottom:4mm;
         }
         .cover-page .cover-rule{
             width:14mm;height:0.9mm;
             margin:0 auto 4mm;
-            background:linear-gradient(90deg,#f5d06a,#eab308);
+            background:linear-gradient(90deg,#4ade80,#22c55e);
             border-radius:1mm;
         }
         .cover-page .cover-title{
