@@ -548,8 +548,6 @@
 
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
         <div class="doc-head">
-            <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-            <h2>LECCIÓN LMS · CONTENIDO COMPLETO</h2>
             <div class="sub">
                 {{ $__estudiante }}
                 <span class="sep">·</span> {{ $fecha }}
