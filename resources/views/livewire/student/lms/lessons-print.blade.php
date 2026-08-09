@@ -97,6 +97,179 @@
         /* ── Footer ── */
         .footer{text-align:center;font-size:6.5pt;color:#6b7280;margin-top:10px;padding-top:6px;border-top:1px solid #e2e8f0;}
 
+        /* ─── Portada (cover) — en pantalla: hoja vertical centrada;
+             en print: media página (mitad izquierda del modo libro) ── */
+        .cover-page{
+            position:relative;
+            width:min(210mm, 92%);
+            aspect-ratio:8.5/11;
+            margin:0 auto 14px;
+            padding:0;
+            background:#ffffff;
+            color:#1e293b;
+            overflow:hidden;
+            font-family:Inter,'Segoe UI',system-ui,-apple-system,sans-serif;
+            box-shadow:0 1px 4px rgba(15,23,42,0.08);
+        }
+        .cover-page .cover-band{
+            position:absolute;top:0;left:0;right:0;height:13mm;
+            background:linear-gradient(90deg,#f5d06a 0%,#eab308 55%,#ca8a04 100%);
+        }
+        .cover-page .cover-band::after{
+            content:'';position:absolute;bottom:-1.8mm;left:0;right:0;height:1.8mm;
+            background:linear-gradient(90deg,#475569,#1e293b 55%,#475569);
+        }
+        .cover-page .cover-frame{
+            position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm;
+            border:0.55mm solid #e2e8f0;
+            border-radius:3.5mm;
+        }
+        .cover-page .cover-frame::after{
+            content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm;
+            border:0.3mm solid #f1f5f9;
+            border-radius:2.5mm;
+        }
+        /* Círculos decorativos (esquina inferior derecha, estilo libro) */
+        .cover-page .cover-rings{
+            position:absolute;right:-14mm;bottom:-14mm;width:80mm;height:80mm;
+            border-radius:50%;
+            border:0.8mm solid #fef3c7;
+            pointer-events:none;
+        }
+        .cover-page .cover-rings::before{
+            content:'';position:absolute;inset:9mm;
+            border-radius:50%;
+            border:0.5mm solid #fde68a;
+        }
+        .cover-page .cover-rings::after{
+            content:'';position:absolute;inset:19mm;
+            border-radius:50%;
+            background:#fef9c3;
+            opacity:0.55;
+        }
+        /* Rombo decorativo (esquina superior derecha) */
+        .cover-page .cover-diamond{
+            position:absolute;top:24mm;right:26mm;width:9mm;height:9mm;
+            background:linear-gradient(135deg,#f5d06a,#eab308);
+            transform:rotate(45deg);
+            border-radius:1mm;
+        }
+        .cover-page .cover-diamond::after{
+            content:'';position:absolute;inset:2.2mm;
+            background:#ffffff;
+            border-radius:0.6mm;
+        }
+        .cover-page .cover-inner{
+            position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm;
+            display:flex;flex-direction:column;
+            padding:12mm 16mm;
+        }
+        .cover-page .cover-crest{
+            margin:0 auto 4mm;
+            width:20mm;height:20mm;
+        }
+        .cover-page .cover-crest-img{
+            width:100%;height:100%;
+            object-fit:contain;
+            display:block;
+        }
+        .cover-page .cover-inst{
+            text-align:center;
+            font-size:2.7mm;
+            font-weight:600;
+            letter-spacing:1.3mm;
+            text-transform:uppercase;
+            color:#64748b;
+            margin-bottom:1.2mm;
+        }
+        .cover-page .cover-kicker{
+            text-align:center;
+            font-size:2.1mm;
+            font-weight:500;
+            letter-spacing:2mm;
+            text-transform:uppercase;
+            color:#eab308;
+            margin-bottom:6mm;
+        }
+        .cover-page .cover-rule{
+            width:16mm;height:1mm;
+            margin:0 auto 6mm;
+            background:linear-gradient(90deg,#f5d06a,#eab308);
+            border-radius:1mm;
+        }
+        .cover-page .cover-title{
+            text-align:center;
+            font-size:5.2mm;
+            font-weight:800;
+            line-height:1.2;
+            letter-spacing:-0.02em;
+            color:#0f172a;
+            margin:0 auto 2mm;
+            max-width:150mm;
+        }
+        .cover-page .cover-thematic{
+            text-align:center;
+            font-size:2.6mm;
+            font-weight:500;
+            color:#64748b;
+            margin-bottom:6mm;
+        }
+        .cover-page .cover-student-label{
+            text-align:center;
+            font-size:2mm;
+            font-weight:500;
+            letter-spacing:1mm;
+            text-transform:uppercase;
+            color:#94a3b8;
+            margin-bottom:1mm;
+        }
+        .cover-page .cover-student{
+            text-align:center;
+            font-size:4mm;
+            font-weight:700;
+            color:#334155;
+            margin-bottom:6mm;
+        }
+        .cover-page .cover-meta{
+            display:flex;
+            justify-content:center;
+            gap:0;
+            margin:0 auto;
+            flex-wrap:wrap;
+            border-top:0.35mm solid #f1f5f9;
+            padding-top:4mm;
+            width:120mm;
+        }
+        .cover-page .cover-meta-item{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            padding:0 6mm;
+            border-right:0.3mm solid #f1f5f9;
+        }
+        .cover-page .cover-meta-item:last-child{border-right:none;}
+        .cover-page .cover-meta-item .k{
+            font-size:1.8mm;
+            font-weight:600;
+            letter-spacing:0.7mm;
+            text-transform:uppercase;
+            color:#94a3b8;
+            margin-bottom:0.8mm;
+        }
+        .cover-page .cover-meta-item .v{
+            font-size:2.7mm;
+            font-weight:700;
+            color:#1e293b;
+        }
+        .cover-page .cover-foot{
+            position:absolute;
+            left:0;right:0;bottom:5mm;
+            text-align:center;
+            font-size:2.1mm;
+            color:#94a3b8;
+            letter-spacing:0.5mm;
+        }
+
         @media print {
             /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MÁS COMPACTO */
             @page {
@@ -248,6 +421,23 @@
             /* Footer */
             .footer{text-align:center;font-size:4.5pt; color:#64748b;margin-top:6px;
                     padding-top:2px;border-top:1px solid #e2e8f0;} /* 6px as requested */
+
+            /* Portada: ocupa la página izquierda (columna 1) del modo libro.
+               Altura = altura útil de la columna (100vh - márgenes @page 0.9cm×2);
+               break-after:column fuerza que el contenido arranque en la página
+               derecha (columna 2) de la misma hoja. */
+            .cover-page{
+                width:100%;
+                height:calc(100vh - 1.8cm);
+                aspect-ratio:auto;
+                margin:0;
+                box-shadow:none;
+                page-break-inside:avoid;
+                break-inside:avoid;
+                page-break-after:column;
+                break-after:column;
+            }
+            .cover-page .cover-inner{padding:10mm 10mm 12mm;}
         }
     </style>
 </head>
@@ -292,9 +482,57 @@
 
         <div class="no-content">Esta lección no está disponible o no tienes permiso para verla.</div>
     @else
-    {{-- Modo libro: el membrete abre la columna 1 (primera "página" de la hoja
+    {{-- Modo libro: la portada abre la columna 1 (primera "página" de la hoja
          horizontal) y la lección fluye de forma continua; el footer cierra. --}}
     <div class="lessons-columns">
+        {{-- Portada (cover): abre la columna 1 = página izquierda de la hoja --}}
+        <div class="cover-page">
+            <div class="cover-band"></div>
+            <div class="cover-frame"></div>
+            <div class="cover-rings"></div>
+            <div class="cover-diamond"></div>
+
+            <div class="cover-inner">
+                {{-- Logo institucional --}}
+                <div class="cover-crest">
+                    <img src="{{ asset('image/logo/logo1x1.png') }}" alt="{{ $institucion?->name }}" class="cover-crest-img">
+                </div>
+
+                <div class="cover-inst">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
+                <div class="cover-kicker">Lección · Contenido completo</div>
+                <div class="cover-rule"></div>
+
+                <h1 class="cover-title">{{ $activity->topic ?: 'Lección sin título' }}</h1>
+                @if($activity->thematic)
+                    <div class="cover-thematic">{{ $activity->thematic }}</div>
+                @endif
+
+                <div class="cover-student-label">Presentado para</div>
+                <div class="cover-student">{{ $__estudiante }}</div>
+
+                <div class="cover-meta">
+                    <div class="cover-meta-item">
+                        <span class="k">Asignatura</span>
+                        <span class="v">{{ $activity->pevaluacion?->pensum?->asignatura?->name ?: '—' }}</span>
+                    </div>
+                    <div class="cover-meta-item">
+                        <span class="k">Grado · Sección</span>
+                        <span class="v">{{ trim(($activity->pevaluacion?->grado?->name ?? '').' '.($activity->pevaluacion?->seccion?->name ?? '')) ?: '—' }}</span>
+                    </div>
+                    <div class="cover-meta-item">
+                        <span class="k">Lapso</span>
+                        <span class="v">{{ $activity->pevaluacion?->lapso?->name ?: '—' }}</span>
+                    </div>
+                    <div class="cover-meta-item">
+                        <span class="k">Fecha</span>
+                        <span class="v">{{ $fecha }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div>
+        </div>
+
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
         <div class="doc-head">
             <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>

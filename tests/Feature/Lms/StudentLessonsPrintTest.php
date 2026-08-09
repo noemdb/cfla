@@ -177,7 +177,8 @@ class StudentLessonsPrintTest extends TestCase
 
         // El tag roto no debe llegar al HTML impreso (se eliminó el elemento).
         $this->assertStringNotContainsString('<rect x="560"', $html);
-        // El <svg> queda cerrado exactamente una vez (reparación).
+        // El <svg> queda cerrado exactamente una vez (reparación). La portada
+        // usa el logo institucional (<img>), no un SVG.
         $this->assertSame(1, substr_count($html, '</svg>'));
         // El wrapper figure se conserva en la salida.
         $this->assertStringContainsString('</figure>', $html);
