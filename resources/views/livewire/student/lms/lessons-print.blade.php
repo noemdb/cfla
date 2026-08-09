@@ -101,9 +101,9 @@
              en print: media página (mitad izquierda del modo libro) ── */
         .cover-page{
             position:relative;
-            width:min(210mm, 92%);
+            width:min(200mm, 80%);
             aspect-ratio:8.5/11;
-            margin:0 auto 14px;
+            margin:0 auto 6px;
             padding:0;
             background:#ffffff;
             color:#1e293b;
@@ -160,9 +160,9 @@
             border-radius:0.6mm;
         }
         .cover-page .cover-inner{
-            position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm;
+            position:absolute;top:6mm;left:6mm;right:6mm;bottom:6mm;
             display:flex;flex-direction:column;
-            padding:12mm 16mm;
+            padding:4mm 4mm;
         }
         .cover-page .cover-crest{
             margin:0 auto 3mm;
@@ -244,7 +244,7 @@
             flex-wrap:wrap;
             border-top:0.3mm solid #f1f5f9;
             padding-top:3mm;
-            width:112mm;
+            width:auto;
         }
         .cover-page .cover-meta-item{
             display:flex;
@@ -478,7 +478,7 @@
     {{-- Barra de acciones --}}
     <div class="print-bar">
         <button id="btn-print" class="btn-print" type="button" onclick="handlePrint()" aria-label="Imprimir o guardar PDF">
-            �� 🖨 Imprimir / Guardar PDF
+            🖨 Imprimir / Guardar PDF
         </button>
     </div>
 
@@ -486,7 +486,7 @@
     {{-- Cabecera del documento (caso sin actividad) --}}
     <div class="doc-head">
         <h1>{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</h1>
-        <h2>LECCIÓN LMS · CONTENIDO COMPLETO</h2>
+        {{-- <h2>LECCIÓN LMS · CONTENIDO COMPLETO</h2> --}}
         <div class="sub">
             {{ $__estudiante }}
             <span class="sep">·</span> {{ $fecha }}
@@ -500,9 +500,9 @@
     <div class="lessons-columns">
         {{-- Portada (cover): abre la columna 1 = página izquierda de la hoja --}}
         <div class="cover-page">
-            <div class="cover-band"></div>
+            {{-- <div class="cover-band"></div> --}}
             <div class="cover-frame"></div>
-            <div class="cover-rings"></div>
+            {{-- <div class="cover-rings"></div> --}}
             <div class="cover-diamond"></div>
 
             <div class="cover-inner">
@@ -512,7 +512,6 @@
                 </div>
 
                 <div class="cover-inst">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
-                <div class="cover-kicker">Lección · Contenido completo</div>
                 <div class="cover-rule"></div>
 
                 <h1 class="cover-title">{{ $activity->topic ?: 'Lección sin título' }}</h1>
