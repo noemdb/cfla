@@ -120,9 +120,9 @@
             background:linear-gradient(90deg,#475569,#1e293b 55%,#475569);
         }
         .cover-page .cover-frame{
-            position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm;
-            border:0.55mm solid #e2e8f0;
-            border-radius:3.5mm;
+            /* position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm; */
+            /* border:0.55mm solid #e2e8f0; */
+            /* border-radius:3.5mm; */
         }
         .cover-page .cover-frame::after{
             content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm;
@@ -162,7 +162,7 @@
         .cover-page .cover-inner{
             position:absolute;top:6mm;left:6mm;right:6mm;bottom:6mm;
             display:flex;flex-direction:column;
-            padding:4mm 4mm;
+           /*  padding:4mm 4mm; */
         }
         .cover-page .cover-crest{
             margin:0 auto 3mm;
@@ -181,6 +181,10 @@
             text-transform:uppercase;
             color:#64748b;
             margin-bottom:1mm;
+            /* Truncate agresivo: el nombre largo de la institución no desborda */
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
         }
         .cover-page .cover-kicker{
             text-align:center;
@@ -219,6 +223,12 @@
             font-weight:500;
             color:#64748b;
             margin-bottom:4mm;
+            /* Truncate agresivo: el tejido temático largo no puede desbordar */
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+            text-overflow:ellipsis;
         }
         .cover-page .cover-student-label{
             text-align:center;
@@ -434,8 +444,13 @@
                derecha (columna 2) de la misma hoja. */
             .cover-page{
                 width:100%;
-                height:calc(100vh - 1.8cm);
-                max-height:calc(100vh - 1.8cm);
+                /* Margen de seguridad agresivo: 100vh puede igualar la altura
+                   exacta de la columna en impresión y cualquier redondeo la
+                   empuja a la siguiente. Se resta 2.8cm (en vez de 1.8cm)
+                   para garantizar que SIEMPRE quepa en la columna 1. */
+                height:calc(100vh - 2.8cm);
+                max-height:calc(100vh - 2.8cm);
+                min-height:0;
                 aspect-ratio:auto;
                 margin:0;
                 box-shadow:none;
@@ -446,8 +461,9 @@
                 break-after:column;
             }
             .cover-page .cover-inner{
-                padding:5mm 10mm 6mm;
-                max-height:calc(100vh - 5cm);
+                padding:4mm 10mm 4mm;
+                max-height:calc(100vh - 6cm);
+                min-height:0;
                 overflow:hidden;
             }
 
