@@ -158,7 +158,7 @@ class RepairMermaidsCommandTest extends TestCase
 
         $before = LmsHtmlEmbed::find($embedId)->html_content;
 
-        $exit = Artisan::call('lms:repair-mermaid', ['--dry-run' => true]);
+        $exit = Artisan::call('lms:repair-mermaid', ['--ids' => [$embedId], '--dry-run' => true]);
         $output = Artisan::output();
 
         $this->assertSame(0, $exit);
@@ -201,7 +201,7 @@ class RepairMermaidsCommandTest extends TestCase
         ])->id;
 
         // 1ª ejecución: repara y persiste
-        $exit = Artisan::call('lms:repair-mermaid');
+        $exit = Artisan::call('lms:repair-mermaid', ['--ids' => [$embedId, $contentId]]);
         $output = Artisan::output();
 
         $this->assertSame(0, $exit);
@@ -217,7 +217,7 @@ class RepairMermaidsCommandTest extends TestCase
         $this->assertStringContainsString('class="mermaid"', $content->body);
 
         // 2ª ejecución: idempotente, nada que reparar
-        $exit2 = Artisan::call('lms:repair-mermaid', ['--dry-run' => true]);
+        $exit2 = Artisan::call('lms:repair-mermaid', ['--ids' => [$embedId, $contentId], '--dry-run' => true]);
         $output2 = Artisan::output();
 
         $this->assertSame(0, $exit2);

@@ -60,22 +60,27 @@ class LmsMermaidRepairService
         }, $code);
 
         // 2. Partir etiquetas largas (35+ chars) en multi-línea con <br/>.
+        //    Idempotente: respeta los <br/> ya existentes (cada segmento se
+        //    re-particiona por palabras de forma independiente), de modo que
+        //    postProcess(postProcess(x)) === postProcess(x).
         return preg_replace_callback('/\["([^"]{35,})"\]/', function ($m) {
             $text = $m[1];
-            $words = preg_split('/\s+/', $text);
             $lines = [];
-            $currentLine = '';
-            foreach ($words as $word) {
-                $test = $currentLine ? $currentLine.' '.$word : $word;
-                if (mb_strlen($test) > 28 && $currentLine) {
-                    $lines[] = $currentLine;
-                    $currentLine = $word;
-                } else {
-                    $currentLine = $test;
+            foreach (preg_split('/<br\s*\/?>/i', $text) as $segment) {
+                $words = preg_split('/\s+/', trim($segment));
+                $currentLine = '';
+                foreach ($words as $word) {
+                    $test = $currentLine ? $currentLine.' '.$word : $word;
+                    if (mb_strlen($test) > 28 && $currentLine) {
+                        $lines[] = $currentLine;
+                        $currentLine = $word;
+                    } else {
+                        $currentLine = $test;
+                    }
                 }
-            }
-            if ($currentLine) {
-                $lines[] = $currentLine;
+                if ($currentLine !== '') {
+                    $lines[] = $currentLine;
+                }
             }
 
             return '["'.implode('<br/>', $lines).'"]';
@@ -135,15 +140,18 @@ class LmsMermaidRepairService
             $issues[] = "demasiadas flechas ({$arrows}; máximo recomendado 11)";
         }
 
-        // Label más largo (solo labels quoted ["..."] o arreglos multi-línea)
+        // Label más largo (solo labels quoted ["..."] o arreglos multi-línea):
+        // mide POR LÍNEA (los <br/> existentes no suman caracteres).
         $maxLabel = 0;
         if (preg_match_all('/\["([^"]*)"/', $src, $mLabels)) {
             foreach ($mLabels[1] as $label) {
-                $maxLabel = max($maxLabel, mb_strlen($label));
+                foreach (preg_split('/<br\s*\/?>/i', $label) as $line) {
+                    $maxLabel = max($maxLabel, mb_strlen($line));
+                }
 
                 // Palabras concatenadas sin espacios (ej. "AutoconocimientoVocacional"):
                 // un run de 23+ caracteres sin espacio delata la concatenación.
-                if (preg_match('/[^\s]{23,}/u', $label)) {
+                if (preg_match('/[^\s]{23,}/u', preg_replace('/<br\s*\/?>/i', ' ', $label))) {
                     $issues[] = "hay palabras concatenadas sin espacios en una etiqueta (\"{$label}\"; separa cada palabra con espacio o <br/>)";
                 }
             }
