@@ -79,64 +79,13 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Resultados</label>
-                <select wire:model.live="paginate"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
+                <select wire:model.live="filter_status"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="9999">Todos</option>
+                    <option value="">Todas</option>
+                    <option value="approved">Aprobada</option>
+                    <option value="pending">En revisión</option>
                 </select>
-            </div>
-
-            <div class="flex items-end gap-4">
-                {{-- Toggle En Revisión --}}
-                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none group">
-                    <input type="checkbox" wire:model.live="filter_revision" class="sr-only peer">
-                    <div class="relative w-10 h-6 rounded-full transition-all duration-500 peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-lg peer-checked:shadow-amber-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-md after:border after:border-gray-200 dark:after:border-white/10 peer-checked:after:shadow-amber-500/30 group-hover:after:scale-110 peer-checked:group-hover:after:scale-110"></div>
-                    <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-amber-600 dark:peer-checked:text-amber-400 transition-all duration-300 peer-checked:drop-shadow-[0_1px_2px_rgba(217,119,6,0.15)]">
-                        <svg class="w-3.5 h-3.5 transition-transform duration-300 peer-checked:scale-110 peer-checked:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
-                        </svg>
-                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 peer-checked:bg-amber-500 transition-all duration-300 peer-checked:shadow-[0_0_6px_rgba(217,119,6,0.5)]"></span>
-                        En revisión
-                    </span>
-                    <span wire:loading wire:target="filter_revision" class="w-3 h-3">
-                        <svg class="w-3 h-3 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                    </span>
-                </label>
-
-                {{-- Filter: Estado (pendientes / aprobadas) — segmented control --}}
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Estado</label>
-                    <div class="flex rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden">
-                        <button type="button" wire:click="$set('filter_status', '')"
-                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
-                                {{ $filter_status === '' ? 'bg-emerald-500/15 text-emerald-400 border-r border-r-emerald-500/30 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 border-r border-gray-200 dark:border-white/10' }}">
-                            Todos
-                        </button>
-                        <button type="button" wire:click="$set('filter_status', 'pending')"
-                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
-                                {{ $filter_status === 'pending' ? 'bg-amber-500/15 text-amber-400 border-r border-r-amber-500/30 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 border-r border-gray-200 dark:border-white/10' }}">
-                            <span class="flex items-center justify-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $filter_status === 'pending' ? 'bg-amber-400' : 'bg-gray-400' }}"></span>
-                                Pendientes
-                            </span>
-                        </button>
-                        <button type="button" wire:click="$set('filter_status', 'approved')"
-                            class="flex-1 min-h-[44px] px-3 py-2 text-[11px] font-bold transition-all duration-200
-                                {{ $filter_status === 'approved' ? 'bg-emerald-500/15 text-emerald-400 shadow-inner' : 'bg-gray-50 dark:bg-white/5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10' }}">
-                            <span class="flex items-center justify-center gap-1.5">
-                                <svg class="w-3 h-3 {{ $filter_status === 'approved' ? 'text-emerald-400' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                Aprobadas
-                            </span>
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -223,7 +172,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $status_activities ?? 'all' }}">
+             wire:key="tab-content-grid-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_status ?: 'all' }}-{{ $status_activities ?? 'all' }}">
             <div class="bg-gray-900/60 border border-white/5 rounded-2xl p-5">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     @forelse($pevaluacions as $item)
@@ -416,7 +365,7 @@
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100">
             <!-- ===== TABBED CONTENT (Lapso tabs) ===== -->
-            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_revision ? 'rev' : 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
+            <div wire:key="tab-content-{{ $lapso_id }}-{{ $pestudio_id ?? 'all' }}-{{ $filter_status ?: 'all' }}-{{ $status_activities ?? 'all' }}" class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg overflow-hidden">
 
         {{-- Tab Navigation --}}
         <div class="border-b border-gray-200 dark:border-white/5">

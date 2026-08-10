@@ -11,12 +11,16 @@ use Illuminate\Support\Facades\Auth;
 class ActivityOverview extends IndexComponent
 {
     public $showLessonPreview = false;
+
     public $previewLessonActivity;
 
     // ─── Publicar lección programada (SCHEDULED → PUBLISHED) ───
     public bool $showApproveModal = false;
+
     public ?int $approveActivityId = null;
+
     public string $approveActivityTitle = '';
+
     public ?string $approvePublishAt = null;   // fecha publicada; vacío → ahora
 
     public function confirmApproveLesson(int $activityId): void
@@ -44,7 +48,7 @@ class ActivityOverview extends IndexComponent
 
     public function doApproveLesson(): void
     {
-        if (!$this->approveActivityId) {
+        if (! $this->approveActivityId) {
             return;
         }
 
@@ -59,15 +63,17 @@ class ActivityOverview extends IndexComponent
             $service->assertCanAccessAsignatura($asignaturaId);
         }
 
-        if (!$activity->lmsPublication || $activity->lmsPublication->status !== 'SCHEDULED') {
+        if (! $activity->lmsPublication || $activity->lmsPublication->status !== 'SCHEDULED') {
             $this->dispatch('notify', message: 'Esta lección ya no está programada.', type: 'warning');
             $this->cancelApproveLesson();
+
             return;
         }
 
-        if (!$activity->status) {
+        if (! $activity->status) {
             $this->dispatch('notify', message: 'La actividad debe estar aprobada para poder publicarla.', type: 'warning');
             $this->cancelApproveLesson();
+
             return;
         }
 
@@ -76,8 +82,8 @@ class ActivityOverview extends IndexComponent
             : now();
 
         $activity->lmsPublication->update([
-            'status'       => 'PUBLISHED',
-            'publish_at'   => $publishAt,                 // nunca nulo (default now())
+            'status' => 'PUBLISHED',
+            'publish_at' => $publishAt,                 // nunca nulo (default now())
             'published_at' => $publishAt->gt(now()) ? null : now(),
             'published_by' => Auth::id(),
         ]);
@@ -104,25 +110,25 @@ class ActivityOverview extends IndexComponent
             'profesor',
             'lapso',
         ])
-        ->with('activities.lmsPublication')
-        ->with('activities.lmsSections')
-        ->withCount([
-            'activities',
-            'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
-            'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
-            'activities as activities_lessons_count' => fn($q) => $q->whereHas('lmsPublication'),
-        ])
-        ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
-        ->whereNull('pevaluacions.deleted_at');
+            ->with('activities.lmsPublication')
+            ->with('activities.lmsSections')
+            ->withCount([
+                'activities',
+                'activities as activities_revision_count' => fn ($q) => $q->where('status', 0),
+                'activities as activities_approved_count' => fn ($q) => $q->where('status', 1),
+                'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
+            ])
+            ->whereHas('pensum.pestudio', fn ($q) => $q->where('planning_module', true))
+            ->whereNull('pevaluacions.deleted_at');
 
         // Apply leadership scope before filters
         $query = $service->scopePevaluacions($query);
 
         if (isset($filters['pestudio_id'])) {
-            $query->whereHas('pensum.pestudio', fn($q) => $q->where('id', $filters['pestudio_id']));
+            $query->whereHas('pensum.pestudio', fn ($q) => $q->where('id', $filters['pestudio_id']));
         }
         if (isset($filters['grado_id'])) {
-            $query->whereHas('seccion.grado', fn($q) => $q->where('id', $filters['grado_id']));
+            $query->whereHas('seccion.grado', fn ($q) => $q->where('id', $filters['grado_id']));
         }
         if (isset($filters['seccion_id'])) {
             $query->where('seccion_id', $filters['seccion_id']);
@@ -140,20 +146,16 @@ class ActivityOverview extends IndexComponent
                 $query->having('activities_count', '=', 0);
             }
         }
-        if (!empty($filters['filter_observations'])) {
+        if (! empty($filters['filter_observations'])) {
             $query->whereNotNull('pevaluacions.observations')
-                  ->where('pevaluacions.observations', '!=', '');
+                ->where('pevaluacions.observations', '!=', '');
         }
-        if (!empty($filters['filter_revision'])) {
-            $query->whereHas('activities', fn($q) => $q->where('status', 0));
-        }
-
-        if (!empty($filters['filter_status'])) {
+        if (! empty($filters['filter_status'])) {
             if ($filters['filter_status'] === 'pending') {
-                $query->whereHas('activities', fn($q) => $q->where('status', 0));
+                $query->whereHas('activities', fn ($q) => $q->where('status', 0));
             } elseif ($filters['filter_status'] === 'approved') {
                 $query->has('activities')
-                      ->whereDoesntHave('activities', fn($q) => $q->where('status', 0));
+                    ->whereDoesntHave('activities', fn ($q) => $q->where('status', 0));
             }
         }
 
@@ -161,6 +163,7 @@ class ActivityOverview extends IndexComponent
 
         if ((int) $this->paginate === 9999) {
             $all = $query->get();
+
             return new \Illuminate\Pagination\LengthAwarePaginator(
                 $all,
                 $all->count(),
@@ -205,15 +208,14 @@ class ActivityOverview extends IndexComponent
             'profesor_id' => $this->profesor_id,
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
-            'filter_revision' => $this->filter_revision ? true : null,
             'filter_status' => $this->filter_status ?: null,
-        ], fn($v) => $v !== null && $v !== '');
+        ], fn ($v) => $v !== null && $v !== '');
 
         $pevaluacions = $this->getPevaluaciones($filters);
 
         $activeTabIndex = 1;
         if ($this->tabsLapsos && $this->lapso_id) {
-            $found = $this->tabsLapsos->search(fn($lapso) => $lapso->id == $this->lapso_id);
+            $found = $this->tabsLapsos->search(fn ($lapso) => $lapso->id == $this->lapso_id);
             if ($found !== false) {
                 $activeTabIndex = $found + 1;
             }

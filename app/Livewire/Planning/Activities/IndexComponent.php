@@ -90,7 +90,6 @@ class IndexComponent extends Component
             'profesor_id' => $this->profesor_id,
             'status_activities' => $this->status_activities,
             'filter_observations' => $this->filter_observations ? true : null,
-            'filter_revision' => $this->filter_revision ? true : null,
             'filter_status' => $this->filter_status ?: null,
         ], fn($v) => $v !== null && $v !== '');
 

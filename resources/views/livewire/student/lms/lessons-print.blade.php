@@ -231,6 +231,7 @@
             font-weight:500;
             color:#64748b;
             margin-bottom:4mm;
+            margin: 12px;
             /* Truncate agresivo: el tejido temático largo no puede desbordar */
             display:-webkit-box;
             -webkit-line-clamp:2;
@@ -258,7 +259,7 @@
             display:flex;
             justify-content:center;
             gap:0;
-            margin:0 auto;
+            margin: 4px auto;
             flex-wrap:wrap;
             border-top:0.3mm solid #f1f5f9;
             padding-top:3mm;
@@ -535,9 +536,9 @@
     <div class="lessons-columns">
         {{-- Portada (cover): abre la columna 1 = página izquierda de la hoja --}}
         <div class="cover-page">
-            <div class="cover-band"></div>
+            {{-- <div class="cover-band"></div> --}}
             <div class="cover-frame"></div>
-            <div class="cover-rings"></div>
+            {{-- <div class="cover-rings"></div> --}}
             <div class="cover-diamond"></div>
 
             <div class="cover-inner">
@@ -547,7 +548,7 @@
                 </div>
 
                 <div class="cover-inst">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
-                <div class="cover-kicker">Lección · Contenido completo</div>
+                {{-- <div class="cover-kicker">Lección · Contenido completo</div> --}}
                 <div class="cover-rule"></div>
 
                 <h1 class="cover-title">{{ $activity->topic ?: 'Lección sin título' }}</h1>
@@ -578,11 +579,11 @@
                 </div>
             </div>
 
-            <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div>
+            {{-- <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div> --}}
         </div>
 
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
-        <div class="doc-head">
+        {{-- <div class="doc-head">
             <div class="sub">
                 {{ $__estudiante }}
                 <span class="sep">·</span> {{ $fecha }}
@@ -599,7 +600,7 @@
                     <span class="sep">·</span> Sección {{ $activity->pevaluacion?->seccion?->name }}
                 @endif
             </div>
-        </div>
+        </div> --}}
 
         @php
             $i = 0; // Índice de la lección (siempre 0 para una sola lección)
