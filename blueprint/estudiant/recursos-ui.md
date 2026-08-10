@@ -70,6 +70,18 @@ La página era funcional pero no seguía los patrones ya establecidos en el rest
 - **Acciones:** botones `text-[10px]` → `text-xs` con `px-3/3.5 py-1.5`, iconos `w-4 h-4`; **Descargar pasa a sólido** (`bg-emerald-600 text-white shadow-sm`, contraste AA) — acción primaria clara frente a "Vista previa" (ghost con borde). Hover con sombra: `hover:shadow-md hover:shadow-gray-900/5`.
 - **Skeleton:** silueta a la nueva escala (mismo `wire:loading` scoped R1).
 
+### R8 · Modal especial para recursos HTML embebidos (2026-08-10)
+
+Los recursos `LmsHtmlEmbed` (videos de YouTube/iframes) abren ahora un **modal propio** al pulsar "Vista previa", en lugar del modal genérico:
+
+- **Cableado por tipo:** el botón de la tarjeta embed pasa el tipo explícito — `wire:click="preview({{ $resource->id }}, 'embed')"`. El lookup ya no es por id a secas: `LmsActivityResource` y `LmsHtmlEmbed` tienen espacios de IDs independientes y colisionaban (un embed cuyo id coincidía con un recurso previsualizaba el recurso equivocado).
+- **Estado separado:** `showEmbedPreviewModal` + `embedPreview` (nuevos), independientes del modal genérico (`showPreviewModal`/`previewResource`). `closeEmbedPreview()` con el mismo patrón R5: Escape cierra, foco inicial en `data-embed-preview-close`, retorno al `data-preview-trigger-{id}` de la tarjeta.
+- **Contenido real:** el cuerpo renderiza `html_content` (no `description`, que en la lista es `''` — el preview anterior mostraba un contenedor vacío). Wrapper `overflow-x-auto` para iframes anchos; empty state si no hay HTML.
+- **Cabeza:** título del embed + topic de la actividad + asignatura (eager load `activity.pevaluacion.pensum.asignatura`).
+- **Servicio:** lookup extraído a `previewEmbed(int $embedId)` privado (visibilidad por sección + publicación idéntica al resto).
+- **Tests:** `test_embed_preview_opens_special_modal_with_html_content` en `StudentResourceTest` (14 aserciones: apertura del modal especial, no del genérico, atributos ARIA, render del iframe, cierre).
+- **Descargar en pestaña nueva:** los botones "Descargar" del footer del modal genérico Y de las tarjetas de la lista abren en `target="_blank"` con `rel="noopener noreferrer"` (cubierto por aserciones en `test_preview_modal_is_an_accessible_dialog` y `test_resources_cards_have_larger_scale_and_solid_download`).
+
 ---
 
 ## 3. Referencias cruzadas

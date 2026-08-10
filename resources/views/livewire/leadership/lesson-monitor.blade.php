@@ -3,7 +3,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
             <h1 class="text-lg font-extrabold text-gray-900 dark:text-white mb-2">Lecciones LMS</h1>
-            <p class="text-amber-600 dark:text-amber-400 font-medium text-sm">Monitoreo de contenido publicado</p>
+            <p class="text-amber-600 dark:text-amber-400 font-medium text-sm">Monitoreo de contenido programado</p>
         </div>
     </div>
 
@@ -56,31 +56,13 @@
                 </select>
             </div>
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Resultados</label>
-                <select wire:model.live="paginate"
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Estado</label>
+                <select wire:model.live="filter_status"
                     class="w-full min-h-[44px] bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 outline-none transition-all">
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="9999">Todos</option>
+                    <option value="">Todos</option>
+                    <option value="PUBLISHED">Solo publicadas</option>
+                    <option value="SCHEDULED">Solo programadas</option>
                 </select>
-            </div>
-            <div class="flex items-end gap-3">
-                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none group">
-                    <input type="checkbox" wire:model.live="filter_published" class="sr-only peer">
-                    <div class="relative w-10 h-6 rounded-full transition-all duration-500 peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-lg peer-checked:shadow-amber-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-md after:border after:border-gray-200 dark:after:border-white/10 peer-checked:after:shadow-amber-500/30 group-hover:after:scale-110 peer-checked:group-hover:after:scale-110"></div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-amber-600 dark:peer-checked:text-amber-400 transition-all duration-300 peer-checked:drop-shadow-[0_1px_2px_rgba(217,119,6,0.15)]">
-                        Solo publicadas
-                    </span>
-                </label>
-                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none group">
-                    <input type="checkbox" wire:model.live="filter_scheduled" class="sr-only peer">
-                    <div class="relative w-10 h-6 rounded-full transition-all duration-500 peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-lg peer-checked:shadow-amber-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-md after:border after:border-gray-200 dark:after:border-white/10 peer-checked:after:shadow-amber-500/30 group-hover:after:scale-110 peer-checked:group-hover:after:scale-110"></div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-amber-600 dark:peer-checked:text-amber-400 transition-all duration-300 peer-checked:drop-shadow-[0_1px_2px_rgba(217,119,6,0.15)]">
-                        Solo programadas
-                    </span>
-                </label>
             </div>
         </div>
     </div>

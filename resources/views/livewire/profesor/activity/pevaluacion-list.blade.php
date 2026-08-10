@@ -24,7 +24,7 @@
 
         {{-- Search Filters (livewire internos) --}}
         <div class="mb-3">
-            <form wire:submit.prevent="$refresh" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <form wire:submit.prevent="$refresh" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
                 <input type="hidden" wire:model="lapsoId" name="lapso_id">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Plan de Estudio</label>
@@ -56,6 +56,26 @@
                         @endforeach
                     </select>
                 </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Actividades/Lecciones</label>
+                    <select wire:model.live="status_activities"
+                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                        <option value="">Todas</option>
+                        <option value="SI">Con actividades</option>
+                        <option value="NO">Sin actividades</option>
+                        <option value="SI_LE">Con lecciones</option>
+                        <option value="NO_LE">Sin lecciones</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Estado</label>
+                    <select wire:model.live="filter_status"
+                        class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200">
+                        <option value="">Todas</option>
+                        <option value="approved">Aprobada</option>
+                        <option value="pending">En revisión</option>
+                    </select>
+                </div>
                 <div class="flex items-end gap-2">
                     <button type="submit"
                         class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 rounded-lg border border-emerald-500/20 transition-all duration-200 text-[11px] font-bold">
@@ -70,6 +90,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
+                </div>
+
+                {{-- Toggle Observaciones --}}
+                <div class="flex items-end gap-4 col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-6">
+                    <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
+                        <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
+                        <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
+                            <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Observaciones
+                        </span>
+                        <span wire:loading wire:target="filter_observations" class="w-3 h-3">
+                            <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </span>
+                    </label>
                 </div>
             </form>
         </div>

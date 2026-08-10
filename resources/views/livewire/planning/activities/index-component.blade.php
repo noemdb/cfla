@@ -36,17 +36,6 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesor_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($list_profesors as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
                 <select wire:model.live="grado_id"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -69,12 +58,25 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades</label>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
+                <select wire:model.live="profesor_id"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todos</option>
+                    @foreach($list_profesors as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
                 <select wire:model.live="status_activities"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
                     <option value="NO">Sin actividades</option>
+                    <option value="SI_LE">Con lecciones</option>
+                    <option value="NO_LE">Sin lecciones</option>
                 </select>
             </div>
 
@@ -461,6 +463,14 @@
                                         Sin actividades
                                     </span>
                                 @endif
+                                @if($item->activities_lessons_count > 0)
+                                    <span class="px-2.5 py-1 bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 text-[10px] font-bold rounded-lg border border-violet-200 dark:border-violet-500/20">
+                                        <svg class="w-3 h-3 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                        {{ $item->activities_lessons_count }} {{ $item->activities_lessons_count === 1 ? 'lección' : 'lecciones' }}
+                                    </span>
+                                @endif
                             </div>
 
                             <!-- Button Group: Observación + PDFs -->
@@ -639,6 +649,9 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    {{-- Lección LMS: estado + Ver lección + Publicar --}}
+                                    <x-lms-lesson-block :activity="$act" />
                                 @endforeach
                             @else
                                 <div class="flex items-center justify-center py-8 text-center">
@@ -1076,6 +1089,14 @@
         });
     </script>
     @endscript
+
+    {{-- Modales LMS: Vista de Lección + Publicar --}}
+    <x-lms-lesson-modals
+        :show-lesson-preview="$showLessonPreview"
+        :preview-data="$previewData"
+        :show-publish-modal="$showPublishModal"
+        :publish-activity-title="$publishActivityTitle"
+        :publish-publish-at="$publishPublishAt" />
 
     @include('leadership.help-activities')
 </div>

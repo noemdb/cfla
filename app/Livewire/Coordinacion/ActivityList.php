@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Coordinacion;
 
+use App\Livewire\Concerns\InteractsWithLmsLessons;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
@@ -15,7 +16,7 @@ use WireUi\Traits\WireUiActions;
 
 class ActivityList extends Component
 {
-    use Concerns\HasCoordinacionScope, WireUiActions, WithPagination;
+    use Concerns\HasCoordinacionScope, InteractsWithLmsLessons, WireUiActions, WithPagination;
 
     // ─── Filters ───────────────────────────────────────────────────
     public string $search = '';
@@ -99,6 +100,8 @@ class ActivityList extends Component
         $service = $this->getCoordinacionService();
 
         $query = Activity::with([
+            'lmsPublication',
+            'lmsSections',
             'pevaluacion' => fn ($q) => $q->with([
                 'profesor:id,name,lastname',
                 'seccion.grado',
@@ -140,6 +143,12 @@ class ActivityList extends Component
             $query->whereHas('pevaluacion.activities');
         } elseif ($this->statusActivities === 'NO') {
             $query->whereDoesntHave('pevaluacion.activities');
+        } elseif ($this->statusActivities === 'SI_LE') {
+            $query->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->whereNotNull('lms_activity_publications.id');
+        } elseif ($this->statusActivities === 'NO_LE') {
+            $query->leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+                ->whereNull('lms_activity_publications.id');
         }
 
         // Observations filter

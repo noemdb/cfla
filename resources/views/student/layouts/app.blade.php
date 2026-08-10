@@ -189,7 +189,7 @@
     <style>
         #notifications,
         .wireui-notifications,
-        [fixed] {
+        [x-data="wireui_notifications"] {
             z-index: 9999 !important;
         }
         {{-- Flotación suave de la mascota (C4) --}}

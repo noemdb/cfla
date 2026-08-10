@@ -3,9 +3,11 @@
 namespace App\Livewire\Coordinacion;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use App\Services\Lms\LmsPublicationService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -25,6 +27,10 @@ class LessonList extends Component
 
     public $profesorId = '';
 
+    public $gradoId = '';
+
+    public $seccionId = '';
+
     public $paginate = 15;
 
     public $lapsos;
@@ -32,6 +38,10 @@ class LessonList extends Component
     public $listPestudio;
 
     public $listProfesores = [];
+
+    public $listGrado = [];
+
+    public $listSeccion = [];
 
     public $filterStatus = '';
 
@@ -82,6 +92,14 @@ class LessonList extends Component
             ->get()
             ->pluck('full_name', 'id');
 
+        // Grados del scope del coordinador (todas las activas del plan de
+        // estudios por defecto); las secciones se cargan al elegir grado.
+        $this->listGrado = Grado::whereIn('pestudio_id', $service->getPestudioIds())
+            ->active('true')
+            ->orderBy('name')
+            ->pluck('name', 'id');
+        $this->listSeccion = collect();
+
         $this->lapsos = Lapso::orderBy('finicial')
             ->orderBy('id')
             ->get();
@@ -118,6 +136,12 @@ class LessonList extends Component
         }
         if ($this->pestudioId) {
             $query->whereHas('pevaluacion.pensum', fn ($q) => $q->where('pestudio_id', $this->pestudioId));
+        }
+        if ($this->gradoId) {
+            $query->whereHas('pevaluacion.seccion.grado', fn ($q) => $q->where('id', $this->gradoId));
+        }
+        if ($this->seccionId) {
+            $query->whereHas('pevaluacion.seccion', fn ($q) => $q->where('id', $this->seccionId));
         }
         if ($this->profesorId) {
             $query->whereHas('pevaluacion', fn ($q) => $q->where('profesor_id', $this->profesorId));
@@ -433,7 +457,65 @@ class LessonList extends Component
         $this->resetPage();
     }
 
+    public function updatingGradoId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSeccionId()
+    {
+        $this->resetPage();
+    }
+
     public function updatingPaginate()
+    {
+        $this->resetPage();
+    }
+
+    // ─── FILTERS CASCADE ─────────────────────────────────────────
+
+    public function updatedPestudioId($value): void
+    {
+        $this->resetPage();
+
+        if ($value) {
+            $this->listGrado = Grado::where('pestudio_id', $value)
+                ->active('true')
+                ->orderBy('name')
+                ->pluck('name', 'id');
+            $this->listProfesores = Profesor::list_profesors_pestudio($value);
+        } else {
+            $service = $this->getCoordinacionService();
+            $this->listGrado = Grado::whereIn('pestudio_id', $service->getPestudioIds())
+                ->active('true')
+                ->orderBy('name')
+                ->pluck('name', 'id');
+            $this->listProfesores = Profesor::where('status_active', 'true')
+                ->whereHas('pevaluacions.pensum', fn ($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
+                ->orderBy('lastname')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id');
+        }
+
+        $this->gradoId = '';
+        $this->seccionId = '';
+        $this->listSeccion = collect();
+    }
+
+    public function updatedGradoId($value): void
+    {
+        $this->resetPage();
+
+        if ($value) {
+            $this->listSeccion = Seccion::list_seccion_grado($value);
+        } else {
+            $this->listSeccion = collect();
+        }
+        $this->seccionId = '';
+    }
+
+    public function updatedSeccionId($value): void
     {
         $this->resetPage();
     }

@@ -56,10 +56,12 @@ class IndexComponent extends Component
     public $chartLessonsByDay = [];
     public $chartScheduledByDay = [];
 
-    // ─── Lesson stats (global, not filtered by lapso) ──────────────────
+    // ─── Lesson stats (scoped by selected lapso) ───────────────────────
     public $lessonTotal = 0;
     public $lessonScheduled = 0;
     public $lessonPublished = 0;
+    public $lessonPublishedPct = 0;
+    public $lessonScheduledPct = 0;
 
     // ─── Registration flow charts (global, with date range) ────────────
     public $registrationRange = '7d';
@@ -445,8 +447,8 @@ class IndexComponent extends Component
         // ══ Chart: Scheduled publications per day ══
         $this->loadChartScheduledByDay();
 
-        // ══ Lesson stats (global, not filtered by lapso) ══
-        $this->loadLessonStats();
+        // ══ Lesson stats (scoped by selected lapso) ══
+        $this->loadLessonStats($this->selectedLapsoId);
 
         // ══ Registration flow charts (global, with date range) ══
         $this->loadRegistrationFlowCharts();
@@ -665,30 +667,49 @@ class IndexComponent extends Component
     }
 
     /**
-     * Load global lesson stats (not filtered by lapso).
-     * Total = published + scheduled + drafts (including activities without LMS publication record),
+     * Load lesson stats for the selected lapso.
+     * Total (registradas) = published + scheduled + drafts (including activities without LMS publication record),
      * matching the same 3-series logic used in loadRegistrationFlowCharts().
      */
-    private function loadLessonStats()
+    private function loadLessonStats(?int $lapsoId = null)
     {
-        $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')
+        $lapsoScope = function ($q) use ($lapsoId) {
+            if ($lapsoId) {
+                $q->whereHas('activity.pevaluacion', fn ($pq) => $pq->where('lapso_id', $lapsoId));
+            }
+        };
+
+        $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
+            ->tap($lapsoScope)
+            ->where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
             ->count();
-        $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')
+        $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::query()
+            ->tap($lapsoScope)
+            ->whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
             ->count();
 
         // Drafts: activities WITH a publication record (publish_at NULL, no PUBLISHED)
         // and activities WITHOUT any publication record (via LEFT JOIN).
-        $draftsCount = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $draftsQuery = \App\Models\app\Academy\Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
                   ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
-            })
-            ->count(\Illuminate\Support\Facades\DB::raw('DISTINCT activities.id'));
+            });
+
+        if ($lapsoId) {
+            $draftsQuery->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
+                ->where('pevaluacions.lapso_id', $lapsoId)
+                ->whereNull('pevaluacions.deleted_at');
+        }
+
+        $draftsCount = $draftsQuery->count(\Illuminate\Support\Facades\DB::raw('DISTINCT activities.id'));
 
         $this->lessonTotal = $this->lessonPublished + $this->lessonScheduled + $draftsCount;
+        $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;
+        $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
     }
 
     /**

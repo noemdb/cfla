@@ -36,17 +36,6 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesor_id"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($list_profesors as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Grado/Año</label>
                 <select wire:model.live="grado_id"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -69,12 +58,25 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades</label>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
+                <select wire:model.live="profesor_id"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todos</option>
+                    @foreach($list_profesors as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
                 <select wire:model.live="status_activities"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
                     <option value="NO">Sin actividades</option>
+                    <option value="SI_LE">Con lecciones</option>
+                    <option value="NO_LE">Sin lecciones</option>
                 </select>
             </div>
 
@@ -86,6 +88,27 @@
                     <option value="approved">Aprobada</option>
                     <option value="pending">En revisión</option>
                 </select>
+            </div>
+
+            <div class="flex items-end gap-4 col-span-1 sm:col-span-2 lg:col-span-4 xl:col-span-6">
+                {{-- Toggle Observaciones --}}
+                <label class="relative inline-flex items-center gap-2 cursor-pointer min-h-[44px] select-none">
+                    <input type="checkbox" wire:model.live="filter_observations" class="sr-only peer">
+                    <div class="relative w-10 h-6 rounded-full transition-all duration-300 peer-checked:bg-blue-500 bg-gray-300 dark:bg-white/10 peer-checked:shadow-sm peer-checked:shadow-blue-500/30 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:shadow-sm after:border after:border-gray-200 dark:after:border-white/10"></div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 peer-checked:text-blue-600 dark:peer-checked:text-blue-400 transition-colors duration-300">
+                        <svg class="w-3.5 h-3.5 inline -mt-0.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Observaciones
+                    </span>
+                    <span wire:loading wire:target="filter_observations" class="w-3 h-3">
+                        <svg class="w-3 h-3 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </span>
+                </label>
             </div>
         </div>
     </div>
@@ -752,19 +775,9 @@
         </div>
     </div>
 
-    <!-- ===== MODAL: Vista Previa de Lección (LMS) ===== -->
-    @if($showLessonPreview && $previewLessonActivity)
-        <x-modal-card title="Vista de Lección" blur="lg" wire:model="showLessonPreview" width="4xl">
-            <div class="max-h-[70vh] overflow-y-auto pr-1 -mr-1">
-                <x-lms-activity-preview :activity="$previewLessonActivity" container-class="w-full" />
-            </div>
-            <x-slot name="footer">
-                <div class="flex justify-end">
-                    <x-button flat label="Cerrar" x-on:click="showLessonPreview = false" />
-                </div>
-            </x-slot>
-        </x-modal-card>
-    @endif
+    <x-lms-lesson-modals
+        :show-lesson-preview="$showLessonPreview"
+        :preview-data="$previewData" />
 
     <!-- ===== MODAL: Publicar lección programada ===== -->
     @if($showApproveModal)

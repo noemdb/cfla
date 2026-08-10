@@ -203,6 +203,11 @@ class LessonMonitor extends Component
     public function updatedFilterStatus($value)
     {
         $this->resetPage();
+
+        // Select único de estado: sincroniza los booleanos legacy que usan el
+        // query de render() y el link de impresión.
+        $this->filter_published = $value === 'PUBLISHED';
+        $this->filter_scheduled = $value === 'SCHEDULED';
     }
 
     public function updatedFilterPublished($value)

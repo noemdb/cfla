@@ -11,6 +11,7 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Academy\Asignatura;
+use App\Livewire\Concerns\InteractsWithLmsLessons;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -20,7 +21,7 @@ use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WithPagination, WireUiActions;
+    use WithPagination, WireUiActions, InteractsWithLmsLessons;
 
     public $activity, $activity_id, $pevaluacion_id, $objetivo, $comments, $status;
     public $previewActivity;
@@ -177,11 +178,13 @@ class IndexComponent extends Component
             'profesor',
             'lapso',
         ])
-        ->with('activities')
+        ->with('activities.lmsPublication')
+        ->with('activities.lmsSections')
         ->withCount([
             'activities',
             'activities as activities_revision_count' => fn($q) => $q->where('status', 0),
             'activities as activities_approved_count' => fn($q) => $q->where('status', 1),
+            'activities as activities_lessons_count' => fn($q) => $q->whereHas('lmsPublication'),
         ])
         ->whereHas('pensum.pestudio', fn($q) => $q->where('planning_module', true))
         ->whereNull('pevaluacions.deleted_at');
@@ -206,6 +209,10 @@ class IndexComponent extends Component
                 $query->having('activities_count', '>', 0);
             } elseif ($filters['status_activities'] === 'NO') {
                 $query->having('activities_count', '=', 0);
+            } elseif ($filters['status_activities'] === 'SI_LE') {
+                $query->having('activities_lessons_count', '>', 0);
+            } elseif ($filters['status_activities'] === 'NO_LE') {
+                $query->having('activities_lessons_count', '=', 0);
             }
         }
         if (!empty($filters['filter_observations'])) {

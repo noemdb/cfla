@@ -87,26 +87,28 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
              aria-valuemax="100"
              class="h-[3px] bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-150 ease-out"
              :style="`width: ${progress}%`"></div>
-        <div class="px-3 sm:px-6 md:px-8 pt-2">
-            <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-1 shadow-sm"
-                 role="radiogroup" aria-label="Modo de lectura">
-                <button type="button"
-                        role="radio"
-                        :aria-checked="Alpine.store('lmsView').mode === 'scroll'"
-                        :class="Alpine.store('lmsView').mode === 'scroll' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
-                        @click="Alpine.store('lmsView').set('scroll')">
-                    Deslizar
-                </button>
-                <button type="button"
-                        role="radio"
-                        :aria-checked="Alpine.store('lmsView').mode === 'pdf'"
-                        :class="Alpine.store('lmsView').mode === 'pdf' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        class="rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
-                        @click="Alpine.store('lmsView').set('pdf')">
-                    PDF
-                </button>
-            </div>
+    </div>
+
+    {{-- Toggle de modo de lectura — flotante abajo a la derecha --}}
+    <div class="fixed bottom-6 right-6 z-50 print:hidden">
+        <div class="inline-flex items-center gap-1 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-1 shadow-lg"
+             role="radiogroup" aria-label="Modo de lectura">
+            <button type="button"
+                    role="radio"
+                    :aria-checked="Alpine.store('lmsView').mode === 'scroll'"
+                    :class="Alpine.store('lmsView').mode === 'scroll' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    class="rounded-full px-3 py-1 text-xs font-semibold transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
+                    @click="Alpine.store('lmsView').set('scroll')">
+                Deslizar
+            </button>
+            <button type="button"
+                    role="radio"
+                    :aria-checked="Alpine.store('lmsView').mode === 'pdf'"
+                    :class="Alpine.store('lmsView').mode === 'pdf' ? 'bg-emerald-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                    class="rounded-full px-3 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2"
+                    @click="Alpine.store('lmsView').set('pdf')">
+                PDF
+            </button>
         </div>
     </div>
 

@@ -149,7 +149,10 @@ class StudentScopeService
 
         return $query
             ->where('is_visible', true)
-            ->whereHas('activity.pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds));
+            ->whereHas('activity.pevaluacion', fn($q) => $q->whereIn('seccion_id', $seccionIds))
+            // Solo recursos de lecciones publicadas para el estudiante
+            // (PUBLISHED + publish_at definido + no expirada).
+            ->whereHas('activity.lmsPublication', fn($q) => $q->visibleNow());
     }
 
     /**

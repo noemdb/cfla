@@ -28,6 +28,14 @@ class PevaluacionList extends Component
     #[Url]
     public $seccion_id = null;
 
+    #[Url]
+    public $status_activities = null;
+
+    #[Url]
+    public $filter_status = null;
+
+    public $filter_observations = false;
+
     public $sort = 'pevaluacions.created_at';
     public $direction = 'desc';
 
@@ -61,9 +69,24 @@ class PevaluacionList extends Component
         $this->seccion_id = null;
     }
 
+    public function updatingStatusActivities()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterStatus()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterObservations()
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
-        $this->reset(['pestudio_id', 'grado_id', 'seccion_id']);
+        $this->reset(['pestudio_id', 'grado_id', 'seccion_id', 'status_activities', 'filter_status', 'filter_observations']);
         $this->resetPage();
     }
 
@@ -100,6 +123,33 @@ class PevaluacionList extends Component
         }
         if ($this->lapsoId) {
             $pevaluacionsQuery->where('pevaluacions.lapso_id', $this->lapsoId);
+        }
+
+        $pevaluacionsQuery->withCount([
+            'activities',
+            'activities as activities_lessons_count' => fn ($q) => $q->whereHas('lmsPublication'),
+        ]);
+
+        if ($this->status_activities === 'SI') {
+            $pevaluacionsQuery->having('activities_count', '>', 0);
+        } elseif ($this->status_activities === 'NO') {
+            $pevaluacionsQuery->having('activities_count', '=', 0);
+        } elseif ($this->status_activities === 'SI_LE') {
+            $pevaluacionsQuery->having('activities_lessons_count', '>', 0);
+        } elseif ($this->status_activities === 'NO_LE') {
+            $pevaluacionsQuery->having('activities_lessons_count', '=', 0);
+        }
+
+        if ($this->filter_status === 'pending') {
+            $pevaluacionsQuery->whereHas('activities', fn ($q) => $q->where('status', 0));
+        } elseif ($this->filter_status === 'approved') {
+            $pevaluacionsQuery->has('activities')
+                ->whereDoesntHave('activities', fn ($q) => $q->where('status', 0));
+        }
+
+        if ($this->filter_observations) {
+            $pevaluacionsQuery->whereNotNull('pevaluacions.observations')
+                ->where('pevaluacions.observations', '!=', '');
         }
 
         $pevaluacions = $pevaluacionsQuery->with([

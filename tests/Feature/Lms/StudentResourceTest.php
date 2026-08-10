@@ -5,6 +5,7 @@ namespace Tests\Feature\Lms;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Inscripcion;
 use App\Models\app\Academy\Lms\LmsActivityResource;
+use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +64,8 @@ class StudentResourceTest extends TestCase
         $this->assertStringContainsString('w-12 h-12', $html);
         // R7 · botón Descargar sólido (afordancia primaria)
         $this->assertStringContainsString('bg-emerald-600', $html);
+        // Descargar abre en pestaña nueva (target=_blank + noopener)
+        $this->assertStringContainsString('target="_blank" rel="noopener noreferrer"', $html);
         // R7 · cuerpo de la tarjeta: descripción visible (anatomía Card)
         $this->assertStringContainsString('Recurso de prueba', $html);
         $this->assertStringContainsString('line-clamp-2', $html);
@@ -130,7 +133,7 @@ class StudentResourceTest extends TestCase
 
         // R1 · skeleton con target scoped (buscar / lapso / paginar), aria-hidden
         $this->assertStringContainsString('wire:loading.delay.shorter', $html);
-        $this->assertStringContainsString('wire:target="search, lapsoId, gotoPage"', $html);
+        $this->assertStringContainsString('wire:target="search, lapsoId, typeFilter, asignaturaId, gotoPage"', $html);
         $this->assertStringContainsString('aria-hidden="true"', $html);
         // La grilla real se oculta mientras carga con el mismo target
         $this->assertStringContainsString('wire:loading.remove', $html);
@@ -184,9 +187,54 @@ class StudentResourceTest extends TestCase
             ->assertSee('data-preview-trigger-'.$resource->id, false)
             // R5 · scrim ::backdrop (clic fuera cierra)
             ->assertSee('bg-black/60', false)
+            // Descargar abre en pestaña nueva (target=_blank + noopener)
+            ->assertSee('target="_blank"', false)
+            ->assertSee('rel="noopener noreferrer"', false)
             ->call('closePreview')
             ->assertSet('showPreviewModal', false)
             ->assertSet('previewResource', null);
+    }
+
+    public function test_embed_preview_opens_special_modal_with_html_content(): void
+    {
+        [$seccionId, $pevaluacionId, $s] = $this->createEvaluacionChain();
+
+        $activity = $this->createActivityWithSubject($pevaluacionId, 'Biología', $s);
+
+        $teacher = User::factory()->create(['is_profesor' => true]);
+        $embed = LmsHtmlEmbed::create([
+            'activity_id' => $activity->id,
+            'added_by' => $teacher->id,
+            'title' => 'Video embebido',
+            'html_content' => '<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video de prueba" width="560" height="315"></iframe>',
+            'render_condition' => 'ALWAYS',
+            'sort_order' => 1,
+            'is_visible' => true,
+        ]);
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\ResourceList::class)
+            // La tarjeta embed pasa el tipo explícito → modal especial, no el genérico
+            ->assertSee("preview({$embed->id}, 'embed')", false)
+            ->call('preview', $embed->id, 'embed')
+            ->assertSet('showEmbedPreviewModal', true)
+            ->assertSet('embedPreview.id', $embed->id)
+            ->assertSet('showPreviewModal', false)
+            // R5 · patrón <dialog>: role, aria-modal, aria-labelledby + Escape + retorno de foco
+            ->assertSee('role="dialog"', false)
+            ->assertSee('aria-modal="true"', false)
+            ->assertSee('aria-labelledby="embed-preview-title"', false)
+            ->assertSee('id="embed-preview-title"', false)
+            ->assertSee('@keydown.escape.window', false)
+            ->assertSee('data-embed-preview-close', false)
+            ->assertSee('data-preview-trigger-'.$embed->id, false)
+            // El HTML embebido real se renderiza en el cuerpo del modal
+            ->assertSeeHtml('<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"')
+            ->call('closeEmbedPreview')
+            ->assertSet('showEmbedPreviewModal', false)
+            ->assertSet('embedPreview', null);
     }
 
     public function test_preview_denied_for_resource_outside_student_section(): void
@@ -374,13 +422,27 @@ class StudentResourceTest extends TestCase
             ->where('code', $chainSuffix ? "ASIG-TEST-{$chainSuffix}" : 'ASIG-TEST')
             ->update(['name' => $subject]);
 
-        return Activity::create([
+        $activity = Activity::create([
             'pevaluacion_id' => $pevaluacionId,
             'finicial' => now()->subDays(2),
             'ffinal' => now()->addDays(7),
             'topic' => 'Tema de la actividad',
             'status' => true,
         ]);
+
+        // Publicación PUBLISHED para que los recursos sean visibles para el estudiante
+        $publisher = \App\Models\User::factory()->create(['is_profesor' => true]);
+        DB::table('lms_activity_publications')->insert([
+            'activity_id'   => $activity->id,
+            'published_by'  => $publisher->id,
+            'status'        => 'PUBLISHED',
+            'publish_at'    => now()->subDay(),
+            'published_at'  => now()->subDay(),
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+
+        return $activity;
     }
 
     private function createResource(int $activityId, string $displayName, string $mimeType): LmsActivityResource

@@ -40,14 +40,6 @@
                     <span class="hidden sm:block text-[9px] font-normal text-gray-400 dark:text-gray-500 normal-case">{{ Str::of($lapso->name)->limit(6, '') }}</span>
                 </button>
             @endforeach
-            <button wire:click="selectLapso('')"
-                class="flex-1 px-2 sm:px-3 lg:px-6 py-2 min-h-[44px] text-xs font-bold uppercase tracking-widest transition-all duration-200 border-b-2 whitespace-nowrap ml-auto
-                    {{ !$lapsoId ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-50 dark:bg-emerald-500/5' : 'text-gray-500 dark:text-gray-500 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' }}">
-                <svg class="w-4 h-4 inline sm:mr-1.5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                <span class="hidden sm:inline">Todos</span>
-            </button>
         </nav>
     </div>
 
@@ -60,17 +52,6 @@
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todos</option>
                     @foreach($listPestudio as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
-                <select wire:model.live="profesorId"
-                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($listProfesores as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
@@ -99,12 +80,25 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades</label>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Profesor</label>
+                <select wire:model.live="profesorId"
+                    class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
+                    <option value="">Todos</option>
+                    @foreach($listProfesores as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-1.5">Actividades/Lecciones</label>
                 <select wire:model.live="statusActivities"
                     class="w-full min-h-[44px] bg-gray-50 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
                     <option value="">Todas</option>
                     <option value="SI">Con actividades</option>
                     <option value="NO">Sin actividades</option>
+                    <option value="SI_LE">Con lecciones</option>
+                    <option value="NO_LE">Sin lecciones</option>
                 </select>
             </div>
 
@@ -282,6 +276,9 @@
                                 </div>
                             @endif
                         </div>
+
+                        {{-- Lección LMS: estado + Ver lección + Publicar --}}
+                        <x-lms-lesson-block :activity="$activity" />
                     </div>
                 @empty
                     <div class="text-center py-16 bg-white dark:bg-gray-800/30 border border-gray-200 dark:border-white/5 rounded-lg">
@@ -429,4 +426,12 @@
             @endif
         </div>
     </div>
+
+    {{-- Modales LMS: Vista de Lección + Publicar --}}
+    <x-lms-lesson-modals
+        :show-lesson-preview="$showLessonPreview"
+        :preview-data="$previewData"
+        :show-publish-modal="$showPublishModal"
+        :publish-activity-title="$publishActivityTitle"
+        :publish-publish-at="$publishPublishAt" />
 </div>

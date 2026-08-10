@@ -144,6 +144,10 @@ class ActivityOverview extends IndexComponent
                 $query->having('activities_count', '>', 0);
             } elseif ($filters['status_activities'] === 'NO') {
                 $query->having('activities_count', '=', 0);
+            } elseif ($filters['status_activities'] === 'SI_LE') {
+                $query->having('activities_lessons_count', '>', 0);
+            } elseif ($filters['status_activities'] === 'NO_LE') {
+                $query->having('activities_lessons_count', '=', 0);
             }
         }
         if (! empty($filters['filter_observations'])) {
@@ -188,7 +192,10 @@ class ActivityOverview extends IndexComponent
 
     public function previewLesson(int $activityId): void
     {
-        $this->previewLessonActivity = Activity::findOrFail($activityId);
+        $activity = $this->loadLessonPreviewActivity($activityId);
+
+        $this->previewLessonActivity = $activity;
+        $this->previewData = $this->buildLessonPreviewData($activity);
         $this->showLessonPreview = true;
     }
 
@@ -196,6 +203,7 @@ class ActivityOverview extends IndexComponent
     {
         $this->showLessonPreview = false;
         $this->previewLessonActivity = null;
+        $this->previewData = [];
     }
 
     public function render()
