@@ -53,6 +53,17 @@ class LessonList extends Component
 
     public ?string $publishPublishAt = null;
 
+    // ─── Modal actividad asociada (revisión / aprobación) ───────
+    public bool $showActivityModal = false;
+
+    public $activity = null;
+
+    public ?int $activityId = null;
+
+    public string $comments = '';
+
+    public int $activityStatus = 0;
+
     public function mount(): void
     {
         $this->initializeHasCoordinacionScope();
@@ -241,13 +252,34 @@ class LessonList extends Component
 
     public function confirmPublish(int $activityId): void
     {
-        $activity = Activity::findOrFail($activityId);
+        $activity = Activity::with('lmsPublication')->findOrFail($activityId);
         if (! $this->getCoordinacionService()->pevaluacionIsInScope($activity->pevaluacion_id)) {
             abort(403);
         }
+
         $this->publishLessonId = $activityId;
         $this->publishLessonTitle = $activity->topic ?? 'Lección';
-        $this->publishPublishAt = null; // vacío → publicar de inmediato
+
+        // Lección con actividad en revisión: no se puede publicar. Se avisa y
+        // no se abre el modal de publicación (mismo criterio que el monitor
+        // de leadership/planning).
+        if (! $activity->status) {
+            $this->notification()->warning(
+                title: 'Actividad en revisión',
+                description: 'La lección no puede publicarse hasta que la actividad asociada sea aprobada.'
+            );
+            $this->cancelPublish();
+
+            return;
+        }
+
+        // Pre-cargar la fecha programada (publish_at) si existe; sino, ahora.
+        // Formato Y-m-d\TH:i para el input datetime-local.
+        $publishAt = $activity->lmsPublication?->publish_at;
+        $this->publishPublishAt = $publishAt
+            ? \Carbon\Carbon::parse($publishAt)->format('Y-m-d\TH:i')
+            : now()->format('Y-m-d\TH:i');
+
         $this->showPublishModal = true;
     }
 
@@ -312,6 +344,68 @@ class LessonList extends Component
             description: 'La lección ahora es visible para los estudiantes.'
         );
         $this->resetPage();
+    }
+
+    // ─── Revisión de la actividad asociada ─────────────────────
+
+    public function openActivityReview(int $activityId): void
+    {
+        $activity = Activity::with([
+            'pevaluacion.lapso',
+            'pevaluacion.seccion.grado',
+            'pevaluacion.pensum.asignatura',
+            'pevaluacion.profesor',
+            'lmsPublication',
+        ])->findOrFail($activityId);
+
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($activity->pevaluacion_id)) {
+            abort(403);
+        }
+
+        $this->activity = $activity;
+        $this->activityId = $activityId;
+        $this->comments = $activity->comments ?? '';
+        $this->activityStatus = (int) ($activity->status ?? 0);
+        $this->showActivityModal = true;
+    }
+
+    public function saveActivityReview(): void
+    {
+        if (! $this->activityId) {
+            return;
+        }
+
+        $this->validate([
+            'comments' => 'nullable|string|max:65535',
+            'activityStatus' => 'required|boolean',
+        ]);
+
+        $activity = Activity::findOrFail($this->activityId);
+
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($activity->pevaluacion_id)) {
+            abort(403);
+        }
+
+        $activity->comments = $this->comments;
+        $activity->status = (bool) $this->activityStatus;
+        $activity->save();
+
+        $this->notification()->success(
+            title: $this->activityStatus ? 'Actividad aprobada' : 'Actividad en revisión',
+            description: $this->activityStatus
+                ? 'La actividad asociada fue aprobada correctamente. Ya puedes publicar la lección.'
+                : 'La actividad asociada fue marcada en revisión.',
+        );
+        $this->closeActivityReview();
+    }
+
+    public function closeActivityReview(): void
+    {
+        $this->showActivityModal = false;
+        $this->activity = null;
+        $this->activityId = null;
+        $this->comments = '';
+        $this->activityStatus = 0;
     }
 
     public function updatingFilterStatus()

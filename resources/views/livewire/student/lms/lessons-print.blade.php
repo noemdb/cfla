@@ -20,14 +20,15 @@
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:'DejaVu Sans',ui-sans-serif,system-ui,sans-serif;font-size:8.5pt;color:#1a1a2e;line-height:1.45;background:#fff;}
 
-        /* ── Barra de acciones (oculta al imprimir) ── */
-        .print-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;
-                   padding:8px 16px;background:#0f172a;color:#e2e8f0;border-bottom:1px solid #1e293b;}
+        /* ── Botón flotante de impresión (abajo a la derecha; oculto al imprimir) ── */
+        .print-bar{position:fixed;bottom:18px;right:18px;z-index:50;}
         .print-bar .title{font-size:10pt;font-weight:700;letter-spacing:0.3px;}
         .print-bar .subtitle{font-size:7pt;color:#94a3b8;}
-        .btn-print{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1px solid #10b981;
-                   background:#059669;color:#fff;font-size:8.5pt;font-weight:700;cursor:pointer;transition:background .15s;}
-        .btn-print:hover{background:#047857;}
+        .btn-print{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;border:1px solid #10b981;
+                   background:#059669;color:#fff;font-size:9pt;font-weight:700;cursor:pointer;
+                   box-shadow:0 10px 28px rgba(2,132,99,.45),0 2px 6px rgba(2,44,34,.25);
+                   transition:background .15s,transform .15s,box-shadow .15s;}
+        .btn-print:hover{background:#047857;transform:translateY(-1px);box-shadow:0 12px 32px rgba(2,132,99,.55);}
 
         /* ── Cabecera del documento ── */
         .doc-head{text-align:center;padding:14px 16px 10px;border-bottom:2px solid #0d9488;}
@@ -110,6 +111,22 @@
             overflow:hidden;
             font-family:Inter,'Segoe UI',system-ui,-apple-system,sans-serif;
             box-shadow:0 1px 4px rgba(15,23,42,0.08);
+        }
+        /* Marca de agua: logo institucional como fondo de la portada.
+           Capa más profunda (::before se pinta antes que el resto), centrada,
+           grande y con opacidad baja. En impresión se conserva gracias al
+           print-color-adjust:exact del bloque @media print. */
+        .cover-page::before{
+            content:'';
+            position:absolute;
+            inset:0;
+            background-image:url("{{ asset('image/logo/logo1x1.png') }}");
+            background-size:62% auto;
+            background-position:center 42%;
+            background-repeat:no-repeat;
+            opacity:0.14;
+            pointer-events:none;
+            z-index:0;
         }
         .cover-page .cover-band{
             position:absolute;top:0;left:0;right:0;height:7.8mm;
