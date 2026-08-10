@@ -88,6 +88,34 @@ class StudentLessonsPrintTest extends TestCase
         $this->assertStringNotContainsString('>PUBLISHED<', $html);
     }
 
+    public function test_print_denies_unapproved_activity(): void
+    {
+        // Una actividad en revisión (status=0) no es visible para el estudiante:
+        // el guard de ActivityPrintController responde 404. El badge "Activity en
+        // revisión" quedaría inalcanzable mientras el guard lo exija aprobada.
+        $activity = $this->createMinimalActivity(['status' => false]);
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publish($activity);
+
+        $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertStatus(404);
+    }
+
+    public function test_print_hides_in_review_alert_when_activity_approved(): void
+    {
+        $activity = $this->createMinimalActivity(['status' => true]);
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publish($activity);
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Activity en revisión', $html);
+    }
+
     public function test_print_embeds_the_student_name_in_member_and_footer(): void
     {
         $activity = $this->createMinimalActivity();

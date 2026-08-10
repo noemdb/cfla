@@ -66,6 +66,7 @@ class ActivityPrintController extends Controller
             'fecha',
             'filters',
             'filterLabels',
+            'estado',
             'estadoLabel',
             'estadoClass'
         ));

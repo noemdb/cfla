@@ -127,11 +127,6 @@
             border:0.55mm solid #e2e8f0;
             border-radius:3.5mm;
         }
-        .cover-page .cover-frame::after{
-            content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm;
-            border:0.3mm solid #f1f5f9;
-            border-radius:2.5mm;
-        }
         /* Círculos decorativos (esquina inferior derecha, estilo libro) */
         .cover-page .cover-rings{
             position:absolute;right:-14mm;bottom:-14mm;width:80mm;height:80mm;
@@ -327,6 +322,10 @@
                 column-count: 2;
                 column-gap: 0.9cm; /* Reduced gap for denser columns */
                 column-fill: auto; /* llenar la columna 1 antes de pasar a la 2 */
+                /* Línea vertical en la división de columnas (gutter del modo
+                   libro): column-rule la dibuja centrada en el hueco entre
+                   columnas en cada hoja. Solo aplica en impresión. */
+                column-rule: 0.4mm solid #cbd5e1;
             }
 
             /* Flujo continuo: lecciones/secciones/contenido se parten en el
@@ -611,6 +610,12 @@
                 <span class="nnum">{{ $i + 1 }}</span>
                 <span class="topic">{{ $activity->topic }}</span>
                 <span class="estado {{ $estadoClass }}">{{ $estadoLabel }}</span>
+                @if($estado === 'PUBLISHED' && ! $activity->status)
+                    <span class="ml-auto mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" title="La lección está publicada pero la activity asociada sigue en revisión (no aprobada)">
+                        <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Activity en revisión
+                    </span>
+                @endif
             </div>
 
             {{-- Metadatos --}}
