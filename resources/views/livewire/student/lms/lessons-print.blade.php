@@ -120,17 +120,17 @@
             background:linear-gradient(90deg,#475569,#1e293b 55%,#475569);
         }
         .cover-page .cover-frame{
-            /* position:absolute;top:17mm;left:11mm;right:11mm;bottom:11mm; */
-            /* border:0.55mm solid #e2e8f0; */
-            /* border-radius:3.5mm; */
+            /* Marco exterior tipo cover book. top:10.5mm lo coloca justo bajo
+               la banda (7.8mm + 1.8mm del ::after) para que el crest quede
+               DENTRO del marco y no se superponga con la banda. */
+            position:absolute;top:10.5mm;left:11mm;right:11mm;bottom:11mm;
+            border:0.55mm solid #e2e8f0;
+            border-radius:3.5mm;
         }
         .cover-page .cover-frame::after{
-            /* Marco interior desactivado junto con .cover-frame: sin el frame
-               exterior el hairline suelto (anclado al borde de la portada)
-               queda huérfano. */
-            /* content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm; */
-            /* border:0.3mm solid #f1f5f9; */
-            /* border-radius:2.5mm; */
+            content:'';position:absolute;top:2.2mm;left:2.2mm;right:2.2mm;bottom:2.2mm;
+            border:0.3mm solid #f1f5f9;
+            border-radius:2.5mm;
         }
         /* Círculos decorativos (esquina inferior derecha, estilo libro) */
         .cover-page .cover-rings{
@@ -163,9 +163,9 @@
             border-radius:0.6mm;
         }
         .cover-page .cover-inner{
-            position:absolute;top:6mm;left:6mm;right:6mm;bottom:6mm;
+            position:absolute;top:10.5mm;left:6mm;right:6mm;bottom:6mm;
             display:flex;flex-direction:column;
-           /*  padding:4mm 4mm; */
+            padding:4mm 4mm;
         }
         .cover-page .cover-crest{
             margin:0 auto 3mm;
@@ -178,13 +178,18 @@
         }
         .cover-page .cover-inst{
             text-align:center;
-            font-size:2.5mm;
+            /* 2.1mm + 0.6mm de tracking: el nombre completo de la institución
+               (≈38 caracteres en mayúsculas) cabe en la columna del modo
+               libro (~111mm útiles). Antes (2.5mm + 1.1mm) se truncaba con
+               "…" en el PDF impreso. */
+            font-size:2.1mm;
             font-weight:600;
-            letter-spacing:1.1mm;
+            letter-spacing:0.6mm;
             text-transform:uppercase;
             color:#64748b;
             margin-bottom:1mm;
-            /* Truncate agresivo: el nombre largo de la institución no desborda */
+            /* Truncate agresivo: red de seguridad si la institución tuviera
+               un nombre aún más largo; no desborda la columna. */
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
@@ -290,6 +295,17 @@
         }
 
         @media print {
+            /* ── CRÍTICO: forzar la impresión de fondos y gradientes. ──
+               Chrome (incluido Android al guardar PDF desde window.print())
+               descarta por defecto TODOS los backgrounds en impresión
+               (banda verde, rombo, regla, cabeceras de sección, tablas…),
+               dejando solo bordes y texto. Sin esto, la portada tipo cover
+               book pierde su diseño en el PDF del móvil. */
+            *{
+                -webkit-print-color-adjust:exact !important;
+                print-color-adjust:exact !important;
+            }
+
             /* Configuración de página para modo libro (horizontal, dos páginas por hoja) - MÁS COMPACTO */
             @page {
                 size: landscape;
@@ -519,9 +535,9 @@
     <div class="lessons-columns">
         {{-- Portada (cover): abre la columna 1 = página izquierda de la hoja --}}
         <div class="cover-page">
-            {{-- <div class="cover-band"></div> --}}
+            <div class="cover-band"></div>
             <div class="cover-frame"></div>
-            {{-- <div class="cover-rings"></div> --}}
+            <div class="cover-rings"></div>
             <div class="cover-diamond"></div>
 
             <div class="cover-inner">
@@ -531,6 +547,7 @@
                 </div>
 
                 <div class="cover-inst">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }}</div>
+                <div class="cover-kicker">Lección · Contenido completo</div>
                 <div class="cover-rule"></div>
 
                 <h1 class="cover-title">{{ $activity->topic ?: 'Lección sin título' }}</h1>
@@ -561,7 +578,7 @@
                 </div>
             </div>
 
-            {{-- <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div> --}}
+            <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div>
         </div>
 
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}

@@ -3,44 +3,59 @@
 namespace App\Livewire\Coordinacion;
 
 use App\Models\app\Academy\Activity;
-use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pestudio;
-use App\Models\app\Academy\Grado;
-use App\Models\app\Academy\Seccion;
+use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
 class ActivityList extends Component
 {
-    use WithPagination, WireUiActions, Concerns\HasCoordinacionScope;
+    use Concerns\HasCoordinacionScope, WireUiActions, WithPagination;
 
     // ─── Filters ───────────────────────────────────────────────────
     public string $search = '';
+
     public $lapsoId = '';
+
     public $pestudioId = '';
+
     public $profesorId = '';
+
     public $gradoId = '';
+
     public $seccionId = '';
+
     public $statusActivities = '';
+
     public $filterObservations = false;
-    public $filterRevision = false;
+
     public $filterStatus = '';
+
     public $paginate = 15;
+
     protected $paginationTheme = 'tailwind';
 
     // ─── Select lists ──────────────────────────────────────────────
     public $listPestudio;
+
     public $listGrado = [];
+
     public $listSeccion = [];
+
     public $listProfesores = [];
+
     public $listLapso;
+
     public $lapsos;
 
     // ─── Edición de observaciones ──────────────────────────────────
     public ?int $editingPevId = null;
+
     public string $observations = '';
 
     public function mount(): void
@@ -55,13 +70,13 @@ class ActivityList extends Component
             ->pluck('name', 'id');
 
         $this->listGrado = Grado::where('status_active', 'true')
-            ->whereHas('pensums', fn($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
+            ->whereHas('pensums', fn ($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
             ->orderBy('order')
             ->get()
             ->pluck('name', 'id');
 
         $this->listProfesores = Profesor::where('status_active', 'true')
-            ->whereHas('pevaluacions.pensum', fn($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
+            ->whereHas('pevaluacions.pensum', fn ($q) => $q->whereIn('pestudio_id', $service->getPestudioIds()))
             ->orderBy('lastname')
             ->orderBy('name')
             ->get()
@@ -84,7 +99,7 @@ class ActivityList extends Component
         $service = $this->getCoordinacionService();
 
         $query = Activity::with([
-            'pevaluacion' => fn($q) => $q->with([
+            'pevaluacion' => fn ($q) => $q->with([
                 'profesor:id,name,lastname',
                 'seccion.grado',
                 'pensum.asignatura',
@@ -97,27 +112,27 @@ class ActivityList extends Component
 
         // Lapso filter
         if ($this->lapsoId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('lapso_id', $this->lapsoId));
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('lapso_id', $this->lapsoId));
         }
 
         // Pestudio filter
         if ($this->pestudioId) {
-            $query->whereHas('pevaluacion.pensum', fn($q) => $q->where('pestudio_id', $this->pestudioId));
+            $query->whereHas('pevaluacion.pensum', fn ($q) => $q->where('pestudio_id', $this->pestudioId));
         }
 
         // Profesor filter
         if ($this->profesorId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('profesor_id', $this->profesorId));
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('profesor_id', $this->profesorId));
         }
 
         // Grado filter
         if ($this->gradoId) {
-            $query->whereHas('pevaluacion.seccion', fn($q) => $q->where('grado_id', $this->gradoId));
+            $query->whereHas('pevaluacion.seccion', fn ($q) => $q->where('grado_id', $this->gradoId));
         }
 
         // Seccion filter
         if ($this->seccionId) {
-            $query->whereHas('pevaluacion', fn($q) => $q->where('seccion_id', $this->seccionId));
+            $query->whereHas('pevaluacion', fn ($q) => $q->where('seccion_id', $this->seccionId));
         }
 
         // Status activities filter
@@ -129,17 +144,12 @@ class ActivityList extends Component
 
         // Observations filter
         if ($this->filterObservations) {
-            $query->whereHas('pevaluacion', fn($q) => $q->whereNotNull('observations')->where('observations', '<>', ''));
-        }
-
-        // Revision filter
-        if ($this->filterRevision) {
-            $query->where(fn($q) => $q->where('status', 0)->orWhereNull('status'));
+            $query->whereHas('pevaluacion', fn ($q) => $q->whereNotNull('observations')->where('observations', '<>', ''));
         }
 
         // Status filter
         if ($this->filterStatus === 'pending') {
-            $query->where(fn($q) => $q->where('status', 0)->orWhereNull('status'));
+            $query->where(fn ($q) => $q->where('status', 0)->orWhereNull('status'));
         } elseif ($this->filterStatus === 'approved') {
             $query->where('status', 1);
         }
@@ -148,7 +158,7 @@ class ActivityList extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('topic', 'like', "%{$this->search}%")
-                  ->orWhere('thematic', 'like', "%{$this->search}%");
+                    ->orWhere('thematic', 'like', "%{$this->search}%");
             });
         }
 
@@ -176,7 +186,7 @@ class ActivityList extends Component
                 ->pluck('name', 'id');
         } else {
             $this->listGrado = Grado::where('status_active', 'true')
-                ->whereHas('pensums', fn($q) => $q->whereIn('pestudio_id', $this->getCoordinacionService()->getPestudioIds()))
+                ->whereHas('pensums', fn ($q) => $q->whereIn('pestudio_id', $this->getCoordinacionService()->getPestudioIds()))
                 ->orderBy('order')
                 ->get()
                 ->pluck('name', 'id');
@@ -207,7 +217,7 @@ class ActivityList extends Component
     public function editObservations(int $pevId): void
     {
         $pev = Pevaluacion::findOrFail($pevId);
-        if (!$this->getCoordinacionService()->pevaluacionIsInScope($pevId)) {
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($pevId)) {
             abort(403);
         }
         $this->editingPevId = $pevId;
@@ -225,7 +235,7 @@ class ActivityList extends Component
         $this->validate(['observations' => 'nullable|string|max:2000']);
 
         $pev = Pevaluacion::findOrFail($this->editingPevId);
-        if (!$this->getCoordinacionService()->pevaluacionIsInScope($pev->id)) {
+        if (! $this->getCoordinacionService()->pevaluacionIsInScope($pev->id)) {
             abort(403);
         }
 
@@ -246,12 +256,38 @@ class ActivityList extends Component
         $this->resetPage();
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingLapsoId() { $this->resetPage(); }
-    public function updatingPestudioId() { $this->resetPage(); }
-    public function updatingProfesorId() { $this->resetPage(); }
-    public function updatingGradoId() { $this->resetPage(); }
-    public function updatingSeccionId() { $this->resetPage(); }
-    public function updatingStatusActivities() { $this->resetPage(); }
-    public function updatingPaginate() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingLapsoId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPestudioId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingProfesorId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingGradoId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSeccionId()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusActivities()
+    {
+        $this->resetPage();
+    }
 }
