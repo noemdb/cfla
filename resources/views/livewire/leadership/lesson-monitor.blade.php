@@ -7,6 +7,30 @@
         </div>
     </div>
 
+    {{-- Lesson Stats KPI (per lapso) --}}
+    @if($lessonTotal > 0)
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4">
+            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($lessonTotal) }}</p>
+            <p class="text-[11px] font-medium text-amber-400 uppercase tracking-wider">Lecciones Registradas</p>
+        </div>
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4">
+            <p class="text-base sm:text-lg font-bold text-white mb-1">
+                {{ number_format($lessonScheduled) }}
+                <span class="text-xs font-normal text-gray-500">({{ $lessonScheduledPct }}%)</span>
+            </p>
+            <p class="text-[11px] font-medium text-amber-400 uppercase tracking-wider">Programadas</p>
+        </div>
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4">
+            <p class="text-base sm:text-lg font-bold text-white mb-1">
+                {{ number_format($lessonPublished) }}
+                <span class="text-xs font-normal text-gray-500">({{ $lessonPublishedPct }}%)</span>
+            </p>
+            <p class="text-[11px] font-medium text-emerald-400 uppercase tracking-wider">Publicadas</p>
+        </div>
+    </div>
+    @endif
+
     {{-- Filters --}}
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-2 sm:p-5 rounded-lg mb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">

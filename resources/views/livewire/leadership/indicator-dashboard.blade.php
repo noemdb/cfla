@@ -55,10 +55,12 @@
                 <span class="flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     Programadas: <strong class="text-sky-400 font-bold">{{ $lessonScheduled }}</strong>
+                    <span class="text-gray-500">({{ $lessonScheduledPct }}%)</span>
                 </span>
                 <span class="flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Publicadas: <strong class="text-emerald-400 font-bold">{{ $lessonPublished }}</strong>
+                    <span class="text-gray-500">({{ $lessonPublishedPct }}%)</span>
                 </span>
             </div>
         </div>

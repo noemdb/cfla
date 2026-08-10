@@ -62,10 +62,12 @@ class IndicatorDashboard extends Component
     public $chartLessonsByDay = [];
     public $chartScheduledByDay = [];
 
-    // Lesson stats (global)
+    // Lesson stats (scoped by selected lapso)
     public $lessonTotal = 0;
     public $lessonScheduled = 0;
     public $lessonPublished = 0;
+    public $lessonPublishedPct = 0;
+    public $lessonScheduledPct = 0;
 
     // Registration flow charts
     public $registrationRange = '7d';
@@ -521,7 +523,7 @@ class IndicatorDashboard extends Component
         $this->loadChartActivitiesByDay();
         $this->loadChartLessonsByDay();
         $this->loadChartScheduledByDay();
-        $this->loadLessonStats();
+        $this->loadLessonStats($this->selectedLapsoId);
         $this->loadRegistrationFlowCharts();
     }
 
@@ -818,21 +820,29 @@ class IndicatorDashboard extends Component
         ])->toArray();
     }
 
-    private function loadLessonStats()
+    private function loadLessonStats(?int $lapsoId = null)
     {
         $asignaturaIds = $this->asignaturaIds;
 
+        $lapsoScope = function ($q) use ($lapsoId) {
+            if ($lapsoId) {
+                $q->whereHas('activity.pevaluacion', fn ($pq) => $pq->where('lapso_id', $lapsoId));
+            }
+        };
+
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
+            ->tap($lapsoScope)
             ->whereHas('activity.pevaluacion.pensum', fn($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
         $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
+            ->tap($lapsoScope)
             ->whereHas('activity.pevaluacion.pensum', fn($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
-        $draftsCount = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
+        $draftsQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
             ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
             ->whereNull('lms_activity_publications.publish_at')
@@ -841,10 +851,17 @@ class IndicatorDashboard extends Component
                   ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
             ->whereIn('pensums.asignatura_id', $asignaturaIds)
-            ->whereNull('pevaluacions.deleted_at')
-            ->count(DB::raw('DISTINCT activities.id'));
+            ->whereNull('pevaluacions.deleted_at');
+
+        if ($lapsoId) {
+            $draftsQuery->where('pevaluacions.lapso_id', $lapsoId);
+        }
+
+        $draftsCount = $draftsQuery->count(DB::raw('DISTINCT activities.id'));
 
         $this->lessonTotal = $this->lessonPublished + $this->lessonScheduled + $draftsCount;
+        $this->lessonPublishedPct = $this->lessonTotal > 0 ? round(($this->lessonPublished / $this->lessonTotal) * 100, 1) : 0;
+        $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
     }
 
     public function updatedRegistrationRange() { $this->loadRegistrationFlowCharts(); }

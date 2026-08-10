@@ -173,6 +173,23 @@ class HomeController extends Controller
                     (new LmsActivityPublication)->scopeVisibleNow($q)
                 )->count();
 
+                $lmsScheduled = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->whereHas('lmsPublication', fn($q) =>
+                    $q->where('status', 'SCHEDULED')
+                )->count();
+
+                $lmsRegistered = Activity::whereHas('pevaluacion', fn($q) =>
+                    $q->where('profesor_id', $profesor->id)
+                        ->where('lapso_id', $lapsoItem->id)
+                )->where(function ($q) {
+                    $q->has('lmsSections')->orWhereHas('lmsPublication');
+                })->count();
+
+                $lmsPublishedPct = $lmsRegistered > 0 ? round(($lmsPublished / $lmsRegistered) * 100, 1) : 0;
+                $lmsScheduledPct = $lmsRegistered > 0 ? round(($lmsScheduled / $lmsRegistered) * 100, 1) : 0;
+
                 $lmsSections = LmsActivitySection::whereHas('activity.pevaluacion', fn($q) =>
                     $q->where('profesor_id', $profesor->id)
                         ->where('lapso_id', $lapsoItem->id)
@@ -242,6 +259,10 @@ class HomeController extends Controller
                     'diag_progress'      => $diagProgress,
                     // LMS / Lecciones
                     'lms_published'      => $lmsPublished,
+                    'lms_scheduled'      => $lmsScheduled,
+                    'lms_registered'     => $lmsRegistered,
+                    'lms_published_pct'  => $lmsPublishedPct,
+                    'lms_scheduled_pct'  => $lmsScheduledPct,
                     'lms_sections'       => $lmsSections,
                     'lms_resources'      => $lmsResources,
                     // Charts

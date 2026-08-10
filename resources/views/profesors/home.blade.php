@@ -450,22 +450,38 @@
                             </div>
                         </div>
 
-                        {{-- ═══ LMS / Lecciones: 1×1 + 2×1 + 1×1 ═══ --}}
-                        <div class="col-span-1">
-                            <x-indicator-box
-                                icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-                                label="Lecciones Publicadas"
-                                value="{{ $ind['lms_published'] ?? 0 }}"
-                                color="violet"
-                                topBorderColor="teal"
-                                subtext="Visibles para estudiantes"
-                            />
+                        {{-- ═══ LMS / Lecciones ── KPI compacto ── --}}
+                        <div class="col-span-1 sm:col-span-2 bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-xl p-4 hover:border-teal-500/30 transition-all duration-200">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-base sm:text-lg font-bold text-white mb-1">{{ number_format($ind['lms_registered'] ?? 0) }}</p>
+                            <p class="text-[11px] font-medium text-teal-400 uppercase tracking-wider">Lecciones</p>
+                            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] sm:text-[11px] text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    Programadas: <strong class="text-amber-400 font-bold">{{ $ind['lms_scheduled'] ?? 0 }}</strong>
+                                    <span class="text-gray-500">({{ $ind['lms_scheduled_pct'] ?? 0 }}%)</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Publicadas: <strong class="text-emerald-400 font-bold">{{ $ind['lms_published'] ?? 0 }}</strong>
+                                    <span class="text-gray-500">({{ $ind['lms_published_pct'] ?? 0 }}%)</span>
+                                </span>
+                            </div>
                         </div>
 
-                        <div class="col-span-1 sm:col-span-2">
+                        <div class="col-span-1">
                             <x-indicator-box
                                 icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>'
-                                label="Secciones de Contenido"
+                                label="Secciones"
                                 value="{{ $ind['lms_sections'] ?? 0 }}"
                                 color="teal"
                                 topBorderColor="teal"
@@ -476,7 +492,7 @@
                         <div class="col-span-1">
                             <x-indicator-box
                                 icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>'
-                                label="Recursos LMS"
+                                label="Recursos"
                                 value="{{ $ind['lms_resources'] ?? 0 }}"
                                 color="pink"
                                 topBorderColor="teal"

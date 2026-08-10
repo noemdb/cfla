@@ -61,6 +61,13 @@ class LessonMonitor extends Component
 
     public $tabsLapsos;
 
+    // ─── Lesson stats (per lapso) ───────────────────────────────
+    public int $lessonTotal = 0;
+    public int $lessonScheduled = 0;
+    public int $lessonPublished = 0;
+    public float $lessonPublishedPct = 0;
+    public float $lessonScheduledPct = 0;
+
     public function mount()
     {
         $service = app(LeadershipService::class, ['user' => Auth::user()]);
@@ -79,6 +86,59 @@ class LessonMonitor extends Component
         $this->lapso_id = \App\Models\app\Academy\Lapso::current()?->id;
 
         $this->setProfesorLists();
+
+        $this->loadLessonStats();
+    }
+
+    /**
+     * Load lesson stats scoped by LeadershipService + lapso_id.
+     * Registered = activities that have lmsSections OR lmsPublication.
+     * Scheduled = those with lmsPublication.status = SCHEDULED.
+     * Published = those with lmsPublication.status = PUBLISHED.
+     */
+    private function loadLessonStats(): void
+    {
+        $lapsoId = $this->lapso_id;
+
+        // Base query: all activities visible to this leader, scoped by lapso
+        $baseQuery = Activity::query()
+            ->whereHas('pevaluacion.pensum', fn ($q) => $q->where('planning_module', true));
+
+        if ($lapsoId) {
+            $baseQuery->whereHas('pevaluacion', fn ($q) => $q->where('lapso_id', $lapsoId));
+        }
+
+        $service = app(LeadershipService::class, ['user' => Auth::user()]);
+        $service->scopeActivities($baseQuery);
+
+        // Registered: activities with lmsSections (content in wizard) OR lmsPublication
+        $this->lessonTotal = $baseQuery
+            ->where(function ($q) {
+                $q->has('lmsSections')->orWhereHas('lmsPublication');
+            })
+            ->count();
+
+        if ($this->lessonTotal === 0) {
+            $this->lessonPublished = 0;
+            $this->lessonScheduled = 0;
+            $this->lessonPublishedPct = 0;
+            $this->lessonScheduledPct = 0;
+
+            return;
+        }
+
+        // Published
+        $this->lessonPublished = $baseQuery
+            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'))
+            ->count();
+
+        // Scheduled
+        $this->lessonScheduled = $baseQuery
+            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))
+            ->count();
+
+        $this->lessonPublishedPct = round(($this->lessonPublished / $this->lessonTotal) * 100, 1);
+        $this->lessonScheduledPct = round(($this->lessonScheduled / $this->lessonTotal) * 100, 1);
     }
 
     public function render()
@@ -385,6 +445,7 @@ class LessonMonitor extends Component
     public function updatedLapsoId($value)
     {
         $this->resetPage();
+        $this->loadLessonStats();
     }
 
     public function updatingSearch()
