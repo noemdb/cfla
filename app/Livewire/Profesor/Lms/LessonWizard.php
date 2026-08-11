@@ -4461,7 +4461,24 @@ PROMPT;
 
     public function isCurrentUserPlanner(): bool
     {
-        return auth()->user()->isPlanner;
+        return $this->canPublishLesson();
+    }
+
+    /**
+     * ¿El usuario actual puede PUBLICAR lecciones de inmediato (PUBLISHED)?
+     * Solo los roles autorizados: Admin, Planificación, Jefatura de Área
+     * (Leadership) o Coordinación. El profesor solo puede programar
+     * (SCHEDULED) y la lección queda pendiente de aprobación/publicación
+     * por un responsable.
+     */
+    public function canPublishLesson(): bool
+    {
+        $user = auth()->user();
+
+        return $user->is_admin
+            || $user->is_planner
+            || $user->isLeadership()
+            || $user->isCoordinacion();
     }
 
     public function confirmPublish(): void
@@ -4480,8 +4497,9 @@ PROMPT;
         $this->showUnsavedConfirm = false;
         $this->pendingSaveAction = null;
 
-        // Planners/admins pueden publicar directamente (comportamiento actual)
-        if ($this->isCurrentUserPlanner()) {
+        // Roles autorizados (admin/planning/leadership/coordinación) publican
+        // directamente (comportamiento actual)
+        if ($this->canPublishLesson()) {
             if (blank($this->publishAt)) {
                 $this->showPublishConfirm = true;
             } else {
@@ -4786,8 +4804,9 @@ PROMPT;
         // 6. Guardar preguntas de repaso
         $this->saveReviewQuestionsSection($activityId);
 
-        // 7. Publicar. Los planners/admins publican de inmediato (PUBLISHED);
-        //    el profesor solo programa (SCHEDULED) y lo notifica a planning.
+        // 7. Publicar. Los roles autorizados (admin/planning/leadership/
+        //    coordinación) publican de inmediato (PUBLISHED); el profesor solo
+        //    programa (SCHEDULED) y lo notifica a los responsables.
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
@@ -4795,11 +4814,12 @@ PROMPT;
                 'allow_downloads' => $this->allowDownloads,
             ],
             auth()->id(),
-            $this->isCurrentUserPlanner()
+            $this->canPublishLesson()
         );
 
-        // Si el usuario es profesor (no planner), notificar a planning
-        if (! $this->isCurrentUserPlanner()) {
+        // Si el usuario es profesor (no tiene rol de publicación), notificar a
+        // los responsables (planning, leadership, coordinación)
+        if (! $this->canPublishLesson()) {
             $this->notifyPlanningScheduled($activityId);
         }
 
@@ -4821,6 +4841,8 @@ PROMPT;
         $planners = User::query()
             ->where('is_planner', true)
             ->orWhere('is_admin', true)
+            ->orWhere('is_leadership', true)
+            ->orWhere('is_coordinacion', true)
             ->get();
 
         $scheduledDate = $this->publishAt

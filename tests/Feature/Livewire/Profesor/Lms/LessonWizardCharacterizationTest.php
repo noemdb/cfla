@@ -3,18 +3,19 @@
 namespace Tests\Feature\Livewire\Profesor\Lms;
 
 use App\Livewire\Profesor\Lms\LessonWizard;
-use App\Models\User;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsActivityLink;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityResource;
-use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\app\Academy\Lms\LmsActivitySection;
-use App\Services\NvidiaService;
+use App\Models\app\Academy\Lms\LmsHtmlEmbed;
+use App\Models\User;
+use App\Notifications\LessonScheduledForApproval;
 use App\Services\OpenRouterService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -275,7 +276,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function cambiar_viewMode_guarda_en_sesion(): void
+    public function cambiar_view_mode_guarda_en_sesion(): void
     {
         $this->createProfesorUser();
         $component = Livewire::test(LessonWizard::class);
@@ -318,7 +319,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function closeDetails_cierra_modal(): void
+    public function close_details_cierra_modal(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -336,7 +337,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function startWizard_cambia_a_modo_wizard(): void
+    public function start_wizard_cambia_a_modo_wizard(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -353,7 +354,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function startWizard_carga_publicacion_existente(): void
+    public function start_wizard_carga_publicacion_existente(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -373,7 +374,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function goToStep_navega_entre_pasos(): void
+    public function go_to_step_navega_entre_pasos(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -396,7 +397,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function goToStep_vuelve_saved_a_false(): void
+    public function go_to_step_vuelve_saved_a_false(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -410,7 +411,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function backToList_resetea_el_estado_del_wizard(): void
+    public function back_to_list_resetea_el_estado_del_wizard(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -434,7 +435,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function goToSlide_navega_entre_diapositivas(): void
+    public function go_to_slide_navega_entre_diapositivas(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -463,7 +464,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function toggleSidebar_commuta_y_persiste(): void
+    public function toggle_sidebar_commuta_y_persiste(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -486,7 +487,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function addWizardSection_agrega_seccion_con_titulo_personalizado(): void
+    public function add_wizard_section_agrega_seccion_con_titulo_personalizado(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -505,7 +506,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function addWizardSection_usa_titulo_default_si_vacio(): void
+    public function add_wizard_section_usa_titulo_default_si_vacio(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -522,7 +523,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function removeWizardSection_elimina_seccion_por_indice(): void
+    public function remove_wizard_section_elimina_seccion_por_indice(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -542,7 +543,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function toggleWizardSectionVisibility_commuta_visibilidad(): void
+    public function toggle_wizard_section_visibility_commuta_visibilidad(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -561,7 +562,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function moveSlide_reordena_secciones(): void
+    public function move_slide_reordena_secciones(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -584,7 +585,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function publishedGuard_bloquea_operaciones_en_leccion_publicada(): void
+    public function published_guard_bloquea_operaciones_en_leccion_publicada(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -609,7 +610,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function addWizardContent_agrega_bloque_a_seccion(): void
+    public function add_wizard_content_agrega_bloque_a_seccion(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -631,7 +632,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function addWizardFirstBlock_crea_bloque_vacio(): void
+    public function add_wizard_first_block_crea_bloque_vacio(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -651,7 +652,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function removeWizardContent_elimina_bloque(): void
+    public function remove_wizard_content_elimina_bloque(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -678,7 +679,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function addWizardLink_agrega_enlace(): void
+    public function add_wizard_link_agrega_enlace(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -699,7 +700,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function removeWizardLink_elimina_enlace(): void
+    public function remove_wizard_link_elimina_enlace(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -722,7 +723,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function addWizardHtmlEmbed_agrega_embed(): void
+    public function add_wizard_html_embed_agrega_embed(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -741,7 +742,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function removeWizardHtmlEmbed_elimina_embed(): void
+    public function remove_wizard_html_embed_elimina_embed(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -768,7 +769,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function generateStep1Content_llena_titulo_y_descripcion(): void
+    public function generate_step1_content_llena_titulo_y_descripcion(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -786,7 +787,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateStep1Content_maneja_error_de_ia(): void
+    public function generate_step1_content_maneja_error_de_ia(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -811,7 +812,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateSectionContent_agrega_contenido_a_seccion(): void
+    public function generate_section_content_agrega_contenido_a_seccion(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -831,7 +832,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateSectionContent_salta_si_indice_invalido(): void
+    public function generate_section_content_salta_si_indice_invalido(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -845,7 +846,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateSlideText_agrega_bloque(): void
+    public function generate_slide_text_agrega_bloque(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -864,7 +865,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateSlideImage_crea_bloque(): void
+    public function generate_slide_image_crea_bloque(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -884,7 +885,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateReviewQuestions_genera_preguntas(): void
+    public function generate_review_questions_genera_preguntas(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -903,7 +904,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function generateReviewQuestions_requiere_titulo(): void
+    public function generate_review_questions_requiere_titulo(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -922,7 +923,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function generateStep2Sections_agrega_secciones_desde_ia(): void
+    public function generate_step2_sections_agrega_secciones_desde_ia(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -969,7 +970,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function saveStep2_persiste_secciones_y_contenidos(): void
+    public function save_step2_persiste_secciones_y_contenidos(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1001,7 +1002,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveStep2_persiste_titulo_y_descripcion(): void
+    public function save_step2_persiste_titulo_y_descripcion(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1021,7 +1022,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveStep2_muestra_confirmacion_si_no_hay_secciones(): void
+    public function save_step2_muestra_confirmacion_si_no_hay_secciones(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1036,7 +1037,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveStep2_guarda_recursos_enlaces_embeds(): void
+    public function save_step2_guarda_recursos_enlaces_embeds(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1074,7 +1075,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function showExport_abre_modal_con_datos_disponibles(): void
+    public function show_export_abre_modal_con_datos_disponibles(): void
     {
         $data = $this->createProfesorUser();
         $sourceActivity = $this->createActivity($data['profesor_id'], ['topic' => 'Actividad Origen']);
@@ -1093,7 +1094,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function closeExportModal_cierra_modal(): void
+    public function close_export_modal_cierra_modal(): void
     {
         $data = $this->createProfesorUser();
         $sourceActivity = $this->createActivity($data['profesor_id']);
@@ -1109,7 +1110,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function goToExportStep_navega_pasos_export(): void
+    public function go_to_export_step_navega_pasos_export(): void
     {
         $data = $this->createProfesorUser();
         $sourceActivity = $this->createActivity($data['profesor_id']);
@@ -1129,7 +1130,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function showImport_abre_modal(): void
+    public function show_import_abre_modal(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1148,7 +1149,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function closeImportModal_cierra_modal(): void
+    public function close_import_modal_cierra_modal(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1164,7 +1165,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function goToImportStep_navega_pasos_import(): void
+    public function go_to_import_step_navega_pasos_import(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1184,7 +1185,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function confirmPublish_muestra_panel(): void
+    public function confirm_publish_muestra_panel(): void
     {
         $data = $this->createProfesorUser(false, ['is_planner' => true]);
         $activity = $this->createActivity($data['profesor_id']);
@@ -1201,7 +1202,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveAndPublish_profesor_solo_programa(): void
+    public function save_and_publish_profesor_solo_programa(): void
     {
         // El profesor no publica: solo programa la lección (SCHEDULED).
         // Debe publicarla un responsable (Jefe de Área, Coordinación o
@@ -1228,7 +1229,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveAndPublish_planner_publica(): void
+    public function save_and_publish_planner_publica(): void
     {
         // Planificación (rol autorizado) publica de inmediato (PUBLISHED).
         $data = $this->createProfesorUser(false, ['is_planner' => true]);
@@ -1253,7 +1254,130 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function resetWizardSections_limpia_todo(): void
+    public function can_publish_lesson_rol_leadership_publica(): void
+    {
+        // Jefatura de Área (is_leadership) es rol autorizado: puede publicar
+        // de inmediato y sin fecha abre el modal de confirmación.
+        $data = $this->createProfesorUser(false, ['is_leadership' => true]);
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $this->assertTrue($component->instance()->canPublishLesson());
+
+        $component->set('newSectionTitle', 'Sección test');
+        $component->call('addWizardSection');
+        $component->call('confirmPublish');
+        $component->assertSet('showPublishConfirm', true);
+    }
+
+    /** @test */
+    public function can_publish_lesson_rol_coordinacion_publica(): void
+    {
+        // Coordinación (is_coordinacion) es rol autorizado: publica de inmediato.
+        $data = $this->createProfesorUser(false, ['is_coordinacion' => true]);
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $this->assertTrue($component->instance()->canPublishLesson());
+
+        $component->set('newSectionTitle', 'Sección test');
+        $component->call('addWizardSection');
+        $component->call('confirmPublish');
+        $component->assertSet('showPublishConfirm', true);
+    }
+
+    /** @test */
+    public function can_publish_lesson_profesor_puro_no_puede_publicar(): void
+    {
+        // El profesor sin rol de publicación no puede publicar: sin fecha NO
+        // se abre el modal de confirmación y no se crea publicación alguna.
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $this->assertFalse($component->instance()->canPublishLesson());
+
+        $component->set('newSectionTitle', 'Sección test');
+        $component->call('addWizardSection');
+        $component->call('confirmPublish');
+        $component->assertSet('showPublishConfirm', false);
+        $component->assertSet('published', false);
+
+        $this->assertNull($activity->refresh()->lmsPublication);
+    }
+
+    /** @test */
+    public function save_and_publish_leadership_publica(): void
+    {
+        // Jefatura de Área (rol autorizado) publica de inmediato (PUBLISHED).
+        $data = $this->createProfesorUser(false, ['is_leadership' => true]);
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $component->set('newSectionTitle', 'Sección para publicar');
+        $component->call('addWizardSection');
+        $component->set('contentBody', 'Contenido');
+        $component->call('addWizardContent', 0);
+        $component->set('saveAnyway', true);
+        $component->call('saveStep2');
+
+        $component->call('saveAndPublish');
+
+        $activity->refresh();
+        $publication = $activity->lmsPublication;
+        $this->assertNotNull($publication);
+        $this->assertEquals('PUBLISHED', $publication->status);
+    }
+
+    /** @test */
+    public function confirm_publish_profesor_con_fecha_programa_y_notifica_responsables(): void
+    {
+        // El profesor con fecha solo PROGRAMA (SCHEDULED, sin published_at) y
+        // notifica a los responsables (planning, leadership, coordinación).
+        Notification::fake();
+
+        $planner = User::factory()->create(['is_planner' => true]);
+        $leader = User::factory()->create(['is_leadership' => true]);
+        $coordinator = User::factory()->create(['is_coordinacion' => true]);
+
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+
+        $component->set('newSectionTitle', 'Sección para publicar');
+        $component->call('addWizardSection');
+        $component->set('contentBody', 'Contenido');
+        $component->call('addWizardContent', 0);
+        $component->set('saveAnyway', true);
+        $component->call('saveStep2');
+        $component->set('publishAt', '2026-12-31T10:00');
+
+        $component->call('confirmPublish');
+
+        $activity->refresh();
+        $publication = $activity->lmsPublication;
+        $this->assertNotNull($publication);
+        $this->assertEquals('SCHEDULED', $publication->status);
+        $this->assertNull($publication->published_at);
+
+        Notification::assertSentTo(
+            [$planner, $leader, $coordinator],
+            LessonScheduledForApproval::class
+        );
+    }
+
+    /** @test */
+    public function reset_wizard_sections_limpia_todo(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1279,7 +1403,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function openListStudentPreview_carga_datos_de_actividad_guardada(): void
+    public function open_list_student_preview_carga_datos_de_actividad_guardada(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1293,7 +1417,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function closeListStudentPreview_cierra_preview(): void
+    public function close_list_student_preview_cierra_preview(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1307,7 +1431,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function openWizardStudentPreview_carga_datos_desde_estado_wizard(): void
+    public function open_wizard_student_preview_carga_datos_desde_estado_wizard(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1328,7 +1452,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function deleteLesson_elimina_contenido_lms_completo(): void
+    public function delete_lesson_elimina_contenido_lms_completo(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1387,7 +1511,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function renderContentBody_convierte_markdown_a_html(): void
+    public function render_content_body_convierte_markdown_a_html(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1404,7 +1528,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function renderContentBody_devuelve_vacio_si_body_null_o_vacio(): void
+    public function render_content_body_devuelve_vacio_si_body_null_o_vacio(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1420,7 +1544,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function renderContentBody_no_convierte_markdown_si_es_MATH(): void
+    public function render_content_body_no_convierte_markdown_si_es_math(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1436,7 +1560,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function renderReviewQuestions_formatea_preguntas(): void
+    public function render_review_questions_formatea_preguntas(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1457,7 +1581,7 @@ class LessonWizardCharacterizationTest extends TestCase
     // ═══════════════════════════════════════════════════════════════
 
     /** @test */
-    public function modificar_lessonTitle_marca_no_guardado(): void
+    public function modificar_lesson_title_marca_no_guardado(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1471,7 +1595,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function modificar_wizardSections_marca_no_guardado(): void
+    public function modificar_wizard_sections_marca_no_guardado(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1486,7 +1610,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function modificar_wizardLinks_marca_no_guardado(): void
+    public function modificar_wizard_links_marca_no_guardado(): void
     {
         $data = $this->createProfesorUser();
         $activity = $this->createActivity($data['profesor_id']);
@@ -1530,7 +1654,7 @@ class LessonWizardCharacterizationTest extends TestCase
     }
 
     /** @test */
-    public function saveStep2_invalida_la_caché_content_type_cuando_la_seccion_queda_sin_contenidos(): void
+    public function save_step2_invalida_la_caché_content_type_cuando_la_seccion_queda_sin_contenidos(): void
     {
         // Spec "Campo content_type": el borrado masivo de contenidos en
         // saveStep2 (query builder) NO dispara el observer → la caché debe

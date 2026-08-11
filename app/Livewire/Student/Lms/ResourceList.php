@@ -7,8 +7,8 @@ use App\Models\app\Academy\Lms\LmsActivityLink;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Services\Estudiant\StudentScopeService;
+use App\Services\Lms\LmsContentRendererService;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -95,26 +95,26 @@ class ResourceList extends Component
             }
             if ($this->typeFilter) {
                 match ($this->typeFilter) {
-                    'image'        => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'image/%')),
-                    'pdf'          => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'application/pdf')),
-                    'video'        => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'video/%')),
-                    'audio'        => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'audio/%')),
+                    'image' => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'image/%')),
+                    'pdf' => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'application/pdf')),
+                    'video' => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'video/%')),
+                    'audio' => $rQuery->whereHas('media', fn ($mq) => $mq->where('mime_type', 'like', 'audio/%')),
                     'downloadable' => $rQuery->whereHas('media', fn ($mq) => $mq->where('provider', 'LOCAL')),
-                    default        => null,
+                    default => null,
                 };
             }
 
             foreach ($rQuery->get() as $r) {
                 $items->push((object) [
-                    '_type'        => 'resource',
-                    'id'           => $r->id,
+                    '_type' => 'resource',
+                    'id' => $r->id,
                     'display_name' => $r->display_name,
-                    'description'  => $r->description,
-                    'activity'     => $r->activity,
-                    'media'        => $r->media,
-                    'section'      => $r->section,
-                    'created_at'   => $r->created_at,
-                    'sort_order'   => $r->sort_order,
+                    'description' => $r->description,
+                    'activity' => $r->activity,
+                    'media' => $r->media,
+                    'section' => $r->section,
+                    'created_at' => $r->created_at,
+                    'sort_order' => $r->sort_order,
                 ]);
             }
         }
@@ -150,16 +150,16 @@ class ResourceList extends Component
 
             foreach ($lQuery->orderBy('created_at', 'desc')->get() as $l) {
                 $items->push((object) [
-                    '_type'        => 'link',
-                    'id'           => $l->id,
+                    '_type' => 'link',
+                    'id' => $l->id,
                     'display_name' => $l->title,
-                    'description'  => $l->description,
-                    'url'          => $l->url,
-                    'link_type'    => $l->link_type,
-                    'activity'     => $l->activity,
-                    'section'      => $l->section,
-                    'created_at'   => $l->created_at,
-                    'sort_order'   => $l->sort_order,
+                    'description' => $l->description,
+                    'url' => $l->url,
+                    'link_type' => $l->link_type,
+                    'activity' => $l->activity,
+                    'section' => $l->section,
+                    'created_at' => $l->created_at,
+                    'sort_order' => $l->sort_order,
                 ]);
             }
         }
@@ -195,14 +195,14 @@ class ResourceList extends Component
 
             foreach ($eQuery->orderBy('created_at', 'desc')->get() as $e) {
                 $items->push((object) [
-                    '_type'        => 'embed',
-                    'id'           => $e->id,
+                    '_type' => 'embed',
+                    'id' => $e->id,
                     'display_name' => $e->title,
-                    'description'  => '', // No mostrar HTML crudo en la lista
-                    'activity'     => $e->activity,
-                    'section'      => $e->section,
-                    'created_at'   => $e->created_at,
-                    'sort_order'   => $e->sort_order,
+                    'description' => '', // No mostrar HTML crudo en la lista
+                    'activity' => $e->activity,
+                    'section' => $e->section,
+                    'created_at' => $e->created_at,
+                    'sort_order' => $e->sort_order,
                 ]);
             }
         }
@@ -226,8 +226,8 @@ class ResourceList extends Component
             ->sort();
 
         return view('livewire.student.lms.resource-list', [
-            'resources'   => $paginated,
-            'lapsos'      => $lapsos,
+            'resources' => $paginated,
+            'lapsos' => $lapsos,
             'asignaturas' => $asignaturas,
         ])->layout('student.layouts.app');
     }
@@ -274,6 +274,7 @@ class ResourceList extends Component
 
             $this->previewResource = $resource->toArray();
             $this->showPreviewModal = true;
+
             return;
         }
 
@@ -322,7 +323,11 @@ class ResourceList extends Component
             return;
         }
 
-        $this->embedPreview = $embed->toArray();
+        // Normaliza el embed para el modal: detecta Mermaid (is_mermaid) y
+        // extrae el código desde formatos legacy (div.mermaid, data-mermaid-code)
+        // — mismo pipeline que el wizard (LmsContentRendererService).
+        $this->embedPreview = app(LmsContentRendererService::class)
+            ->ensureMermaidWrapper($embed->toArray());
         $this->showEmbedPreviewModal = true;
     }
 

@@ -505,7 +505,7 @@
                                     <div>
                                         <h3 class="text-sm font-bold text-white uppercase tracking-wider">Sin fecha de programación</h3>
                                         <p class="text-xs text-slate-400 mt-1">
-                                            No has establecido una fecha de programación. La lección se guardará como borrador.
+                                            No has establecido una fecha de programación. La lección se <strong class="text-amber-400">publicará de inmediato</strong>.
                                         </p>
                                     </div>
                                 </div>

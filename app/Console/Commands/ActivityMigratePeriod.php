@@ -33,13 +33,13 @@ class ActivityMigratePeriod extends Command
     protected $signature = 'activity:migrate-period
                           {--from-grado=10 : Grado fuente (cuarto año anterior)}
                           {--to-grado=15 : Grado destino (cuarto año actual)}
-                          {--pestudio=2 : Plan de estudio}
+                          {--pestudio=2 : Plan de estudio FUENTE (el destino se infiere del grado)}
                           {--planning-only : Copiar solo activities + achievements (sin LMS)}
                           {--dry-run : Mostrar cambios sin persistir}
                           {--rollback : Revertir la migración más reciente para este rango}
                           {--force : Ejecutar sin confirmación}';
 
-    protected $description = 'Copia activities de un grado a otro (misma asignatura, misma estructura)';
+    protected $description = 'Copia activities de un grado a otro (misma asignatura, misma estructura; el pestudio destino se toma del grado)';
 
     /** @var array<int, array{source:int, target:int}> Pensums creados (source_id → target_id) */
     private array $pensumMap = [];
@@ -64,14 +64,14 @@ class ActivityMigratePeriod extends Command
 
         $fromGrado = (int) $this->option('from-grado');
         $toGrado = (int) $this->option('to-grado');
-        $pestudioId = (int) $this->option('pestudio');
+        $sourcePestudioId = (int) $this->option('pestudio');
         $planningOnly = (bool) $this->option('planning-only');
         $dryRun = (bool) $this->option('dry-run');
 
         // ── 1. Validar inputs ──
         $fromGradoModel = Grado::find($fromGrado);
         $toGradoModel = Grado::find($toGrado);
-        $pestudio = Pestudio::find($pestudioId);
+        $pestudio = Pestudio::find($sourcePestudioId);
 
         if (! $fromGradoModel || ! $toGradoModel || ! $pestudio) {
             $this->error('Grado fuente, destino o pestudio no encontrado.');
@@ -79,20 +79,25 @@ class ActivityMigratePeriod extends Command
             return self::FAILURE;
         }
 
+        // El pestudio destino se infiere del grado destino (no del flag --pestudio)
+        $toPestudioId = (int) $toGradoModel->pestudio_id;
+
         $this->info("=== Diagnóstico ===");
-        $this->info("Pestudio: {$pestudio->name} (id={$pestudioId})");
+        $this->info("Pestudio fuente: {$pestudio->name} (id={$sourcePestudioId})");
         $this->info("Grado fuente: {$fromGradoModel->name} (id={$fromGrado}) — active=" . var_export($fromGradoModel->status_active, true));
         $this->info("Grado destino: {$toGradoModel->name} (id={$toGrado}) — active=" . var_export($toGradoModel->status_active, true));
+        $toPestudio = Pestudio::find($toPestudioId);
+        $this->info("Pestudio destino (inferido del grado): " . ($toPestudio?->name ?? '?') . " (id={$toPestudioId})");
         $this->newLine();
 
         // ── 2. Pensums fuente ──
-        $sourcePensums = Pensum::where('pestudio_id', $pestudioId)
+        $sourcePensums = Pensum::where('pestudio_id', $sourcePestudioId)
             ->where('grado_id', $fromGrado)
             ->with('asignatura')
             ->get();
 
         if ($sourcePensums->isEmpty()) {
-            $this->error("No hay pensums en pestudio={$pestudioId} grado={$fromGrado}.");
+            $this->error("No hay pensums en pestudio={$sourcePestudioId} grado={$fromGrado}.");
 
             return self::FAILURE;
         }
@@ -102,7 +107,7 @@ class ActivityMigratePeriod extends Command
         // ── 3. Pevaluaciones fuente ──
         $sourcePevs = Pevaluacion::with('pensum.asignatura', 'seccion', 'lapso', 'profesor')
             ->whereHas('seccion', fn ($q) => $q->where('grado_id', $fromGrado))
-            ->whereHas('pensum', fn ($q) => $q->where('pestudio_id', $pestudioId))
+            ->whereHas('pensum', fn ($q) => $q->where('pestudio_id', $sourcePestudioId))
             ->get();
 
         $pevsWithActivities = $sourcePevs->filter(fn ($p) => $p->activities()->count() > 0);
@@ -138,7 +143,7 @@ class ActivityMigratePeriod extends Command
         if (! $dryRun && ! $this->option('force')) {
             $targetActivities = Activity::whereIn('pevaluacion_id', $sourcePevs->pluck('id'))->count();
             $this->newLine();
-            $this->warn("Esto creará {$sourcePensums->count()} pensums, {$sourcePevs->count()} pevaluaciones y {$targetActivities} activities en grado {$toGrado}/pestudio {$pestudioId}.");
+            $this->warn("Esto creará {$sourcePensums->count()} pensums, {$sourcePevs->count()} pevaluaciones y {$targetActivities} activities en grado {$toGrado}/pestudio {$toPestudioId}.");
             $this->warn("La fuente (grado {$fromGrado}) NO se modifica.");
 
             if (! $this->confirm('¿Continuar?', false)) {
@@ -155,13 +160,13 @@ class ActivityMigratePeriod extends Command
 
         try {
             // Paso 1: Clonar pensums
-            $this->clonarPensums($sourcePensums, $pestudioId, $toGrado, $dryRun);
+            $this->clonarPensums($sourcePensums, $toPestudioId, $toGrado, $dryRun);
 
             // Paso 2: Crear/find pevaluaciones destino
-            $this->mapearPevs($sourcePevs, $pestudioId, $toGrado, $targetSeccions, $dryRun);
+            $this->mapearPevs($sourcePevs, $toPestudioId, $toGrado, $targetSeccions, $dryRun);
 
             // Paso 3: Copiar activities + relaciones
-            $this->copiarActivities($pevsWithActivities, $planningOnly, $dryRun);
+            $this->copiarActivities($pevsWithActivities, $planningOnly, $dryRun, $toPestudioId);
 
             if ($dryRun) {
                 DB::rollBack();
@@ -199,13 +204,13 @@ class ActivityMigratePeriod extends Command
 
     // ─── PASO 1: PENSUMS ──────────────────────────────────────────────────
 
-    private function clonarPensums(\Illuminate\Support\Collection $sourcePensums, int $pestudioId, int $toGrado, bool $dryRun): void
+    private function clonarPensums(\Illuminate\Support\Collection $sourcePensums, int $toPestudioId, int $toGrado, bool $dryRun): void
     {
         $this->info('▸ Clonando pensums...');
 
         foreach ($sourcePensums as $src) {
             // ¿Ya existe un pensum con misma asignatura en destino?
-            $exists = Pensum::where('pestudio_id', $pestudioId)
+            $exists = Pensum::where('pestudio_id', $toPestudioId)
                 ->where('grado_id', $toGrado)
                 ->where('asignatura_id', $src->asignatura_id)
                 ->first();
@@ -219,7 +224,7 @@ class ActivityMigratePeriod extends Command
 
             if (! $dryRun) {
                 $target = Pensum::create([
-                    'pestudio_id' => $pestudioId,
+                    'pestudio_id' => $toPestudioId,
                     'grado_id' => $toGrado,
                     'asignatura_id' => $src->asignatura_id,
                     'status_component' => $src->status_component,
@@ -240,7 +245,7 @@ class ActivityMigratePeriod extends Command
 
     private function mapearPevs(
         \Illuminate\Support\Collection $sourcePevs,
-        int $pestudioId,
+        int $toPestudioId,
         int $toGrado,
         \Illuminate\Support\Collection $targetSeccions,
         bool $dryRun
@@ -309,7 +314,8 @@ class ActivityMigratePeriod extends Command
     private function copiarActivities(
         \Illuminate\Support\Collection $pevsWithActivities,
         bool $planningOnly,
-        bool $dryRun
+        bool $dryRun,
+        int $toPestudioId
     ): void {
         $this->info('▸ Copiando activities...');
 
@@ -372,7 +378,7 @@ class ActivityMigratePeriod extends Command
 
                 // Log
                 DB::table('activity_migration_logs')->insert([
-                    'pestudio_id' => 2, // Se infiere del contexto; se puede generalizar
+                    'pestudio_id' => $toPestudioId,
                     'from_grado_id' => (int) $this->option('from-grado'),
                     'to_grado_id' => (int) $this->option('to-grado'),
                     'pensum_source_id' => $srcActivity->pevaluacion->pensum_id ?? null,
@@ -519,10 +525,18 @@ class ActivityMigratePeriod extends Command
     {
         $fromGrado = (int) $this->option('from-grado');
         $toGrado = (int) $this->option('to-grado');
-        $pestudioId = (int) $this->option('pestudio');
+
+        // El pestudio con el que se registró el log es el destino (inferido del grado)
+        $toGradoModel = Grado::find($toGrado);
+        if (! $toGradoModel) {
+            $this->error('Grado destino no encontrado.');
+
+            return self::FAILURE;
+        }
+        $toPestudioId = (int) $toGradoModel->pestudio_id;
 
         $logs = DB::table('activity_migration_logs')
-            ->where('pestudio_id', $pestudioId)
+            ->where('pestudio_id', $toPestudioId)
             ->where('from_grado_id', $fromGrado)
             ->where('to_grado_id', $toGrado)
             ->orderByDesc('id')
@@ -579,7 +593,7 @@ class ActivityMigratePeriod extends Command
 
             // Limpiar log
             DB::table('activity_migration_logs')
-                ->where('pestudio_id', $pestudioId)
+                ->where('pestudio_id', $toPestudioId)
                 ->where('from_grado_id', $fromGrado)
                 ->where('to_grado_id', $toGrado)
                 ->delete();

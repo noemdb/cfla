@@ -395,7 +395,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                                 @endif
                                 @if($embed->is_mermaid ?? false)
                                     <div wire:ignore x-data="mermaidEmbed()"
-                                         data-mermaid-code="{{ trim(strip_tags($embed->html_content)) }}"
+                                         data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}"
                                          class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
                                         <div x-ref="target" class="w-full min-h-0"></div>
                                     </div>
@@ -560,7 +560,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                         @endif
                         @if($embed->is_mermaid ?? false)
                             <div wire:ignore x-data="mermaidEmbed()"
-                                 data-mermaid-code="{{ trim(strip_tags($embed->html_content)) }}"
+                                 data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}"
                                  class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
                                 <div x-ref="target" class="w-full min-h-0"></div>
                             </div>

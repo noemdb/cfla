@@ -91,10 +91,13 @@ class ActivityView extends Component
             ->where('is_visible', true)
             ->get()
             ->map(function ($embed) {
-                $embed->is_mermaid = preg_match(
-                    '/^(flowchart|graph|mindmap|sequenceDiagram|classDiagram|gantt|pie|stateDiagram|erDiagram|journey|gitgraph|timeline)\b/',
-                    trim($embed->html_content ?? '')
-                ) === 1;
+                // Detección unificada de Mermaid (mismo pipeline que el wizard):
+                // keyword inicial, div.mermaid legacy y data-mermaid-code. Además
+                // normaliza html_content extrayendo el código plano.
+                $data = app(\App\Services\Lms\LmsContentRendererService::class)
+                    ->ensureMermaidWrapper($embed->toArray());
+                $embed->html_content = $data['html_content'];
+                $embed->is_mermaid = $data['is_mermaid'];
 
                 return $embed;
             });

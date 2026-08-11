@@ -230,11 +230,101 @@ class StudentResourceTest extends TestCase
             ->assertSee('@keydown.escape.window', false)
             ->assertSee('data-embed-preview-close', false)
             ->assertSee('data-preview-trigger-'.$embed->id, false)
-            // El HTML embebido real se renderiza en el cuerpo del modal
-            ->assertSeeHtml('<iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ"')
+            // El HTML embebido se renderiza vía math-text (DOMPurify + KaTeX):
+            // el contenido viaja en data-math-content (escapado) y se inyecta
+            // en el DOM por JS en el cliente — mismo pipeline que la lección.
+            ->assertSee('x-data="mathContent()"', false)
+            ->assertSee('data-math-content="', false)
+            ->assertSee('&lt;iframe src=&quot;https://www.youtube.com/embed/dQw4w9WgXcQ&quot;', false)
             ->call('closeEmbedPreview')
             ->assertSet('showEmbedPreviewModal', false)
             ->assertSet('embedPreview', null);
+    }
+
+    public function test_embed_preview_renders_mermaid_diagram_with_wrapper(): void
+    {
+        [$seccionId, $pevaluacionId, $s] = $this->createEvaluacionChain();
+
+        $activity = $this->createActivityWithSubject($pevaluacionId, 'Biología', $s);
+
+        $teacher = User::factory()->create(['is_profesor' => true]);
+        $embed = LmsHtmlEmbed::create([
+            'activity_id' => $activity->id,
+            'added_by' => $teacher->id,
+            'title' => 'Diagrama de identidad',
+            'html_content' => "graph TD\n    A[\"Construyendo<br/>Nuestra Identidad\"] --> B[\"Yo Individual\"]\n    B --> C[\"Nosotros Colectivo\"]",
+            'render_condition' => 'ALWAYS',
+            'sort_order' => 1,
+            'is_visible' => true,
+        ]);
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\ResourceList::class)
+            ->call('preview', $embed->id, 'embed')
+            ->assertSet('showEmbedPreviewModal', true)
+            // is_mermaid detectado por ensureMermaidWrapper (keyword inicial)
+            ->assertSet('embedPreview.is_mermaid', true)
+            // wrapper mermaidEmbed en el body del modal (mismo pipeline que la lección)
+            ->assertSee('x-data="mermaidEmbed()"', false)
+            // código extraído con <br/> de labels conservado (A1)
+            ->assertSee('data-mermaid-code="graph TD', false)
+            ->assertSee('Construyendo&lt;br/&gt;Nuestra Identidad', false)
+            ->call('closeEmbedPreview')
+            ->assertSet('showEmbedPreviewModal', false);
+    }
+
+    public function test_embed_preview_renders_markdown_and_latex_via_math_text(): void
+    {
+        [$seccionId, $pevaluacionId, $s] = $this->createEvaluacionChain();
+
+        $activity = $this->createActivityWithSubject($pevaluacionId, 'Matemática', $s);
+
+        $teacher = User::factory()->create(['is_profesor' => true]);
+        // Markdown puro → conversión server-side (Str::markdown)
+        $mdEmbed = LmsHtmlEmbed::create([
+            'activity_id' => $activity->id,
+            'added_by' => $teacher->id,
+            'title' => 'Guía',
+            'html_content' => "## Fórmula de Einstein\n\nLa energía es **cinética** o **potencial**.",
+            'render_condition' => 'ALWAYS',
+            'sort_order' => 1,
+            'is_visible' => true,
+        ]);
+        // LaTeX puro → se preserva crudo para el auto-render de KaTeX
+        // (Str::markdown se comería los delimitadores \( \))
+        $mathEmbed = LmsHtmlEmbed::create([
+            'activity_id' => $activity->id,
+            'added_by' => $teacher->id,
+            'title' => 'Fórmula',
+            'html_content' => 'La energía es \\(E = mc^2\\).',
+            'render_condition' => 'ALWAYS',
+            'sort_order' => 2,
+            'is_visible' => true,
+        ]);
+
+        $student = $this->createStudentInSeccion($seccionId);
+
+        Livewire::actingAs($student)
+            ->test(\App\Livewire\Student\Lms\ResourceList::class)
+            // ── Markdown: no es mermaid → pipeline math-text + Str::markdown ──
+            ->call('preview', $mdEmbed->id, 'embed')
+            ->assertSet('showEmbedPreviewModal', true)
+            ->assertSet('embedPreview.is_mermaid', false)
+            ->assertSee('x-data="mathContent()"', false)
+            // markdown convertido server-side y escapado en data-math-content
+            ->assertSee('data-math-content="', false)
+            ->assertSee('&lt;h2&gt;Fórmula de Einstein&lt;/h2&gt;', false)
+            ->call('closeEmbedPreview')
+            // ── LaTeX: delimitadores \(...\) preservados para KaTeX ──
+            ->call('preview', $mathEmbed->id, 'embed')
+            ->assertSet('showEmbedPreviewModal', true)
+            ->assertSet('embedPreview.is_mermaid', false)
+            ->assertSee('x-data="mathContent()"', false)
+            ->assertSee('La energía es \\(E = mc^2\\).', false)
+            ->call('closeEmbedPreview')
+            ->assertSet('showEmbedPreviewModal', false);
     }
 
     public function test_preview_denied_for_resource_outside_student_section(): void
@@ -433,13 +523,13 @@ class StudentResourceTest extends TestCase
         // Publicación PUBLISHED para que los recursos sean visibles para el estudiante
         $publisher = \App\Models\User::factory()->create(['is_profesor' => true]);
         DB::table('lms_activity_publications')->insert([
-            'activity_id'   => $activity->id,
-            'published_by'  => $publisher->id,
-            'status'        => 'PUBLISHED',
-            'publish_at'    => now()->subDay(),
-            'published_at'  => now()->subDay(),
-            'created_at'    => now(),
-            'updated_at'    => now(),
+            'activity_id' => $activity->id,
+            'published_by' => $publisher->id,
+            'status' => 'PUBLISHED',
+            'publish_at' => now()->subDay(),
+            'published_at' => now()->subDay(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return $activity;

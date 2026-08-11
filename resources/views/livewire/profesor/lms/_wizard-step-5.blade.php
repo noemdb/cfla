@@ -42,8 +42,13 @@
                                 </div>
 
                                 <p class="text-[11px] text-amber-400/70 leading-relaxed">
-                                    Al <strong class="text-amber-300">guardar</strong>, se genera la notificación para la aprobación / publicación.
-                                    Si aún no está lista, usa el botón flotante <strong class="text-blue-400">Guardar</strong> para mantenerla en borrador.
+                                    @if($this->canPublishLesson())
+                                        Al <strong class="text-amber-300">guardar</strong>, la lección se guarda y publica (o queda programada si estableces fecha).
+                                        Si aún no está lista, usa el botón flotante <strong class="text-blue-400">Guardar</strong> para mantenerla en borrador.
+                                    @else
+                                        Al <strong class="text-amber-300">programar</strong>, la lección quedará <strong class="text-amber-300">pendiente de aprobación</strong>: Planificación, Jefatura de Área o Coordinación la revisarán y publicarán.
+                                        Si aún no está lista, usa el botón flotante <strong class="text-blue-400">Guardar</strong> para mantenerla en borrador.
+                                    @endif
                                 </p>
                             </div>
 
@@ -71,10 +76,10 @@
                             </div>
 
 
-                            @php $isPlanner = auth()->user()->isPlanner; @endphp
+                            @php $isPlanner = $this->canPublishLesson(); @endphp
 
                             @if($isPlanner)
-                                {{-- Planner/Admin: botón contextual --}}
+                                {{-- Rol autorizado (admin/planning/leadership/coordinación): botón contextual --}}
                                 <button wire:click="confirmPublish"
                                         wire:loading.attr="disabled"
                                         class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-200 dark:disabled:bg-slate-700 disabled:text-gray-400 dark:disabled:text-slate-500 text-white text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2" @disabled($isPublished)>
@@ -83,14 +88,14 @@
                                     </svg>
                                     <span wire:loading.remove wire:target="confirmPublish">
                                         @if(blank($publishAt))
-                                            Guardar lección
+                                            Publicar lección
                                         @else
                                             Programar lección
                                         @endif
                                     </span>
                                     <span wire:loading wire:target="confirmPublish">
                                         @if(blank($publishAt))
-                                            Guardando…
+                                            Publicando…
                                         @else
                                             Programando…
                                         @endif

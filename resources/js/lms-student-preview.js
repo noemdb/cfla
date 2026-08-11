@@ -192,6 +192,104 @@ Alpine.data('lessonPreviewSwiper', () => ({
     },
 }));
 
+// ── Math Content (KaTeX + sanitize) ─────────────────────────────────
+// Mismo componente que registra el inline script de <x-lms.math-text>,
+// pero registrado aquí (alpine:init de página) para que funcione también
+// en modales renderizados por Livewire a demanda, donde el script @once
+// inline llega DESPUÉS de que Alpine ya inicializó y no captura alpine:init.
+// El guard _mathContentRegistered evita doble registro con el inline.
+Alpine.data('mathContent', () => ({
+    _content: '',
+    _observer: null,
+
+    init() {
+        this._content = this.$el.getAttribute('data-math-content') || '';
+        this._ensureKatex().then(() => this.$nextTick(() => this.render()));
+
+        this._observer = new MutationObserver(() => {
+            const newContent = this.$el.getAttribute('data-math-content') || '';
+            if (newContent !== this._content) {
+                this._content = newContent;
+                this.$nextTick(() => this.render());
+            }
+        });
+        this._observer.observe(this.$el, {
+            attributes: true,
+            attributeFilter: ['data-math-content'],
+        });
+    },
+
+    _ensureKatex() {
+        return window._mathKatexReady;
+    },
+
+    render() {
+        const target = this.$refs && this.$refs.target;
+        if (!target) return;
+
+        // Sanitizar antes de inyectar al DOM (XSS prevention)
+        let __html = this._content;
+        if (window.DOMPurify) {
+            // ADD_ATTR: preserve Alpine/Livewire directives needed by
+            // mermaidEmbed and other dynamically-injected components.
+            __html = window.DOMPurify.sanitize(__html, {
+                ADD_ATTR: ['x-data', 'x-ref', 'wire:ignore'],
+            });
+        } else {
+            // Fallback: más robusto que solo <script> tags
+            __html = __html
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/<iframe\b[^>]*>.*?<\/iframe\s*>/gi, '')
+                .replace(/<object\b[^>]*>.*?<\/object\s*>/gi, '')
+                .replace(/<embed\b[^>]*\/?>/gi, '')
+                .replace(/ on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+                .replace(/ javascript\s*:/gi, '')
+                .replace(/<form\b[^>]*>.*?<\/form\s*>/gi, '');
+        }
+
+        // Parchar vulnerabilidad conocida de KaTeX:
+        // CVE-2025-1390 — macros \htmlData, \htmlClass, \htmlStyle
+        // permiten inyectar atributos HTML arbitrarios (como onclick)
+        // en el output renderizado. DOMPurify no puede proteger contra
+        // esto porque son macros de LaTeX, no HTML.
+        __html = __html.replace(/\\html(?:Data|Class|Style)\s*\{[^}]*\}\s*\{[^}]*\}/g, '');
+
+        target.innerHTML = __html;
+
+        // Inicializar componentes Alpine inyectados dinámicamente
+        // (p. ej. mermaidEmbed). Sin initTree, Alpine solo escanea
+        // el DOM una vez al cargar la página y no detecta elementos
+        // añadidos via innerHTML.
+        try {
+            if (window.Alpine && typeof Alpine.initTree === 'function') {
+                Alpine.initTree(target);
+            }
+        } catch (_e) {
+            if (window.console) console.warn('[KATEX] Alpine.initTree error', _e);
+        }
+
+        if (!window.renderMathInElement) return;
+
+        try {
+            renderMathInElement(target, {
+                delimiters: [
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '$$', right: '$$', display: true },
+                    { left: '\\[', right: '\\]', display: true },
+                    { left: '$', right: '$', display: false },
+                ],
+                throwOnError: false,
+            });
+        } catch (e) {
+            if (window.console) console.warn('[KATEX]', e);
+        }
+    },
+
+    destroy() {
+        if (this._observer) this._observer.disconnect();
+    },
+}));
+
 // ── Mermaid Embed ────────────────────────────────────────────────────
 Alpine.data('mermaidEmbed', () => ({
     zoom: 1,

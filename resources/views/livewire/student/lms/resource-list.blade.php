@@ -554,9 +554,41 @@
                 {{-- Body: render del HTML embebido --}}
                 <div class="flex-1 overflow-auto p-6 bg-gray-50/50 dark:bg-gray-900/30">
                     @if(!empty($e['html_content']))
-                        <div class="w-full max-w-full overflow-x-auto">
-                            {!! $e['html_content'] !!}
-                        </div>
+                        @if(!empty($e['is_mermaid'] ?? false))
+                            {{-- Mermaid: mismo pipeline que la vista de lección
+                                 (mermaidEmbed + data-mermaid-code). El clasificador
+                                 conserva <br/> de labels multi-línea (A1). --}}
+                            @php
+                                $__mermaidCode = app(\App\Services\Lms\LmsContentClassifier::class)
+                                    ->extractMermaidCode($e['html_content']);
+                            @endphp
+                            <div wire:ignore x-data="mermaidEmbed()"
+                                 data-mermaid-code="{{ $__mermaidCode }}"
+                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
+                                <div x-ref="target" class="w-full min-h-0"></div>
+                            </div>
+                        @else
+                            {{-- Markdown → HTML (solo texto plano) y LaTeX/HTML vía
+                                 math-text (KaTeX auto-render + DOMPurify), el mismo
+                                 pipeline que step-card en la vista de lección. --}}
+                            @php
+                                $__embedHtml = $e['html_content'];
+                                $__trimmed = trim($__embedHtml);
+                                // Precedencia canónica (classifyContent): math > markdown.
+                                // Str::markdown interpreta \( \[ como escapes de puntuación
+                                // y se comería los delimitadores LaTeX — si hay math, se
+                                // preserva el contenido crudo para el auto-render de KaTeX.
+                                $__isMath = app(\App\Services\Lms\LmsContentClassifier::class)
+                                    ->isMathBody($__embedHtml);
+                                if ($__trimmed !== '' && ! preg_match('/<[a-z\/][^>]*>/i', $__trimmed) && ! $__isMath) {
+                                    $__embedHtml = Str::markdown($__embedHtml);
+                                }
+                            @endphp
+                            <div class="w-full max-w-full overflow-x-auto">
+                                <x-lms.math-text :content="$__embedHtml"
+                                                 class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none lms-content" />
+                            </div>
+                        @endif
                     @else
                         <div class="flex flex-col items-center justify-center py-16 text-center">
                             <div class="w-16 h-16 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-4">
@@ -576,4 +608,217 @@
             </div>
         </div>
     @endif
+
+    {{-- Estilos para Mermaid (zoom/fullscreen/fill-height) y lms-content
+         (markdown/LaTeX en el modal de embed) — mismos valores que la vista
+         de lección. CSS idempotente: no usa @once a propósito. --}}
+    <style>
+        .mermaid-zoom-toolbar {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        [x-data="mermaidEmbed()"]:fullscreen {
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: auto;
+        }
+        [x-data="mermaidEmbed()"]:fullscreen .mermaid-zoom-toolbar {
+            opacity: 1 !important;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+        }
+        .zoom-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mermaid-fill-height {
+            min-height: 0;
+        }
+        .mermaid-fill-height svg {
+            width: 100% !important;
+            flex: 1 !important;
+        }
+        .mermaid-fill-height > [x-ref="target"] {
+            min-width: 100%;
+        }
+        .lms-content {
+            font-size: 17px !important;
+            line-height: 1.75 !important;
+            color: #1e293b !important;
+        }
+        .lms-content :is(h1, h2, h3, h4) {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+            letter-spacing: -0.01em !important;
+        }
+        .lms-content h1 {
+            font-size: 1.5em !important;
+            margin: 1.2em 0 0.6em !important;
+            padding-bottom: 0.3em !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+        .lms-content h2 {
+            font-size: 1.25em !important;
+            margin: 1.4em 0 0.5em !important;
+            padding-bottom: 0.25em !important;
+            border-bottom: 1.5px solid #CAE8BD !important;
+            color: #4C7C3B !important;
+        }
+        .lms-content h3 {
+            font-size: 1.05em !important;
+            margin: 1.2em 0 0.4em !important;
+            color: #1e293b !important;
+        }
+        .lms-content h4 {
+            font-size: 0.95em !important;
+            margin: 1em 0 0.3em !important;
+            color: #334155 !important;
+            font-weight: 600 !important;
+        }
+        .lms-content blockquote {
+            border-left: 4px solid #B0DB9C !important;
+            background: #ECFAE5 !important;
+            padding: 0.75em 1.25em !important;
+            margin: 1.2em 0 !important;
+            border-radius: 0 0.5rem 0.5rem 0 !important;
+        }
+        .lms-content blockquote p {
+            margin: 0 !important;
+        }
+        .lms-content table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin: 1.2em 0 !important;
+            font-size: 0.9em !important;
+            line-height: 1.6 !important;
+        }
+        @media (max-width: 640px) {
+            .lms-content table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+                width: max-content;
+                min-width: 100%;
+                max-width: 100%;
+            }
+            .lms-content table thead,
+            .lms-content table tbody,
+            .lms-content table tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+            .lms-content table th,
+            .lms-content table td {
+                white-space: normal;
+            }
+        }
+        .lms-content table thead {
+            border-bottom: 2px solid #B0DB9C !important;
+        }
+        .lms-content table th {
+            background-color: #DDF6D2 !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            font-size: 0.85em !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.025em !important;
+            padding: 0.65rem 0.75rem !important;
+            border: 1px solid #cbd5e1 !important;
+            text-align: left !important;
+            vertical-align: top !important;
+        }
+        .lms-content table td {
+            padding: 0.55rem 0.75rem !important;
+            border: 1px solid #cbd5e1 !important;
+            vertical-align: top !important;
+            color: #334155 !important;
+        }
+        .lms-content table tbody tr {
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .lms-content table tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+        .lms-content table tbody tr:hover {
+            background-color: #f1f5f9 !important;
+        }
+        .lms-content p {
+            margin: 0.6em 0 !important;
+            line-height: 1.75 !important;
+        }
+        .lms-content p:first-child {
+            margin-top: 0 !important;
+        }
+        .lms-content ul, .lms-content ol {
+            margin: 0.6em 0 !important;
+            padding-left: 1.4em !important;
+        }
+        .lms-content li {
+            margin: 0.3em 0 !important;
+            line-height: 1.7 !important;
+            color: #1e293b !important;
+        }
+        .lms-content strong {
+            color: #0f172a !important;
+            font-weight: 700 !important;
+        }
+        .lms-content em {
+            color: #334155 !important;
+            font-style: italic !important;
+        }
+        .lms-content code {
+            font-size: 0.875em !important;
+            font-weight: 600 !important;
+            padding: 0.15em 0.4em !important;
+            border-radius: 4px !important;
+            background: #f1f5f9 !important;
+            color: #be123c !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        .lms-content pre {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            padding: 1em !important;
+            overflow-x: auto !important;
+            margin: 1em 0 !important;
+            font-size: 0.875em !important;
+            line-height: 1.6 !important;
+        }
+        .lms-content pre code {
+            background: none !important;
+            border: none !important;
+            padding: 0 !important;
+            color: #1e293b !important;
+            font-weight: 400 !important;
+        }
+        .lms-content img {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 6px !important;
+            margin: 1em 0 !important;
+        }
+        .lms-content a {
+            color: #5E9849 !important;
+            text-decoration: underline !important;
+            text-underline-offset: 2px !important;
+            text-decoration-thickness: 1px !important;
+        }
+        .lms-content a:hover {
+            color: #4C7C3B !important;
+            text-decoration-thickness: 2px !important;
+        }
+        .lms-content hr {
+            border: none !important;
+            border-top: 1.5px solid #e2e8f0 !important;
+        }
+    </style>
 </div>
