@@ -1,4 +1,4 @@
-<div class="h-full flex flex-col">
+<div class="h-full flex flex-col relative">
     <!-- Header -->
     <div class="flex items-center space-x-3 mb-2">
         <div class="p-2 bg-emerald-900/50 rounded-lg border border-emerald-500/30">
@@ -40,4 +40,27 @@
             </x-button>
         </div>
     </div>
+
+    @if ($showVideo)
+        <!-- Pantalla de Video (overlay solo dentro del card) -->
+        <div class="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/95 backdrop-blur-sm rounded-lg p-4">
+            <div class="relative w-full">
+                <video id="introVideo" class="w-full h-[480px] rounded-lg border border-emerald-500/30 shadow-xl"
+                    autoplay muted controls playsinline>
+                    <source src="{{ asset('videos/census/newCatch.mp4') }}" type="video/mp4">
+                    Tu navegador no soporta videos.
+                </video>
+
+                <!-- Botón para Cerrar -->
+                <button wire:click="hideVideo"
+                    class="absolute top-2 right-2 z-10 inline-flex items-center space-x-1.5 bg-black/50 hover:bg-black/70 text-white/90 hover:text-white px-3 py-1.5 rounded-lg border border-white/20 backdrop-blur-sm text-xs font-medium transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    <span>Cerrar</span>
+                </button>
+            </div>
+        </div>
+    @endif
 </div>
