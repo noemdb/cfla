@@ -5,7 +5,7 @@
         <div class="h-1 w-20 bg-emerald-500 mx-auto rounded-full"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- Census Column -->
         <div
@@ -34,12 +34,6 @@
                     </div>
                 </div>
             @endif
-        </div>
-
-        <!-- Payment Column -->
-        <div
-            class="diagnostic-card bg-gray-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-lg p-4 h-full flex flex-col hover:border-emerald-500/50 transition-all duration-300">
-            <livewire:app.payment.index-component />
         </div>
 
         <!-- Info Payment Column -->
