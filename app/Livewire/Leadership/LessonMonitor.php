@@ -102,7 +102,7 @@ class LessonMonitor extends Component
 
         // Base query: all activities visible to this leader, scoped by lapso
         $baseQuery = Activity::query()
-            ->whereHas('pevaluacion.pensum', fn ($q) => $q->where('planning_module', true));
+            ->whereHas('pevaluacion.pensum.pestudio', fn ($q) => $q->where('planning_module', true));
 
         if ($lapsoId) {
             $baseQuery->whereHas('pevaluacion', fn ($q) => $q->where('lapso_id', $lapsoId));
