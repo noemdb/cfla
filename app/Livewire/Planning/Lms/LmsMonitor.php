@@ -46,6 +46,9 @@ class LmsMonitor extends Component
     /** @var \Illuminate\Support\Collection Secciones filtradas por grado seleccionado */
     public $seccionesFiltradas;
 
+    /** @var \Illuminate\Support\Collection Grados filtrados por pestudio seleccionado */
+    public $gradosFiltrados;
+
     // ─── Bulk selection ────────────────────────────────────────
     public array $selectedIds = [];
 
@@ -279,7 +282,30 @@ class LmsMonitor extends Component
     public function mount(): void
     {
         $this->seccionesFiltradas = collect();
+        $this->gradosFiltrados = collect();
         $this->viewMode = session('lms_monitor_view_mode', 'table');
+    }
+
+    /** Hook: cuando cambia filterPestudio, actualiza los grados disponibles */
+    public function updatedFilterPestudio(string $value): void
+    {
+        if (blank($value)) {
+            $this->gradosFiltrados = Grado::whereHas('pensums.pevaluacions.activities')
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->get();
+        } else {
+            $this->gradosFiltrados = Grado::where('pestudio_id', $value)
+                ->where('status_active', 'true')
+                ->whereHas('pensums.pevaluacions.activities')
+                ->orderBy('name')
+                ->get();
+        }
+
+        $this->filterGrado = '';
+        $this->filterSeccion = '';
+        $this->seccionesFiltradas = collect();
+        $this->resetPage();
     }
 
     /** Hook: cuando cambia filterGrado, actualiza las secciones disponibles */
@@ -292,7 +318,8 @@ class LmsMonitor extends Component
             return;
         }
 
-        $this->seccionesFiltradas = Seccion::whereHas('pevaluacions.pensum', fn ($q) => $q->where('grado_id', $value))
+        $this->seccionesFiltradas = Seccion::where('status_active', 'true')
+            ->whereHas('pevaluacions.pensum', fn ($q) => $q->where('grado_id', $value))
             ->whereHas('pevaluacions.activities')
             ->orderBy('name')
             ->get();
@@ -506,6 +533,7 @@ class LmsMonitor extends Component
             'filterGrado', 'filterSeccion', 'filterAsignatura', 'filterPestudio',
         ]);
         $this->seccionesFiltradas = collect();
+        $this->gradosFiltrados = collect();
         $this->resetPage();
     }
 
@@ -661,11 +689,13 @@ class LmsMonitor extends Component
         return view('livewire.planning.lms.monitor', [
             'publications' => $query->latest('updated_at')->paginate(20),
             'stats' => $this->getStats(),
-            'profesores' => Profesor::with('user')->whereHas('pevaluacions.activities')->orderBy('lastname')->orderBy('name')->get(),
-            'grados' => Grado::whereHas('pensums.pevaluacions.activities')->get(),
+            'profesores' => Profesor::with('user')->whereHas('pevaluacions.activities')->where('status_active', 'true')->orderBy('lastname')->orderBy('name')->get(),
+            'grados' => $this->gradosFiltrados->isNotEmpty()
+                ? $this->gradosFiltrados
+                : Grado::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->orderBy('name')->get(),
             'secciones' => $this->seccionesFiltradas,
-            'asignaturas' => Asignatura::whereHas('pensums.pevaluacions.activities')->get(),
-            'pestudios' => Pestudio::whereHas('pensums.pevaluacions.activities')->get(),
+            'asignaturas' => Asignatura::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->get(),
+            'pestudios' => Pestudio::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->get(),
         ])->layout('planning.layouts.app');
     }
 }

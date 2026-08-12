@@ -37,30 +37,79 @@
 
         <x-ui.divider class="my-6"/>
 
-        {{-- �������� ������ ������ ���� ������ ���� ���� �� ������ ���� ���� �� ���� �� �� ═���������������═���������������═ Stats rápidas �������� ������ ������ ���� ������ ���� ���� �� ������ ���� ���� �� ���� �� �� ═���������������═���������������═ --}}
+        {{-- ════════════════════ Stats rápidas ════════════════════
+             Misma semántica y markup que StudentHome (dashboard canónico):
+             conteos reales + progreso real en %. Antes se mostraban los
+             conteos crudos como si fueran porcentajes (2%, 0%). --}}
         @if($stats)
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <x-ui.stat-circle
-                :percentage="$stats['total_activities']"
-                label="Actividades"
-                class="w-20 h-20"
-            />
-            <x-ui.stat-circle
-                :percentage="$stats['total_lessons']"
-                label="Lecciones"
-                class="w-20 h-20"
-            />
-            <x-ui.stat-circle
-                :percentage="$stats['total_comments']"
-                label="Comentarios"
-                class="w-20 h-20"
-            />
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {{-- Lecciones --}}
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-all duration-200 ease-out">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-sky-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Lecciones</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ $stats['total'] }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Disponibles para ti</p>
+            </div>
+
+            {{-- Completadas --}}
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-all duration-200 ease-out">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-emerald-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Completadas</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ $stats['completed'] }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">
+                    @if($stats['total'] > 0)
+                        {{ $stats['progress_pct'] }}% del total
+                    @else
+                        Sin actividades
+                    @endif
+                </p>
+            </div>
+
+            {{-- Comentarios --}}
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-all duration-200 ease-out">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-amber-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Comentarios</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ $stats['comments'] }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Que has dejado</p>
+            </div>
+
+            {{-- Descargas --}}
+            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-2 shadow-sm transition-all duration-200 ease-out">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-purple-400" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Descargas</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ $stats['downloads'] }}</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Recursos descargados</p>
+            </div>
         </div>
         @endif
 
         <x-ui.divider class="my-6"/>
 
-        {{-- �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═�������� Datos personales �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ --}}
+        {{-- ════════════════════ Datos personales ════════════════════ --}}
         <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700/50">
             <div class="px-6 py-3">
                 <h2 class="text-xs font-bold uppercase tracking-widest text-gray-500">Datos Personales</h2>
@@ -89,7 +138,7 @@
                 <x-ui.info-card
                     label="Edad"
                     :value="$e->age"
-                    icon="<svg class='w-4 h-4 text-gray-400' aria-hidden='true'><path fill='currentColor' d='M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2 2-2 .9-2 2-2zm0 6a3 3 0 1000-6 3 3 0 000 6z'/></svg>"
+                    icon="<svg class='w-4 h-4 text-gray-400' aria-hidden='true'><path fill='currentColor' d='M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2 2-2 .9-2 2zm0 6a3 3 0 1000-6 3 3 0 000 6z'/></svg>"
                 />
                 <x-ui.info-card
                     label="Nacionalidad"

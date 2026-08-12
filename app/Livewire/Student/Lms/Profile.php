@@ -4,6 +4,7 @@ namespace App\Livewire\Student\Lms;
 
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
+use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Services\Estudiant\StudentScopeService;
 use Illuminate\Support\Facades\Auth;
@@ -35,23 +36,42 @@ class Profile extends Component
         $this->showMascot = $age === null || $age === '-' || (int) $age <= 12;
         $this->mascotEmphasis = $age !== null && $age !== '-' && (int) $age <= 8;
 
-        // Estadísticas académicas rápidas
+        // Estadísticas académicas rápidas — MISMA semántica que StudentHome
+        // (dashboard canónico): conteos reales, progreso como %, y comentarios
+        // DEL PROPIO estudiante (antes se contaban los de todos y los conteos
+        // crudos se mostraban como si fueran porcentajes — 2%, 0%).
         $seccionIds = $service->getSeccionIds();
         if ($seccionIds->isNotEmpty()) {
             $publishedActivityIds = LmsActivityPublication::query()
                 ->visibleNow()
                 ->pluck('activity_id');
 
-            $activities = Activity::whereIn('id', $publishedActivityIds)
+            $visibleActivityIds = Activity::whereIn('id', $publishedActivityIds)
                 ->whereHas('pevaluacion', fn ($q) => $q->whereIn('seccion_id', $seccionIds))
-                ->get();
+                ->pluck('id');
+
+            $totalActivities = $visibleActivityIds->count();
+
+            $completedIds = LmsActivityLog::where('user_id', Auth::id())
+                ->where('event', 'COMPLETE')
+                ->whereIn('activity_id', $visibleActivityIds)
+                ->pluck('activity_id')
+                ->unique();
+
+            $commentsCount = ActivityComment::where('user_id', Auth::id())->count();
+
+            $downloadsCount = LmsActivityLog::where('user_id', Auth::id())
+                ->where('event', 'RESOURCE_DOWNLOAD')
+                ->count();
 
             $this->stats = [
-                'total_activities' => $activities->count(),
-                'total_lessons' => $activities->filter(fn ($a) => $a->lmsPublication?->isVisibleToStudents())->count(),
-                'total_comments' => ActivityComment::whereIn('activity_id', $activities->pluck('id'))
-                    ->approved()
-                    ->count(),
+                'total' => $totalActivities,
+                'completed' => $completedIds->count(),
+                'comments' => $commentsCount,
+                'downloads' => $downloadsCount,
+                'progress_pct' => $totalActivities > 0
+                    ? round(($completedIds->count() / $totalActivities) * 100)
+                    : 0,
             ];
         }
     }

@@ -185,7 +185,7 @@
                                         {{ $inscripcion->escolaridad?->name ?? '—' }}
                                     </td>
                                     <td class="px-5 py-2 text-right">
-                                        <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div class="flex items-center justify-end gap-1.5">
                                             <button type="button" wire:click="viewStudent({{ $inscripcion->id }})"
                                                 class="p-2 bg-white/5 hover:bg-sky-500/10 rounded-lg border border-white/5 hover:border-sky-500/20 text-gray-400 hover:text-sky-400 transition-all duration-200"
                                                 title="Ver perfil del estudiante">

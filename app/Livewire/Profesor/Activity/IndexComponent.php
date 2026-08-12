@@ -777,15 +777,31 @@ class IndexComponent extends Component
                 'La IA ha mejorado el contenido de la actividad basándose en el referente normativo y actividades previas.'
             );
         } catch (\Throwable $e) {
+            // ── Log técnico completo (para depuración) ──
             Log::error('Error mejorando actividad con IA', [
+                'exception' => $e::class,
                 'error'     => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
                 'activity'  => $this->activity_id,
                 'pevaluacion' => $this->pevaluacion_id,
             ]);
-            $this->notification()->error(
-                'Error al mejorar contenido',
-                $e->getMessage()
-            );
+
+            // ── Confirm amigable con reintento (NO exponer detalles
+            //    técnicos al usuario — el profesor ve un toast claro) ──
+            $this->dialog()->confirm([
+                'title'       => 'No se pudo mejorar el contenido',
+                'description' => 'Ocurrió una situación inesperada con el servicio de IA. '
+                    . 'Tu actividad no se modificó. ¿Deseas intentar de nuevo?',
+                'icon'        => 'warning',
+                'accept'      => [
+                    'label'  => 'Reintentar',
+                    'method' => 'improveActivity',
+                    'color'  => 'primary',
+                ],
+                'reject'      => [
+                    'label' => 'Cerrar',
+                ],
+            ]);
         }
     }
 

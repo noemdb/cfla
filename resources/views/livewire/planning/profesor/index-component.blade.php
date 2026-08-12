@@ -221,7 +221,7 @@
                                         @endif
                                     </td>
                                     <td class="px-5 py-2 text-right">
-                                        <div class="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div class="flex items-center justify-end gap-1.5">
                                             <button type="button" @click="expandedRows['e{{ $profesor->id }}'] = !expandedRows['e{{ $profesor->id }}']"
                                                 class="p-2 bg-white/5 hover:bg-amber-500/10 rounded-lg border border-white/5 hover:border-amber-500/20 text-gray-400 hover:text-amber-400 transition-all duration-200"
                                                 title="Info ampliada">

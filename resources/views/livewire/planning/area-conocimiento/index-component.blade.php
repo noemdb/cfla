@@ -663,7 +663,7 @@
                                                 <span class="text-xs text-gray-500">{{ $campo->observations ? \Illuminate\Support\Str::limit($campo->observations, 30) : '—' }}</span>
                                             </td>
                                             <td class="px-4 py-2 text-right">
-                                                <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex items-center justify-end gap-1">
                                                     <button wire:click="editCampo({{ $campo->id }})"
                                                         class="p-1.5 bg-white/5 hover:bg-emerald-500/10 rounded-lg border border-white/5 hover:border-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all duration-200"
                                                         title="Editar">

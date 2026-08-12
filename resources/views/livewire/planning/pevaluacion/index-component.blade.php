@@ -1,4 +1,38 @@
-<div class="fade-in">
+<div class="fade-in"
+     x-data="{
+        init() {
+          const saved = localStorage.getItem('pevaluacion_filters');
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              const keys = ['search', 'filter_pestudio', 'filter_profesor', 'filter_grado', 'filter_seccion', 'filter_lapso'];
+              keys.forEach(key => {
+                if (parsed.hasOwnProperty(key)) {
+                  if ($wire) {
+                    $wire.set(key, parsed[key]);
+                  }
+                }
+              });
+            } catch (e) {
+              console.error('Failed to parse filters from localStorage', e);
+            }
+          }
+        },
+        saveFilters() {
+          if (!$wire) return;
+          const data = {
+            search: $wire.search,
+            filter_pestudio: $wire.filter_pestudio,
+            filter_profesor: $wire.filter_profesor,
+            filter_grado: $wire.filter_grado,
+            filter_seccion: $wire.filter_seccion,
+            filter_lapso: $wire.filter_lapso
+          };
+          localStorage.setItem('pevaluacion_filters', JSON.stringify(data));
+        }
+      }"
+     x-init="init()"
+     x-on:change.window="saveFilters()"
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -34,11 +68,6 @@
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Profesor, asignatura, sección..."
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
-            </div>
-            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Estudio</label>
                 <select wire:model.live="filter_pestudio"
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -69,6 +98,11 @@
                 </select>
             </div>
             <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Buscar</label>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Profesor, asignatura, sección..."
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all placeholder:text-gray-600">
+            </div>
+            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Profesor</label>
                 <select wire:model.live="filter_profesor"
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
@@ -88,16 +122,6 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Ver</label>
-                <select wire:model.live="paginate"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="15">15</option>
-                    <option value="30">30</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
             <div class="flex items-end">
                 <button wire:click="resetFilters"
                     class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20 transition-all duration-300 text-sm font-bold">
@@ -115,7 +139,7 @@
          x-init="if (!localStorage.getItem('pevaluacions-view-mode')) localStorage.setItem('pevaluacions-view-mode', 'table')">
 
         {{-- View mode toggle: Grid/Table --}}
-        <div wire:ignore.self class="mb-4 flex items-center gap-2">
+        <div wire:ignore.self class="mb-4 flex items-center justify-end gap-2">
             <button @click="mode = 'grid'; localStorage.setItem('pevaluacions-view-mode', 'grid')"
                 :class="mode === 'grid' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-gray-800/50 text-gray-500 border-white/5 hover:text-gray-300'"
                 class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-[10px] font-bold">
@@ -175,7 +199,7 @@
                 <tbody class="divide-y divide-white/5">
                     @forelse($pevaluacions as $pevaluacion)
                         @php $lapsoClosed = $pevaluacion->is_lapso_closed; @endphp
-                        <tr class="hover:bg-white/[0.02] transition-colors {{ $lapsoClosed ? 'opacity-60' : '' }}">
+                        <tr class="hover:bg-white/[0.02] transition-colors {{ $lapsoClosed ? 'border-l-4 border-red-500 bg-red-50' : '' }}">
                             <td class="px-5 py-2 text-sm text-gray-400 font-mono">{{ $pevaluacion->id }}</td>
                             <td class="px-4 py-2">
                                 <div class="flex items-center gap-2">
@@ -344,7 +368,7 @@
 
         @if($pevaluacions->hasPages())
             <div class="px-5 py-2 border-t border-white/5">
-                {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
+                @include('components.pagination-wrapper', ['paginator' => $pevaluacions])
             </div>
         @endif
             </div>
@@ -516,7 +540,7 @@
 
                 @if($pevaluacions->hasPages())
                     <div class="mt-4 px-2 py-2 border-t border-white/5">
-                        {{ $pevaluacions->links('vendor.livewire.custom-tailwind') }}
+                        @include('components.pagination-wrapper', ['paginator' => $pevaluacions])
                     </div>
                 @endif
             </div>
