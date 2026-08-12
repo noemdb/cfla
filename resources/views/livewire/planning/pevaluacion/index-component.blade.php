@@ -166,7 +166,15 @@
 
             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <div wire:loading wire:target="sortBy,search,filter_pestudio,filter_grado,filter_seccion,filter_profesor,filter_lapso,resetFilters,paginate" class="animate-pulse space-y-4 p-5">
+                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                <div class="h-4 bg-gray-200 rounded w-full"></div>
+            </div>
+
+            <table wire:loading.remove wire:target="sortBy,search,filter_pestudio,filter_grado,filter_seccion,filter_profesor,filter_lapso,resetFilters,paginate" class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-white/5">
                         <th class="text-left px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
@@ -381,7 +389,14 @@
              x-transition:enter-end="opacity-100">
 
             <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                <div wire:loading wire:target="sortBy,search,filter_pestudio,filter_grado,filter_seccion,filter_profesor,filter_lapso,resetFilters,paginate" class="animate-pulse space-y-4">
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-full"></div>
+                </div>
+                <div wire:loading.remove wire:target="sortBy,search,filter_pestudio,filter_grado,filter_seccion,filter_profesor,filter_lapso,resetFilters,paginate" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
                     @forelse($pevaluacions as $pevaluacion)
                         @php $lapsoClosed = $pevaluacion->is_lapso_closed; @endphp
                         @php $delDisabled = ($pevaluacion->activities_count > 0); @endphp

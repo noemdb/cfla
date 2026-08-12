@@ -150,7 +150,7 @@
 
         <x-ui.divider class="my-6"/>
 
-        <!-- �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ Lugar de nacimiento �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ -->
+        <!-- ══════════════ Lugar de nacimiento ══════════════ -->
         @if($e->city_birth || $e->state_birth || $e->country_birth)
         <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700/50">
             <div class="px-6 py-3">
@@ -178,7 +178,7 @@
 
         <x-ui.divider class="my-6"/>
 
-        <!-- �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ Contacto �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ -->
+        <!-- ══════════════ Contacto ══════════════ -->
         @if($e->email || $e->gsemail || $e->cellphone || $e->phone || $e->dir_address)
         <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700/50">
             <div class="px-6 py-3">
@@ -284,7 +284,7 @@
 
         <x-ui.divider class="my-6"/>
 
-        <!-- �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ Enlaces rápidos �������� �������� ������ ������ ������ ���� ������ ������ ���� ���� ���� �� ������ ������ ���� ���� ���� �� ���� ���� �� �� �� ═���������������═���������������═ -->
+        <!-- ══════════════ Enlaces rápidos ══════════════ -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <a href="{{ route('student.lms.academic') }}"
                class="flex items-center gap-2 px-4 py-3 min-h-[44px] bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500/40 hover:shadow-sm transition-all duration-200 ease-out focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
