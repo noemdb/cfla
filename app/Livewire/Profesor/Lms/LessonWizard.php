@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Profesor\Lms;
 
+use App\Events\Lms\LessonScheduled;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
@@ -4855,6 +4856,15 @@ PROMPT;
             activityTitle: $activity->topic ?? 'Lección',
             scheduledAt: $scheduledDate,
         ));
+
+        // Notificación en tiempo real (Laravel Reverb): los responsables ven el
+        // badge/conteo de lecciones programadas SIN recargar la página.
+        LessonScheduled::dispatch(
+            $activity,
+            $planners->all(),
+            auth()->user()->fullName ?? 'Profesor',
+            $scheduledDate,
+        );
 
         \App\Models\app\Academy\Lms\LmsActivityLog::record($activityId, auth()->id(), 'SCHEDULE');
     }

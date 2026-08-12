@@ -32,5 +32,16 @@ if (document.documentElement.dataset.reverb === 'enabled') {
         enabledTransports: ['ws', 'wss'],
         disableStats: true,
     });
+
+    // Evento "lesson.scheduled" (canal privado App.Models.User.{id}).
+    // Al recibirlo, notifica a los componentes Livewire que escuchan
+    // 'lesson-scheduled' (p. ej. el contador de lecciones programadas).
+    const userId = document.documentElement.dataset.userId;
+    if (userId) {
+        Echo.private(`App.Models.User.${userId}`)
+            .listen('.lesson.scheduled', () => {
+                Livewire.dispatch('lesson-scheduled');
+            });
+    }
 }
 

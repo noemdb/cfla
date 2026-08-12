@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Livewire\Profesor\Lms;
 
+use App\Events\Lms\LessonScheduled;
 use App\Livewire\Profesor\Lms\LessonWizard;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\LmsActivityContent;
@@ -15,6 +16,7 @@ use App\Notifications\LessonScheduledForApproval;
 use App\Services\OpenRouterService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -1343,6 +1345,7 @@ class LessonWizardCharacterizationTest extends TestCase
         // El profesor con fecha solo PROGRAMA (SCHEDULED, sin published_at) y
         // notifica a los responsables (planning, leadership, coordinación).
         Notification::fake();
+        Event::fake();
 
         $planner = User::factory()->create(['is_planner' => true]);
         $leader = User::factory()->create(['is_leadership' => true]);
@@ -1374,6 +1377,15 @@ class LessonWizardCharacterizationTest extends TestCase
             [$planner, $leader, $coordinator],
             LessonScheduledForApproval::class
         );
+
+        // El evento broadcast LessonScheduled se dispara para los responsables.
+        Event::assertDispatched(LessonScheduled::class, function (LessonScheduled $event) use ($planner, $leader, $coordinator, $activity) {
+            $ids = collect($event->recipients)->pluck('id')->all();
+            return in_array($planner->id, $ids)
+                && in_array($leader->id, $ids)
+                && in_array($coordinator->id, $ids)
+                && $event->activity->id === $activity->id;
+        });
     }
 
     /** @test */
