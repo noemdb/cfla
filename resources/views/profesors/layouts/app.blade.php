@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-      x-data="{ dark: localStorage.getItem('theme') !== 'light' }">
+      x-data="{ dark: localStorage.getItem('theme') !== 'light' }"
+      data-reverb="enabled"
+      data-user-id="{{ auth()->id() }}">
 
 <head>
     <meta charset="utf-8">
