@@ -58,7 +58,13 @@ class Profile extends Component
                 ->pluck('activity_id')
                 ->unique();
 
+            // Comentarios: DOS indicadores — total dejados por el estudiante y
+            // cuántos de esos pasaron la moderación (aprobados).
             $commentsCount = ActivityComment::where('user_id', Auth::id())->count();
+
+            $commentsApprovedCount = ActivityComment::where('user_id', Auth::id())
+                ->approved()
+                ->count();
 
             $downloadsCount = LmsActivityLog::where('user_id', Auth::id())
                 ->where('event', 'RESOURCE_DOWNLOAD')
@@ -68,6 +74,7 @@ class Profile extends Component
                 'total' => $totalActivities,
                 'completed' => $completedIds->count(),
                 'comments' => $commentsCount,
+                'comments_approved' => $commentsApprovedCount,
                 'downloads' => $downloadsCount,
                 'progress_pct' => $totalActivities > 0
                     ? round(($completedIds->count() / $totalActivities) * 100)

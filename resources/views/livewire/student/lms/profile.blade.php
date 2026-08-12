@@ -88,7 +88,7 @@
                     <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Comentarios</span>
                 </div>
                 <p class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{{ $stats['comments'] }}</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">Que has dejado</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Que has dejado · {{ $stats['comments_approved'] }} {{ $stats['comments_approved'] === 1 ? 'aprobado' : 'aprobados' }}</p>
             </div>
 
             {{-- Descargas --}}

@@ -694,7 +694,7 @@ class LmsMonitor extends Component
                 ? $this->gradosFiltrados
                 : Grado::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->orderBy('name')->get(),
             'secciones' => $this->seccionesFiltradas,
-            'asignaturas' => Asignatura::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->get(),
+            'asignaturas' => Asignatura::whereHas('pensums.pevaluacions.activities')->get(),
             'pestudios' => Pestudio::whereHas('pensums.pevaluacions.activities')->where('status_active', 'true')->get(),
         ])->layout('planning.layouts.app');
     }

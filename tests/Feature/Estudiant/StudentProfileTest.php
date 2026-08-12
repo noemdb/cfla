@@ -72,7 +72,8 @@ class StudentProfileTest extends TestCase
             'created_at' => now(),
         ]);
 
-        // Comentarios: 1 del estudiante + 1 de OTRO usuario (no debe contarse)
+        // Comentarios: 1 aprobado del estudiante + 1 pendiente del estudiante
+        // (no cuenta) + 1 aprobado de OTRO usuario (no cuenta)
         ActivityComment::create([
             'activity_id' => $activityA,
             'user_id' => $user->id,
@@ -80,6 +81,12 @@ class StudentProfileTest extends TestCase
             'is_approved' => true,
             'approved_at' => now(),
             'approved_by' => $user->id,
+        ]);
+        ActivityComment::create([
+            'activity_id' => $activityA,
+            'user_id' => $user->id,
+            'body' => 'Comentario pendiente de moderación',
+            'is_approved' => false,
         ]);
         ActivityComment::create([
             'activity_id' => $activityA,
@@ -96,12 +103,15 @@ class StudentProfileTest extends TestCase
             ->assertSet('stats.total', 2)
             ->assertSet('stats.completed', 1)
             ->assertSet('stats.progress_pct', 50)
-            ->assertSet('stats.comments', 1)   // solo el del propio estudiante
+            // Ambos indicadores de comentarios: total dejado y aprobados
+            ->assertSet('stats.comments', 2)          // 1 aprobado + 1 pendiente (suyos)
+            ->assertSet('stats.comments_approved', 1) // solo el aprobado propio
             ->assertSet('stats.downloads', 1)
             // UI honesta: el % solo aparece como "X% del total"
             ->assertSee('Disponibles para ti')
             ->assertSee('50% del total')
             ->assertSee('Que has dejado')
+            ->assertSee('1 aprobado')
             ->assertSee('Recursos descargados');
     }
 

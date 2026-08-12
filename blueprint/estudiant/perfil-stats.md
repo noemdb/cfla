@@ -32,8 +32,12 @@ en `progress-dashboard.md`). El perfil ahora computa y muestra lo mismo:
   `LmsActivityLog` `event=COMPLETE` del propio estudiante.
 - **Progreso** → `stats['progress_pct']`: `round(completed/total*100)` — el único
   % de la sección, y es REAL ("X% del total").
-- **Comentarios** → `stats['comments']`: `ActivityComment::where('user_id', auth()->id())`
-  (solo los DEL estudiante — bug de semántica corregido).
+- **Comentarios** → DOS indicadores (decisión 2026-08-11, corrección del
+  usuario): `stats['comments']` = TOTAL de comentarios dejados por el
+  estudiante (`ActivityComment::where('user_id', auth()->id())`) y
+  `stats['comments_approved']` = cuántos de esos pasaron la moderación
+  (scope `approved()`). La card muestra el total como número grande y
+  "Que has dejado · X aprobado(s)" como microcopy — ambos visibles.
 - **Descargas** → `stats['downloads']`: logs `RESOURCE_DOWNLOAD` del estudiante.
 
 **Markup** = las 4 KPI cards del home (icono en caja de color + número grande +
@@ -58,7 +62,7 @@ de `<x-ui.stat-circle>` (componente queda disponible, sin usos).
 | `php8.2 -l` Profile.php | OK |
 | `Blade::compileString` profile.blade.php | OK |
 | Test: conteos reales (sin % engañoso) | PASS |
-| Test: comentarios solo del propio estudiante | PASS |
+| Test: comentarios — total dejado Y aprobados (pendientes y ajenos excluidos del aprobado) | PASS |
 | Test: progreso `X% del total` solo con actividades | PASS |
 | `npm run build` | OK |
 | QA navegador (perfil con datos) | Sección muestra 4 cards honestas |
