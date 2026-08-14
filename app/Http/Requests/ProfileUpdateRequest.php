@@ -18,6 +18,11 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
+            'firstname' => ['nullable', 'string', 'max:255'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'card_number' => ['nullable', 'string', 'max:50'],
+            'dir_address' => ['nullable', 'string', 'max:500'],
+            'url_img' => ['nullable', 'url', 'max:500'],
         ];
     }
 }

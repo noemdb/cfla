@@ -412,6 +412,17 @@
                                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
                                             Generar Imagen
                                         </button>
+                                        <button wire:click="generateInfografia"
+                                                wire:loading.attr="disabled"
+                                                wire:target="generateInfografia"
+                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
+                                                @disabled($isPublished)
+                                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
+                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]
+                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
+                                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21v-9a4 4 0 004-4h12a4 4 0 004 4v9m-4-9h3v4m4 0h3v-4m-7 0h3v4m4 0h3v-4z"/></svg>
+                                                Generar Infografía
+                                        </button>
                                         <button wire:click="generateSectionIllustration"
                                                 @click="editorTab = 'preview'"
                                                 disabled

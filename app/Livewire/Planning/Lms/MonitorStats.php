@@ -3,6 +3,8 @@
 namespace App\Livewire\Planning\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Services\Lms\LmsPublicationService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 /**
@@ -45,15 +47,36 @@ class MonitorStats extends Component
         $this->refreshStats();
     }
 
+    /**
+     * Recalcula los stats. Se cachean en una sola fila (TTL = poll interval)
+     * para que el `wire:poll` de cada página no lance 7 counts a la DB por
+     * tick; se invalidan desde el punto central (LmsPublicationService).
+     */
     public function refreshStats(): void
     {
-        $this->total = Activity::count();
-        $this->published = Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'))->count();
-        $this->scheduled = Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))->count();
-        $this->draft = Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'DRAFT'))->count();
-        $this->archived = Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'ARCHIVED'))->count();
-        $this->withContent = Activity::whereHas('lmsSections')->count();
-        $this->totalActivities = Activity::count();
+        $stats = Cache::remember(
+            LmsPublicationService::MONITOR_STATS_CACHE_KEY,
+            LmsPublicationService::cacheTtlSeconds(),
+            function (): array {
+                return [
+                    'total' => Activity::count(),
+                    'published' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'))->count(),
+                    'scheduled' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))->count(),
+                    'draft' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'DRAFT'))->count(),
+                    'archived' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'ARCHIVED'))->count(),
+                    'withContent' => Activity::whereHas('lmsSections')->count(),
+                    'totalActivities' => Activity::count(),
+                ];
+            }
+        );
+
+        $this->total = $stats['total'];
+        $this->published = $stats['published'];
+        $this->scheduled = $stats['scheduled'];
+        $this->draft = $stats['draft'];
+        $this->archived = $stats['archived'];
+        $this->withContent = $stats['withContent'];
+        $this->totalActivities = $stats['totalActivities'];
     }
 
     public function render(): \Illuminate\View\View

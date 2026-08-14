@@ -10,11 +10,35 @@ use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\User;
 use App\Notifications\LessonScheduledForApproval;
 use App\Services\Leadership\LeadershipService;
+use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Cache;
 
 class LmsPublicationService
 {
+    /**
+     * Prefijo de caché del contador de SCHEDULED pendientes por usuario
+     * (badge de navbar). Se invalida por destinatario al notificar, para que
+     * el badge reaccione al instante cuando llega el broadcast.
+     */
+    public const PENDING_COUNT_CACHE_PREFIX = 'lms_pending_count_';
+
+    /**
+     * Clave de caché del grid de stats del monitor (MonitorStats). Se invalida
+     * en el punto central (publish/unpublish) y expira con el poll interval.
+     */
+    public const MONITOR_STATS_CACHE_KEY = 'lms_monitor_stats';
+
+    /**
+     * TTL de caché (segundos) alineado con la cadencia de `wire:poll`
+     * (config('broadcasting.poll_interval'), default 5000ms).
+     */
+    public static function cacheTtlSeconds(): int
+    {
+        return max(1, (int) ceil((int) config('broadcasting.poll_interval', 5000) / 1000));
+    }
+
     /**
      * Publica o programa la lección de una actividad.
      *
@@ -57,6 +81,10 @@ class LmsPublicationService
 
         LmsActivityLog::record($activity->id, $publisherId, $authorized ? 'PUBLISH' : 'SCHEDULE');
 
+        // Los stats del monitor (PUBLISHED/SCHEDULED/DRAFT/…) cambiaron:
+        // invalidar la caché del widget (Opción 5).
+        Cache::forget(self::MONITOR_STATS_CACHE_KEY);
+
         // Si es SCHEDULED (no autorizado), notificar a los responsables
         if (! $authorized) {
             $this->notifyScheduled($activity, $publisherId, $publishAt);
@@ -71,6 +99,9 @@ class LmsPublicationService
         if ($pub) {
             $pub->update(['status' => 'ARCHIVED']);
             LmsActivityLog::record($activity->id, $userId, 'UNPUBLISH');
+
+            // Los stats del monitor cambiaron (SCHEDULED/PUBLISHED → ARCHIVED).
+            Cache::forget(self::MONITOR_STATS_CACHE_KEY);
         }
     }
 
@@ -131,8 +162,62 @@ class LmsPublicationService
     }
 
     /**
+     * Query de actividades SCHEDULED visibles para un usuario según su rol y
+     * scope (blueprint Opción 2). Reutilizada por el badge (LessonPendingCount)
+     * y por el marcado de lectura al abrir el monitor (LmsMonitor), para que
+     * ambos cuenten/marquen exactamente el mismo conjunto de lecciones.
+     */
+    public function scopedScheduledQuery(User $user): Builder
+    {
+        $query = Activity::query()
+            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'));
+
+        $this->applyRoleScope($query, $user);
+
+        return $query;
+    }
+
+    /**
+     * Restringe la query al scope del rol del usuario:
+     * - Admin / Planner / Director: visión global (sin restricción).
+     * - Coordinación: solo sus peducativos (CoordinacionScopeService).
+     * - Leadership: solo sus áreas asignadas (LeadershipService).
+     * - Usuario sin rol responsable: no ve nada (1 = 0).
+     */
+    private function applyRoleScope(Builder $query, User $user): void
+    {
+        // is_planner/is_director son accessors que ya incluyen a los admins.
+        if ($user->is_planner || $user->is_director) {
+            return;
+        }
+
+        $query->where(function ($q) use ($user) {
+            $scoped = false;
+
+            if ($user->isCoordinacion()) {
+                $pestudioIds = app(CoordinacionScopeService::class, ['user' => $user])->getPestudioIds();
+                $q->orWhereHas('pevaluacion.pensum', fn ($sq) => $sq->whereIn('pestudio_id', $pestudioIds));
+                $scoped = true;
+            }
+
+            if ($user->isLeadership()) {
+                $asignaturaIds = app(LeadershipService::class, ['user' => $user])->getAssignedAsignaturaIds();
+                $q->orWhereHas('pevaluacion.pensum', fn ($sq) => $sq->whereIn('asignatura_id', $asignaturaIds));
+                $scoped = true;
+            }
+
+            if (! $scoped) {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
+
+    /**
      * Notifica a los responsables cuando una lección queda SCHEDULED.
      * Emite broadcast (Reverb) + notificación DB.
+     * La notificación DB se delega en NotificationService, que además emite el
+     * broadcast optimista `NotificationReceived` para el dropdown del navbar
+     * (blueprint/notifications) e invalida la caché de no-leídas (N6).
      * Crash-guard (Opción 9): ShouldBroadcastNow lanza excepción síncrona si Reverb
      * está caído; envolvemos el dispatch para no romper saveStep2 del profesor.
      * La notificación DB y el log ya están persistidos; el poll (5s) cubre el badge.
@@ -141,12 +226,21 @@ class LmsPublicationService
     {
         $recipients = $this->getRecipients($activity);
 
+        // El contador del badge (SCHEDULED no-leídas) cambió para los
+        // destinatarios: invalidar la caché por usuario en el mismo request
+        // para que el refresh disparado por el broadcast lea datos frescos.
+        foreach ($recipients as $recipient) {
+            Cache::forget(self::PENDING_COUNT_CACHE_PREFIX.$recipient->id);
+        }
+
         $scheduledFor = $scheduledAt
             ? \Carbon\Carbon::parse($scheduledAt)->format('d/m/Y H:i')
             : '—';
 
-        // Notificación en base de datos (siempre persistida)
-        Notification::send($recipients, new LessonScheduledForApproval(
+        // Notificación en base de datos (siempre persistida) + broadcast
+        // optimista por destinatario (NotificationReceived). El punto central
+        // (NotificationService) invalida la caché de no-leídas del dropdown.
+        app(NotificationService::class)->notifyUsers($recipients, new LessonScheduledForApproval(
             activityId: $activity->id,
             teacherName: \App\Models\User::find($publisherId)?->fullName ?? 'Profesor',
             activityTitle: $activity->topic ?? 'Lección',
@@ -179,11 +273,14 @@ class LmsPublicationService
             // Job de respaldo con reintentos/backoff: si Reverb vuelve en
             // 10/60/300 s, el worker re-emite el broadcast. La notificación DB
             // ya está persistida y el poll (5 s) cubre el badge mientras tanto.
+            // Se propaga el event_id para que la re-emisión conserve el ACK de
+            // auditoría (Opción 10) de la fila broadcast_events original.
             BroadcastLessonScheduled::dispatch(
                 $activity,
                 $recipients->all(),
                 \App\Models\User::find($publisherId)?->fullName ?? 'Profesor',
                 $scheduledFor,
+                $audit->id,
             );
         }
     }

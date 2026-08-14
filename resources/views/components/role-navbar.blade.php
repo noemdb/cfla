@@ -1,8 +1,8 @@
 @props(['subtitle' => 'Panel Administrativo'])
 
 <header x-data="{ mobileOpen: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/50 dark:border-white/5 sticky top-0 z-50">
-    <div class="container mx-auto px-4 py-2">
-        <div class="flex items-center justify-between">
+    <div class="container-fluid w-full px-4 py-2">
+        <div class="flex items-center justify-around space-x-2">
             <!-- Logo -->
             <a href="{{ url('/') }}" class="flex items-center space-x-4">
                 <img src="{{ asset('image/logo/logo1x1.png') }}" alt="Logo" class="w-10 h-10 rounded-lg shrink-0">
@@ -25,22 +25,14 @@
 
             <!-- Right section: Profile + Theme Toggle + Hamburger -->
             <div class="flex items-center space-x-2">
-                <!-- User Profile (sm+) -->
-                <div class="hidden sm:flex items-center space-x-4 px-2 py-1 bg-gray-100/80 dark:bg-gray-900/30 backdrop-blur-md rounded-lg">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ Auth::user()->username }}</p>
-                        <p class="text-xs text-emerald-500">{{ Auth::user()->role_label }}</p>
-                    </div>
+                <!-- Notificaciones (campana, todos los roles) -->
+                @auth
+                    <livewire:app.notifications.notification-bell />
+                @endauth
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="p-2 text-gray-500 hover:text-gray-900 bg-gray-100/50 hover:bg-emerald-100 dark:text-gray-400 dark:hover:text-white dark:bg-white/5 dark:hover:bg-emerald-500/20 rounded-lg border border-gray-200 dark:border-white/5 transition-all duration-300 group">
-                            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                        </button>
-                    </form>
+                <!-- User Profile (sm+) - Dropdown -->
+                <div class="hidden sm:block">
+                    <x-user-dropdown :user="Auth::user()" align="right" width="64" />
                 </div>
 
                 {{-- Theme Toggle (inline en el header, alineado a la derecha) --}}
@@ -108,21 +100,8 @@
             @endif
 
             {{-- User profile (mobile) --}}
-            <div class="pt-3 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ Auth::user()->username }}</p>
-                    <p class="text-xs text-emerald-500">{{ Auth::user()->role_label }}</p>
-                </div>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="p-2 text-gray-500 hover:text-gray-900 bg-gray-100/50 hover:bg-emerald-100 dark:text-gray-400 dark:hover:text-white dark:bg-white/5 dark:hover:bg-emerald-500/20 rounded-lg border border-gray-200 dark:border-white/5 transition-all duration-300 group">
-                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                    </button>
-                </form>
+            <div class="pt-3 border-t border-gray-200 dark:border-white/5">
+                <x-user-dropdown :user="Auth::user()" align="left" width="64" />
             </div>
         </div>
     </div>

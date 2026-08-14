@@ -15,7 +15,9 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
+use App\Services\Lms\LmsPublicationService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -31,6 +33,10 @@ class MonitorStatsTest extends TestCase
         parent::setUp();
 
         $this->planner = User::factory()->create(['is_planner' => true]);
+
+        // La clave de stats es global y la caché persiste entre tests del mismo
+        // proceso: arrancar limpio para que los asserts no lean valores previos.
+        Cache::forget(LmsPublicationService::MONITOR_STATS_CACHE_KEY);
     }
 
     private function createLesson(string $status): Activity
@@ -123,6 +129,10 @@ class MonitorStatsTest extends TestCase
         $component->assertSet('scheduled', $baselineScheduled);
 
         $this->createLesson('SCHEDULED');
+
+        // En producción la caché de stats se invalida en el punto central
+        // (LmsPublicationService::publish()); aquí simulamos esa invalidación.
+        Cache::forget(LmsPublicationService::MONITOR_STATS_CACHE_KEY);
 
         $component->call('refreshStats')
             ->assertSet('scheduled', $baselineScheduled + 1);

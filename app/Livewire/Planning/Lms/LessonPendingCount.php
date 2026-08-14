@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Planning\Lms;
 
-use App\Models\app\Academy\Activity;
-use App\Models\User;
 use App\Models\UserLessonRead;
-use App\Services\Leadership\LeadershipService;
-use App\Services\Lms\CoordinacionScopeService;
+use App\Services\Lms\LmsPublicationService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
@@ -35,6 +33,12 @@ class LessonPendingCount extends Component
     }
 
     /**
+     * Límite de entradas del dedup de toasts por sesión: evita que la sesión
+     * crezca sin límite (blueprint Opción 5 / hallazgo de auditoría).
+     */
+    private const MAX_TOAST_DEDUP = 50;
+
+    /**
      * Muestra el toast WireUI al recibir el broadcast. Deduplicación por
      * usuario + activity_id: evita N toasts cuando hay varios badges
      * (planning/coordinación/director/admin) en la misma página.
@@ -50,14 +54,17 @@ class LessonPendingCount extends Component
         }
         if ($activityId) {
             $shown[] = $activityId;
-            session([$shownKey => $shown]);
+            // Cota el array para que la sesión no crezca indefinidamente.
+            session([$shownKey => array_slice($shown, -self::MAX_TOAST_DEDUP)]);
         }
 
         $url = $payload['url'] ?? route('app.planning.lms.monitor', ['filterStatus' => 'SCHEDULED']);
         $message = $payload['message'] ?? 'Nueva lección programada para aprobación.';
 
-        // La descripción usa x-html (WireUI): el enlace es navegable.
-        $description = $message.' <a class="font-semibold underline" href="'.$url.'">Ver en el monitor →</a>';
+        // La descripción usa x-html (WireUI), por lo que el texto y la URL se
+        // escapan antes de insertarlos: `message` interpola activity->topic
+        // (contenido editable por profesores) y no debe renderizar HTML.
+        $description = e($message).' <a class="font-semibold underline" href="'.e($url).'">Ver en el monitor →</a>';
 
         $this->notification()->success(
             title: 'Lección programada',
@@ -72,52 +79,26 @@ class LessonPendingCount extends Component
 
     /**
      * Contador de lecciones SCHEDULED **no leídas** por el usuario actual,
-     * filtrado por rol y scope (blueprint Opción 2 + Opción 5):
-     * - Admin / Planner / Director: ven todas (sin restricción de scope).
-     * - Coordinación: solo las lecciones de sus peducativos (CoordinacionScopeService).
-     * - Leadership: solo las lecciones de sus áreas asignadas (LeadershipService).
+     * filtrado por rol y scope (blueprint Opción 2 + Opción 5). El scope se
+     * delega en LmsPublicationService::scopedScheduledQuery() para que badge y
+     * monitor cuenten/marquen exactamente el mismo conjunto de lecciones.
+     *
+     * El resultado se cachea por usuario (TTL = poll interval): con N badges
+     * en la página o el poll activo, solo la primera consulta toca la DB; la
+     * caché se invalida por destinatario en notifyScheduled() (Opción 5), así
+     * el broadcast refresca el badge al instante.
      */
     public function refreshCount(): void
     {
         $user = auth()->user();
+        $cacheKey = LmsPublicationService::PENDING_COUNT_CACHE_PREFIX.$user->id;
 
-        $query = Activity::query()
-            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))
-            ->whereDoesntHave('lessonReads', fn ($q) => $q->where('user_id', $user->id));
-
-        // Opción 2 — scope por rol (roles globales no se restringen)
-        if (! $this->hasGlobalScope($user)) {
-            $query->where(function ($q) use ($user) {
-                $scoped = false;
-
-                if ($user->isCoordinacion()) {
-                    $pestudioIds = app(CoordinacionScopeService::class, ['user' => $user])->getPestudioIds();
-                    $q->orWhereHas('pevaluacion.pensum', fn ($sq) => $sq->whereIn('pestudio_id', $pestudioIds));
-                    $scoped = true;
-                }
-
-                if ($user->isLeadership()) {
-                    $asignaturaIds = app(LeadershipService::class, ['user' => $user])->getAssignedAsignaturaIds();
-                    $q->orWhereHas('pevaluacion.pensum', fn ($sq) => $sq->whereIn('asignatura_id', $asignaturaIds));
-                    $scoped = true;
-                }
-
-                if (! $scoped) {
-                    $q->whereRaw('1 = 0');
-                }
-            });
-        }
-
-        $this->count = $query->count();
-    }
-
-    /**
-     * Roles con visión global (sin restricción de scope sobre SCHEDULED).
-     * is_planner/is_director son accessors que ya incluyen a los admins.
-     */
-    private function hasGlobalScope(User $user): bool
-    {
-        return $user->is_planner || $user->is_director;
+        $this->count = Cache::remember($cacheKey, LmsPublicationService::cacheTtlSeconds(), function () use ($user) {
+            return app(LmsPublicationService::class)
+                ->scopedScheduledQuery($user)
+                ->whereDoesntHave('lessonReads', fn ($q) => $q->where('user_id', $user->id))
+                ->count();
+        });
     }
 
     /**
@@ -148,6 +129,11 @@ class LessonPendingCount extends Component
                     ])->all()
                 );
             }
+        }
+
+        // El estado de lectura cambió: invalidar la caché del contador.
+        if ($userId) {
+            Cache::forget(LmsPublicationService::PENDING_COUNT_CACHE_PREFIX.$userId);
         }
 
         $this->refreshCount();

@@ -4147,6 +4147,225 @@ PROMPT;
         );
     }
 
+    // ─── Infografías Jerárquicas ────────────────
+    public bool $infografiaModalOpen = false;
+    public bool $infografiaPreviewOpen = false;
+    public array $infografiaConfig = [
+        'niveles' => 4,
+        'tipoEstructura' => 'jerarquica',
+        'direccion' => 'vertical',
+        'temaColor' => 'esafe'
+    ];
+    public string $infografiaPreviewSvg = '';
+    public string $infografiaError = '';
+    public bool $generatingInfografia = false;
+
+    public function openInfografiaModal(): void
+    {
+        $this->resetInfografiaState();
+        $this->infografiaModalOpen = true;
+    }
+
+    public function closeInfografiaModal(): void
+    {
+        $this->resetInfografiaState();
+        $this->infografiaModalOpen = false;
+    }
+
+    public function openInfografiaPreview(): void
+    {
+        $this->infografiaPreviewOpen = true;
+    }
+
+    public function closeInfografiaPreview(): void
+    {
+        $this->infografiaPreviewOpen = false;
+    }
+
+    public function resetInfografiaState(): void
+    {
+        $this->infografiaConfig = [
+            'niveles' => 4,
+            'tipoEstructura' => 'jerarquica',
+            'direccion' => 'vertical',
+            'temaColor' => 'esafe'
+        ];
+        $this->infografiaPreviewSvg = '';
+        $this->infografiaError = '';
+        $this->generatingInfografia = false;
+    }
+
+    public function generateInfografia(): void
+    {
+        if ($this->generatingInfografia || empty($this->infografiaConfig)) {
+            return;
+        }
+
+        $this->generatingInfografia = true;
+        $this->infografiaError = null;
+
+        try {
+            $infografiaService = app(\App\Services\Lms\InfografiaGeneratorService::class);
+            $result = $infografiaService->generate($this->infografiaConfig);
+
+            if (!$result['success']) {
+                throw new \Exception($result['error'] ?? 'Error desconocido al generar infografía');
+            }
+
+            $this->infografiaPreviewSvg = $this->renderInfografiaToSvg($result['data']);
+            $this->openInfografiaPreview();
+            $this->notification()->success(
+                'Infografía generada',
+                'La infografía se ha generado correctamente. Revise la vista previa y haga clic en "Insertar" para agregarla a la lección.'
+            );
+        } catch (\Exception $e) {
+            $this->infografiaError = $e->getMessage();
+            $this->notification()->error('Error al generar infografía', $e->getMessage());
+        } finally {
+            $this->generatingInfografia = false;
+        }
+    }
+
+    public function validateInfografiaResponse(array $response): bool
+    {
+        // Validar que la respuesta tenga la estructura esperada
+        if (!isset($response['structure']) || !is_array($response['structure'])) {
+            return false;
+        }
+
+        // Validar que cada nivel tenga los campos requeridos
+        foreach ($response['structure'] as $level => $items) {
+            if (!is_int($level) || $level < 1 || $level > 6) {
+                return false;
+            }
+
+            if (!is_array($items)) {
+                return false;
+            }
+
+            foreach ($items as $item) {
+                if (!isset($item['id']) || !isset($item['label']) || !isset($item['icon'])) {
+                    return false;
+                }
+
+                if (!is_string($item['id']) || !is_string($item['label']) || !is_string($item['icon'])) {
+                    return false;
+                }
+
+                // Validar hijos si existen
+                if (isset($item['children']) && !is_array($item['children'])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function renderInfografiaToSvg(array $data): string
+    {
+        if (!isset($data['estructura']) || !isset($data['metadata'])) {
+            return '';
+        }
+
+        $estructura = $data['estructura'];
+        $metadata = $data['metadata'];
+
+        // Obtener configuración del request (debería estar en metadata o necesitamos pasarla)
+        // Por ahora, usamos valores por defecto razonables
+        $tipoEstructura = $estructura['tipo'] ?? 'jerarquica';
+        $niveles = $estructura['niveles'] ?? 4;
+        $paletaColor = 'emerald'; // Podemos obtener esto del metadata o contexto
+
+        // Definir paleta SAEFL (los mismos colores que usa el servicio)
+        $saeflPalettes = [
+            'emerald' => ['#f0fdf4', '#dcfce7', '#bbf7d0', '#86efac', '#4ade80', '#10b981', '#059669', '#047857', '#064e3b', '#065f46'],
+            'sky' => ['#f0f9ff', '#e0f2fe', '#bae6fd', '#7dd3fc', '#38bdf8', '#0ea5e9', '#0284c7', '#0369a1', '#075985', '#0c4a6e'],
+            'amber' => ['#fffbeb', '#fef3c7', '#fde68a', '#fbbf24', '#facc15', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f'],
+            'purple' => ['#faf5ff', '#f3e8ff', '#e9d5ff', '#d8b4fe', '#c084fc', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#4c1d95'],
+            'rose' => ['#fff1f2', '#ffe4e6', '#fecdd3', '#fda4af', '#fb7185', '#f43f5e', '#e11d48', '#be123c', '#9f1239', '#881337'],
+            'stone' => ['#fafaf9', '#f5f5f4', '#e7e5e4', '#d6d3d1', '#a8a29e', '#78716c', '#57534e', '#44403c', '#292524', '#1c1917'],
+        ];
+
+        $palette = $saeflPalettes[$paletaColor] ?? $saeflPalettes['emerald'];
+
+        // Función para obtener color de la paleta por índice (0-9)
+        $getColor = function ($index) use ($palette) {
+            return $palette[min($index, count($palette) - 1)] ?? '#000000';
+        };
+
+        // Función para validar contraste WCAG AA
+        $getTextColor = function ($bgColor) {
+            // Conversión simple de hex a luminance
+            $hex = str_replace('#', '', $bgColor);
+            if (strlen($hex) === 3) {
+                $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+            }
+            $r = hexdec(substr($hex, 0, 2)) / 255;
+            $g = hexdec(substr($hex, 2, 2)) / 255;
+            $b = hexdec(substr($hex, 4, 2)) / 255;
+
+            $r = ($r > 0.03928) ? pow(($r + 0.055) / 1.055, 2.4) : $r / 12.92;
+            $g = ($g > 0.03928) ? pow(($g + 0.055) / 1.055, 2.4) : $g / 12.92;
+            $b = ($b > 0.03928) ? pow(($b + 0.055) / 1.055, 2.4) : $b / 12.92;
+
+            $luminance = 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
+
+            // Retornar blanco o negro según contraste
+            return ($luminance > 0.4) ? '#000000' : '#ffffff';
+        };
+
+        // Íconos educativos disponibles
+        $educationalIcons = ['book', 'lightbulb', 'microscope', 'globe', 'calculator', 'atom', 'leaf', 'gear', 'paint-brush', 'music-note', 'soccer-ball', 'heart', 'shield', 'magnet', 'flask', 'binoculars', 'compass', 'ruler'];
+        $getIcon = function () use ($educationalIcons) {
+            return $educationalIcons[array_rand($educationalIcons)];
+        };
+
+        // Generar SVG basado en el tipo de estructura
+        switch ($tipoEstructura) {
+            case 'radial':
+                return $this->renderRadialInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+            case 'flujo':
+                return $this->renderFlowInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+            case 'matriz':
+                return $this->renderMatrixInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+            case 'jerarquica':
+            default:
+                return $this->renderHierarchicalInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+        }
+    }
+
+    public function insertInfografiaEnEditor(): void
+    {
+        if (empty($this->infografiaPreviewSvg)) {
+            $this->notification()->error('Error', 'No hay infografía generada para insertar');
+            return;
+        }
+
+        // Generar un ID único para el embed
+        $embedId = 'infografia_' . uniqid();
+
+        // Preparar el contenido HTML para el embed
+        $htmlContent = '<div class="infografia-wrapper">' . $this->infografiaPreviewSvg . '</div>';
+
+        // Añadir al array de embeds del wizard
+        $this->wizardHtmlEmbeds[] = [
+            'id' => 'temp_' . $embedId,
+            'title' => 'Infografía Jerárquica',
+            'html_content' => $htmlContent,
+            'sort_order' => count($this->wizardHtmlEmbeds) + 1,
+            'is_visible' => true
+        ];
+
+        // Cerrar modal y resetear estado
+        $this->closeInfografiaModal();
+
+        $this->notification()->success(
+            'Infografía insertada',
+            'La infografía se ha agregado correctamente a su lección como un bloque HTML embebido.'
+        );
+    }
+
     // ─── Wizard: Paso 2 — Guardado incremental ────────────────
 
     public function saveStep2(): void
@@ -4803,7 +5022,9 @@ PROMPT;
 
         // 7. Publicar. Los roles autorizados (admin/planning/leadership/
         //    coordinación) publican de inmediato (PUBLISHED); el profesor solo
-        //    programa (SCHEDULED) y lo notifica a los responsables.
+        //    programa (SCHEDULED) y lo notifica a los responsables. La
+        //    notificación (DB + broadcast) vive dentro del servicio cuando
+        //    $authorized = false.
         app(LmsPublicationService::class)->publish(
             $this->selectedActivity,
             [
@@ -4813,14 +5034,6 @@ PROMPT;
             auth()->id(),
             $this->canPublishLesson()
         );
-
-        // Si el usuario es profesor (no tiene rol de publicación), notificar a
-        // los responsables (planning, leadership, coordinación)
-        // AHORA: la notificación se hace dentro de LmsPublicationService::publish()
-        // cuando $authorized = false. Se mantiene el if por claridad de flujo.
-        if (! $this->canPublishLesson()) {
-            // La notificación ya se disparó en LmsPublicationService
-        }
 
         $this->saved = true;
         $this->showPublishConfirm = false;
@@ -5572,10 +5785,371 @@ PROMPT;
     }
 
     /**
-     * Sanitiza texto delegando en LmsTextSanitizerService.
+     * Genera un SVG para infografía jerárquica (estructura de árbol)
      */
-    private function sanitizeText(?string $text, string $level = 'standard'): ?string
+    private function renderHierarchicalInfografia(array $nodoRaiz, callable $getColor, callable $getTextColor, callable $getIcon, int $niveles): string
     {
-        return $this->rendererService->sanitizeText($text, $level);
+        // Contenedor SVG principal
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-full h-auto p-4" viewBox="0 0 800 600">';
+
+        // Estilos para nodos y conexiones
+        $svg .= '<style>.node { transition: all 0.3s ease; } .node:hover { transform: scale(1.05); } .connection { stroke: #e2e8f0; stroke-width: 2; }</style>';
+
+        // Grupo principal
+        $svg .= '<g class="infografia-hierarquica" transform="translate(400, 50)">';
+
+        // Función recursiva para dibujar el árbol
+        $drawNode = function ($node, $x, $y, $level, $parentX = null, $parentY = null) use (&$drawNode, $getColor, $getTextColor, $getIcon, $niveles, &$svg) {
+            if ($level > $niveles || !is_array($node)) {
+                return;
+            }
+
+            // Dibujar conexión desde el padre
+            if ($parentX !== null && $parentY !== null) {
+                $svg .= '<line x1="' . $parentX . '" y1="' . $parentY . '" x2="' . $x . '" y2="' . $y . '" class="connection"/>';
+            }
+
+            // Obtener datos del nodo
+            $label = isset($node['label']) ? htmlspecialchars($node['label']) : 'Nodo';
+            $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'book';
+            $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
+
+            $bgColor = $getColor($colorIndex);
+            $textColor = $getTextColor($bgColor);
+
+            // Dibujar nodo (círculo con fondo)
+            $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="28" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node"/>';
+
+            // Icono
+            $svg .= '<text x="' . $x . '" y="' . ($y - 8) . '" text-anchor="middle" fill="' . $textColor . '" font-size="16" font-weight="bold">' . $icon . '</text>';
+
+            // Etiqueta
+            $svg .= '<text x="' . $x . '" y="' . ($y + 20) . '" text-anchor="middle" fill="' . $textColor . '" font-size="14" font-weight="600">' . $label . '</text>';
+
+            // Dibujar hijos
+            if (isset($node['children']) && is_array($node['children'])) {
+                $children = $node['children'];
+                $childCount = count($children);
+
+                if ($childCount > 0) {
+                    $spacing = 120; // Espaciado entre hermanos
+                    $startX = $x - (($childCount - 1) * $spacing) / 2;
+                    $childY = $y + 80;
+
+                    foreach ($children as $index => $childNode) {
+                        $childX = $startX + ($index * $spacing);
+                        $drawNode($childNode, $childX, $childY, $level + 1, $x, $y);
+                    }
+                }
+            }
+        };
+
+        // Dibujar desde la raíz
+        $drawNode($nodoRaiz, 0, 0, 1);
+
+        $svg .= '</g>'; // Fin del grupo principal
+        $svg .= '</svg>';
+
+        return $svg;
+    }
+
+    /**
+     * Genera un SVG para infografía radial (estructura circular)
+     */
+    private function renderRadialInfografia(array $nodoRaiz, callable $getColor, callable $getTextColor, callable $getIcon, int $niveles): string
+    {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-full h-auto p-4" viewBox="0 0 600 600">';
+
+        // Estilos
+        $svg .= '<style>.node { transition: all 0.3s ease; } .node:hover { transform: scale(1.1); } .connection { stroke: #cbd5e0; stroke-width: 1.5; stroke-dasharray: 4,2; }</style>';
+
+        // Centro del SVG
+        $centerX = 300;
+        $centerY = 300;
+
+        $svg .= '<g class="infografia-radial" transform="translate(' . $centerX . ', ' . $centerY . ')">';
+
+        // Función recursiva para dibujar en círculos concéntricos
+        $drawLevel = function ($nodes, $radius, $level) use (&$drawLevel, $getColor, $getTextColor, $getIcon, $niveles, &$svg, $centerX, $centerY) {
+            if ($level > $niveles || empty($nodes)) {
+                return;
+            }
+
+            $nodeCount = count($nodes);
+            if ($nodeCount === 0) {
+                return;
+            }
+
+            $angleStep = 2 * M_PI / $nodeCount;
+            $startAngle = -M_PI/2; // Comenzar desde arriba
+
+            foreach ($nodes as $index => $node) {
+                $angle = $startAngle + ($index * $angleStep);
+                $x = $radius * cos($angle);
+                $y = $radius * sin($angle);
+
+                // Datos del nodo
+                $label = isset($node['label']) ? htmlspecialchars($node['label']) : 'Nodo';
+                $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'book';
+                $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
+
+                $bgColor = $getColor($colorIndex);
+                $textColor = $getTextColor($bgColor);
+
+                // Dibujar nodo
+                $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="22" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node"/>';
+
+                // Icono
+                $svg .= '<text x="' . $x . '" y="' . ($y - 4) . '" text-anchor="middle" fill="' . $textColor . '" font-size="14">' . $icon . '</text>';
+
+                // Etiqueta (curve along the circle or straight)
+                $labelAngle = atan2($y, $x);
+                $labelRadius = $radius + 35;
+                $labelX = $labelRadius * cos($labelAngle);
+                $labelY = $labelRadius * sin($labelAngle);
+
+                // Rotar el texto para que siga la curva
+                $svg .= '<text x="' . $labelX . '" y="' . $labelY . '" text-anchor="middle" fill="' . $textColor . '" font-size="12" transform="rotate(' . rad2deg($labelAngle) . ', ' . $labelX . ', ' . $labelY . ')">' . $label . '</text>';
+
+                // Dibujar conexión desde el centro (solo para el primer nivel) o desde el nivel anterior
+                if ($level === 1) {
+                    // Conexión desde el centro
+                    $svg .= '<line x1="0" y1="0" x2="' . $x . '" y2="' . $y . '" class="connection"/>';
+                } else {
+                    // Para niveles superiores, conectar con nodos del nivel anterior
+                    // Esto requeriría pasar información del padre, simplificando por ahora
+                    $svg .= '<line x1="0" y1="0" x2="' . $x . '" y2="' . $y . '" class="connection" opacity="0.3"/>';
+                }
+
+                // Procesar hijos recursivamente (en el siguiente nivel)
+                if (isset($node['children']) && is_array($node['children'])) {
+                    $drawLevel($node['children'], $radius + 80, $level + 1);
+                }
+            }
+        };
+
+        // Comenzar con el nodo raíz en el centro
+        $rootLabel = isset($nodoRaiz['label']) ? htmlspecialchars($nodoRaiz['label']) : 'Centro';
+        $rootIcon = isset($nodoRaiz['icon']) ? htmlspecialchars($nodoRaiz['icon']) : 'atom';
+        $rootColorIndex = isset($nodoRaiz['color_index']) ? min($nodoRaiz['color_index'], 9) : 0;
+        $rootBgColor = $getColor($rootColorIndex);
+        $rootTextColor = $getTextColor($rootBgColor);
+
+        // Nodo raíz central
+        $svg .= '<circle cx="0" cy="0" r="30" fill="' . $rootBgColor . '" stroke="' . $rootTextColor . '" stroke-width="3" class="node"/>';
+        $svg .= '<text x="0" y="4" text-anchor="middle" fill="' . $rootTextColor . '" font-size="16" font-weight="bold">' . $rootIcon . '</text>';
+        $svg .= '<text x="0" y="24" text-anchor="middle" fill="' . $rootTextColor . '" font-size="14" font-weight="600">' . $rootLabel . '</text>';
+
+        // Dibujar niveles
+        if (isset($nodoRaiz['children']) && is_array($nodoRaiz['children'])) {
+            $drawLevel($nodoRaiz['children'], 120, 2);
+        }
+
+        $svg .= '</g>';
+        $svg .= '</svg>';
+
+        return $svg;
+    }
+
+    /**
+     * Genera un SVG para infografía de flujo (diagrama de flujo vertical/horizontal)
+     */
+    private function renderFlowInfografia(array $nodoRaiz, callable $getColor, callable $getTextColor, callable $getIcon, int $niveles): string
+    {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-full h-auto p-4" viewBox="0 0 800 600">';
+
+        // Estilos
+        $svg .= '<style>.node { transition: all 0.3s ease; } .node:hover { transform: scale(1.05); } .connection { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrowhead); } .decision { shape-rendering: geometricPrecision; }</style>';
+        $svg .= '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/></marker></defs>';
+
+        // Agrupar elementos
+        $svg .= '<g class="infografia-flujo" transform="translate(40, 40)">';
+
+        // Función para dibujar nodos de flujo
+        $currentX = 40;
+        $currentY = 40;
+        $nodeWidth = 180;
+        $nodeHeight = 60;
+        $levelSpacing = 100;
+
+        $drawFlowNode = function ($node, $x, $y, $level, $parentIndex = null, $isDecision = false) use (&$drawFlowNode, $getColor, $getTextColor, $getIcon, $niveles, &$svg, $nodeWidth, $nodeHeight, &$currentY) {
+            if ($level > $niveles || !is_array($node)) {
+                return null;
+            }
+
+            $label = isset($node['label']) ? htmlspecialchars($node['label']) : 'Proceso';
+            $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'gear';
+            $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
+
+            $bgColor = $getColor($colorIndex);
+            $textColor = $getTextColor($bgColor);
+
+            // Determinar forma según tipo
+            $isDecision = isset($node['type']) && $node['type'] === 'decision';
+
+            if ($isDecision) {
+                // Rombo para decisiones
+                $points = ($x - $nodeWidth/2) . ',' . $y . ' ' .
+                         $x . ',' . ($y - $nodeHeight/2) . ' ' .
+                         ($x + $nodeWidth/2) . ',' . $y . ' ' .
+                         $x . ',' . ($y + $nodeHeight/2);
+                $svg .= '<polygon points="' . $points . '" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node decision"/>';
+
+                // Icono en el rombo
+                $svg .= '<text x="' . $x . '" y="' . ($y - 8) . '" text-anchor="middle" fill="' . $textColor . '" font-size="16">' . $icon . '</text>';
+                $svg .= '<text x="' . $x . '" y="' . ($y + 12) . '" text-anchor="middle" fill="' . $textColor . '" font-size="13">' . $label . '</text>';
+            } else {
+                // Rectángulo para procesos
+                $svg .= '<rect x="' . ($x - $nodeWidth/2) . '" y="' . ($y - $nodeHeight/2) . '" width="' . $nodeWidth . '" height="' . $nodeHeight . '" rx="8" ry="8" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node"/>';
+
+                // Icono
+                $svg .= '<text x="' . $x . '" y="' . ($y - 12) . '" text-anchor="middle" fill="' . $textColor . '" font-size="18">' . $icon . '</text>';
+
+                // Etiqueta (puede ser multilínea)
+                $labelLines = explode('\\n', $label);
+                $lineCount = count($labelLines);
+                $startY = $y - (($lineCount - 1) * 12) / 2;
+
+                foreach ($labelLines as $index => $line) {
+                    $svg .= '<text x="' . $x . '" y="' . ($startY + ($index * 24)) . '" text-anchor="middle" fill="' . $textColor . '" font-size="13">' . $line . '</text>';
+                }
+            }
+
+            // Procesar hijos
+            $childY = $y + $nodeHeight/2 + $levelSpacing;
+            $childIndex = 0;
+
+            if (isset($node['children']) && is_array($node['children'])) {
+                foreach ($node['children'] as $childNode) {
+                    $childX = $x; // Flujo vertical por defecto
+
+                    // Dibujar conexión
+                    $svg .= '<line x1="' . $x . '" y1="' . ($y + $nodeHeight/2) . '" x2="' . $childX . '" y2="' . ($childY - $nodeHeight/2) . '" class="connection"/>';
+
+                    // Dibujar hijo recursivamente
+                    $drawFlowNode($childNode, $childX, $childY, $level + 1, $childIndex, isset($childNode['type']) && $childNode['type'] === 'decision');
+
+                    $childY += $nodeHeight + $levelSpacing;
+                    $childIndex++;
+                }
+            }
+
+            return ['x' => $x, 'y' => $y];
+        };
+
+        // Dibujar desde la raíz
+        $drawFlowNode($nodoRaiz, 400, 80, 1);
+
+        $svg .= '</g>';
+        $svg .= '</svg>';
+
+        return $svg;
+    }
+
+    /**
+     * Genera un SVG para infografía matricial (estructura de cuadrícula/matriz)
+     */
+    private function renderMatrixInfografia(array $nodoRaiz, callable $getColor, callable $getTextColor, callable $getIcon, int $niveles): string
+    {
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" class="w-full h-auto p-4" viewBox="0 0 800 600">';
+
+        // Estilos
+        $svg .= '<style>.node { transition: all 0.3s ease; } .node:hover { transform: scale(1.05); } .header { fill: #1e293b; } .connection { stroke: #94a3b8; stroke-width: 1.5; }</style>';
+
+        // Agrupar elementos
+        $svg .= '<g class="infografia-matriz" transform="translate(40, 40)">';
+
+        // Extraer matriz del nodo raíz
+        $matrix = isset($nodoRaiz['matrix']) && is_array($nodoRaiz['matrix']) ? $nodoRaiz['matrix'] : [];
+        $rowHeaders = isset($nodoRaiz['row_headers']) && is_array($nodoRaiz['row_headers']) ? $nodoRaiz['row_headers'] : [];
+        $colHeaders = isset($nodoRaiz['col_headers']) && is_array($nodoRaiz['col_headers']) ? $nodoRaiz['col_headers'] : [];
+
+        if (empty($matrix)) {
+            // Si no hay matriz, crear una einfache estructura basada en el nodo raíz
+            $matrix = [[isset($nodoRaiz['label']) ? $nodoRaiz['label'] : 'Datos']];
+            $rowHeaders = ['Fila 1'];
+            $colHeaders = ['Columna 1'];
+        }
+
+        $rows = count($matrix);
+        $cols = $rows > 0 ? count($matrix[0]) : 0;
+
+        // Ajustar para_headers
+        $displayRows = $rows + (count($rowHeaders) > 0 ? 1 : 0);
+        $displayCols = $cols + (count($colHeaders) > 0 ? 1 : 0);
+
+        $cellWidth = 120;
+        $cellHeight = 50;
+        $startX = 0;
+        $startY = 0;
+
+        // Dibujar encabezados de columna
+        if (!empty($colHeaders)) {
+            foreach ($colHeaders as $colIndex => $header) {
+                $x = $startX + ($colIndex + 1) * $cellWidth + $cellWidth/2;
+                $y = $startY - 20;
+
+                $svg .= '<rect x="' . ($x - $cellWidth/2) . '" y="' . ($y - $cellHeight/2) . '" width="' . $cellWidth . '" height="' . $cellHeight . '" rx="6" ry="6" fill="#3b82f6" class="header"/>';
+                $svg .= '<text x="' . $x . '" y="' . ($y + 4) . '" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">' . htmlspecialchars($header) . '</text>';
+            }
+        }
+
+        // Dibujar encabezados de fila
+        if (!empty($rowHeaders)) {
+            foreach ($rowHeaders as $rowIndex => $header) {
+                $x = $startX - 20;
+                $y = $startY + ($rowIndex + 1) * $cellHeight + $cellHeight/2;
+
+                $svg .= '<rect x="' . ($x - $cellWidth/2) . '" y="' . ($y - $cellHeight/2) . '" width="' . $cellWidth . '" height="' . $cellHeight . '" rx="6" ry="6" fill="#3b82f6" class="header"/>';
+                $svg .= '<text x="' . $x . '" y="' . ($y + 4) . '" text-anchor="end" fill="#ffffff" font-size="12" font-weight="600">' . htmlspecialchars($header) . '</text>';
+            }
+        }
+
+        // Dibujar celdas de datos
+        foreach ($matrix as $rowIndex => $row) {
+            foreach ($row as $colIndex => $cellValue) {
+                $x = $startX + ($colIndex + 1) * $cellWidth + $cellWidth/2;
+                $y = $startY + ($rowIndex + 1) * $cellHeight + $cellHeight/2;
+
+                // Determinar color basado en el valor (heatmap simple)
+                $value = is_numeric($cellValue) ? floatval($cellValue) : 0;
+                $intensity = min(max($value / 100, 0), 1); // Normalizar 0-1
+
+                // De azul claro a azul intenso
+                $blue = 100 + (int)($intensity * 155);
+                $bgColor = sprintf('#%02x%02x%ff', 150, 200 - (int)($intensity * 50), $blue);
+                $textColor = $intensity > 0.5 ? '#ffffff' : '#1e293b';
+
+                $svg .= '<rect x="' . ($x - $cellWidth/2) . '" y="' . ($y - $cellHeight/2) . '" width="' . $cellWidth . '" height="' . $cellHeight . '" rx="4" ry="4" fill="' . $bgColor . '" class="node"/>';
+
+                // Valor de la celda
+                $displayValue = is_array($cellValue) ? (isset($cellValue['label']) ? $cellValue['label'] : 'Complex') : $cellValue;
+                $svg .= '<text x="' . $x . '" y="' . ($y + 4) . '" text-anchor="middle" fill="' . $textColor . '" font-size="12">' . htmlspecialchars((string)$displayValue) . '</text>';
+            }
+        }
+
+        // Dibujar líneas de separación entre filas y columnas
+        // Líneas verticales
+        for ($i = 0; $i <= $displayCols; $i++) {
+            $x = $startX + $i * $cellWidth;
+            $y1 = $startY - (count($colHeaders) > 0 ? $cellHeight : 0);
+            $y2 = $startY + $displayRows * $cellHeight;
+
+            $svg .= '<line x1="' . $x . '" y1="' . $y1 . '" x2="' . $x . '" y2="' . $y2 . '" class="connection"/>';
+        }
+
+        // Líneas horizontales
+        for ($i = 0; $i <= $displayRows; $i++) {
+            $y = $startY + $i * $cellHeight;
+            $x1 = $startX - (count($rowHeaders) > 0 ? $cellWidth : 0);
+            $x2 = $startX + $displayCols * $cellWidth;
+
+            $svg .= '<line x1="' . $x1 . '" y1="' . $y . '" x2="' . $x2 . '" y2="' . $y . '" class="connection"/>';
+        }
+
+        $svg .= '</g>';
+        $svg .= '</svg>';
+
+        return $svg;
     }
 }

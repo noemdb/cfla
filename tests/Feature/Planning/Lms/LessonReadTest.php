@@ -17,7 +17,9 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\User;
 use App\Models\UserLessonRead;
+use App\Services\Lms\LmsPublicationService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -135,6 +137,10 @@ class LessonReadTest extends TestCase
             'activity_id' => $lesson->id,
             'read_at' => now(),
         ]);
+
+        // En producción el marcado pasa por el componente/servicio que invalida
+        // la caché del badge; aquí se inserta directo, así que la invalidamos.
+        Cache::forget(LmsPublicationService::PENDING_COUNT_CACHE_PREFIX.$this->planner->id);
 
         Livewire::actingAs($this->planner)
             ->test(LessonPendingCount::class)

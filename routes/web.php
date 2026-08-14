@@ -36,7 +36,6 @@ Route::get('/studia', [HomeController::class, 'studia'])->name('studia');
 Route::get('/diagnostico', [HomeController::class, 'diagnostico'])->name('diagnostico');
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/reporte', [HomeController::class, 'payment'])->name('payment');
 Route::get('/matricula', [HomeController::class, 'enrollment'])->name('enrollment');
 Route::get('/pago', [HomeController::class, 'credicard'])->name('credicard');
 Route::get('/post/{id}', [HomeController::class, 'post'])->name('post');
@@ -144,6 +143,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 // MÓDULOS /app (Planificación, Profesor, etc.)
 // ===================================================
 Route::prefix('app')->name('app.')->group(function () {
+
+    // ───────────────────────────────────────────────
+    // NOTIFICACIONES (todos los roles autenticados)
+    // ───────────────────────────────────────────────
+    Route::prefix('notificaciones')->middleware(['auth'])->name('notifications.')->group(function () {
+        Route::get('/', \App\Livewire\App\Notifications\NotificationsIndex::class)
+            ->name('index');   // nombre completo: app.notifications.index
+    });
 
     // ───────────────────────────────────────────────
     // MÓDULO DE PLANIFICACIÓN
@@ -447,6 +454,13 @@ Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isSt
 // API para fingerprinting
 Route::post('/voting/store-fingerprint', [VotingFingerprintController::class, 'store'])
     ->name('voting.store-fingerprint');
+
+// Rutas de Perfil de Usuario
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/perfil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/perfil', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 // Mostrar formulario de login
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

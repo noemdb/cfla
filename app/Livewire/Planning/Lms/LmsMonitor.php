@@ -12,6 +12,7 @@ use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\UserLessonRead;
 use App\Services\Lms\LmsPublicationService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
@@ -312,19 +313,27 @@ class LmsMonitor extends Component
     }
 
     /**
-     * Marca como leídas (por el usuario actual) todas las lecciones SCHEDULED
-     * visibles en el monitor. Idempotente: no duplica filas (clave única).
+     * Marca como leídas (por el usuario actual) las lecciones SCHEDULED visibles
+     * en el monitor **según su scope de rol** (blueprint Opción 2 + Opción 5).
+     * Reutiliza LmsPublicationService::scopedScheduledQuery() para que el marcado
+     * cubra exactamente el mismo conjunto que cuenta el badge: un coordinador o
+     * jefe de área solo marca las lecciones de su scope, no las globales.
+     * Idempotente: no duplica filas (clave única).
      */
     public function markScheduledAsRead(): void
     {
         $userId = auth()->id();
 
-        $scheduledIds = Activity::query()
-            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))
+        if (! $userId) {
+            return;
+        }
+
+        $scheduledIds = app(LmsPublicationService::class)
+            ->scopedScheduledQuery(auth()->user())
             ->pluck('id')
             ->all();
 
-        if (! $userId || empty($scheduledIds)) {
+        if (empty($scheduledIds)) {
             return;
         }
 
@@ -345,6 +354,10 @@ class LmsMonitor extends Component
                 ])->all()
             );
         }
+
+        // El estado de lectura cambió: invalidar la caché del badge (Opción 5)
+        // para que el contador refleje el marcado de inmediato, sin esperar el TTL.
+        Cache::forget(\App\Services\Lms\LmsPublicationService::PENDING_COUNT_CACHE_PREFIX.$userId);
     }
 
     /** Hook: cuando cambia filterPestudio, actualiza los grados disponibles */
