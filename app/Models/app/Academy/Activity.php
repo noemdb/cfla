@@ -7,7 +7,6 @@ use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
-use App\Models\app\Academy\Pevaluacion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -59,30 +58,35 @@ class Activity extends Model
     public function lmsSections()
     {
         return $this->hasMany(LmsActivitySection::class, 'activity_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 
     public function lmsResources()
     {
         return $this->hasMany(LmsActivityResource::class, 'activity_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 
     public function lmsLinks()
     {
         return $this->hasMany(LmsActivityLink::class, 'activity_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 
     public function lmsHtmlEmbeds()
     {
         return $this->hasMany(\App\Models\app\Academy\Lms\LmsHtmlEmbed::class, 'activity_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 
     public function lmsLogs()
     {
         return $this->hasMany(LmsActivityLog::class, 'activity_id');
+    }
+
+    public function lessonReads()
+    {
+        return $this->hasMany(\App\Models\UserLessonRead::class, 'activity_id');
     }
 
     public function comments()
@@ -105,14 +109,14 @@ class Activity extends Model
      */
     public function getStatusResumeAttribute()
     {
-        return !empty($this->description);
+        return ! empty($this->description);
     }
 
     /**
      * Cuenta las palabras del campo `teaching` cuya longitud sea mayor a $num letras.
      *
      * @param  int  $num  Longitud mínima (exclusiva). Por defecto 3.
-     * @return int        Cantidad de palabras con más de $num letras.
+     * @return int Cantidad de palabras con más de $num letras.
      */
     public function teachingWordsMayorCount(int $num = 3): int
     {
@@ -126,7 +130,7 @@ class Activity extends Model
         // Separar por espacios (uno o más)
         $palabras = preg_split('/\s+/u', trim($texto), -1, PREG_SPLIT_NO_EMPTY);
 
-        return count(array_filter($palabras, fn(string $p) => mb_strlen($p) > $num));
+        return count(array_filter($palabras, fn (string $p) => mb_strlen($p) > $num));
     }
 
     /**
@@ -136,6 +140,7 @@ class Activity extends Model
     public function getActivitiesAvrAttribute(): ?int
     {
         $avr = optional(optional(optional($this->pevaluacion)->pensum)->pestudio)->activities_avr;
+
         return $avr !== null ? (int) $avr : null;
     }
 
@@ -151,22 +156,23 @@ class Activity extends Model
             return false;
         }
         foreach (['INICIO', 'DESARROLLO', 'CIERRE'] as $kw) {
-            if (!preg_match('/\b' . preg_quote($kw, '/') . '\b/ui', $this->teaching)) {
+            if (! preg_match('/\b'.preg_quote($kw, '/').'\b/ui', $this->teaching)) {
                 return false;
             }
         }
+
         return true;
     }
 
     /**
      * Descompone el campo `teaching` en tres secciones (INICIO, DESARROLLO, CIERRE).
      *
-     * @return array<string, string>  Claves: 'INICIO', 'DESARROLLO', 'CIERRE'
-     *                                Vacío si no están las tres palabras.
+     * @return array<string, string> Claves: 'INICIO', 'DESARROLLO', 'CIERRE'
+     *                               Vacío si no están las tres palabras.
      */
     public function getTeachingSections(): array
     {
-        if (!$this->hasTeachingStructure()) {
+        if (! $this->hasTeachingStructure()) {
             return [];
         }
 
@@ -181,7 +187,7 @@ class Activity extends Model
         foreach ($parts as $part) {
             $upper = mb_strtoupper($part);
             if (in_array($upper, ['INICIO', 'DESARROLLO', 'CIERRE'])) {
-                if ($currentLabel !== null && !isset($sections[$currentLabel])) {
+                if ($currentLabel !== null && ! isset($sections[$currentLabel])) {
                     $sections[$currentLabel] = '';
                 }
                 $currentLabel = $upper;
@@ -197,7 +203,7 @@ class Activity extends Model
 
         // Si hay texto antes del primer INICIO, anteponerlo a la sección INICIO
         if (trim($preamble) !== '' && isset($sections['INICIO'])) {
-            $sections['INICIO'] = trim($preamble) . "\n" . trim($sections['INICIO']);
+            $sections['INICIO'] = trim($preamble)."\n".trim($sections['INICIO']);
         }
 
         return array_map('trim', $sections);

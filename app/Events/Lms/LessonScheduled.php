@@ -22,6 +22,7 @@ class LessonScheduled implements ShouldBroadcastNow
         public array $recipients,
         public string $teacherName,
         public string $scheduledFor,
+        public ?int $eventId = null,
     ) {}
 
     /**
@@ -45,13 +46,14 @@ class LessonScheduled implements ShouldBroadcastNow
         $title = $this->activity->topic ?? 'Lección';
 
         return [
-            'type'          => 'lesson_scheduled',
-            'activity_id'   => $this->activity->id,
-            'teacher_name'  => $this->teacherName,
-            'lesson_title'  => $title,
-            'scheduled_at'  => $this->scheduledFor,
-            'message'       => "{$this->teacherName} ha programado la lección «{$title}» para aprobación de Planificación.",
-            'url'           => route('app.planning.lms.monitor', ['filterStatus' => 'SCHEDULED']),
+            'event_id' => $this->eventId,
+            'type' => 'lesson_scheduled',
+            'activity_id' => $this->activity->id,
+            'teacher_name' => $this->teacherName,
+            'lesson_title' => $title,
+            'scheduled_at' => $this->scheduledFor,
+            'message' => "{$this->teacherName} ha programado la lección «{$title}» para aprobación de Planificación.",
+            'url' => route('app.planning.lms.monitor', ['filterStatus' => 'SCHEDULED']),
         ];
     }
 }

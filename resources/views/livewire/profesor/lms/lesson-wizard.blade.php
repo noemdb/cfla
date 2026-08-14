@@ -527,58 +527,50 @@
                 </div>
             @endif
 
-            {{-- ═══ BOTONES FLOTANTES: Ayuda + Vista estudiante + Guardar ═══ --}}
-            <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                <div class="flex">
-                <button wire:click="$set('showHelpModal', true)"
-                        title="Ayuda del wizard"
-                        class="inline-flex items-center justify-center w-11 h-11 rounded-l-xl text-sm font-semibold transition-all duration-200
-                               text-slate-400 bg-slate-800/80 hover:bg-slate-700 hover:text-white
-                               border border-slate-600/30 hover:border-slate-500/50
-                               active:scale-[0.95]
-                               border-r-0">
-                    <svg class="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
-                    </svg>
-                </button>
-
-                <button wire:click="openWizardStudentPreview"
-                        title="Vista estudiante"
-                        class="inline-flex items-center justify-center w-11 h-11 text-sm font-semibold transition-all duration-200
-                               text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20
-                               border border-fuchsia-500/20 hover:border-fuchsia-500/40
-                               active:scale-[0.95]
-                               border-r-0 border-l-0">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                </button>
-
-	                <button wire:click="saveStep2"
-	                        wire:loading.attr="disabled"
-	                        wire:target="saveStep2"
-	                        title="{{ $saved ? 'Guardado - sin cambios pendientes' : 'Guardar lección - hay cambios sin guardar' }}"
-	                        @class([
-	                            'inline-flex items-center justify-center w-11 h-11 rounded-r-xl text-sm font-semibold transition-all duration-200 text-white active:scale-[0.95] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100',
-	                            'shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 active:shadow-blue-500/30 border border-blue-400/30' => $saved,
-	                            'shadow-lg shadow-amber-500/20 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:shadow-amber-500/30 border border-amber-400/30' => !$saved,
-	                        ])
-	                        @disabled($isPublished)>
-                    <svg wire:loading wire:target="saveStep2" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                    </svg>
-                </button>
-                </div>
-            </div>
-
         @endif
     </div>
 </div>
     @endif
+
+    {{-- ═══ BOTONES FLOTANTES: Vista estudiante + Guardar (solo en edición/creación) ═══ --}}
+    @if($mode === 'wizard' && $selectedActivityId)
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        <div class="flex">
+            <button wire:click="openWizardStudentPreview"
+                    title="Vista estudiante"
+                    class="inline-flex items-center justify-center w-11 h-11 text-sm font-semibold transition-all duration-200
+                           text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20
+                           border border-fuchsia-500/20 hover:border-fuchsia-500/40
+                           active:scale-[0.95]
+                           rounded-l-xl border-r-0">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+            </button>
+
+            <button wire:click="saveStep2"
+                    wire:loading.attr="disabled"
+                    wire:target="saveStep2"
+                    title="{{ $saved ? 'Guardado - sin cambios pendientes' : 'Guardar lección - hay cambios sin guardar' }}"
+                    @class([
+                        'inline-flex items-center justify-center w-11 h-11 rounded-r-xl text-sm font-semibold transition-all duration-200 text-white active:scale-[0.95] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100',
+                        'shadow-lg shadow-blue-500/20 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 active:shadow-blue-500/30 border border-blue-400/30' => $saved,
+                        'shadow-lg shadow-amber-500/20 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:shadow-amber-500/30 border border-amber-400/30' => !$saved,
+                    ])
+                    @disabled($isPublished)>
+                <svg wire:loading wire:target="saveStep2" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <svg wire:loading.remove wire:target="saveStep2" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    @endif
+
+    @include('profesors.help-lesson-wizard')
 
     {{-- ═══════════ MODAL VISTA ESTUDIANTE (componente unificado) ═══════════ --}}
     @if($showListStudentPreview && $listPreviewData)
@@ -823,8 +815,6 @@
     @endif
 
         {{-- @endif --}}
-
-    @include('profesors.help-lesson-wizard')
 </div>
 
 {{-- ═══ Mermaid.js — bundled via Vite (resources/js/app.js) ═══ --}}

@@ -10,6 +10,7 @@ use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
+use App\Models\UserLessonRead;
 use App\Services\Lms\LmsPublicationService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,6 +20,25 @@ class LmsMonitor extends Component
 {
     use WireUiActions;
     use WithPagination;
+
+    // ─── Realtime (Opción 6) ──────────────────────────────────
+    protected function getListeners(): array
+    {
+        return [
+            'lesson-scheduled' => 'refreshFromRealtimeEvent',
+            'echo-private:App.Models.User.'.auth()->id().',.lesson.scheduled' => 'refreshFromRealtimeEvent',
+        ];
+    }
+
+    /**
+     * Opción 6 — Vista en vivo: cuando llega un broadcast de lección programada,
+     * se re-renderiza el listado (la query corre con los datos frescos). El
+     * widget MonitorStats (componente hijo) ya se actualiza por su propio listener.
+     */
+    public function refreshFromRealtimeEvent(): void
+    {
+        // Sin-op: Livewire re-renderiza tras el listener y la query refleja el cambio.
+    }
 
     // ─── View mode ─────────────────────────────────────────────
     public string $viewMode = 'table';
@@ -284,6 +304,47 @@ class LmsMonitor extends Component
         $this->seccionesFiltradas = collect();
         $this->gradosFiltrados = collect();
         $this->viewMode = session('lms_monitor_view_mode', 'table');
+
+        // Opción 5 — Marcar como leída: al abrir el monitor, las lecciones
+        // SCHEDULED pasan a "vistas" para este usuario (el badge deja de
+        // contarlas). Las nuevas que lleguen en vivo seguirán contando.
+        $this->markScheduledAsRead();
+    }
+
+    /**
+     * Marca como leídas (por el usuario actual) todas las lecciones SCHEDULED
+     * visibles en el monitor. Idempotente: no duplica filas (clave única).
+     */
+    public function markScheduledAsRead(): void
+    {
+        $userId = auth()->id();
+
+        $scheduledIds = Activity::query()
+            ->whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))
+            ->pluck('id')
+            ->all();
+
+        if (! $userId || empty($scheduledIds)) {
+            return;
+        }
+
+        $existing = UserLessonRead::where('user_id', $userId)
+            ->whereIn('activity_id', $scheduledIds)
+            ->pluck('activity_id')
+            ->all();
+
+        $new = array_values(array_diff($scheduledIds, $existing));
+
+        if (! empty($new)) {
+            $now = now();
+            UserLessonRead::insert(
+                collect($new)->map(fn ($id) => [
+                    'user_id' => $userId,
+                    'activity_id' => $id,
+                    'read_at' => $now,
+                ])->all()
+            );
+        }
     }
 
     /** Hook: cuando cambia filterPestudio, actualiza los grados disponibles */
@@ -344,20 +405,6 @@ class LmsMonitor extends Component
             'settingsNotes' => 'nullable|string|max:500',
             'publishPublishAt' => 'nullable|date',
             'bulkPublishAt' => 'nullable|date',
-        ];
-    }
-
-    // ─── Stats cache ───────────────────────────────────────────
-    protected function getStats(): array
-    {
-        return [
-            'total' => Activity::count(),
-            'published' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'PUBLISHED'))->count(),
-            'scheduled' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'SCHEDULED'))->count(),
-            'draft' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'DRAFT'))->count(),
-            'archived' => Activity::whereHas('lmsPublication', fn ($q) => $q->where('status', 'ARCHIVED'))->count(),
-            'withContent' => Activity::whereHas('lmsSections')->count(),
-            'totalActivities' => Activity::count(),
         ];
     }
 
@@ -608,7 +655,7 @@ class LmsMonitor extends Component
         $this->bulkPublishAt = null;
         $this->clearSelection();
         if ($count > 0) {
-            $this->notification()->success('Publicación masiva', "$count contenido(s) publicado(s)." . ($skipped ? " $skipped omitido(s) por estar en revisión." : ''));
+            $this->notification()->success('Publicación masiva', "$count contenido(s) publicado(s).".($skipped ? " $skipped omitido(s) por estar en revisión." : ''));
         } elseif ($skipped > 0) {
             $this->notification()->warning('Nada publicado', "$skipped seleccionado(s) tienen la activity en revisión. Apruébalas antes de publicar.");
         }
@@ -688,7 +735,6 @@ class LmsMonitor extends Component
 
         return view('livewire.planning.lms.monitor', [
             'publications' => $query->latest('updated_at')->paginate(20),
-            'stats' => $this->getStats(),
             'profesores' => Profesor::with('user')->whereHas('pevaluacions.activities')->where('status_active', 'true')->orderBy('lastname')->orderBy('name')->get(),
             'grados' => $this->gradosFiltrados->isNotEmpty()
                 ? $this->gradosFiltrados

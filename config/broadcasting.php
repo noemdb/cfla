@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Livewire Polling (fallback)
+    |--------------------------------------------------------------------------
+    |
+    | Intervalo (ms) de `wire:poll` para los componentes LMS que escuchan
+    | eventos en tiempo real (badge de lecciones programadas y widget de stats
+    | del monitor). Si Reverb está caído, el poll mantiene los datos al día.
+    |
+    */
+
+    'poll_interval' => env('REVERB_POLL_INTERVAL', 5000),
+
+    /*
+    |--------------------------------------------------------------------------
     | Broadcast Connections
     |--------------------------------------------------------------------------
     |

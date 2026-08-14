@@ -11,7 +11,8 @@
     name="helpLessonWizard"
     title="Wizard de Lecciones"
     subtitle="Creación de contenido educativo con IA"
-    color="sky">
+    color="sky"
+    buttonClass="bottom-24 right-6">
 
     {{-- Intro text --}}
     <div class="bg-sky-50/50 dark:bg-slate-700/20 border border-sky-200 dark:border-slate-600/30 rounded-lg p-4 mb-6">

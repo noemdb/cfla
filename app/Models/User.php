@@ -42,7 +42,6 @@ class User extends Authenticatable
         'number_id',
     ];
 
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -83,7 +82,7 @@ class User extends Authenticatable
     public function getFullNameAttribute()
     {
         if ($this->relationLoaded('profile') && $this->profile) {
-            return trim($this->profile->firstname . ' ' . $this->profile->lastname);
+            return trim($this->profile->firstname.' '.$this->profile->lastname);
         }
 
         $user = DB::table('users')
@@ -187,5 +186,10 @@ class User extends Authenticatable
     public function leadershipAreas()
     {
         return $this->hasMany(\App\Models\app\Academy\AreaConocimiento::class, 'leader_id');
+    }
+
+    public function lessonReads()
+    {
+        return $this->hasMany(UserLessonRead::class, 'user_id');
     }
 }

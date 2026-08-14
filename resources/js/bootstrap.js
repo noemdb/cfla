@@ -36,11 +36,22 @@ if (document.documentElement.dataset.reverb === 'enabled') {
     // Evento "lesson.scheduled" (canal privado App.Models.User.{id}).
     // Al recibirlo, notifica a los componentes Livewire que escuchan
     // 'lesson-scheduled' (p. ej. el contador de lecciones programadas).
+    // Pasa el payload completo para que el componente pueda mostrar toast.
     const userId = document.documentElement.dataset.userId;
     if (userId) {
-        Echo.private(`App.Models.User.${userId}`)
-            .listen('.lesson.scheduled', () => {
-                Livewire.dispatch('lesson-scheduled');
+        window.Echo.private(`App.Models.User.${userId}`)
+            .listen('.lesson.scheduled', (e) => {
+                Livewire.dispatch('lesson-scheduled', e);
+
+                // ACK (Opción 10): confirma la entrega al backend para la
+                // auditoría broadcast_events.delivered. Idempotente y
+                // rate-limited en el servidor.
+                if (e?.event_id) {
+                    axios.post('/api/broadcast/ack', { event_id: e.event_id })
+                        .catch(() => {
+                            // Silencioso: el ACK es best-effort para métricas.
+                        });
+                }
             });
     }
 }

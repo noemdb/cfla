@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Profesor\Lms;
 
-use App\Events\Lms\LessonScheduled;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
@@ -17,8 +16,6 @@ use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Instrument\DiagReferent;
-use App\Models\User;
-use App\Notifications\LessonScheduledForApproval;
 use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsAiOrchestrationService;
 use App\Services\Lms\LmsContentRendererService;
@@ -26,7 +23,6 @@ use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -4820,53 +4816,16 @@ PROMPT;
 
         // Si el usuario es profesor (no tiene rol de publicación), notificar a
         // los responsables (planning, leadership, coordinación)
+        // AHORA: la notificación se hace dentro de LmsPublicationService::publish()
+        // cuando $authorized = false. Se mantiene el if por claridad de flujo.
         if (! $this->canPublishLesson()) {
-            $this->notifyPlanningScheduled($activityId);
+            // La notificación ya se disparó en LmsPublicationService
         }
 
         $this->saved = true;
         $this->showPublishConfirm = false;
         $this->published = true;
         $this->dispatch('lesson-saved');
-    }
-
-    // ─── Wizard orchestrator ──────────────────────────────────
-
-    private function notifyPlanningScheduled(int $activityId): void
-    {
-        $activity = \App\Models\app\Academy\Activity::find($activityId);
-        if (! $activity) {
-            return;
-        }
-
-        $planners = User::query()
-            ->where('is_planner', true)
-            ->orWhere('is_admin', true)
-            ->orWhere('is_leadership', true)
-            ->orWhere('is_coordinacion', true)
-            ->get();
-
-        $scheduledDate = $this->publishAt
-            ? \Carbon\Carbon::parse($this->publishAt)->format('d/m/Y H:i')
-            : '—';
-
-        Notification::send($planners, new LessonScheduledForApproval(
-            activityId: $activityId,
-            teacherName: auth()->user()->fullName ?? 'Profesor',
-            activityTitle: $activity->topic ?? 'Lección',
-            scheduledAt: $scheduledDate,
-        ));
-
-        // Notificación en tiempo real (Laravel Reverb): los responsables ven el
-        // badge/conteo de lecciones programadas SIN recargar la página.
-        LessonScheduled::dispatch(
-            $activity,
-            $planners->all(),
-            auth()->user()->fullName ?? 'Profesor',
-            $scheduledDate,
-        );
-
-        \App\Models\app\Academy\Lms\LmsActivityLog::record($activityId, auth()->id(), 'SCHEDULE');
     }
 
     // ─── Export/Import ─────────────────────────────────────────

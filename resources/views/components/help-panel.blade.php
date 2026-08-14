@@ -4,6 +4,7 @@
     'subtitle' => '',
     'color' => 'indigo',
     'icon' => 'default',
+    'buttonClass' => '',
 ])
 
 @php
@@ -36,12 +37,13 @@ $colorClasses = [
 ];
 $c = $colorClasses[$color] ?? $colorClasses['indigo'];
 $openVar = "{$name}Open";
+$buttonPositionClass = $buttonClass !== '' ? $buttonClass : 'bottom-6 right-6';
 @endphp
 
 <div x-data="{ {{ $openVar }}: false }" class="contents">
     {{-- Floating help button --}}
     <button @click="{{ $openVar }} = true"
-            class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full {{ $c['btn'] }} hover:scale-110 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-300 group"
+            class="fixed z-40 w-12 h-12 rounded-full {{ $buttonPositionClass }} {{ $c['btn'] }} hover:scale-110 flex items-center justify-center shadow-lg backdrop-blur-sm transition-all duration-300 group"
             title="{{ $title }}"
             x-show="!{{ $openVar }}">
         <svg class="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

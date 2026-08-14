@@ -163,9 +163,9 @@ class LessonWizardCharacterizationTest extends TestCase
         );
     }
 
-    private function createActivity(int $profesorId, array $overrides = []): Activity
+    private function createActivity(int $profesorId, array $overrides = [], ?array $chain = null): Activity
     {
-        $chain = $this->buildFkChain();
+        $chain = $chain ?? $this->buildFkChain();
 
         $pevaluacionId = DB::table('pevaluacions')->insertGetId([
             'pensum_id' => $chain['pensumId'],
@@ -1352,7 +1352,29 @@ class LessonWizardCharacterizationTest extends TestCase
         $coordinator = User::factory()->create(['is_coordinacion' => true]);
 
         $data = $this->createProfesorUser();
-        $activity = $this->createActivity($data['profesor_id']);
+
+        // Opción 2 (H3): el líder solo recibe si su área cubre la asignatura de
+        // la lección, y el coordinador solo si gestiona el peducativo del pestudio.
+        // La actividad se crea sobre la MISMA cadena donde se aplica el scope.
+        $chain = $this->buildFkChain();
+        $areaId = DB::table('area_conocimientos')->insertGetId([
+            'leader_id' => $leader->id,
+            'name' => 'Área del líder',
+            'code' => 'AREA-TEST',
+            'peducativo_id' => $chain['peducativoId'],
+            'pestudio_id' => $chain['pestudioId'],
+            'order' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('campo_conocimientos')->insert([
+            'area_conocimiento_id' => $areaId,
+            'asignatura_id' => $chain['asignaturaId'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        DB::table('peducativos')->where('id', $chain['peducativoId'])->update(['manager_id' => $coordinator->id]);
+        $activity = $this->createActivity($data['profesor_id'], [], $chain);
 
         $component = Livewire::test(LessonWizard::class);
         $component->call('startWizard', $activity->id);
@@ -1381,11 +1403,19 @@ class LessonWizardCharacterizationTest extends TestCase
         // El evento broadcast LessonScheduled se dispara para los responsables.
         Event::assertDispatched(LessonScheduled::class, function (LessonScheduled $event) use ($planner, $leader, $coordinator, $activity) {
             $ids = collect($event->recipients)->pluck('id')->all();
+
             return in_array($planner->id, $ids)
                 && in_array($leader->id, $ids)
                 && in_array($coordinator->id, $ids)
                 && $event->activity->id === $activity->id;
         });
+
+        // Opción 11 (no-duplicación): el wizard delega en el servicio y NO
+        // emite por su cuenta → exactamente 1 broadcast y 1 notificación.
+        Event::assertDispatchedTimes(LessonScheduled::class, 1);
+        foreach ([$planner, $leader, $coordinator] as $recipient) {
+            Notification::assertSentToTimes($recipient, LessonScheduledForApproval::class, 1);
+        }
     }
 
     /** @test */

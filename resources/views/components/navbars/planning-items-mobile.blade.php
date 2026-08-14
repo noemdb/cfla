@@ -1,32 +1,14 @@
-@if(Auth::user()->is_leadership)
-    <div class="space-y-1">
-        <div class="text-[10px] font-bold uppercase tracking-widest text-amber-400/60 px-3 py-1.5">Seguimiento · Jefatura</div>
-        <a href="{{ route('app.leadership.dashboard') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.leadership.dashboard') ? 'text-amber-400 bg-amber-500/5' : 'text-gray-300 hover:text-amber-300 hover:bg-white/5' }} transition-colors">
-            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Dashboard
-        </a>
-        <a href="{{ route('app.leadership.activities') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.leadership.activities') ? 'text-amber-400 bg-amber-500/5' : 'text-gray-300 hover:text-amber-300 hover:bg-white/5' }} transition-colors">
-            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-            Actividades
-        </a>
-        <a href="{{ route('app.leadership.lessons') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.leadership.lessons') ? 'text-amber-400 bg-amber-500/5' : 'text-gray-300 hover:text-amber-300 hover:bg-white/5' }} transition-colors">
-            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-            Lecciones
-        </a>
-        <a href="{{ route('app.leadership.profesores') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.leadership.profesores') ? 'text-amber-400 bg-amber-500/5' : 'text-gray-300 hover:text-amber-300 hover:bg-white/5' }} transition-colors">
-            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            Profesores
-        </a>
-    </div>
-@endif
-
-@if(Auth::user()->is_admin || Auth::user()->is_diagnostic || Auth::user()->is_planner)
+{{-- resources/views/components/navbars/planning-items-mobile.blade.php --}}
+{{-- Menú responsive para mobile (mismo set de enlaces que planning-items) --}}
+@if(Auth::user()->is_planning)
     <div x-data="{ open: false }">
         <button @click="open = !open"
-                class="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors">
+                :aria-expanded="open ? 'true' : 'false'"
+                aria-controls="planning-submenu"
+                class="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-amber-400/40">
             <span class="flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 Planificación
             </span>
@@ -35,105 +17,19 @@
             </svg>
         </button>
 
-        <div x-show="open" class="ml-4 mt-1 space-y-0.5 border-l border-gray-200 dark:border-white/10 pl-3">
-            <a href="{{ route('app.planning.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.index') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                Dashboard
-            </a>
-            <a href="{{ route('app.planning.indicators.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.indicators.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Indicadores
-            </a>
-            <a href="{{ route('app.planning.activities.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.activities.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                Actividades
-            </a>
-            <a href="{{ route('app.planning.pevaluacions.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.pevaluacions.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Carga Académica
-            </a>
-            <a href="{{ route('app.planning.lapsos.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.lapsos.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Lapsos Académicos
-            </a>
-            <a href="{{ route('app.planning.peducativos.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.peducativos.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Programas Educativos
-            </a>
-            <a href="{{ route('app.planning.pestudios.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.pestudios.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                Planes de Estudio
-            </a>
-            <a href="{{ route('app.planning.area-conocimientos.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.area-conocimientos.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                Áreas de Conocimiento
-            </a>
-            <a href="{{ route('app.planning.asignaturas.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.asignaturas.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                Asignaturas
-            </a>
-            <a href="{{ route('app.planning.grados.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.grados.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                Grados
-            </a>
-            <a href="{{ route('app.planning.secciones.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.secciones.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Secciones
-            </a>
-            <a href="{{ route('app.planning.inscripcions.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.inscripcions.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Inscripciones
-            </a>
-            <a href="{{ route('app.planning.pensums.index') }}"
-                class="flex items-center gap-2 px-3 py-2 text-sm text-gray-500 hover:text-emerald-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-emerald-300 dark:hover:bg-white/5 rounded-lg transition-colors {{ request()->routeIs('app.planning.pensums.*') ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/5' : '' }}">
-                <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                Pensums
-            </a>
-
-            {{-- Footer tools --}}
-            <div class="pt-2 mt-2 border-t border-gray-200 dark:border-white/5 space-y-0.5">
-                <a href="{{ route('app.planning.diagnostico.index') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    Diagnóstico
-                </a>
-                <a href="{{ route('app.planning.diagnostico.referents.index') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    Referentes
-                </a>
-                <a href="{{ route('app.planning.profesors.index') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    Profesores
-                </a>
-                <a href="{{ route('app.planning.educational.competition.index') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                    Competiciones
-                </a>
-                <a href="{{ route('app.planning.lms.monitor') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Contenido LMS
-                </a>
-                <a href="{{ route('app.planning.flow.index') }}"
-                    class="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-300 rounded-lg transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    Diagramas de Flujo
-                </a>
+        <div x-show="open" id="planning-submenu" class="ml-4 mt-1 space-y-0.5 border-l border-gray-200 dark:border-white/10 pl-3">
+            <a href="{{ route('app.planning.index') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.index') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Dashboard</a>
+            <a href="{{ route('app.planning.pensums') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.pensums') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Pensums</a>
+            <a href="{{ route('app.planning.carga-academica') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.carga-academica') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Carga Académica</a>
+            <a href="{{ route('app.planning.activities') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.activities') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Actividades</a>
+            <a href="{{ route('app.planning.lessons') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.lessons') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Lecciones</a>
+            <a href="{{ route('app.planning.resources') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.resources') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Recursos</a>
+            <a href="{{ route('app.planning.profesores') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.profesores') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Profesores</a>
+            {{-- Contador de lecciones programadas (mobile) --}}
+            <div class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300">
+                <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Contenido LMS
+                <livewire:planning.lms.lesson-pending-count />
             </div>
         </div>
     </div>
