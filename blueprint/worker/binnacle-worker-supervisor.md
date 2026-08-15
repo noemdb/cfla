@@ -15,15 +15,19 @@ esta cola.
 
 ## 1. Ajustar rutas al entorno de producción
 
-Copia el bloque y adapta `command`, `directory`, `stdout_logfile` y `user` al
-servidor. Ejemplo:
+Hay un archivo listo para copiar: **`blueprint/worker/cfla-binnacle.conf`**
+(incluye `--max-jobs=500 --max-time=3600` y `startretries=5`, mejora #2).
+Adapta `command`, `directory`, `stdout_logfile` y `user` al servidor.
+
+Ejemplo:
 
 ```ini
 [program:cfla-binnacle-queue]
-command=php8.2 /var/www/saefl/artisan queue:work database --queue=binnacle --sleep=3 --tries=3 --backoff=10
+command=php8.2 /var/www/saefl/artisan queue:work database --queue=binnacle --sleep=3 --tries=3 --backoff=10 --max-jobs=500 --max-time=3600
 directory=/var/www/saefl
 autostart=true
 autorestart=true
+startretries=5
 stopasgroup=true
 killasgroup=true
 user=www-data

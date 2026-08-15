@@ -67,8 +67,8 @@ Crea `/etc/supervisor/conf.d/cfla-binnacle.conf` (Debian/Ubuntu) o
 
 ```ini
 [program:cfla-binnacle-queue]
-command=php8.2 /var/www/saefl/artisan queue:work database --queue=binnacle --sleep=3 --tries=3 --backoff=10 --max-jobs=500 --max-time=3600
-directory=/var/www/saefl
+command=php8.2 /home/cflasf/source/cflal/artisan queue:work database --queue=binnacle --sleep=3 --tries=3 --backoff=10 --max-jobs=500 --max-time=3600
+directory=/home/cflasf/source/cfla
 autostart=true
 autorestart=true
 startretries=5
@@ -77,7 +77,7 @@ killasgroup=true
 user=www-data
 numprocs=1
 redirect_stderr=true
-stdout_logfile=/var/www/saefl/storage/logs/binnacle-queue.log
+stdout_logfile=/home/cflasf/source/cfla/storage/logs/binnacle-queue.log
 stdout_logfile_maxbytes=10MB
 stdout_logfile_backups=5
 stopwaitsecs=60
