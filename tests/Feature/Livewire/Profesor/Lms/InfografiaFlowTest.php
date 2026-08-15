@@ -5,6 +5,8 @@ namespace Tests\Feature\Livewire\Profesor\Lms;
 use App\Livewire\Profesor\Lms\LessonWizard;
 use App\Models\app\Academy\Activity;
 use App\Models\User;
+use App\Services\KimiService;
+use App\Services\NvidiaService;
 use App\Services\OpenRouterService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -282,6 +284,28 @@ class InfografiaFlowTest extends TestCase
     public function maneja_errores_de_ia_sin_romper(): void
     {
         $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('ask')
+                ->andReturn([
+                    'success' => false,
+                    'content' => null,
+                    'model' => 'test-model',
+                    'usage' => null,
+                    'error' => 'API error simulado',
+                ]);
+        });
+
+        $this->mock(NvidiaService::class, function ($mock) {
+            $mock->shouldReceive('ask')
+                ->andReturn([
+                    'success' => false,
+                    'content' => null,
+                    'model' => 'test-model',
+                    'usage' => null,
+                    'error' => 'API error simulado',
+                ]);
+        });
+
+        $this->mock(KimiService::class, function ($mock) {
             $mock->shouldReceive('ask')
                 ->andReturn([
                     'success' => false,

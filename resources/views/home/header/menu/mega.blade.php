@@ -89,7 +89,7 @@
                         @keydown.escape="open = false"
                         class="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100"
                         aria-label="Close menu">
-                    <x-heroicon-m::x-mark class="h-5 w-5" />
+                    <x-icon name="x-mark" class="h-5 w-5" />
                 </button>
             </div>
             <!-- User info (only when authenticated) -->
@@ -117,32 +117,32 @@
                         <a href="{{ route('home.index') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150"
                            :class="{ 'font-medium text-blue-600': request()->routeIs('home.index') }">
-                            <x-heroicon-m::home class="h-4 w-4 mr-3" />
+                            <x-icon name="home" class="h-4 w-4 mr-3" />
                             <span>Inicio</span>
                         </a>
                         <a href="{{ route('censo.index') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150">
-                            <x-heroicon-m::user-group class="h-4 w-4 mr-3" />
+                            <x-icon name="user-group" class="h-4 w-4 mr-3" />
                             <span>Censo</span>
                         </a>
                         <a href="{{ route('matricula.index') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150">
-                            <x-heroicon-m::clipboard-list class="h-4 w-4 mr-3" />
+                            <x-icon name="clipboard" class="h-4 w-4 mr-3" />
                             <span>Matrícula</span>
                         </a>
                         <a href="{{ route('pagos.index') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150">
-                            <x-heroicon-m::credit-card class="h-4 w-4 mr-3" />
+                            <x-icon name="credit-card" class="h-4 w-4 mr-3" />
                             <span>Pagos</span>
                         </a>
                         <a href="{{ path('/notas') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150">
-                            <x-heroicon-m::chart-bar class="h-4 w-4 mr-3" />
+                            <x-icon name="chart-bar" class="h-4 w-4 mr-3" />
                             <span>Notas</span>
                         </a>
                         <a href="{{ path('/asistencia') }}"
                            class="flex items-center px-3 py-2 rounded hover:bg-gray-50 transition-colors duration-150">
-                            <x-heroicon-m::calendar-check class="h-4 w-4 mr-3" />
+                            <x-icon name="calendar-days" class="h-4 w-4 mr-3" />
                             <span>Asistencia</span>
                         </a>
                     </nav>
@@ -154,22 +154,22 @@
                     <div class="space-y-2">
                         <button @click="open = false"
                                 class="w-full flex items-center justify-start px-4 py-3 rounded hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <x-heroicon-m::plus class="h-5 w-5 mr-4" />
+                            <x-icon name="plus" class="h-5 w-5 mr-4" />
                             <span class="flex-1 text-left">Nuevo Estudiante</span>
                         </button>
                         <button @click="open = false"
                                 class="w-full flex items-center justify-start px-4 py-3 rounded hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <x-heroicon-m::calendar-days class="h-5 w-5 mr-4" />
+                            <x-icon name="calendar-days" class="h-5 w-5 mr-4" />
                             <span class="flex-1 text-left">Calendario Escolar</span>
                         </button>
                         <button @click="open = false"
                                 class="w-full flex items-center justify-start px-4 py-3 rounded hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <x-heroicon-m::document-text class="h-5 w-5 mr-4" />
+                            <x-icon name="document-text" class="h-5 w-5 mr-4" />
                             <span class="flex-1 text-left">Generar Reportes</span>
                         </button>
                         <button @click="open = false"
                                 class="w-full flex items-center justify-start px-4 py-3 rounded hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                            <x-heroicon-m::banknotes class="h-5 w-5 mr-4" />
+                            <x-icon name="banknotes" class="h-5 w-5 mr-4" />
                             <span class="flex-1 text-left">Registrar Pago</span>
                         </button>
                     </div>
@@ -180,21 +180,21 @@
                     <h3 class="font-medium text-gray-800 mb-2">Información</h3>
                     <div class="space-y-3">
                         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded">
-                            <x-heroicon-m::chart-bar class="h-5 w-5 text-blue-500" />
+                            <x-icon name="chart-bar" class="h-5 w-5 text-blue-500" />
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Estudiantes activos</p>
                                 <p class="text-xs text-gray-500">1,234</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded">
-                            <x-heroicon-m::banknotes class="h-5 w-5 text-green-500" />
+                            <x-icon name="banknotes" class="h-5 w-5 text-green-500" />
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Pagos pendientes</p>
                                 <p class="text-xs text-gray-500">23</p>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded">
-                            <x-heroicon-m::bell class="h-5 w-5 text-yellow-500" />
+                            <x-icon name="bell" class="h-5 w-5 text-yellow-500" />
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Notificaciones</p>
                                 <p class="text-xs text-gray-500">
@@ -203,7 +203,7 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded">
-                            <x-heroicon-m::user-group class="h-5 w-5 text-purple-500" />
+                            <x-icon name="user-group" class="h-5 w-5 text-purple-500" />
                             <div>
                                 <p class="text-sm font-medium text-gray-900">Docentes activos</p>
                                 <p class="text-xs text-gray-500">89</p>

@@ -213,11 +213,12 @@ INSTRUCCIONES ADICIONALES:
 1. **Intentos**: OpenRouter (primario) → Nvidia (fallback 1) → Kimi (fallback 2)
 2. **Parámetros optimizados**:
    - temperature: 0.3 (para mayor determinismo en estructuras)
-   - max_tokens: 2000 (suficiente para JSON estructurado de 4-6 niveles)
-   - timeout: 30 segundos
+   - max_tokens: 2000 para OpenRouter; para Nvidia/Kimi usar su `max_tokens` de config (4000-6000) — los modelos de razonamiento de Nvidia (nemotron-*) agotan el presupuesto razonando y no alcanzan a emitir el JSON si el límite es bajo
+   - timeout: 30 segundos (NVIDIA_TIMEOUT=10 es insuficiente; usar ≥60)
 3. **Validación de respuesta**:
-   - Verificar que sea JSON válido
+   - Verificar que sea JSON válido (se extrae el bloque JSON de respuestas con texto de razonamiento pre-pendido mediante `extractJsonBlock`)
    - Validar que `estructura.niveles` esté entre 4 y 6
+   - La validación de profundidad del nodo raíz usa un tope permisivo (8 niveles); el exceso se colapsa en post-procesamiento
    - Verificar que no haya nodos huérfanos o ciclos
    - Asegurar que todas las etiquetas tengan longitud ≤ 50
    - Verificar contraste de colores usando algoritmo WCAG
@@ -226,6 +227,8 @@ INSTRUCCIONES ADICIONALES:
    - Si hay menos de 4 niveles: expandir el nivel más pequeño mediante división lógica
    - Si hay más de 8 nodos por nivel: aplicar clustering semántico básico
    - Ajustar colores para asegurar contraste mínimo
+
+> **Nota de operación (2026-08-15):** la cuenta de OpenRouter está sin créditos (HTTP 402 "can only afford 94"). El fallback funcional real es **Nvidia** con modelo `openai/gpt-oss-20b` (responde JSON limpio sin texto de razonamiento; `nvidia/nemotron-3-nano-30b-a3b` y `nemotron-3-super-120b-a12b` sí funcionan pero anteponen razonamiento, soportado por `extractJsonBlock`). Kimi devuelve HTTP 401 (clave inválida) — corregir `KIMI_API_KEY` para reactivar ese fallback.
 
 ## Integración con LessonWizard
 

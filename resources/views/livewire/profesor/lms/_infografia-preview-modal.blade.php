@@ -5,7 +5,7 @@
      x-transition:leave-start="opacity-100 transform scale-100"
      x-transition:leave-end="opacity-0 transform scale-95"
      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-lg">
-    <div class="relative w-full max-w-xl max-h-[90vh] overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+    <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl">
         <!-- Header -->
         <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Vista Previa de Infografía</h2>
@@ -20,11 +20,11 @@
 
                 <button @click="insertInfografiaEnEditor"
                         :disabled="infografiaError || !infografiaPreviewSvg"
-                        class="px-3 py-1 rounded-lg font-medium transition-colors
-                               :class="{
-                                   'bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50': !infografiaError && infografiaPreviewSvg,
-                                   'bg-gray-400': infografiaError || !infografiaPreviewSvg
-                               }">
+                        class="px-3 py-1 rounded-lg font-medium transition-colors"
+                        :class="{
+                            'bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50': !infografiaError && infografiaPreviewSvg,
+                            'bg-gray-400': infografiaError || !infografiaPreviewSvg
+                        }">
                     Insertar en Lección
                     <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor" stroke-width="2">
@@ -55,6 +55,16 @@
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">
                                 @{{ infografiaError }}
                             </p>
+                            <div class="mt-3 flex space-x-2">
+                                <button @click="generarInfografia"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">
+                                    Reintentar
+                                </button>
+                                <button @click="closeInfografiaPreview"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+                                    Cerrar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -84,9 +94,9 @@
                     <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>
                             Niveles: @{{ infografiaConfig.niveles }} |
-                            Tipo: @{{ infografiaConfig.tipoEstructura | capitalize }} |
-                            Dirección: @{{ infografiaConfig.direccion | capitalize }} |
-                            Tema: @{{ infografiaConfig.temaColor | capitalize }}
+                            Tipo: @{{ capitalize(infografiaConfig.tipoEstructura) }} |
+                            Dirección: @{{ capitalize(infografiaConfig.direccion) }} |
+                            Tema: @{{ capitalize(infografiaConfig.temaColor) }}
                         </span>
                         <button @click="downloadInfografiaSvg"
                                 class="flex items-center space-x-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">

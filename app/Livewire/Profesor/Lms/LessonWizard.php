@@ -4226,6 +4226,8 @@ PROMPT;
             );
         } catch (\Exception $e) {
             $this->infografiaError = $e->getMessage();
+            $this->infografiaModalOpen = false;
+            $this->openInfografiaPreview();
             $this->notification()->error('Error al generar infografía', $e->getMessage());
         } finally {
             $this->generatingInfografia = false;

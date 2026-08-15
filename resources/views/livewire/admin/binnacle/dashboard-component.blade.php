@@ -123,6 +123,58 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Ancla externa (§8.3 / mejora #6) -->
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+            <h2 class="text-sm font-bold text-white mb-4">Ancla externa (hash-chain §8.3)</h2>
+            @if($anchor['anchored'])
+                <div class="flex items-center gap-3 mb-4">
+                    @if($anchor['valid'])
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Ancla íntegra
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            ¡Ancla rota!
+                        </span>
+                    @endif
+                </div>
+                <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between gap-4"><dt class="text-gray-500 shrink-0">Último ancla</dt><dd class="text-gray-300 font-mono text-xs text-right break-all">{{ $anchor['last_anchor']['hash'] }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-500">Evento</dt><dd class="text-white font-mono">#{{ $anchor['last_anchor']['entry_id'] }} · {{ $anchor['last_anchor']['event_type'] }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-500">Publicado</dt><dd class="text-white font-mono">{{ $anchor['last_anchor']['timestamp'] }}</dd></div>
+                </dl>
+            @else
+                <p class="text-sm text-gray-500">{{ $anchor['reason'] }}.</p>
+                <p class="text-xs text-gray-600 mt-1">Se publica con <code class="font-mono">php8.2 artisan binnacle:anchor</code> (diario 04:00).</p>
+            @endif
+        </div>
+
+        <!-- Proyección de crecimiento (§9 / mejora #8) -->
+        <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-5">
+            <h2 class="text-sm font-bold text-white mb-4">Crecimiento y particionado (Spec §9)</h2>
+            @if($growth['partition_needed'])
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Particionado recomendado
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold mb-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Sin necesidad por ahora
+                </span>
+            @endif
+            <dl class="space-y-2 text-sm">
+                <div class="flex justify-between"><dt class="text-gray-500">Filas actuales</dt><dd class="text-white font-mono">{{ number_format($growth['total']) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Ritmo (últimos 30d)</dt><dd class="text-white font-mono">{{ number_format($growth['daily_rate'], 1) }}/día</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Proyección a {{ $growth['lookahead_months'] }} meses</dt><dd class="text-white font-mono">{{ number_format($growth['projected']) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-gray-500">Umbral</dt><dd class="text-white font-mono">{{ number_format($growth['threshold']) }}</dd></div>
+            </dl>
+        </div>
+    </div>
+
     <!-- Eventos críticos recientes -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden">
         <div class="px-5 py-4 border-b border-white/5">

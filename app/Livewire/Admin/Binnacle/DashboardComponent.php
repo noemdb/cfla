@@ -56,6 +56,8 @@ class DashboardComponent extends Component
                 ->limit(10)
                 ->get(),
             'integrity' => Binnacle::verifyChainIntegrity(),
+            'anchor' => Binnacle::verifyAnchorIntegrity(),
+            'growth' => Binnacle::projectedGrowth(),
             'severityTotal' => $bySeverity->sum('total'),
         ]);
     }

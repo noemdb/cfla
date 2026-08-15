@@ -11,6 +11,7 @@ use App\Services\Binnacle;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -225,5 +226,47 @@ class BinnacleFase2Test extends TestCase
             ->firstOrFail();
 
         $this->assertSame('security', $entry->event_category);
+    }
+
+    public function test_entry_detail_modal_shows_event_data(): void
+    {
+        $entry = BinnacleEntry::forceCreate([
+            'uuid' => fake()->uuid(),
+            'event_type' => 'detail_probe',
+            'event_category' => 'user_action',
+            'event_severity' => 'warning',
+            'title' => 'Evento de detalle',
+            'description' => 'Descripción completa del evento',
+            'subject_type' => User::class,
+            'subject_identifier' => 'admin_demo',
+            'ip_address' => '127.0.0.1',
+            'request_method' => 'POST',
+            'request_url' => 'https://colegio.test/app/probe',
+            'request_id' => 'req-123',
+            'changed_fields' => ['status', 'monto'],
+            'old_values' => ['status' => 'pendiente'],
+            'new_values' => ['status' => 'pagado', 'monto' => 500],
+            'metadata' => ['origen' => 'test'],
+        ]);
+
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $component = Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\Binnacle\IndexComponent::class);
+
+        $component->call('openEntryDetails', $entry->id)
+            ->assertSet('showEntryDetails', true)
+            ->assertSet('viewingEntryId', $entry->id);
+
+        $html = $component->html();
+
+        $this->assertStringContainsString('Evento de detalle', $html);
+        $this->assertStringContainsString('Descripción completa del evento', $html);
+        $this->assertStringContainsString('req-123', $html);
+        $this->assertStringContainsString('status', $html);
+
+        $component->call('closeEntryDetails')
+            ->assertSet('showEntryDetails', false)
+            ->assertSet('viewingEntryId', null);
     }
 }

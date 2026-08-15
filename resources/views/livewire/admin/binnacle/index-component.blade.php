@@ -94,6 +94,7 @@
                         <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Usuario</th>
                         <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">Objeto</th>
                         <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-widest text-gray-400">IP</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold uppercase tracking-widest text-gray-400">Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,6 +124,16 @@
                                 <span class="block text-xs text-gray-500">{{ $entry->object_type ? class_basename($entry->object_type) : '' }}</span>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-500 font-mono whitespace-nowrap">{{ $entry->ip_address ?: '—' }}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button type="button" wire:click="openEntryDetails({{ $entry->id }})"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/10 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Ver
+                                </button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -139,4 +150,163 @@
             {{ $entries->links() }}
         </div>
     </div>
+
+    <!-- Modal de detalle del evento (7xl) -->
+    @if($viewingEntry)
+        <div x-data="{ open: @js($showEntryDetails) }"
+             x-show="open"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div @click.self="open = false"
+                 class="absolute inset-0"></div>
+            <div class="relative w-full max-w-7xl max-h-[90vh] overflow-y-auto bg-gray-900 border border-white/10 rounded-xl shadow-2xl">
+                <!-- Header -->
+                <div class="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 bg-gray-900/95 backdrop-blur border-b border-white/10">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                        </span>
+                        <div class="min-w-0">
+                            <h3 class="text-lg font-bold text-white truncate">{{ $viewingEntry->title }}</h3>
+                            <p class="text-xs text-gray-500 font-mono">{{ $viewingEntry->event_type }} · {{ $viewingEntry->uuid }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <x-binnacle.badge :value="$viewingEntry->event_severity" kind="severity" />
+                        <x-binnacle.badge :value="$viewingEntry->event_category" kind="category" />
+                        <button type="button" wire:click="closeEntryDetails"
+                                class="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="p-6 space-y-6">
+                    @if($viewingEntry->description)
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-sm text-gray-300">{{ $viewingEntry->description }}</p>
+                        </div>
+                    @endif
+
+                    <!-- Grid de metadatos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Fecha</p>
+                            <p class="text-sm text-gray-200">{{ $viewingEntry->created_at?->format('d/m/Y H:i:s') }}</p>
+                        </div>
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">IP</p>
+                            <p class="text-sm text-gray-200 font-mono">{{ $viewingEntry->ip_address ?: '—' }}</p>
+                        </div>
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Método</p>
+                            <p class="text-sm text-gray-200">{{ $viewingEntry->request_method ?: '—' }}</p>
+                        </div>
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Request ID</p>
+                            <p class="text-sm text-gray-200 font-mono">{{ $viewingEntry->request_id ?: '—' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Sujeto / Objeto / Sesión -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Sujeto</p>
+                            <div class="space-y-1 text-sm">
+                                <p class="text-gray-200">{{ $viewingEntry->subject_identifier ?: '—' }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ $viewingEntry->subject_type ? class_basename($viewingEntry->subject_type) : '' }}@if($viewingEntry->subject_id) #{{ $viewingEntry->subject_id }}@endif</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Objeto</p>
+                            <div class="space-y-1 text-sm">
+                                <p class="text-gray-200">{{ $viewingEntry->object_identifier ?: '—' }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ $viewingEntry->object_type ? class_basename($viewingEntry->object_type) : '' }}@if($viewingEntry->object_id) #{{ $viewingEntry->object_id }}@endif</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Request URL / User Agent -->
+                    <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Request</p>
+                        <p class="text-sm text-gray-300 font-mono break-all">{{ $viewingEntry->request_url ?: '—' }}</p>
+                        @if($viewingEntry->user_agent)
+                            <p class="text-xs text-gray-500 mt-2 break-all">{{ $viewingEntry->user_agent }}</p>
+                        @endif
+                        @if($viewingEntry->session_id)
+                            <p class="text-xs text-gray-500 mt-2 font-mono">sesión: {{ $viewingEntry->session_id }}</p>
+                        @endif
+                    </div>
+
+                    <!-- Cambios (old/new) -->
+                    @if($viewingEntry->changed_fields)
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Campos modificados</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach($viewingEntry->changed_fields as $field)
+                                    <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-gray-400 font-mono">{{ $field }}</span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($viewingEntry->old_values || $viewingEntry->new_values)
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            @if($viewingEntry->old_values)
+                                <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Valores anteriores</p>
+                                    <pre class="text-xs text-gray-300 font-mono overflow-x-auto max-h-64">{{ json_encode($viewingEntry->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                </div>
+                            @endif
+                            @if($viewingEntry->new_values)
+                                <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                                    <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Valores nuevos</p>
+                                    <pre class="text-xs text-gray-300 font-mono overflow-x-auto max-h-64">{{ json_encode($viewingEntry->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    <!-- Metadata completa -->
+                    @if($viewingEntry->metadata)
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Metadata</p>
+                            <pre class="text-xs text-gray-300 font-mono overflow-x-auto max-h-64">{{ json_encode($viewingEntry->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                        </div>
+                    @endif
+
+                    <!-- Integridad de cadena -->
+                    @if($viewingEntry->entry_hash)
+                        <div class="bg-gray-800/40 border border-white/5 rounded-lg p-4">
+                            <p class="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Integridad (hash-chain)</p>
+                            <div class="space-y-2 text-xs font-mono break-all">
+                                <p class="text-gray-400"><span class="text-gray-600">entry_hash: </span>{{ $viewingEntry->entry_hash }}</p>
+                                <p class="text-gray-400"><span class="text-gray-600">previous_hash: </span>{{ $viewingEntry->previous_hash ?: '— (génesis)' }}</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Footer -->
+                <div class="sticky bottom-0 flex items-center justify-between gap-4 px-6 py-4 bg-gray-900/95 backdrop-blur border-t border-white/10">
+                    <p class="text-xs text-gray-500">Registro inmutable — solo lectura</p>
+                    <button type="button" wire:click="closeEntryDetails"
+                            class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

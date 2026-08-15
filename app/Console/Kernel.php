@@ -36,6 +36,16 @@ class Kernel extends ConsoleKernel
         // un resumen del día anterior (critical/alert, accesos, top actores).
         // Tras el archivado de las 03:00, antes del inicio de la jornada.
         $schedule->command('binnacle:report')->dailyAt('05:30')->withoutOverlapping();
+
+        // Ancla externa del hash-chain (mejora #6, Spec §8.3): publica el hash
+        // de la última entrada critical/alert a un log append-only fuera de la
+        // BD. Entre el archivado (03:00) y el reporte (05:30).
+        $schedule->command('binnacle:anchor')->dailyAt('04:00')->withoutOverlapping();
+
+        // Gate de particionado (mejora #8, Spec §9): evalúa semanalmente si el
+        // crecimiento proyectado de binnacle_entries justifica particionar por
+        // fecha. Solo alerta; el procedimiento está documentado.
+        $schedule->command('binnacle:check-growth')->weeklyOn(1, '06:15')->withoutOverlapping();
     }
 
     protected $commands = [

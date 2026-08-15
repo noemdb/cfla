@@ -146,6 +146,96 @@ class Binnacle
         ];
     }
 
+    /**
+     * Proyección de crecimiento de binnacle_entries (Spec §9 / mejora #8).
+     *
+     * Con el ritmo real de los últimos 30 días se estima cuántas filas habrá
+     * en `partition_lookahead_months` meses. Si la proyección supera
+     * `partition_threshold`, el particionado por rango de fecha está justificado.
+     * Compartida por el comando binnacle:check-growth y el dashboard.
+     *
+     * @return array<string, mixed>
+     */
+    public static function projectedGrowth(?int $lookaheadMonths = null): array
+    {
+        $lookaheadMonths ??= (int) config('binnacle.partition_lookahead_months', 12);
+        $threshold = (int) config('binnacle.partition_threshold', 1_000_000);
+
+        $total = BinnacleEntry::count();
+        $last30 = BinnacleEntry::where('created_at', '>=', now()->subDays(30))->count();
+        $daily = $last30 / 30;
+
+        return [
+            'total' => $total,
+            'last_30_days' => $last30,
+            'daily_rate' => round($daily, 1),
+            'lookahead_months' => $lookaheadMonths,
+            'projected' => (int) round($total + $daily * 30 * $lookaheadMonths),
+            'threshold' => $threshold,
+            'partition_needed' => (int) round($total + $daily * 30 * $lookaheadMonths) >= $threshold,
+        ];
+    }
+
+    /**
+     * Verifica el ancla externa (Spec §8.3 / mejora #6): el último hash
+     * publicado por binnacle:anchor sigue presente en la cadena actual.
+     *
+     * No detecta alteración del contenido de un eslabón (limitación de ADR-003),
+     * pero sí detecta borrado/reordenación que haya retirado la fila anclada
+     * (rollback o manipulación con acceso a la BD, recalculando la cadena).
+     *
+     * @return array<string, mixed>
+     */
+    public static function verifyAnchorIntegrity(?string $path = null): array
+    {
+        $path ??= config('binnacle.anchor_path');
+
+        if (! is_file($path)) {
+            return ['anchored' => false, 'valid' => false, 'reason' => 'Sin archivo ancla', 'last_anchor' => null];
+        }
+
+        $lines = array_values(array_filter(
+            file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [],
+            fn ($l) => trim($l) !== ''
+        ));
+
+        if (empty($lines)) {
+            return ['anchored' => false, 'valid' => false, 'reason' => 'Archivo ancla vacío', 'last_anchor' => null];
+        }
+
+        $last = trim((string) end($lines));
+        $parts = explode('|', $last);
+
+        if (count($parts) < 4) {
+            return ['anchored' => false, 'valid' => false, 'reason' => 'Línea ancla malformada', 'last_anchor' => $last];
+        }
+
+        [$timestamp, $entryId, $eventType, $hash] = $parts;
+
+        $found = BinnacleEntry::whereIn('event_severity', ['critical', 'alert'])
+            ->where('entry_hash', $hash)
+            ->exists();
+
+        $tip = BinnacleEntry::whereIn('event_severity', ['critical', 'alert'])
+            ->orderByDesc('id')
+            ->value('entry_hash');
+
+        return [
+            'anchored' => true,
+            'valid' => $found,
+            'reason' => $found
+                ? 'El ancla externa sigue presente en la cadena'
+                : 'El hash anclado ya no está en la cadena (posible manipulación o rollback)',
+            'last_anchor' => [
+                'timestamp' => $timestamp,
+                'entry_id' => (int) $entryId,
+                'event_type' => $eventType,
+                'hash' => $hash,
+            ],
+            'chain_tip' => $tip,
+        ];
+    }
+
     private static function extractAuditableDiff(Model&Auditable $model): array
     {
         $allowed = $model->auditableAttributes();

@@ -15,6 +15,10 @@ class IndexComponent extends Component
 
     public int $perPage = 50;
 
+    public ?int $viewingEntryId = null;
+
+    public bool $showEntryDetails = false;
+
     #[Url(as: 'q', history: true)]
     public ?string $search = null;
 
@@ -74,6 +78,18 @@ class IndexComponent extends Component
         $this->resetPage();
     }
 
+    public function openEntryDetails(int $entryId): void
+    {
+        $this->viewingEntryId = $entryId;
+        $this->showEntryDetails = true;
+    }
+
+    public function closeEntryDetails(): void
+    {
+        $this->showEntryDetails = false;
+        $this->viewingEntryId = null;
+    }
+
     public function render()
     {
         $entries = $this->query()->paginate($this->perPage);
@@ -94,6 +110,9 @@ class IndexComponent extends Component
         return view('livewire.admin.binnacle.index-component', [
             'entries' => $entries,
             'meta' => $meta,
+            'viewingEntry' => $this->viewingEntryId
+                ? BinnacleEntry::find($this->viewingEntryId)
+                : null,
         ]);
     }
 

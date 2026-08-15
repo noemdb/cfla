@@ -1,7 +1,7 @@
 # Guía de configuración en producción — Worker y Scheduler de la Bitácora
 
-> **Versión**: 2026-08-15 · **Aplica a**: Spec BINNACLE-001 (§4, §12), ADR-002,
-> mejoras #1, #2, #5 y #10.
+> **Versión**: 2026-08-15 · **Aplica a**: Spec BINNACLE-001 (§4, §8.3, §9, §12),
+> ADR-002, mejoras #1, #2, #5, #6, #8, #9 y #10.
 >
 > Esta guía detalla la puesta en producción de **tres piezas** necesarias para
 > que la bitácora funcione completa: (1) el worker dedicado de la cola
@@ -25,9 +25,11 @@ Además hay **comandos programados** que el scheduler debe ejecutar:
 
 | Comando | Horario | Propósito |
 |---|---|---|
-| `binnacle:archive` | diario 03:00 | Mueve entradas vencidas a `binnacle_entries_archive` (retención §12) |
+| `binnacle:archive` | diario 03:00 | Mueve entradas vencidas a `binnacle_entries_archive` (retención §12; `--dry-run` para validar la política) |
 | `binnacle:watch` | cada 5 min | Detecta backlog en la cola y alerta si el worker cae |
+| `binnacle:anchor` | diario 04:00 | Publica el hash de la última entrada critical/alert a un log ancla append-only (mejora #6, §8.3) |
 | `binnacle:report` | diario 05:30 | Envía el resumen del día anterior por email |
+| `binnacle:check-growth` | lunes 06:15 | Gate de particionado: alerta si el crecimiento proyectado supera el umbral (mejora #8, §9) |
 | `lms:normalize-svgs --dry-run` | horaria | Mantiene contraste de SVGs (fuera del módulo, se ejecuta igual) |
 | `voting-sessions:cleanup` | diaria | Limpieza (fuera del módulo) |
 | `lms:cleanup-media` | semanal | Limpieza (fuera del módulo) |
@@ -140,17 +142,17 @@ sudo crontab -u www-data -e
 ```
 
 ```cron
-* * * * * cd /var/www/saefl && php8.2 artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/cflasf/source/cfla && php8.2 artisan schedule:run >> /dev/null 2>&1
 ```
 
 > `>> /dev/null 2>&1` evita que cron genere un email por minuto. Si se quiere
-> log, usar `>> /var/www/saefl/storage/logs/schedule.log 2>&1` (rotar con
+> log, usar `>> /home/cflasf/source/cfla//storage/logs/schedule.log 2>&1` (rotar con
 > logrotate o `stdout_logfile` de supervisor).
 
-### 3.2 Qué ejecuta el scheduler (verificar que los 6 estén)
+### 3.2 Qué ejecuta el scheduler (verificar que los 8 estén)
 
 ```bash
-cd /var/www/saefl
+cd /home/cflasf/source/cfla/
 php8.2 artisan schedule:list
 ```
 
@@ -161,7 +163,9 @@ Esperado (resumen):
 | `* * * * *` (evaluación del scheduler) | cada 1 min | — |
 | `03:00` diario | 1/día | `binnacle:archive` |
 | `*/5 * * * *` | cada 5 min | `binnacle:watch` |
+| `04:00` diario | 1/día | `binnacle:anchor` |
 | `05:30` diario | 1/día | `binnacle:report` |
+| `06:15` lunes | 1/semana | `binnacle:check-growth` |
 | `0 * * * *` | horaria | `lms:normalize-svgs --dry-run` |
 | `0 0 * * *` | diaria | `voting-sessions:cleanup` |
 | `0 0 * * 0` | semanal | `lms:cleanup-media` |
@@ -220,6 +224,17 @@ php8.2 artisan binnacle:report --no-notify     # solo imprime el resumen, no env
 php8.2 artisan binnacle:report --date=2026-08-14   # fecha concreta
 ```
 
+### 4.6 El ancla externa y el gate de particionado
+
+```bash
+php8.2 artisan binnacle:anchor              # publica el hash de la última critical/alert
+php8.2 artisan binnacle:anchor --check; echo "exit=$?"   # exit 0 → ancla íntegra, 1 → rota
+sudo chattr +a storage/logs/binnacle-anchor.log          # (recomendado) append-only real
+
+php8.2 artisan binnacle:check-growth        # proyección de crecimiento (Spec §9)
+php8.2 artisan binnacle:check-growth --check; echo "exit=$?"  # exit 0 → OK, 1 → particionado recomendado
+```
+
 ---
 
 ## 5. Diagnóstico y resolución de problemas
@@ -232,6 +247,8 @@ php8.2 artisan binnacle:report --date=2026-08-14   # fecha concreta
 | Los eventos `critical`/`alert` NO aparecen pese a worker caído | Config alterada | Confirmar `binnacle.sync_severities = ['critical','alert']` en `config/binnacle.php` (no editar sin revisar ADR-002) |
 | `schedule:run` no ejecuta nada | cron no instalado o scheduler detenido | Verificar `crontab -l`; ejecutar `php8.2 artisan schedule:run` manualmente; revisar `storage/logs/schedule.log` |
 | `binnacle:report` no llega el email | Config SMTP/Resend/Gmail o destinatarios vacíos | Probar `php8.2 artisan binnacle:report --no-notify` (genera OK) y luego con email; revisar `BINNACLE_ALERT_RECIPIENTS` |
+| `binnacle:anchor --check` falla (exit 1) | El hash anclado ya no está en la cadena (rollback/manipulación) | Comparar la última línea de `binnacle-anchor.log` con el `entry_hash` de la fila; investigar quién/desde cuándo; ver `verifyAnchorIntegrity()` |
+| `binnacle:check-growth` recomienda particionar | La proyección supera `BINNACLE_PARTITION_THRESHOLD` | Seguir `blueprint/binnacle/particionado-procedimiento.md` (swap de tabla particionada + recrear triggers) |
 | Jobs atascados `reserved` (el worker murió a mitad) | Bloqueo de job huérfano | Reiniciar el worker; si persiste, `php8.2 artisan queue:retry` sobre el id del `failed_jobs` |
 
 ### Comandos útiles en caliente
@@ -269,7 +286,8 @@ php8.2 artisan schedule:list                   # ver la tabla de horarios efecti
       `--max-jobs=500`, `--max-time=3600`
 - [ ] `supervisorctl status` → `RUNNING`
 - [ ] Cron `* * * * * ... artisan schedule:run` instalado para `www-data`
-- [ ] `php8.2 artisan schedule:list` muestra los 6 comandos
+- [ ] `php8.2 artisan schedule:list` muestra los 8 comandos (incluye `binnacle:anchor` y `binnacle:check-growth`)
 - [ ] `binnacle:watch --check` → `exit=0`
+- [ ] `binnacle:anchor --check` → `exit=0` (y `chattr +a` aplicado al ancla)
 - [ ] Login en la app → el job se procesa en `binnacle-queue.log`
 - [ ] `binnacle:report --no-notify` genera resumen sin error

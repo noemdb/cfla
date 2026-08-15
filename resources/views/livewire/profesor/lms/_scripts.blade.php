@@ -54,12 +54,17 @@
 	        infografiaPreviewSvg: $wire.entangle('infografiaPreviewSvg'),
 	        infografiaError: $wire.entangle('infografiaError'),
 	        generatingInfografia: $wire.entangle('generatingInfografia'),
+	        configTab: 'estructura',
 
 	        closeInfografiaModal() {
 	            $wire.call('closeInfografiaModal');
 	        },
 	        closeInfografiaPreview() {
 	            $wire.call('closeInfografiaPreview');
+	        },
+	        capitalize(value) {
+	            if (!value) return '';
+	            return value.charAt(0).toUpperCase() + value.slice(1);
 	        },
 	        generarInfografia() {
 	            $wire.call('generateInfografia');

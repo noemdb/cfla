@@ -62,6 +62,25 @@ return [
     | Retención por categoría (meses) — Spec §12
     |--------------------------------------------------------------------------
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Retención por categoría (meses) — Spec §12 / mejora propuesta #9
+    |--------------------------------------------------------------------------
+    | El comando binnacle:archive (diario 03:00) mueve a binnacle_entries_archive
+    | toda fila cuya categoría supere estos meses. La cifra es la política
+    | institucional; el archivado es el ÚNICO proceso que puede borrar filas
+    | (trigger ADR-004 con @binnacle_archive_process = 1).
+    |
+    | Racional de los valores (revisar con el equipo legal antes de Fase 3):
+    |   security 24 / error 24 — eventos críticos: ventana mínima de 2 años
+    |     exigida para material de auditoría de seguridad y resolución de
+    |     incidentes (normas LOPDP/SIPINNA y buenas prácticas de compliance).
+    |   authentication 12 / user_action 12 — actividad de usuario: 1 año,
+    |     suficiente para conciliación de accesos y reclamos de representantes.
+    |   system 6 — rutinas internas (backups, scheduled tasks): 6 meses.
+    |   debug 1 — solo entorno de desarrollo; no debería haber filas en prod.
+    | Ajustar aquí es cambiar la política; el archivo queda igualmente auditado.
+    */
     'retention_months' => [
         'security' => 24,       // eventos críticos de seguridad
         'error' => 24,          // errores críticos
@@ -70,6 +89,32 @@ return [
         'system' => 6,          // eventos de sistema de rutina
         'debug' => 1,           // solo en desarrollo
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ancla externa del hash-chain — Spec §8.3 / mejora propuesta #6
+    |--------------------------------------------------------------------------
+    | Ruta del archivo de ancla (append-only, fuera de la BD y del control del
+    | DBA). El comando binnacle:anchor (diario 04:00) añade una línea por cada
+    | entrada critical/alert anclada: `timestamp|entry_id|event_type|entry_hash`.
+    |
+    | En Linux se recomienda marcar el archivo como append-only:
+    |   sudo chattr +a storage/logs/binnacle-anchor.log
+    | (el comando crea la ruta si no existe y respeta el bit si ya está marcado).
+    */
+    'anchor_path' => env('BINNACLE_ANCHOR_PATH', storage_path('logs/binnacle-anchor.log')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Umbral de particionado por fecha — Spec §9 / mejora propuesta #8
+    |--------------------------------------------------------------------------
+    | El comando binnacle:check-growth (semanal) proyecta el crecimiento de
+    | binnacle_entries a N meses y recomienda particionado cuando la proyección
+    | supera partition_threshold. Referencia: el benchmark real a 50k filas dio
+    | filtros <15ms; el umbral por defecto (1M) deja margen amplio de seguridad.
+    */
+    'partition_threshold' => env('BINNACLE_PARTITION_THRESHOLD', 1_000_000),
+    'partition_lookahead_months' => env('BINNACLE_PARTITION_LOOKAHEAD_MONTHS', 12),
 
     /*
     |--------------------------------------------------------------------------

@@ -481,7 +481,15 @@ enum BinnacleEventType: string
 Ver matriz RBAC (§6). Reutiliza el mecanismo de `is_director` en desarrollo en lugar de duplicar lógica de scope.
 
 ### 8.3 Integridad
-Ver ADR-003/004. Limitación documentada: el hash-chain (Fase 4) protege contra manipulación por un actor sin acceso directo a MariaDB con privilegios suficientes para deshabilitar temporalmente los triggers. Si el modelo de amenaza institucional incluye ese actor, se requiere anclaje externo del hash (ej. publicación periódica a un log append-only fuera del control del DBA) — fuera de alcance de este spec, anotado como trabajo futuro.
+Ver ADR-003/004. **Ancla externa implementada (mejora #6, 2026-08-15)**: el
+comando `binnacle:anchor` (diario 04:00) publica el hash de la última entrada
+`critical`/`alert` a un log append-only fuera de la BD y del control del DBA
+(`config/binnacle.php#anchor_path`), con opción `--notify` (email firmado a
+admin/dirección) y verificación `binnacle:anchor --check` /
+`Binnacle::verifyAnchorIntegrity()`. Mitiga la limitación documentada del
+hash-chain (manipulación por un actor con acceso a MariaDB que recalcule la
+cadena): cualquier rollback por debajo del hash anclado queda detectable. Para
+forzar append-only a nivel filesystem en producción: `chattr +a <anchor_path>`.
 
 ---
 
@@ -498,7 +506,13 @@ Antes de Fase 1, completar:
 Con esos tres números se calcula el crecimiento mensual esperado de la tabla y se decide si el particionamiento por rango de fecha (§9.1) es necesario desde Fase 1 o se puede diferir a Fase 4 como estaba previsto.
 
 ### 9.1 Estrategias
-Índices ya cubiertos en §4; particionamiento mensual condicionado a los datos de la tabla anterior; archivado vía §4.2; colas dedicadas (§5.4); paginación 100-500/página; selección de columnas por vista.
+Índices ya cubiertos en §4; **gate de particionado implementado (mejora #8)**:
+el comando `binnacle:check-growth` (semanal, programado) proyecta el crecimiento
+con `Binnacle::projectedGrowth()` (ritmo de 30 días × `partition_lookahead_months`)
+y recomienda particionar cuando supera `partition_threshold`; el procedimiento de
+ejecución (swap de tabla particionada, recreación de triggers ADR-004) está en
+`blueprint/binnacle/particionado-procedimiento.md`. Archivado vía §4.2; colas
+dedicadas (§5.4); paginación 100-500/página; selección de columnas por vista.
 
 ### 9.2 `model_viewed`
 Restringido explícitamente a un allowlist de modelos "sensibles" definido en configuración (`config/binnacle.php`), no a todos los `show()`. Sin esta restricción, el volumen de este único tipo de evento puede superar al resto de la tabla combinado.
@@ -549,10 +563,16 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 - [x] Exportación CSV (`/admin/binnacle/export`, con los filtros del panel) y PDF (`/admin/binnacle/export/pdf`, dompdf, 2.000 filas)
 - [x] Tabla y job de archivado (§4.2): `binnacle_entries_archive` + comando `php8.2 artisan binnacle:archive`
 - [x] Reportes programados por email (mejora #5): comando `binnacle:report` (resumen diario a admin/dirección, 05:30), auditado como `binnacle_report_sent`
+- [x] Ancla externa del hash-chain (mejora #6, §8.3): comando `binnacle:anchor` (diario 04:00) → log append-only + `--notify` + `verifyAnchorIntegrity()` + tarjeta en dashboard
+- [x] Retención revisada (mejora #9, §12): racional documentado en `config/binnacle.php` + `binnacle:archive --dry-run` para validar la política con el equipo legal
+- [x] Gate de particionado (mejora #8, §9): comando `binnacle:check-growth` (semanal) + procedimiento en `blueprint/binnacle/particionado-procedimiento.md`
 
 ### Fase 4 — Optimización y seguridad avanzada
-- [ ] Particionamiento por rango de fecha (si §9 lo justifica; benchmark indica que aún no hace falta)
+- [x] Particionamiento por rango de fecha: **gate implementado**; la ejecución
+      del particionado es **a demanda** cuando `binnacle:check-growth` lo
+      recomiende (benchmark actual a 50k filas: <15ms, no hace falta aún)
 - [x] Hash-chain para eventos `critical`/`alert` (ADR-003) — `entry_hash`/`previous_hash`, primera fila con genesis implícito
+- [x] Ancla externa del hash-chain (mejora #6, §8.3) — `binnacle:anchor`
 - [x] Meta-auditoría: `event_type=binnacle_accessed` al consultar `/admin/binnacle` (config `binnacle.meta_audit`)
 - [x] Pruebas de carga: comandos `binnacle:seed-test` y `binnacle:benchmark` (Spec §11). Validado con 50k filas: filtro combinado 12ms, +usuario 4.8ms, texto libre 2.5ms (criterio <1s cumplido). Índice agregado `idx_subject_identifier`.
 
@@ -567,7 +587,7 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 | Eventos de sistema de rutina | 6 meses |
 | Logs de depuración (solo dev) | 1 mes |
 
-Después del período: archivado comprimido (§4.2) o eliminación según política institucional, ejecutado exclusivamente por el job con `@binnacle_archive_process = 1`.
+Después del período: archivado comprimido (§4.2) o eliminación según política institucional, ejecutado exclusivamente por el job con `@binnacle_archive_process = 1`. Para **validar la política sin efectos** (mejora #9): `php8.2 artisan binnacle:archive --dry-run` (muestra filas por categoría sin mover nada). El racional de cada valor está documentado en `config/binnacle.php#retention_months`; revisarlo con el equipo legal.
 
 ---
 

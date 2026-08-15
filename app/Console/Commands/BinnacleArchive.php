@@ -13,15 +13,21 @@ use Illuminate\Support\Facades\DB;
  * La sesión marca @binnacle_archive_process = 1 para que los triggers de
  * inmutabilidad (ADR-004) permitan el DELETE únicamente en este proceso.
  *
+ * --dry-run (mejora #9): no mueve nada; solo informa cuántas filas por
+ * categoría superan la retención vigente. Útil para validar la política con
+ * el equipo legal antes de ejecutar el archivado real.
+ *
  * Uso:
  *   php8.2 artisan binnacle:archive
+ *   php8.2 artisan binnacle:archive --dry-run
  *   php8.2 artisan binnacle:archive --older-than=90 --limit=5000
  */
 class BinnacleArchive extends Command
 {
     protected $signature = 'binnacle:archive
         {--older-than= : Antigüedad mínima en días (reemplaza la retención por categoría)}
-        {--limit=10000 : Máximo de filas movidas por categoría en esta ejecución}';
+        {--limit=10000 : Máximo de filas movidas por categoría en esta ejecución}
+        {--dry-run : No mover filas; solo mostrar cuántas se archivarían por categoría}';
 
     protected $description = 'Archiva las entradas de la bitácora que superan su política de retención';
 
@@ -29,6 +35,15 @@ class BinnacleArchive extends Command
     {
         $limit = max(1, (int) $this->option('limit'));
         $cutoffs = $this->cutoffs($this->option('older-than'));
+
+        if ($this->option('dry-run')) {
+            $moved = $this->preview($cutoffs, $limit);
+
+            $this->info("Vista previa (--dry-run): {$moved} filas se archivarían. No se movió nada.");
+
+            return self::SUCCESS;
+        }
+
         $moved = 0;
 
         DB::transaction(function () use (&$moved, $cutoffs, $limit) {
@@ -50,6 +65,32 @@ class BinnacleArchive extends Command
         $this->info("Bitácora archivada: {$moved} filas movidas.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Conteo sin efectos (--dry-run): cuántas filas por categoría superan el
+     * corte y se moverían en una ejecución real. Respeta el --limit.
+     */
+    private function preview(array $cutoffs, int $limit): int
+    {
+        $moved = 0;
+
+        foreach ($cutoffs as $category => $cutoff) {
+            // COUNT() de MySQL ignora LIMIT, así que se cuentan los ids de la
+            // misma ventana/orden que la ejecución real (hasta --limit).
+            $count = DB::table('binnacle_entries')
+                ->where('event_category', $category)
+                ->where('created_at', '<', $cutoff)
+                ->orderBy('id')
+                ->limit($limit)
+                ->get(['id'])
+                ->count();
+
+            $moved += $count;
+            $this->line("  → {$category}: {$count} filas (corte {$cutoff->toDateTimeString()})");
+        }
+
+        return $moved;
     }
 
     private function cutoffs(string|int|null $days): array

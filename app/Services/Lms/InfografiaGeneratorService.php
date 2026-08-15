@@ -329,6 +329,7 @@ PROMPT;
     private function executeFallbackChain(string $prompt): array
     {
         // Intentos: OpenRouter (primario) → Nvidia (fallback 1) → Kimi (fallback 2)
+        // Cada servicio usa su propio modelo configurado (no modelos de OpenRouter).
         $attempts = [
             [
                 'service' => $this->openRouter,
@@ -338,12 +339,12 @@ PROMPT;
             [
                 'service' => $this->nvidia,
                 'label' => 'Nvidia fallback 1',
-                'params' => ['model' => config('openrouter.model_fallback1'), 'temperature' => 0.3, 'max_tokens' => 2000],
+                'params' => ['model' => config('nvidia.model'), 'temperature' => 0.3, 'max_tokens' => (int) config('nvidia.max_tokens', 4000)],
             ],
             [
                 'service' => $this->kimi,
                 'label' => 'Kimi fallback 2',
-                'params' => ['model' => config('openrouter.model_fallback2'), 'temperature' => 0.3, 'max_tokens' => 2000],
+                'params' => ['model' => config('kimi.model'), 'temperature' => 0.3, 'max_tokens' => (int) config('kimi.max_tokens', 4000)],
             ],
         ];
 
@@ -382,18 +383,107 @@ PROMPT;
     }
 
     /**
+     * Extrae el primer bloque JSON válido de una respuesta que puede contener
+     * texto de razonamiento pre-pendido o wrappers de markdown (```json ... ```).
+     *
+     * Estrategia:
+     *   1. Quitar wrappers de código markdown si existen.
+     *   2. Si el contenido completo ya es JSON, devolverlo tal cual.
+     *   3. Recorrer cada "{" como posible inicio y buscar el cierre balanceado;
+     *      devolver la primera candidatura que sea JSON válido.
+     */
+    private function extractJsonBlock(string $content): string
+    {
+        $content = trim($content);
+
+        // Quitar wrappers de código markdown
+        $content = preg_replace('/^```(?:json)?\s*\n/i', '', $content);
+        $content = preg_replace('/\n?```\s*$/s', '', $content);
+        $content = trim($content);
+
+        // Si ya es JSON válido, devolverlo
+        if ($this->isValidJson($content)) {
+            return $content;
+        }
+
+        $length = strlen($content);
+        $positions = [];
+
+        // Recolectar todas las posiciones de apertura de objeto
+        for ($i = 0; $i < $length; $i++) {
+            if ($content[$i] === '{') {
+                $positions[] = $i;
+            }
+        }
+
+        foreach ($positions as $start) {
+            $candidate = $this->extractBalancedJson($content, $start);
+            if ($candidate !== null && $this->isValidJson($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $content;
+    }
+
+    /**
+     * Extrae el bloque balanceado de llaves que inicia en $start,
+     * respetando strings y escapes. Devuelve null si no cierra.
+     */
+    private function extractBalancedJson(string $content, int $start): ?string
+    {
+        $depth = 0;
+        $inString = false;
+        $escape = false;
+        $length = strlen($content);
+
+        for ($i = $start; $i < $length; $i++) {
+            $char = $content[$i];
+
+            if ($inString) {
+                if ($escape) {
+                    $escape = false;
+                } elseif ($char === '\\') {
+                    $escape = true;
+                } elseif ($char === '"') {
+                    $inString = false;
+                }
+
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = true;
+            } elseif ($char === '{') {
+                $depth++;
+            } elseif ($char === '}') {
+                $depth--;
+                if ($depth === 0) {
+                    return substr($content, $start, $i - $start + 1);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Verifica si una cadena es JSON válido.
+     */
+    private function isValidJson(string $content): bool
+    {
+        json_decode($content, true);
+
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
+    /**
      * Parsea y valida la respuesta JSON del servicio de IA.
      */
     private function parseAndValidateResponse(string $content): array
     {
-        // Limpiar posibles wrappers
-        $content = trim($content);
-        if (preg_match('/^```(?:json)?\s*$/i', $content)) {
-            $content = '';
-        }
-        $content = preg_replace('/^```(?:json)?\s*\n/i', '', $content);
-        $content = preg_replace('/\n?```\s*$/s', '', $content);
-        $content = trim($content);
+        // Limpiar posibles wrappers y texto de razonamiento pre-pendido
+        $content = $this->extractJsonBlock($content);
 
         // Intentar parsear JSON
         $data = json_decode($content, true);
@@ -429,8 +519,9 @@ PROMPT;
             ];
         }
 
-        // Validar nodo raíz recursivamente
-        $nodoRaizValidation = $this->validateNode($estructura['nodo_raiz'], 1, $niveles);
+        // Validar nodo raíz recursivamente con un tope permisivo (el post-procesado
+        // ajustará al número de niveles solicitado si el modelo excede la profundidad)
+        $nodoRaizValidation = $this->validateNode($estructura['nodo_raiz'], 1, 8);
         if (! $nodoRaizValidation['valid']) {
             return [
                 'valid' => false,
