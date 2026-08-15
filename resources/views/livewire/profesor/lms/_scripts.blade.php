@@ -46,5 +46,37 @@
 	            { label: 'Consejos', short: 'Tips', icon: '💡' },
 	        ],
 	    }));
+
+	    Alpine.data('infografiaWizard', () => ({
+	        infografiaModalOpen: $wire.entangle('infografiaModalOpen'),
+	        infografiaPreviewOpen: $wire.entangle('infografiaPreviewOpen'),
+	        infografiaConfig: $wire.entangle('infografiaConfig'),
+	        infografiaPreviewSvg: $wire.entangle('infografiaPreviewSvg'),
+	        infografiaError: $wire.entangle('infografiaError'),
+	        generandoInfografia: $wire.entangle('generatingInfografia'),
+
+	        closeInfografiaModal() {
+	            $wire.call('closeInfografiaModal');
+	        },
+	        closeInfografiaPreview() {
+	            $wire.call('closeInfografiaPreview');
+	        },
+	        generarInfografia() {
+	            $wire.call('generateInfografia');
+	        },
+	        insertInfografiaEnEditor() {
+	            $wire.call('insertInfografiaEnEditor');
+	        },
+	        downloadInfografiaSvg() {
+	            if (!this.infografiaPreviewSvg) return;
+	            const blob = new Blob([this.infografiaPreviewSvg], { type: 'image/svg+xml' });
+	            const url = URL.createObjectURL(blob);
+	            const a = document.createElement('a');
+	            a.href = url;
+	            a.download = 'infografia.svg';
+	            a.click();
+	            URL.revokeObjectURL(url);
+	        }
+	    }));
 </script>
 @endscript

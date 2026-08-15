@@ -449,6 +449,12 @@
 
             @include("livewire.profesor.lms._full-preview-modal")
 
+            {{-- ═══════════ MODALES INFOGRAFÍA ═══════════ --}}
+            <div x-data="infografiaWizard()">
+                @include("livewire.profesor.lms._infografia-config-modal")
+                @include("livewire.profesor.lms._infografia-preview-modal")
+            </div>
+
             {{-- ═══════════ MODAL VISTA ESTUDIANTE (wizard → unificado) ═══════════ --}}
             {{-- openWizardStudentPreview() normaliza los datos del wizard y activa el componente unificado --}}
 

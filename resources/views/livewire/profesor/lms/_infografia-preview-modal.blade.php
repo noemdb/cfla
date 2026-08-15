@@ -53,7 +53,7 @@
                                 Error al generar la infografía
                             </p>
                             <p class="text-xs text-red-600 dark:text-red-400 mt-1">
-                                {{ infografiaError }}
+                                @{{ infografiaError }}
                             </p>
                         </div>
                     </div>
@@ -83,10 +83,10 @@
                     <!-- Info Bar -->
                     <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                         <span>
-                            Niveles: {{ infografiaConfig.niveles }} |
-                            Tipo: {{ infografiaConfig.tipoEstructura | capitalize }} |
-                            Dirección: {{ infografiaConfig.direccion | capitalize }} |
-                            Tema: {{ infografiaConfig.temaColor | capitalize }}
+                            Niveles: @{{ infografiaConfig.niveles }} |
+                            Tipo: @{{ infografiaConfig.tipoEstructura | capitalize }} |
+                            Dirección: @{{ infografiaConfig.direccion | capitalize }} |
+                            Tema: @{{ infografiaConfig.temaColor | capitalize }}
                         </span>
                         <button @click="downloadInfografiaSvg"
                                 class="flex items-center space-x-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">

@@ -1,5 +1,13 @@
 # Bitácora de Auditoría del Sistema (Binnacle Module)
 
+> ## ⚠️ DOCUMENTO OBSOLETO
+>
+> Este documento es la **especificación original** de alcance amplio. Fue superado en dos etapas:
+> 1. `binnacle-module-fase1-revisado.md` corrigió su arquitectura y seguridad (single source of writing, `Auditable` allowlist, inmutabilidad por triggers, ADRs).
+> 2. **`SPEC-BINNACLE-001.md` es el spec normativo vigente** y consolida ambas revisiones para la implementación por fases.
+>
+> Se conserva solo como registro histórico del alcance completo (objetivos, timeline, retención, riesgos). **No usar como referencia de implementación.** Cualquier discrepancia con `SPEC-BINNACLE-001.md` se resuelve a favor de este último.
+
 ## Resumen Ejecutivo
 Este documento especifica la implementación de un sistema de bitácora de auditoría integral para el Sistema de Gestión Escolar (SAEFL). El objetivo es registrar cronológicamente todas las actividades de usuarios, eventos del sistema, errores importantes y transacciones críticas para fines de seguridad, cumplimiento, depuración y análisis de uso.
 

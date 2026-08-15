@@ -20,11 +20,5 @@
                 @include('profile.partials.update-password-form')
             </div>
         </div>
-
-        <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
-            <div class="p-4 sm:p-6">
-                @include('profile.partials.delete-user-form')
-            </div>
-        </div>
     </div>
 @endsection

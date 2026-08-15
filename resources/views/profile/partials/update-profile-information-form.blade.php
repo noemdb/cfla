@@ -23,12 +23,6 @@
 
             <div class="space-y-4">
                 <div>
-                    <x-input-label for="name" :value="__('Nombre')" />
-                    <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-                    <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                </div>
-
-                <div>
                     <x-input-label for="email" :value="__('Email')" />
                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
@@ -83,13 +77,6 @@
                     <x-input-label for="dir_address" :value="__('Dirección')" />
                     <x-text-input id="dir_address" name="dir_address" type="text" class="mt-1 block w-full" :value="old('dir_address', $user->profile?->dir_address)" autocomplete="street-address" />
                     <x-input-error class="mt-2" :messages="$errors->get('dir_address')" />
-                </div>
-
-                <div>
-                    <x-input-label for="url_img" :value="__('URL de Imagen de Perfil')" />
-                    <x-text-input id="url_img" name="url_img" type="url" class="mt-1 block w-full" :value="old('url_img', $user->profile?->url_img)" placeholder="https://ejemplo.com/imagen.jpg" autocomplete="url" />
-                    <x-input-error class="mt-2" :messages="$errors->get('url_img')" />
-                    <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">{{ __('Opcional. URL de una imagen para tu avatar.') }}</p>
                 </div>
             </div>
         </fieldset>

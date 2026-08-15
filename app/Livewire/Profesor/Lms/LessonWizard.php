@@ -4157,7 +4157,7 @@ PROMPT;
         'temaColor' => 'esafe'
     ];
     public string $infografiaPreviewSvg = '';
-    public string $infografiaError = '';
+    public ?string $infografiaError = null;
     public bool $generatingInfografia = false;
 
     public function openInfografiaModal(): void
@@ -4206,13 +4206,14 @@ PROMPT;
 
         try {
             $infografiaService = app(\App\Services\Lms\InfografiaGeneratorService::class);
-            $result = $infografiaService->generate($this->infografiaConfig);
+            $result = $infografiaService->generate($this->buildInfografiaRequest());
 
             if (!$result['success']) {
                 throw new \Exception($result['error'] ?? 'Error desconocido al generar infografía');
             }
 
-            $this->infografiaPreviewSvg = $this->renderInfografiaToSvg($result['data']);
+            $this->infografiaPreviewSvg = $this->renderInfografiaToSvg($result);
+            $this->infografiaModalOpen = false;
             $this->openInfografiaPreview();
             $this->notification()->success(
                 'Infografía generada',
@@ -4224,6 +4225,69 @@ PROMPT;
         } finally {
             $this->generatingInfografia = false;
         }
+    }
+
+    private function buildInfografiaRequest(): array
+    {
+        $config = $this->infografiaConfig;
+
+        $direcciones = [
+            'vertical' => 'top-down',
+            'horizontal' => 'left-right',
+            'top-down' => 'top-down',
+            'left-right' => 'left-right',
+            'radial' => 'radial',
+        ];
+
+        $colores = [
+            'esafe' => 'emerald',
+            'emerald' => 'emerald',
+            'azul' => 'sky',
+            'sky' => 'sky',
+            'amarillo' => 'amber',
+            'amber' => 'amber',
+            'rosa' => 'rose',
+            'rose' => 'rose',
+            'purpura' => 'purple',
+            'purple' => 'purple',
+            'gris' => 'stone',
+            'stone' => 'stone',
+        ];
+
+        $estructuras = [
+            'jerarquica' => 'jerarquica',
+            'radial' => 'radial',
+            'flujo' => 'flujo',
+            'matriz' => 'matriz',
+        ];
+
+        $tipoEstructura = $estructuras[$config['tipoEstructura'] ?? 'jerarquica'] ?? 'jerarquica';
+        $temaColor = $colores[$config['temaColor'] ?? 'esafe'] ?? 'emerald';
+        $direccion = $direcciones[$config['direccion'] ?? 'vertical'] ?? 'top-down';
+
+        $act = $this->selectedActivity;
+
+        return [
+            'niveles' => (int) ($config['niveles'] ?? 4),
+            'tipo_estructura' => $tipoEstructura,
+            'direccion' => $direccion,
+            'tema_color' => $temaColor,
+            'contexto_pedagogico' => [
+                'grado' => $act?->pevaluacion?->pensum?->grado?->name ?? '5to básico',
+                'asignatura' => $act?->pevaluacion?->pensum?->asignatura?->name ?? '',
+                'tema_leccion' => $this->lessonTitle ?: ($act?->topic ?? 'Tema general'),
+                'indicadores_relacionados' => ($act?->achievements ?? collect())->pluck('code')->values()->all(),
+                'referente_normativo' => $act?->pevaluacion?->pensum?->asignatura?->referente ?? '',
+                'contenido_actual' => $this->contentBody ?? '',
+            ],
+            'restricciones' => [
+                'maximo_nodos_por_nivel' => 8,
+                'maximo_total_nodos' => 30,
+                'etiqueta_maxima_longitud' => 50,
+                'incluir_iconos' => true,
+                'incluir_tooltips' => true,
+            ],
+        ];
     }
 
     public function validateInfografiaResponse(array $response): bool
@@ -4275,7 +4339,20 @@ PROMPT;
         // Por ahora, usamos valores por defecto razonables
         $tipoEstructura = $estructura['tipo'] ?? 'jerarquica';
         $niveles = $estructura['niveles'] ?? 4;
-        $paletaColor = 'emerald'; // Podemos obtener esto del metadata o contexto
+        $paletaColor = $metadata['tema_color'] ?? $this->infografiaConfig['temaColor'] ?? 'esafe';
+
+        $mapaTema = [
+            'esafe' => 'emerald',
+            'azul' => 'sky',
+            'amarillo' => 'amber',
+            'rosa' => 'rose',
+            'purpura' => 'purple',
+            'gris' => 'stone',
+        ];
+        $paletaColor = $mapaTema[$paletaColor] ?? $paletaColor;
+
+        // Normalizar el árbol de nodos del esquema de IA al esquema de renderizado
+        $nodoRaiz = $this->normalizeInfografiaNodo($estructura['nodo_raiz'] ?? []);
 
         // Definir paleta SAEFL (los mismos colores que usa el servicio)
         $saeflPalettes = [
@@ -4324,15 +4401,46 @@ PROMPT;
         // Generar SVG basado en el tipo de estructura
         switch ($tipoEstructura) {
             case 'radial':
-                return $this->renderRadialInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+                return $this->renderRadialInfografia($nodoRaiz, $getColor, $getTextColor, $getIcon, $niveles);
             case 'flujo':
-                return $this->renderFlowInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+                return $this->renderFlowInfografia($nodoRaiz, $getColor, $getTextColor, $getIcon, $niveles);
             case 'matriz':
-                return $this->renderMatrixInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+                return $this->renderMatrixInfografia($nodoRaiz, $getColor, $getTextColor, $getIcon, $niveles);
             case 'jerarquica':
             default:
-                return $this->renderHierarchicalInfografia($estructura['nodo_raiz'], $getColor, $getTextColor, $getIcon, $niveles);
+                return $this->renderHierarchicalInfografia($nodoRaiz, $getColor, $getTextColor, $getIcon, $niveles);
         }
+    }
+
+    /**
+     * Normaliza un nodo del esquema de la IA (etiqueta, hijos, icono_sugerido)
+     * al esquema esperado por los métodos de renderizado (label, children, icon).
+     */
+    private function normalizeInfografiaNodo(array $node): array
+    {
+        $normalized = [
+            'label' => $node['etiqueta'] ?? $node['label'] ?? 'Nodo',
+            'description' => $node['descripcion'] ?? $node['description'] ?? '',
+            'icon' => $node['icono_sugerido'] ?? $node['icon'] ?? 'book',
+            'color_index' => $node['color_index'] ?? 0,
+            'type' => $node['tipo'] ?? $node['type'] ?? null,
+            'color_fondo' => $node['color_fondo'] ?? null,
+            'color_texto' => $node['color_texto'] ?? null,
+        ];
+
+        if (isset($node['hijos']) && is_array($node['hijos'])) {
+            $normalized['children'] = array_map(
+                fn ($hijo) => $this->normalizeInfografiaNodo($hijo),
+                $node['hijos']
+            );
+        } elseif (isset($node['children']) && is_array($node['children'])) {
+            $normalized['children'] = array_map(
+                fn ($hijo) => $this->normalizeInfografiaNodo($hijo),
+                $node['children']
+            );
+        }
+
+        return $normalized;
     }
 
     public function insertInfografiaEnEditor(): void
@@ -4358,7 +4466,7 @@ PROMPT;
         ];
 
         // Cerrar modal y resetear estado
-        $this->closeInfografiaModal();
+        $this->closeInfografiaPreview();
 
         $this->notification()->success(
             'Infografía insertada',
@@ -5814,8 +5922,8 @@ PROMPT;
             $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'book';
             $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
 
-            $bgColor = $getColor($colorIndex);
-            $textColor = $getTextColor($bgColor);
+            $bgColor = $node['color_fondo'] ?? $getColor($colorIndex);
+            $textColor = $node['color_texto'] ?? $getTextColor($bgColor);
 
             // Dibujar nodo (círculo con fondo)
             $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="28" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node"/>';
@@ -5893,8 +6001,8 @@ PROMPT;
                 $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'book';
                 $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
 
-                $bgColor = $getColor($colorIndex);
-                $textColor = $getTextColor($bgColor);
+                $bgColor = $node['color_fondo'] ?? $getColor($colorIndex);
+                $textColor = $node['color_texto'] ?? $getTextColor($bgColor);
 
                 // Dibujar nodo
                 $svg .= '<circle cx="' . $x . '" cy="' . $y . '" r="22" fill="' . $bgColor . '" stroke="' . $textColor . '" stroke-width="2" class="node"/>';
@@ -5932,8 +6040,8 @@ PROMPT;
         $rootLabel = isset($nodoRaiz['label']) ? htmlspecialchars($nodoRaiz['label']) : 'Centro';
         $rootIcon = isset($nodoRaiz['icon']) ? htmlspecialchars($nodoRaiz['icon']) : 'atom';
         $rootColorIndex = isset($nodoRaiz['color_index']) ? min($nodoRaiz['color_index'], 9) : 0;
-        $rootBgColor = $getColor($rootColorIndex);
-        $rootTextColor = $getTextColor($rootBgColor);
+        $rootBgColor = $nodoRaiz['color_fondo'] ?? $getColor($rootColorIndex);
+        $rootTextColor = $nodoRaiz['color_texto'] ?? $getTextColor($rootBgColor);
 
         // Nodo raíz central
         $svg .= '<circle cx="0" cy="0" r="30" fill="' . $rootBgColor . '" stroke="' . $rootTextColor . '" stroke-width="3" class="node"/>';
@@ -5972,7 +6080,7 @@ PROMPT;
         $nodeHeight = 60;
         $levelSpacing = 100;
 
-        $drawFlowNode = function ($node, $x, $y, $level, $parentIndex = null, $isDecision = false) use (&$drawFlowNode, $getColor, $getTextColor, $getIcon, $niveles, &$svg, $nodeWidth, $nodeHeight, &$currentY) {
+        $drawFlowNode = function ($node, $x, $y, $level, $parentIndex = null, $isDecision = false) use (&$drawFlowNode, $getColor, $getTextColor, $getIcon, $niveles, &$svg, $nodeWidth, $nodeHeight, $levelSpacing, &$currentY) {
             if ($level > $niveles || !is_array($node)) {
                 return null;
             }
@@ -5981,8 +6089,8 @@ PROMPT;
             $icon = isset($node['icon']) ? htmlspecialchars($node['icon']) : 'gear';
             $colorIndex = isset($node['color_index']) ? min($node['color_index'], 9) : ($level - 1);
 
-            $bgColor = $getColor($colorIndex);
-            $textColor = $getTextColor($bgColor);
+            $bgColor = $node['color_fondo'] ?? $getColor($colorIndex);
+            $textColor = $node['color_texto'] ?? $getTextColor($bgColor);
 
             // Determinar forma según tipo
             $isDecision = isset($node['type']) && $node['type'] === 'decision';
@@ -6151,5 +6259,10 @@ PROMPT;
         $svg .= '</svg>';
 
         return $svg;
+    }
+
+    private function sanitizeText(?string $text, string $level = 'standard'): ?string
+    {
+        return app(\App\Services\Lms\LmsTextSanitizerService::class)->sanitize($text, $level);
     }
 }

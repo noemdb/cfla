@@ -36,7 +36,7 @@
                         </svg>
                     </button>
                     <span class="w-16 text-center font-mono text-gray-900 dark:text-gray-100">
-                        {{ infografiaConfig.niveles }}
+                        @{{ infografiaConfig.niveles }}
                     </span>
                     <button type="button"
                             @click="infografiaConfig.niveles = Math.min(6, infografiaConfig.niveles + 1)"
@@ -160,7 +160,7 @@
                                 </svg>
                             </button>
                             <span class="text-sm font-mono text-gray-900 dark:text-gray-100 capitalize">
-                                {{ infografiaConfig.direccion }}
+                                @{{ infografiaConfig.direccion }}
                             </span>
                         </div>
                     </div>

@@ -1,5 +1,11 @@
 # Bitácora de Auditoría — Fase 1 (Revisión Técnica)
 
+> ## ⚠️ DOCUMENTO SUPERSEDIDO
+>
+> Esta revisión técnica fue **absorbida e integrada** en **`SPEC-BINNACLE-001.md`**, que es el spec normativo vigente (estado: listo para implementación). Sus decisiones (ADR-001 a ADR-005, contrato `Auditable`, trigger de inmutabilidad, flujo único de escritura) están consolidadas allí.
+>
+> Se conserva solo como registro histórico de las decisiones tomadas. **No usar como referencia de implementación.**
+
 > Este documento reemplaza las secciones **Arquitectura**, **Mecanismos de Implementación** y **Consideraciones de Seguridad** del spec original. El resto del documento (Alcance, Fases 2-4, Retención, Riesgos) permanece vigente sin cambios.
 
 ## Decisiones de arquitectura tomadas
