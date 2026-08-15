@@ -96,6 +96,16 @@ Route::get('/voting/results', [PollVotingController::class, 'results'])->name('v
 Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('poll.qr.show');
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
+// Horario: vistas públicas por enlace firmado (SPEC-TIMETABLE-001 §8)
+Route::prefix('timetable')->name('timetable.public.')->middleware('signed')->group(function () {
+    Route::get('/section/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePublicController::class, 'section'])
+        ->name('section');
+    Route::get('/teacher/{calendar}/{profesor}', [\App\Http\Controllers\Timetable\TimetablePublicController::class, 'teacher'])
+        ->name('teacher');
+    Route::get('/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePublicController::class, 'room'])
+        ->name('room');
+});
+
 // Rutas del panel administrativo
 Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', 'auth'])->group(function () {
 
@@ -272,6 +282,21 @@ Route::prefix('app')->name('app.')->group(function () {
             ])->name('print');   // nombre completo: app.planning.lms.print
         });
 
+        // ─── Horario (ADR-TT-006: is_planner gestiona igual que coordinación) ──
+        Route::get('/timetable', \App\Livewire\Planning\Timetable\TimetableWizard::class)
+            ->name('timetable');
+        Route::get('/timetable/editor/{calendar?}', \App\Livewire\Planning\Timetable\TimetableEditor::class)
+            ->name('timetable.editor');
+        Route::get('/timetable/substitutes/{calendar?}', \App\Livewire\Planning\Timetable\TimetableSubstitutes::class)
+            ->name('timetable.substitutes');
+
+        Route::get('/timetable/pdf/section/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'section'])
+            ->name('timetable.pdf.section');
+        Route::get('/timetable/pdf/teacher/{calendar}/{profesor}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacher'])
+            ->name('timetable.pdf.teacher');
+        Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
+            ->name('timetable.pdf.room');
+
         // Diagramas de flujo: hub e infografías (documentos estáticos).
         // Cada archivo `docs/infografia/flujo{Studly}.html` se publica como
         // /app/planning/diagram/flow/{slug}. Protegido por el middleware del
@@ -320,6 +345,19 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('resources');
             Route::get('/profesores', \App\Livewire\Coordinacion\ProfesorList::class)
                 ->name('profesores');
+            Route::get('/timetable', \App\Livewire\Coordinacion\Timetable\TimetableWizard::class)
+                ->name('timetable');
+            Route::get('/timetable/editor/{calendar?}', \App\Livewire\Coordinacion\Timetable\TimetableEditor::class)
+                ->name('timetable.editor');
+            Route::get('/timetable/substitutes/{calendar?}', \App\Livewire\Coordinacion\Timetable\TimetableSubstitutes::class)
+                ->name('timetable.substitutes');
+
+            Route::get('/timetable/pdf/section/{calendar}/{seccion}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'section'])
+                ->name('timetable.pdf.section');
+            Route::get('/timetable/pdf/teacher/{calendar}/{profesor}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'teacher'])
+                ->name('timetable.pdf.teacher');
+            Route::get('/timetable/pdf/room/{calendar}/{room}', [\App\Http\Controllers\Timetable\TimetablePdfController::class, 'room'])
+                ->name('timetable.pdf.room');
         });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────
@@ -360,6 +398,10 @@ Route::prefix('app')->name('app.')->group(function () {
             // Profesores con KPIs
             Route::get('/profesores', \App\Livewire\Leadership\ProfesorIndicators::class)
                 ->name('profesores');
+
+            // Horario (SOLO lectura, cualquier sección) — ADR-TT-013
+            Route::get('/timetable/{seccion?}', \App\Livewire\Leadership\Timetable\SectionGrid::class)
+                ->name('timetable.view');
         });
 
     // ─── Dirección: Supervisión y Seguimiento (READ-ONLY) ─────────
@@ -407,6 +449,10 @@ Route::prefix('app')->name('app.')->group(function () {
             // Seguimiento Docente (KPIs)
             Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
                 ->name('profesores');
+
+            // Horario (SOLO lectura, cualquier sección) — ADR-TT-013
+            Route::get('/timetable/{seccion?}', \App\Livewire\Director\Timetable\SectionGrid::class)
+                ->name('timetable.view');
         });
 
     // ───────────────────────────────────────────────
@@ -455,6 +501,14 @@ Route::prefix('app')->name('app.')->group(function () {
         // ─── Binnacle: Mi Bitácora (solo registros propios) ───────
         Route::get('/binnacle/mi-bitcora', \App\Livewire\Profesor\Binnacle\ActivityTimeline::class)
             ->name('binnacle.mi-bitcora');
+
+        // ─── Horario: suplencias asignadas (confirmar/rechazar) ────
+        Route::get('/timetable/substitutes', \App\Livewire\Profesor\Timetable\SubstituteInbox::class)
+            ->name('timetable.substitutes');
+
+        // ─── Horario: mi horario (solo sus slots) ─────────────────
+        Route::get('/timetable', \App\Livewire\Profesor\Timetable\MyTimetable::class)
+            ->name('timetable');
     });
 });
 
@@ -465,6 +519,7 @@ Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isSt
     Route::get('/academica', \App\Livewire\Student\Lms\AcademicInfo::class)->name('academic');
     Route::get('/lecciones', \App\Livewire\Student\Lms\LessonList::class)->name('lessons');
     Route::get('/recursos', \App\Livewire\Student\Lms\ResourceList::class)->name('resources');
+    Route::get('/timetable', \App\Livewire\Student\Lms\Timetable::class)->name('timetable');
     Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
     Route::get('/activity/{activity}/print', [\App\Http\Controllers\Lms\ActivityPrintController::class, 'show'])->name('activity.print');
     Route::get('/resource/{resource}/download', [

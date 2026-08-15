@@ -55,6 +55,11 @@
                           {{ request()->routeIs('student.lms.lessons') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
                     Lecciones
                 </a>
+                <a href="{{ route('student.lms.timetable') }}"
+                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                          {{ request()->routeIs('student.lms.timetable') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
+                    Horario
+                </a>
                 <a href="{{ route('student.lms.resources') }}"
                    class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
                           {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">

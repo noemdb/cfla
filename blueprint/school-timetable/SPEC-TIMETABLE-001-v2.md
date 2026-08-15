@@ -575,7 +575,13 @@ Esto es necesario porque una regeneración accidental sobre un calendario
   (mismo patrón que `BinnaclePdfController` y `CatchmentPDFController`).
 - **Vista del estudiante** (rol `is_student`): su sección vía
   `Estudiant → inscripcion → seccion → slots`; **docente** (rol `is_profesor`):
-  solo sus slots.
+  solo sus slots. Ambas vía `App\Livewire\Timetable\TimetableRoleView`
+  (base read-only) y sus subclases:
+  - `Student\Lms\Timetable` (ruta `student.lms.timetable`, layout `student.layouts.app`)
+  - `Profesor\Timetable\MyTimetable` (ruta `app.profesors.timetable`, layout `profesors.layouts.app`)
+  - `Leadership\Timetable\SectionGrid` y `Director\Timetable\SectionGrid`
+    (rutas `app.leadership.timetable.view` / `app.director.timetable.view`,
+    solo lectura, cualquier sección del calendario activo — ADR-TT-013).
 
 ---
 
@@ -585,9 +591,11 @@ Esto es necesario porque una regeneración accidental sobre un calendario
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | CRUD calendario/aulas/lecciones/disponibilidad | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Ejecutar generación / regeneración | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Editor manual + suplencias | ✅ | ✅ | ✅ (ver) | ❌ | ❌ | ❌ |
-| Ver horario de cualquier sección | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Ver su propio horario | — | — | — | — | ✅ | ✅ (su sección) |
+| Editor manual | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Suplencias (registrar/asignar) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Suplencias (confirmar/rechazar las propias) | — | — | — | — | ✅ | ❌ |
+| Ver horario de cualquier sección | ✅ | ✅ | ✅ (solo lectura, ADR-TT-013) | ✅ (solo lectura, ADR-TT-013) | ❌ | ❌ |
+| Ver su propio horario | — | — | — | — | ✅ (sus slots) | ✅ (su sección) |
 | Publicar / exportar / enlace firmado | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 
 **Nota:** `is_coordinacion` e `is_planner` (flags booleanos en `users`, rol
@@ -608,10 +616,15 @@ lectura para leadership/director reutiliza `isLeadership`/`isDirector`.
 Reutilizar `App\Services\NotificationService::notifyUsers()` (canal `database` +
 broadcast `NotificationReceived`, tabla `notifications` existente).
 
-- Cambio de horario que afecta a un docente o sección → notificación DB al
-  docente (`Profesor.user_id`).
-- Regeneración completa → notificación de resumen a coordinación.
-- Suplencia asignada → notificación con confirmar/rechazar (v1.2).
+- **Cambio de horario → job propio de cola** (`NotifyTimetableChangesJob`):
+  `GenerateTimetableJob` calcula el **diff real** entre el horario vigente y el
+  resultado del solver (`computeDiff`: lecciones movidas de período, sin
+  asignar, profesores afectados) y encola la notificación; NO se notifica en
+  línea. Solo reciben notificación los docentes con cambios (§15 "diff antes
+  de aplicar"). Coordinación recibe el resumen.
+- **Suplencia asignada** → `SubstituteAssignedNotification` al suplente vía
+  `NotifySubstituteJob` (cola), con enlace a su bandeja para confirmar/rechazar
+  (§7 v1.2).
 
 ---
 
@@ -629,6 +642,9 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **TT-008** | `roomBusy` en `SchedulingContext` solo se toca cuando `roomId !== null` | Evita que "periodId:" con `roomId=null` colisione entre secciones sin aula dedicada |
 | **TT-009** | Corte por tiempo: al vencer el deadline se marcan las restantes como no asignadas y se devuelve `true` (conserva la solución parcial) | Devolver `false` desharía todo lo ya asignado (release en cascada) y se perdería el progreso |
 | **TT-010** | El DTO mantiene `blocksT`/`blocksP` separados; `room_type_required` solo aplica a bloques prácticos | Preserva el desglose teórico/práctico (requisito `hour_t_week`/`hour_p_week`) y evita exigir laboratorio a bloques teóricos |
+| **TT-011** | Pool de candidatos del solver **adaptativo** y combinaciones con corte temprano | `C(14,7)=3432` era acotado pero un tope fijo de 14 huérfanaba lecciones de >14 bloques; ahora `pool = clamp(max(14, n), 26)` y `combine()` corta al llegar a `MAX_COMBOS_PER_LESSON`/presupuesto de nodos, y si `n > m/2` se generan combinaciones de EXCLUSIONES complementadas (`C(26,25)` se resuelve como `C(26,1)`) |
+| **TT-012** | Suplencias v1.2: registro de ausencia → slots afectados (por `day_of_week`) → suplente sugerido → asignación `pending` → notificación al suplente por cola | El suplente confirma/rechaza desde su bandeja; la asignación nunca es auto-confirmada |
+| **TT-013** | Leadership y Dirección acceden al horario **solo lectura** (cualquier sección del calendario activo), sin editor ni generación | Matriz RBAC §9: lectura para supervisión, escritura exclusiva coordinación/planning |
 
 ---
 
@@ -652,7 +668,12 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 
 - **Rendimiento del backtracking** en instituciones grandes (>80 docentes): si se
   supera el límite de tiempo → solución parcial + resolución manual (recomendado,
-  igual que `specDrive01.md` §11).
+  igual que `specDrive01.md` §11). El pool adaptativo (ADR-TT-011) elimina el
+  caso de lecciones huérfanas por tope fijo; en casos extremos >26 bloques la
+  lección se reporta sin asignar para resolución manual.
+- **Suplentes sin disponibilidad declarada**: el sistema sugiere con aviso
+  (no bloquea); coordinación decide. La confirmación del suplente es explícita
+  (ADR-TT-012).
 - **Carga docente cruzada entre lapsos**: un calendario por lapso es lo mínimo;
   si la carga cambia entre lapsos, se crea un calendario por lapso (ya cubierto
   por `uq_calendar_lapso`).
@@ -765,6 +786,43 @@ class TimetableEditor extends Component
 o de `App\Services\Timetable\ConflictValidator` (síncrono, solo valida un
 slot a la vez, reutilizado tanto por el editor como por el job).
 
+### `App\Livewire\Coordinacion\Timetable\TimetableSubstitutes` (y subclase Planning)
+
+```php
+class TimetableSubstitutes extends Component
+{
+    public $calendarId = null;
+    public $absentProfesorId = null;
+    public string $dateStart = '';
+    public string $dateEnd = '';
+    public string $reason = '';
+    public $selectedAbsenceId = null;
+
+    public function registerAbsence(): void {}          // crea TimetableAbsence
+    public function selectAbsence(int $absenceId): void {} // muestra slots afectados
+    public function assignSubstitute(int $slotId, int $substituteProfesorId): void {
+        // crea TimetableSubstituteAssignment (pending) y encola NotifySubstituteJob
+    }
+}
+```
+
+### `App\Livewire\Profesor\Timetable\SubstituteInbox`
+
+```php
+class SubstituteInbox extends Component
+{
+    public function confirmAssignment(int $assignmentId): void {}  // solo las propias
+    public function declineAssignment(int $assignmentId): void {}
+}
+```
+
+### `App\Livewire\Timetable\TimetableRoleView` (base read-only) y subclases
+
+`Student\Lms\Timetable`, `Profesor\Timetable\MyTimetable`,
+`Leadership\Timetable\SectionGrid`, `Director\Timetable\SectionGrid`.
+Cada una implementa `scope(): array{calendar, grid, label}` y su layout; el
+componente base renderiza la grilla con `TimetableViewService` (sin acciones).
+
 ---
 
 ## 17. Requisitos no funcionales y observabilidad
@@ -784,10 +842,13 @@ slot a la vez, reutilizado tanto por el editor como por el job).
 
 | Nivel | Qué cubre |
 |---|---|
-| **Unit — `TimetableSolver`** | Sin Eloquent, solo DTOs (§6.1): dataset factible pequeño (3 lecciones, 2 docentes) → sin conflictos; dataset infactible (1 docente, 40 horas/semana) → reporta no asignadas, nunca doble-booking; respeta `locked` (no reasigna y **reserva primero**); respeta `shift_mismatch`; **timeout → conserva la solución parcial** (no vacía); **aulas `roomId=null` no colisionan entre secciones**; bloques prácticos exigen aula del tipo pedido |
+| **Unit — `TimetableSolver`** | Sin Eloquent, solo DTOs (§6.1): dataset factible pequeño (3 lecciones, 2 docentes) → sin conflictos; dataset infactible (1 docente, 40 horas/semana) → reporta no asignadas, nunca doble-booking; respeta `locked` (no reasigna y **reserva primero**); respeta `shift_mismatch`; **timeout → conserva la solución parcial** (no vacía); **aulas `roomId=null` no colisionan entre secciones**; bloques prácticos exigen aula del tipo pedido; **pool adaptativo (ADR-TT-011)**: lección de 18 y 25 bloques se asigna sin explotar el CSP |
 | **Unit — `ConflictValidator`** | Cada regla dura del §6 probada aislada (docente doble, aula doble, sección doble, disponibilidad, turno) |
 | **Feature — `TimetableWizard`** | Flujo completo de los 5 pasos con `Livewire::test()`; paso 3 deriva bloques correctamente desde `hour_t_week/hour_p_week` (regla de redondeo del §4) |
 | **Feature — `TimetableEditor`** | `moveSlot` a un slot conflictivo falla con error inline y no persiste; bloqueo optimista: dos "usuarios" (dos instancias del componente con `version` desactualizado) → el segundo falla con mensaje de recarga |
 | **Feature — regeneración sobre `active`** | Confirma que `dryRun` no toca `timetable_slots`; confirmar preview aplica el diff y preserva slots `locked` |
 | **Feature — publicación** | Enlace firmado expira según TTL configurado; estudiante solo ve su propia sección; docente solo sus slots |
+| **Feature — notificaciones** | `GenerateTimetableJob` encola `NotifyTimetableChangesJob` con el diff real; regeneración idéntica → diff vacío (no notifica); `NotifySubstituteJob` notifica al suplente |
+| **Feature — suplencias** | Ausencia → slots afectados por `day_of_week`; asignar suplente crea `pending` y encola notificación; el suplente confirma/rechaza; otro profesor NO puede confirmar una suplencia ajena |
+| **Feature — vistas por rol** | Estudiante ve solo su sección; docente solo sus slots; leadership/director leen cualquier sección (read-only); estudiante sin inscripción → 404 |
 | **Seeder de dataset sintético** | `TimetableTestSeeder`: genera un lapso con N secciones/M docentes/pevaluaciones aleatorias pero reproducibles (seed fijo) para usar en los tests de arriba y en QA manual |

@@ -28,7 +28,7 @@ class InfografiaGeneratorService
 
 Reglas críticas:
 1. Generar EXACTAMENTE el número de niveles solicitado (entre 4 y 6).
-2. Cada nodo debe tener: etiqueta (máx 50 chars), descripción opcional (máx 150 chars).
+2. Cada nodo debe tener: etiqueta (máx 50 chars), descripción opcional (máx 80 chars).
 3. Jerarquía clara: cada nodo (excepto raíz) tiene exactamente un padre.
 4. No permitir huérfanos ni ciclos en la estructura.
 5. Usar exclusivamente colores de la paleta SAEFL especificados.
@@ -69,7 +69,8 @@ TEXT;
         // 3. Construir prompt especializado para infografías jerárquicas
         $prompt = $this->buildInfografiaPrompt($enrichedRequest);
 
-        // 4. Ejecutar cadena de fallback: OpenRouter → Nvidia → Kimi
+        // 4-5. Ejecutar cadena de fallback y validar el esquema JSON con cada servicio.
+        // Si un servicio responde con JSON que no cumple el esquema, se intenta con el siguiente.
         $result = $this->executeFallbackChain($prompt);
 
         if (! $result['success']) {
@@ -81,22 +82,8 @@ TEXT;
             ];
         }
 
-        // 5. Parsear y validar respuesta JSON
-        $parsed = $this->parseAndValidateResponse($result['content']);
-        if (! $parsed['valid']) {
-            return [
-                'success' => false,
-                'estructura' => null,
-                'error' => $parsed['error'],
-                'metadata' => array_merge(
-                    $result['metadata'] ?? [],
-                    ['raw_response' => $result['content']]
-                ),
-            ];
-        }
-
         // 6. Aplicar post-procesamiento para asegurar límites de niveles (4-6)
-        $processed = $this->postProcessStructure($parsed['estructura'], $requestData['niveles']);
+        $processed = $this->postProcessStructure($result['estructura'], $requestData['niveles']);
 
         // 7. Devolver estructura enriquecida con metadatos
         return [
@@ -220,59 +207,36 @@ TEXT;
         $paletaColores = $this->getSaeflPalette($temaColor);
 
         $systemPrompt = <<<'PROMPT'
-Eres un diseñador instruccional especializado en infografías educativas para el sistema escolar venezolano.
-Genera una estructura jerárquica de EXACTAMENTE {{niveles}} niveles (entre 4 y 6) para el tema "{{tema_leccion}}".
+Eres un diseñador instruccional de infografías educativas.
+Genera una estructura jerárquica de EXACTAMENTE {{niveles}} niveles para el tema "{{tema_leccion}}".
 
-RESTRICCIONES OBLIGATORIAS:
-- Mínimo 4 niveles, máximo 6 niveles
-- Máximo {{maximo_nodos_por_nivel}} nodos por nivel para evitar sobrecarga visual
-- Cada nodo debe tener: etiqueta (máx {{etiqueta_maxima_longitud}} chars), descripción opcional (máx 150 chars)
-- Jerarquía clara: cada nodo (excepto raíz) tiene exactamente un padre
-- No permitir huérfanos ni ciclos en la estructura
-- Usar exclusivamente colores de la paleta SAEFL proporcionada para {{tema_color}}
-- Asegurar contraste mínimo WCAG AA (4.5:1) entre fondo y texto de cada nodo
-- Sugerir iconos del conjunto predefinido cuando sea apropiado
+RESTRICCIONES:
+- Máximo {{maximo_nodos_por_nivel}} nodos por nivel
+- Cada nodo: etiqueta (máx {{etiqueta_maxima_longitud}} chars), descripcion opcional (máx 80 chars)
+- Cada nodo (excepto raíz) tiene exactamente un padre; sin huérfanos ni ciclos
+- Colores solo de la paleta {{tema_color}}; contraste texto/fondo ≥ 4.5:1
+- Sugerir icono del conjunto predefinido
 
-FORMATO DE SALIDA (JSON ESTRICTO):
-{
-  "estructura": {
-    "tipo": "{{tipo_estructura}}",
-    "niveles": <entero 4-6>,
-    "nodo_raiz": {
-      "id": "string único",
-      "etiqueta": "string (máx {{etiqueta_maxima_longitud}})",
-      "descripcion": "string opcional (máx 150)",
-      "color_fondo": "hex color válido de la paleta {{tema_color}}",
-      "color_texto": "hex color válido de la paleta {{tema_color}} (con contraste ≥4.5:1)",
-      "icono_sugerido": "string del conjunto predefinido o null",
-      "hijos": [ /* arreglo de nodos del siguiente nivel */ ]
-    }
-  }
-}
+FORMATO DE SALIDA (SOLO JSON, SIN OTRO TEXTO):
+{"estructura":{"tipo":"{{tipo_estructura}}","niveles":{{niveles}},"nodo_raiz":{"id":"...","etiqueta":"...","descripcion":"...","color_fondo":"hex","color_texto":"hex","icono_sugerido":"...","hijos":[{"id":"...","etiqueta":"...","descripcion":"...","color_fondo":"hex","color_texto":"hex","icono_sugerido":"...","hijos":[...]}]}}}
 
-CONJUNTO PREDEFINIDO DE ÍCONOS EDUCATIVOS SIMPLES:
-['book', 'lightbulb', 'microscope', 'globe', 'calculator', 'atom', 'leaf',
- 'gear', 'paint-brush', 'music-note', 'soccer-ball', 'heart', 'shield',
- 'magnet', 'flask', 'binoculars', 'compass', 'ruler']
+ÍCONOS: ['book','lightbulb','microscope','globe','calculator','atom','leaf','gear','paint-brush','music-note','soccer-ball','heart','shield','magnet','flask','binoculars','compass','ruler']
 
-PALETA DE COLORES SAEFL PARA {{tema_color}} (usar exclusivamente estos valores):
+PALETA {{tema_color}} (solo estos):
 {{paleta_colores}}
 
-CONTEXTO PEDAGÓGICO:
-**Grado:** {{grado}}
-**Asignatura:** {{asignatura}}
-**Tema de la lección:** {{tema_leccion}}
-**Indicadores relacionados:** {{indicadores_relacionados}}
-**Referente normativo:** {{referente_normativo}}
-**Contenido actual (para inspiración):** {{contenido_actual}}
+CONTEXTO:
+- Grado: {{grado}}
+- Asignatura: {{asignatura}}
+- Tema: {{tema_leccion}}
+- Indicadores: {{indicadores_relacionados}}
+- Referente: {{referente_normativo}}
+- Contenido actual: {{contenido_actual}}
 
-INSTRUCCIONES ADICIONALES:
-- Prioriza conceptos clave y relaciones causales sobre enumeraciones simples
-- Usa vocabulario acorde al grado especificado
-- Asegura progresión lógica de conceptos (de general a específico o viceversa según tipo de estructura)
-- Incluye al menos una relación de causa-efecto o proceso en cada nivel intermedio
-- El nodo raíz debe representar el concepto central del tema
-- Los niveles deben mostrar una progresión pedagógica clara
+Notas:
+- Progresión lógica de conceptos (general → específico)
+- Vocabulario acorde al grado
+- El nodo raíz es el concepto central
 PROMPT;
 
         // Reemplazar placeholders
@@ -348,6 +312,8 @@ PROMPT;
             ],
         ];
 
+        $fallos = [];
+
         foreach ($attempts as $attempt) {
             $this->logger->info("Intentando generar infografía con {$attempt['label']}");
 
@@ -361,15 +327,34 @@ PROMPT;
                 if ($result['success'] && ! empty($result['content'])) {
                     $this->logger->info("Éxito con {$attempt['label']}");
 
-                    return [
-                        'success' => true,
-                        'content' => $result['content'],
-                        'model' => $attempt['params']['model'],
-                        'usage' => $result['usage'] ?? [],
-                    ];
+                    // Validar el esquema del JSON antes de aceptar la respuesta.
+                    // Si no cumple, se intenta con el siguiente servicio.
+                    $parsed = $this->parseAndValidateResponse($result['content']);
+
+                    if ($parsed['valid']) {
+                        return [
+                            'success' => true,
+                            'estructura' => $parsed['estructura'],
+                            'content' => $result['content'],
+                            'model' => $attempt['params']['model'],
+                            'usage' => $result['usage'] ?? [],
+                        ];
+                    }
+
+                    $this->logger->warning("Respuesta de {$attempt['label']} no cumple esquema: {$parsed['error']}");
+                    $fallos[] = "{$attempt['label']}: respuesta inválida ({$parsed['error']})";
+
+                    continue;
                 }
+
+                // El servicio respondió pero sin éxito: registrar el motivo para diagnóstico
+                $motivo = $result['error'] ?? 'Respuesta vacía sin error especificado';
+                $contenido = isset($result['content']) && $result['content'] !== '' ? ' (contenido no vacío pero marcado como fallo)' : '';
+                $this->logger->warning("Sin éxito con {$attempt['label']}: {$motivo}{$contenido}");
+                $fallos[] = "{$attempt['label']}: {$motivo}";
             } catch (\Throwable $e) {
                 $this->logger->warning("Error con {$attempt['label']}: {$e->getMessage()}");
+                $fallos[] = "{$attempt['label']}: {$e->getMessage()}";
 
                 continue;
             }
@@ -377,20 +362,21 @@ PROMPT;
 
         return [
             'success' => false,
-            'error' => 'Todos los servicios de IA fallaron al generar la infografía.',
+            'error' => 'Todos los servicios de IA fallaron al generar la infografía: '.implode(' | ', $fallos),
             'metadata' => [],
         ];
     }
 
     /**
-     * Extrae el primer bloque JSON válido de una respuesta que puede contener
+     * Extrae el bloque JSON más adecuado de una respuesta que puede contener
      * texto de razonamiento pre-pendido o wrappers de markdown (```json ... ```).
      *
      * Estrategia:
      *   1. Quitar wrappers de código markdown si existen.
      *   2. Si el contenido completo ya es JSON, devolverlo tal cual.
      *   3. Recorrer cada "{" como posible inicio y buscar el cierre balanceado;
-     *      devolver la primera candidatura que sea JSON válido.
+     *      entre las candidaturas JSON válidas, preferir la que contenga "estructura"
+     *      y, en su defecto, la de mayor tamaño (evita bloques de razonamiento parciales).
      */
     private function extractJsonBlock(string $content): string
     {
@@ -416,14 +402,27 @@ PROMPT;
             }
         }
 
+        $mejorCandidato = null;
+        $mejorPuntaje = -1;
+
         foreach ($positions as $start) {
             $candidate = $this->extractBalancedJson($content, $start);
-            if ($candidate !== null && $this->isValidJson($candidate)) {
-                return $candidate;
+            if ($candidate === null || ! $this->isValidJson($candidate)) {
+                continue;
+            }
+
+            // Priorizar candidaturas que contienen la clave "estructura"
+            $puntaje = str_contains($candidate, '"estructura"') ? 1000 : 0;
+            // Entre las del mismo tipo, preferir la más larga (JSON completo > razonamiento parcial)
+            $puntaje += strlen($candidate);
+
+            if ($puntaje > $mejorPuntaje) {
+                $mejorPuntaje = $puntaje;
+                $mejorCandidato = $candidate;
             }
         }
 
-        return $content;
+        return $mejorCandidato ?? $content;
     }
 
     /**
@@ -488,21 +487,27 @@ PROMPT;
         // Intentar parsear JSON
         $data = json_decode($content, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->warning('Infografía: respuesta no es JSON válido. '.substr($content, 0, 500));
+
             return [
                 'valid' => false,
                 'error' => 'Respuesta no es JSON válido: '.json_last_error_msg(),
             ];
         }
 
-        // Validar estructura básica
-        if (! isset($data['estructura']) || ! is_array($data['estructura'])) {
+        // Buscar "estructura" en cualquier profundidad (algunos modelos anidan
+        // el JSON en data/result/response antes de devolver la estructura)
+        $estructura = $this->findKey($data, 'estructura');
+
+        if ($estructura === null || ! is_array($estructura)) {
+            $this->logger->warning('Infografía: respuesta sin campo "estructura". '.substr($content, 0, 500));
+
             return [
                 'valid' => false,
                 'error' => 'Falta el campo "estructura" o no es un array.',
             ];
         }
 
-        $estructura = $data['estructura'];
         if (! isset($estructura['tipo']) || ! isset($estructura['niveles']) || ! isset($estructura['nodo_raiz'])) {
             return [
                 'valid' => false,
@@ -533,6 +538,27 @@ PROMPT;
             'valid' => true,
             'estructura' => $estructura,
         ];
+    }
+
+    /**
+     * Busca una clave en el array decodificado recorriendo todas las profundidades.
+     * Devuelve el valor asociado a la primera ocurrencia, o null si no existe.
+     */
+    private function findKey(array $data, string $needle): mixed
+    {
+        foreach ($data as $key => $value) {
+            if ($key === $needle) {
+                return $value;
+            }
+            if (is_array($value)) {
+                $found = $this->findKey($value, $needle);
+                if ($found !== null) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

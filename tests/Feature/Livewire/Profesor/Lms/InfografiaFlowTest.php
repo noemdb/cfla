@@ -323,7 +323,7 @@ class InfografiaFlowTest extends TestCase
         $component->call('startWizard', $activity->id);
 
         $component->call('generateInfografia')
-            ->assertSet('infografiaError', 'Todos los servicios de IA fallaron al generar la infografía.');
+            ->assertSet('infografiaError', 'Todos los servicios de IA fallaron al generar la infografía: OpenRouter primario: API error simulado | Nvidia fallback 1: API error simulado | Kimi fallback 2: API error simulado');
     }
 
     /** @test */

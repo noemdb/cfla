@@ -17,7 +17,7 @@ return [
 
     'base_url' => env('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1'),
 
-    'model' => env('NVIDIA_MODEL', 'qwen/qwen3.5-122b-a10b'),
+    'model' => env('NVIDIA_MODEL', 'openai/gpt-oss-20b'),
 
     /*
     |--------------------------------------------------------------------------

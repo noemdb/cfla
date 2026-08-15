@@ -413,13 +413,11 @@
                                             Generar Imagen
                                         </button>
                                         <button wire:click="openInfografiaModal"
-                                                wire:loading.attr="disabled"
-                                                wire:target="generateInfografia"
-                                                {{ $blockCount >= 2 ? 'disabled' : '' }}
-                                                @disabled($isPublished)
+                                                disabled
+                                                title="Función desactivada temporalmente"
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200
-                                                       text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]
-                                                       {{ $blockCount >= 2 ? 'opacity-40 cursor-not-allowed pointer-events-none' : '' }}">
+                                                       text-gray-400 bg-gray-500/10 border border-gray-500/20
+                                                       opacity-40 cursor-not-allowed pointer-events-none">
                                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 21v-9a4 4 0 004-4h12a4 4 0 004 4v9m-4-9h3v4m4 0h3v-4m-7 0h3v4m4 0h3v-4z"/></svg>
                                                 Generar Infografía
                                         </button>
