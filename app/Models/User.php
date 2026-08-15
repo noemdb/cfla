@@ -17,9 +17,28 @@ use Laravel\Sanctum\HasApiTokens;
  * @method bool isStudent()
  * @method bool isAdminOrDiagnostic()
  */
-class User extends Authenticatable
+class User extends Authenticatable implements \App\Contracts\Auditable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * NO existe role_id: los roles son flags booleanos.
+     * Excluidos a propósito: password, remember_token, api_token, number_id.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'username', 'email', 'is_active',
+            'is_admin', 'is_planner', 'is_diagnostic', 'is_profesor',
+            'is_coordinacion', 'is_leadership', 'is_director', 'is_student',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return ['email'];
+    }
 
     /**
      * The attributes that are mass assignable.

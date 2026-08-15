@@ -7,6 +7,31 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     /**
+     * Prioridad de ejecución de middleware. Sin esto, Authenticate se ordena
+     * ANTES de TrackBinnacleAccess y, para invitados, el redirect de auth
+     * impide registrar el acceso (Spec BINNACLE-001 §5.5). TrackBinnacleAccess
+     * debe correr tras arrancar la sesión (para resolver auth()->user()) pero
+     * antes de la autenticación (para capturar también intentos de invitados).
+     *
+     * @var array<int, class-string>
+     */
+    protected $middlewarePriority = [
+        \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \App\Http\Middleware\TrackBinnacleAccess::class,
+        \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
+        \Illuminate\Contracts\Session\Middleware\AuthenticatesSessions::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
+    ];
+
+    /**
      * The application's global HTTP middleware stack.
      *
      * These middleware are run during every request to your application.
@@ -80,5 +105,6 @@ class Kernel extends HttpKernel
         'isLeadership' => \App\Http\Middleware\IsLeadership::class,
         'isCoordinacion' => \App\Http\Middleware\IsCoordinacion::class,
         'isDirector' => \App\Http\Middleware\IsDirector::class,
+        'binnacle.track' => \App\Http\Middleware\TrackBinnacleAccess::class,
     ];
 }

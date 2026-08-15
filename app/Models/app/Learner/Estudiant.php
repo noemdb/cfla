@@ -14,10 +14,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class Estudiant extends Model
+class Estudiant extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
     use Prosecucions;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Excluidos a propósito: datos de salud, token, obs_resumen_final.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'user_id', 'planpago_id', 'grado_inicial_id', 'seccion_inicial',
+            'type_ci_id', 'ci_estudiant', 'ci_estudiant_temp',
+            'lastname', 'name', 'gender', 'date_birth',
+            'dir_address', 'phone', 'cellphone', 'email', 'gsemail',
+            'representant_ci', 'representant_id',
+            'status_active', 'status_blacklist', 'status_notice',
+            'status_prosecution', 'date_prosecution',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return ['ci_estudiant', 'ci_estudiant_temp', 'email', 'gsemail', 'phone', 'cellphone', 'representant_ci', 'dir_address'];
+    }
 
     // protected $connection = 's2526';
     // protected $table = 'estudiants';
@@ -25,8 +47,9 @@ class Estudiant extends Model
     protected $fillable = [
         'user_id', 'planpago_id', 'grado_inicial_id', 'seccion_inicial', 'type_ci_id', 'ci_estudiant', 'ci_estudiant_temp', 'lastname', 'name', 'gender',
         'date_birth', 'city_birth', 'town_hall_birth', 'state_birth', 'country_birth', 'dir_address', 'phone', 'cellphone', 'email', 'gsemail', 'representant_ci',
-        'representant_id', 'status_active', 'status_blacklist','status_notice', 'status_blacklist', 'obs_resumen_final','token','status_prosecution','date_prosecution'
+        'representant_id', 'status_active', 'status_blacklist', 'status_notice', 'status_blacklist', 'obs_resumen_final', 'token', 'status_prosecution', 'date_prosecution',
     ];
+
     const COLUMN_COMMENTS = [
         'user_id' => 'Usuario',
         'planpago_id' => 'Plan de pago',
@@ -64,14 +87,17 @@ class Estudiant extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function representant()
     {
         return $this->belongsTo(Representant::class, 'representant_id');
     }
+
     public function inscripcion()
     {
         return $this->hasOne(Inscripcion::class, 'estudiant_id');
     }
+
     public function administrativa()
     {
         return $this->hasOne(Administrativa::class, 'estudiant_id');
@@ -79,10 +105,11 @@ class Estudiant extends Model
 
     public function getShortNameAttribute()
     {
-        $arr_name = explode(" ", $this->name);
-        $arr_lastname = explode(" ", $this->lastname);
+        $arr_name = explode(' ', $this->name);
+        $arr_lastname = explode(' ', $this->lastname);
         $firstName = (array_key_exists(0, $arr_name)) ? $arr_name[0] : null;
         $lastName = (array_key_exists(0, $arr_lastname)) ? $arr_lastname[0] : Str::random(8);
+
         return "{$lastName} {$firstName}";
     }
 
@@ -97,12 +124,13 @@ class Estudiant extends Model
         $seccion = ($inscripcion) ? $inscripcion->seccion : null;
         $grado = ($seccion) ? $seccion->grado : null;
         $pestudio = ($grado) ? $grado->pestudio : null;
+
         return $pestudio;
     }
 
     public function getAgeAttribute()
     {
-        return ($this->date_birth <> '0000-00-00') ? Carbon::parse($this->date_birth)->age : '-';
+        return ($this->date_birth != '0000-00-00') ? Carbon::parse($this->date_birth)->age : '-';
     }
 
     /**
@@ -145,27 +173,31 @@ class Estudiant extends Model
     {
         $date_end = Carbon::parse($dateEnd);
         $date_birth = Carbon::parse($this->date_birth);
-        $age = $date_end->DiffInYears($date_birth); //dd($age);
+        $age = $date_end->DiffInYears($date_birth); // dd($age);
+
         return $age;
     }
 
     public function getNacionalidadAttribute()
     {
-        $country_birth = (!empty($this->country_birth)) ? strpos($this->country_birth, 'VENEZUELA') : null;
+        $country_birth = (! empty($this->country_birth)) ? strpos($this->country_birth, 'VENEZUELA') : null;
+
         return ($country_birth === false) ? 'E' : 'V';
     }
 
     public function getDayBirthAttribute()
     {
-        return ($this->date_birth <> '0000-00-00') ? Carbon::parse($this->date_birth)->format('d') : null;
+        return ($this->date_birth != '0000-00-00') ? Carbon::parse($this->date_birth)->format('d') : null;
     }
+
     public function getMonthBirthAttribute()
     {
-        return ($this->date_birth <> '0000-00-00') ? Carbon::parse($this->date_birth)->format('m') : null;
+        return ($this->date_birth != '0000-00-00') ? Carbon::parse($this->date_birth)->format('m') : null;
     }
+
     public function getYearBirthAttribute()
     {
-        return ($this->date_birth <> '0000-00-00') ? Carbon::parse($this->date_birth)->format('Y') : null;
+        return ($this->date_birth != '0000-00-00') ? Carbon::parse($this->date_birth)->format('Y') : null;
     }
 
     public function getGenderSmAttribute()
@@ -176,10 +208,10 @@ class Estudiant extends Model
     public function getSeccionAttribute()
     {
         $inscripcion = $this->inscripcion;
-        if (!empty($inscripcion)) {
+        if (! empty($inscripcion)) {
             $seccion = $this->inscripcion->seccion;
-            if (!empty($seccion)) {
-                if ($seccion->status_active == "true") {
+            if (! empty($seccion)) {
+                if ($seccion->status_active == 'true') {
                     return $seccion;
                 }
             }
@@ -189,11 +221,12 @@ class Estudiant extends Model
     public function getGradoAttribute()
     {
         $inscripcion = $this->inscripcion;
-        if (!empty($inscripcion)) {
+        if (! empty($inscripcion)) {
             $seccion = $this->inscripcion->seccion;
-            if (!empty($seccion)) {
-                if ($seccion->status_active == "true" && $seccion->status_inscription_affects == "true") {
+            if (! empty($seccion)) {
+                if ($seccion->status_active == 'true' && $seccion->status_inscription_affects == 'true') {
                     $grado = $seccion->grado;
+
                     return ($grado->status_active) ? $grado : null;
                 }
             }
@@ -202,14 +235,15 @@ class Estudiant extends Model
 
     public function getFullInscripcionAttribute()
     {
-        if (!empty($this->inscripcion)) {
+        if (! empty($this->inscripcion)) {
             $inscripcion = $this->inscripcion;
-            if (!empty($inscripcion->seccion)) {
+            if (! empty($inscripcion->seccion)) {
                 $seccion = $inscripcion->seccion;
                 if ($seccion) {
-                    if ($seccion->status_active == "true" && $seccion->status_inscription_affects == "true") {
-                        if (!empty($seccion->grado)) {
+                    if ($seccion->status_active == 'true' && $seccion->status_inscription_affects == 'true') {
+                        if (! empty($seccion->grado)) {
                             $grado = $seccion->grado;
+
                             return "{$grado->name} {$seccion->name}";
                         }
                     }
@@ -221,35 +255,32 @@ class Estudiant extends Model
     public static function getStatusInscriptionsCI($ci)
     {
         $estudiant = DB::table('estudiants')
-        ->select('estudiants.*')
-        ->join('inscripcions', 'estudiants.id', '=', 'inscripcions.estudiant_id')
-        ->join('seccions', 'seccions.id', '=', 'inscripcions.seccion_id')
-        ->where('estudiants.ci_estudiant',$ci)
-        ->where('seccions.status_active', 'true')
-        ->first();
+            ->select('estudiants.*')
+            ->join('inscripcions', 'estudiants.id', '=', 'inscripcions.estudiant_id')
+            ->join('seccions', 'seccions.id', '=', 'inscripcions.seccion_id')
+            ->where('estudiants.ci_estudiant', $ci)
+            ->where('seccions.status_active', 'true')
+            ->first();
+
         return ($estudiant) ? true : false;
     }
-
 
     public function getPensumsAttribute()
     {
         return Pensum::select('pensums.*')
-        ->join('grados', 'grados.id', '=', 'pensums.grado_id')
-        ->join('seccions', 'grados.id', '=', 'seccions.grado_id')
-        ->join('inscripcions', 'seccions.id', '=', 'inscripcions.seccion_id')
-        ->join('estudiants', 'estudiants.id', '=', 'inscripcions.estudiant_id')
-        ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
-        ->join('asignaturas', 'asignaturas.id', '=', 'pensums.asignatura_id')
-
-        ->Where('estudiants.id',$this->id)
-
-        ->wherenull('pensums.deleted_at')
-        ->wherenull('grados.deleted_at')
-        ->wherenull('seccions.deleted_at')
-        ->wherenull('inscripcions.deleted_at')
-        ->wherenull('estudiants.deleted_at')
-
-        ->groupby('pensums.id')
-        ->get();
+            ->join('grados', 'grados.id', '=', 'pensums.grado_id')
+            ->join('seccions', 'grados.id', '=', 'seccions.grado_id')
+            ->join('inscripcions', 'seccions.id', '=', 'inscripcions.seccion_id')
+            ->join('estudiants', 'estudiants.id', '=', 'inscripcions.estudiant_id')
+            ->join('administrativas', 'estudiants.id', '=', 'administrativas.estudiant_id')
+            ->join('asignaturas', 'asignaturas.id', '=', 'pensums.asignatura_id')
+            ->Where('estudiants.id', $this->id)
+            ->wherenull('pensums.deleted_at')
+            ->wherenull('grados.deleted_at')
+            ->wherenull('seccions.deleted_at')
+            ->wherenull('inscripcions.deleted_at')
+            ->wherenull('estudiants.deleted_at')
+            ->groupby('pensums.id')
+            ->get();
     }
 }

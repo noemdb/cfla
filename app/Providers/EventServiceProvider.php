@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\BinnacleEntryRequested;
+use App\Listeners\WriteBinnacleEntry;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -20,6 +22,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         OrderShipped::class => [
             SendShipmentNotification::class,
+        ],
+        // Bitácora de auditoría (Spec BINNACLE-001, ADR-001): único camino de escritura.
+        BinnacleEntryRequested::class => [
+            WriteBinnacleEntry::class,
         ],
     ];
 

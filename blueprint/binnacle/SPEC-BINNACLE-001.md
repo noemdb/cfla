@@ -1,4 +1,4 @@
-# SPEC-BINNACLE-001: Sistema de Bitácora de Auditoría (SAEFL)
+# SPEC-BINNACLE-001: Sistema de Bitácora de Auditoría (CFLA)
 
 | | |
 |---|---|
@@ -349,6 +349,16 @@ class UserObserver
 }
 ```
 
+> **Corrección de modelos Fase 1** (respecto al draft original):
+> - `Profile` → **`App\Models\sys\Profile`** (tabla `profiles`).
+> - `Payment` → **`App\Models\app\Admon\Payment`** (tabla `payments`, **conexión `s2526`**, no la default).
+> - `Order` → **no existe** como modelo en el repositorio (el `OrderController` opera sobre `DebateCompetition`). Se **elimina de la Fase 1**; si más adelante surge un modelo `Order` real, se añade a la allowlist.
+>
+> **Consecuencia técnica de `Payment` en conexión `s2526`**: sus observers se disparan contra esa BD. La tabla `binnacle_entries` y sus triggers de inmutabilidad viven en la conexión **default** (`s2627`), así que:
+> 1. `BinnacleEntry::create()` en el listener escribe en la conexión default — correcto sin cambios.
+> 2. `subject_id`/`object_id` solo guardan IDs (sin FKs), por lo que referenciar filas de otra conexión no es un problema.
+> 3. La escritura debe tolerar que `request()`/`auth()` del worker de cola reflejen la request que originó el evento (ver §5.4).
+
 ### 5.4 Listener (único consumidor de escritura)
 
 ```php
@@ -372,6 +382,8 @@ class WriteBinnacleEntry implements ShouldQueue
 
     public function handle(BinnacleEntryRequested $event): void
     {
+        $request = $event->requestContext();
+
         BinnacleEntry::create([
             'uuid' => (string) Str::uuid(),
             'event_type' => $event->eventType,
@@ -385,25 +397,31 @@ class WriteBinnacleEntry implements ShouldQueue
             'object_type' => $event->objectType(),
             'object_id' => $event->objectId(),
             'object_identifier' => $event->objectIdentifier(),
-            'ip_address' => request()?->ip(),
-            'user_agent' => request()?->userAgent(),
-            'request_method' => request()?->method(),
-            'request_url' => request()?->fullUrl(),
-            'request_id' => request()?->header('X-Request-Id'),
-            'session_id' => session()?->getId(),
+            'ip_address' => $request['ip'] ?? null,
+            'user_agent' => $request['user_agent'] ?? null,
+            'request_method' => $request['method'] ?? null,
+            'request_url' => $request['url'] ?? null,
+            'request_id' => $request['request_id'] ?? null,
+            'session_id' => $request['session_id'] ?? null,
             'old_values' => $event->context['old_values'] ?? null,
             'new_values' => $event->context['new_values'] ?? null,
             'changed_fields' => $event->context['changed_fields'] ?? null,
             'metadata' => $event->context['metadata'] ?? null,
-            'created_by' => auth()->id(),
+            'created_by' => $event->context['created_by'] ?? null,
         ]);
     }
 }
 ```
 
-### 5.5 Middleware de requests (Fase 2)
+> **Ajuste de implementación (difiere del draft §5.4)**: el contexto HTTP (`ip`, `user_agent`, `method`, `url`, `request_id`, `session_id`) y `created_by` se **capturan en el momento del dispatch** dentro del constructor de `BinnacleEntryRequested` y se serializan con el evento. No se leen desde `request()`/`auth()` dentro del listener, porque al procesarse en un worker de cola el request global es obsoleto o inexistente. El listener lee `$event->requestContext()`.
+>
+> **Operación requerida**: la cola dedicada necesita un worker propio. Config supervisor de referencia: `cfla-binnacle-queue` → `artisan queue:work database --queue=binnacle` (ver `supervisor-reverb.conf`). Sin ese worker, las entradas de severidad `info`/`warning`/`debug` no se persisten; las `critical`/`alert` sí (síncronas).
+
+### 5.5 Middleware de requests (Fase 2) — ✅ implementado
 
 Captura autenticación fallida, accesos a rutas protegidas y tiempos de respuesta. Se registra **solo** para rutas marcadas explícitamente (`->middleware('binnacle.track')`), no globalmente — registrar cada request de forma indiscriminada genera volumen sin valor de auditoría (ver §9, capacity planning).
+
+**Implementación**: `App\Http\Middleware\TrackBinnacleAccess`, alias `binnacle.track`. Parámetro opcional de categoría: `binnacle.track` → `user_action`, `binnacle.track:security` → `security`. Registra `event_type = access` con `subject` = usuario autenticado (o `system` para invitados), `response_status` y `response_ms` en metadata. El grupo `/admin/*` lo usa con `:security`. **Ajuste técnico**: `$middlewarePriority` en `app/Http/Kernel.php` incluye a `TrackBinnacleAccess` tras la sesión y antes de `AuthenticatesRequests`; sin esto Laravel ordena `Authenticate` antes y el redirect de invitados impide registrar el acceso.
 
 ### 5.6 Manejador de excepciones (Fase 2)
 
@@ -495,14 +513,15 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 ## 11. Plan de implementación por fases
 
 ### Fase 1 — Base y eventos críticos
-- [ ] Migración: tabla `binnacle_entries` + triggers de inmutabilidad (§4, §4.1)
-- [ ] `BinnacleEntry` model (`$guarded = ['*']`, sin mutators de update)
-- [ ] Contrato `Auditable` + implementación en `User`, `Profile`, `Payment`, `Order`
-- [ ] Servicio `Binnacle` (§5.2) + evento `BinnacleEntryRequested` + listener `WriteBinnacleEntry` (§5.4)
-- [ ] Observers para los 4 modelos críticos
-- [ ] Middleware básico de autenticación (login/logout/fallos)
-- [ ] Vista de tabla simple en `/admin/binnacle` (sin filtros avanzados aún)
-- [ ] Confirmar driver de cola configurado (Redis/database) antes de activar `ShouldQueue`
+- [x] Confirmar driver de cola configurado: **`QUEUE_CONNECTION=database`** (`.env`) — tabla `jobs` existente. Se requiere worker `php8.2 artisan queue:work --queue=binnacle`.
+- [x] Rol `is_director`: **ya implementado** (columna + middleware `IsDirector` + `DirectorScopeService`) — la matriz RBAC (§6) es implementable desde Fase 1.
+- [x] Migración: tabla `binnacle_entries` + triggers de inmutabilidad (§4, §4.1)
+- [x] `BinnacleEntry` model (`$guarded = ['*']`, sin mutators de update)
+- [x] Contrato `Auditable` + implementación en `User`, `Profile` (`App\Models\sys\Profile`), `Payment` (`App\Models\app\Admon\Payment`). `Order` descartado (no existe).
+- [x] Servicio `Binnacle` (§5.2) + evento `BinnacleEntryRequested` + listener `WriteBinnacleEntry` (§5.4)
+- [x] Observers para los 3 modelos críticos + registro en `AppServiceProvider`
+- [x] Middleware básico de autenticación (login/logout/fallos) — enganchado en `LoginController` (auth custom)
+- [x] Vista de tabla simple en `/admin/binnacle` (con filtros avanzados de Fase 2)
 
 **Criterios de aceptación Fase 1**:
 1. Crear/actualizar/eliminar un `User` genera una entrada con `old_values`/`new_values` correctos y **sin** `password` ni `remember_token` presentes (verificado por test automatizado, no inspección manual).
@@ -511,26 +530,26 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 4. Un usuario con rol `profesor` no puede acceder a `/admin/binnacle` (403).
 
 ### Fase 2 — Cobertura completa
-- [ ] Observers para el resto de modelos de negocio
-- [ ] Integración con `Handler::report()` para excepciones no manejadas
-- [ ] Filtros avanzados + búsqueda de texto libre en el panel
-- [ ] API/endpoint del timeline (`Binnacle::getUserActivityTimeline()`)
-- [ ] `config/binnacle.php` con allowlist de modelos para `model_viewed`
+- [x] Observers para el resto de modelos de negocio (observer genérico `AuditableModelObserver` + `Auditable` en `Learner\Estudiant`, `Learner\Representant`, `Academy\Enrollment`, `Admon\Ingreso`, `Blog\Post`)
+- [x] Integración con `Handler::report()` para excepciones no manejadas (`exception_thrown`, omite `ValidationException`)
+- [x] Filtros avanzados + búsqueda de texto libre en el panel (`/admin/binnacle`: búsqueda, categoría, severidad, rango de fechas, paginación)
+- [x] API/endpoint del timeline (`GET /api/binnacle/user/{id}/timeline`, auth:sanctum)
+- [x] `config/binnacle.php` con allowlist de modelos para `model_viewed`
 
 **Criterios de aceptación Fase 2**: una excepción no manejada en producción genera entrada `severity=critical` sin bloquear la respuesta al usuario; un filtro combinado (rango de fecha + severidad + usuario) responde en <1s sobre datos de prueba con 100k filas.
 
 ### Fase 3 — Visualización y reportes
-- [ ] Componente Livewire `user-activity-timeline` (implementación custom, §10)
-- [ ] Dashboard de métricas de auditoría
-- [ ] Exportación CSV/PDF
-- [ ] Tabla y job de archivado (§4.2)
+- [x] Componente Livewire `user-activity-timeline` (implementación custom, §10)
+- [x] Dashboard de métricas de auditoría (`/admin/binnacle/dashboard`: totales, distribución por categoría/severidad, top actores, críticos recientes, verificación de integridad de cadena)
+- [x] Exportación CSV (`/admin/binnacle/export`, con los filtros del panel) y PDF (`/admin/binnacle/export/pdf`, dompdf, 2.000 filas)
+- [x] Tabla y job de archivado (§4.2): `binnacle_entries_archive` + comando `php8.2 artisan binnacle:archive`
 - [ ] Reportes programados por email (opcional, según prioridad institucional)
 
 ### Fase 4 — Optimización y seguridad avanzada
-- [ ] Particionamiento por rango de fecha (si §9 lo justifica)
-- [ ] Hash-chain para eventos `critical`/`alert` (ADR-003)
-- [ ] Meta-auditoría: registro de accesos al propio panel de bitácora
-- [ ] Pruebas de carga
+- [ ] Particionamiento por rango de fecha (si §9 lo justifica; benchmark indica que aún no hace falta)
+- [x] Hash-chain para eventos `critical`/`alert` (ADR-003) — `entry_hash`/`previous_hash`, primera fila con genesis implícito
+- [x] Meta-auditoría: `event_type=binnacle_accessed` al consultar `/admin/binnacle` (config `binnacle.meta_audit`)
+- [x] Pruebas de carga: comandos `binnacle:seed-test` y `binnacle:benchmark` (Spec §11). Validado con 50k filas: filtro combinado 12ms, +usuario 4.8ms, texto libre 2.5ms (criterio <1s cumplido). Índice agregado `idx_subject_identifier`.
 
 ---
 

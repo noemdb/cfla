@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Admin\Users;
 
-use App\Models\User;
 use App\Models\sys\Profile;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -12,41 +12,58 @@ use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WithPagination, WireUiActions;
+    use WireUiActions, WithPagination;
 
     public $modeIndex = true;
+
     public $modeForm = false;
 
     public $isEditing = false;
+
     public $user_id;
 
     // ─── Form fields ───────────────────────────────────────────
     public $username;
+
     public $email;
+
     public $password;
+
     public $is_active = 'enable';
 
     // Role flags
     public $is_admin = false;
+
     public $is_diagnostic = false;
+
     public $is_planner = false;
+
     public $is_profesor = false;
+
     public $is_leadership = false;
+
     public $is_coordinacion = false;
+
     public $is_director = false;
+
     public $is_student = false;
 
     // Profile fields
     public $firstname;
+
     public $lastname;
+
     public $card_number;
 
     // ─── Filters, pagination & sorting ─────────────────────────
     public $search = '';
+
     public $filter_role = '';
+
     public $paginate = 15;
 
     public $sortField = 'id';
+
     public $sortDirection = 'desc';
 
     // ─── Delete confirmation ───────────────────────────────────
@@ -56,46 +73,46 @@ class IndexComponent extends Component
     {
         $rules = [
             'username' => 'required|string|max:150',
-            'email'     => [
+            'email' => [
                 'required',
                 'email',
                 'max:255',
                 $this->isEditing ? "unique:users,email,{$this->user_id}" : 'unique:users,email',
             ],
-            'password'  => $this->isEditing ? 'nullable|string|min:6' : 'required|string|min:6',
+            'password' => $this->isEditing ? 'nullable|string|min:6' : 'required|string|min:6',
             'is_active' => 'required|in:enable,disable',
-            'is_admin'  => 'boolean',
+            'is_admin' => 'boolean',
             'is_diagnostic' => 'boolean',
-            'is_planner'    => 'boolean',
-            'is_profesor'   => 'boolean',
+            'is_planner' => 'boolean',
+            'is_profesor' => 'boolean',
             'is_leadership' => 'boolean',
             'is_coordinacion' => 'boolean',
-            'is_director'   => 'boolean',
-            'is_student'   => 'boolean',
-            'firstname'     => 'nullable|string|max:100',
-            'lastname'      => 'nullable|string|max:100',
-            'card_number'   => 'nullable|string|max:20',
+            'is_director' => 'boolean',
+            'is_student' => 'boolean',
+            'firstname' => 'nullable|string|max:100',
+            'lastname' => 'nullable|string|max:100',
+            'card_number' => 'nullable|string|max:20',
         ];
 
         return $rules;
     }
 
     protected $validationAttributes = [
-        'username'  => 'nombre de usuario',
-        'email'     => 'correo electrónico',
-        'password'  => 'contraseña',
+        'username' => 'nombre de usuario',
+        'email' => 'correo electrónico',
+        'password' => 'contraseña',
         'is_active' => 'activo',
-        'is_admin'  => 'administrador',
+        'is_admin' => 'administrador',
         'is_diagnostic' => 'diagnóstico',
-        'is_planner'    => 'planificador',
-        'is_profesor'   => 'profesor',
-        'is_leadership'  => 'jefe de área',
+        'is_planner' => 'planificador',
+        'is_profesor' => 'profesor',
+        'is_leadership' => 'jefe de área',
         'is_coordinacion' => 'coordinación',
-        'is_director'    => 'dirección',
-        'is_student'    => 'estudiante',
-        'firstname'     => 'nombre',
-        'lastname'      => 'apellido',
-        'card_number'   => 'cédula',
+        'is_director' => 'dirección',
+        'is_student' => 'estudiante',
+        'firstname' => 'nombre',
+        'lastname' => 'apellido',
+        'card_number' => 'cédula',
     ];
 
     public function render()
@@ -105,12 +122,12 @@ class IndexComponent extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('username', 'like', "%{$this->search}%")
-                  ->orWhere('email', 'like', "%{$this->search}%")
-                  ->orWhere('number_id', 'like', "%{$this->search}%")
-                  ->orWhereHas('profile', function ($p) {
-                      $p->where('firstname', 'like', "%{$this->search}%")
-                        ->orWhere('lastname', 'like', "%{$this->search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$this->search}%")
+                    ->orWhere('number_id', 'like', "%{$this->search}%")
+                    ->orWhereHas('profile', function ($p) {
+                        $p->where('firstname', 'like', "%{$this->search}%")
+                            ->orWhere('lastname', 'like', "%{$this->search}%");
+                    });
             });
         }
 
@@ -133,13 +150,13 @@ class IndexComponent extends Component
             $query->where('is_student', true);
         } elseif ($this->filter_role === 'standard') {
             $query->where('is_admin', false)
-                  ->where('is_diagnostic', false)
-                  ->where('is_planner', false)
-                  ->where('is_profesor', false)
-                  ->where('is_leadership', false)
-                  ->where('is_coordinacion', false)
-                  ->where('is_director', false)
-                  ->where('is_student', false);
+                ->where('is_diagnostic', false)
+                ->where('is_planner', false)
+                ->where('is_profesor', false)
+                ->where('is_leadership', false)
+                ->where('is_coordinacion', false)
+                ->where('is_director', false)
+                ->where('is_student', false);
         }
 
         if (in_array($this->sortField, ['id', 'username', 'email', 'is_active'])) {
@@ -151,27 +168,38 @@ class IndexComponent extends Component
         $users = $query->paginate($this->paginate);
 
         $roleOptions = [
-            ''           => 'Todos los roles',
-            'admin'      => 'Administrador',
+            '' => 'Todos los roles',
+            'admin' => 'Administrador',
             'diagnostic' => 'Diagnóstico',
-            'planner'    => 'Planificación',
-            'profesor'   => 'Profesor',
+            'planner' => 'Planificación',
+            'profesor' => 'Profesor',
             'leadership' => 'Jefe de Área',
             'coordinacion' => 'Coordinación',
-            'director'   => 'Dirección',
-            'student'    => 'Estudiante',
-            'standard'   => 'Usuario Estándar',
+            'director' => 'Dirección',
+            'student' => 'Estudiante',
+            'standard' => 'Usuario Estándar',
         ];
 
         return view('livewire.admin.users.index-component', [
-            'users'        => $users,
-            'roleOptions'  => $roleOptions,
+            'users' => $users,
+            'roleOptions' => $roleOptions,
         ]);
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingFilterRole() { $this->resetPage(); }
-    public function updatingPaginate() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterRole()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPaginate()
+    {
+        $this->resetPage();
+    }
 
     public function sortBy($field)
     {
@@ -195,22 +223,26 @@ class IndexComponent extends Component
     {
         $user = User::with('profile')->findOrFail($id);
 
-        $this->user_id      = $user->id;
-        $this->username     = $user->username;
-        $this->email        = $user->email;
-        $this->is_active    = $user->is_active;
-        $this->is_admin     = (bool) $user->is_admin;
+        // Meta-auditoría: consulta de registro sensible (Spec BINNACLE-001, §9.2).
+        // Restringido por allowlist config/binnacle.php#viewed_models.
+        \App\Services\Binnacle::logView($user);
+
+        $this->user_id = $user->id;
+        $this->username = $user->username;
+        $this->email = $user->email;
+        $this->is_active = $user->is_active;
+        $this->is_admin = (bool) $user->is_admin;
         $this->is_diagnostic = (bool) $user->is_diagnostic;
-        $this->is_planner   = (bool) $user->is_planner;
-        $this->is_profesor  = (bool) $user->is_profesor;
+        $this->is_planner = (bool) $user->is_planner;
+        $this->is_profesor = (bool) $user->is_profesor;
         $this->is_leadership = (bool) ($user->is_leadership ?? false);
         $this->is_coordinacion = (bool) ($user->is_coordinacion ?? false);
         $this->is_director = (bool) ($user->is_director ?? false);
         $this->is_student = (bool) ($user->is_student ?? false);
 
         if ($user->profile) {
-            $this->firstname   = $user->profile->firstname;
-            $this->lastname    = $user->profile->lastname;
+            $this->firstname = $user->profile->firstname;
+            $this->lastname = $user->profile->lastname;
             $this->card_number = $user->profile->card_number;
         }
 
@@ -226,24 +258,24 @@ class IndexComponent extends Component
             DB::beginTransaction();
 
             $userData = [
-                'username'      => $this->username,
-                'email'         => $this->email,
-                'is_admin'      => $this->is_admin ? 1 : 0,
+                'username' => $this->username,
+                'email' => $this->email,
+                'is_admin' => $this->is_admin ? 1 : 0,
                 'is_diagnostic' => $this->is_diagnostic ? 1 : 0,
-                'is_planner'    => $this->is_planner ? 1 : 0,
-                'is_profesor'   => $this->is_profesor ? 1 : 0,
+                'is_planner' => $this->is_planner ? 1 : 0,
+                'is_profesor' => $this->is_profesor ? 1 : 0,
                 'is_leadership' => $this->is_leadership ? 1 : 0,
                 'is_coordinacion' => $this->is_coordinacion ? 1 : 0,
-                'is_director'   => $this->is_director ? 1 : 0,
-                'is_student'    => $this->is_student ? 1 : 0,
-                'is_active'     => $this->is_active,
+                'is_director' => $this->is_director ? 1 : 0,
+                'is_student' => $this->is_student ? 1 : 0,
+                'is_active' => $this->is_active,
             ];
 
             if ($this->isEditing) {
                 $user = User::findOrFail($this->user_id);
                 $user->update($userData);
 
-                if (!empty($this->password)) {
+                if (! empty($this->password)) {
                     $user->update(['password' => bcrypt($this->password)]);
                 }
 
@@ -266,8 +298,8 @@ class IndexComponent extends Component
                 Profile::updateOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'firstname'   => mb_strtoupper($this->firstname ?? ''),
-                        'lastname'    => mb_strtoupper($this->lastname ?? ''),
+                        'firstname' => mb_strtoupper($this->firstname ?? ''),
+                        'lastname' => mb_strtoupper($this->lastname ?? ''),
                         'card_number' => $this->card_number,
                     ]
                 );
@@ -280,7 +312,7 @@ class IndexComponent extends Component
             DB::rollBack();
             $this->notification()->error(
                 title: 'Error',
-                description: 'Ocurrió un error al guardar: ' . $e->getMessage()
+                description: 'Ocurrió un error al guardar: '.$e->getMessage()
             );
         }
     }
@@ -305,6 +337,7 @@ class IndexComponent extends Component
                 description: 'No puedes eliminar tu propio usuario.'
             );
             $this->cancelDelete();
+
             return;
         }
 

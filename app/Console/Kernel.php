@@ -20,6 +20,11 @@ class Kernel extends ConsoleKernel
         // Mantiene legibles los diagramas SVG recién creados/editados.
         // Idempotente: solo persiste cuando hay cambios reales.
         $schedule->command('lms:normalize-svgs --dry-run')->hourly()->withoutOverlapping();
+
+        // Bitácora de auditoría (Spec BINNACLE-001 §12): archiva las entradas
+        // que superan la retención por categoría hacia binnacle_entries_archive.
+        // De madrugada, sin solaparse con la ejecución anterior.
+        $schedule->command('binnacle:archive')->dailyAt('03:00')->withoutOverlapping();
     }
 
     protected $commands = [

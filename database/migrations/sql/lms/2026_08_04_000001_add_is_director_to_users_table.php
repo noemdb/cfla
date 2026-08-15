@@ -1,4 +1,5 @@
 <?php
+
 // database/migrations/2026_08_04_000001_add_is_director_to_users_table.php
 
 use Illuminate\Database\Migrations\Migration;
@@ -9,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('users', 'is_director')) {
+        if (! Schema::hasColumn('users', 'is_director')) {
             Schema::table('users', function (Blueprint $table) {
                 $table->boolean('is_director')
                     ->default(false)

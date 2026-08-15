@@ -7,8 +7,8 @@ use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Observers\AreaConocimientoObserver;
 use App\Observers\LmsActivityContentObserver;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
@@ -41,12 +41,13 @@ class AppServiceProvider extends ServiceProvider
         // así que redirigimos al nombre corto de la clase.
         Factory::guessFactoryNamesUsing(function (string $modelFqn) {
             $shortName = class_basename($modelFqn);
-            $factoryClass = 'Database\\Factories\\' . $shortName . 'Factory';
+            $factoryClass = 'Database\\Factories\\'.$shortName.'Factory';
             if (class_exists($factoryClass)) {
                 return $factoryClass;
             }
+
             // fallback al default de Laravel
-            return 'Database\\Factories\\' . Str::after($modelFqn, 'App\\Models\\') . 'Factory';
+            return 'Database\\Factories\\'.Str::after($modelFqn, 'App\\Models\\').'Factory';
         });
 
         // Observer de invalidación de caché para el scope de liderazgo (ADR-007).
@@ -59,5 +60,19 @@ class AppServiceProvider extends ServiceProvider
         // (Spec "Campo content_type"): cualquier mutación de un contenido
         // (crear/editar/ocultar/eliminar) recalcula el tipo de su sección.
         LmsActivityContent::observe(LmsActivityContentObserver::class);
+
+        // Observers de la bitácora de auditoría (Spec BINNACLE-001, Fase 1).
+        // Registrar siempre al final: no deben colisionar con otros observers.
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
+        \App\Models\sys\Profile::observe(\App\Observers\ProfileObserver::class);
+        \App\Models\app\Admon\Payment::observe(\App\Observers\PaymentObserver::class);
+
+        // Observer genérico (Fase 2): cubre el resto de modelos críticos que
+        // implementan App\Contracts\Auditable sin observer dedicado.
+        \App\Models\app\Learner\Estudiant::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Learner\Representant::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Enrollment::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Admon\Ingreso::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Blog\Post::observe(\App\Observers\AuditableModelObserver::class);
     }
 }

@@ -7,9 +7,41 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Enrollment extends Model
+class Enrollment extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Excluidos a propósito: campos de salud (blood_type, illness_*, conditions_*,
+     * medication, etc.) — información médica sensible no debe persistir en la
+     * bitácora de auditoría.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'user_id', 'ci_estudiant', 'lastname', 'name', 'cellphone',
+            'gender', 'date_birth', 'dir_address', 'pestudio_id', 'grado_id',
+            'grupo_estable_id', 'pending_matter', 'institution',
+            'ci_representant', 'name_representant', 'relationship', 'profession_representant',
+            'phone_representant', 'cellphone_representant', 'email_representant',
+            'status_transport_private_vehicle', 'status_transport_public_vehicle',
+            'status_transport_walking', 'status_transport_other',
+            'status_vaccination_schedule', 'status_sports_potential',
+            'mother_name', 'mother_lastname', 'father_name', 'father_lastname',
+            'status_treated_by_specialist',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [
+            'ci_estudiant', 'cellphone', 'ci_representant', 'phone_representant',
+            'cellphone_representant', 'email_representant',
+            'mother_name', 'mother_lastname', 'father_name', 'father_lastname',
+            'dir_address',
+        ];
+    }
 
     protected $fillable = [
         'user_id', 'ci_estudiant', 'lastname', 'name', 'photo', 'cellphone', 'gender', 'date_birth',
@@ -163,42 +195,44 @@ class Enrollment extends Model
 
     public static function list_coexistence()
     {
-        return ["Con mis padres" => "Con mis padres", "Con mis abuelos" => "Con mis abuelos", "Con mis padres adoptivos" => "Con mis padres adoptivos", "Con mis hermanos" => "Con mis hermanos", "Con mis tíos o tías" => "Con mis tíos o tías", "Con mis primos" => "Con mis primos", "Con un tutor" => "Con un tutor", "Con un cuidador informal" => "Con un cuidador informal", "No vivo con nadie" => "No vivo con nadie"];
+        return ['Con mis padres' => 'Con mis padres', 'Con mis abuelos' => 'Con mis abuelos', 'Con mis padres adoptivos' => 'Con mis padres adoptivos', 'Con mis hermanos' => 'Con mis hermanos', 'Con mis tíos o tías' => 'Con mis tíos o tías', 'Con mis primos' => 'Con mis primos', 'Con un tutor' => 'Con un tutor', 'Con un cuidador informal' => 'Con un cuidador informal', 'No vivo con nadie' => 'No vivo con nadie'];
     }
 
     public static function list_sports_potential()
     {
-        return ["Tenis"=>"Tenis","Futbol rápido"=>"Futbol rápido","Voleibol"=>"Voleibol","Baile"=>"Baile","Futbol soccer"=>"Futbol soccer","Instrumento músical"=>"Instrumento músical","Otros"=>"Otros","Karate do"=>"Karate do","Ciclismo"=>"Ciclismo","Beisbol"=>"Beisbol","Tae kwon do"=>"Tae kwon do","Canto"=>"Canto","Basquetbol"=>"Basquetbol","Natación"=>"Natación","Box"=>"Box","Tenis de mesa"=>"Tenis de mesa","Ajedrez"=>"Ajedrez","Halterofilia"=>"Halterofilia","Atletismo"=>"Atletismo"];
+        return ['Tenis' => 'Tenis', 'Futbol rápido' => 'Futbol rápido', 'Voleibol' => 'Voleibol', 'Baile' => 'Baile', 'Futbol soccer' => 'Futbol soccer', 'Instrumento músical' => 'Instrumento músical', 'Otros' => 'Otros', 'Karate do' => 'Karate do', 'Ciclismo' => 'Ciclismo', 'Beisbol' => 'Beisbol', 'Tae kwon do' => 'Tae kwon do', 'Canto' => 'Canto', 'Basquetbol' => 'Basquetbol', 'Natación' => 'Natación', 'Box' => 'Box', 'Tenis de mesa' => 'Tenis de mesa', 'Ajedrez' => 'Ajedrez', 'Halterofilia' => 'Halterofilia', 'Atletismo' => 'Atletismo'];
     }
 
     public static function list_profession()
     {
-        return ["Músico"=>"Músico","Profesor"=>"Profesor","Médico"=>"Médico","Enfermero"=>"Enfermero","Policía"=>"Policía","Militar"=>"Militar","Bombero"=>"Bombero","Abogado"=>"Abogado","Juez"=>"Juez","Fiscal"=>"Fiscal","Funcionario de gobierno"=>"Funcionario de gobierno","Empresario"=>"Empresario","Gerente"=>"Gerente","Director"=>"Director","Ejecutivo"=>"Ejecutivo","Profesional técnico"=>"Profesional técnico","Profesional especializado"=>"Profesional especializado","Trabajador manual"=>"Trabajador manual","Trabajador no calificado"=>"Trabajador no calificado","Artista"=>"Artista","Escritor"=>"Escritor","Periodista"=>"Periodista","Deportista"=>"Deportista","Religioso"=>"Religioso","Voluntario"=>"Voluntario","Otro/a"=>"Otro/a"];
+        return ['Músico' => 'Músico', 'Profesor' => 'Profesor', 'Médico' => 'Médico', 'Enfermero' => 'Enfermero', 'Policía' => 'Policía', 'Militar' => 'Militar', 'Bombero' => 'Bombero', 'Abogado' => 'Abogado', 'Juez' => 'Juez', 'Fiscal' => 'Fiscal', 'Funcionario de gobierno' => 'Funcionario de gobierno', 'Empresario' => 'Empresario', 'Gerente' => 'Gerente', 'Director' => 'Director', 'Ejecutivo' => 'Ejecutivo', 'Profesional técnico' => 'Profesional técnico', 'Profesional especializado' => 'Profesional especializado', 'Trabajador manual' => 'Trabajador manual', 'Trabajador no calificado' => 'Trabajador no calificado', 'Artista' => 'Artista', 'Escritor' => 'Escritor', 'Periodista' => 'Periodista', 'Deportista' => 'Deportista', 'Religioso' => 'Religioso', 'Voluntario' => 'Voluntario', 'Otro/a' => 'Otro/a'];
     }
 
     public static function list_blood_type()
     {
-        return ['A+'=>'A+','A-'=>'A-','B+'=>'B+','B-'=>'B-','O+'=>'O+','O-'=>'O-'];
+        return ['A+' => 'A+', 'A-' => 'A-', 'B+' => 'B+', 'B-' => 'B-', 'O+' => 'O+', 'O-' => 'O-'];
     }
 
     public static function list_relationship()
     {
-        return ['Madre'=>'Madre','Padre'=>'Padre','Hermano(a)'=>'Hermano(a)','Abuelo(a)'=>'Abuelo(a)','Otro'=>'Otro'];
+        return ['Madre' => 'Madre', 'Padre' => 'Padre', 'Hermano(a)' => 'Hermano(a)', 'Abuelo(a)' => 'Abuelo(a)', 'Otro' => 'Otro'];
     }
 
     public static function list_laterality()
     {
-        return ['IZQUIERDA'=>'IZQUIERDA','DERECHA'=>'DERECHA'];
+        return ['IZQUIERDA' => 'IZQUIERDA', 'DERECHA' => 'DERECHA'];
     }
 
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function pestudio()
     {
         return $this->belongsTo(Pestudio::class, 'pestudio_id');
     }
+
     public function grado()
     {
         return $this->belongsTo(Grado::class, 'grado_id');
@@ -213,14 +247,14 @@ class Enrollment extends Model
     {
         return ($this->date_birth) ? Carbon::parse($this->date_birth)->format('d') : null;
     }
+
     public function getMonthAttribute()
     {
         return ($this->date_birth) ? Carbon::parse($this->date_birth)->format('m') : null;
     }
+
     public function getYearAttribute()
     {
         return ($this->date_birth) ? Carbon::parse($this->date_birth)->format('Y') : null;
     }
-
-    
 }

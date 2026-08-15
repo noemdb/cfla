@@ -5,10 +5,33 @@ namespace App\Models\app\Admon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ingreso extends Model
+class Ingreso extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
-    protected $fillable = ['registro_pago_id','representant_id','estudiant_id','method_pay_id','banco_id','caf_id','number_i_pay','date_transaction','date_payment','date_reported','ingreso_ammount','exchange_rate_id','exchange_ammount_rate','exchange_ammount','status_late_payment','exchange_ammount_late_payment','ingreso_observations','person_bill_ci','person_bill_name','terminal_pos','approval_pos','sequence_pos','trace_pos','deleted_at',];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * No se incluye la relación de exchange_ammount_rate por ser derivada.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'registro_pago_id', 'representant_id', 'estudiant_id',
+            'method_pay_id', 'banco_id', 'caf_id', 'number_i_pay',
+            'date_transaction', 'date_payment', 'date_reported',
+            'ingreso_ammount', 'exchange_rate_id', 'exchange_ammount',
+            'status_late_payment', 'exchange_ammount_late_payment',
+            'ingreso_observations', 'person_bill_ci', 'person_bill_name',
+            'terminal_pos', 'approval_pos', 'sequence_pos', 'trace_pos',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return ['number_i_pay', 'person_bill_ci', 'terminal_pos', 'approval_pos', 'sequence_pos', 'trace_pos'];
+    }
+
+    protected $fillable = ['registro_pago_id', 'representant_id', 'estudiant_id', 'method_pay_id', 'banco_id', 'caf_id', 'number_i_pay', 'date_transaction', 'date_payment', 'date_reported', 'ingreso_ammount', 'exchange_rate_id', 'exchange_ammount_rate', 'exchange_ammount', 'status_late_payment', 'exchange_ammount_late_payment', 'ingreso_observations', 'person_bill_ci', 'person_bill_name', 'terminal_pos', 'approval_pos', 'sequence_pos', 'trace_pos', 'deleted_at'];
 
     const COLUMN_COMMENTS = [
         'representant_id' => 'Representante',
@@ -39,14 +62,17 @@ class Ingreso extends Model
     {
         return $this->belongsTo('App\Models\app\Planpago\MetodoPago', 'method_pay_id');
     }
+
     public function banco()
     {
         return $this->belongsTo('App\Models\app\Institucion\Banco');
     }
+
     public function estudiant()
     {
         return $this->belongsTo('App\Models\app\Estudiant');
     }
+
     public function representant()
     {
         return $this->belongsTo('App\Models\app\Estudiante\Representant');

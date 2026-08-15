@@ -53,7 +53,7 @@
 	        infografiaConfig: $wire.entangle('infografiaConfig'),
 	        infografiaPreviewSvg: $wire.entangle('infografiaPreviewSvg'),
 	        infografiaError: $wire.entangle('infografiaError'),
-	        generandoInfografia: $wire.entangle('generatingInfografia'),
+	        generatingInfografia: $wire.entangle('generatingInfografia'),
 
 	        closeInfografiaModal() {
 	            $wire.call('closeInfografiaModal');

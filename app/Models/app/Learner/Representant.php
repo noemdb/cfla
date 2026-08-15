@@ -6,9 +6,26 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Representant extends Model
+class Representant extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'user_id', 'ci_representant', 'name', 'phone', 'cellphone',
+            'pmovilphone', 'email', 'gsemail',
+            'status_active', 'status_blacklist', 'status_adviders',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return ['ci_representant', 'phone', 'cellphone', 'pmovilphone', 'email', 'gsemail'];
+    }
 
     // protected $connection = 's2526';
     // protected $table = 'representants';
@@ -19,6 +36,7 @@ class Representant extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function estudiants()
     {
         return $this->belongsTo(Estudiant::class, 'user_id');
@@ -47,6 +65,7 @@ class Representant extends Model
             ->join('planpagos', 'planpagos.id', '=', 'administrativas.planpago_id')
             ->where('representants.status_active', 'true')
             ->get();
+
         return $estudiants;
     }
 

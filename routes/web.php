@@ -3,8 +3,8 @@
 use App\Http\Controllers\Admin\VotingDashboardController;
 use App\Http\Controllers\Admin\VotingPollController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Census\CatchmentPDFController;
+use App\Http\Controllers\CensusController;
 use App\Http\Controllers\Educational\CompetitionController;
 use App\Http\Controllers\GmailController;
 use App\Http\Controllers\HomeController;
@@ -12,10 +12,10 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Planning\PlanningController;
 use App\Http\Controllers\PollVotingController;
 use App\Http\Controllers\VotingFingerprintController;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Diagnostic\IndexComponent as DiagnosticIndex;
 use App\Livewire\Admin\Educational\Competition\IndexComponent as CompetitionIndex;
 use App\Livewire\Bot\IndexComponent as BotIndex;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,13 +60,13 @@ Route::group(['prefix' => 'general', 'namespace' => 'General'], function () {
 // Route::put('/competitions/{orderId}/status', [OrderController::class, 'updateOrderStatus']);
 Route::get('/competitions/{orderId}/status/{status}', [OrderController::class, 'updateOrderStatus']);
 
-//Api Gmail
+// Api Gmail
 Route::get('/auth/google', [GmailController::class, 'redirectToGoogle'])->name('google.auth');
 Route::get('/oauth2callback', [GmailController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/send-email', [GmailController::class, 'sendEmail']);
 
-/////////////////////////////////////////////////////////////
-//////////////// Encuestas Anonimas /////////////////////////
+// ///////////////////////////////////////////////////////////
+// ////////////// Encuestas Anonimas /////////////////////////
 
 // Rutas públicas (activas) de votación
 // Route::get('/voting/index', [PollVotingController::class, 'index'])->name('poll.voting.index');
@@ -97,7 +97,7 @@ Route::get('/poll/qr/{uuid}', [PollVotingController::class, 'showQR'])->name('po
 Route::get('/poll/participation/{uuid}', [PollVotingController::class, 'showParticipation'])->name('poll.participation.show');
 
 // Rutas del panel administrativo
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', 'auth'])->group(function () {
 
     // Rutas protegidas para Administradores y Personal de Diagnóstico
     Route::middleware(['isAdminOrDiagnostic'])->group(function () {
@@ -136,6 +136,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::middleware(['isAdmin'])->group(function () {
         Route::get('logs', \App\Livewire\Admin\Logs\IndexComponent::class)->name('logs');
         Route::get('database/backup', [\App\Http\Controllers\Admin\DatabaseController::class, 'downloadBackup'])->name('database.backup');
+        Route::get('binnacle', \App\Livewire\Admin\Binnacle\IndexComponent::class)->name('binnacle');
+        Route::get('binnacle/dashboard', \App\Livewire\Admin\Binnacle\DashboardComponent::class)->name('binnacle.dashboard');
+        Route::get('binnacle/export', \App\Http\Controllers\Admin\BinnacleExportController::class)->name('binnacle.export');
+        Route::get('binnacle/export/pdf', \App\Http\Controllers\Admin\BinnaclePdfController::class)->name('binnacle.export.pdf');
+        Route::get('binnacle/timeline', \App\Livewire\Admin\Binnacle\UserActivityTimeline::class)->name('binnacle.timeline');
     });
 });
 
@@ -251,7 +256,7 @@ Route::prefix('app')->name('app.')->group(function () {
             // del monitor lleva los filtros activos como query string (asignatura/status
             // incluidos) y el membrete se adapta al módulo de origen.
             Route::get('/print', [
-                \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
             ])->name('print');   // nombre completo: app.planning.lms.print
         });
 
@@ -271,39 +276,39 @@ Route::prefix('app')->name('app.')->group(function () {
         ->name('coordinacion.')
         ->group(function () {
 
-        Route::get('/', \App\Livewire\Coordinacion\IndicatorDashboard::class)
-            ->name('index');
+            Route::get('/', \App\Livewire\Coordinacion\IndicatorDashboard::class)
+                ->name('index');
 
-        Route::get('/pensums', \App\Livewire\Coordinacion\PensumList::class)
-            ->name('pensums');
+            Route::get('/pensums', \App\Livewire\Coordinacion\PensumList::class)
+                ->name('pensums');
 
-        Route::get('/carga-academica', \App\Livewire\Coordinacion\CargaAcademicaList::class)
-            ->name('carga-academica');
+            Route::get('/carga-academica', \App\Livewire\Coordinacion\CargaAcademicaList::class)
+                ->name('carga-academica');
 
-        Route::get('/activities', \App\Livewire\Coordinacion\ActivityList::class)
-            ->name('activities');
-        Route::get('/activities/format/{pevaluacion}', [
-            \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
-        ])->name('activities.format');
-        Route::get('/activities/resume/{pevaluacion}', [
-            \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
-        ])->name('activities.resume');
+            Route::get('/activities', \App\Livewire\Coordinacion\ActivityList::class)
+                ->name('activities');
+            Route::get('/activities/format/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
+            ])->name('activities.format');
+            Route::get('/activities/resume/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
+            ])->name('activities.resume');
 
-        Route::get('/lecciones', \App\Livewire\Coordinacion\LessonList::class)
-            ->name('lessons');
+            Route::get('/lecciones', \App\Livewire\Coordinacion\LessonList::class)
+                ->name('lessons');
 
-        // Impresión de lecciones LMS: reusa Director\LessonsPrintController; el
-        // scope (peducativos del coordinador) lo deduce el controlador por el
-        // nombre de ruta (patrón ADR-006).
-        Route::get('/lecciones/print', [
-            \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
-        ])->name('lessons.print');
+            // Impresión de lecciones LMS: reusa Director\LessonsPrintController; el
+            // scope (peducativos del coordinador) lo deduce el controlador por el
+            // nombre de ruta (patrón ADR-006).
+            Route::get('/lecciones/print', [
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
+            ])->name('lessons.print');
 
-        Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
-            ->name('resources');
-        Route::get('/profesores', \App\Livewire\Coordinacion\ProfesorList::class)
-            ->name('profesores');
-    });
+            Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
+                ->name('resources');
+            Route::get('/profesores', \App\Livewire\Coordinacion\ProfesorList::class)
+                ->name('profesores');
+        });
 
     // ─── Leadership: Seguimiento Jefes de Área ────────────────────
     Route::prefix('leadership')
@@ -318,10 +323,10 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/activities', \App\Livewire\Leadership\ActivityOverview::class)
                 ->name('activities');
             Route::get('/activities/format/{pevaluacion}', [
-                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
             ])->name('activities.format');
             Route::get('/activities/resume/{pevaluacion}', [
-                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
             ])->name('activities.resume');
 
             // Lecciones LMS por área
@@ -332,7 +337,7 @@ Route::prefix('app')->name('app.')->group(function () {
             // el scope (áreas asignadas al jefe) lo deduce el controlador por el
             // nombre de ruta (patrón ADR-006).
             Route::get('/lessons/print', [
-                \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
             ])->name('lessons.print');
 
             // Vista previa de actividad LMS (independiente del módulo planning)
@@ -351,46 +356,46 @@ Route::prefix('app')->name('app.')->group(function () {
         ->name('director.')
         ->group(function () {
 
-        // Dashboard con indicadores globales
-        Route::get('/', \App\Livewire\Director\IndicatorDashboard::class)
-            ->name('index');
+            // Dashboard con indicadores globales
+            Route::get('/', \App\Livewire\Director\IndicatorDashboard::class)
+                ->name('index');
 
-        // Información Académica: Pensums
-        Route::get('/pensums', \App\Livewire\Director\PensumList::class)
-            ->name('pensums');
+            // Información Académica: Pensums
+            Route::get('/pensums', \App\Livewire\Director\PensumList::class)
+                ->name('pensums');
 
-        // Carga Académica (Pevaluacions)
-        Route::get('/carga-academica', \App\Livewire\Director\CargaAcademicaList::class)
-            ->name('carga-academica');
+            // Carga Académica (Pevaluacions)
+            Route::get('/carga-academica', \App\Livewire\Director\CargaAcademicaList::class)
+                ->name('carga-academica');
 
-        // Actividades de Planificación (SÓLO VISUALIZACIÓN + PDF)
-        Route::get('/activities', \App\Livewire\Director\ActivityList::class)
-            ->name('activities');
-        Route::get('/activities/format/{pevaluacion}', [
-            \App\Http\Controllers\Planning\ActivityPdfController::class, 'format'
-        ])->name('activities.format');
-        Route::get('/activities/resume/{pevaluacion}', [
-            \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume'
-        ])->name('activities.resume');
+            // Actividades de Planificación (SÓLO VISUALIZACIÓN + PDF)
+            Route::get('/activities', \App\Livewire\Director\ActivityList::class)
+                ->name('activities');
+            Route::get('/activities/format/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
+            ])->name('activities.format');
+            Route::get('/activities/resume/{pevaluacion}', [
+                \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
+            ])->name('activities.resume');
 
-        // Lecciones LMS
-        Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
-            ->name('lessons');
+            // Lecciones LMS
+            Route::get('/lecciones', \App\Livewire\Director\LessonList::class)
+                ->name('lessons');
 
-        // Impresión de lecciones LMS (Mermaid/KaTeX renderizado en el navegador;
-        // misma semántica de filtros que el listado; SOLO LECTURA)
-        Route::get('/lecciones/print', [
-            \App\Http\Controllers\Director\LessonsPrintController::class, 'index'
-        ])->name('lessons.print');
+            // Impresión de lecciones LMS (Mermaid/KaTeX renderizado en el navegador;
+            // misma semántica de filtros que el listado; SOLO LECTURA)
+            Route::get('/lecciones/print', [
+                \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
+            ])->name('lessons.print');
 
-        // Recursos Compartidos
-        Route::get('/recursos', \App\Livewire\Director\ResourceList::class)
-            ->name('resources');
+            // Recursos Compartidos
+            Route::get('/recursos', \App\Livewire\Director\ResourceList::class)
+                ->name('resources');
 
-        // Seguimiento Docente (KPIs)
-        Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
-            ->name('profesores');
-    });
+            // Seguimiento Docente (KPIs)
+            Route::get('/profesores', \App\Livewire\Director\ProfesorIndicators::class)
+                ->name('profesores');
+        });
 
     // ───────────────────────────────────────────────
     // MÓDULO DE PROFESOR (Dashboard)
@@ -426,13 +431,13 @@ Route::prefix('app')->name('app.')->group(function () {
         // ─── LMS: Editor de Contenido del Profesor ─────────────────
         Route::prefix('lms')->name('lms.')->group(function () {
             Route::get('/activity/lesson/new', \App\Livewire\Profesor\Lms\LessonWizard::class)
-                 ->name('lesson.wizard');
+                ->name('lesson.wizard');
             Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
-                 ->name('editor');
+                ->name('editor');
             Route::get('/comments', \App\Livewire\Profesor\Lms\CommentModeration::class)
-                 ->name('comments');
+                ->name('comments');
             Route::get('/lessons/print', [\App\Http\Controllers\Profesor\Lms\LessonsPrintController::class, 'index'])
-                 ->name('lessons.print');
+                ->name('lessons.print');
         });
     });
 });
@@ -447,7 +452,7 @@ Route::prefix('app/estudiante')->name('student.lms.')->middleware(['auth', 'isSt
     Route::get('/activity/{activity}', \App\Livewire\Student\Lms\ActivityView::class)->name('activity');
     Route::get('/activity/{activity}/print', [\App\Http\Controllers\Lms\ActivityPrintController::class, 'show'])->name('activity.print');
     Route::get('/resource/{resource}/download', [
-        \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download'
+        \App\Http\Controllers\Lms\ResourceDownloadController::class, 'download',
     ])->name('resource.download');
 });
 

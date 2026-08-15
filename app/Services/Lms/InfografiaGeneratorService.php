@@ -2,9 +2,9 @@
 
 namespace App\Services\Lms;
 
-use App\Services\OpenRouterService;
-use App\Services\NvidiaService;
 use App\Services\KimiService;
+use App\Services\NvidiaService;
+use App\Services\OpenRouterService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,14 +47,14 @@ TEXT;
     /**
      * Genera una estructura jerárquica para infografía basada en el request.
      *
-     * @param array $requestData Debe contener: niveles, tipo_estructura, direccion, tema_color, contexto_pedagogico, restricciones
+     * @param  array  $requestData  Debe contener: niveles, tipo_estructura, direccion, tema_color, contexto_pedagogico, restricciones
      * @return array ['success' => bool, 'estructura' => array|null, 'error' => string|null, 'metadata' => array]
      */
     public function generate(array $requestData): array
     {
         // 1. Validar requestData contra esquema básico
         $validation = $this->validateRequest($requestData);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             return [
                 'success' => false,
                 'estructura' => null,
@@ -72,7 +72,7 @@ TEXT;
         // 4. Ejecutar cadena de fallback: OpenRouter → Nvidia → Kimi
         $result = $this->executeFallbackChain($prompt);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return [
                 'success' => false,
                 'estructura' => null,
@@ -83,7 +83,7 @@ TEXT;
 
         // 5. Parsear y validar respuesta JSON
         $parsed = $this->parseAndValidateResponse($result['content']);
-        if (!$parsed['valid']) {
+        if (! $parsed['valid']) {
             return [
                 'success' => false,
                 'estructura' => null,
@@ -121,36 +121,36 @@ TEXT;
     private function validateRequest(array $requestData): array
     {
         // Validar niveles
-        if (!isset($requestData['niveles']) || !is_int($requestData['niveles']) || $requestData['niveles'] < 4 || $requestData['niveles'] > 6) {
+        if (! isset($requestData['niveles']) || ! is_int($requestData['niveles']) || $requestData['niveles'] < 4 || $requestData['niveles'] > 6) {
             return ['valid' => false, 'error' => 'El número de niveles debe ser un entero entre 4 y 6.'];
         }
 
         // Validar tipo_estructura
         $allowedTypes = ['jerarquica', 'radial', 'flujo', 'matriz'];
-        if (!isset($requestData['tipo_estructura']) || !in_array($requestData['tipo_estructura'], $allowedTypes)) {
+        if (! isset($requestData['tipo_estructura']) || ! in_array($requestData['tipo_estructura'], $allowedTypes)) {
             return ['valid' => false, 'error' => 'Tipo de estructura no válido. Debe ser: jerarquica, radial, flujo o matriz.'];
         }
 
         // Validar dirección (solo para jerarquica y flujo)
         $allowedDirections = ['top-down', 'left-right', 'radial'];
         if (in_array($requestData['tipo_estructura'], ['jerarquica', 'flujo']) &&
-            (!isset($requestData['direccion']) || !in_array($requestData['direccion'], $allowedDirections))) {
+            (! isset($requestData['direccion']) || ! in_array($requestData['direccion'], $allowedDirections))) {
             return ['valid' => false, 'error' => 'Dirección no válida para el tipo de estructura seleccionado.'];
         }
 
         // Validar tema_color
         $allowedColors = ['emerald', 'sky', 'amber', 'purple', 'rose', 'stone'];
-        if (!isset($requestData['tema_color']) || !in_array($requestData['tema_color'], $allowedColors)) {
+        if (! isset($requestData['tema_color']) || ! in_array($requestData['tema_color'], $allowedColors)) {
             return ['valid' => false, 'error' => 'Tema de color no válido. Debe ser uno de: emerald, sky, amber, purple, rose, stone.'];
         }
 
         // Validar contexto_pedagogico (opcional pero si existe debe tener ciertos campos)
-        if (isset($requestData['contexto_pedagogico']) && !is_array($requestData['contexto_pedagogico'])) {
+        if (isset($requestData['contexto_pedagogico']) && ! is_array($requestData['contexto_pedagogico'])) {
             return ['valid' => false, 'error' => 'El contexto pedagógico debe ser un array.'];
         }
 
         // Validar restricciones (opcional)
-        if (isset($requestData['restricciones']) && !is_array($requestData['restricciones'])) {
+        if (isset($requestData['restricciones']) && ! is_array($requestData['restricciones'])) {
             return ['valid' => false, 'error' => 'Las restricciones deben ser un array.'];
         }
 
@@ -289,12 +289,12 @@ PROMPT;
         $systemPrompt = str_replace('{{contenido_actual}}', $contexto['contenido_actual'], $systemPrompt);
         $systemPrompt = str_replace('{{paleta_colores}}', $this->formatColorPalette($paletaColores), $systemPrompt);
 
-        $userPrompt = <<<PROMPT
+        $userPrompt = <<<'PROMPT'
 Genera la estructura jerárquica según las especificaciones anteriores.
 RESPONDE ÚNICAMENTE CON EL JSON, SIN TEXTO ADICIONAL.
 PROMPT;
 
-        return $systemPrompt . "\n\n" . $userPrompt;
+        return $systemPrompt."\n\n".$userPrompt;
     }
 
     /**
@@ -357,8 +357,9 @@ PROMPT;
                     $attempt['params']
                 );
 
-                if ($result['success'] && !empty($result['content'])) {
+                if ($result['success'] && ! empty($result['content'])) {
                     $this->logger->info("Éxito con {$attempt['label']}");
+
                     return [
                         'success' => true,
                         'content' => $result['content'],
@@ -368,6 +369,7 @@ PROMPT;
                 }
             } catch (\Throwable $e) {
                 $this->logger->warning("Error con {$attempt['label']}: {$e->getMessage()}");
+
                 continue;
             }
         }
@@ -398,12 +400,12 @@ PROMPT;
         if (json_last_error() !== JSON_ERROR_NONE) {
             return [
                 'valid' => false,
-                'error' => 'Respuesta no es JSON válido: ' . json_last_error_msg(),
+                'error' => 'Respuesta no es JSON válido: '.json_last_error_msg(),
             ];
         }
 
         // Validar estructura básica
-        if (!isset($data['estructura']) || !is_array($data['estructura'])) {
+        if (! isset($data['estructura']) || ! is_array($data['estructura'])) {
             return [
                 'valid' => false,
                 'error' => 'Falta el campo "estructura" o no es un array.',
@@ -411,7 +413,7 @@ PROMPT;
         }
 
         $estructura = $data['estructura'];
-        if (!isset($estructura['tipo']) || !isset($estructura['niveles']) || !isset($estructura['nodo_raiz'])) {
+        if (! isset($estructura['tipo']) || ! isset($estructura['niveles']) || ! isset($estructura['nodo_raiz'])) {
             return [
                 'valid' => false,
                 'error' => 'La estructura debe tener "tipo", "niveles" y "nodo_raiz".',
@@ -420,7 +422,7 @@ PROMPT;
 
         // Validar niveles
         $niveles = $estructura['niveles'];
-        if (!is_int($niveles) || $niveles < 4 || $niveles > 6) {
+        if (! is_int($niveles) || $niveles < 4 || $niveles > 6) {
             return [
                 'valid' => false,
                 'error' => 'El número de niveles debe estar entre 4 y 6.',
@@ -429,10 +431,10 @@ PROMPT;
 
         // Validar nodo raíz recursivamente
         $nodoRaizValidation = $this->validateNode($estructura['nodo_raiz'], 1, $niveles);
-        if (!$nodoRaizValidation['valid']) {
+        if (! $nodoRaizValidation['valid']) {
             return [
                 'valid' => false,
-                'error' => 'Error en nodo raíz: ' . $nodoRaizValidation['error'],
+                'error' => 'Error en nodo raíz: '.$nodoRaizValidation['error'],
             ];
         }
 
@@ -448,38 +450,38 @@ PROMPT;
     private function validateNode(array $node, int $level, int $maxLevels): array
     {
         // Validar campos obligatorios
-        if (!isset($node['id']) || !is_string($node['id'])) {
+        if (! isset($node['id']) || ! is_string($node['id'])) {
             return ['valid' => false, 'error' => 'El nodo debe tener un "id" string.'];
         }
-        if (!isset($node['etiqueta']) || !is_string($node['etiqueta']) || mb_strlen($node['etiqueta']) > 50) {
+        if (! isset($node['etiqueta']) || ! is_string($node['etiqueta']) || mb_strlen($node['etiqueta']) > 50) {
             return ['valid' => false, 'error' => 'La etiqueta debe ser un string de máximo 50 caracteres.'];
         }
-        if (isset($node['descripcion']) && (!is_string($node['descripcion']) || mb_strlen($node['descripcion']) > 150)) {
+        if (isset($node['descripcion']) && (! is_string($node['descripcion']) || mb_strlen($node['descripcion']) > 150)) {
             return ['valid' => false, 'error' => 'La descripción debe ser un string de máximo 150 caracteres.'];
         }
         // Validar colores (deben ser hex y de la paleta, pero aquí solo verificamos formato hex)
-        if (isset($node['color_fondo']) && !preg_match('/^#[0-9A-Fa-f]{6}$/', $node['color_fondo'])) {
+        if (isset($node['color_fondo']) && ! preg_match('/^#[0-9A-Fa-f]{6}$/', $node['color_fondo'])) {
             return ['valid' => false, 'error' => 'El color de fondo debe ser un hex válido (#RRGGBB).'];
         }
-        if (isset($node['color_texto']) && !preg_match('/^#[0-9A-Fa-f]{6}$/', $node['color_texto'])) {
+        if (isset($node['color_texto']) && ! preg_match('/^#[0-9A-Fa-f]{6}$/', $node['color_texto'])) {
             return ['valid' => false, 'error' => 'El color de texto debe ser un hex válido (#RRGGBB).'];
         }
         // Validar icono (opcional, debe ser del conjunto predefinido o null)
-        if (isset($node['icono_sugerido']) && $node['icono_sugerido'] !== null && !is_string($node['icono_sugerido'])) {
+        if (isset($node['icono_sugerido']) && $node['icono_sugerido'] !== null && ! is_string($node['icono_sugerido'])) {
             return ['valid' => false, 'error' => 'El icono sugerido debe ser string o null.'];
         }
 
         // Validar hijos si existen y no estamos en el último nivel
         if (isset($node['hijos']) && is_array($node['hijos'])) {
             if ($level >= $maxLevels) {
-                return ['valid' => false, 'error' => 'No se permiten hijos en el nivel máximo (' . $maxLevels . ').'];
+                return ['valid' => false, 'error' => 'No se permiten hijos en el nivel máximo ('.$maxLevels.').'];
             }
             foreach ($node['hijos'] as $hijo) {
-                if (!is_array($hijo)) {
+                if (! is_array($hijo)) {
                     return ['valid' => false, 'error' => 'Cada hijo debe ser un array.'];
                 }
                 $hijoValidation = $this->validateNode($hijo, $level + 1, $maxLevels);
-                if (!$hijoValidation['valid']) {
+                if (! $hijoValidation['valid']) {
                     return $hijoValidation;
                 }
             }
@@ -526,18 +528,33 @@ PROMPT;
                 }
             }
         }
+
         return $maxLevel;
     }
 
     /**
      * Expande la estructura añadiendo niveles dividiendo nodos hoja.
      */
+
+    /**
+     * Expande la estructura añadiendo niveles dividiendo nodos hoja.
+     */
     private function expandLevels(array $estructura, int $nivelesAAadir): array
     {
-        // Estrategia simple: encontrar nodos hoja y dividirlos
-        // Por ahora, retornamos la estructura original y dejamos que el proceso de generación lo ajuste
-        // En una implementación más completa, aplicaríamos lógica de división semántica
-        return $estructura;
+        if ($nivelesAAadir <= 0 || empty($estructura['nodo_raiz'])) {
+            return $estructura;
+        }
+
+        // Estrategia simple: añadir niveles hoja duplicando y modificando ligeramente
+        // Esto es una implementación básica - en producción se haría algo más sofisticado
+        $resultado = $estructura;
+
+        for ($i = 0; $i < $nivelesAAadir; $i++) {
+            // Encontrar nodos hoja y añadir un hijo a cada uno
+            $resultado = $this->addLevelToLeaves($resultado);
+        }
+
+        return $resultado;
     }
 
     /**
@@ -545,8 +562,140 @@ PROMPT;
      */
     private function collapseLevels(array $estructura, int $nivelesAEliminar): array
     {
-        // Estrategia simple: fusionar los niveles más profundos
-        // Por ahora, retornamos la estructura original
+        if ($nivelesAEliminar <= 0 || empty($estructura['nodo_raiz'])) {
+            return $estructura;
+        }
+
+        // Estrategia simple: fusionar niveles desde el más profundo hacia arriba
+        $resultado = $estructura;
+
+        for ($i = 0; $i < $nivelesAEliminar; $i++) {
+            $resultado = $this->mergeDeepestLevel($resultado);
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Añade un nivel hoja a todas las hojas del árbol.
+     */
+    private function addLevelToLeaves(array $estructura): array
+    {
+        if (empty($estructura['nodo_raiz'])) {
+            return $estructura;
+        }
+
+        // Clonar la estructura para no modificar la original
+        $resultado = $estructura;
+
+        // Encontrar todas las hojas y añadir un hijo a cada una
+        $hojas = $this->findLeafNodes($resultado['nodo_raiz']);
+
+        foreach ($hojas as &$hoja) {
+            // Añadir un nodo hijo hoja
+            $hoja['hijos'][] = [
+                'id' => 'temp_'.uniqid(),
+                'etiqueta' => 'Detalle',
+                'descripcion' => 'Información adicional',
+                'color_fondo' => $hoja['color_fondo'] ?? '#10b981',
+                'color_texto' => $hoja['color_texto'] ?? '#ffffff',
+                'icono_sugerido' => $hoja['icono_sugerido'] ?? 'book',
+                'hijos' => [],
+            ];
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Fusiona el nivel más profundo moviendo sus hijos al nivel superior.
+     */
+    private function mergeDeepestLevel(array $estructura): array
+    {
+        if (empty($estructura['nodo_raiz'])) {
+            return $estructura;
+        }
+
+        $nivelMaximo = $this->countLevels($estructura);
+
+        if ($nivelMaximo <= 1) {
+            return $estructura; // Ya no se puede colapsar más
+        }
+
+        // Encontrar nodos en el nivel más profundo y su padres
+        $nodosProfundosConPadres = $this->findDeepestNodesWithParents($estructura['nodo_raiz']);
+
+        foreach ($nodosProfundosConPadres as $nodoInfo) {
+            $nodoProfundo = $nodoInfo['nodo'];
+            $padre = $nodoInfo['padre'];
+
+            // Mover los hijos del nodo profundo al padre
+            if (! empty($nodoProfundo['hijos']) && is_array($nodoProfundo['hijos'])) {
+                foreach ($nodoProfundo['hijos'] as $hijo) {
+                    $padre['hijos'][] = $hijo;
+                }
+
+                // Eliminar el nodo profundo de los hijos del padre
+                $padre['hijos'] = array_filter($padre['hijos'], function ($h) use ($nodoProfundo) {
+                    return ! isset($h['id']) || $h['id'] !== $nodoProfundo['id'];
+                });
+
+                // Reindexar el array
+                $padre['hijos'] = array_values($padre['hijos']);
+            }
+        }
+
         return $estructura;
+    }
+
+    /**
+     * Encuentra todas las hojas en el árbol y devuelve su información incluyendo padre.
+     */
+    private function findLeafNodes(array $nodo, array $padres = []): array
+    {
+        $hojas = [];
+
+        // Si es hoja
+        if (empty($nodo['hijos']) || ! is_array($nodo['hijos'])) {
+            $hojas[] = [
+                'nodo' => $nodo,
+                'padre' => end($padres) ?: null,
+            ];
+        } else {
+            // Continuar recursivamente
+            $nuevosPadres = array_merge($padres, [$nodo]);
+            foreach ($nodo['hijos'] as $hijo) {
+                $hojas = array_merge($hojas, $this->findLeafNodes($hijo, $nuevosPadres));
+            }
+        }
+
+        return $hojas;
+    }
+
+    /**
+     * Encuentra los nodos en el nivel más profundo y devuelve su información con padre.
+     */
+    private function findDeepestNodesWithParents(array $nodo, array $padres = [], int $nivelActual = 1): array
+    {
+        $resultado = [];
+        $nivelMaximo = $this->countLevels(['nodo_raiz' => $nodo]);
+
+        // Si llegamos al nivel más profundo
+        if ($nivelActual === $nivelMaximo) {
+            $resultado[] = [
+                'nodo' => $nodo,
+                'padre' => end($padres) ?: null,
+            ];
+        } else {
+            // Continuar recursivamente
+            $nuevosPadres = array_merge($padres, [$nodo]);
+            if (! empty($nodo['hijos']) && is_array($nodo['hijos'])) {
+                foreach ($nodo['hijos'] as $hijo) {
+                    $resultado = array_merge($resultado, $this->findDeepestNodesWithParents($hijo, $nuevosPadres, $nivelActual + 1));
+                }
+            }
+        }
+
+        return $resultado;
     }
 }
