@@ -442,6 +442,10 @@ Se engancha en `App\Exceptions\Handler::report()`. Solo excepciones no capturada
 
 ¹ *Pendiente de definir junto con el diseño en curso del rol `is_director` — el scope de "su ámbito" para coordinación debe usar el mismo servicio de global scope que ya está en desarrollo para ese rol, no un mecanismo nuevo.*
 
+**Implementación (2026-08-14)**: middlewares `binnacle.view` (`CanViewBinnacle`: panel, dashboard, timeline → admin | is_director | is_leadership) y `binnacle.export` (`CanExportBinnacle`: CSV/PDF → admin | is_director). "Ver su propia actividad" → ruta `/admin/binnacle/mi-actividad` (`binnacle.mi-actividad`, solo `auth`), que bloquea la consulta al usuario autenticado (modo `selfMode` del componente timeline). `is_coordinacion` sigue pendiente del servicio de scope (ver nota ¹).
+
+**Implementación profesor (2026-08-15)**: el módulo del profesor tiene su propia sección "Mi Bitácora" en `/app/profesors/binnacle/mi-bitcora` (`app.profesors.binnacle.mi-bitcora`, `auth` + `isProfesor`), enlace en el menú Profesor (desktop y móvil). Reutiliza el componente `UserActivityTimeline` en modo `selfMode` vía `App\Livewire\Profesor\Binnacle\ActivityTimeline` (subclase que fuerza `selfMode = true`, `userId = auth()->id()` y cambia el layout a `profesors.layouts.app`); el usuario solo ve sus propios registros y el intento de fijar otro `userId` queda bloqueado.
+
 **Meta-auditoría**: toda consulta al panel de bitácora por parte de `admin`/`is_director`/`is_leadership` genera su propia entrada `event_type = binnacle_accessed`, `category = security`, para poder auditar quién audita.
 
 ---
@@ -530,7 +534,7 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 4. Un usuario con rol `profesor` no puede acceder a `/admin/binnacle` (403).
 
 ### Fase 2 — Cobertura completa
-- [x] Observers para el resto de modelos de negocio (observer genérico `AuditableModelObserver` + `Auditable` en `Learner\Estudiant`, `Learner\Representant`, `Academy\Enrollment`, `Admon\Ingreso`, `Blog\Post`)
+- [x] Observers para el resto de modelos de negocio (observer genérico `AuditableModelObserver` + `Auditable` en `Learner\Estudiant`, `Learner\Representant`, `Academy\Enrollment`, `Admon\Ingreso`, `Blog\Post`). **Ampliado (mejora #7)**: `Auditable` en `Academy` (Achievement, Activity, Pevaluacion, Profesor), `Academy\Lms` (contenido/publicación/progreso), `Educational` (debates) e `Instrument` (diagnóstico). Excluidos por diseño: `LmsActivityLog` y `BroadcastEvent` — son ellos mismos logs de auditoría/telemetría (registrarlos duplicaría el rastro).
 - [x] Integración con `Handler::report()` para excepciones no manejadas (`exception_thrown`, omite `ValidationException`)
 - [x] Filtros avanzados + búsqueda de texto libre en el panel (`/admin/binnacle`: búsqueda, categoría, severidad, rango de fechas, paginación)
 - [x] API/endpoint del timeline (`GET /api/binnacle/user/{id}/timeline`, auth:sanctum)
@@ -540,10 +544,11 @@ Panel `/admin/binnacle` con filtros (rango de fechas, tipo de evento, severidad,
 
 ### Fase 3 — Visualización y reportes
 - [x] Componente Livewire `user-activity-timeline` (implementación custom, §10)
+- [x] Sección "Mi Bitácora" del profesor: `/app/profesors/binnacle/mi-bitcora` (`app.profesors.binnacle.mi-bitcora`, `auth` + `isProfesor`), reutiliza el timeline en `selfMode` vía `App\Livewire\Profesor\Binnacle\ActivityTimeline` con layout de profesor (2026-08-15)
 - [x] Dashboard de métricas de auditoría (`/admin/binnacle/dashboard`: totales, distribución por categoría/severidad, top actores, críticos recientes, verificación de integridad de cadena)
 - [x] Exportación CSV (`/admin/binnacle/export`, con los filtros del panel) y PDF (`/admin/binnacle/export/pdf`, dompdf, 2.000 filas)
 - [x] Tabla y job de archivado (§4.2): `binnacle_entries_archive` + comando `php8.2 artisan binnacle:archive`
-- [ ] Reportes programados por email (opcional, según prioridad institucional)
+- [x] Reportes programados por email (mejora #5): comando `binnacle:report` (resumen diario a admin/dirección, 05:30), auditado como `binnacle_report_sent`
 
 ### Fase 4 — Optimización y seguridad avanzada
 - [ ] Particionamiento por rango de fecha (si §9 lo justifica; benchmark indica que aún no hace falta)

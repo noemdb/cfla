@@ -5,15 +5,29 @@ namespace App\Models\app\Educational;
 use App\Models\app\Academy\Peducativo;
 use App\Models\app\Academy\Pestudio;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class DebateCompetition extends Model
+class DebateCompetition extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
-    protected $fillable = ['user_id','name','token','description','motive','date','status_active','attachment'];
+
+    protected $fillable = ['user_id', 'name', 'token', 'description', 'motive', 'date', 'status_active', 'attachment'];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * token excluido: ident. de acceso (como password, no se audita).
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'user_id', 'name', 'description', 'motive', 'date', 'status_active', 'attachment'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     const COLUMN_COMMENTS = [
         'user_id' => 'Usuario que creó la competición',
@@ -27,8 +41,15 @@ class DebateCompetition extends Model
     ];
 
     // Relación
-    public function user() { return $this->belongsTo(User::class,'user_id'); }   
-    public function debates() { return $this->hasMany(Debate::class,'competition_id'); }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function debates()
+    {
+        return $this->hasMany(Debate::class, 'competition_id');
+    }
 
     // Scope para obtener las competiciones activas
     public function scopeActive($query)
@@ -43,7 +64,7 @@ class DebateCompetition extends Model
 
     public static function genToken()
     {
-        return substr(str_replace(['+', '/', '=', '&'], '', bcrypt(random_bytes(45))), 0, 32);
+        return substr(str_replace(['+', '/', '=', '&'], '', bcrypt(\Illuminate\Support\Str::random(45))), 0, 32);
     }
 
     // Método para obtener el puntaje total de la sección
@@ -54,8 +75,8 @@ class DebateCompetition extends Model
             ->join('debates', 'grados.id', '=', 'debates.grado_id')
             ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
             ->where('debate_competitions.id', $this->id)
-            ->where('pestudios.status_active', "true")
-            ->where('grados.status_active', "true")
+            ->where('pestudios.status_active', 'true')
+            ->where('grados.status_active', 'true')
             ->groupBy('pestudios.id')
             ->get();
     }
@@ -68,9 +89,9 @@ class DebateCompetition extends Model
             ->join('debates', 'grados.id', '=', 'debates.grado_id')
             ->join('debate_competitions', 'debate_competitions.id', '=', 'debates.competition_id')
             ->where('debate_competitions.id', $this->id)
-            ->where('peducativos.status_active', "true")
-            ->where('pestudios.status_active', "true")
-            ->where('grados.status_active', "true")
+            ->where('peducativos.status_active', 'true')
+            ->where('pestudios.status_active', 'true')
+            ->where('grados.status_active', 'true')
             ->groupBy('peducativos.id')
             ->get();
     }
@@ -100,16 +121,17 @@ class DebateCompetition extends Model
 
     public static function setActive($id)
     {
-        $competitions = DebateCompetition::all();    
+        $competitions = DebateCompetition::all();
         foreach ($competitions as $competition) {
             $competition->status_active = ($competition->id == $id) ? true : false;
             $competition->save();
-        } 
-        
+        }
+
         Debate::setDesActiveAll();
         DebateQuestion::setDesActiveAll();
+
         return DebateCompetition::find($id);
-    }    
+    }
 
     public static function setDesActive($id)
     {
@@ -120,6 +142,7 @@ class DebateCompetition extends Model
         }
         Debate::setDesActiveAll();
         DebateQuestion::setDesActiveAll();
+
         return DebateCompetition::find($id);
     }
 
@@ -146,9 +169,9 @@ class DebateCompetition extends Model
             DebateQuestion::whereIn('debate_id', $debateIds)->update([
                 'time_elapsed' => 0,
                 'status_answer' => 0,
-                'status_active' => false
+                'status_active' => false,
             ]);
-            
+
             // Also deactivate debates
             $this->debates()->update(['status_active' => false]);
         });

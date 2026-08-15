@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * desde el punto central de emisión (LmsPublicationService). El flag
  * `delivered` se marca por ACK del cliente cuando el navegador recibe el evento.
  */
-class BroadcastEvent extends Model
+class BroadcastEvent extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'broadcast_events';
 
@@ -19,6 +19,21 @@ class BroadcastEvent extends Model
         'event', 'subject_type', 'subject_id', 'actor_user_id',
         'recipient_ids', 'channel_count', 'driver', 'delivered',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Este modelo ES un log de auditoría de broadcasts; no se registra en
+     * binnacle (duplicaría el rastro). Contrato expuesto por completitud.
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'event', 'subject_type', 'subject_id', 'actor_user_id', 'channel_count', 'driver', 'delivered'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $casts = [
         'recipient_ids' => 'array',

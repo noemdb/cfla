@@ -5,7 +5,7 @@ namespace App\Models\app\Instrument;
 use App\Models\app\Academy\Pestudio;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagReferent extends Model
+class DiagReferent extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'diag_referents';
 
@@ -17,6 +17,19 @@ class DiagReferent extends Model
         'description',
         'active',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'pestudio_id', 'name', 'code', 'version', 'description', 'active'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     public function competencies()
     {

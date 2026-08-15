@@ -29,6 +29,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Eventos síncronos (mejora propuesta #4)
+    |--------------------------------------------------------------------------
+    | Eventos que, aunque su severidad sea info/warning, se escriben en la misma
+    | request (sin pasar por la cola) para no perderse si el worker cae.
+    | Ej: user_login y access son los que la institución considera críticos.
+    | queue_backlog DEBE ser síncrono: una alerta de cola caída no puede depender
+    | de la propia cola para persistirse.
+    */
+    'sync_event_types' => ['user_login', 'access', 'queue_backlog'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Umbral de backlog (mejora propuesta #1)
+    |--------------------------------------------------------------------------
+    | El comando binnacle:watch (programado) emite una entrada warning
+    | event_type=queue_backlog y notifica al admin si la cola supera este
+    | número de jobs pendientes (worker caído o congestionado).
+    */
+    'backlog_threshold' => env('BINNACLE_BACKLOG_THRESHOLD', 100),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Destinatarios de alertas (mejora propuesta #1 y #5)
+    |--------------------------------------------------------------------------
+    | Emails a los que se notifica (fallback de roles admin/director).
+    */
+    'alert_recipients' => array_filter(explode(',', env('BINNACLE_ALERT_RECIPIENTS', ''))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Retención por categoría (meses) — Spec §12
     |--------------------------------------------------------------------------
     */

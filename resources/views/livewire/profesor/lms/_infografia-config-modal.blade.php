@@ -314,13 +314,11 @@
             <div class="flex justify-center">
                 <button @click="generarInfografia"
                         :disabled="generatingInfografia"
-                        :class="
-                            w-full px-6 py-3 rounded-lg font-medium transition-colors
-                            {
-                                'bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50': !generatingInfografia,
-                                'bg-gray-400': generatingInfografia
-                            }
-                        ">
+                        class="w-full px-6 py-3 rounded-lg font-medium transition-colors"
+                        :class="{
+                            'bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50': !generatingInfografia,
+                            'bg-gray-400': generatingInfografia
+                        }">
                     <template x-if="!generatingInfografia">
                         Generar Vista Previa
                         <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24"

@@ -2,15 +2,28 @@
 
 namespace App\Models\app\Academy\Lms;
 
-use App\Models\User;
 use App\Models\app\Academy\Activity;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class LmsActivityLink extends Model
+class LmsActivityLink extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'lms_activity_links';
 
     public const TYPES = ['REFERENCE', 'VIDEO', 'TOOL', 'DOCUMENT', 'OTHER'];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'activity_id', 'section_id', 'added_by', 'title', 'url', 'link_type', 'sort_order', 'is_visible'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'activity_id', 'section_id', 'added_by', 'title', 'url',

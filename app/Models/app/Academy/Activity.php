@@ -10,9 +10,27 @@ use App\Models\app\Academy\Lms\LmsActivitySection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Activity extends Model
+class Activity extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Contenido académico completo; sin campos de datos personales.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'pevaluacion_id', 'finicial', 'ffinal', 'topic', 'thematic',
+            'references', 'teaching', 'learning', 'description', 'observations',
+            'comments', 'status',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'pevaluacion_id', 'finicial', 'ffinal', 'topic', 'thematic', 'references',

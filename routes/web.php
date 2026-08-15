@@ -136,12 +136,24 @@ Route::prefix('admin')->name('admin.')->middleware(['binnacle.track:security', '
     Route::middleware(['isAdmin'])->group(function () {
         Route::get('logs', \App\Livewire\Admin\Logs\IndexComponent::class)->name('logs');
         Route::get('database/backup', [\App\Http\Controllers\Admin\DatabaseController::class, 'downloadBackup'])->name('database.backup');
+    });
+
+    // Matriz RBAC BINNACLE-001 §6:
+    //   binnacle.view   → admin | is_director | is_leadership (panel, dashboard, timeline)
+    //   binnacle.export → admin | is_director (exportación CSV/PDF)
+    //   mi-actividad    → cualquier usuario autenticado (solo su propia actividad)
+    Route::middleware(['binnacle.view'])->group(function () {
         Route::get('binnacle', \App\Livewire\Admin\Binnacle\IndexComponent::class)->name('binnacle');
         Route::get('binnacle/dashboard', \App\Livewire\Admin\Binnacle\DashboardComponent::class)->name('binnacle.dashboard');
-        Route::get('binnacle/export', \App\Http\Controllers\Admin\BinnacleExportController::class)->name('binnacle.export');
-        Route::get('binnacle/export/pdf', \App\Http\Controllers\Admin\BinnaclePdfController::class)->name('binnacle.export.pdf');
         Route::get('binnacle/timeline', \App\Livewire\Admin\Binnacle\UserActivityTimeline::class)->name('binnacle.timeline');
     });
+
+    Route::middleware(['binnacle.export'])->group(function () {
+        Route::get('binnacle/export', \App\Http\Controllers\Admin\BinnacleExportController::class)->name('binnacle.export');
+        Route::get('binnacle/export/pdf', \App\Http\Controllers\Admin\BinnaclePdfController::class)->name('binnacle.export.pdf');
+    });
+
+    Route::get('binnacle/mi-actividad', \App\Livewire\Admin\Binnacle\UserActivityTimeline::class)->name('binnacle.mi-actividad');
 });
 
 // ===================================================
@@ -439,6 +451,10 @@ Route::prefix('app')->name('app.')->group(function () {
             Route::get('/lessons/print', [\App\Http\Controllers\Profesor\Lms\LessonsPrintController::class, 'index'])
                 ->name('lessons.print');
         });
+
+        // ─── Binnacle: Mi Bitácora (solo registros propios) ───────
+        Route::get('/binnacle/mi-bitcora', \App\Livewire\Profesor\Binnacle\ActivityTimeline::class)
+            ->name('binnacle.mi-bitcora');
     });
 });
 

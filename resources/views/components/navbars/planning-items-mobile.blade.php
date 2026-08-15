@@ -1,6 +1,6 @@
 {{-- resources/views/components/navbars/planning-items-mobile.blade.php --}}
 {{-- Menú responsive para mobile (mismo set de enlaces que planning-items) --}}
-@if(Auth::user()->is_planning)
+@if(Auth::user()->is_planner)
     <div x-data="{ open: false }">
         <button @click="open = !open"
                 :aria-expanded="open ? 'true' : 'false'"
@@ -19,12 +19,9 @@
 
         <div x-show="open" id="planning-submenu" class="ml-4 mt-1 space-y-0.5 border-l border-gray-200 dark:border-white/10 pl-3">
             <a href="{{ route('app.planning.index') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.index') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Dashboard</a>
-            <a href="{{ route('app.planning.pensums') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.pensums') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Pensums</a>
-            <a href="{{ route('app.planning.carga-academica') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.carga-academica') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Carga Académica</a>
-            <a href="{{ route('app.planning.activities') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.activities') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Actividades</a>
-            <a href="{{ route('app.planning.lessons') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.lessons') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Lecciones</a>
-            <a href="{{ route('app.planning.resources') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.resources') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Recursos</a>
-            <a href="{{ route('app.planning.profesores') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.profesores') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Profesores</a>
+            <a href="{{ route('app.planning.pensums.index') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.pensums.index') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Pensums</a>
+            <a href="{{ route('app.planning.activities.index') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.activities.index') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Actividades</a>
+            <a href="{{ route('app.planning.lms.monitor') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm rounded-lg {{ request()->routeIs('app.planning.lms.monitor') ? 'text-emerald-400 bg-emerald-500/5' : 'text-gray-300 hover:text-emerald-300 hover:bg-white/5' }} transition-colors">Contenido LMS</a>
             {{-- Contador de lecciones programadas (mobile) --}}
             <div class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-300">
                 <svg class="w-4 h-4 text-teal-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

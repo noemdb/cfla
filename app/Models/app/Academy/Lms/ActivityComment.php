@@ -7,9 +7,28 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ActivityComment extends Model
+class ActivityComment extends Model implements \App\Contracts\Auditable
 {
     use SoftDeletes;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * body (comentario del estudiante) excluido por volumen/privacy;
+     * solo el flujo de aprobación y metadatos.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'activity_id', 'user_id',
+            'is_approved', 'approved_at', 'approved_by',
+            'rejected_at', 'rejected_by', 'rejected_reason',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'activity_id', 'user_id', 'body',

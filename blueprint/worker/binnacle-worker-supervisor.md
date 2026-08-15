@@ -1,5 +1,10 @@
 # Guía de configuración del worker de bitácora en producción (Supervisor)
 
+> **Guía detallada**: la referencia completa (workers + scheduler + cron +
+> diagnóstico + checklist de despliegue) está en
+> `blueprint/binnacle/guia-produccion-worker-schedule.md`. Este archivo es el
+> resumen operativo rápido.
+
 La configuración del worker dedicado ya está incluida en `supervisor-reverb.conf`
 (bloque `[program:cfla-binnacle-queue]`, al final del archivo).
 

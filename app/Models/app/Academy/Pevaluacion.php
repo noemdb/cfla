@@ -7,9 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
-class Pevaluacion extends Model
+class Pevaluacion extends Model implements \App\Contracts\Auditable
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'profesor_id', 'lapso_id', 'seccion_id', 'pensum_id', 'grupo_estable_id',
+            'status_baremo', 'status_official', 'status_note_report', 'nota_type',
+            'escala_id', 'objetivo', 'description', 'observations', 'category',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'profesor_id', 'lapso_id', 'seccion_id', 'pensum_id', 'grupo_estable_id',
@@ -146,6 +163,7 @@ class Pevaluacion extends Model
         $asignatura = $this->pensum?->asignatura?->name ?? '?';
         $seccion = $this->seccion?->name ?? '?';
         $lapso = $this->lapso?->name ?? '?';
+
         return "{$asignatura} - {$seccion} ({$lapso})";
     }
 
@@ -161,8 +179,6 @@ class Pevaluacion extends Model
     /**
      * Obtiene las competencias del pensum asociado con sus indicadores
      * y referentes normativos, como una colección.
-     *
-     * @return \Illuminate\Support\Collection|null
      */
     public function getCompetenciasWithIndicators(): ?\Illuminate\Support\Collection
     {

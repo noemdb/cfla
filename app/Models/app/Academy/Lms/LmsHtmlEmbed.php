@@ -6,9 +6,23 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LmsHtmlEmbed extends Model
+class LmsHtmlEmbed extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'lms_html_embeds';
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * html_content excluido por volumen; solo metadatos del embed.
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'activity_id', 'section_id', 'added_by', 'title', 'render_condition', 'sort_order', 'is_visible'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'activity_id',

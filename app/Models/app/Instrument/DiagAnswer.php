@@ -6,8 +6,7 @@ use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
-class DiagAnswer extends Model
+class DiagAnswer extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
 
@@ -22,6 +21,24 @@ class DiagAnswer extends Model
         'valor_numerico',
         'completado_at',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * respuesta (texto abierto del estudiante) excluida por volumen/privacy;
+     * solo metadatos de la respuesta.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'estudiant_id', 'question_id', 'option_id',
+            'session_id', 'valor_numerico', 'completado_at',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     public function question()
     {
@@ -46,17 +63,17 @@ class DiagAnswer extends Model
     public function isCorrect()
     {
         // Si no hay option_id, no es correcta
-        if (!$this->option_id) {
+        if (! $this->option_id) {
             return false;
         }
 
         // Cargar la relación si no está cargada
-        if (!$this->relationLoaded('selectedOption')) {
+        if (! $this->relationLoaded('selectedOption')) {
             $this->load('selectedOption');
         }
 
         // Si no hay opción seleccionada después de cargar, no es correcta
-        if (!$this->selectedOption) {
+        if (! $this->selectedOption) {
             return false;
         }
 
@@ -68,8 +85,8 @@ class DiagAnswer extends Model
      * Calculate student precision for answering multiple choice questions correctly
      * Formula: (100 * correct_answers / total_answered_questions)
      *
-     * @param int|null $estudiantId - Student ID (optional, uses current answer's student if not provided)
-     * @param int|null $pensumId - Pensum ID to filter by (optional)
+     * @param  int|null  $estudiantId  - Student ID (optional, uses current answer's student if not provided)
+     * @param  int|null  $pensumId  - Pensum ID to filter by (optional)
      * @return array - Returns array with precision percentage, correct answers count, and total answered count
      */
     public static function calculateStudentPrecision($estudiantId = null, $pensumId = null)
@@ -104,7 +121,7 @@ class DiagAnswer extends Model
             return [
                 'precision' => 0,
                 'correct_answers' => 0,
-                'total_answered' => 0
+                'total_answered' => 0,
             ];
         }
 
@@ -119,15 +136,15 @@ class DiagAnswer extends Model
         return [
             'precision' => $precision,
             'correct_answers' => $correctAnswers,
-            'total_answered' => $totalAnswered
+            'total_answered' => $totalAnswered,
         ];
     }
 
     /**
      * Get precision statistics for a specific student
      *
-     * @param int $estudiantId - Student ID
-     * @param int|null $pensumId - Optional pensum filter
+     * @param  int  $estudiantId  - Student ID
+     * @param  int|null  $pensumId  - Optional pensum filter
      * @return array
      */
     public static function getStudentPrecisionStats($estudiantId, $pensumId = null)
@@ -138,7 +155,7 @@ class DiagAnswer extends Model
     /**
      * Get overall precision statistics for all students
      *
-     * @param int|null $pensumId - Optional pensum filter
+     * @param  int|null  $pensumId  - Optional pensum filter
      * @return array
      */
     public static function getOverallPrecisionStats($pensumId = null)

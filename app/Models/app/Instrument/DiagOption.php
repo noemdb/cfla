@@ -2,10 +2,9 @@
 
 namespace App\Models\app\Instrument;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagOption extends Model
+class DiagOption extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'diag_options';
 
@@ -15,6 +14,20 @@ class DiagOption extends Model
         'valor',
         'orden',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * opcion (texto) excluido por volumen; solo metadatos.
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'question_id', 'valor', 'orden'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     public function question()
     {

@@ -2,11 +2,11 @@
 
 namespace App\Models\app\Academy\Lms;
 
-use App\Models\User;
 use App\Models\app\Academy\Activity;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class LmsActivityProgress extends Model
+class LmsActivityProgress extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'lms_activity_progress';
 
@@ -20,6 +20,23 @@ class LmsActivityProgress extends Model
         'last_access_at',
         'completed_at',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Progreso por estudiante: metadatos de avance, sin contenido de lección.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'activity_id', 'student_id', 'status', 'completion_pct',
+            'time_spent_secs', 'first_access_at', 'last_access_at', 'completed_at',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $casts = [
         'completion_pct' => 'decimal:2',

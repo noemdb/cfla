@@ -17,37 +17,44 @@
 
     <!-- Selector de usuario -->
     <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg p-4 mb-6">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Usuario</label>
-        <div class="relative">
-            <input type="search"
-                   wire:model.live.debounce.300ms="userSearch"
-                   placeholder="Buscar por username o correo…"
-                   class="w-full bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
-            @if($userSearch && $candidates->isNotEmpty())
-                <ul class="absolute z-20 mt-1 w-full bg-gray-800 border border-white/10 rounded-lg shadow-xl overflow-hidden">
-                    @foreach($candidates as $u)
-                        <li>
-                            <button type="button" wire:click="selectUser({{ $u->id }})"
-                                    class="w-full text-left px-3 py-2 hover:bg-white/5 transition-colors">
-                                <span class="text-sm text-gray-200 font-medium">{{ $u->username }}</span>
-                                <span class="block text-xs text-gray-500">{{ $u->email }}</span>
-                            </button>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
+        @if($selfMode)
+            <p class="text-sm text-gray-400 mb-3">
+                Mostrando <span class="text-emerald-400 font-medium">tu propia actividad</span>. Este acceso solo permite ver tus registros.
+            </p>
+        @endif
 
-        <div class="flex flex-wrap items-end gap-3 mt-3">
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Desde</label>
-                <input type="date" wire:model.live="dateFrom"
-                       class="bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-emerald-500 focus:outline-none">
+        <div class="flex flex-wrap items-start gap-3">
+            @if(!$selfMode)
+            <div class="relative flex-1 min-w-[12rem]">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Usuario</label>
+                <input type="search"
+                       wire:model.live.debounce.300ms="userSearch"
+                       placeholder="Buscar por username o correo…"
+                       class="w-full bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-emerald-500 focus:outline-none">
+                @if($userSearch && $candidates->isNotEmpty())
+                    <ul class="absolute z-20 mt-1 w-full bg-gray-800 border border-white/10 rounded-lg shadow-xl overflow-hidden">
+                        @foreach($candidates as $u)
+                            <li>
+                                <button type="button" wire:click="selectUser({{ $u->id }})"
+                                        class="w-full text-left px-3 py-2 hover:bg-white/5 transition-colors">
+                                    <span class="text-sm text-gray-200 font-medium">{{ $u->username }}</span>
+                                    <span class="block text-xs text-gray-500">{{ $u->email }}</span>
+                                </button>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Hasta</label>
-                <input type="date" wire:model.live="dateTo"
-                       class="bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-emerald-500 focus:outline-none">
+            @endif
+
+            <div class="w-full sm:w-52">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Rango de fechas</label>
+                <select wire:model.live="rangeDays"
+                        class="w-full bg-gray-800/60 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-emerald-500 focus:outline-none">
+                    @foreach(\App\Livewire\Admin\Binnacle\UserActivityTimeline::DATE_RANGES as $days => $label)
+                        <option value="{{ $days }}">{{ $label }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
 

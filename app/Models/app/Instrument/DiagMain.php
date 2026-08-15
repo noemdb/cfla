@@ -7,7 +7,7 @@ use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagMain extends Model
+class DiagMain extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'diag_mains';
 
@@ -20,6 +20,20 @@ class DiagMain extends Model
         'lapso_id',
         'pestudio_id',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * token excluido: ident. de acceso, no se audita.
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'name', 'description', 'active', 'referent_id', 'lapso_id', 'pestudio_id'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     public function questions()
     {

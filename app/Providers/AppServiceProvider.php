@@ -74,5 +74,44 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\app\Academy\Enrollment::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Admon\Ingreso::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Blog\Post::observe(\App\Observers\AuditableModelObserver::class);
+
+        // Mejora propuesta #7: ampliar cobertura de auditoría a los modelos
+        // académicos del módulo de planificación (Academy + LMS).
+        \App\Models\app\Academy\Activity::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Achievement::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Pevaluacion::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Profesor::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivitySection::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivityContent::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivityLink::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivityResource::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsHtmlEmbed::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsMediaLibrary::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivityPublication::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\ActivityComment::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\LmsActivityProgress::observe(\App\Observers\AuditableModelObserver::class);
+
+        // Mejora propuesta #7 ampliada: Educational (debates) e Instrument (diagnóstico).
+        \App\Models\app\Educational\DebateCompetition::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Educational\Debate::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Educational\DebateQuestion::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Educational\DebateOption::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Educational\DebateAnswer::observe(\App\Observers\AuditableModelObserver::class);
+
+        \App\Models\app\Instrument\DiagMain::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagQuestion::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagOption::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagSession::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagAnswer::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagResult::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagCompetency::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagIndicator::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReferent::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagRecommendation::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReport::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReportAiDraft::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReportAuditLog::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReportIndicatorResult::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Instrument\DiagReportPensum::observe(\App\Observers\AuditableModelObserver::class);
     }
 }

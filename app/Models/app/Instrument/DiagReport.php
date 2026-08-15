@@ -6,7 +6,7 @@ use App\Models\app\Academy\Lapso;
 use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagReport extends Model
+class DiagReport extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'diag_reports';
 
@@ -20,6 +20,23 @@ class DiagReport extends Model
         'validated_at',
         'global',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * estudiant_id referido por ID, sin datos personales del estudiante.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'estudiant_id', 'diag_main_id', 'referent_id',
+            'lapso_id', 'status', 'generated_at', 'validated_at', 'global',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $dates = [
         'generated_at',

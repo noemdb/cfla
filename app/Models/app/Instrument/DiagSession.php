@@ -8,7 +8,7 @@ use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagSession extends Model
+class DiagSession extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
 
@@ -26,6 +26,23 @@ class DiagSession extends Model
         'lapso_id',
         'status',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * estudiant_id referido por ID, sin datos personales del estudiante.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'estudiant_id', 'pensum_id', 'iniciado_at', 'completado_at',
+            'progreso', 'total_preguntas', 'activo', 'diag_main_id', 'lapso_id', 'status',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $dates = [
         'iniciado_at',

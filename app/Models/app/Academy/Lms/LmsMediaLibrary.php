@@ -7,11 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
-class LmsMediaLibrary extends Model
+class LmsMediaLibrary extends Model implements \App\Contracts\Auditable
 {
     use SoftDeletes;
 
     protected $table = 'lms_media_library';
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * metadata excluido por volumen/variabilidad; solo metadatos del archivo.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'uploaded_by', 'disk', 'path', 'original_name', 'mime_type',
+            'size_bytes', 'duration_secs', 'thumbnail_path', 'provider', 'external_url',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'uploaded_by', 'disk', 'path', 'original_name',
@@ -48,10 +65,11 @@ class LmsMediaLibrary extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        if (!$this->isLocal()) {
+        if (! $this->isLocal()) {
             return $this->external_url ?? '';
         }
         $url = Storage::disk($this->disk)->url($this->path);
+
         // Normaliza dobles slashes (p. ej. si APP_URL termina en / y el
         // config del disco agrega otra /), preservando el protocolo ://
         return preg_replace('#(?<!:)/{2,}#', '/', $url);
@@ -64,8 +82,9 @@ class LmsMediaLibrary extends Model
             return "{$bytes} B";
         }
         if ($bytes < 1048576) {
-            return round($bytes / 1024, 1) . ' KB';
+            return round($bytes / 1024, 1).' KB';
         }
-        return round($bytes / 1048576, 1) . ' MB';
+
+        return round($bytes / 1048576, 1).' MB';
     }
 }

@@ -25,6 +25,17 @@ class Kernel extends ConsoleKernel
         // que superan la retención por categoría hacia binnacle_entries_archive.
         // De madrugada, sin solaparse con la ejecución anterior.
         $schedule->command('binnacle:archive')->dailyAt('03:00')->withoutOverlapping();
+
+        // Vigila el backlog de la cola binnacle (mejora propuesta #1): si el
+        // worker cae, los eventos info/warning se acumulan en `jobs`. La alerta
+        // entra en la propia bitácora y notifica a admin/dirección. Sin overlap
+        // para que la revisión anterior termine antes de la siguiente.
+        $schedule->command('binnacle:watch')->everyFiveMinutes()->withoutOverlapping();
+
+        // Resumen diario por email (mejora propuesta #5): envía a admin/dirección
+        // un resumen del día anterior (critical/alert, accesos, top actores).
+        // Tras el archivado de las 03:00, antes del inicio de la jornada.
+        $schedule->command('binnacle:report')->dailyAt('05:30')->withoutOverlapping();
     }
 
     protected $commands = [

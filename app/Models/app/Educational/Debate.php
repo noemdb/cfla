@@ -3,14 +3,14 @@
 namespace App\Models\app\Educational;
 
 use App\Models\app\Academy\Grado;
-use App\Models\app\Academy\Pestudio;
 use App\Models\app\Academy\Seccion;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Debate extends Model
+class Debate extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
+
     protected $fillable = [
         'competition_id',
         'grado_id',
@@ -22,6 +22,22 @@ class Debate extends Model
         'attachment',
     ];
 
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'competition_id', 'grado_id', 'seccion_id', 'name',
+            'description', 'status_active', 'winner_section_id', 'attachment',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
+
     const COLUMN_COMMENTS = [
         'competition_id' => 'Competición',
         'grado_id' => 'Grado',
@@ -31,22 +47,46 @@ class Debate extends Model
         'description' => 'Descripción',
         'status_active' => 'Estado (Activo/Desactivo)',
         'winner_section_id' => 'Sección ganadora',
-        'attachment' => 'Archivo adjunto'
+        'attachment' => 'Archivo adjunto',
     ];
 
     // Relación
-    public function questions() { return $this->hasMany(DebateQuestion::class); }
-    public function answers() { return $this->hasMany(DebateAnswer::class); }
-    public function grado() { return $this->belongsTo(Grado::class,'grado_id'); }
-    public function seccion() { return $this->belongsTo(Seccion::class,'seccion_id'); }
-    public function competition() { return $this->belongsTo(DebateCompetition::class,'competition_id'); }
-    public function winnerSection() { return $this->belongsTo(Seccion::class, 'winner_section_id'); }
+    public function questions()
+    {
+        return $this->hasMany(DebateQuestion::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(DebateAnswer::class);
+    }
+
+    public function grado()
+    {
+        return $this->belongsTo(Grado::class, 'grado_id');
+    }
+
+    public function seccion()
+    {
+        return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    public function competition()
+    {
+        return $this->belongsTo(DebateCompetition::class, 'competition_id');
+    }
+
+    public function winnerSection()
+    {
+        return $this->belongsTo(Seccion::class, 'winner_section_id');
+    }
 
     // Scope para obtener los debates activos
     public function scopeActive($query)
     {
         return $query->where('status_active', true);
     }
+
     // Scope para obtener los debates finalizados
     public function scopeFinished($query)
     {
@@ -56,9 +96,10 @@ class Debate extends Model
     // Accessor para obtener el nombre completo del debate
     public function getFullNameAttribute()
     {
-        $grado = $this->grado->name;
-        $seccion = $this->seccion->name;
-        return $this->name . ' - ' . $this->competition->name. ' ['.$grado.' '.$seccion.']';
+        $grado = $this->grado?->name;
+        $seccion = $this->seccion?->name;
+
+        return $this->name.' - '.$this->competition?->name.' ['.$grado.' '.$seccion.']';
     }
 
     // Método para obtener el puntaje total de la sección
@@ -76,7 +117,7 @@ class Debate extends Model
 
     public function getFullGradoAttribute()
     {
-        return $this->grado->name . '['.$this->grado->pestudio->name . ']';
+        return $this->grado->name.'['.$this->grado->pestudio->name.']';
     }
 
     public static function setActive($id)
@@ -84,14 +125,18 @@ class Debate extends Model
         DebateQuestion::setDesActiveAll();
         Debate::query()->where('id', $id)->update(['status_active' => true]);
         Debate::query()->where('id', '!=', $id)->update(['status_active' => false]);
+
         return Debate::find($id);
     }
+
     public static function setDesactive($id)
     {
         DebateQuestion::setDesActiveAll();
-        Debate::query()->where('id',$id)->update(['status_active' => false]);
+        Debate::query()->where('id', $id)->update(['status_active' => false]);
+
         return Debate::find($id);
     }
+
     public static function setDesActiveAll()
     {
         DebateQuestion::setDesActiveAll();
@@ -104,9 +149,9 @@ class Debate extends Model
             ->select('seccions.*')
             ->join('grados', 'grados.id', '=', 'seccions.grado_id')
             ->join('debates', 'grados.id', '=', 'debates.grado_id')
-            ->where('debates.id',$this->id)
-            ->where('seccions.status_active','true')
-            ->where('seccions.status_inscription_affects','true')
+            ->where('debates.id', $this->id)
+            ->where('seccions.status_active', 'true')
+            ->where('seccions.status_inscription_affects', 'true')
             ->get();
     }
 
@@ -119,10 +164,9 @@ class Debate extends Model
     {
         return Debate::query()
             ->select('debates.*')
-            ->where('debates.competition_id',$CompetitionId)
-            ->where('debates.status_active',true)
+            ->where('debates.competition_id', $CompetitionId)
+            ->where('debates.status_active', true)
             ->orderby('debates.created_at')
             ->first();
     }
-
 }

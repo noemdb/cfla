@@ -6,9 +6,22 @@ use App\Models\app\Academy\Activity;
 use App\Services\Lms\LmsContentClassifier;
 use Illuminate\Database\Eloquent\Model;
 
-class LmsActivitySection extends Model
+class LmsActivitySection extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'lms_activity_sections';
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'activity_id', 'title', 'description', 'sort_order', 'is_visible', 'content_type'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'activity_id',
@@ -51,14 +64,14 @@ class LmsActivitySection extends Model
     public function contents()
     {
         return $this->hasMany(LmsActivityContent::class, 'section_id')
-                    ->orderBy('sort_order');
+            ->orderBy('sort_order');
     }
 
     public function visibleContents()
     {
         return $this->hasMany(LmsActivityContent::class, 'section_id')
-                    ->where('is_visible', true)
-                    ->orderBy('sort_order');
+            ->where('is_visible', true)
+            ->orderBy('sort_order');
     }
 
     public function activity()

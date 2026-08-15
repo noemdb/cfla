@@ -5,7 +5,7 @@ namespace App\Models\app\Instrument;
 use App\Models\app\Academy\Pensum;
 use Illuminate\Database\Eloquent\Model;
 
-class DiagCompetency extends Model
+class DiagCompetency extends Model implements \App\Contracts\Auditable
 {
     protected $table = 'diag_competencies';
 
@@ -15,6 +15,19 @@ class DiagCompetency extends Model
         'name',
         'description',
     ];
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return ['id', 'referent_id', 'pensum_id', 'name', 'description'];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     public function referent()
     {

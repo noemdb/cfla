@@ -46,7 +46,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \Illuminate\Routing\Middleware\ThrottleRequests::class . ':global',
+        \Illuminate\Routing\Middleware\ThrottleRequests::class.':global',
         // 'isAdmin' => \App\Http\Middleware\IsAdmin::class,
 
     ];
@@ -72,7 +72,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -106,5 +106,7 @@ class Kernel extends HttpKernel
         'isCoordinacion' => \App\Http\Middleware\IsCoordinacion::class,
         'isDirector' => \App\Http\Middleware\IsDirector::class,
         'binnacle.track' => \App\Http\Middleware\TrackBinnacleAccess::class,
+        'binnacle.view' => \App\Http\Middleware\CanViewBinnacle::class,
+        'binnacle.export' => \App\Http\Middleware\CanExportBinnacle::class,
     ];
 }

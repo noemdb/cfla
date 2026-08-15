@@ -152,6 +152,26 @@ class BroadcastAuditTest extends TestCase
         $this->assertDatabaseHas('broadcast_events', ['id' => $event->id, 'delivered' => true]);
     }
 
+    public function test_endpoint_ack_acepta_sesion_web_sin_token(): void
+    {
+        // Escenario real del browser: el ACK se envía desde una página Livewire
+        // autenticada por sesión HTTP (cookies), no con un token Sanctum Bearer.
+        // EnsureFrontendRequestsAreStateful (grupo `api`) puentea la sesión web.
+        $event = BroadcastEvent::create([
+            'event' => 'lesson.scheduled',
+            'channel_count' => 2,
+            'delivered' => false,
+        ]);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson('/api/broadcast/ack', ['event_id' => $event->id])
+            ->assertOk()
+            ->assertJson(['ok' => true]);
+
+        $this->assertDatabaseHas('broadcast_events', ['id' => $event->id, 'delivered' => true]);
+    }
+
     public function test_endpoint_ack_valida_event_id(): void
     {
         $user = User::factory()->create();

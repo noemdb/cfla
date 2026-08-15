@@ -25,7 +25,11 @@ class Binnacle
     {
         $event = new BinnacleEntryRequested($eventType, $context);
 
-        if (in_array($context['severity'] ?? 'info', config('binnacle.sync_severities', []), true)) {
+        $severity = $context['severity'] ?? 'info';
+        $isSyncSeverity = in_array($severity, config('binnacle.sync_severities', []), true);
+        $isSyncEvent = in_array($eventType, config('binnacle.sync_event_types', []), true);
+
+        if ($isSyncSeverity || $isSyncEvent) {
             // Mismo camino de escritura (WriteBinnacleEntry::handle), sin cola.
             (new WriteBinnacleEntry)->handle($event);
 

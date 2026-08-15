@@ -2,31 +2,49 @@
 
 namespace App\Models\app\Academy;
 
-use App\Models\app\Learner\Estudiant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
-class Profesor extends Model
+class Profesor extends Model implements \App\Contracts\Auditable
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     * Datos personales del profesor; los identificadores y contactos se
+     * enmascaran. Excluido gspassword: credencial de cuenta, nunca auditar.
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'user_id', 'ti_teacher', 'ci_profesor', 'lastname', 'name',
+            'gender', 'date_birth', 'dir_address', 'phone', 'cellphone', 'email',
+            'status_census_taker', 'status_active',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return ['ci_profesor', 'dir_address', 'phone', 'cellphone', 'email'];
+    }
+
     protected $fillable = [
-        'user_id','ti_teacher','ci_profesor','lastname','name','gender','date_birth','city_birth','town_hall_birth',
-        'state_birth','country_birth','dir_address','phone','cellphone','email','gsemail','gspassword','status_census_taker','status_active'
+        'user_id', 'ti_teacher', 'ci_profesor', 'lastname', 'name', 'gender', 'date_birth', 'city_birth', 'town_hall_birth',
+        'state_birth', 'country_birth', 'dir_address', 'phone', 'cellphone', 'email', 'gsemail', 'gspassword', 'status_census_taker', 'status_active',
     ];
 
     public static function getProfesorsAcademic()
     {
         return DB::table('profesors')
-        ->select('profesors.id','profesors.ci_profesor', 'profesors.name', 'profesors.lastname','profesors.date_birth')
-        ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
-        ->where('profesors.status_active', "true")
-        ->wherenull('pevaluacions.deleted_at')
-        ->orderBy('profesors.name')
-        ->groupBy('profesors.id','profesors.ci_profesor','profesors.name', 'profesors.lastname','profesors.date_birth')
-        ->get();
+            ->select('profesors.id', 'profesors.ci_profesor', 'profesors.name', 'profesors.lastname', 'profesors.date_birth')
+            ->join('pevaluacions', 'profesors.id', '=', 'pevaluacions.profesor_id')
+            ->where('profesors.status_active', 'true')
+            ->wherenull('pevaluacions.deleted_at')
+            ->orderBy('profesors.name')
+            ->groupBy('profesors.id', 'profesors.ci_profesor', 'profesors.name', 'profesors.lastname', 'profesors.date_birth')
+            ->get();
     }
 
     /**
@@ -308,6 +326,7 @@ class Profesor extends Model
     {
         $goal = $this->goal_notas_load($lapsoId, $pestudioId);
         $real = $this->real_notas_load($lapsoId, $pestudioId);
+
         return ($goal > 0) ? min(1, $real / $goal) : 0;
     }
 
@@ -387,12 +406,13 @@ class Profesor extends Model
 
     public function getProfesorIEECN($lapsoId = null, $pestudioId = null)
     {
-        if (!$lapsoId) {
+        if (! $lapsoId) {
             return $this->getProfesorIEE(null, $pestudioId);
         }
 
         $goal = $this->goal_notas_load_corte($lapsoId, $pestudioId);
         $real = $this->real_notas_load_corte($lapsoId, $pestudioId);
+
         return ($goal > 0) ? min(1, $real / $goal) : 0;
     }
 
@@ -403,7 +423,7 @@ class Profesor extends Model
     public function getProfesorIRE($pestudioId, $lapsoId = null)
     {
         $pestudio = Pestudio::find($pestudioId);
-        if (!$pestudio) {
+        if (! $pestudio) {
             return null;
         }
 
@@ -439,7 +459,7 @@ class Profesor extends Model
             return null;
         }
 
-        $aprobados = $boletins->filter(fn($b) => $b->nota >= $b->aprobacion)->count();
+        $aprobados = $boletins->filter(fn ($b) => $b->nota >= $b->aprobacion)->count();
 
         return round(100 * $aprobados / $boletins->count(), $decimal);
     }

@@ -2,16 +2,33 @@
 
 namespace App\Models\app\Academy\Lms;
 
-use App\Models\User;
 use App\Models\app\Academy\Activity;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LmsActivityPublication extends Model
+class LmsActivityPublication extends Model implements \App\Contracts\Auditable
 {
     use HasFactory;
 
     protected $table = 'lms_activity_publications';
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'activity_id', 'published_by', 'status',
+            'publish_at', 'unpublish_at', 'published_at',
+            'allow_comments', 'allow_downloads', 'notes',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected static function newFactory()
     {
@@ -63,6 +80,7 @@ class LmsActivityPublication extends Model
         if ($this->unpublish_at && now()->gt($this->unpublish_at)) {
             return 'hidden';
         }
+
         return now()->lt($this->publish_at) ? 'preview' : 'full';
     }
 
@@ -96,6 +114,6 @@ class LmsActivityPublication extends Model
     {
         return $query->where('status', 'PUBLISHED')
             ->whereNotNull('publish_at')
-            ->where(fn($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
+            ->where(fn ($q) => $q->whereNull('unpublish_at')->orWhere('unpublish_at', '>=', now()));
     }
 }
