@@ -151,7 +151,7 @@ SVG;
             $classes .= " {$baseClass}";
         }
 
-        $href = $item['route'] ?? '#';
+        $href = $this->href($item);
 
         return <<<HTML
 <a href="{$href}" class="{$classes}">
@@ -160,6 +160,23 @@ SVG;
     {$badge}
 </a>
 HTML;
+    }
+
+    /**
+     * Resuelve el href de un item: el valor de `route` es un NOMBRE de ruta
+     * (config/menus.php), no una URL; si no existe la ruta se usa el literal.
+     */
+    protected function href(array $item): string
+    {
+        $route = $item['route'] ?? '#';
+
+        if ($route === '#') {
+            return '#';
+        }
+
+        return \Illuminate\Support\Facades\Route::has($route)
+            ? route($route)
+            : $route;
     }
 
     /**

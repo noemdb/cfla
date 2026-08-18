@@ -63,4 +63,39 @@ class UserFactory extends Factory
             'is_director' => true,
         ]);
     }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_admin' => true,
+        ]);
+    }
+
+    public function diagnostic(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_diagnostic' => true,
+        ]);
+    }
+
+    public function planner(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_planner' => true,
+        ]);
+    }
+
+    public function profesor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_profesor' => true,
+        ]);
+    }
+
+    public function student(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_student' => true,
+        ]);
+    }
 }

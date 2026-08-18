@@ -13,7 +13,7 @@ class IndexComponent extends Component
 {
     use WithPagination;
 
-    public int $perPage = 50;
+    public $paginate = 50;
 
     public ?int $viewingEntryId = null;
 
@@ -50,6 +50,11 @@ class IndexComponent extends Component
     public function resetFilters(): void
     {
         $this->reset(['search', 'category', 'severity', 'dateFrom', 'dateTo']);
+        $this->resetPage();
+    }
+
+    public function updatingPaginate(): void
+    {
         $this->resetPage();
     }
 
@@ -92,7 +97,7 @@ class IndexComponent extends Component
 
     public function render()
     {
-        $entries = $this->query()->paginate($this->perPage);
+        $entries = $this->query()->paginate($this->paginate);
 
         $meta = [
             'categories' => BinnacleEntry::query()

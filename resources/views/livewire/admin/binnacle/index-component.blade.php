@@ -146,9 +146,7 @@
             </table>
         </div>
 
-        <div class="px-4 py-3 border-t border-white/5">
-            {{ $entries->links() }}
-        </div>
+        <x-pagination-wrapper :paginator="$entries" />
     </div>
 
     <!-- Modal de detalle del evento (7xl) -->
