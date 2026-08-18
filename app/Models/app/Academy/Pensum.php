@@ -8,9 +8,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Pensum extends Model
+class Pensum extends Model implements \App\Contracts\Auditable
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'pestudio_id', 'grado_id', 'asignatura_id',
+            'status_component', 'status_active', 'status_active_diagnostic', 'observations',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
 
     protected $fillable = [
         'pestudio_id',
@@ -83,6 +99,7 @@ class Pensum extends Model
     {
         $gradoName = $this->grado?->name ?? '?';
         $asignaturaName = $this->asignatura?->code ?? '?';
+
         return "{$gradoName} - {$asignaturaName}";
     }
 }

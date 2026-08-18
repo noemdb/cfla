@@ -27,6 +27,11 @@ npm run build
 # Run all PHPUnit tests
 php8.2 artisan test
 
+# ⚠️ ANTES de correr tests: si existe bootstrap/cache/config.php (config
+#    cacheado), los tests arrancan con APP_ENV=local en vez de testing y todos
+#    los POST fallan con 419 CSRF. Ejecutar siempre:
+php8.2 artisan config:clear
+
 # Run a single test class
 php8.2 artisan test --filter=TestClassName
 

@@ -22,10 +22,6 @@
     @wireUiScripts
     @livewireStyles
 
-    <!-- Meta tags -->
-    <meta name="description" content="Dashboard administrativo U.E. COLEGIO FRAY LUIS AMIGÓ">
-    <meta name="robots" content="noindex, nofollow">
-
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -42,23 +38,7 @@
     </div>
 
     <!-- Navbar compartido para todos los roles -->
-    <x-role-navbar subtitle="Panel Administrativo">
-        <x-slot:navbarInfo>
-            @yield('navbar-info')
-        </x-slot:navbarInfo>
-        @include('components.navbars.admin-items')
-        @include('components.navbars.coordinacion-items')
-        @include('components.navbars.planning-items')
-        @include('components.navbars.profesor-items')
-        @include('components.navbars.director-items')
-        <x-slot:mobileSlot>
-            @include('components.navbars.admin-items-mobile')
-            @include('components.navbars.coordinacion-items-mobile')
-            @include('components.navbars.planning-items-mobile')
-            @include('components.navbars.director-items-mobile')
-            @include('components.navbars.profesor-items-mobile')
-        </x-slot:mobileSlot>
-    </x-role-navbar>
+    <x-role-navbar subtitle="Panel Administrativo" layout="admin" />
 
     <!-- Main Content -->
     <main class="flex-1 container mx-auto px-4 py-8">
@@ -105,7 +85,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
         /* Ensure notifications are above sticky navbar */
-        #notifications, 
+        #notifications,
         .wireui-notifications,
         [fixed] {
             z-index: 9999 !important;

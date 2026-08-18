@@ -37,7 +37,15 @@ return [
     | queue_backlog DEBE ser síncrono: una alerta de cola caída no puede depender
     | de la propia cola para persistirse.
     */
-    'sync_event_types' => ['user_login', 'access', 'queue_backlog'],
+    'sync_event_types' => [
+        'user_login',
+        'access',
+        'queue_backlog',
+        'sql_select',
+        'sql_insert',
+        'sql_update',
+        'sql_delete',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -128,6 +136,30 @@ return [
         \App\Models\User::class,
         \App\Models\app\Learner\Estudiant::class,
         \App\Models\app\Learner\Representant::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auditoría SQL (expansión binnacle)
+    |--------------------------------------------------------------------------
+    | El middleware binnacle.sql agrega por (tabla, operación) las consultas
+    | select/insert/update/delete que tocan las tablas de sql_monitored_tables
+    | durante una request a una ruta marcada. El conteo se emite como evento
+    | sql_<operación> (category=user_action), síncrono vía sync_event_types.
+    |
+    | El alcance es SOLO las URLs marcadas (no global): así se acota el volumen,
+    | coherente con la advertencia de SELECTs de la Spec §9.2. Los INSERT/UPDATE/
+    | DELETE de modelos también quedan cubiertos globalmente por el observer
+    | AuditableModelObserver (diff semántico); este auditor aporta el plano SQL.
+    */
+    'sql_audit_enabled' => env('BINNACLE_SQL_AUDIT_ENABLED', true),
+    'sql_audit_max_samples' => (int) env('BINNACLE_SQL_AUDIT_MAX_SAMPLES', 3),
+    'sql_audit_sample_length' => (int) env('BINNACLE_SQL_AUDIT_SAMPLE_LENGTH', 200),
+    'sql_monitored_tables' => [
+        'achievements', 'activities', 'inscripcions', 'pensums', 'pevaluacions', 'profesors',
+        'activity_comments', 'broadcast_events', 'lms_activity_contents', 'lms_activity_links',
+        'lms_activity_progress', 'lms_activity_publications', 'lms_activity_resources',
+        'lms_activity_sections', 'lms_html_embeds', 'lms_media_library',
     ],
 
     /*

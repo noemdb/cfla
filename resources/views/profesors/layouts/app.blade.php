@@ -40,23 +40,7 @@
     </div>
 
     <!-- Navbar compartido para todos los roles -->
-    <x-role-navbar subtitle="Panel del Profesor">
-        <x-slot:navbarInfo>
-            @yield('navbar-info')
-        </x-slot:navbarInfo>
-        @include('components.navbars.profesor-items')
-        @include('components.navbars.coordinacion-items')
-        @include('components.navbars.admin-items')
-        @include('components.navbars.planning-items')
-        @include('components.navbars.director-items')
-        <x-slot:mobileSlot>
-            @include('components.navbars.profesor-items-mobile')
-            @include('components.navbars.coordinacion-items-mobile')
-            @include('components.navbars.admin-items-mobile')
-            @include('components.navbars.director-items-mobile')
-            @include('components.navbars.planning-items-mobile')
-        </x-slot:mobileSlot>
-    </x-role-navbar>
+    <x-role-navbar subtitle="Panel del Profesor" layout="profesor" />
 
     <!-- Main Content -->
     <main class="flex-1 container-fluid w-full mx-auto px-2 py-2 sm:px-4 sm:py-8">

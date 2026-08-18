@@ -7,13 +7,29 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Inscripcion extends Model
+class Inscripcion extends Model implements \App\Contracts\Auditable
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
+     */
+    public function auditableAttributes(): array
+    {
+        return [
+            'id', 'tipo_id', 'seccion_id', 'estudiant_id', 'escolaridad_id',
+            'programacion_id', 'grupo_estable_id', 'observations',
+        ];
+    }
+
+    public function maskedAuditFields(): array
+    {
+        return [];
+    }
+
     protected $fillable = [
         'tipo_id', 'seccion_id', 'estudiant_id', 'escolaridad_id',
-        'programacion_id', 'grupo_estable_id', 'observations'
+        'programacion_id', 'grupo_estable_id', 'observations',
     ];
 
     public function estudiant()

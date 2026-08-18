@@ -6,6 +6,7 @@ use App\Models\app\Academy\AreaConocimiento;
 use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Observers\AreaConocimientoObserver;
 use App\Observers\LmsActivityContentObserver;
+use App\Services\Binnacle\SqlQueryAuditor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SqlQueryAuditor::class);
     }
 
     /**
@@ -81,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\app\Academy\Achievement::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Pevaluacion::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Profesor::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Inscripcion::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Pensum::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\LmsActivitySection::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\LmsActivityContent::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\LmsActivityLink::observe(\App\Observers\AuditableModelObserver::class);
@@ -90,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\app\Academy\Lms\LmsActivityPublication::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\ActivityComment::observe(\App\Observers\AuditableModelObserver::class);
         \App\Models\app\Academy\Lms\LmsActivityProgress::observe(\App\Observers\AuditableModelObserver::class);
+        \App\Models\app\Academy\Lms\BroadcastEvent::observe(\App\Observers\AuditableModelObserver::class);
 
         // Mejora propuesta #7 ampliada: Educational (debates) e Instrument (diagnóstico).
         \App\Models\app\Educational\DebateCompetition::observe(\App\Observers\AuditableModelObserver::class);

@@ -423,6 +423,25 @@ Captura autenticación fallida, accesos a rutas protegidas y tiempos de respuest
 
 **Implementación**: `App\Http\Middleware\TrackBinnacleAccess`, alias `binnacle.track`. Parámetro opcional de categoría: `binnacle.track` → `user_action`, `binnacle.track:security` → `security`. Registra `event_type = access` con `subject` = usuario autenticado (o `system` para invitados), `response_status` y `response_ms` en metadata. El grupo `/admin/*` lo usa con `:security`. **Ajuste técnico**: `$middlewarePriority` en `app/Http/Kernel.php` incluye a `TrackBinnacleAccess` tras la sesión y antes de `AuthenticatesRequests`; sin esto Laravel ordena `Authenticate` antes y el redirect de invitados impide registrar el acceso.
 
+### 5.7 Cobertura ampliada: rutas académicas y auditoría SQL — ✅ implementado (expansión binnacle)
+
+Por decisión institucional (blueprint/binnacle, expansión), la bitácora amplía su cobertura al módulo académico de planificación/LMS en dos planos complementarios:
+
+**A. Acceso a rutas académicas marcadas.** Las siguientes rutas se registran con `binnacle.track` (además de `binnacle.sql`, ver B):
+
+- Profesor LMS: `app/profesors/lms/activity/lesson/new`, `app/profesors/lms/activity/{activity}`, `app/profesors/lms/comments`, `app/profesors/lms/lessons/print`.
+- Coordinación: `app/coordinacion/activities`, `app/coordinacion/activities/format/{pevaluacion}`, `app/coordinacion/activities/resume/{pevaluacion}`, `app/coordinacion/lecciones`, `app/coordinacion/lecciones/print`.
+- Leadership: `app/leadership/activities`, `app/leadership/activities/format/{pevaluacion}`, `app/leadership/activities/resume/{pevaluacion}`, `app/leadership/lessons`, `app/leadership/lessons/print`, `app/leadership/lms/activity/{activity}/preview`.
+
+**B. Auditoría SQL por request.** `App\Http\Middleware\TrackBinnacleSql` (alias `binnacle.sql`) arranca `App\Services\Binnacle\SqlQueryAuditor` al inicio de la request y lo vuelca al final (incluye errores: `finally`). El auditor escucha cada `QueryExecuted` y agrega el conteo por `(operación, tabla)` **solo** para las tablas de `config/binnacle.php#sql_monitored_tables`, emitiendo una entrada `sql_select`/`sql_insert`/`sql_update`/`sql_delete` (`category = user_action`, `severity = info`) con `table`, `operation`, `count`, `response_ms` y hasta `sql_audit_max_samples` muestras del SQL **parametrizado** (nunca bindings/literales). Los eventos `sql_*` se añadieron a `sync_event_types` (se escriben síncronos).
+
+- **Alcance acotado a URLs**: coherente con §9.2 — la voluminosa clase SELECT se registra solo en las páginas marcadas; nunca globalmente.
+- **Cobertura global de modelos**: los INSERT/UPDATE/DELETE de los modelos afectados quedan igualmente auditados en todo el sistema por `AuditableModelObserver` (diff semántico, ADR-005). El auditor SQL aporta el plano físico adicional.
+- **Modelos nuevos auditables**: `Inscripcion`, `Pensum` (implementan `App\Contracts\Auditable`) y `BroadcastEvent` (observer registrado por decisión institucional, pese a que el modelo es un log de broadcasts; `LmsActivityLog` queda excluido por no aportar valor — ya es su propio log de auditoría).
+- **Conteos sin duplicar**: el listener se registra una sola vez por instancia singleton y se desactiva con un flag, de modo que requests sucesivas (o re-ejecuciones del middleware) no doblan los conteos; la escritura del propio `BinnacleEntry` no se re-audita porque `binnacle_entries` no está en la allowlist.
+
+Tablas monitoreadas (`config/binnacle.php#sql_monitored_tables`): `achievements`, `activities`, `inscripcions`, `pensums`, `pevaluacions`, `profesors`, `activity_comments`, `broadcast_events`, `lms_activity_contents`, `lms_activity_links`, `lms_activity_progress`, `lms_activity_publications`, `lms_activity_resources`, `lms_activity_sections`, `lms_html_embeds`, `lms_media_library`.
+
 ### 5.6 Manejador de excepciones (Fase 2)
 
 Se engancha en `App\Exceptions\Handler::report()`. Solo excepciones no capturadas explícitamente (no `ValidationException`, que ya tiene su propio flujo de UX) — evita ruido. `severity = critical` para excepciones 500, `warning` para 4xx no manejados.
@@ -468,6 +487,8 @@ enum BinnacleEventType: string
     case BruteForceDetected = 'brute_force_detected';
 }
 ```
+
+**Expansión (5.7)**: se añaden los eventos `sql_select`, `sql_insert`, `sql_update`, `sql_delete` (`category = user_action`), emitidos únicamente por el middleware `binnacle.sql` en las rutas académicas marcadas.
 
 ---
 

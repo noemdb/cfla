@@ -112,11 +112,23 @@ class GenerateTimetableJobTest extends TestCase
 
         $coordinator = \App\Models\User::factory()->create(['is_coordinacion' => true]);
 
+        // El diff se calcula ANTES de persistir (igual que en producción, §15
+        // "diff antes de aplicar"): con el calendario sin slots, todas las
+        // lecciones son nuevas → ambos docentes quedan afectados.
+        $calendar = $fixture['calendar']->fresh();
+        $job = new GenerateTimetableJob($calendar->id, dryRun: false);
+        $solver = new \ReflectionMethod($job, 'runSolver');
+        $solver->setAccessible(true);
+        $computeDiff = new \ReflectionMethod($job, 'computeDiff');
+        $computeDiff->setAccessible(true);
+        $result = $solver->invoke($job, $calendar);
+        $diff = $computeDiff->invoke($job, $calendar, $result);
+
+        // Confirmar (persiste slots) y procesar el job de notificaciones en
+        // cola (síncrono) con el mismo diff que encola GenerateTimetableJob.
         GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: false);
 
-        // El job de persistencia encola el job de notificaciones con el diff.
-        // En el test se procesa en cola (síncrono) para verificar el efecto.
-        NotifyTimetableChangesJob::dispatchSync($fixture['calendar']->id);
+        NotifyTimetableChangesJob::dispatchSync($fixture['calendar']->id, $diff);
 
         // El usuario del profesor A recibe notificación DB.
         $this->assertDatabaseHas('notifications', [

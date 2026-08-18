@@ -22,8 +22,9 @@ class BroadcastEvent extends Model implements \App\Contracts\Auditable
 
     /**
      * Allowlist para la bitácora (Spec BINNACLE-001, ADR-005).
-     * Este modelo ES un log de auditoría de broadcasts; no se registra en
-     * binnacle (duplicaría el rastro). Contrato expuesto por completitud.
+     * El modelo ES un log de auditoría de broadcasts; su observer se registra
+     * en binnacle por decisión institucional (expansión binnacle) para tener
+     * un rastro unificado de la actividad del módulo LMS.
      */
     public function auditableAttributes(): array
     {

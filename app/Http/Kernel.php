@@ -106,6 +106,7 @@ class Kernel extends HttpKernel
         'isCoordinacion' => \App\Http\Middleware\IsCoordinacion::class,
         'isDirector' => \App\Http\Middleware\IsDirector::class,
         'binnacle.track' => \App\Http\Middleware\TrackBinnacleAccess::class,
+        'binnacle.sql' => \App\Http\Middleware\TrackBinnacleSql::class,
         'binnacle.view' => \App\Http\Middleware\CanViewBinnacle::class,
         'binnacle.export' => \App\Http\Middleware\CanExportBinnacle::class,
     ];

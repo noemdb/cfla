@@ -1,4 +1,8 @@
-@props(['subtitle' => 'Panel Administrativo'])
+@props(['subtitle' => 'Panel Administrativo', 'layout' => 'admin'])
+
+<?php
+$menuBuilder = app(\App\Services\MenuBuilder::class, ['layout' => $layout ?? 'admin']);
+?>
 
 <header x-data="{ mobileOpen: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-900/50 dark:border-white/5 sticky top-0 z-50">
     <div class="container-fluid w-full px-4 py-2">
@@ -15,7 +19,7 @@
             <!-- Navigation (desktop: lg+) -->
             <nav class="hidden lg:flex items-center space-x-1 mr-auto mx-2">
                 {{ $leading ?? '' }}
-                {{ $slot }}
+                {!! $menuBuilder->renderDesktop() !!}
             </nav>
 
             <!-- Navbar Info (desktop) -->
@@ -86,9 +90,9 @@
                 </div>
             @endif
 
-            {{-- Nav items (mobile-specific accordions, sin x-transition) --}}
+            {{-- Nav items (mobile-specific accordions) --}}
             <div class="space-y-1">
-                {{ $mobileSlot }}
+                {!! $menuBuilder->renderMobile() !!}
             </div>
 
             {{-- NavbarInfo (theme toggle, etc.) --}}
@@ -106,4 +110,3 @@
         </div>
     </div>
 </header>
-

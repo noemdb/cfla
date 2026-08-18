@@ -323,23 +323,25 @@ Route::prefix('app')->name('app.')->group(function () {
                 ->name('carga-academica');
 
             Route::get('/activities', \App\Livewire\Coordinacion\ActivityList::class)
-                ->name('activities');
+                ->name('activities')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/activities/format/{pevaluacion}', [
                 \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
-            ])->name('activities.format');
+            ])->name('activities.format')->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/activities/resume/{pevaluacion}', [
                 \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
-            ])->name('activities.resume');
+            ])->name('activities.resume')->middleware(['binnacle.track', 'binnacle.sql']);
 
             Route::get('/lecciones', \App\Livewire\Coordinacion\LessonList::class)
-                ->name('lessons');
+                ->name('lessons')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Impresión de lecciones LMS: reusa Director\LessonsPrintController; el
             // scope (peducativos del coordinador) lo deduce el controlador por el
             // nombre de ruta (patrón ADR-006).
             Route::get('/lecciones/print', [
                 \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
-            ])->name('lessons.print');
+            ])->name('lessons.print')->middleware(['binnacle.track', 'binnacle.sql']);
 
             Route::get('/recursos', \App\Livewire\Coordinacion\ResourceList::class)
                 ->name('resources');
@@ -371,29 +373,31 @@ Route::prefix('app')->name('app.')->group(function () {
 
             // Activities (reuso IndexComponent scoped)
             Route::get('/activities', \App\Livewire\Leadership\ActivityOverview::class)
-                ->name('activities');
+                ->name('activities')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/activities/format/{pevaluacion}', [
                 \App\Http\Controllers\Planning\ActivityPdfController::class, 'format',
-            ])->name('activities.format');
+            ])->name('activities.format')->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/activities/resume/{pevaluacion}', [
                 \App\Http\Controllers\Planning\ActivityPdfController::class, 'resume',
-            ])->name('activities.resume');
+            ])->name('activities.resume')->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Lecciones LMS por área
             Route::get('/lessons', \App\Livewire\Leadership\LessonMonitor::class)
-                ->name('lessons');
+                ->name('lessons')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Impresión de lecciones LMS: reusa Director\LessonsPrintController;
             // el scope (áreas asignadas al jefe) lo deduce el controlador por el
             // nombre de ruta (patrón ADR-006).
             Route::get('/lessons/print', [
                 \App\Http\Controllers\Director\LessonsPrintController::class, 'index',
-            ])->name('lessons.print');
+            ])->name('lessons.print')->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Vista previa de actividad LMS (independiente del módulo planning)
             Route::get('/lms/activity/{activity}/preview', function (\App\Models\app\Academy\Activity $activity) {
                 return view('livewire.leadership.lms-activity-preview', compact('activity'));
-            })->name('lms.preview');
+            })->name('lms.preview')->middleware(['binnacle.track', 'binnacle.sql']);
 
             // Profesores con KPIs
             Route::get('/profesores', \App\Livewire\Leadership\ProfesorIndicators::class)
@@ -489,13 +493,17 @@ Route::prefix('app')->name('app.')->group(function () {
         // ─── LMS: Editor de Contenido del Profesor ─────────────────
         Route::prefix('lms')->name('lms.')->group(function () {
             Route::get('/activity/lesson/new', \App\Livewire\Profesor\Lms\LessonWizard::class)
-                ->name('lesson.wizard');
+                ->name('lesson.wizard')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/activity/{activity}', \App\Livewire\Profesor\Lms\ActivityEditor::class)
-                ->name('editor');
+                ->name('editor')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/comments', \App\Livewire\Profesor\Lms\CommentModeration::class)
-                ->name('comments');
+                ->name('comments')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
             Route::get('/lessons/print', [\App\Http\Controllers\Profesor\Lms\LessonsPrintController::class, 'index'])
-                ->name('lessons.print');
+                ->name('lessons.print')
+                ->middleware(['binnacle.track', 'binnacle.sql']);
         });
 
         // ─── Binnacle: Mi Bitácora (solo registros propios) ───────
