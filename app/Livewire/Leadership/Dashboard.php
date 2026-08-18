@@ -10,12 +10,13 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     public array $metrics = [];
+
     private LeadershipService $service;
 
     public function mount()
     {
         $this->service = app(LeadershipService::class, [
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
         $this->metrics = $this->service->dashboardMetrics();
     }
@@ -27,6 +28,6 @@ class Dashboard extends Component
         ]);
     }
 
-    #[Layout('planning.layouts.app')]
+    #[Layout('leadership.layouts.app')]
     public function layout() {}
 }

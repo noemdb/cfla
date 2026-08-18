@@ -28,10 +28,7 @@ class Timetable extends TimetableRoleView
             throw new NotFoundHttpException('No tenés una inscripción asociada para ver tu horario.');
         }
 
-        $calendar = TimetableCalendar::query()
-            ->where('status', 'active')
-            ->latest('id')
-            ->first();
+        $calendar = TimetableCalendar::activeForCurrentLapso();
 
         if (! $calendar) {
             throw new NotFoundHttpException('Todavía no hay un horario publicado.');

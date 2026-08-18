@@ -3,8 +3,8 @@
 namespace App\Livewire\Leadership\Concerns;
 
 use App\Services\Leadership\LeadershipService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 trait HasLeadershipScope
 {
@@ -13,7 +13,7 @@ trait HasLeadershipScope
     public function initializeHasLeadershipScope()
     {
         $this->leadershipService = app(LeadershipService::class, [
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
     }
 

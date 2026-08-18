@@ -44,7 +44,7 @@
                 </span>
                 <div>
                     <p class="font-semibold text-sky-800 dark:text-sky-300 text-sm leading-snug">
-                        Horario de atención: <span class="font-bold">8:00 AM a 12:00 M</span>
+                        Horario de atención: <span class="font-bold">2:00 PM a 4:00 PM</span>
                     </p>
                     <p class="text-[11px] text-sky-600/70 dark:text-sky-400/60 mt-0.5">Lunes a viernes — presentarse con el estudiante</p>
                 </div>

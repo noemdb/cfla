@@ -97,6 +97,8 @@ class TimetableSubstitutes extends Component
     public function render(): \Illuminate\View\View
     {
         $calendars = TimetableCalendar::query()
+            // PLAN-TIMETABLE-002 §4.6: excluir alternativas archivadas.
+            ->where('status', '!=', TimetableCalendar::STATUS_ARCHIVED)
             ->orderByDesc('id')
             ->get(['id', 'name', 'status']);
 

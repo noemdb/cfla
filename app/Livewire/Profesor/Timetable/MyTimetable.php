@@ -27,10 +27,7 @@ class MyTimetable extends TimetableRoleView
             throw new NotFoundHttpException('No tenés un perfil de docente asociado para ver tu horario.');
         }
 
-        $calendar = TimetableCalendar::query()
-            ->where('status', 'active')
-            ->latest('id')
-            ->first();
+        $calendar = TimetableCalendar::activeForCurrentLapso();
 
         if (! $calendar) {
             throw new NotFoundHttpException('Todavía no hay un horario publicado.');

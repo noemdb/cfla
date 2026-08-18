@@ -2,16 +2,15 @@
 
 namespace App\Livewire\Leadership;
 
-use App\Models\User;
-use App\Models\app\Academy\Lapso;
-use App\Models\app\Academy\Pestudio;
-use App\Models\app\Academy\Peducativo;
-use App\Models\app\Academy\Profesor;
-use App\Models\app\Academy\Grado;
-use App\Models\app\Academy\Seccion;
-use App\Models\app\Academy\AreaConocimiento;
-use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\AreaConocimiento;
+use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Instrument\DiagMain;
 use App\Models\app\Instrument\DiagSession;
 use App\Services\Leadership\LeadershipService;
@@ -23,21 +22,31 @@ use Livewire\Component;
 class IndicatorDashboard extends Component
 {
     public $activeTab = 1;
+
     public $selectedLapsoId;
 
     // ─── Filters ─────────────────────────────────────────────────────
     public $selectedPeducativoId = null;
+
     public $selectedPestudioId = null;
+
     public $selectedGradoId = null;
+
     public $selectedSeccionId = null;
 
     // Master data (scoped to leadership areas)
     public $pestudios;
+
     public $filteredPestudios;
+
     public $peducativos;
+
     public $lapsos;
+
     public $lapsoActive;
+
     public $seccionesOptions = [];
+
     public $gradosOptions = [];
 
     // Tab 1: Main indicators per peducativo
@@ -54,29 +63,41 @@ class IndicatorDashboard extends Component
 
     // Global KPI boxes
     public $totalActivities = 0;
+
     public $totalProfesoresActivos = 0;
+
     public $totalDiagActive = 0;
 
     // Charts
     public $chartActivitiesByDay = [];
+
     public $chartLessonsByDay = [];
+
     public $chartScheduledByDay = [];
 
     // Lesson stats (scoped by selected lapso)
     public $lessonTotal = 0;
+
     public $lessonScheduled = 0;
+
     public $lessonPublished = 0;
+
     public $lessonPublishedPct = 0;
+
     public $lessonScheduledPct = 0;
 
     // Registration flow charts
     public $registrationRange = '7d';
+
     public $chartActivitiesFlow = [];
+
     public $chartLessonsFlow = [];
+
     public $chartDiagnosticsFlow = [];
 
     // ─── Areas/Pensums Modal ──────────────────────────────────────────
     public $showAreasPensumsModal = false;
+
     public $areasPensumsData = [];
 
     private LeadershipService $leadershipService;
@@ -91,13 +112,13 @@ class IndicatorDashboard extends Component
     {
         $this->isAdmin = Auth::user()->is_admin;
         $this->leadershipService = app(LeadershipService::class, [
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
 
         if ($this->isAdmin) {
             // Admin sees ALL planning-related asignatura IDs
             $this->asignaturaIds = \App\Models\app\Academy\Asignatura::whereHas(
-                'pensums.pestudio', fn($q) => $q->where('planning_module', true)
+                'pensums.pestudio', fn ($q) => $q->where('planning_module', true)
             )->pluck('id')->toArray();
         } else {
             $this->asignaturaIds = $this->leadershipService->getAssignedAsignaturaIds();
@@ -150,7 +171,7 @@ class IndicatorDashboard extends Component
 
         if ($this->isAdmin) {
             // Admin sees all areas that have planning-related asignaturas
-            $query->whereHas('campo_conocimientos.asignatura.pensums.pestudio', fn($q) => $q->where('planning_module', true));
+            $query->whereHas('campo_conocimientos.asignatura.pensums.pestudio', fn ($q) => $q->where('planning_module', true));
         } else {
             $query->where('leader_id', Auth::id());
         }
@@ -168,7 +189,11 @@ class IndicatorDashboard extends Component
     }
 
     // ─── Filter change handlers ──────────────────────────────────────
-    public function updatedSelectedLapsoId() { $this->loadAllData(); }
+    public function updatedSelectedLapsoId()
+    {
+        $this->loadAllData();
+    }
+
     public function updatedSelectedPeducativoId()
     {
         $this->selectedPestudioId = null;
@@ -179,6 +204,7 @@ class IndicatorDashboard extends Component
         $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
+
     public function updatedSelectedPestudioId()
     {
         $this->selectedGradoId = null;
@@ -187,19 +213,29 @@ class IndicatorDashboard extends Component
         $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
-    public function updatedSelectedSeccionId() { $this->loadAllData(); }
+
+    public function updatedSelectedSeccionId()
+    {
+        $this->loadAllData();
+    }
+
     public function updatedSelectedGradoId()
     {
         $this->selectedSeccionId = null;
         $this->refreshSeccionesOptions();
         $this->loadAllData();
     }
-    public function switchTab($tab) { $this->activeTab = $tab; }
+
+    public function switchTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
 
     private function refreshGradosOptions()
     {
-        if (!$this->isAdmin && empty($this->asignaturaIds)) {
+        if (! $this->isAdmin && empty($this->asignaturaIds)) {
             $this->gradosOptions = [];
+
             return;
         }
         $query = Grado::where('status_active', 'true')
@@ -251,7 +287,10 @@ class IndicatorDashboard extends Component
     /** Scope a pevaluacion query by the leader's asignatura_ids */
     private function scopePevaQuery($query)
     {
-        if ($this->isAdmin) return $query;
+        if ($this->isAdmin) {
+            return $query;
+        }
+
         return $query->whereHas('pensum', function ($q) {
             $q->whereIn('asignatura_id', $this->asignaturaIds);
         });
@@ -260,7 +299,10 @@ class IndicatorDashboard extends Component
     /** Scope a query that already joins pensums by the leader's asignatura_ids */
     private function scopePensumJoin($query)
     {
-        if ($this->isAdmin) return $query;
+        if ($this->isAdmin) {
+            return $query;
+        }
+
         return $query->whereIn('pensums.asignatura_id', $this->asignaturaIds);
     }
 
@@ -276,6 +318,7 @@ class IndicatorDashboard extends Component
                 $pestudios = $pestudios->where('id', $grado->pestudio_id);
             }
         }
+
         return $pestudios;
     }
 
@@ -292,12 +335,13 @@ class IndicatorDashboard extends Component
         if ($this->selectedPeducativoId) {
             $list = $list->where('id', $this->selectedPeducativoId);
         }
+
         return $list->values();
     }
 
     public function loadAllData()
     {
-        if (!$this->isAdmin && empty($this->asignaturaIds)) {
+        if (! $this->isAdmin && empty($this->asignaturaIds)) {
             return; // No areas — keep empty state
         }
         $lapsoId = $this->selectedLapsoId;
@@ -412,7 +456,7 @@ class IndicatorDashboard extends Component
                 $cobertura = $totalPevCount > 0 ? round($totalActivities / $totalPevCount, 2) : 0;
                 $participacion = $totalTeachers > 0 ? round(($totalActiveTeachers / $totalTeachers) * 100, 1) : 0;
 
-                $withComments = $allActivities->filter(fn($a) => !empty($a->comments))->count();
+                $withComments = $allActivities->filter(fn ($a) => ! empty($a->comments))->count();
                 $approved = $allActivities->where('status', true)->count();
                 $seguimiento = $totalActivities > 0 ? round(($withComments / $totalActivities) * 100, 1) : 0;
                 $aprobacion = $totalActivities > 0 ? round(($approved / $totalActivities) * 100, 1) : 0;
@@ -468,8 +512,8 @@ class IndicatorDashboard extends Component
                     ->get();
 
                 $totalLessons = $lessons->count();
-                $published = $lessons->filter(fn($l) => $l->pub_status === 'PUBLISHED')->count();
-                $scheduled = $lessons->filter(fn($l) => !is_null($l->publish_at) && $l->pub_status !== 'PUBLISHED')->count();
+                $published = $lessons->filter(fn ($l) => $l->pub_status === 'PUBLISHED')->count();
+                $scheduled = $lessons->filter(fn ($l) => ! is_null($l->publish_at) && $l->pub_status !== 'PUBLISHED')->count();
                 $drafts = $totalLessons - $published - $scheduled;
 
                 $publishedPct = $totalLessons > 0 ? round(($published / $totalLessons) * 100, 1) : 0;
@@ -489,23 +533,23 @@ class IndicatorDashboard extends Component
                 }
                 $teachersParticipation = $totalTeachers > 0 ? round(($profIdsWithLessons / $totalTeachers) * 100, 1) : 0;
 
-                $withNotes = $lessons->filter(fn($l) => !empty($l->notes))->count();
+                $withNotes = $lessons->filter(fn ($l) => ! empty($l->notes))->count();
                 $supervision = $totalLessons > 0 ? round(($withNotes / $totalLessons) * 100, 1) : 0;
 
                 $this->tab4Data[$tab4Lapso->id][$peducativo->id] = (object) [
                     'peducativo' => $peducativo,
                     'lapso' => $tab4Lapso,
                     'indicators' => (object) [
-                        'total_lessons'          => $totalLessons,
-                        'published_count'        => $published,
-                        'scheduled_count'        => $scheduled,
-                        'draft_count'            => $drafts,
-                        'published_pct'          => $publishedPct,
-                        'scheduled_pct'          => $scheduledPct,
-                        'draft_pct'              => $draftPct,
-                        'avg_lessons_per_pev'    => $avgPerPev,
+                        'total_lessons' => $totalLessons,
+                        'published_count' => $published,
+                        'scheduled_count' => $scheduled,
+                        'draft_count' => $drafts,
+                        'published_pct' => $publishedPct,
+                        'scheduled_pct' => $scheduledPct,
+                        'draft_pct' => $draftPct,
+                        'avg_lessons_per_pev' => $avgPerPev,
                         'teachers_participation' => $teachersParticipation,
-                        'supervision_rate'       => $supervision,
+                        'supervision_rate' => $supervision,
                     ],
                     'pevCount' => $totalPevCount,
                 ];
@@ -516,7 +560,7 @@ class IndicatorDashboard extends Component
         $pestudioIds = $this->getBasePestudios()->pluck('id');
         $this->totalDiagActive = DiagMain::where('active', true)
             ->where('lapso_id', $this->selectedLapsoId)
-            ->whereHas('pestudio', fn($q) => $q->whereIn('id', $pestudioIds))
+            ->whereHas('pestudio', fn ($q) => $q->whereIn('id', $pestudioIds))
             ->count();
 
         // ══ Charts y lesson stats ══
@@ -553,7 +597,7 @@ class IndicatorDashboard extends Component
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
             ->whereNull('pevaluacions.deleted_at')
             ->whereNull('pensums.deleted_at')
-            ->when($seccionId, fn($q) => $q->where('pevaluacions.seccion_id', $seccionId))
+            ->when($seccionId, fn ($q) => $q->where('pevaluacions.seccion_id', $seccionId))
             ->distinct();
 
         if ($lapsoId) {
@@ -566,12 +610,15 @@ class IndicatorDashboard extends Component
     private function getScopedProfesoresIEEsPROM(int $pestudioId, ?int $lapsoId, ?int $seccionId = null): float
     {
         $profesors = $this->getScopedProfesores($pestudioId, $lapsoId, $seccionId);
-        if ($profesors->isEmpty()) return 0;
+        if ($profesors->isEmpty()) {
+            return 0;
+        }
 
         $totalBoletins = 0;
         foreach ($profesors as $profesor) {
             $totalBoletins += $profesor->getBoletins($lapsoId, $pestudioId)->count();
         }
+
         return $totalBoletins / $profesors->count();
     }
 
@@ -583,22 +630,22 @@ class IndicatorDashboard extends Component
             ->where('pensums.pestudio_id', $pestudioId)
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
             ->whereNull('pevaluacions.deleted_at')
-            ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
-            ->when($seccionId, fn($q) => $q->where('pevaluacions.seccion_id', $seccionId))
+            ->when($lapsoId, fn ($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+            ->when($seccionId, fn ($q) => $q->where('pevaluacions.seccion_id', $seccionId))
             ->select('profesors.id', 'profesors.name', 'profesors.lastname', 'profesors.ci_profesor')
             ->distinct()
             ->get();
 
         $ieePROM = $this->getScopedProfesoresIEEsPROM($pestudioId, $lapsoId, $seccionId);
 
-        return $profesors->map(function ($profesor) use ($lapsoId, $pestudioId, $ieePROM) {
+        return $profesors->map(function ($profesor) use ($lapsoId, $pestudioId) {
             $fullProfesor = Profesor::find($profesor->id);
 
             $pevIds = Pevaluacion::where('profesor_id', $profesor->id)
                 ->join('pensums', 'pevaluacions.pensum_id', '=', 'pensums.id')
                 ->where('pensums.pestudio_id', $pestudioId)
                 ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
-                ->when($lapsoId, fn($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
+                ->when($lapsoId, fn ($q) => $q->where('pevaluacions.lapso_id', $lapsoId))
                 ->pluck('pevaluacions.id');
 
             $activitiesCount = Activity::whereIn('pevaluacion_id', $pevIds)->count();
@@ -613,7 +660,7 @@ class IndicatorDashboard extends Component
 
             return (object) [
                 'id' => $profesor->id,
-                'full_name' => ($profesor->lastname ?? '') . ' ' . ($profesor->name ?? ''),
+                'full_name' => ($profesor->lastname ?? '').' '.($profesor->name ?? ''),
                 'ci_profesor' => $profesor->ci_profesor ?? '',
                 'activities_count' => $activitiesCount,
                 'approval_rate' => $approvalRate,
@@ -630,7 +677,10 @@ class IndicatorDashboard extends Component
             ->where('pensums.pestudio_id', $pestudioId)
             ->whereIn('pensums.asignatura_id', $this->asignaturaIds)
             ->whereNull('pevaluacions.deleted_at');
-        if ($lapsoId) $query->where('pevaluacions.lapso_id', $lapsoId);
+        if ($lapsoId) {
+            $query->where('pevaluacions.lapso_id', $lapsoId);
+        }
+
         return $query->distinct('profesors.id')->count('profesors.id');
     }
 
@@ -647,7 +697,10 @@ class IndicatorDashboard extends Component
                     ->from('activities')
                     ->whereColumn('activities.pevaluacion_id', 'pevaluacions.id');
             });
-        if ($lapsoId) $query->where('pevaluacions.lapso_id', $lapsoId);
+        if ($lapsoId) {
+            $query->where('pevaluacions.lapso_id', $lapsoId);
+        }
+
         return $query->distinct('profesors.id')->count('profesors.id');
     }
 
@@ -684,7 +737,7 @@ class IndicatorDashboard extends Component
         }
         if ($this->selectedGradoId) {
             $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
-                  ->where('seccions.grado_id', $this->selectedGradoId);
+                ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
         return $query;
@@ -693,7 +746,11 @@ class IndicatorDashboard extends Component
     private function loadChartActivitiesByDay()
     {
         $lapsoId = $this->selectedLapsoId;
-        if (!$lapsoId) { $this->chartActivitiesByDay = []; return; }
+        if (! $lapsoId) {
+            $this->chartActivitiesByDay = [];
+
+            return;
+        }
 
         $query = Activity::selectRaw('activities.finicial, COUNT(*) as total')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
@@ -717,10 +774,10 @@ class IndicatorDashboard extends Component
         }
         if ($this->selectedGradoId) {
             $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
-                  ->where('seccions.grado_id', $this->selectedGradoId);
+                ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
-        $this->chartActivitiesByDay = $query->get()->map(fn($r) => [
+        $this->chartActivitiesByDay = $query->get()->map(fn ($r) => [
             'x' => $r->finicial,
             'y' => (int) $r->total,
         ])->toArray();
@@ -729,7 +786,11 @@ class IndicatorDashboard extends Component
     private function loadChartLessonsByDay()
     {
         $lapsoId = $this->selectedLapsoId;
-        if (!$lapsoId) { $this->chartLessonsByDay = []; return; }
+        if (! $lapsoId) {
+            $this->chartLessonsByDay = [];
+
+            return;
+        }
 
         $published = $this->applyLessonChartFilters(
             Activity::query()->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id'),
@@ -761,7 +822,7 @@ class IndicatorDashboard extends Component
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
-                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+                    ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
             ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
             ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
@@ -778,9 +839,9 @@ class IndicatorDashboard extends Component
         $this->chartLessonsByDay = [
             'categories' => $allDates->toArray(),
             'series' => [
-                ['name' => 'Publicadas', 'data' => $allDates->map(fn($d) => (int) ($published[$d]->total ?? 0))->toArray()],
-                ['name' => 'Programadas', 'data' => $allDates->map(fn($d) => (int) ($scheduled[$d]->total ?? 0))->toArray()],
-                ['name' => 'Borradores', 'data' => $allDates->map(fn($d) => (int) ($drafts[$d]->total ?? 0))->toArray()],
+                ['name' => 'Publicadas', 'data' => $allDates->map(fn ($d) => (int) ($published[$d]->total ?? 0))->toArray()],
+                ['name' => 'Programadas', 'data' => $allDates->map(fn ($d) => (int) ($scheduled[$d]->total ?? 0))->toArray()],
+                ['name' => 'Borradores', 'data' => $allDates->map(fn ($d) => (int) ($drafts[$d]->total ?? 0))->toArray()],
             ],
         ];
     }
@@ -788,7 +849,11 @@ class IndicatorDashboard extends Component
     private function loadChartScheduledByDay()
     {
         $lapsoId = $this->selectedLapsoId;
-        if (!$lapsoId) { $this->chartScheduledByDay = []; return; }
+        if (! $lapsoId) {
+            $this->chartScheduledByDay = [];
+
+            return;
+        }
 
         $query = DB::query()
             ->from('lms_activity_publications')
@@ -803,18 +868,21 @@ class IndicatorDashboard extends Component
             ->groupByRaw('DATE(lms_activity_publications.publish_at)')
             ->orderBy('pub_date');
 
-        if ($this->selectedSeccionId) $query->where('pevaluacions.seccion_id', $this->selectedSeccionId);
-        if ($this->selectedPestudioId) $query->where('pensums.pestudio_id', $this->selectedPestudioId);
-        elseif ($this->selectedPeducativoId) {
+        if ($this->selectedSeccionId) {
+            $query->where('pevaluacions.seccion_id', $this->selectedSeccionId);
+        }
+        if ($this->selectedPestudioId) {
+            $query->where('pensums.pestudio_id', $this->selectedPestudioId);
+        } elseif ($this->selectedPeducativoId) {
             $pestudioIds = $this->pestudios->where('peducativo_id', $this->selectedPeducativoId)->pluck('id');
             $query->whereIn('pensums.pestudio_id', $pestudioIds);
         }
         if ($this->selectedGradoId) {
             $query->join('seccions', 'pevaluacions.seccion_id', '=', 'seccions.id')
-                  ->where('seccions.grado_id', $this->selectedGradoId);
+                ->where('seccions.grado_id', $this->selectedGradoId);
         }
 
-        $this->chartScheduledByDay = $query->get()->map(fn($r) => [
+        $this->chartScheduledByDay = $query->get()->map(fn ($r) => [
             'x' => $r->pub_date,
             'y' => (int) $r->total,
         ])->toArray();
@@ -833,13 +901,13 @@ class IndicatorDashboard extends Component
         $this->lessonPublished = \App\Models\app\Academy\Lms\LmsActivityPublication::where('status', 'PUBLISHED')
             ->whereNotNull('published_at')
             ->tap($lapsoScope)
-            ->whereHas('activity.pevaluacion.pensum', fn($q) => $q->whereIn('asignatura_id', $asignaturaIds))
+            ->whereHas('activity.pevaluacion.pensum', fn ($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
         $this->lessonScheduled = \App\Models\app\Academy\Lms\LmsActivityPublication::whereNotNull('publish_at')
             ->where('status', '!=', 'PUBLISHED')
             ->tap($lapsoScope)
-            ->whereHas('activity.pevaluacion.pensum', fn($q) => $q->whereIn('asignatura_id', $asignaturaIds))
+            ->whereHas('activity.pevaluacion.pensum', fn ($q) => $q->whereIn('asignatura_id', $asignaturaIds))
             ->count();
 
         $draftsQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
@@ -848,7 +916,7 @@ class IndicatorDashboard extends Component
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
-                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+                    ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
             ->whereIn('pensums.asignatura_id', $asignaturaIds)
             ->whereNull('pevaluacions.deleted_at');
@@ -864,14 +932,17 @@ class IndicatorDashboard extends Component
         $this->lessonScheduledPct = $this->lessonTotal > 0 ? round(($this->lessonScheduled / $this->lessonTotal) * 100, 1) : 0;
     }
 
-    public function updatedRegistrationRange() { $this->loadRegistrationFlowCharts(); }
+    public function updatedRegistrationRange()
+    {
+        $this->loadRegistrationFlowCharts();
+    }
 
     private function loadRegistrationFlowCharts()
     {
         $since = match ($this->registrationRange) {
-            '7d'  => now()->subDays(7)->startOfDay(),
+            '7d' => now()->subDays(7)->startOfDay(),
             '30d' => now()->subDays(30)->startOfDay(),
-            '3m'  => now()->subMonths(3)->startOfDay(),
+            '3m' => now()->subMonths(3)->startOfDay(),
             'all' => null,
             default => now()->subDays(7)->startOfDay(),
         };
@@ -885,8 +956,10 @@ class IndicatorDashboard extends Component
             ->whereNull('pevaluacions.deleted_at')
             ->groupBy('date')
             ->orderBy('date');
-        if ($since) $query->where('activities.created_at', '>=', $since);
-        $this->chartActivitiesFlow = $query->get()->map(fn($r) => [
+        if ($since) {
+            $query->where('activities.created_at', '>=', $since);
+        }
+        $this->chartActivitiesFlow = $query->get()->map(fn ($r) => [
             'x' => $r->date,
             'y' => (int) $r->total,
         ])->toArray();
@@ -904,8 +977,12 @@ class IndicatorDashboard extends Component
             ->whereNull('pevaluacions.deleted_at')
             ->selectRaw('DATE(lms_activity_publications.published_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $pubQuery->where('lms_activity_publications.published_at', '>=', $since);
-        foreach ($pubQuery->get() as $r) $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        if ($since) {
+            $pubQuery->where('lms_activity_publications.published_at', '>=', $since);
+        }
+        foreach ($pubQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
 
         $schQuery = DB::table('lms_activity_publications')
             ->join('activities', 'lms_activity_publications.activity_id', '=', 'activities.id')
@@ -917,8 +994,12 @@ class IndicatorDashboard extends Component
             ->whereNull('pevaluacions.deleted_at')
             ->selectRaw('DATE(lms_activity_publications.publish_at) as date, COUNT(*) as total')
             ->groupBy('date');
-        if ($since) $schQuery->where('lms_activity_publications.publish_at', '>=', $since);
-        foreach ($schQuery->get() as $r) $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        if ($since) {
+            $schQuery->where('lms_activity_publications.publish_at', '>=', $since);
+        }
+        foreach ($schQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
 
         $drfQuery = Activity::leftJoin('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
             ->join('pevaluacions', 'activities.pevaluacion_id', '=', 'pevaluacions.id')
@@ -926,19 +1007,23 @@ class IndicatorDashboard extends Component
             ->whereNull('lms_activity_publications.publish_at')
             ->where(function ($q) {
                 $q->whereNull('lms_activity_publications.status')
-                  ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
+                    ->orWhere('lms_activity_publications.status', '!=', 'PUBLISHED');
             })
             ->whereIn('pensums.asignatura_id', $asignaturaIds)
             ->whereNull('pevaluacions.deleted_at')
             ->selectRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) as date, COUNT(*) as total')
             ->groupByRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at))')
             ->orderBy('date');
-        if ($since) $drfQuery->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since]);
-        foreach ($drfQuery->get() as $r) $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        if ($since) {
+            $drfQuery->whereRaw('DATE(COALESCE(lms_activity_publications.created_at, activities.created_at)) >= ?', [$since]);
+        }
+        foreach ($drfQuery->get() as $r) {
+            $merged->push(['date' => $r->date, 'total' => (int) $r->total]);
+        }
 
         $this->chartLessonsFlow = $merged
             ->groupBy('date')
-            ->map(fn($items, $date) => ['x' => $date, 'y' => $items->sum('total')])
+            ->map(fn ($items, $date) => ['x' => $date, 'y' => $items->sum('total')])
             ->sortBy('x')
             ->values()
             ->toArray();
@@ -947,11 +1032,13 @@ class IndicatorDashboard extends Component
         $diagQuery = DiagSession::selectRaw('DATE(diag_sessions.created_at) as date, COUNT(*) as total')
             ->join('diag_mains', 'diag_sessions.diag_main_id', '=', 'diag_mains.id')
             ->where('diag_mains.lapso_id', $this->selectedLapsoId)
-            ->whereHas('diagMain.pestudio', fn($q) => $q->whereIn('id', $this->getBasePestudios()->pluck('id')))
+            ->whereHas('diagMain.pestudio', fn ($q) => $q->whereIn('id', $this->getBasePestudios()->pluck('id')))
             ->groupBy('date')
             ->orderBy('date');
-        if ($since) $diagQuery->where('diag_sessions.created_at', '>=', $since);
-        $this->chartDiagnosticsFlow = $diagQuery->get()->map(fn($r) => [
+        if ($since) {
+            $diagQuery->where('diag_sessions.created_at', '>=', $since);
+        }
+        $this->chartDiagnosticsFlow = $diagQuery->get()->map(fn ($r) => [
             'x' => $r->date,
             'y' => (int) $r->total,
         ])->toArray();
@@ -965,6 +1052,6 @@ class IndicatorDashboard extends Component
         ]);
     }
 
-    #[Layout('planning.layouts.app')]
+    #[Layout('leadership.layouts.app')]
     public function layout() {}
 }

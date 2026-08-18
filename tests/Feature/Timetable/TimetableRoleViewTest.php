@@ -168,7 +168,11 @@ class TimetableRoleViewTest extends TestCase
             'pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignaturaA->id,
         ]);
 
-        $lapso = Lapso::factory()->create();
+        // Lapso vigente: los lectores resuelven el activo del lapso actual.
+        $lapso = Lapso::factory()->create([
+            'finicial' => now()->subMonth(),
+            'ffinal' => now()->addMonth(),
+        ]);
         $pevA = Pevaluacion::factory()->create([
             'profesor_id' => $profesor->id, 'seccion_id' => $seccionA->id,
             'pensum_id' => $pensumA->id, 'lapso_id' => $lapso->id,

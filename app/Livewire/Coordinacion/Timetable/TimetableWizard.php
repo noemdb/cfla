@@ -27,6 +27,8 @@ class TimetableWizard extends Component
     // ─── Paso 1 · Calendario ──────────────────────────────────
     public $calendarId = null;
 
+    public array $calendars = [];
+
     public $lapsoId = null;
 
     public $pescolarId = null;
@@ -81,14 +83,18 @@ class TimetableWizard extends Component
 
     public function mount(): void
     {
-        $activeCalendar = TimetableCalendar::query()
-            ->whereIn('status', ['draft', 'active'])
-            ->latest('id')
-            ->first();
+        // PLAN-TIMETABLE-002 §4.5: prioriza el activo del lapso vigente; si no
+        // hay, mantiene el comportamiento previo (último draft|active).
+        $activeCalendar = TimetableCalendar::activeForCurrentLapso()
+            ?? TimetableCalendar::query()
+                ->whereIn('status', ['draft', 'active'])
+                ->latest('id')
+                ->first();
 
         if ($activeCalendar) {
             $this->calendarId = $activeCalendar->id;
             $this->loadCalendar($activeCalendar);
+            $this->loadCalendars();
         }
 
         $this->rooms = TimetableRoom::query()
@@ -101,6 +107,16 @@ class TimetableWizard extends Component
 
     public function updatedLapsoId($value): void
     {
+        // PLAN-TIMETABLE-002: al cambiar de lapso se resetea el contexto y se
+        // listan los calendarios (alternativas) de ese lapso.
+        $this->calendars = [];
+        $this->calendarId = null;
+        $this->lessons = [];
+        $this->availability = [];
+        $this->periods = [];
+        $this->generationState = null;
+        $this->preview = null;
+
         if (! $value) {
             return;
         }
@@ -109,6 +125,14 @@ class TimetableWizard extends Component
         if ($lapso) {
             $this->calendarName = 'Horario '.$lapso->name;
             $this->pescolarId = $lapso->pescolar_id;
+            $this->loadCalendars();
+
+            $active = TimetableCalendar::activeForLapso($lapso->id);
+            if ($active) {
+                $this->calendarId = $active->id;
+                $this->loadCalendar($active);
+                $this->loadAvailability();
+            }
         }
     }
 
@@ -120,9 +144,15 @@ class TimetableWizard extends Component
             'periodMinutes' => 'required|integer|min:30|max:120',
         ]);
 
-        $exists = TimetableCalendar::query()->where('lapso_id', $this->lapsoId)->exists();
-        if ($exists) {
-            session()->flash('error', 'Ya existe un calendario para ese lapso.');
+        // PLAN-TIMETABLE-002 I-1: se permiten N borradores por lapso. Solo se
+        // evitan nombres duplicados dentro del lapso (D-3, app-level).
+        $nameExists = TimetableCalendar::query()
+            ->forLapso($this->lapsoId)
+            ->where('name', $this->calendarName)
+            ->exists();
+
+        if ($nameExists) {
+            session()->flash('error', 'Ya existe un calendario con ese nombre en el lapso.');
 
             return;
         }
@@ -138,7 +168,78 @@ class TimetableWizard extends Component
 
         $this->calendarId = $calendar->id;
         $this->loadCalendar($calendar);
-        session()->flash('message', 'Calendario creado. Ahora crea los turnos y períodos.');
+        $this->loadCalendars();
+        session()->flash('message', 'Borrador creado. Ahora crea los turnos y períodos.');
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 §4.5 — Cambia el calendario en edición (alternativa
+     * del lapso) recargando todo el contexto del wizard.
+     */
+    public function selectCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar) {
+            return;
+        }
+
+        $this->calendarId = $calendar->id;
+        $this->loadCalendar($calendar);
+        $this->periods = [];
+        $this->generationState = null;
+        $this->preview = null;
+        $this->loadLessons();
+        $this->loadAvailability();
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 I-4 — Activa un borrador que ya tiene horario generado
+     * (archiva al activo anterior del mismo lapso).
+     */
+    public function activateCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar || $calendar->status === 'active') {
+            return;
+        }
+
+        if (! $calendar->slots()->exists()) {
+            session()->flash('error', 'El borrador no tiene horario generado. Ejecuta el dry-run y confirma la publicación para activarlo.');
+
+            return;
+        }
+
+        $calendar->activate();
+        $this->loadCalendars();
+        if ($this->calendarId === $calendar->id) {
+            $this->generationState = 'published';
+            $this->preview = null;
+        }
+        session()->flash('message', 'Calendario «'.$calendar->name.'» activado. El activo anterior quedó archivado.');
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 I-7 — Elimina solo borradores.
+     */
+    public function deleteCalendar($calendarId): void
+    {
+        $calendar = TimetableCalendar::find((int) $calendarId);
+        if (! $calendar || ! $calendar->deleteDraft()) {
+            session()->flash('error', 'Solo se pueden eliminar calendarios en estado borrador.');
+
+            return;
+        }
+
+        if ($this->calendarId === $calendar->id) {
+            $this->calendarId = null;
+            $this->lessons = [];
+            $this->availability = [];
+            $this->periods = [];
+            $this->generationState = null;
+            $this->preview = null;
+        }
+        $this->loadCalendars();
+        session()->flash('message', 'Borrador eliminado.');
     }
 
     public function createShift(): void
@@ -433,7 +534,8 @@ class TimetableWizard extends Component
 
     public function updatedCalendarId(): void
     {
-        $this->loadAvailability();
+        // Switcher global: al cambiar el calendario se recarga todo el contexto.
+        $this->selectCalendar($this->calendarId);
     }
 
     public function loadAvailability(): void
@@ -502,6 +604,23 @@ class TimetableWizard extends Component
         $this->pescolarId = $calendar->pescolar_id;
         $this->calendarName = $calendar->name;
         $this->periodMinutes = (int) $calendar->period_minutes;
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 §4.5 — Alternativas (calendarios) del lapso en edición,
+     * ordenadas activo → borrador → generando → archivado.
+     */
+    private function loadCalendars(): void
+    {
+        $this->calendars = $this->lapsoId
+            ? TimetableCalendar::query()
+                ->forLapso($this->lapsoId)
+                ->orderByRaw("FIELD(status, 'active', 'draft', 'generating', 'archived'), id DESC")
+                ->get()
+                ->map(fn ($c) => $c->toArray())
+                ->values()
+                ->all()
+            : [];
     }
 
     private function defaultShiftId(): int

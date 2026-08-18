@@ -23,10 +23,8 @@ class SectionGrid extends TimetableRoleView
 
     protected function scope(): array
     {
-        $calendar = TimetableCalendar::query()
-            ->where('status', 'active')
-            ->latest('id')
-            ->first();
+        // PLAN-TIMETABLE-002 §4.4: el único activo del lapso vigente.
+        $calendar = TimetableCalendar::activeForCurrentLapso();
 
         if (! $calendar) {
             throw new NotFoundHttpException('Todavía no hay un horario publicado.');
@@ -47,6 +45,6 @@ class SectionGrid extends TimetableRoleView
 
     protected function getLayout(): string
     {
-        return 'planning.layouts.app';
+        return 'leadership.layouts.app';
     }
 }

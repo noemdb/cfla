@@ -158,6 +158,12 @@ class TimetableEditor extends Component
 
     public function render(): \Illuminate\View\View
     {
+        // PLAN-TIMETABLE-002 §4.6: alternativas editables (sin archivados).
+        $calendars = TimetableCalendar::query()
+            ->where('status', '!=', TimetableCalendar::STATUS_ARCHIVED)
+            ->orderByDesc('id')
+            ->get(['id', 'name', 'status']);
+
         $calendar = $this->calendarId ? TimetableCalendar::find($this->calendarId) : null;
 
         $periods = collect();
@@ -206,6 +212,7 @@ class TimetableEditor extends Component
 
         return view('livewire.coordinacion.timetable.timetable-editor', [
             'calendar' => $calendar,
+            'calendars' => $calendars,
             'periods' => $periods,
             'slots' => $slots,
             'sections' => $sections,

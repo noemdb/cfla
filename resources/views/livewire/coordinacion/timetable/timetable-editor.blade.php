@@ -18,6 +18,15 @@
     <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Calendario</label>
+                <select wire:model.live="calendarId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                    <option value="">Selecciona un calendario</option>
+                    @foreach ($calendars as $cal)
+                        <option value="{{ $cal->id }}">{{ $cal->name }} ({{ $cal->status }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Vista</label>
                 <select wire:model.live="view" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
                     <option value="section">Por sección</option>
@@ -114,7 +123,19 @@
         </div>
     @else
         <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            Selecciona un calendario para editar.
+            @if ($calendars->isEmpty())
+                Selecciona un calendario para editar.
+            @else
+                Selecciona un calendario para editar:
+                <div class="mt-4 flex flex-wrap justify-center gap-2">
+                    @foreach ($calendars as $cal)
+                        <button wire:click="$set('calendarId', {{ $cal->id }})"
+                            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+                            {{ $cal->name }} ({{ $cal->status }})
+                        </button>
+                    @endforeach
+                </div>
+            @endif
         </div>
     @endif
 

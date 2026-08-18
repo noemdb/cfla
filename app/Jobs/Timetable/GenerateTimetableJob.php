@@ -220,66 +220,99 @@ class GenerateTimetableJob implements ShouldQueue
      * Persiste la asignación en una transacción (ADR-TT-002) con el bloqueo
      * optimista del §15. En una regeneración no-dry-run el diff contra el
      * preview previo no aplica: el preview siempre se confirma explícitamente.
+     *
+     * PLAN-TIMETABLE-002 §4.3: antes de activar este calendario se demueve
+     * (status=archived) al activo anterior del mismo lapso (I-4). Si dos
+     * publicaciones del mismo lapso corren a la vez, uq_active_lapso rechaza
+     * la segunda: se captura, se revierte el objetivo a draft y se loguea.
      */
     private function persist(TimetableCalendar $calendar, SolverResult $result, int $expectedVersion): void
     {
-        DB::transaction(function () use ($calendar, $result, $expectedVersion) {
-            $updated = TimetableCalendar::query()
-                ->where('id', $calendar->id)
-                ->where('version', $expectedVersion)
-                ->update([
+        try {
+            DB::transaction(function () use ($calendar, $result, $expectedVersion) {
+                // Row-lock: serializa democión + activación por calendario.
+                $row = TimetableCalendar::query()->lockForUpdate()->find($calendar->id);
+
+                if (! $row || $row->version !== $expectedVersion) {
+                    Log::channel('timetable')->warning('GenerateTimetableJob: conflicto de versión, no persiste', [
+                        'correlation_id' => $this->correlationId(),
+                        'calendar_id' => $this->calendarId,
+                        'expected_version' => $expectedVersion,
+                    ]);
+
+                    // Recuperación: un job stale no debe dejar el calendario en 'generating'.
+                    TimetableCalendar::query()
+                        ->where('id', $calendar->id)
+                        ->where('status', TimetableCalendar::STATUS_GENERATING)
+                        ->update(['status' => TimetableCalendar::STATUS_DRAFT]);
+
+                    return;
+                }
+
+                // Democión del activo anterior del lapso antes de activar este.
+                TimetableCalendar::query()
+                    ->forLapso($row->lapso_id)
+                    ->where('id', '!=', $row->id)
+                    ->active()
+                    ->update(['status' => TimetableCalendar::STATUS_ARCHIVED]);
+
+                $row->update([
                     'version' => $expectedVersion + 1,
-                    'status' => 'active',
+                    'status' => TimetableCalendar::STATUS_ACTIVE,
                     'quality_score' => $this->qualityScore($result),
                     'preview_payload' => null,
                 ]);
 
-            if ($updated === 0) {
-                Log::channel('timetable')->warning('GenerateTimetableJob: conflicto de versión, no persiste', [
-                    'correlation_id' => $this->correlationId(),
-                    'calendar_id' => $this->calendarId,
-                    'expected_version' => $expectedVersion,
-                ]);
+                TimetableSlot::query()->where('calendar_id', $calendar->id)->delete();
+                TimetableConflict::query()->where('calendar_id', $calendar->id)->delete();
 
-                return;
-            }
+                foreach ($result->assignment as $lessonId => $slots) {
+                    $lesson = TimetableLesson::query()
+                        ->with('pevaluacion')
+                        ->find($lessonId);
 
-            TimetableSlot::query()->where('calendar_id', $calendar->id)->delete();
-            TimetableConflict::query()->where('calendar_id', $calendar->id)->delete();
+                    if (! $lesson || ! $lesson->pevaluacion) {
+                        continue;
+                    }
 
-            foreach ($result->assignment as $lessonId => $slots) {
-                $lesson = TimetableLesson::query()
-                    ->with('pevaluacion')
-                    ->find($lessonId);
-
-                if (! $lesson || ! $lesson->pevaluacion) {
-                    continue;
+                    foreach ($slots as $slot) {
+                        TimetableSlot::create([
+                            'calendar_id' => $calendar->id,
+                            'lesson_id' => $lessonId,
+                            'period_id' => $slot->periodId,
+                            'profesor_id' => $lesson->pevaluacion->profesor_id,
+                            'seccion_id' => $lesson->pevaluacion->seccion_id,
+                            'room_id' => $slot->roomId,
+                            'locked' => $lesson->locked,
+                            'is_manual_override' => false,
+                        ]);
+                    }
                 }
 
-                foreach ($slots as $slot) {
-                    TimetableSlot::create([
+                foreach ($result->unassigned as $lessonId) {
+                    TimetableConflict::create([
                         'calendar_id' => $calendar->id,
                         'lesson_id' => $lessonId,
-                        'period_id' => $slot->periodId,
-                        'profesor_id' => $lesson->pevaluacion->profesor_id,
-                        'seccion_id' => $lesson->pevaluacion->seccion_id,
-                        'room_id' => $slot->roomId,
-                        'locked' => $lesson->locked,
-                        'is_manual_override' => false,
+                        'period_id' => null,
+                        'type' => 'unassigned',
+                        'details' => ['reason' => 'Sin combinación viable (solver).'],
                     ]);
                 }
-            }
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Carrera de activación (otro calendario del lapso se activó antes):
+            // la transacción revierte y el objetivo vuelve a draft.
+            TimetableCalendar::query()
+                ->where('id', $calendar->id)
+                ->where('status', TimetableCalendar::STATUS_GENERATING)
+                ->update(['status' => TimetableCalendar::STATUS_DRAFT]);
 
-            foreach ($result->unassigned as $lessonId) {
-                TimetableConflict::create([
-                    'calendar_id' => $calendar->id,
-                    'lesson_id' => $lessonId,
-                    'period_id' => null,
-                    'type' => 'unassigned',
-                    'details' => ['reason' => 'Sin combinación viable (solver).'],
-                ]);
-            }
-        });
+            Log::channel('timetable')->warning('GenerateTimetableJob: carrera de activación, se revierte a draft', [
+                'correlation_id' => $this->correlationId(),
+                'calendar_id' => $this->calendarId,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

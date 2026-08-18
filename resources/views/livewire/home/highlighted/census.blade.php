@@ -23,7 +23,7 @@
                 <div class="text-lg font-semibold text-gray-200 mb-2">El primer paso hacia una educación de excelencia.
                 </div>
                 @php $jornadaProxima = App\Models\app\Academy\Catchment::getJornadaProxima(); @endphp
-                <div class="text-sm text-emerald-300 font-medium mb-2">{{ $jornadaProxima['label'] }}, de 8am a 12m.</div>
+                <div class="text-sm text-emerald-300 font-medium mb-2">{{ $jornadaProxima['label'] }}, de 2pm a 4pm.</div>
             </div>
         </div>
 

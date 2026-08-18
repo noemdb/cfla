@@ -1,4 +1,4 @@
-@extends('planning.layouts.app')
+@extends('leadership.layouts.app')
 
 @section('content')
     <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 space-y-6">

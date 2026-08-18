@@ -6,6 +6,7 @@ use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pescolar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TimetableCalendar extends Model
 {
@@ -23,6 +24,10 @@ class TimetableCalendar extends Model
         'version' => 'integer',
         'quality_score' => 'decimal:2',
         'preview_payload' => 'array',
+    ];
+
+    protected $hidden = [
+        'active_lapso_key',
     ];
 
     const STATUS_DRAFT = 'draft';
@@ -73,8 +78,74 @@ class TimetableCalendar extends Model
         return $query->where('status', self::STATUS_ACTIVE);
     }
 
+    public function scopeArchived($query)
+    {
+        return $query->where('status', self::STATUS_ARCHIVED);
+    }
+
+    public function scopeForLapso($query, $lapsoId)
+    {
+        return $query->where('lapso_id', $lapsoId);
+    }
+
     public function getIsEditableAttribute(): bool
     {
         return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 I-2 — Activo del lapso (máximo uno por lapso).
+     */
+    public static function activeForLapso($lapsoId): ?self
+    {
+        return self::query()->forLapso($lapsoId)->active()->first();
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 §4.4 — Resuelve "el activo del lapso vigente".
+     */
+    public static function activeForCurrentLapso(): ?self
+    {
+        $lapso = Lapso::query()
+            ->where('finicial', '<=', now())
+            ->where('ffinal', '>=', now())
+            ->orderBy('finicial', 'desc')
+            ->first();
+
+        if ($lapso) {
+            return self::activeForLapso($lapso->id);
+        }
+
+        return self::query()->active()->latest('id')->first();
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 §4.2 — Activa este calendario y archiva el activo
+     * anterior del mismo lapso (democión atómica, respeta I-2/I-4).
+     */
+    public function activate(): void
+    {
+        DB::transaction(function () {
+            TimetableCalendar::query()
+                ->forLapso($this->lapso_id)
+                ->where('id', '!=', $this->id)
+                ->active()
+                ->update(['status' => self::STATUS_ARCHIVED]);
+
+            $this->update(['status' => self::STATUS_ACTIVE]);
+        });
+    }
+
+    /**
+     * PLAN-TIMETABLE-002 I-7 — Elimina solo borradores (cascada FK limpia
+     * periods/lessons/availability/slots/conflicts).
+     */
+    public function deleteDraft(): bool
+    {
+        if ($this->status !== self::STATUS_DRAFT) {
+            return false;
+        }
+
+        return $this->delete();
     }
 }

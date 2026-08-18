@@ -66,7 +66,7 @@ class TimetableWizardTest extends TestCase
             ->assertSet('calendarId', TimetableCalendar::query()->where('lapso_id', $lapso->id)->first()->id);
     }
 
-    public function test_calendar_is_unique_per_lapso(): void
+    public function test_multiple_drafts_allowed_per_lapso(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
@@ -75,7 +75,24 @@ class TimetableWizardTest extends TestCase
         Livewire::actingAs($user)
             ->test(TimetableWizard::class)
             ->set('lapsoId', $lapso->id)
-            ->set('calendarName', 'Duplicado')
+            ->set('calendarName', 'Alternativa B')
+            ->call('createCalendar')
+            ->assertHasNoErrors()
+            ->assertSet('calendarId', TimetableCalendar::query()->where('lapso_id', $lapso->id)->orderByDesc('id')->first()->id);
+
+        $this->assertSame(2, TimetableCalendar::query()->where('lapso_id', $lapso->id)->count());
+    }
+
+    public function test_calendar_name_must_be_unique_within_lapso(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'name' => 'Horario Test']);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('lapsoId', $lapso->id)
+            ->set('calendarName', 'Horario Test')
             ->call('createCalendar');
 
         $this->assertSame(1, TimetableCalendar::query()->where('lapso_id', $lapso->id)->count());

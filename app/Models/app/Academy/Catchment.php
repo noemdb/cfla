@@ -92,6 +92,28 @@ class Catchment extends Model
             'start' => '2026-08-13',
             'end'   => '2026-08-14',
         ],
+
+        // --- Septiembre ---
+        [
+            'label' => 'Decimoquinta convocatoria: del 07 al 11 de septiembre (lunes a viernes)',
+            'start' => '2026-09-07',
+            'end'   => '2026-09-11',
+        ],
+        [
+            'label' => 'Decimosexta convocatoria: del 14 al 18 de septiembre (lunes a viernes)',
+            'start' => '2026-09-14',
+            'end'   => '2026-09-18',
+        ],
+        [
+            'label' => 'Decimoséptima convocatoria: del 21 al 25 de septiembre (lunes a viernes)',
+            'start' => '2026-09-21',
+            'end'   => '2026-09-25',
+        ],
+        [
+            'label' => 'Decimoctava convocatoria: del 28 al 30 de septiembre (lunes a miércoles)',
+            'start' => '2026-09-28',
+            'end'   => '2026-09-30',
+        ],
     ];
 
     /**

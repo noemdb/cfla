@@ -7,21 +7,26 @@ use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Profesor;
 use App\Services\Leadership\LeadershipService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class ProfesorIndicators extends Component
 {
     public $selectedProfesorId = null;
+
     public $selectedLapsoId = null;
+
     public $profesores = [];
+
     public $searchProfesor = '';
 
     // Charts
     public $activityRange = '7d';
+
     public $chartActivitiesFlow = [];
+
     public $chartLessonsFlow = [];
+
     public $chartStatusFlow = [];
 
     public function mount()
@@ -52,14 +57,14 @@ class ProfesorIndicators extends Component
                     'goal_notas' => $profesor->goal_notas_load($this->selectedLapsoId),
                     'real_notas' => $profesor->real_notas_load($this->selectedLapsoId),
                     'total_pevas' => $profesor->pevaluacions()
-                        ->when($this->selectedLapsoId, fn($q) => $q->where('lapso_id', $this->selectedLapsoId))
+                        ->when($this->selectedLapsoId, fn ($q) => $q->where('lapso_id', $this->selectedLapsoId))
                         ->count(),
                 ];
 
                 // D) Información general
                 $profesorInfo = [
                     'full_name' => $profesor->full_name,
-                    'ci' => $profesor->ti_teacher . ' ' . $profesor->ci_profesor,
+                    'ci' => $profesor->ti_teacher.' '.$profesor->ci_profesor,
                     'email' => $profesor->email,
                     'phone' => $profesor->phone,
                     'cellphone' => $profesor->cellphone,
@@ -68,7 +73,7 @@ class ProfesorIndicators extends Component
 
                 // B) Carga académica
                 $pensums = $profesor->pensums()->get();
-                $cargaAcademica['asignaturas'] = $pensums->map(fn($p) => [
+                $cargaAcademica['asignaturas'] = $pensums->map(fn ($p) => [
                     'id' => $p->id,
                     'name' => $p->asignatura_name,
                 ]);
@@ -105,7 +110,7 @@ class ProfesorIndicators extends Component
                 })
                     ->whereHas('lmsPublication')
                     ->join('lms_activity_publications', 'activities.id', '=', 'lms_activity_publications.activity_id')
-                    ->selectRaw("lms_activity_publications.status, COUNT(*) as count")
+                    ->selectRaw('lms_activity_publications.status, COUNT(*) as count')
                     ->groupBy('lms_activity_publications.status')
                     ->pluck('count', 'status');
 
@@ -120,8 +125,7 @@ class ProfesorIndicators extends Component
         $filteredProfesores = $this->profesores;
         if ($this->searchProfesor) {
             $needle = mb_strtolower($this->searchProfesor);
-            $filteredProfesores = $filteredProfesores->filter(fn($p) =>
-                mb_strpos(mb_strtolower($p->name ?? ''), $needle) !== false
+            $filteredProfesores = $filteredProfesores->filter(fn ($p) => mb_strpos(mb_strtolower($p->name ?? ''), $needle) !== false
                 || mb_strpos(mb_strtolower($p->lastname ?? ''), $needle) !== false
             )->values();
         }
@@ -154,17 +158,18 @@ class ProfesorIndicators extends Component
 
     private function loadProfesorFlowCharts(?Profesor $profesor): void
     {
-        if (!$profesor) {
+        if (! $profesor) {
             $this->chartActivitiesFlow = [];
             $this->chartLessonsFlow = [];
             $this->chartStatusFlow = [];
+
             return;
         }
 
         $since = match ($this->activityRange) {
-            '7d'  => now()->subDays(7)->startOfDay(),
+            '7d' => now()->subDays(7)->startOfDay(),
             '30d' => now()->subDays(30)->startOfDay(),
-            '3m'  => now()->subMonths(3)->startOfDay(),
+            '3m' => now()->subMonths(3)->startOfDay(),
             'all' => null,
             default => now()->subDays(7)->startOfDay(),
         };
@@ -179,8 +184,10 @@ class ProfesorIndicators extends Component
             })
             ->groupBy('date')
             ->orderBy('date');
-        if ($since) $actQuery->where('activities.created_at', '>=', $since);
-        $this->chartActivitiesFlow = $actQuery->get()->map(fn($r) => [
+        if ($since) {
+            $actQuery->where('activities.created_at', '>=', $since);
+        }
+        $this->chartActivitiesFlow = $actQuery->get()->map(fn ($r) => [
             'x' => $r->date,
             'y' => (int) $r->total,
         ])->toArray();
@@ -196,8 +203,10 @@ class ProfesorIndicators extends Component
             ->whereHas('lmsPublication')
             ->groupBy('date')
             ->orderBy('date');
-        if ($since) $lesQuery->where('activities.created_at', '>=', $since);
-        $this->chartLessonsFlow = $lesQuery->get()->map(fn($r) => [
+        if ($since) {
+            $lesQuery->where('activities.created_at', '>=', $since);
+        }
+        $this->chartLessonsFlow = $lesQuery->get()->map(fn ($r) => [
             'x' => $r->date,
             'y' => (int) $r->total,
         ])->toArray();
@@ -215,16 +224,18 @@ class ProfesorIndicators extends Component
             })
             ->groupBy('date')
             ->orderBy('date');
-        if ($since) $statusQuery->where('activities.created_at', '>=', $since);
+        if ($since) {
+            $statusQuery->where('activities.created_at', '>=', $since);
+        }
         $statusData = $statusQuery->get();
 
         $this->chartStatusFlow = [
             'categories' => $statusData->pluck('date')->toArray(),
-            'approved'   => $statusData->pluck('approved')->map(fn($v) => (int) $v)->toArray(),
-            'pending'    => $statusData->pluck('pending')->map(fn($v) => (int) $v)->toArray(),
+            'approved' => $statusData->pluck('approved')->map(fn ($v) => (int) $v)->toArray(),
+            'pending' => $statusData->pluck('pending')->map(fn ($v) => (int) $v)->toArray(),
         ];
     }
 
-    #[Layout('planning.layouts.app')]
+    #[Layout('leadership.layouts.app')]
     public function layout() {}
 }

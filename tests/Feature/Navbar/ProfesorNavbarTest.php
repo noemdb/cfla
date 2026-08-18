@@ -15,7 +15,7 @@ class ProfesorNavbarTest extends TestCase
         $user = User::factory()->profesor()->create();
 
         $this->actingAs($user)
-            ->get('/app/profesors')
+            ->get('/app/profesors/home')
             ->assertOk()
             ->assertSee('Profesor')
             ->assertSee('Dashboard')
@@ -34,7 +34,7 @@ class ProfesorNavbarTest extends TestCase
         $user = User::factory()->profesor()->create();
 
         $this->actingAs($user)
-            ->get('/app/profesors')
+            ->get('/app/profesors/home')
             ->assertOk()
             ->assertSee('Coordinación')
             ->assertSee('Admin');

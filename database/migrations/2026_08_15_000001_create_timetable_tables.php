@@ -29,7 +29,7 @@ return new class extends Migration
             });
         }
 
-        // ─── Calendarios (uno por lapso) ────────────────────────────────────
+        // ─── Calendarios (varios por lapso; máximo UNO activo, ADR-TT-014) ──
         if (! Schema::hasTable('timetable_calendars')) {
             Schema::create('timetable_calendars', function (Blueprint $table) {
                 $table->bigIncrements('id');
@@ -37,6 +37,11 @@ return new class extends Migration
                 $table->unsignedInteger('pescolar_id')->nullable(); // pescolars.id int unsigned
                 $table->string('name', 120);
                 $table->enum('status', ['draft', 'generating', 'active', 'archived'])->default('draft');
+                // PLAN-TIMETABLE-002: columna generada que solo aporta clave si
+                // status='active' → N borradores/alternativas por lapso, máximo
+                // UNO activo (los NULL no colisionan en índice único).
+                $table->string('active_lapso_key', 20)
+                    ->storedAs("IF(status = 'active', CONCAT('L', lapso_id), NULL)");
                 $table->unsignedSmallInteger('period_minutes')->default(45);
                 $table->unsignedInteger('version')->default(0);          // §15 bloqueo optimista
                 $table->decimal('quality_score', 8, 2)->nullable();      // §6.2
@@ -44,7 +49,8 @@ return new class extends Migration
                 $table->unsignedBigInteger('active_job_id')->nullable(); // §15
                 $table->timestamps();
 
-                $table->unique('lapso_id', 'uq_calendar_lapso');
+                $table->index('lapso_id', 'idx_cal_lapso');              // backing de la FK
+                $table->unique('active_lapso_key', 'uq_active_lapso');
                 $table->foreign('lapso_id')->references('id')->on('lapsos')->onDelete('cascade');
                 $table->foreign('pescolar_id')->references('id')->on('pescolars')->onDelete('cascade');
             });

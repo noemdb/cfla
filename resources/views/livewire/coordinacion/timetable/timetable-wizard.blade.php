@@ -42,6 +42,31 @@
         </div>
     @endif
 
+    {{-- Switcher global: alternativas (calendarios) del lapso en edición --}}
+    @if (count($calendars))
+        <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-4 mb-6">
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Alternativas del lapso</span>
+                <select wire:model.live="calendarId" class="flex-1 min-w-[200px] bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                    @foreach ($calendars as $c)
+                        <option value="{{ $c['id'] }}">{{ $c['name'] }} ({{ $c['status'] }})</option>
+                    @endforeach
+                </select>
+                <a href="{{ request()->url() }}"
+                    class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all">+ Nuevo borrador</a>
+            </div>
+            @if ($calendarId)
+                <div class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                    Editando: <span class="font-bold text-gray-900 dark:text-white">{{ collect($calendars)->firstWhere('id', $calendarId)['name'] ?? '' }}</span>
+                    @php($activeCal = collect($calendars)->firstWhere('status', 'active'))
+                    @if ($activeCal)
+                        · Activo: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $activeCal['name'] }}</span>
+                    @endif
+                </div>
+            @endif
+        </div>
+    @endif
+
     {{-- ═══════════ Paso 1 · Calendario ═══════════ --}}
     @if ($currentStep === 1)
         <div class="space-y-6">
@@ -72,9 +97,41 @@
                 </div>
                 <button wire:click="createCalendar"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all">
-                    Crear calendario
+                    Crear borrador
                 </button>
             </div>
+
+            {{-- PLAN-TIMETABLE-002 §4.5: alternativas (calendarios) del lapso --}}
+            @if (count($calendars))
+                <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-extrabold text-gray-900 dark:text-white">Calendarios del lapso</h2>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ count($calendars) }} alternativa(s) · máximo 1 activo</span>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach ($calendars as $c)
+                            <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border {{ $calendarId === $c['id'] ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-gray-200 dark:border-white/10 bg-white/5' }}">
+                                <div class="flex items-center gap-3">
+                                    <div>
+                                        <div class="text-sm font-extrabold text-gray-900 dark:text-white">{{ $c['name'] }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">v{{ $c['version'] }} · calidad {{ $c['quality_score'] ?? '—' }}</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase {{ $c['status'] === 'active' ? 'bg-emerald-500/15 text-emerald-600' : ($c['status'] === 'archived' ? 'bg-gray-500/10 text-gray-500' : 'bg-amber-500/15 text-amber-600') }}">
+                                        {{ $c['status'] }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="selectCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">Continuar</button>
+                                    @if ($c['status'] === 'draft')
+                                        <button wire:click="activateCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg bg-white/5 text-gray-200 text-xs font-bold border border-gray-200 dark:border-white/10">Activar</button>
+                                        <button wire:click="deleteCalendar({{ $c['id'] }})" class="px-3 py-1.5 rounded-lg text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             @if ($calendarId)
                 <div class="bg-white dark:bg-gray-900/40 backdrop-blur-md border border-gray-200 dark:border-white/5 rounded-lg p-5">

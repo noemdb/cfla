@@ -114,5 +114,29 @@ export default {
     require('@tailwindcss/typography'),
   ],
 
-  safelist: ['animate-[fade-in_1s_ease-in-out]', 'animate-[fade-in-down_1s_ease-in-out]', 'animate-[data-te-animation-delay]']
+  safelist: [
+    'animate-[fade-in_1s_ease-in-out]',
+    'animate-[fade-in-down_1s_ease-in-out]',
+    'animate-[data-te-animation-delay]',
+    // Clases dinámicas generadas en runtime por MenuBuilder / componentes de menú
+    // (colores por grupo/ícono en config/menus.php: emerald, blue, green, teal,
+    // cyan, purple, amber, sky, rose, indigo, orange, yellow, pink, lime, fuchsia, violet)
+    {
+      pattern: /text-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-(300|400|500)/,
+      variants: ['hover'],
+    },
+    {
+      pattern: /text-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-400\/60/,
+    },
+    {
+      pattern: /bg-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-500\/(5|10)/,
+    },
+    {
+      pattern: /ring-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-400\/40/,
+    },
+    {
+      pattern: /ring-(emerald|blue|green|teal|cyan|purple|amber|sky|rose|indigo|orange|yellow|pink|lime|fuchsia|violet)-400\/40/,
+      variants: ['focus-visible'],
+    },
+  ]
 }

@@ -63,9 +63,13 @@ class LessonMonitor extends Component
 
     // ─── Lesson stats (per lapso) ───────────────────────────────
     public int $lessonTotal = 0;
+
     public int $lessonScheduled = 0;
+
     public int $lessonPublished = 0;
+
     public float $lessonPublishedPct = 0;
+
     public float $lessonScheduledPct = 0;
 
     public function mount()
@@ -590,6 +594,6 @@ class LessonMonitor extends Component
         $this->list_profesors = $profesors->pluck('profesor_fullname', 'id');
     }
 
-    #[Layout('planning.layouts.app')]
+    #[Layout('leadership.layouts.app')]
     public function layout() {}
 }

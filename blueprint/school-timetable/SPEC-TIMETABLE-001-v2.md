@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | Draft v2 — nivel implementación (solver, contratos Livewire, concurrencia, NFRs, testing) |
+| **Estado** | Draft v2.1 — nivel implementación (multi-calendario por lapso vía ADR-TT-014 / `PLAN-TIMETABLE-002`) |
 | **Stack** | Laravel 10 · Livewire 3 · Alpine.js · Tailwind 3 · MariaDB (db `s2627`, driver `mysql`) |
 | **Autor** | Staff Engineer spec para agente de código |
 | **Punto de partida** | `blueprint/school-timetable/specDrive01.md` (spec semilla de dominio genérico) |
@@ -78,16 +78,20 @@ CREATE TABLE timetable_shifts (
     end_time TIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Un calendario por lapso académico.
+-- Varios calendarios por lapso (PLAN-TIMETABLE-002 / ADR-TT-014): N borradores/
+-- alternativas, máximo UNO activo. La columna generada STORED solo aporta clave
+-- cuando status='active': los NULL no colisionan en índice único (I-2).
 CREATE TABLE timetable_calendars (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     lapso_id BIGINT UNSIGNED NOT NULL,  -- FK → lapsos (período académico)
     pescolar_id BIGINT UNSIGNED NULL,   -- FK → pescolars (año escolar, opcional)
     name VARCHAR(120) NOT NULL,
     status ENUM('draft','generating','active','archived') DEFAULT 'draft',
+    active_lapso_key VARCHAR(20) GENERATED ALWAYS AS (IF(status='active', CONCAT('L', lapso_id), NULL)) STORED,
     period_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 45,
+    version INT UNSIGNED NOT NULL DEFAULT 0,  -- §15 bloqueo optimista (por calendario)
     created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-    UNIQUE KEY uq_calendar_lapso (lapso_id),
+    UNIQUE KEY uq_active_lapso (active_lapso_key),
     CONSTRAINT fk_cal_lapso FOREIGN KEY (lapso_id) REFERENCES lapsos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -253,7 +257,7 @@ con `currentStep`, sin clases de pasos separadas, layout `coordinacion.layouts.a
 
 | Paso | Contenido | Validación |
 |---|---|---|
-| **1 · Calendario** | Elegir `Lapso` (se crea `timetable_calendars`, único por lapso), `period_minutes`, crear turnos M/T y períodos por día (con recreos) | Lapso activo; `timetable_periods` no vacío |
+| **1 · Calendario** | Elegir `Lapso`; se listan las **alternativas (calendarios)** del lapso (N borradores, máximo 1 activo, ADR-TT-014) con acciones Continuar/Activar/Eliminar(borrador); crear un nuevo borrador con `period_minutes`, turnos M/T y períodos por día (con recreos) | Lapso activo; `timetable_periods` no vacío; nombre de borrador único dentro del lapso |
 | **2 · Aulas** | CRUD de `timetable_rooms` (código único, capacidad, tipo) | `code` único, `capacity ≥ 1` |
 | **3 · Lecciones** | Seleccionar pevaluacions del lapso (de `Pevaluacion::where('lapso_id', ...)`), asignar turno, revisar bloques teóricos/prácticos derivados, `room_type_required`, prioridad | 1 pev por lección; bloques > 0; sección con turno coherente |
 | **4 · Disponibilidad** | Grilla día×período por docente (`timetable_teacher_availability`), con preset "todo disponible" | Al menos el turno de sus secciones |
@@ -645,6 +649,7 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **TT-011** | Pool de candidatos del solver **adaptativo** y combinaciones con corte temprano | `C(14,7)=3432` era acotado pero un tope fijo de 14 huérfanaba lecciones de >14 bloques; ahora `pool = clamp(max(14, n), 26)` y `combine()` corta al llegar a `MAX_COMBOS_PER_LESSON`/presupuesto de nodos, y si `n > m/2` se generan combinaciones de EXCLUSIONES complementadas (`C(26,25)` se resuelve como `C(26,1)`) |
 | **TT-012** | Suplencias v1.2: registro de ausencia → slots afectados (por `day_of_week`) → suplente sugerido → asignación `pending` → notificación al suplente por cola | El suplente confirma/rechaza desde su bandeja; la asignación nunca es auto-confirmada |
 | **TT-013** | Leadership y Dirección acceden al horario **solo lectura** (cualquier sección del calendario activo), sin editor ni generación | Matriz RBAC §9: lectura para supervisión, escritura exclusiva coordinación/planning |
+| **TT-014** | Un lapso admite **N calendarios** (borradores/alternativas) con **máximo UNO `active`**; activar uno archiva al activo anterior del mismo lapso. Garantía dura: columna generada `active_lapso_key` + índice único `uq_active_lapso`. Lectores resuelven el **activo del lapso vigente** (`activeForCurrentLapso()`). Implementación: `PLAN-TIMETABLE-002` | Permite comparar/promover alternativas sin rediseñar conflictos ni el read-side; `archived` deja de ser código muerto; `version` sigue siendo por-calendario (I-4, I-6) |
 
 ---
 
@@ -689,22 +694,28 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 
 ## 14. Máquina de estados — `timetable_calendars.status`
 
+**v2.1 (ADR-TT-014):** un lapso tiene **N calendarios** (`draft`/`generating`/
+`archived`/`active`), con **máximo UNO `active`** (columna generada `uq_active_lapso`).
+El `version` (§15) es **por calendario**.
+
 ```
 draft ──(wizard paso 5: "Generar")──▶ generating
 generating ──(solver termina, dry_run=false)──▶ draft   (si hay lecciones sin asignar → revisar)
-generating ──(solver termina, todo asignado, dry_run=false)──▶ active
+generating ──(solver termina, todo asignado, dry_run=false)──▶ active   (+ archiva al activo anterior del lapso)
 generating ──(solver termina, dry_run=true)──▶ draft    (con preview_payload listo para revisar)
 active ──(coordinación edita a mano vía §7)──▶ active   (no cambia de estado; slots individuales se marcan is_manual_override)
+active ──(se activa OTRA alternativa del mismo lapso)──▶ archived   (democión automática, persist()/activate())
 active ──(coordinación dispara "Regenerar")──▶ generating  (requiere confirmación explícita, ADR-TT-007)
 active ──(cierre de lapso)──▶ archived
-archived ──▶ (terminal; solo lectura, no editable)
+archived ──▶ (terminal; solo lectura, no editable; conserva su historial por calendar_id)
 ```
 
 **ADR-TT-007:** regenerar un calendario `active` **siempre** pasa por modo
 `dryRun` (§6.3) primero; nunca se sobreescribe `timetable_slots` en un solo
 paso sin confirmación explícita del usuario. Los slots con `locked=true` se
 preservan íntegros en cualquier regeneración (se pasan al solver como ya
-asignados, no como dominio libre).
+asignados, no como dominio libre). Con multi-calendario, el `dryRun` de una
+alternativa **no** desactiva al activo vigente del lapso (I-5).
 
 ---
 
@@ -725,6 +736,11 @@ asignados, no como dominio libre).
   horario vigente y se la muestra a coordinación (ej. "12 lecciones cambian de
   período, 3 docentes afectados") antes de persistir — reutiliza el mismo
   payload de notificaciones del §10.
+- **Carrera de activación (v2.1, ADR-TT-014):** si dos coordinadores confirman
+  simultáneamente **distintos** borradores del mismo lapso, `uq_active_lapso`
+  rechaza el segundo; `GenerateTimetableJob::persist()` lo captura
+  (`QueryException`), revierte el objetivo a `draft` y lo loguea (equivalente al
+  warning de versión). El `version` es **por calendario**, no por lapso.
 
 ---
 
