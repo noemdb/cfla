@@ -517,14 +517,36 @@
                                         <svg class="w-8 h-8 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                     </div>
                                     <h3 class="text-sm font-bold text-gray-500 dark:text-slate-400 mb-2">No hay diapositivas</h3>
-                                    <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">Agrega una seccion o genera la estructura con IA para empezar.</p>
-                                    <div class="flex items-center justify-center gap-3">
-                                        <button wire:click="generateStep2Sections"
-                                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
-                                                       text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all" @disabled($isPublished)>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                            Generar estructura con IA
-                                        </button>
+                                    <p class="text-xs text-gray-400 dark:text-slate-500 mb-2">Agrega una seccion, sube un PDF o genera la estructura con IA para empezar.</p>
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <div class="flex flex-wrap items-center justify-center gap-3">
+                                            <button wire:click="generateStep2Sections"
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
+                                                           text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 transition-all" @disabled($isPublished)>
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                Generar estructura con IA
+                                            </button>
+
+                                            <input type="file" id="pdf-upload-input" accept="application/pdf" class="hidden"
+                                                   wire:model="pdfFile" @disabled($isPublished)">
+                                            @if($pdfFile)
+                                                <button wire:click="generateStep2FromPdf"
+                                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
+                                                               text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all" @disabled($isPublished)>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    Procesar PDF
+                                                </button>
+                                            @else
+                                                <button type="button"
+                                                        onclick="document.getElementById('pdf-upload-input').click()"
+                                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
+                                                               text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all" @disabled($isPublished)>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    Estructura desde PDF
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 dark:text-slate-600">El PDF se analiza con IA para desglosarlo en secciones (INICIO, desarrollo y CIERRE).</p>
                                     </div>
                                 </div>
                             @endif

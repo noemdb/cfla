@@ -25,7 +25,7 @@ return [
         'admin' => [
             'label' => 'Admin',
             'icon' => 'M4 6h16M4 12h16M4 18h16',
-            'permission' => 'is_admin_or_diagnostic_or_profesor',
+            'permission' => 'is_admin_or_diagnostic',
             'color' => 'emerald',
             'items' => [
                 [
@@ -85,7 +85,7 @@ return [
         'coordinacion' => [
             'label' => 'Coordinación',
             'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-            'permission' => 'is_admin_or_coordinacion_or_director_or_profesor_or_planner',
+            'permission' => 'is_admin_or_coordinacion',
             'color' => 'emerald',
             'items' => [
                 [
@@ -234,7 +234,6 @@ return [
                     'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
                     'active' => 'app.planning.lms*',
                     'icon_color' => 'teal',
-                    'badge' => 'planning.lms.lesson-pending-count',
                 ],
             ],
         ],
@@ -281,7 +280,7 @@ return [
         'planning' => [
             'label' => 'Planificación',
             'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
-            'permission' => 'is_planner_or_admin_or_diagnostic_or_director',
+            'permission' => 'is_planner_or_admin_or_diagnostic',
             'color' => 'emerald',
             'mega_menu' => true,
             'dashboard_route' => 'app.planning.index',
@@ -533,7 +532,7 @@ return [
             'groups' => ['director', 'coordinacion', 'admin', 'planning', 'profesor'],
         ],
         'profesor' => [
-            'groups' => ['profesor', 'coordinacion', 'admin', 'planning', 'director'],
+            'groups' => ['profesor'],
         ],
         'planning' => [
             'groups' => ['planning', 'profesor', 'coordinacion', 'admin', 'director'],

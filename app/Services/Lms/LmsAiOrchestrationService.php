@@ -43,6 +43,18 @@ Reglas críticas:
 5. El ejemplo en las instrucciones es solo para mostrar el FORMATO — usa el contexto real de la actividad.
 TEXT;
 
+    /**
+     * Construye el prompt de reparación con el feedback específico del validador.
+     */
+    private function buildRepairPrompt(string $feedback): string
+    {
+        return "\n\n⚠️ CORRECCIÓN — Tu intento anterior fue rechazado por el validador:\n"
+            .'MOTIVO: '.$feedback."\n"
+            .'Reescribe la respuesta COMPLETA corrigiendo exactamente ese problema. '
+            .'Conserva el tema y la estructura //INICIO, mínimo 5 bloques en //DESARROLLO y //CIERRE. '
+            .'Sin meta-comentarios ni explicaciones.';
+    }
+
     public function __construct(
         private readonly OpenRouterService $openRouter,
         private readonly NvidiaService $nvidia,
@@ -312,19 +324,22 @@ TEXT;
      * cada uno. Si todos fallan, retorna error.
      *
      * Si se proporciona un $contentValidator, el contenido devuelto por
-     * cada modelo se valida con ese callable. Si retorna false, se considera
-     * que el modelo falló (contenido inválido) y se pasa al siguiente.
+     * cada modelo se valida con ese callable. Si retorna true, es válido;
+     * si retorna false o un string con feedback, se considera fallido y se
+     * reintenta el MISMO modelo (hasta `lms.repair_attempts`) con el feedback
+     * como corrección antes de pasar al siguiente modelo.
      *
-     * @param  string        $systemPrompt      Instrucción del sistema.
-     * @param  string        $userPrompt        Mensaje del usuario.
-     * @param  array         $overrides         Overrides base para el LLM.
-     * @param  int           $tokenBudget       Máx. tokens del user prompt antes de compactar.
-     * @param  callable|null $contentValidator  Recibe (string $content): bool.
-     *                                          true = válido, false = inválido (pasar al sig. modelo).
-     * @param  array|null    $customChain       Cadena custom de modelos [['model','label'],...].
-     *                                          null = usa la cadena por defecto.
-     * @param  callable|null $notify            Recibe (string $type, string $title, string $desc): void.
-     *                                          Tipos: 'info', 'warning', 'error'.
+     * @param  string  $systemPrompt  Instrucción del sistema.
+     * @param  string  $userPrompt  Mensaje del usuario.
+     * @param  array  $overrides  Overrides base para el LLM.
+     * @param  int  $tokenBudget  Máx. tokens del user prompt antes de compactar.
+     * @param  callable|null  $contentValidator  Recibe (string $content): true|string|bool.
+     *                                           true = válido; string = inválido + feedback;
+     *                                           false = inválido (feedback genérico).
+     * @param  array|null  $customChain  Cadena custom de modelos [['model','label'],...].
+     *                                   null = usa la cadena por defecto.
+     * @param  callable|null  $notify  Recibe (string $type, string $title, string $desc): void.
+     *                                 Tipos: 'info', 'warning', 'error'.
      * @return array{success: bool, content: ?string, model: ?string, usage: ?array, error: ?string, debug_raw_content: ?string}
      */
     public function askWithCompaction(
@@ -370,21 +385,52 @@ TEXT;
 
         $llm = $this->openRouter;
         $lastError = null;
+        $repairAttempts = max(0, (int) config('lms.repair_attempts', 1));
 
         foreach ($modelChain as $i => $attempt) {
-            $attemptUserPrompt = $i > 0 ? $userPrompt.self::FALLBACK_REINFORCEMENT : $userPrompt;
+            $baseUserPrompt = $i > 0 ? $userPrompt.self::FALLBACK_REINFORCEMENT : $userPrompt;
 
             $attemptOverrides = array_merge($overrides, [
                 'model' => $attempt['model'],
                 'timeout' => max($overrides['timeout'] ?? 120, 120),
             ]);
 
-            $result = $llm->ask($systemPrompt, $attemptUserPrompt, $attemptOverrides);
+            $attemptUserPrompt = $baseUserPrompt;
 
-            if ($result['success']) {
+            for ($repair = 0; $repair <= $repairAttempts; $repair++) {
+                $startedAt = microtime(true);
+                $result = $llm->ask($systemPrompt, $attemptUserPrompt, $attemptOverrides);
+                $elapsed = round(microtime(true) - $startedAt, 1);
+
+                if (! $result['success']) {
+                    $lastError = $result['error'] ?? 'Error desconocido';
+                    $reason = $this->describeModelError($lastError);
+                    $this->logger->warning("askWithCompaction: {$attempt['label']} falló", [
+                        'model' => $attempt['model'],
+                        'error' => $lastError,
+                        'reason' => $reason,
+                        'chain_index' => $i,
+                        'elapsed_seconds' => $elapsed,
+                    ]);
+
+                    if ($notify) {
+                        $notify(
+                            'warning',
+                            "{$attempt['label']} no respondió",
+                            "Cambiando al siguiente modelo... ({$reason})"
+                        );
+                    }
+
+                    break; // ir al siguiente modelo de la cadena
+                }
+
                 $content = $result['content'] ?? '';
-                if ($contentValidator !== null && (empty($content) || ! $contentValidator($content))) {
+
+                if ($contentValidator !== null && (empty($content) || ($validation = $contentValidator($content)) !== true)) {
                     $failedContent = $content;
+                    $feedback = is_string($validation ?? false)
+                        ? $validation
+                        : 'El contenido no cumple la estructura requerida (//INICIO, mínimo 5 bloques en //DESARROLLO, //CIERRE).';
                     $lastError = 'Contenido inválido: no superó la validación de estructura.';
 
                     $vHasInicio = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
@@ -410,6 +456,10 @@ TEXT;
                             'has_cierre' => $vHasCierre,
                             'dev_blocks' => $vDevBlocks,
                         ],
+                        'feedback' => $feedback,
+                        'chain_index' => $i,
+                        'repair_attempt' => $repair,
+                        'elapsed_seconds' => $elapsed,
                         'content_preview' => mb_substr(preg_replace('/\s+/', ' ', $content), 0, 500),
                     ]);
 
@@ -421,34 +471,43 @@ TEXT;
                         );
                     }
 
-                    continue;
+                    if ($repair < $repairAttempts) {
+                        // Reintentar el MISMO modelo con feedback específico
+                        $attemptUserPrompt = $baseUserPrompt."\n\n".$this->buildRepairPrompt($feedback);
+
+                        $this->logger->info('askWithCompaction: reparación con feedback', [
+                            'model' => $attempt['model'],
+                            'label' => $attempt['label'],
+                            'repair_attempt' => $repair + 1,
+                            'max_repairs' => $repairAttempts,
+                            'feedback' => mb_substr($feedback, 0, 300),
+                        ]);
+
+                        if ($notify) {
+                            $notify(
+                                'info',
+                                "{$attempt['label']} reparando contenido",
+                                'El contenido fue rechazado: '.mb_substr($feedback, 0, 120).' Reintentando el mismo modelo...'
+                            );
+                        }
+
+                        continue;
+                    }
+
+                    break; // reparaciones agotadas → siguiente modelo
                 }
 
                 $this->logger->info("askWithCompaction: {$attempt['label']} generó contenido válido", [
                     'model' => $attempt['model'],
                     'length' => mb_strlen($content),
                     'chain_index' => $i,
+                    'repair_attempt' => $repair,
+                    'elapsed_seconds' => $elapsed,
                 ]);
 
                 $result['debug_raw_content'] = $failedContent;
 
                 return $result;
-            }
-
-            $lastError = $result['error'] ?? 'Error desconocido';
-            $reason = $this->describeModelError($lastError);
-            $this->logger->warning("askWithCompaction: {$attempt['label']} falló", [
-                'model' => $attempt['model'],
-                'error' => $lastError,
-                'reason' => $reason,
-            ]);
-
-            if ($notify) {
-                $notify(
-                    'warning',
-                    "{$attempt['label']} no respondió",
-                    "Cambiando al siguiente modelo... ({$reason})"
-                );
             }
         }
 

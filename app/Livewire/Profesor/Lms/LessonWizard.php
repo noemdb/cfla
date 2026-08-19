@@ -20,6 +20,7 @@ use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsAiOrchestrationService;
 use App\Services\Lms\LmsContentRendererService;
 use App\Services\Lms\LmsMediaUploadService;
+use App\Services\Lms\LmsPdfExtractorService;
 use App\Services\Lms\LmsPublicationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -39,10 +40,13 @@ class LessonWizard extends Component
 
     protected LmsContentRendererService $rendererService;
 
+    protected LmsPdfExtractorService $pdfExtractorService;
+
     public function boot(): void
     {
         $this->aiService ??= app(LmsAiOrchestrationService::class);
         $this->rendererService ??= app(LmsContentRendererService::class);
+        $this->pdfExtractorService ??= app(LmsPdfExtractorService::class);
     }
 
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
@@ -145,6 +149,8 @@ class LessonWizard extends Component
     public ?string $generationError = null;
 
     public ?string $debugRawContent = null;
+
+    public $pdfFile;
 
     // ─── Wizard: Resultado de generación (typewriter overlay) ──
     public bool $showGenerationResult = false;
@@ -2840,10 +2846,6 @@ PROMPT;
         if ($this->publishedGuard()) {
             return;
         }
-        $this->generatingStep2 = true;
-        $this->saved = false;
-        $this->generationError = null;
-        $this->debugRawContent = null;
 
         $activity = $this->selectedActivity;
         $pevaluacion = $activity?->pevaluacion;
@@ -2979,15 +2981,32 @@ PROMPT;
 Genera estructura completa con //INICIO, mínimo 5 bloques en //DESARROLLO y //CIERRE. Sin explicaciones ni meta-comentarios.
 PROMPT;
 
+        // ─── Llamar al servicio con cadena dedicada ──────────
+        $this->runStep2AiGeneration($systemPrompt, $userPrompt);
+    }
+
+    /**
+     * Ejecuta la generación de la estructura de secciones (paso 2) con la
+     * cadena de modelos dedicada, validando y parseando el resultado en
+     * wizardSections. Compartido por la generación desde contexto (IA) y
+     * desde un PDF subido.
+     */
+    private function runStep2AiGeneration(string $systemPrompt, string $userPrompt): void
+    {
+        $this->generatingStep2 = true;
+        $this->saved = false;
+        $this->generationError = null;
+        $this->debugRawContent = null;
+
         // ─── Validación de contenido mejorada ───────────────
-        $contentValidator = function (string $content): bool {
+        $contentValidator = function (string $content): true|string {
             // 1. Debe contener los tres marcadores estructurales
             $hasInicio = preg_match('/^\/\/INICIO\s*$/m', $content) === 1;
             $hasDesarrollo = preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1;
             $hasCierre = preg_match('/^\/\/CIERRE\s*$/m', $content) === 1;
 
             if (! ($hasInicio && $hasDesarrollo && $hasCierre)) {
-                return false;
+                return 'Faltan los marcadores estructurales //INICIO, //DESARROLLO o //CIERRE.';
             }
 
             // Extraer contenido entre //DESARROLLO y //CIERRE
@@ -2995,7 +3014,7 @@ PROMPT;
             preg_match('/^\/\/DESARROLLO\s*$(.*?)^\/\/CIERRE\s*$/ms', $content, $devMatch);
 
             if (empty($devMatch[1])) {
-                return false;
+                return 'No se encontró contenido entre //DESARROLLO y //CIERRE.';
             }
 
             $blocks = preg_split('/\n\s*\n/', trim($devMatch[1]));
@@ -3003,7 +3022,7 @@ PROMPT;
 
             // Mínimo 5 bloques en DESARROLLO
             if (count($validBlocks) < 5) {
-                return false;
+                return '//DESARROLLO solo tiene '.count($validBlocks).' bloque(s) (mínimo 5).';
             }
 
             // 2. Verificar idioma español (heurística combinada)
@@ -3033,7 +3052,7 @@ PROMPT;
                     'accent_ratio' => round($accentRatio, 4),
                 ]);
 
-                return false;
+                return 'El contenido no parece estar en español (sin palabras funcionales ni acentos).';
             }
 
             // 3. Detectar contenido genérico
@@ -3048,7 +3067,7 @@ PROMPT;
                         'pattern' => $pattern,
                     ]);
 
-                    return false;
+                    return 'Se detectó un tema genérico ("'.mb_substr($pattern, 1, -2).'") que no corresponde al contexto de la actividad.';
                 }
             }
 
@@ -3062,35 +3081,59 @@ PROMPT;
                             'title' => $firstLine,
                         ]);
 
-                        return false;
+                        return 'El título "'.$firstLine.'" es un placeholder; usa un título descriptivo del contenido.';
                     }
                 }
             }
 
-            // 5. Verificar longitud mínima por bloque (100+ palabras)
-            // Primero, fusionar bloques muy cortos (< 50 palabras) con el siguiente,
-            // ya que algunos modelos separan el título en negrita del contenido con
-            // una línea en blanco, creando bloques de solo 5-10 palabras.
+            // 5. Verificar longitud mínima por bloque
+            // Primero, fusionar bloques muy cortos (< 50 palabras) con el siguiente
+            // (o con el anterior si es el último), ya que algunos modelos separan
+            // el título en negrita del contenido con una línea en blanco. Los bloques
+            // sin palabras alfabéticas (p.ej. "---") son separadores, no contenido,
+            // y se descartan en lugar de rechazar la generación.
             $processedBlocks = [];
             foreach ($validBlocks as $i => $block) {
                 $wordCount = preg_match_all('/\p{L}+/u', trim($block));
-                if ($wordCount < 50 && isset($validBlocks[$i + 1])) {
-                    // Fusionar título separado con su contenido
-                    $validBlocks[$i + 1] = trim($block)."\n\n".trim($validBlocks[$i + 1]);
-
+                if ($wordCount === 0) {
                     continue;
+                }
+                if ($wordCount < 50) {
+                    if (isset($validBlocks[$i + 1])) {
+                        // Fusionar título separado con su contenido
+                        $validBlocks[$i + 1] = trim($block)."\n\n".trim($validBlocks[$i + 1]);
+
+                        continue;
+                    }
+
+                    // Último bloque corto: fusionar con el bloque ya procesado
+                    if (! empty($processedBlocks)) {
+                        $processedBlocks[count($processedBlocks) - 1] .= "\n\n".trim($block);
+
+                        continue;
+                    }
                 }
                 $processedBlocks[] = $block;
             }
+            $minWords = (int) config('lms.section_block_min_words', 60);
+            $hardFloor = (int) config('lms.section_block_hard_floor', 30);
             foreach ($processedBlocks as $block) {
                 $wordCount = preg_match_all('/\p{L}+/u', trim($block));
-                if ($wordCount < 100) {
+                if ($wordCount < $hardFloor) {
                     Log::warning('generateStep2Sections: content rejected — block too short', [
                         'words' => $wordCount,
+                        'hard_floor' => $hardFloor,
                         'preview' => mb_substr(trim($block), 0, 100),
                     ]);
 
-                    return false;
+                    return 'Hay un bloque en //DESARROLLO demasiado corto ('.$wordCount.' palabras, mínimo '.$hardFloor.'): "'.mb_substr(trim($block), 0, 80).'...". Amplía ese bloque.';
+                }
+
+                if ($wordCount < $minWords) {
+                    Log::debug('generateStep2Sections: bloque corto aceptado', [
+                        'words' => $wordCount,
+                        'min_words' => $minWords,
+                    ]);
                 }
             }
 
@@ -3099,6 +3142,7 @@ PROMPT;
 
         // ─── Llamar al servicio con cadena dedicada ──────────
         try {
+            $generationStartedAt = microtime(true);
             $result = $this->askWithCompaction(
                 systemPrompt: $systemPrompt,
                 userPrompt: $userPrompt,
@@ -3198,6 +3242,7 @@ PROMPT;
                 'content_length' => mb_strlen($content),
                 'used_model' => $result['model'] ?? '—',
                 'was_compacted' => $result['compacted'] ?? false,
+                'elapsed_seconds' => round(microtime(true) - $generationStartedAt, 1),
                 'has_markers' => [
                     'inicio' => preg_match('/^\/\/INICIO\s*$/m', $content) === 1,
                     'desarrollo' => preg_match('/^\/\/DESARROLLO\s*$/m', $content) === 1,
@@ -3235,6 +3280,139 @@ PROMPT;
         } finally {
             $this->generatingStep2 = false;
         }
+    }
+
+    // ─── Wizard: Paso 2 — Estructura desde PDF ───────────────
+
+    /**
+     * Extrae el texto de un PDF subido y lo estructura en secciones
+     * (//INICIO + MÍNIMO 5 bloques de DESARROLLO + //CIERRE) usando la
+     * cadena de IA, conservando fielmente el contenido del documento.
+     */
+    public function generateStep2FromPdf(): void
+    {
+        if ($this->publishedGuard()) {
+            return;
+        }
+
+        $this->validate([
+            'pdfFile' => ['required', 'file', 'max:10240', 'mimes:pdf'],
+        ]);
+
+        $pdfText = $this->pdfExtractorService->extract($this->pdfFile->getRealPath());
+        $this->pdfFile = null;
+
+        if (trim($pdfText ?? '') === '') {
+            $this->notification()->error(
+                'No se pudo leer el PDF',
+                'El archivo no contiene texto extraíble. Verifica que sea un PDF con texto (no escaneado) y vuelve a intentarlo.'
+            );
+
+            return;
+        }
+
+        $pdfText = $this->sanitizePdfText($pdfText);
+
+        $activity = $this->selectedActivity;
+        $pevaluacion = $activity?->pevaluacion;
+
+        // ─── Contexto de la actividad ───────────────────────────
+        $gradeName = $pevaluacion?->pensum?->grado?->name ?? '—';
+        $subjectName = $pevaluacion?->pensum?->asignatura?->name ?? '—';
+        $sectionName = $pevaluacion?->seccion?->name ?? '—';
+        $lessonTitle = $this->lessonTitle ?: $activity->topic ?? '';
+        $lessonDescription = $this->lessonDescription;
+
+        $activityContext = collect([
+            'Tema generador' => $activity->topic,
+            'Tejido temático' => $activity->thematic,
+            'Actividad evaluativa' => $activity->description,
+            'Enseñanza' => $activity->teaching,
+            'Aprendizaje esperado' => $activity->learning,
+            'Referentes teóricos' => $activity->references,
+            'ODS/Sistematización' => $activity->observations,
+        ])->filter()->map(fn ($v, $k) => "• {$k}: {$v}")->implode("\n");
+
+        // ─── Indicadores de logro ───────────────────────────────
+        $indicators = $activity?->achievements?->pluck('name')?->filter() ?? collect();
+        $indicatorsText = $indicators->isNotEmpty()
+            ? $indicators->map(fn ($n) => "• {$n}")->implode("\n")
+            : '—';
+
+        // ─── Referentes normativos ──────────────────────────────
+        $referentsText = $this->aiService->getReferentsContext($pevaluacion?->pensum?->pestudio_id, $pevaluacion?->pensum);
+
+        // ─── Construir prompt ───────────────────────────────────
+        $systemPrompt = <<<'PROMPT'
+Eres docente venezolano. Convierte el TEXTO FUENTE (extraído de un PDF) en una lección LMS estructurada.
+
+EXIGENCIA DE CALIDAD LITERARIA: El lenguaje debe ser formal, profesional y refinado, con la calidad narrativa de un best seller. Vocabulario preciso, sintaxis cuidada, tono pedagógico pero elegante. Cada sección debe redactarse con el rigor y la elegancia de un libro de texto de alta calidad editorial.
+
+REGLA FUNDAMENTAL: Conserva fielmente el contenido, los datos, conceptos y ejemplos del TEXTO FUENTE. NO inventes temas nuevos ni cambies el significado. Solo reorganiza el material en una estructura pedagógica coherente, complementando con una breve introducción y un cierre si el texto no las tiene.
+
+Debes generar EXACTAMENTE el formato que se indica. NO expliques lo que vas a hacer, NO describas las reglas, NO incluyas meta-comentarios. Solamente escribe el contenido directamente.
+
+Estructura obligatoria: //INICIO, luego //DESARROLLO con MÍNIMO 5 bloques, luego //CIERRE (total mínimo 7 secciones).
+
+Reglas estrictas:
+- //INICIO: título llamativo (máx 50 caracteres) + párrafo introductorio que contextualice el tema del PDF
+- MÍNIMO 5 bloques en //DESARROLLO (más si el contenido lo requiere)
+- Cada bloque de DESARROLLO separado por una línea en blanco
+- Primera línea de cada bloque = título (máx 10 palabras), lenguaje acorde al grado
+- Cada bloque de DESARROLLO: mínimo 100 palabras (3-5 párrafos)
+- //CIERRE: resumen o recapitulación de lo aprendido (mínimo 100 palabras)
+- SIN meta-comentarios, explicaciones ni introducciones antes del formato
+- Alineado con los referentes normativos y el contexto de la actividad
+- NO uses temas genéricos — usa EXACTAMENTE el contenido del TEXTO FUENTE
+
+═══ REGLAS DE IMPRESIÓN (modo libro, 2 columnas) ═══
+El contenido se imprime en orientación horizontal con layout de 2 columnas (~350px cada una).
+- Párrafos: máximo 4-5 oraciones (150-200 palabras). Más = ilegible en columna.
+- Tablas: máximo 3 columnas, celdas ≤40 caracteres. Usar listas si hay más campos.
+- Listas (-) preferidas sobre párrafos cuando hay 3+ elementos enumerables.
+- Títulos de sección: máximo 50 caracteres (aparecen en header + portada).
+- Diagramas: máximo 12 nodos, graph TD, viewBox ≤1200px.
+- Sin bloques de código, sin HTML inline.
+
+--- AHORA ESTRUCTURA EL TEXTO FUENTE PROPORCIONADO ---
+PROMPT;
+
+        $userPrompt = <<<PROMPT
+### Contexto
+
+**Lección:** {$lessonTitle}
+**Descripción:** {$lessonDescription}
+**Curso:** {$gradeName} · {$subjectName} · Sec. {$sectionName}
+
+**Actividad pedagógica:**
+{$activityContext}
+
+**Indicadores de logro:**
+{$indicatorsText}
+
+**Referentes normativos:**
+{$referentsText}
+
+### TEXTO FUENTE (extraído del PDF subido)
+
+{$pdfText}
+
+Estructura el texto anterior en //INICIO, mínimo 5 bloques en //DESARROLLO y //CIERRE. Conserva el contenido original. Sin explicaciones ni meta-comentarios.
+PROMPT;
+
+        $this->runStep2AiGeneration($systemPrompt, $userPrompt);
+    }
+
+    /**
+     * Normaliza el texto extraído del PDF antes de enviarlo a la IA:
+     * colapsa espacios múltiples e interlineados excesivos.
+     */
+    private function sanitizePdfText(string $text): string
+    {
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace("/\n{3,}/", "\n\n", $text) ?? $text;
+
+        return $this->sanitizeText($text, 'standard') ?? '';
     }
 
     /**

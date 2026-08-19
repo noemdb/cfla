@@ -14,7 +14,9 @@ use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\User;
 use App\Notifications\LessonScheduledForApproval;
 use App\Services\OpenRouterService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -965,6 +967,255 @@ class LessonWizardCharacterizationTest extends TestCase
 
         $sections = $component->get('wizardSections');
         $this->assertNotEmpty($sections);
+    }
+
+    /** @test */
+    public function generate_step2_sections_acepta_bloques_de_desarrollo_cortos(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // Bloques de ~64 palabras (título + cuerpo): por debajo del antiguo
+        // umbral de 100 pero contenido sustancial y válido.
+        $blockBody = 'En esta primera sección de la lección los estudiantes van a aprender los conceptos fundamentales que son necesarios para comprender el tema principal de esta unidad didáctica del curso escolar. Es importante que los alumnos presten atención a cada uno de los contenidos porque estos sientan las bases para el aprendizaje futuro que se desarrollará en las secciones posteriores.';
+
+        $this->mockOpenRouter(implode("\n", [
+            '//INICIO',
+            '',
+            '**Título de inicio**',
+            'Contenido introductorio de la lección que contextualiza el tema para los estudiantes.',
+            '',
+            '//DESARROLLO',
+            '',
+            '**Conceptos fundamentales del aprendizaje**',
+            $blockBody,
+            '',
+            '**Aplicaciones prácticas de los contenidos**',
+            $blockBody,
+            '',
+            '**Ejercicios de refuerzo y práctica**',
+            $blockBody,
+            '',
+            '**Evaluación formativa del aprendizaje**',
+            $blockBody,
+            '',
+            '**Actividades de cierre y síntesis**',
+            $blockBody,
+            '',
+            '//CIERRE',
+            '',
+            'Contenido final de cierre para concluir la lección educativa y reforzar los aprendizajes más importantes que los estudiantes han adquirido durante el desarrollo de toda la unidad didáctica del curso escolar.',
+        ]));
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+
+        $component->call('generateStep2Sections');
+
+        $sections = $component->get('wizardSections');
+        $this->assertNotEmpty($sections);
+        $this->assertNull($component->get('generationError'));
+        $this->assertTrue(count($sections) >= 7);
+    }
+
+    /** @test */
+    public function generate_step2_sections_ignora_bloques_separadores(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // Último bloque de DESARROLLO separado por "---" (sin palabras): antes
+        // del fix provocaba rechazo por "block too short"; ahora se descarta.
+        $blockBody = 'En esta primera sección de la lección los estudiantes van a aprender los conceptos fundamentales que son necesarios para comprender el tema principal de esta unidad didáctica del curso escolar. Es importante que los alumnos presten atención a cada uno de los contenidos porque estos sientan las bases para el aprendizaje futuro que se desarrollará en las secciones posteriores.';
+
+        $this->mockOpenRouter(implode("\n", [
+            '//INICIO',
+            '',
+            '**Título de inicio**',
+            'Contenido introductorio de la lección que contextualiza el tema para los estudiantes.',
+            '',
+            '//DESARROLLO',
+            '',
+            '**Conceptos fundamentales del aprendizaje**',
+            $blockBody,
+            '',
+            '**Aplicaciones prácticas de los contenidos**',
+            $blockBody,
+            '',
+            '**Ejercicios de refuerzo y práctica**',
+            $blockBody,
+            '',
+            '**Evaluación formativa del aprendizaje**',
+            $blockBody,
+            '',
+            '**Actividades de cierre y síntesis**',
+            $blockBody,
+            '',
+            '---',
+            '',
+            '//CIERRE',
+            '',
+            'Contenido final de cierre para concluir la lección educativa y reforzar los aprendizajes más importantes que los estudiantes han adquirido durante el desarrollo de toda la unidad didáctica del curso escolar.',
+        ]));
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+
+        $component->call('generateStep2Sections');
+
+        $sections = $component->get('wizardSections');
+        $this->assertNotEmpty($sections);
+        $this->assertNull($component->get('generationError'));
+        $this->assertTrue(count($sections) >= 7);
+    }
+
+    /** @test */
+    public function generate_step2_sections_acepta_bloques_de_50_palabras(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // Réplica del caso real del log: bloque de 50 palabras (título + cuerpo)
+        // que antes rechazaba la generación completa y forzaba el fallback.
+        $blockBody = 'Los genes se clasifican funcionalmente en dos categorías principales que trabajan de manera coordinada para regular la expresión génica: los genes estructurales codifican proteínas funcionales mientras que los genes reguladores controlan cuándo y cuánto se expresan los primeros determinando así el fenotipo de cada organismo.';
+
+        $this->mockOpenRouter(implode("\n", [
+            '//INICIO',
+            '',
+            '**Título de inicio**',
+            'Contenido introductorio de la lección que contextualiza el tema para los estudiantes.',
+            '',
+            '//DESARROLLO',
+            '',
+            '**Clasificación funcional de los genes**',
+            $blockBody,
+            '',
+            '**Aplicaciones prácticas de los contenidos**',
+            $blockBody,
+            '',
+            '**Ejercicios de refuerzo y práctica**',
+            $blockBody,
+            '',
+            '**Evaluación formativa del aprendizaje**',
+            $blockBody,
+            '',
+            '**Actividades de cierre y síntesis**',
+            $blockBody,
+            '',
+            '//CIERRE',
+            '',
+            'Contenido final de cierre para concluir la lección educativa y reforzar los aprendizajes más importantes que los estudiantes han adquirido durante el desarrollo de toda la unidad didáctica del curso escolar.',
+        ]));
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+
+        $component->call('generateStep2Sections');
+
+        $sections = $component->get('wizardSections');
+        $this->assertNotEmpty($sections);
+        $this->assertNull($component->get('generationError'));
+        $this->assertTrue(count($sections) >= 7);
+    }
+
+    /** @test */
+    public function generate_step2_sections_rechaza_bloques_placeholder(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // Bloques de 3 palabras: al fusionarse quedan por debajo del piso duro (30).
+        $placeholder = '**Título**'."\n".'Bloque breve.';
+
+        $this->mockOpenRouter(implode("\n", [
+            '//INICIO',
+            '',
+            '**Título de inicio**',
+            'Contenido introductorio de la lección.',
+            '',
+            '//DESARROLLO',
+            '',
+            $placeholder,
+            '',
+            $placeholder,
+            '',
+            $placeholder,
+            '',
+            $placeholder,
+            '',
+            $placeholder,
+            '',
+            '//CIERRE',
+            '',
+            'Contenido final de cierre.',
+        ]));
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+
+        $component->call('generateStep2Sections');
+
+        $this->assertNotEmpty($component->get('generationError'));
+    }
+
+    /** @test */
+    public function generate_step2_desde_pdf_estructura_secciones(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // Generar un PDF real con texto usando dompdf
+        $pdf = Pdf::loadHTML('
+            <html><body>
+                <h1>Las fracciones en la vida cotidiana</h1>
+                <p>Las fracciones representan una o varias partes iguales de un todo y se utilizan constantemente en nuestra vida diaria.</p>
+                <p>El numerador indica cuántas partes tomamos y el denominador indica en cuántas partes iguales se divide el todo.</p>
+                <p>Las fracciones se clasifican en propias, impropias y mixtas según la relación entre numerador y denominador.</p>
+            </body></html>
+        ');
+        $file = UploadedFile::fake()->createWithContent('fracciones.pdf', $pdf->output())->mimeType('application/pdf');
+
+        $this->mockOpenRouter(implode("\n", [
+            '//INICIO',
+            '',
+            'Las fracciones en la vida cotidiana',
+            'Contenido de inicio para la lección educativa donde se presentan los conceptos fundamentales que los estudiantes van a aprender a lo largo de esta unidad didáctica del curso escolar correspondiente al programa de estudios vigente en el sistema educativo nacional venezolano.',
+            '',
+            '//DESARROLLO',
+            '',
+            '**Conceptos fundamentales del aprendizaje**',
+            'En esta primera sección de la lección los estudiantes van a aprender los conceptos fundamentales que son necesarios para comprender el tema principal de esta unidad didáctica del curso escolar correspondiente al plan de estudios oficial vigente. Es importante que los alumnos presten atención a cada uno de los contenidos que se presentan a continuación porque estos sientan las bases para todo el aprendizaje futuro que se va a desarrollar en las secciones posteriores de la lección y en las unidades siguientes del programa educativo. Los docentes deben guiar este proceso educativo con ejemplos claros y actividades prácticas que faciliten la comprensión de los conceptos más importantes que se abordan en esta primera sección de la unidad didáctica del curso escolar correspondiente al año académico en curso.',
+            '',
+            '**Aplicaciones prácticas de los contenidos**',
+            'Una vez que los estudiantes han comprendido los conceptos fundamentales de la lección es necesario explorar las aplicaciones prácticas que tienen estos contenidos en contextos reales y cotidianos del entorno escolar y social de los alumnos del curso. La capacidad de transferir el conocimiento teórico a situaciones concretas de la vida diaria es uno de los indicadores más importantes del aprendizaje profundo y significativo que se busca desarrollar en los estudiantes del sistema educativo. Por ello es necesario presentar una variedad de ejercicios y problemas contextualizados que permitan a los alumnos practicar y aplicar lo aprendido en escenarios auténticos relacionados con su vida diaria y su entorno inmediato familiar y social.',
+            '',
+            '**Ejercicios de refuerzo y práctica**',
+            'Los ejercicios de refuerzo y práctica constituyen una herramienta pedagógica esencial para consolidar los aprendizajes adquiridos durante las fases anteriores del proceso educativo formal y sistemático. En esta sección se presentan una serie de actividades complementarias diseñadas específicamente para que los estudiantes practiquen de manera autónoma y refuercen su comprensión de los contenidos abordados en la lección. Cada ejercicio incluye instrucciones claras y precisas así como ejemplos resueltos que guían al alumno en su proceso de aprendizaje autodirigido y autónomo dentro del contexto del aula y del hogar. Estas actividades están diseñadas para promover el aprendizaje significativo y la autonomía del estudiante en su proceso de formación académica integral.',
+            '',
+            '**Evaluación formativa del aprendizaje**',
+            'La evaluación formativa del aprendizaje es un proceso continuo y sistemático que permite tanto al docente como al estudiante identificar los avances y las dificultades que surgen durante el proceso de enseñanza y aprendizaje escolar. En esta sección se proponen diversas estrategias e instrumentos de evaluación que pueden aplicarse a lo largo de la unidad didáctica para monitorear el progreso de los alumnos y ajustar la enseñanza según sus necesidades específicas de aprendizaje. La retroalimentación oportuna y constructiva es un componente clave de este proceso evaluativo que favorece el aprendizaje profundo y significativo de los estudiantes del curso.',
+            '',
+            '**Actividades de cierre y síntesis**',
+            'Las actividades de cierre y síntesis final tienen como objetivo principal integrar y consolidar todos los aprendizajes desarrollados a lo largo de la unidad didáctica completa del curso escolar. Estas actividades permiten a los estudiantes establecer conexiones significativas entre los diferentes conceptos abordados durante la lección y reflexionar sobre su propio proceso de aprendizaje personal y académico. La elaboración de mapas conceptuales resúmenes escritos y exposiciones orales son algunas de las estrategias pedagógicas que se pueden utilizar para facilitar esta síntesis final y garantizar que los aprendizajes sean duraderos y transferibles a otros contextos educativos y situaciones de la vida real de los estudiantes.',
+            '',
+            '//CIERRE',
+            '',
+            'Contenido final de cierre para concluir la lección educativa y reforzar los aprendizajes más importantes que los estudiantes han adquirido durante el desarrollo de toda la unidad didáctica del curso escolar. Este cierre incluye un resumen de los conceptos clave y sugerencias prácticas para continuar profundizando en el tema de manera autónoma y autodidacta fuera del aula de clases.',
+        ]));
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+        $component->upload('pdfFile', [$file]);
+        $component->call('generateStep2FromPdf');
+
+        $sections = $component->get('wizardSections');
+        $this->assertNotEmpty($sections);
+        $this->assertTrue(count($sections) >= 7);
     }
 
     // ═══════════════════════════════════════════════════════════════

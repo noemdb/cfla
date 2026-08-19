@@ -20,7 +20,7 @@
         @endphp
 
         <div wire:loading.flex
-             wire:target="generateStep1Content,generateStep2Sections,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags,generateSlideMath,repairSlideBlock,generateInfografia"
+             wire:target="generateStep1Content,generateStep2Sections,generateStep2FromPdf,generateSectionContent,generateSlideText,generateSlideImage,generateSlideDiagram,generateSectionIllustration,generateReviewQuestions,generateSlideHtmlTags,generateSlideMath,repairSlideBlock,generateInfografia"
              class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
              id="llm-loading-overlay"
              x-data="{
