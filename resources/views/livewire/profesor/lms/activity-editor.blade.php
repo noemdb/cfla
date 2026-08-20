@@ -300,6 +300,54 @@
                         <span class="text-[10px] text-slate-500">{{ $comment->created_at->diffForHumans() }}</span>
                     </div>
                     <p class="text-sm text-slate-300 mt-1">{{ $comment->body }}</p>
+
+                    {{-- Réplicas del profesor (contexto del hilo) --}}
+                    @if($comment->replies->isNotEmpty())
+                        <div class="mt-2 ml-2 pl-3 border-l-2 border-emerald-500/30 space-y-2">
+                            @foreach($comment->replies as $reply)
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-semibold text-emerald-300">
+                                            {{ $reply->user?->profile?->firstname ?? '—' }}
+                                        </span>
+                                        <span class="text-[9px] font-bold uppercase text-emerald-400/70 bg-emerald-500/10 px-1 rounded">Profesor</span>
+                                        <span class="text-[10px] text-slate-500">{{ $reply->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mt-0.5">{{ $reply->body }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- Botón Responder --}}
+                    <button wire:click="openActivityReply({{ $comment->id }})"
+                            class="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                        </svg>
+                        Responder
+                    </button>
+
+                    {{-- Form de réplica inline --}}
+                    @if($activityReplyToCommentId === $comment->id)
+                        <div wire:key="activity-reply-form-{{ $comment->id }}" class="mt-2 space-y-1">
+                            <textarea wire:model="activityReplyBody" rows="2" maxlength="1000"
+                                      placeholder="Escribe tu respuesta…"
+                                      class="w-full bg-slate-900 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm
+                                             placeholder-slate-500 resize-none transition-all"></textarea>
+                            @error('activityReplyBody') <p class="text-xs text-red-400">{{ $message }}</p> @enderror
+                            <div class="flex gap-2 justify-end">
+                                <button wire:click="$set('activityReplyToCommentId', null)"
+                                        class="px-3 py-1 text-[11px] text-slate-400 hover:text-slate-300 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button wire:click="saveActivityReply" wire:loading.attr="disabled"
+                                        class="px-3 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg">
+                                    Enviar réplica
+                                </button>
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 @if($commentsTab === 'pending')
                     <div class="flex items-center gap-2 shrink-0">

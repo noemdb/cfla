@@ -3,6 +3,10 @@
 **Staff Engineer Blueprint**
 _Autor:_ Claude Architect
 _Última revisión:_ 2026-07-28
+> **Nota (2026-08-20):** este blueprint cubre la moderación base (aprobación/rechazo).
+> La feature **Réplicas del profesor** (con `parent_id`, `is_instructor_reply`,
+> notificaciones al autor y rate limiting) se documenta por separado en
+> [`replicas-comentarios.md`](replicas-comentarios.md).
 
 ---
 

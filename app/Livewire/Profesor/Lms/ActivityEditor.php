@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Profesor\Lms;
 
+use App\Livewire\Concerns\HasCommentRateLimit;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Lms\LmsActivityContent;
@@ -9,18 +10,22 @@ use App\Models\app\Academy\Lms\LmsActivityLink;
 use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityResource;
 use App\Models\app\Academy\Lms\LmsActivitySection;
+use App\Models\app\Academy\Profesor;
 use App\Services\Lms\CommentModerationService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPublicationService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use WireUi\Traits\WireUiActions;
 
 class ActivityEditor extends Component
 {
-    use WithFileUploads;
+    use HasCommentRateLimit, WireUiActions, WithFileUploads;
 
     public Activity $activity;
+
     public $sections = [];
 
     // Nueva sección
@@ -28,51 +33,70 @@ class ActivityEditor extends Component
 
     // Nuevo contenido
     public ?int $editingSectionId = null;
+
     public string $contentType = 'TEXT';
+
     public string $contentTitle = '';
+
     public string $contentBody = '';
 
     // Upload de recurso
     public $resourceFile;
+
     public string $resourceName = '';
+
     public string $resourceDescription = '';
 
     // URL externa
     public string $linkTitle = '';
+
     public string $linkUrl = '';
+
     public string $linkType = 'REFERENCE';
 
     // Publicación
     public string $pubStatus = 'DRAFT';
+
     public ?string $publishAt = null;
+
     public bool $allowDownloads = true;
 
     public bool $showLinkForm = false;
+
     public bool $showResourceForm = false;
 
     // ─── Comentarios inline ──────────────────────────────────────
     public string $commentsTab = 'pending'; // pending | approved
+
     public $activityComments;
+
     public string $activityRejectReason = '';
+
     public ?int $activityRejectCommentId = null;
+
+    // Réplica inline
+    public ?int $activityReplyToCommentId = null;
+
+    public string $activityReplyBody = '';
 
     protected function rules(): array
     {
         return [
-            'newSectionTitle'    => 'required|string|max:255',
-            'contentBody'        => 'required_without:resourceFile|nullable|string',
-            'resourceFile'       => 'nullable|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
-            'resourceName'       => 'required_with:resourceFile|nullable|string|max:255',
-            'linkTitle'          => 'required_with:linkUrl|nullable|string|max:255',
-            'linkUrl'            => 'required_with:linkTitle|nullable|url|max:1000',
+            'newSectionTitle' => 'required|string|max:255',
+            'contentBody' => 'required_without:resourceFile|nullable|string',
+            'resourceFile' => 'nullable|file|max:51200|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,mp4,mp3',
+            'resourceName' => 'required_with:resourceFile|nullable|string|max:255',
+            'linkTitle' => 'required_with:linkUrl|nullable|string|max:255',
+            'linkUrl' => 'required_with:linkTitle|nullable|url|max:1000',
         ];
     }
 
     public function mount(Activity $activity): void
     {
+        $profesor = Profesor::where('user_id', auth()->id())->first();
         abort_unless(
             auth()->user()->is_admin
-            || $activity->pevaluacion->profesor_id === auth()->id(),
+            || ($profesor && $activity->pevaluacion->profesor_id === $profesor->id),
             403
         );
 
@@ -95,8 +119,8 @@ class ActivityEditor extends Component
     {
         $pub = $this->activity->lmsPublication;
         if ($pub) {
-            $this->pubStatus      = $pub->status;
-            $this->publishAt      = $pub->publish_at?->format('Y-m-d\TH:i');
+            $this->pubStatus = $pub->status;
+            $this->publishAt = $pub->publish_at?->format('Y-m-d\TH:i');
             $this->allowDownloads = $pub->allow_downloads;
         }
     }
@@ -107,8 +131,8 @@ class ActivityEditor extends Component
 
         LmsActivitySection::create([
             'activity_id' => $this->activity->id,
-            'title'       => $this->newSectionTitle,
-            'sort_order'  => count($this->sections) + 1,
+            'title' => $this->newSectionTitle,
+            'sort_order' => count($this->sections) + 1,
         ]);
 
         $this->newSectionTitle = '';
@@ -122,15 +146,15 @@ class ActivityEditor extends Component
 
         LmsActivityContent::create([
             'section_id' => $sectionId,
-            'type'       => 'TEXT',
-            'title'      => $this->contentTitle ?: null,
-            'body'       => $this->contentBody,
+            'type' => 'TEXT',
+            'title' => $this->contentTitle ?: null,
+            'body' => $this->contentBody,
             'sort_order' => LmsActivityContent::where('section_id', $sectionId)->count() + 1,
         ]);
 
-        $this->contentBody       = '';
-        $this->contentTitle      = '';
-        $this->editingSectionId  = null;
+        $this->contentBody = '';
+        $this->contentTitle = '';
+        $this->editingSectionId = null;
         $this->loadSections();
     }
 
@@ -144,12 +168,12 @@ class ActivityEditor extends Component
         $media = app(LmsMediaUploadService::class)->upload($this->resourceFile, auth()->id());
 
         LmsActivityResource::create([
-            'activity_id'  => $this->activity->id,
-            'media_id'     => $media->id,
-            'uploaded_by'  => auth()->id(),
+            'activity_id' => $this->activity->id,
+            'media_id' => $media->id,
+            'uploaded_by' => auth()->id(),
             'display_name' => $this->resourceName,
-            'description'  => $this->resourceDescription,
-            'sort_order'   => $this->activity->lmsResources()->count() + 1,
+            'description' => $this->resourceDescription,
+            'sort_order' => $this->activity->lmsResources()->count() + 1,
         ]);
 
         LmsActivityLog::record($this->activity->id, auth()->id(), 'RESOURCE_ADD', $media->id, 'lms_media_library');
@@ -163,16 +187,16 @@ class ActivityEditor extends Component
     {
         $this->validate([
             'linkTitle' => 'required|string|max:255',
-            'linkUrl'   => 'required|url|max:1000',
+            'linkUrl' => 'required|url|max:1000',
         ]);
 
         LmsActivityLink::create([
             'activity_id' => $this->activity->id,
-            'added_by'    => auth()->id(),
-            'title'       => $this->linkTitle,
-            'url'         => $this->linkUrl,
-            'link_type'   => $this->linkType,
-            'sort_order'  => $this->activity->lmsLinks()->count() + 1,
+            'added_by' => auth()->id(),
+            'title' => $this->linkTitle,
+            'url' => $this->linkUrl,
+            'link_type' => $this->linkType,
+            'sort_order' => $this->activity->lmsLinks()->count() + 1,
         ]);
 
         $this->reset('linkTitle', 'linkUrl', 'linkType');
@@ -184,7 +208,7 @@ class ActivityEditor extends Component
     {
         $section = LmsActivitySection::findOrFail($sectionId);
         abort_unless($section->activity_id === $this->activity->id, 403);
-        $section->update(['is_visible' => !$section->is_visible]);
+        $section->update(['is_visible' => ! $section->is_visible]);
         $this->loadSections();
     }
 
@@ -246,7 +270,7 @@ class ActivityEditor extends Component
         app(LmsPublicationService::class)->publish(
             $this->activity,
             [
-                'publish_at'      => $this->publishAt,
+                'publish_at' => $this->publishAt,
                 'allow_downloads' => $this->allowDownloads,
             ],
             auth()->id(),
@@ -261,10 +285,16 @@ class ActivityEditor extends Component
 
     private function loadComments(): void
     {
-        $this->activityComments = ActivityComment::with('user.profile')
+        $this->activityComments = ActivityComment::with([
+            'user.profile',
+            'replies' => fn ($q) => $q->approved()
+                ->orderBy('created_at', 'asc')
+                ->with('user.profile'),
+        ])
             ->forActivity($this->activity->id)
-            ->when($this->commentsTab === 'pending', fn($q) => $q->pending())
-            ->when($this->commentsTab === 'approved', fn($q) => $q->approved())
+            ->root()
+            ->when($this->commentsTab === 'pending', fn ($q) => $q->pending())
+            ->when($this->commentsTab === 'approved', fn ($q) => $q->approved())
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -300,6 +330,60 @@ class ActivityEditor extends Component
     public function updatedCommentsTab(): void
     {
         $this->loadComments();
+    }
+
+    public function openActivityReply(int $commentId): void
+    {
+        $this->activityReplyToCommentId = $commentId;
+        $this->activityReplyBody = '';
+    }
+
+    public function saveActivityReply(): void
+    {
+        if (! $this->commentRateLimitPassed('reply', 15, 60)) {
+            $seconds = $this->commentRateLimitWaitSeconds('reply');
+
+            $this->notification()->warning(
+                title: 'Demasiadas respuestas',
+                description: "Estás enviando respuestas muy rápido. Inténtalo de nuevo en {$seconds} segundos."
+            );
+
+            return;
+        }
+
+        $this->validate(['activityReplyBody' => 'required|string|min:1|max:1000']);
+
+        $comment = ActivityComment::findOrFail($this->activityReplyToCommentId);
+
+        try {
+            app(CommentModerationService::class, ['user' => auth()->user()])
+                ->reply($comment, $this->activityReplyBody);
+        } catch (\InvalidArgumentException $e) {
+            $this->notification()->error(
+                title: 'No se pudo enviar la réplica',
+                description: $e->getMessage()
+            );
+
+            return;
+        } catch (\Throwable $e) {
+            Log::error('ActivityEditor::saveActivityReply inesperado', [
+                'comment_id' => $this->activityReplyToCommentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->notification()->error(
+                title: 'Ocurrió una situación inesperada',
+                description: 'Tu respuesta no pudo enviarse. Por favor, inténtalo de nuevo.'
+            );
+
+            return;
+        }
+
+        $this->activityReplyToCommentId = null;
+        $this->activityReplyBody = '';
+        $this->loadComments();
+
+        $this->notification()->success(title: 'Réplica enviada');
     }
 
     #[Layout('planning.layouts.app')]

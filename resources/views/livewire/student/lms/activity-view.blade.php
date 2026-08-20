@@ -273,7 +273,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 <p class="text-sm font-bold text-amber-900 dark:text-amber-300">Vista previa de la lección</p>
                 <p class="text-xs sm:text-[13px] text-amber-700 dark:text-amber-400 leading-relaxed mt-0.5">
                     @if($activity->lmsPublication?->publish_at)
-                        Esta lección se publicará el <strong>{{ \Carbon\Carbon::parse($activity->lmsPublication->publish_at)->translatedFormat('j M Y \a \l\a\s H:i') }}</strong> y por ahora solo puedes ver la primera sección.
+                        Esta lección se publicará <strong>{{ $activity->lmsPublication->humanPublishIn() }}</strong>, el <strong>{{ \Carbon\Carbon::parse($activity->lmsPublication->publish_at)->translatedFormat('j M Y \a \l\a\s H:i') }}</strong>, y por ahora solo puedes ver la primera sección.
                     @else
                         Esta lección aún no está publicada por completo. Solo puedes ver la primera sección.
                     @endif
@@ -620,6 +620,35 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                                 <p class="text-sm text-gray-900 dark:text-gray-100 mt-1 leading-relaxed">{{ $comment->body }}</p>
                             </div>
                         </div>
+
+                        {{-- Réplicas del profesor (anidadas) --}}
+                        @if($comment->replies->isNotEmpty())
+                            <div class="ml-10 sm:ml-12 pl-3 sm:pl-4 border-l-2 border-emerald-200 dark:border-emerald-500/30 space-y-2">
+                                @foreach($comment->replies as $reply)
+                                    <div class="flex gap-3 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/5">
+                                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                                            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+                                                {{ strtoupper(mb_substr($reply->user?->profile?->firstname ?? $reply->user?->name ?? '?', 0, 1)) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                                                    {{ $reply->user?->profile?->firstname ?? $reply->user?->name ?? '—' }}
+                                                </span>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                                                    Profesor
+                                                </span>
+                                                <span class="text-[10px] text-gray-400 dark:text-gray-500">
+                                                    {{ $reply->created_at->diffForHumans() }}
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-gray-800 dark:text-gray-100 mt-1 leading-relaxed">{{ $reply->body }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     @empty
                         <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-6">No hay comentarios aún. ¡Sé el primero en comentar!</p>
                     @endforelse

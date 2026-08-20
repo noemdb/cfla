@@ -20,6 +20,7 @@ class ActivityComment extends Model implements \App\Contracts\Auditable
     {
         return [
             'id', 'activity_id', 'user_id',
+            'parent_id', 'is_instructor_reply',
             'is_approved', 'approved_at', 'approved_by',
             'rejected_at', 'rejected_by', 'rejected_reason',
         ];
@@ -31,13 +32,15 @@ class ActivityComment extends Model implements \App\Contracts\Auditable
     }
 
     protected $fillable = [
-        'activity_id', 'user_id', 'body',
+        'activity_id', 'user_id', 'parent_id', 'is_instructor_reply',
+        'body',
         'is_approved', 'approved_at', 'approved_by',
         'rejected_at', 'rejected_by', 'rejected_reason',
     ];
 
     protected $casts = [
         'is_approved' => 'boolean',
+        'is_instructor_reply' => 'boolean',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
@@ -62,7 +65,31 @@ class ActivityComment extends Model implements \App\Contracts\Auditable
         return $this->belongsTo(User::class, 'rejected_by');
     }
 
+    // ─── Relaciones de hilo ────────────────────────────────────────
+
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
     // ─── SCOPES ────────────────────────────────────────────────────
+
+    /** Comentarios raíz (inicio de hilo). */
+    public function scopeRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    /** Réplicas directas de un comentario raíz. */
+    public function scopeRepliesOf($query, int $commentId)
+    {
+        return $query->where('parent_id', $commentId);
+    }
 
     public function scopePending($query)
     {
@@ -74,7 +101,8 @@ class ActivityComment extends Model implements \App\Contracts\Auditable
     public function scopeApproved($query)
     {
         return $query->where('is_approved', true)
-            ->whereNull('rejected_at');
+            ->whereNull('rejected_at')
+            ->whereNull('deleted_at');
     }
 
     public function scopeRejected($query)
@@ -106,5 +134,17 @@ class ActivityComment extends Model implements \App\Contracts\Auditable
             'rejected_by' => $userId,
             'rejected_reason' => $reason,
         ]);
+    }
+
+    // ─── HELPERS ───────────────────────────────────────────────────
+
+    public function isReply(): bool
+    {
+        return $this->parent_id !== null;
+    }
+
+    public function isInstructorReply(): bool
+    {
+        return (bool) $this->is_instructor_reply;
     }
 }

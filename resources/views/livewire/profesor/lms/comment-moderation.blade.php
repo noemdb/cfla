@@ -136,6 +136,35 @@
                                     @endif
                                 </p>
                             @endif
+
+                            {{-- Réplicas del profesor (contexto del hilo) --}}
+                            @if($comment->replies->isNotEmpty())
+                                <div class="mt-2 ml-2 pl-3 border-l-2 border-emerald-500/30 space-y-2">
+                                    @foreach($comment->replies as $reply)
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="text-[10px] font-semibold text-emerald-300">
+                                                    {{ $reply->user?->profile?->firstname ?? '—' }}
+                                                </span>
+                                                <span class="text-[9px] font-bold uppercase text-emerald-400/70 bg-emerald-500/10 px-1 rounded">Profesor</span>
+                                                <span class="text-[10px] text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-300 mt-0.5">{{ $reply->body }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Botón Responder (solo en comentarios raíz no rechazados) --}}
+                            @unless($comment->rejected_at)
+                            <button wire:click="openReply({{ $comment->id }})"
+                                    class="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                </svg>
+                                Responder
+                            </button>
+                            @endunless
                         </div>
                     </div>
 
@@ -154,6 +183,28 @@
                     </div>
                     @endif
                 @if($tab === 'pending')
+                </div>
+                @endif
+
+                {{-- Form de réplica inline --}}
+                @if($replyToCommentId === $comment->id)
+                <div wire:key="reply-form-{{ $comment->id }}" class="space-y-1">
+                    <textarea wire:model="replyBody" rows="2" maxlength="1000"
+                              placeholder="Escribe tu respuesta…"
+                              class="w-full bg-white/5 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm
+                                     focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none
+                                     placeholder:text-gray-600 resize-none transition-all"></textarea>
+                    @error('replyBody') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+                    <div class="flex gap-2 justify-end">
+                        <button wire:click="$set('replyToCommentId', null)"
+                                class="px-3 py-1 text-[11px] text-gray-400 hover:text-gray-300 transition-colors">
+                            Cancelar
+                        </button>
+                        <button wire:click="saveReply" wire:loading.attr="disabled"
+                                class="px-3 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors">
+                            Enviar réplica
+                        </button>
+                    </div>
                 </div>
                 @endif
             </div>

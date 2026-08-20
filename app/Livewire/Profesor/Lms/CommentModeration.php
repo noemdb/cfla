@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Profesor\Lms;
 
+use App\Livewire\Concerns\HasCommentRateLimit;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Profesor;
 use App\Services\Lms\CommentModerationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,20 +17,30 @@ use WireUi\Traits\WireUiActions;
 
 class CommentModeration extends Component
 {
-    use WithPagination, WireUiActions, AuthorizesRequests;
+    use AuthorizesRequests, HasCommentRateLimit, WireUiActions, WithPagination;
 
     public string $tab = 'pending'; // pending | approved | rejected
+
     public string $search = '';
+
     public string $activityFilter = '';
 
     // Bulk actions
     public array $selected = [];
+
     public bool $selectAll = false;
 
     // Reject modal
     public bool $showRejectModal = false;
+
     public ?int $rejectCommentId = null;
+
     public string $rejectReason = '';
+
+    // Reply (inline, sin modal)
+    public ?int $replyToCommentId = null;
+
+    public string $replyBody = '';
 
     protected CommentModerationService $moderationService;
 
@@ -46,23 +58,27 @@ class CommentModeration extends Component
             'activity.pevaluacion.pensum.asignatura',
             'activity.pevaluacion.profesor',
             'user.profile',
+            'replies' => fn ($q) => $q->approved()
+                ->orderBy('created_at', 'asc')
+                ->with('user.profile'),
         ]);
 
-        $query = $this->moderationService->scopeModeratable($query);
+        $query = $this->moderationService->scopeModeratable($query)
+            ->root();
 
         // Filtro por tab
         match ($this->tab) {
             'approved' => $query->approved(),
             'rejected' => $query->rejected(),
-            default    => $query->pending(),
+            default => $query->pending(),
         };
 
         // Búsqueda textual
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('body', 'like', "%{$this->search}%")
-                  ->orWhereHas('user', fn($uq) => $uq->where('username', 'like', "%{$this->search}%"))
-                  ->orWhereHas('activity', fn($aq) => $aq->where('topic', 'like', "%{$this->search}%"));
+                    ->orWhereHas('user', fn ($uq) => $uq->where('username', 'like', "%{$this->search}%"))
+                    ->orWhereHas('activity', fn ($aq) => $aq->where('topic', 'like', "%{$this->search}%"));
             });
         }
 
@@ -78,8 +94,7 @@ class CommentModeration extends Component
         $profesor = Profesor::where('user_id', Auth::id())->first();
         $activities = collect();
         if ($profesor) {
-            $activities = Activity::whereHas('pevaluacion', fn($q) =>
-                $q->where('profesor_id', $profesor->id)
+            $activities = Activity::whereHas('pevaluacion', fn ($q) => $q->where('profesor_id', $profesor->id)
             )->whereHas('comments')->orderBy('topic')->pluck('topic', 'id');
         } elseif (Auth::user()->is_admin) {
             $activities = Activity::whereHas('comments')->orderBy('topic')->pluck('topic', 'id');
@@ -88,9 +103,9 @@ class CommentModeration extends Component
         $pendingCount = $this->moderationService->countPending();
 
         return view('livewire.profesor.lms.comment-moderation', [
-            'comments'      => $comments,
-            'activities'    => $activities,
-            'pendingCount'  => $pendingCount,
+            'comments' => $comments,
+            'activities' => $activities,
+            'pendingCount' => $pendingCount,
         ]);
     }
 
@@ -130,6 +145,66 @@ class CommentModeration extends Component
         $this->notification()->success(
             title: 'Comentario rechazado',
             description: 'El comentario ha sido rechazado.'
+        );
+    }
+
+    // ─── Réplicas del profesor ────────────────────────────────────
+
+    public function openReply(int $commentId): void
+    {
+        $this->replyToCommentId = $commentId;
+        $this->replyBody = '';
+    }
+
+    public function saveReply(): void
+    {
+        if (! $this->commentRateLimitPassed('reply', 15, 60)) {
+            $seconds = $this->commentRateLimitWaitSeconds('reply');
+
+            $this->notification()->warning(
+                title: 'Demasiadas respuestas',
+                description: "Estás enviando respuestas muy rápido. Inténtalo de nuevo en {$seconds} segundos."
+            );
+
+            return;
+        }
+
+        $this->validate(['replyBody' => 'required|string|min:1|max:1000']);
+
+        $comment = ActivityComment::findOrFail($this->replyToCommentId);
+
+        try {
+            $this->authorize('reply', $comment);
+            $this->moderationService->reply($comment, $this->replyBody);
+        } catch (\InvalidArgumentException $e) {
+            $this->notification()->error(
+                title: 'No se pudo enviar la réplica',
+                description: $e->getMessage()
+            );
+
+            return;
+        } catch (\Throwable $e) {
+            Log::error('CommentModeration::saveReply inesperado', [
+                'comment_id' => $this->replyToCommentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->notification()->error(
+                title: 'Ocurrió una situación inesperada',
+                description: 'Tu respuesta no pudo enviarse. Por favor, inténtalo de nuevo.'
+            );
+
+            return;
+        }
+
+        $this->replyToCommentId = null;
+        $this->replyBody = '';
+
+        $this->dispatch('comment-approved');
+
+        $this->notification()->success(
+            title: 'Réplica enviada',
+            description: 'El estudiante verá tu respuesta de inmediato.'
         );
     }
 
@@ -178,7 +253,18 @@ class CommentModeration extends Component
 
     // ─── Filtros ──────────────────────────────────────────────────
 
-    public function updatingTab() { $this->resetPage(); }
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingActivityFilter() { $this->resetPage(); }
+    public function updatingTab()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingActivityFilter()
+    {
+        $this->resetPage();
+    }
 }

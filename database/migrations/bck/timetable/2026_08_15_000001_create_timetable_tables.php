@@ -115,13 +115,13 @@ return new class extends Migration
         // ─── Disponibilidad de docentes (grilla día × período) ──────────────
         if (! Schema::hasTable('timetable_teacher_availability')) {
             Schema::create('timetable_teacher_availability', function (Blueprint $table) {
-$table->bigIncrements('id');
-            $table->unsignedBigInteger('calendar_id');
-            $table->unsignedInteger('profesor_id');   // profesors.id es int unsigned
-            $table->unsignedBigInteger('period_id');
-            $table->boolean('is_available')->default(true);
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('calendar_id');
+                $table->unsignedInteger('profesor_id');   // profesors.id es int unsigned
+                $table->unsignedBigInteger('period_id');
+                $table->boolean('is_available')->default(true);
 
-            $table->unique(['calendar_id', 'profesor_id', 'period_id'], 'uq_avail');
+                $table->unique(['calendar_id', 'profesor_id', 'period_id'], 'uq_avail');
                 $table->foreign('calendar_id')->references('id')->on('timetable_calendars')->onDelete('cascade');
                 $table->foreign('profesor_id')->references('id')->on('profesors')->onDelete('cascade');
                 $table->foreign('period_id')->references('id')->on('timetable_periods')->onDelete('cascade');
@@ -131,13 +131,13 @@ $table->bigIncrements('id');
         // ─── Slots: resultado de la asignación (ADR-TT-002) ─────────────────
         if (! Schema::hasTable('timetable_slots')) {
             Schema::create('timetable_slots', function (Blueprint $table) {
-$table->bigIncrements('id');
-            $table->unsignedBigInteger('calendar_id');
-            $table->unsignedBigInteger('lesson_id');
-            $table->unsignedBigInteger('period_id');
-            $table->unsignedInteger('profesor_id');   // profesors.id int unsigned (desnormalizado §3)
-            $table->unsignedInteger('seccion_id');    // seccions.id int unsigned (desnormalizado §3)
-            $table->unsignedBigInteger('room_id')->nullable();
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('calendar_id');
+                $table->unsignedBigInteger('lesson_id');
+                $table->unsignedBigInteger('period_id');
+                $table->unsignedInteger('profesor_id');   // profesors.id int unsigned (desnormalizado §3)
+                $table->unsignedInteger('seccion_id');    // seccions.id int unsigned (desnormalizado §3)
+                $table->unsignedBigInteger('room_id')->nullable();
                 $table->boolean('is_manual_override')->default(false);
                 $table->boolean('locked')->default(false);
                 $table->timestamps();
@@ -177,12 +177,12 @@ $table->bigIncrements('id');
         // ─── Ausencias y suplencias (v1.2) ──────────────────────────────────
         if (! Schema::hasTable('timetable_absences')) {
             Schema::create('timetable_absences', function (Blueprint $table) {
-$table->bigIncrements('id');
-            $table->unsignedBigInteger('calendar_id');
-            $table->unsignedInteger('profesor_id');   // profesors.id int unsigned
-            $table->date('date_start');
-            $table->date('date_end');
-            $table->string('reason', 255)->nullable();
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('calendar_id');
+                $table->unsignedInteger('profesor_id');   // profesors.id int unsigned
+                $table->date('date_start');
+                $table->date('date_end');
+                $table->string('reason', 255)->nullable();
 
                 $table->foreign('calendar_id')->references('id')->on('timetable_calendars')->onDelete('cascade');
                 $table->foreign('profesor_id')->references('id')->on('profesors')->onDelete('cascade');
@@ -191,10 +191,10 @@ $table->bigIncrements('id');
 
         if (! Schema::hasTable('timetable_substitute_assignments')) {
             Schema::create('timetable_substitute_assignments', function (Blueprint $table) {
-$table->bigIncrements('id');
-            $table->unsignedBigInteger('absence_id');
-            $table->unsignedBigInteger('slot_id');
-            $table->unsignedInteger('substitute_profesor_id');   // profesors.id int unsigned
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('absence_id');
+                $table->unsignedBigInteger('slot_id');
+                $table->unsignedInteger('substitute_profesor_id');   // profesors.id int unsigned
                 $table->enum('status', ['pending', 'confirmed', 'declined'])->default('pending');
                 $table->timestamp('notified_at')->nullable();
 

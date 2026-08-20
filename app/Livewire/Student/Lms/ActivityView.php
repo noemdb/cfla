@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Student\Lms;
 
+use App\Livewire\Concerns\HasCommentRateLimit;
 use App\Livewire\Student\Lms\Concerns\HasStudentScope;
 use App\Models\app\Academy\Activity;
 use App\Models\app\Academy\Lms\ActivityComment;
@@ -12,6 +13,7 @@ use WireUi\Traits\WireUiActions;
 
 class ActivityView extends Component
 {
+    use HasCommentRateLimit;
     use HasStudentScope;
     use WireUiActions;
 
@@ -113,9 +115,16 @@ class ActivityView extends Component
             $this->htmlEmbeds = $this->htmlEmbeds->filter(fn ($e) => $e->section_id === $firstSectionId);
         }
 
-        $this->comments = ActivityComment::with('user')
+        $this->comments = ActivityComment::with([
+            'user.profile',
+            'replies' => fn ($q) => $q
+                ->approved()
+                ->orderBy('created_at', 'asc')
+                ->with('user.profile'),
+        ])
             ->forActivity($activity->id)
             ->approved()
+            ->root()
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -185,6 +194,17 @@ class ActivityView extends Component
 
     public function saveComment(): void
     {
+        if (! $this->commentRateLimitPassed('comment', 10, 60)) {
+            $seconds = $this->commentRateLimitWaitSeconds('comment');
+
+            $this->notification()->warning(
+                title: 'Demasiados comentarios',
+                description: "Estás enviando mensajes muy rápido. Inténtalo de nuevo en {$seconds} segundos."
+            );
+
+            return;
+        }
+
         $this->validate(['newComment' => 'required|string|min:1|max:1000']);
 
         ActivityComment::create([

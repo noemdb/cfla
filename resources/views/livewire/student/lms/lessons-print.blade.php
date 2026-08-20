@@ -92,6 +92,17 @@
         .estado-pub{color:#059669;} .estado-prog{color:#0891b2;} .estado-draft{color:#d97706;}
         .estado-arc{color:#6b7280;} .estado-npub{color:#9ca3af;}
 
+        /* ── Vista previa ── */
+        .estado-preview{background:#fef3c7;color:#b45309;}
+
+        .preview-banner{display:flex;align-items:flex-start;gap:8px;margin:8px 0;
+                        padding:8px 12px;background:#fffbeb;border:1px solid #fcd34d;
+                        border-left:4px solid #f59e0b;border-radius:6px;
+                        font-size:7.5pt;color:#78350f;break-inside:avoid;}
+        .preview-banner svg{flex-shrink:0;margin-top:1px;}
+        .preview-banner .banner-title{font-weight:800;font-size:8pt;}
+        .preview-banner .banner-text{margin-top:1px;line-height:1.5;}
+
         /* ── Sin contenido ── */
         .no-content{padding:14px;text-align:center;color:#9ca3af;font-size:8pt;border:1px dashed #cbd5e1;border-radius:6px;margin-top:10px;}
 
@@ -307,6 +318,33 @@
             letter-spacing:0.5mm;
         }
 
+        /* ── Sello de vista previa sobre la portada ──
+           Tinta tipo "rubber stamp": rotado, borde ámbar, semitransparente,
+           centrado sobre el título. Solo en preview (now() < publish_at). */
+        .cover-preview-stamp{
+            position:absolute;
+            top:56%;
+            left:50%;
+            transform:translate(-50%,-50%) rotate(-12deg);
+            padding:2.5mm 8mm;
+            border:0.8mm solid #f59e0b;
+            border-radius:2mm;
+            background:rgba(255,251,235,.6);
+            color:#b45309;
+            font-size:4.5mm;
+            font-weight:800;
+            letter-spacing:1.5mm;
+            text-indent:1.5mm;
+            text-transform:uppercase;
+            text-align:center;
+            line-height:1.35;
+            white-space:nowrap;
+            pointer-events:none;
+            z-index:6;
+            -webkit-print-color-adjust:exact;
+            print-color-adjust:exact;
+        }
+
         @media print {
             /* ── CRÍTICO: forzar la impresión de fondos y gradientes. ──
                Chrome (incluido Android al guardar PDF desde window.print())
@@ -466,6 +504,14 @@
             .estado-arc{background:#e5e7eb;color:#6b7280;}
             .estado-npub{background:#f3f4f6;color:#6b7280;}
 
+            /* Vista previa (impresión) */
+            .estado-preview{background:#fef3c7;color:#92400e;}
+            .preview-banner{margin:6px 0;padding:6px 10px;font-size:5.25pt;
+                            background:#fffbeb;border:1px solid #fcd34d;
+                            border-left:4px solid #f59e0b;border-radius:4px;
+                            color:#78350f;break-inside:avoid;}
+            .preview-banner .banner-title{font-size:6pt;}
+
             /* Sin contenido */
             .no-content{padding:6px;text-align:center;color:#64748b;font-size:4.5pt;
                        border:1px dashed #e2e8f0;border-radius:3px;margin-top:6px;}
@@ -592,11 +638,43 @@
                         <span class="k">Fecha</span>
                         <span class="v">{{ $fecha }}</span>
                     </div>
+                    @if($isPreview && $activity->lmsPublication?->publish_at)
+                        <div class="cover-meta-item">
+                            <span class="k">Publicación</span>
+                            <span class="v">{{ \Carbon\Carbon::parse($activity->lmsPublication->publish_at)->translatedFormat('j M Y') }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
 
+            @if($isPreview)
+                {{-- Sello de vista previa sobre la portada: visible incluso si el
+                     banner del flujo queda en otra hoja al imprimir. --}}
+                <div class="cover-preview-stamp" aria-hidden="true">Vista<br>previa</div>
+            @endif
+
             {{-- <div class="cover-foot">{{ $institucion?->name ?? 'INSTITUCIÓN EDUCATIVA' }} · Plataforma Educativa</div> --}}
         </div>
+
+        {{-- Aviso de vista previa: la lección no se puede visualizar completa
+             hasta su fecha de publicación (mismo criterio que el detalle). --}}
+        @if($isPreview)
+            <div class="preview-banner" role="status">
+                <svg style="width:14px;height:14px;color:#d97706" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div>
+                    <p class="banner-title">Vista previa de la lección</p>
+                    <p class="banner-text">
+                        @if($activity->lmsPublication?->publish_at)
+                            Esta lección se publicará <strong>{{ $activity->lmsPublication->humanPublishIn() }}</strong>, el <strong>{{ \Carbon\Carbon::parse($activity->lmsPublication->publish_at)->translatedFormat('j M Y \a \l\a\s H:i') }}</strong>, y por ahora solo puedes ver la primera sección.
+                        @else
+                            Esta lección aún no está publicada por completo. Solo puedes ver la primera sección.
+                        @endif
+                    </p>
+                </div>
+            </div>
+        @endif
 
         {{-- Cabecera del documento (dentro del flujo de columnas) --}}
         {{-- <div class="doc-head">
@@ -627,6 +705,9 @@
                 <span class="nnum">{{ $i + 1 }}</span>
                 <span class="topic">{{ $activity->topic }}</span>
                 <span class="estado {{ $estadoClass }}">{{ $estadoLabel }}</span>
+                @if($isPreview)
+                    <span class="estado estado-preview">Vista previa</span>
+                @endif
                 @if($estado === 'PUBLISHED' && ! $activity->status)
                     <span class="ml-auto mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" title="La lección está publicada pero la activity asociada sigue en revisión (no aprobada)">
                         <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -738,6 +819,29 @@
                     @empty
                         <div class="content-block" style="color:#9ca3af;font-style:italic;">Sin contenido en esta sección.</div>
                     @endforelse
+
+                    {{-- HTML Embeds vinculados a esta sección (diagramas Mermaid,
+                         contenido embebido) — mismo criterio que el detalle. --}}
+                    @php
+                        $sectionEmbeds = $htmlEmbeds->filter(fn($e) => $e->section_id === $section->id);
+                    @endphp
+                    @foreach($sectionEmbeds as $embed)
+                        <div class="content-block">
+                            @if($embed->title)
+                                <div class="content-title">{{ $embed->title }}</div>
+                            @endif
+                            @if($embed->is_mermaid ?? false)
+                                <div class="mermaid-wrap">
+                                    <div wire:ignore x-data="mermaidEmbed()"
+                                         data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}">
+                                        <div x-ref="target" class="w-full"></div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="content">{!! $embed->html_content !!}</div>
+                            @endif
+                        </div>
+                    @endforeach
                 </div>
             @empty
                 <div class="no-content">Lección sin contenido LMS.</div>
@@ -766,6 +870,29 @@
                     @endif
                 </div>
             @endif
+
+            {{-- Contenido embebido no vinculado a ninguna sección (mismo
+                 criterio que el detalle). --}}
+            @php
+                $unlinkedEmbeds = $htmlEmbeds->filter(fn($e) => empty($e->section_id));
+            @endphp
+            @foreach($unlinkedEmbeds as $embed)
+                <div class="content-block">
+                    @if($embed->title)
+                        <div class="content-title">{{ $embed->title }}</div>
+                    @endif
+                    @if($embed->is_mermaid ?? false)
+                        <div class="mermaid-wrap">
+                            <div wire:ignore x-data="mermaidEmbed()"
+                                 data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}">
+                                <div x-ref="target" class="w-full"></div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="content">{!! $embed->html_content !!}</div>
+                    @endif
+                </div>
+            @endforeach
         </div>
 
         <div class="footer">

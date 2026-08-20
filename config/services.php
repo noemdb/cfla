@@ -32,16 +32,24 @@ return [
     ],
 
     'sendpulse' => [
-        'client_id'              => env('SENDPULSE_CLIENT_ID'),
-        'client_secret'          => env('SENDPULSE_API_KEY'),
-        'from_email'             => env('SENDPULSE_FROM'),
-        'from_name'              => env('SENDPULSE_FROM_NAME'),
-        'oauth_url'              => env('SENDPULSE_OAUTH_URL', 'https://api.sendpulse.com/oauth/access_token'),
+        'client_id' => env('SENDPULSE_CLIENT_ID'),
+        'client_secret' => env('SENDPULSE_API_KEY'),
+        'from_email' => env('SENDPULSE_FROM'),
+        'from_name' => env('SENDPULSE_FROM_NAME'),
+        'oauth_url' => env('SENDPULSE_OAUTH_URL', 'https://api.sendpulse.com/oauth/access_token'),
+    ],
+
+    // Fallback transaccional cuando SendPulse falla o no está configurado.
+    'resend' => [
+        'api_key' => env('RESEND_API_KEY'),
+        'url' => env('RESEND_URL', 'https://api.resend.com/emails'),
+        'from' => env('RESEND_FROM'),
+        'from_name' => env('RESEND_FROM_NAME'),
     ],
 
     'gemini' => [
-        'api_key'         => env('GEMINI_API_KEY'),
-        'api_url'         => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'api_key' => env('GEMINI_API_KEY'),
+        'api_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
     ],
 
 ];

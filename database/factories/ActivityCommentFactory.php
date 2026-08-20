@@ -15,42 +15,62 @@ class ActivityCommentFactory extends Factory
     {
         return [
             'activity_id' => Activity::factory(),
-            'user_id'     => User::factory(),
-            'body'        => $this->faker->paragraph(),
+            'user_id' => User::factory(),
+            'body' => $this->faker->paragraph(),
             'is_approved' => false,
         ];
     }
 
     public function pending(): static
     {
-        return $this->state(fn(array $attributes) => [
-            'is_approved'  => false,
-            'approved_at'  => null,
-            'approved_by'  => null,
-            'rejected_at'  => null,
-            'rejected_by'  => null,
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => false,
+            'approved_at' => null,
+            'approved_by' => null,
+            'rejected_at' => null,
+            'rejected_by' => null,
             'rejected_reason' => null,
         ]);
     }
 
     public function approved(): static
     {
-        return $this->state(fn(array $attributes) => [
-            'is_approved'  => true,
-            'approved_at'  => now(),
-            'approved_by'  => 1,
-            'rejected_at'  => null,
-            'rejected_by'  => null,
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => true,
+            'approved_at' => now(),
+            'approved_by' => 1,
+            'rejected_at' => null,
+            'rejected_by' => null,
         ]);
     }
 
     public function rejected(): static
     {
-        return $this->state(fn(array $attributes) => [
-            'is_approved'     => false,
-            'rejected_at'     => now(),
-            'rejected_by'     => 1,
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => false,
+            'rejected_at' => now(),
+            'rejected_by' => 1,
             'rejected_reason' => 'Contenido inapropiado',
+        ]);
+    }
+
+    public function instructorReply(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => true,
+            'approved_at' => now(),
+            'approved_by' => $attributes['user_id'] ?? 1,
+            'is_instructor_reply' => true,
+        ]);
+    }
+
+    /** Réplica del profesor a un comentario raíz. */
+    public function replyTo(ActivityComment $parent, ?User $author = null): static
+    {
+        return $this->instructorReply()->state(fn (array $attributes) => [
+            'activity_id' => $parent->activity_id,
+            'user_id' => $author?->id ?? $attributes['user_id'],
+            'parent_id' => $parent->id,
         ]);
     }
 }

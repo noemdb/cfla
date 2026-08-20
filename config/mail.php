@@ -118,6 +118,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Modo tester (redirección de correos)
+    |--------------------------------------------------------------------------
+    | Cuando MAIL_MODE_TESTER=true, los emails transaccionales se redirigen al
+    | buzón MAIL_ADDRESS_TESTER en vez de al destinatario real (protección
+    | durante desarrollo/pruebas). Lo consume EmailDeliveryService.
+    */
+
+    'mode_tester' => env('MAIL_MODE_TESTER', false),
+    'address_tester' => env('MAIL_ADDRESS_TESTER'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------
     |

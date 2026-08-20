@@ -110,6 +110,34 @@ class LmsActivityPublication extends Model implements \App\Contracts\Auditable
         return $this->studentVisibility() === 'full';
     }
 
+    /**
+     * Texto amigable de cuándo se publica la lección, visto desde hoy.
+     * Solo aplica mientras es vista previa (now() < publish_at):
+     * devuelve "hoy", "mañana" o "en X días".
+     */
+    public function humanPublishIn(): ?string
+    {
+        if ($this->publish_at === null) {
+            return null;
+        }
+
+        if (now()->gt($this->publish_at)) {
+            return 'publicada el ' . $this->publish_at->translatedFormat('j M Y');
+        }
+
+        $days = now()->copy()->startOfDay()
+            ->diffInDays($this->publish_at->copy()->startOfDay());
+
+        if ($days <= 0) {
+            return 'hoy';
+        }
+        if ($days === 1) {
+            return 'mañana';
+        }
+
+        return "en {$days} días";
+    }
+
     public function scopeVisibleNow($query)
     {
         return $query->where('status', 'PUBLISHED')

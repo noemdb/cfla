@@ -41,4 +41,9 @@ class ActivityCommentPolicy
     {
         return $user->is_admin || $user->is_profesor || $user->is_leadership;
     }
+
+    public function reply(User $user, ActivityComment $comment): bool
+    {
+        return $user->is_admin || $user->is_profesor || $user->is_leadership;
+    }
 }

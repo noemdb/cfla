@@ -2,10 +2,15 @@
 
 namespace App\Services\Lms;
 
-use App\Models\User;
 use App\Models\app\Academy\Lms\ActivityComment;
 use App\Models\app\Academy\Profesor;
+use App\Models\User;
+use App\Notifications\CommentRepliedNotification;
+use App\Services\EmailDeliveryService;
+use App\Services\NotificationService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 
 class CommentModerationService
 {
@@ -14,7 +19,7 @@ class CommentModerationService
     public function __construct(
         protected User $user
     ) {
-        if (!$user->is_admin) {
+        if (! $user->is_admin) {
             $this->profesor = Profesor::where('user_id', $user->id)->first();
         }
     }
@@ -28,7 +33,7 @@ class CommentModerationService
             return $query;
         }
 
-        if (!$this->profesor) {
+        if (! $this->profesor) {
             return $query->whereRaw('1 = 0');
         }
 
@@ -103,10 +108,116 @@ class CommentModerationService
             return true;
         }
 
-        if (!$this->profesor) {
+        if (! $this->profesor) {
             return false;
         }
 
         return $comment->activity?->pevaluacion?->profesor_id === $this->profesor->id;
+    }
+
+    /**
+     * Crear una réplica del moderador (autoaprobada) a un comentario raíz.
+     *
+     * Reglas (SPEC REPLIES-COMMENTS-001):
+     *  - Solo comentarios raíz reciben réplicas (profundidad 2 niveles, ADR-003).
+     *  - No se responde a comentarios rechazados (la comunicación se cierra
+     *    con el motivo del rechazo en `rejected_reason`).
+     *  - El autor debe poder moderar la actividad del comentario.
+     *  - La réplica nace is_approved = true → visible al estudiante de inmediato.
+     *
+     * @throws AuthorizationException si el usuario no puede moderar.
+     * @throws \InvalidArgumentException si el comentario es una réplica o está rechazado.
+     */
+    public function reply(ActivityComment $comment, string $body): ActivityComment
+    {
+        if ($comment->isReply()) {
+            throw new \InvalidArgumentException(
+                'Solo se puede responder a comentarios raíz.'
+            );
+        }
+
+        if ($comment->rejected_at !== null) {
+            throw new \InvalidArgumentException(
+                'No se puede responder a un comentario rechazado.'
+            );
+        }
+
+        if (! $this->canModerate($comment)) {
+            throw new AuthorizationException(
+                'No tienes permisos para responder este comentario.'
+            );
+        }
+
+        $reply = ActivityComment::create([
+            'activity_id' => $comment->activity_id,
+            'user_id' => $this->user->id,
+            'parent_id' => $comment->id,
+            'body' => $body,
+            'is_approved' => true,
+            'approved_at' => now(),
+            'approved_by' => $this->user->id,
+            'is_instructor_reply' => true,
+        ]);
+
+        $this->notifyAuthor($comment, $reply);
+
+        return $reply;
+    }
+
+    /**
+     * Avisa al autor del comentario raíz que su hilo recibió una respuesta:
+     * notificación de base de datos (campana/broadcast) y email transaccional
+     * (SendPulse → Resend). Nunca rompe el flujo de la réplica: cualquier
+     * fallo se loguea y se ignora (la réplica ya está creada y es visible).
+     */
+    private function notifyAuthor(ActivityComment $root, ActivityComment $reply): void
+    {
+        try {
+            $author = $root->user;
+
+            if (! $author) {
+                return;
+            }
+
+            app(NotificationService::class)->notifyUsers(
+                [$author],
+                new CommentRepliedNotification($reply, $root)
+            );
+
+            $email = $author->email;
+
+            if ($email) {
+                app(EmailDeliveryService::class)->send(
+                    $email,
+                    'Te respondieron en tu comentario',
+                    $this->replyEmailHtml($root, $reply)
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('No se pudo notificar al autor del comentario', [
+                'comment_id' => $root->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * HTML del email transaccional de réplica. Contenido minimalista y seguro
+     * (e()) — las réplicas son texto plano ya escapado al renderizar.
+     */
+    private function replyEmailHtml(ActivityComment $root, ActivityComment $reply): string
+    {
+        $activityUrl = route('student.lms.activity', $reply->activity_id);
+        $activityTitle = e($reply->activity?->topic ?? 'actividad');
+        $authorName = e($this->user->full_name);
+        $replyBody = nl2br(e($reply->body));
+
+        return view('emails.comment-replied', [
+            'activityUrl' => $activityUrl,
+            'activityTitle' => $activityTitle,
+            'authorName' => $authorName,
+            'replyBody' => $replyBody,
+            'yourComment' => nl2br(e(mb_substr($root->body, 0, 200))),
+        ])->render();
     }
 }
