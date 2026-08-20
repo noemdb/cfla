@@ -182,3 +182,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn("No se pudo detectar la IP privada:", error);
     }
 });
+
+// Workaround bug core de Livewire 3.x (livewire/livewire#10535): diff() emite
+// paths raíz inválidos ("" o ".clave") cuando un deploy reordena propiedades
+// públicas, lo que produce "Public property [$] not found" y atasca el
+// componente hasta recargar. Antes de cada commit, descartamos esos paths
+// malformados; el servidor nunca recibe un path vacío.
+document.addEventListener("livewire:init", () => {
+    Livewire.hook("commit", ({ commit }) => {
+        const updates = commit.updates;
+        if (!updates) return;
+
+        Object.keys(updates).forEach((key) => {
+            if (key === "" || key.startsWith(".")) delete updates[key];
+        });
+    });
+});

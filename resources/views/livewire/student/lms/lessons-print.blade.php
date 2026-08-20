@@ -826,21 +826,7 @@
                         $sectionEmbeds = $htmlEmbeds->filter(fn($e) => $e->section_id === $section->id);
                     @endphp
                     @foreach($sectionEmbeds as $embed)
-                        <div class="content-block">
-                            @if($embed->title)
-                                <div class="content-title">{{ $embed->title }}</div>
-                            @endif
-                            @if($embed->is_mermaid ?? false)
-                                <div class="mermaid-wrap">
-                                    <div wire:ignore x-data="mermaidEmbed()"
-                                         data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}">
-                                        <div x-ref="target" class="w-full"></div>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="content">{!! $embed->html_content !!}</div>
-                            @endif
-                        </div>
+                        @include('livewire.student.lms._embed-renderer', ['embed' => $embed, 'variant' => 'print'])
                     @endforeach
                 </div>
             @empty
@@ -877,21 +863,7 @@
                 $unlinkedEmbeds = $htmlEmbeds->filter(fn($e) => empty($e->section_id));
             @endphp
             @foreach($unlinkedEmbeds as $embed)
-                <div class="content-block">
-                    @if($embed->title)
-                        <div class="content-title">{{ $embed->title }}</div>
-                    @endif
-                    @if($embed->is_mermaid ?? false)
-                        <div class="mermaid-wrap">
-                            <div wire:ignore x-data="mermaidEmbed()"
-                                 data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}">
-                                <div x-ref="target" class="w-full"></div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="content">{!! $embed->html_content !!}</div>
-                    @endif
-                </div>
+                @include('livewire.student.lms._embed-renderer', ['embed' => $embed, 'variant' => 'print'])
             @endforeach
         </div>
 

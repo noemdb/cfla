@@ -189,6 +189,35 @@ class LmsPdfExtractorService
         return $process->getOutput();
     }
 
+    /**
+     * Devuelve el número de páginas de un PDF usando la utilidad del
+     * sistema `pdfinfo`. Retorna 0 si el archivo no es un PDF válido
+     * o la utilidad falla.
+     */
+    public function pageCount(string $pdfPath): int
+    {
+        $process = new \Symfony\Component\Process\Process(['pdfinfo', $pdfPath]);
+        $process->setTimeout(30);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            Log::warning('LmsPdfExtractorService: pdfinfo falló', [
+                'exit_code' => $process->getExitCode(),
+                'stderr' => mb_substr($process->getErrorOutput() ?: '', 0, 500),
+            ]);
+
+            return 0;
+        }
+
+        if (preg_match('/^Pages:\s*(\d+)/m', $process->getOutput(), $match) !== 1) {
+            Log::warning('LmsPdfExtractorService: pdfinfo no reportó número de páginas');
+
+            return 0;
+        }
+
+        return (int) $match[1];
+    }
+
     private function logApiFailure(string $stage, Response $response, array $extra = []): void
     {
         Log::warning('LmsPdfExtractorService: Datalab falló en '.$stage.', se usará pdftotext', array_merge([

@@ -34,9 +34,11 @@ class ActivityPrintController extends Controller
 
         // Cargar las relaciones necesarias para la vista de impresión
         $activity->load([
+            'lmsSections' => fn ($q) => $q->where('is_visible', true),
             'lmsSections.visibleContents.media',
+            'lmsResources' => fn ($q) => $q->where('is_visible', true),
             'lmsResources.media',
-            'lmsLinks',
+            'lmsLinks' => fn ($q) => $q->where('is_visible', true),
             'pevaluacion.pensum.asignatura',
             'pevaluacion.grado',
             'pevaluacion.seccion',
@@ -44,61 +46,31 @@ class ActivityPrintController extends Controller
             'lmsPublication',
         ]);
 
-        // Vista previa (now() < publish_at): solo la 1ª sección y sus adjuntos
-        // vinculados, igual que en el detalle (ActivityView). Los adjuntos
-        // globales (section_id vacío) quedan ocultos.
-        $isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
-
-        // Embeds HTML (diagramas Mermaid, contenido embebido) — mismo pipeline
-        // de normalización que el detalle (ActivityView).
-        $htmlEmbeds = $activity->lmsHtmlEmbeds()
-            ->where('is_visible', true)
-            ->get()
-            ->map(function ($embed) {
-                $data = app(\App\Services\Lms\LmsContentRendererService::class)
-                    ->ensureMermaidWrapper($embed->toArray());
-                $embed->html_content = $data['html_content'];
-                $embed->is_mermaid = $data['is_mermaid'];
-
-                return $embed;
-            });
-
-        if ($isPreview) {
-            $firstSection = $activity->lmsSections
+        // Vista previa (now() < publish_at) y embeds HTML normalizados — misma
+        // lógica que el detalle (ActivityView), centralizada en LmsPreviewService.
+        $previewService = app(\App\Services\Lms\LmsPreviewService::class);
+        $isPreview = $previewService->isPreview($activity);
+        $htmlEmbeds = $previewService->normalizeEmbeds(
+            $activity->lmsHtmlEmbeds()
                 ->where('is_visible', true)
-                ->first();
-            $firstSectionId = $firstSection?->id;
+                ->get()
+        );
 
-            $activity->setRelation(
-                'lmsSections',
-                $firstSection ? collect([$firstSection]) : collect()
-            );
-            $activity->setRelation(
-                'lmsResources',
-                $activity->lmsResources->filter(
-                    fn ($r) => $r->is_visible && $r->section_id === $firstSectionId
-                )
-            );
-            $activity->setRelation(
-                'lmsLinks',
-                $activity->lmsLinks->filter(
-                    fn ($l) => $l->is_visible && $l->section_id === $firstSectionId
-                )
-            );
-            $htmlEmbeds = $htmlEmbeds->filter(
-                fn ($e) => $e->section_id === $firstSectionId
-            );
-        }
+        $preview = $previewService->applyPreview(
+            $activity->lmsSections,
+            $activity->lmsResources,
+            $activity->lmsLinks,
+            $htmlEmbeds,
+            $isPreview
+        );
+        $activity->setRelation('lmsSections', $preview['sections']);
+        $activity->setRelation('lmsResources', $preview['resources']);
+        $activity->setRelation('lmsLinks', $preview['links']);
+        $htmlEmbeds = $preview['htmlEmbeds'];
 
-        // Obtener el título para la vista
-        $titulo = $isPreview
-            ? 'LECCIÓN LMS · VISTA PREVIA'
-            : 'LECCIÓN LMS · CONTENIDO COMPLETO';
+        // Datos para la vista de impresión
         $institucion = Institucion::orderBy('created_at', 'DESC')->first();
-        $contexto = 'Estudiante';
         $fecha = now()->translatedFormat('j \d\e\ F \d\e\ Y');
-        $filters = []; // No hay filtros en la vista de actividad individual
-        $filterLabels = [];
 
         // Etiqueta/clase legibles para el estado de publicación (ADIR-007).
         $estado = $activity->lmsPublication?->status ?? null;
@@ -108,12 +80,8 @@ class ActivityPrintController extends Controller
         // Devolver la vista de impresión
         return view('livewire.student.lms.lessons-print', compact(
             'activity',
-            'titulo',
             'institucion',
-            'contexto',
             'fecha',
-            'filters',
-            'filterLabels',
             'estado',
             'estadoLabel',
             'estadoClass',
@@ -121,8 +89,4 @@ class ActivityPrintController extends Controller
             'htmlEmbeds'
         ));
     }
-
-    /**
-     * Etiqueta/clase legible del estado — compartido (P5): LmsPublicationStatus.
-     */
 }

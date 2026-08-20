@@ -165,6 +165,59 @@ class CommentModerationService
     }
 
     /**
+     * Editar el cuerpo de una réplica del moderador.
+     *
+     * Solo el autor de la réplica (o un admin) puede editarla. La réplica
+     * mantiene su estado aprobado (no reingresa a la cola de moderación).
+     *
+     * @throws AuthorizationException si el usuario no es autor ni admin.
+     * @throws \InvalidArgumentException si el comentario no es una réplica del profesor.
+     */
+    public function updateReply(ActivityComment $reply, string $body): ActivityComment
+    {
+        $this->ensureOwnReply($reply);
+
+        $reply->update(['body' => $body]);
+
+        return $reply;
+    }
+
+    /**
+     * Borrar (soft-delete) una réplica del moderador.
+     *
+     * Solo el autor de la réplica (o un admin) puede borrarla. Al ser un
+     * soft-delete, `scopeApproved()` (que excluye deleted_at) la oculta de la
+     * vista del estudiante de inmediato sin perder el registro en la tabla.
+     *
+     * @throws AuthorizationException si el usuario no es autor ni admin.
+     * @throws \InvalidArgumentException si el comentario no es una réplica del profesor.
+     */
+    public function deleteReply(ActivityComment $reply): void
+    {
+        $this->ensureOwnReply($reply);
+
+        $reply->delete();
+    }
+
+    /**
+     * Guard común de autoría para editar/borrar réplicas (ADR-012).
+     */
+    private function ensureOwnReply(ActivityComment $reply): void
+    {
+        if (! $reply->isReply() || ! $reply->isInstructorReply()) {
+            throw new \InvalidArgumentException(
+                'Solo se pueden modificar réplicas del profesor.'
+            );
+        }
+
+        if ($this->user->id !== $reply->user_id && ! $this->user->is_admin) {
+            throw new AuthorizationException(
+                'No tienes permisos para modificar esta réplica.'
+            );
+        }
+    }
+
+    /**
      * Avisa al autor del comentario raíz que su hilo recibió una respuesta:
      * notificación de base de datos (campana/broadcast) y email transaccional
      * (SendPulse → Resend). Nunca rompe el flujo de la réplica: cualquier

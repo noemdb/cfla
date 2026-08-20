@@ -389,22 +389,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 @if($sectionEmbeds->isNotEmpty())
                     <div class="space-y-3 pt-2 border-t border-gray-200">
                         @foreach($sectionEmbeds as $embed)
-                            <div class="bg-white border border-fuchsia-200 rounded-xl p-2.5 sm:p-3 html-embed-item">
-                                @if($embed->title)
-                                    <h4 class="text-sm font-bold text-gray-900 mb-2">{{ $embed->title }}</h4>
-                                @endif
-                                @if($embed->is_mermaid ?? false)
-                                    <div wire:ignore x-data="mermaidEmbed()"
-                                         data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}"
-                                         class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
-                                        <div x-ref="target" class="w-full min-h-0"></div>
-                                    </div>
-                                @else
-                                    <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none html-embed-content">
-                                        {!! $embed->html_content !!}
-                                    </div>
-                                @endif
-                            </div>
+                            @include('livewire.student.lms._embed-renderer', ['embed' => $embed])
                         @endforeach
                     </div>
                 @endif
@@ -554,22 +539,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             </div>
             <div class="p-2.5 sm:p-4 space-y-2">
                 @foreach($unlinkedEmbeds as $embed)
-                    <div class="bg-white border border-fuchsia-200 rounded-xl p-2.5 sm:p-3 html-embed-item">
-                        @if($embed->title)
-                            <h4 class="text-sm font-bold text-gray-900 mb-2">{{ $embed->title }}</h4>
-                        @endif
-                        @if($embed->is_mermaid ?? false)
-                            <div wire:ignore x-data="mermaidEmbed()"
-                                 data-mermaid-code="{{ app(\App\Services\Lms\LmsContentClassifier::class)->extractMermaidCode($embed->html_content) }}"
-                                 class="w-full bg-white rounded-lg p-4 overflow-x-auto border border-slate-200/60 flex flex-col mermaid-fill-height relative">
-                                <div x-ref="target" class="w-full min-h-0"></div>
-                            </div>
-                        @else
-                            <div class="text-[17px] text-gray-900 leading-7 prose prose-sm max-w-none html-embed-content">
-                                {!! $embed->html_content !!}
-                            </div>
-                        @endif
-                    </div>
+                    @include('livewire.student.lms._embed-renderer', ['embed' => $embed])
                 @endforeach
             </div>
         </section>
@@ -603,11 +573,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                 <div class="space-y-3">
                     @forelse($comments as $comment)
                         <div class="flex gap-3 p-3 rounded-xl bg-white dark:bg-gray-800/50">
-                            <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
-                                <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                                    {{ strtoupper(mb_substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
-                                </span>
-                            </div>
+                            <x-lms.user-avatar :user="$comment->user" size="md" />
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-xs font-semibold text-gray-900 dark:text-white">
@@ -616,6 +582,14 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                                     <span class="text-[10px] text-gray-400 dark:text-gray-500">
                                         {{ $comment->created_at->diffForHumans() }}
                                     </span>
+                                    @if($comment->replies->isNotEmpty())
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-[10px] font-semibold">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                            </svg>
+                                            {{ $comment->replies->count() }} {{ $comment->replies->count() === 1 ? 'respuesta' : 'respuestas' }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <p class="text-sm text-gray-900 dark:text-gray-100 mt-1 leading-relaxed">{{ $comment->body }}</p>
                             </div>
@@ -626,11 +600,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                             <div class="ml-10 sm:ml-12 pl-3 sm:pl-4 border-l-2 border-emerald-200 dark:border-emerald-500/30 space-y-2">
                                 @foreach($comment->replies as $reply)
                                     <div class="flex gap-3 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/5">
-                                        <div class="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                                            <span class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                                                {{ strtoupper(mb_substr($reply->user?->profile?->firstname ?? $reply->user?->name ?? '?', 0, 1)) }}
-                                            </span>
-                                        </div>
+                                        <x-lms.user-avatar :user="$reply->user" size="sm" />
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">

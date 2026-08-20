@@ -1218,6 +1218,33 @@ class LessonWizardCharacterizationTest extends TestCase
         $this->assertTrue(count($sections) >= 7);
     }
 
+    /** @test */
+    public function generate_step2_desde_pdf_rechaza_pdf_con_mas_paginas_que_el_maximo(): void
+    {
+        config(['lms.datalab.max_pages' => 2]);
+
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+
+        // PDF real de 3 páginas (se excede el máximo configurado de 2).
+        $html = '<html><body>';
+        for ($i = 1; $i <= 3; $i++) {
+            $html .= '<div style="page-break-after: always"><p>Página '.$i.' del documento con contenido suficiente para verificar el límite de páginas del flujo de estructura desde PDF del módulo LMS.</p></div>';
+        }
+        $html .= '</body></html>';
+        $file = UploadedFile::fake()->createWithContent('largo.pdf', Pdf::loadHTML($html)->output())->mimeType('application/pdf');
+
+        $component = Livewire::test(LessonWizard::class);
+        $component->call('startWizard', $activity->id);
+        $component->set('lessonTitle', 'Mi Lección');
+        $component->upload('pdfFile', [$file]);
+        $component->call('generateStep2FromPdf');
+
+        // No se generó ninguna sección y el archivo se descartó.
+        $this->assertEmpty($component->get('wizardSections'));
+        $this->assertNull($component->get('pdfFile'));
+    }
+
     // ═══════════════════════════════════════════════════════════════
     //  9. TESTS DE GUARDADO (saveStep2)
     // ═══════════════════════════════════════════════════════════════

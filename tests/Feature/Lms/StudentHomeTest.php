@@ -273,48 +273,6 @@ class StudentHomeTest extends TestCase
     }
 
     /**
-     * D3 · Mini-barra sticky "Próxima lección" — mantiene la siguiente lección
-     * visible al hacer scroll (cuando el hero y su CTA salieron de pantalla).
-     * La barra existe, empieza oculta (x-show + x-cloak), es sticky bajo el
-     * navbar (top-14) y reutiliza el color de materia (D2) para el punto.
-     */
-    public function test_home_renders_sticky_next_lesson_bar(): void
-    {
-        [$seccionId, $pevaluacionId] = $this->createEvaluacionChain();
-
-        $activity = $this->createPublishedActivity($pevaluacionId, 'Lección de Test Asignatura', now()->subDay());
-
-        $student = $this->createStudentInSeccion($seccionId);
-
-        $html = Livewire::actingAs($student)
-            ->test(\App\Livewire\Student\Lms\StudentHome::class)
-            ->html();
-
-        // La barra existe y enlaza al detalle de la próxima lección
-        $this->assertStringContainsString('Próxima lección', $html);
-        $this->assertStringContainsString(route('student.lms.activity', $activity), $html);
-
-        // Estado Alpine: oculta por defecto (x-show="nextOpen" + x-cloak),
-        // sticky justo debajo del navbar (h-14 = 56px → top-14), y mide el hero
-        $this->assertStringContainsString('x-show="nextOpen"', $html);
-        $this->assertStringContainsString('x-cloak', $html);
-        $this->assertStringContainsString('sticky top-14 z-20', $html);
-        $this->assertStringContainsString('x-ref="heroSection"', $html);
-
-        // FIX (5): los listeners de scroll/resize van manuales en init() con
-        // cleanup en destroy() (no se depende del decorativo @scroll.window)
-        $this->assertStringContainsString("addEventListener('scroll',", $html);
-        $this->assertStringContainsString('destroy() {', $html);
-
-        // Reutiliza el color de materia (D2): el punto lleva la clave rose
-        $key = Asignatura::colorKey('Test Asignatura');
-        $this->assertStringContainsString("bg-{$key}-400", $html);
-
-        // El botón compacto "Continuar" comparte el mismo destino
-        $this->assertStringContainsString('Continuar', $html);
-    }
-
-    /**
      * NavTabs · El home renderiza 4 pestañas visibles (Continuar, Lecciones,
      * Distribución, Actividad) siguiendo el patrón del listado del profesor
      * (nav reactiva con border-b). Cada pestaña enlaza su panel con x-show
@@ -433,7 +391,7 @@ class StudentHomeTest extends TestCase
         // F3: el CTA del hero usa micro-copia infantil
         $this->assertStringContainsString('Pulsa para empezar', $html);
 
-        // D3: la barra sticky sigue presente en modo lectura
+        // El CTA del hero comparte el destino de la lección siguiente
         $this->assertStringContainsString('Continuar', $html);
     }
 
@@ -473,7 +431,7 @@ class StudentHomeTest extends TestCase
         $this->assertStringContainsString('Lección de Test Asignatura', $html);
         $this->assertStringNotContainsString('Pulsa para empezar', $html);
 
-        // D3: la barra sticky sigue presente
+        // El CTA del hero comparte el destino de la lección siguiente
         $this->assertStringContainsString('Continuar', $html);
     }
 
@@ -514,7 +472,7 @@ class StudentHomeTest extends TestCase
      * El listado "Todas las Lecciones" muestra TODAS las lecciones visibles
      * (publicadas y previews con publish_at futuro) con paginación de 5 por
      * página, de la más reciente a la más antigua según publish_at DESC
-     * (a diferencia del fallback de "Continuar Aprendiendo" que usa take(5)),
+     * (a diferencia del fallback de "Continuar Aprendiendo" que usa take(4)),
      * e independiente del historial de interacción. La preview (publish_at
      * futuro) se ordena PRIMERO por tener el publish_at más alto.
      */

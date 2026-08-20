@@ -2,8 +2,8 @@
 
 **Staff Engineer Blueprint**
 _Autor:_ Claude Architect
-_Última revisión:_ 2026-08-20 (v1 + mejoras implementadas)
-_Estado:_ **COMPLETADO** — v1 (Fases 1–7) + notificaciones (#3+#6) + rate limiting (#9) + correcciones (#1, #2) + tests (#10)
+_Última revisión:_ 2026-08-20 (v1 + mejoras implementadas, incl. #7 avatar y #8 contador de réplicas)
+_Estado:_ **COMPLETADO** — v1 (Fases 1–7) + notificaciones (#3+#6) + rate limiting (#9) + correcciones (#1, #2) + tests (#10) + edición/borrado de réplicas (#4) + **workaround del bug core de Livewire 3.x (#10535) vía hook en el bundle**
 _Extiende:_ `blueprint/comments/moderacion-comentarios.md`
 _Módulo:_ LMS — Comentarios de actividades
 
@@ -27,6 +27,7 @@ _Módulo:_ LMS — Comentarios de actividades
     - [Fase 8: Notificaciones al autor (#3+#6)](#fase-8-notificaciones-al-autor-implementado--mejora-36)
     - [Fase 9: Rate limiting (anti-spam)](#fase-9-rate-limiting-anti-spam--mejora-9)
     - [Fase 10: Correcciones y endurecimiento](#fase-10-correcciones-y-endurecimiento--fix-1-2-tests-10)
+    - [Fase 11: Edición y borrado de réplicas](#fase-11-edición-y-borrado-de-réplicas--mejora-4)
 7. [ADRs](#7-adrs)
 8. [Dependencias y Roadmap](#8-dependencias-y-roadmap)
 9. [Checklist de Rollback](#9-checklist-de-rollback)
@@ -238,9 +239,15 @@ Fase 9: Rate limiting / anti-spam — #9                                        
     │
     ▼
 Fase 10: Correcciones y endurecimiento — Fix #1, #2, tests #10                      ✅
+    │
+    ▼
+Fase 11: Edición / borrado de réplicas — #4                                         ✅
+     │
+     ▼
+Fase 12: Workaround bug core Livewire 3.x #10535 (hook en el bundle)               ✅
 ```
 
-La **Fase 4** es el hito mínimo de valor: réplicas visibles al estudiante. Las fases 5–6 son la cara del profesor. Las fases 8–10 se añadieron a partir de la revisión de mejoras (ver la tabla de mejoras en §8).
+La **Fase 4** es el hito mínimo de valor: réplicas visibles al estudiante. Las fases 5–6 son la cara del profesor. Las fases 8–10 se añadieron a partir de la revisión de mejoras (ver la tabla de mejoras en §8). La **Fase 12** es un fix operativo del cliente Livewire (no del código de la feature) que se detectó al desplegar esta feature.
 
 ---
 
@@ -958,6 +965,137 @@ sin tener el trait `WireUiActions`; se le agregó el trait (`use WireUiActions`)
 
 ---
 
+### Fase 11: Edición y borrado de réplicas (implementado — mejora #4)
+
+> **Estado**: ✅ implementado y testeado. Completa el ciclo del moderador: crear → editar → borrar.
+
+**Reglas (ADR-012)**:
+- **Quién edita/borra**: el **autor** de la réplica (o un **admin**). Un profesor no puede tocar
+  las réplicas de otro profesor, aunque modere la misma actividad.
+- **Qué se edita**: solo el `body`. La réplica **mantiene** su estado autoaprobado (no reingresa
+  a la cola de pendientes).
+- **Qué se borra**: **soft-delete** (`deleted_at`). Al estar `scopeApproved()` filtrado por
+  `deleted_at IS NULL`, la réplica desaparece al instante de la vista del estudiante pero el
+  registro persiste (reversible, y la cascada FK de `parent_id` no se dispara).
+- **Guardas**: solo réplicas (`parent_id` no nulo **y** `is_instructor_reply = true`); nunca se
+  editan/borran comentarios raíz.
+
+#### 11.1 Servicio `CommentModerationService`
+
+```php
+public function updateReply(ActivityComment $reply, string $body): ActivityComment
+{
+    $this->ensureOwnReply($reply);
+    $reply->update(['body' => $body]);
+
+    return $reply;
+}
+
+public function deleteReply(ActivityComment $reply): void
+{
+    $this->ensureOwnReply($reply);
+    $reply->delete();
+}
+
+private function ensureOwnReply(ActivityComment $reply): void
+{
+    if (! $reply->isReply() || ! $reply->isInstructorReply()) {
+        throw new \InvalidArgumentException('Solo se pueden modificar réplicas del profesor.');
+    }
+
+    if ($this->user->id !== $reply->user_id && ! $this->user->is_admin) {
+        throw new AuthorizationException('No tienes permisos para modificar esta réplica.');
+    }
+}
+```
+
+#### 11.2 UI (moderación + editor)
+
+- Cada réplica muestra botones **Editar / Borrar** solo cuando `auth()->id() === $reply->user_id`
+  o `auth()->user()->is_admin`.
+- **Editar**: form inline (`editReplyId`/`editReplyBody` en `CommentModeration`;
+  `activityEditReplyId`/`activityEditReplyBody` en `ActivityEditor`) que precarga el body actual
+  y valida `required|string|min:1|max:1000`.
+- **Borrar**: confirmación **WireUI** `$this->dialog()->confirm([...])` (patrón de
+  `IndexComponent.php:791`) → `deleteReply` / `deleteActivityReply`. Los dos componentes capturan
+  `InvalidArgumentException` (toast con el motivo) y `\Throwable` (toast "situación inesperada").
+- En `CommentModeration` se usan las policies existentes `update`/`delete` (autor-o-admin) vía
+  `$this->authorize()`; el servicio re-valida (doble capa, igual que `reply()` + `canModerate`).
+- La vista del estudiante no cambia: muestra el body editado y oculta la réplica borrada.
+
+#### 11.3 Tests (11 nuevos en `CommentReplyTest`)
+
+`profesor_can_edit_own_reply`, `profesor_cannot_edit_other_profesor_reply`,
+`admin_can_edit_any_reply`, `profesor_can_delete_own_reply_and_it_hides_from_student`,
+`profesor_cannot_delete_other_profesor_reply`, `cannot_edit_or_delete_a_root_comment`,
+`edited_reply_is_reflected_in_student_view`, `moderation_component_can_edit_reply_via_livewire`,
+`moderation_component_can_delete_reply_via_livewire`, `moderation_edit_requires_body`,
+`activity_editor_can_edit_reply_inline`, `activity_editor_can_delete_reply_inline`.
+
+> **Nota de tests**: `find()`/`fresh()` excluyen registros soft-deleted; para asertar el borrado
+> se usa `ActivityComment::withTrashed()->find($reply->id)->deleted_at`.
+
+Suite `tests/Feature/Lms` final: **145 passed, 531 assertions**.
+
+---
+
+### Fase 12: Bug core de Livewire 3.x (issue #10535) → workaround por hook en el bundle
+
+**Síntoma en vivo**: al desplegar esta feature, usuarios con la pestaña abierta
+en `/app/profesors/lms/comments` recibían, en cualquier interacción:
+
+```
+Unable to set component data. Public property [$] not found on component: [profesor.lms.comment-moderation]
+```
+
+El `[$]` no es una propiedad: es un nombre vacío. El **código de la feature estaba
+limpio** (se verificó render por render, `wire:model`, `$set`, WireUI, campana,
+paginación). La causa era un **bug core del cliente Livewire 3.x**.
+
+**Causa raíz** (`livewire/livewire` issue **#10535**, abierto, sin fix upstream en 3.x;
+confirmado presente en v3.8.1 → v3.8.4):
+
+- `diff()` en `js/utils.js` construye los `updates` de cada commit como
+  `diff(canonical, ephemeral)`. Cuando un deploy **añade/quita/reordena propiedades
+  públicas**, el snapshot nuevo cambia el orden de claves; el navegador (que hizo
+  `mergeNewSnapshot` sobre el `ephemeral` existente) termina con las mismas claves
+  en **otro orden**.
+- La rama "key order" de `diff()` entonces emite `diffs[''] = <todo el estado>` (o
+  `diffs['.clave'] = "__rm__"` para borrados). El servidor hace
+  `array_shift(explode('.', $path))` → `''` → `PublicPropertyNotFoundException`.
+- No es un error aislado: cada commit posterior reenvía el mismo diff inválido →
+  **el componente queda "atascado" hasta recargar la página** (por eso no se
+  reproduce en tests locales, que siempre montan en fresco).
+
+**Fix aplicado — workaround por hook en el bundle de la app** (sin tocar vendor ni
+assets publicados):
+
+- `resources/js/app.js` registra `Livewire.hook('commit', ...)` en `livewire:init`:
+  antes de enviar cada commit, elimina de `commit.updates` los paths inválidos
+  (`''` y los que empiezan por `.`). El servidor nunca recibe un path vacío → no hay
+  500 ni componente atascado.
+- La API es pública (`window.Livewire.hook = on2`; el hook `'commit'` recibe
+  `{ component, commit }` con `commit.updates` por referencia, antes del `fetch`).
+- Sobrevive a `composer update` y `vendor:publish --tag=livewire:assets`; el fix
+  vive en código de la app y viaja con el deploy.
+- Trade-off conocido: en el caso raro "orden cambiado + cambio real simultáneo",
+  ese cambio puntual se descarta en ese commit (posible pérdida del valor digitado
+  si no hay interacción posterior). Aceptado a cambio de no patchear vendor.
+- Verificación: `node --check resources/js/app.js` + simulación del sanitize sobre
+  payloads con keys `''`/`.b`/válidas + `npm run build` (el hook queda en
+  `public/build/assets/app-*.js`) + suite `tests/Feature/Lms` en verde.
+
+> **Historial**: primero se parcheó `diff()` en los assets publicados
+> (`public/vendor/livewire/livewire*.js`, manifest `p10535`). Al elegir no usar
+> el parche de assets, se revirtió todo a los bytes originales
+> (`e949cd11`, `git checkout -- public/vendor/livewire/` y restauración exacta de
+> `dist/`) y se sustituyó por este hook. No quedan restos del parche en el repo.
+
+**Opcional pendiente**: cuando el fix llegue a Livewire 3.x (o si se migra a 4.x,
+que ya trae el guard), el hook puede eliminarse. El `.esm.js` nunca se tocó.
+
+---
+
 ## 7. ADRs
 
 ### ADR-001: Self-FK `parent_id` (no tabla separada de réplicas)
@@ -1048,6 +1186,22 @@ sin tener el trait `WireUiActions`; se le agregó el trait (`use WireUiActions`)
 | **Razón** | En este foro actividad↔profesor el único interesado es quien escribió el comentario; una tabla de suscripciones sería sobre-ingeniería para un caso de 1-1 | |
 | **Consecuencia** | Si en el futuro se permite responder a estudiantes o multi-respondientes, se introduce la tabla de suscripciones sin tocar `reply()` (solo el destino de `notifyAuthor`) | |
 
+### ADR-012: Solo el autor (o admin) edita/borra su réplica
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | Editar/borrar réplica restringido a `user_id === $reply->user_id` (o admin); guarda en servicio (`ensureOwnReply`) + policies `update`/`delete` | Cualquier moderador de la actividad puede editar/borrar |
+| **Razón** | La réplica es la palabra pública del profesor; permitir que otro profesor (aunque modere la misma actividad) la altere sería confuso e invasivo. El admin conserva supervisión total | |
+| **Consecuencia** | `updateReply`/`deleteReply` validan autoría; el borrado es soft-delete (reversible) para no perder el registro ni disparar la cascada FK | |
+
+### ADR-013: Workaround del bug core de Livewire 3.x (#10535) vía hook en el bundle
+
+| | Decisión | Alternativa |
+|--|----------|-------------|
+| **Selección** | Workaround en `resources/js/app.js`: `Livewire.hook('commit', ...)` descarta paths inválidos (`''`, `.key`) de `commit.updates` antes de enviar | Parchear `diff()` en los assets publicados (se probó y se revirtió); esperar al fix upstream; migrar a 4.x |
+| **Razón** | El bug es del cliente de Livewire 3.x (abierto en #10535, sin fix en v3.8.x): `diff()` emite paths raíz inválidos cuando un deploy reordena propiedades públicas y **atasca el componente hasta recargar**. El hook usa la API pública (`Livewire.hook('commit')`), vive en el bundle de la app, sobrevive a `composer update`/`vendor:publish` y no ensucia vendor ni assets versionados | |
+| **Consecuencia** | En el caso raro "orden cambiado + cambio real simultáneo" ese cambio puntual se descarta en ese commit. Al llegar el fix a 3.x (o migrar a 4.x, que ya trae el guard) el hook se elimina | |
+
 ---
 
 ## 8. Dependencias y Roadmap
@@ -1067,18 +1221,25 @@ NUEVOS:
 
 MODIFICADOS:
   app/Models/app/Academy/Lms/ActivityComment.php    (+ parent_id/is_instructor_reply, root/repliesOf, helpers, scopeApproved) ✅
-  app/Services/Lms/CommentModerationService.php     (+ reply() con bloqueo de rechazados, + notifyAuthor)                    ✅
-  app/Policies/ActivityCommentPolicy.php            (+ reply())                                                             ✅
-  app/Livewire/Student/Lms/ActivityView.php         (+ carga de hilos, + rate limiting en saveComment)                       ✅
-  resources/views/livewire/student/lms/activity-view.blade.php   (+ réplicas anidadas)                                        ✅
-  app/Livewire/Profesor/Lms/CommentModeration.php   (+ openReply/saveReply, root(), rate limiting, errores amigables)         ✅
-  resources/views/livewire/profesor/lms/comment-moderation.blade.php (+ form respuesta + réplicas, botón oculto en rechazados) ✅
+  app/Services/Lms/CommentModerationService.php     (+ reply() con bloqueo de rechazados, + notifyAuthor, + updateReply/deleteReply) ✅
+  app/Policies/ActivityCommentPolicy.php            (+ reply(); edit/borrado usa update/delete existentes)                        ✅
+  app/Livewire/Student/Lms/ActivityView.php         (+ carga de hilos, + rate limiting en saveComment)                              ✅
+  resources/views/livewire/student/lms/activity-view.blade.php   (+ réplicas anidadas)                                              ✅
+  app/Livewire/Profesor/Lms/CommentModeration.php   (+ openReply/saveReply, root(), rate limiting, errores amigables,
+                                                     + openEditReply/saveEditReply, confirmDeleteReply/deleteReply)                  ✅
+  resources/views/livewire/profesor/lms/comment-moderation.blade.php (+ form respuesta + réplicas, botón oculto en rechazados,
+                                                     + editar/borrar réplicas)                                                        ✅
   app/Livewire/Profesor/Lms/ActivityEditor.php      (+ openActivityReply/saveActivityReply, rate limiting, errores amigables,
-                                                     Fix #1 profesor por user_id, trait WireUiActions)                          ✅
-  resources/views/livewire/profesor/lms/activity-editor.blade.php (+ form respuesta + réplicas)                               ✅
-  database/factories/ActivityCommentFactory.php     (+ replyTo)                                                              ✅
-  config/services.php                               (+ bloque resend)                                                        ✅ (Fase 8)
-  config/mail.php                                   (+ mode_tester/address_tester)                                           ✅ (Fase 8)
+                                                     Fix #1 profesor por user_id, trait WireUiActions,
+                                                     + openActivityEditReply/saveActivityEditReply, confirmActivityDeleteReply/deleteActivityReply) ✅
+  resources/views/livewire/profesor/lms/activity-editor.blade.php (+ form respuesta + réplicas, + editar/borrar réplicas)            ✅
+  database/factories/ActivityCommentFactory.php     (+ replyTo)                                                                      ✅
+  config/services.php                               (+ bloque resend)                                                                ✅ (Fase 8)
+  config/mail.php                                   (+ mode_tester/address_tester)                                                   ✅ (Fase 8)
+
+PARCHEADOS (bug core Livewire #10535, Fase 12):
+  resources/js/app.js                             (+ Livewire.hook('commit') que descarta paths inválidos de commit.updates)  ✅
+  (los assets publicados de Livewire se revirtieron a los bytes originales — sin cambios en el repo)
 ```
 
 ### Dependencias
@@ -1103,22 +1264,24 @@ MODIFICADOS:
 | 8. Notificaciones (#3+#6) | 4 nuevos + 2 config | 60 min |
 | 9. Rate limiting (#9) | 1 trait + 3 componentes + 2 tests | 25 min |
 | 10. Correcciones (#1, #2, #10) | 3 + 4 tests | 30 min |
-| **Total v1 + mejoras** | **~18 archivos** | **~5.5 horas** |
+| 11. Edición/borrado réplicas (#4) | 2 componentes + 2 blades + 1 servicio | 50 min |
+| 12. Workaround bug core Livewire #10535 | 1 (app.js) + build | 20 min |
+| **Total v1 + mejoras** | **~20 archivos** | **~6.8 horas** |
 
 ### Mejoras posteriores evaluadas (no implementadas)
 
-De la revisión post-v1 se evaluaron 12 mejoras; quedan **opcionales** para una v2:
+De la revisión post-v1 se evaluaron 12 mejoras; quedan **opcionales** para una v2 (#5 y #12):
 
 | # | Mejora | Estado |
 |---|--------|--------|
 | 1 | Fix `ActivityEditor::mount` (profesor por user_id) | ✅ aplicado (Fase 10) |
 | 2 | Bloquear réplica a comentarios rechazados | ✅ aplicado (Fase 10) |
 | 3 | Notificar al autor (DB) | ✅ aplicado (Fase 8) |
-| 4 | Editar / borrar réplica del profesor | ⏳ pendiente |
+| 4 | Editar / borrar réplica del profesor | ✅ aplicado (Fase 11) |
 | 5 | Marcar notificaciones como leídas al abrir | ⏳ pendiente |
 | 6 | Email transaccional al autor (SendPulse→Resend) | ✅ aplicado (Fase 8) |
-| 7 | Avatar en réplicas (en vez de inicial) | ⏳ pendiente |
-| 8 | Contador de réplicas por hilo | ⏳ pendiente |
+| 7 | Avatar en réplicas (en vez de inicial) | ✅ aplicado (componente `lms.user-avatar`, 3 vistas) |
+| 8 | Contador de réplicas por hilo | ✅ aplicado (badge en `ActivityView`, `CommentModeration`, `ActivityEditor` + tests) |
 | 9 | Rate limiting anti-spam | ✅ aplicado (Fase 9) |
 | 10 | Tests de casos borde (scopes, cascade, auditoría) | ✅ aplicado (Fase 10) |
 | 11 | Índices en `parent_id`/`is_instructor_reply` | sin cambio (la FK ya crea índice de `parent_id`) |
@@ -1130,7 +1293,7 @@ De la revisión post-v1 se evaluaron 12 mejoras; quedan **opcionales** para una 
 
 - [ ] `php8.2 artisan migrate:rollback --step=1` (drop `parent_id`, `is_instructor_reply`)
 - [ ] Revertir `ActivityComment.php` (relaciones/scopes/helpers + `scopeApproved`)
-- [ ] Revertir `CommentModerationService.php` (quitar `reply()` y `notifyAuthor()`)
+- [ ] Revertir `CommentModerationService.php` (quitar `reply()`, `notifyAuthor()`, `updateReply()`, `deleteReply()`, `ensureOwnReply()`)
 - [ ] Revertir `ActivityCommentPolicy.php` (quitar `reply()`)
 - [ ] Revertir `ActivityView.php` y `activity-view.blade.php`
 - [ ] Revertir `CommentModeration.php` y su blade
@@ -1138,4 +1301,5 @@ De la revisión post-v1 se evaluaron 12 mejoras; quedan **opcionales** para una 
 - [ ] Eliminar `HasCommentRateLimit.php` y los guards de los 3 `save*` (Fase 9)
 - [ ] Eliminar `CommentRepliedNotification.php`, `EmailDeliveryService.php`, `comment-replied.blade.php` y revertir `config/services.php` / `config/mail.php` (Fase 8)
 - [ ] Eliminar tests de réplicas (`CommentReplyTest.php`, `EmailDeliveryTest.php`)
+- [ ] Eliminar el hook `Livewire.hook('commit', ...)` de `resources/js/app.js` y re-buildear cuando el fix llegue a Livewire 3.x o se migre a 4.x (Fase 12; los assets de Livewire quedan intactos)
 - [ ] `php8.2 artisan optimize:clear`

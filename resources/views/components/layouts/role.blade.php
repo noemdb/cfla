@@ -60,7 +60,6 @@
     <!-- Main Content -->
     <main class="flex-1 container-fluid w-full mx-auto px-2 py-2 sm:px-4 sm:py-8">
         {{ $slot ?? '' }}
-        @yield('content')
     </main>
 
     <!-- Footer -->

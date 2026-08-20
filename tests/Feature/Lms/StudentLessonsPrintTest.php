@@ -3,7 +3,10 @@
 namespace Tests\Feature\Lms;
 
 use App\Models\app\Academy\Activity;
+use App\Models\app\Academy\Lms\LmsActivityContent;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
+use App\Models\app\Academy\Lms\LmsActivitySection;
+use App\Models\app\Academy\Lms\LmsHtmlEmbed;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -190,11 +193,11 @@ class StudentLessonsPrintTest extends TestCase
             'type' => 'IMAGE',
             'title' => 'Diagrama truncado',
             'body' => "<figure class=\"my-6\">\n"
-                . "  <figcaption>Diagrama</figcaption>\n"
-                . "  <div class=\"flex justify-center rounded-xl p-2\">\n"
-                . ' <svg viewBox="0 0 1000 950" xmlns="http://www.w3.org/2000/svg">' . "\n"
-                . "  <rect x=\"560\" y=\"210\" width=\"380\" height=\"170\" rx=\"8\"</svg>\n"
-                . "  </div>\n</figure>",
+                ."  <figcaption>Diagrama</figcaption>\n"
+                ."  <div class=\"flex justify-center rounded-xl p-2\">\n"
+                .' <svg viewBox="0 0 1000 950" xmlns="http://www.w3.org/2000/svg">'."\n"
+                ."  <rect x=\"560\" y=\"210\" width=\"380\" height=\"170\" rx=\"8\"</svg>\n"
+                ."  </div>\n</figure>",
             'is_visible' => true,
         ]);
 
@@ -212,6 +215,122 @@ class StudentLessonsPrintTest extends TestCase
         $this->assertStringContainsString('</figure>', $html);
     }
 
+    // ── Vista previa (now() < publish_at) ──────────────────────────────
+
+    public function test_print_in_preview_shows_only_first_section(): void
+    {
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publishAsPreview($activity);
+
+        $section1 = $this->createSection($activity, 'Sección uno (visible en preview)', 1);
+        $this->createSection($activity, 'Sección dos (oculta en preview)', 2);
+        $this->createContent($section1, 'Contenido de la primera sección.');
+        $this->createContent(
+            $this->createSection($activity, 'Sección tres (oculta en preview)', 3),
+            'Contenido de la tercera sección.'
+        );
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        // Solo la 1ª sección se imprime; el resto queda fuera del documento.
+        $this->assertStringContainsString('Sección uno', $html);
+        $this->assertStringContainsString('Contenido de la primera sección', $html);
+        $this->assertStringNotContainsString('Sección dos', $html);
+        $this->assertStringNotContainsString('Sección tres', $html);
+        $this->assertStringNotContainsString('Contenido de la tercera sección', $html);
+    }
+
+    public function test_print_in_preview_shows_banner_and_badge(): void
+    {
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publishAsPreview($activity, days: 3);
+        $this->createSection($activity, 'Primera sección', 1);
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        // Banner + badge "Vista previa" + sello de portada + cuenta regresiva.
+        $this->assertStringContainsString('Vista previa de la lección', $html);
+        $this->assertStringContainsString('<span class="estado estado-preview"', $html);
+        $this->assertStringContainsString('<div class="cover-preview-stamp"', $html);
+        $this->assertStringContainsString('Esta lección se publicará', $html);
+        $this->assertStringContainsString('en 3 días', $html);
+    }
+
+    public function test_print_full_view_has_no_preview_signage(): void
+    {
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publish($activity);
+        $this->createSection($activity, 'Sección única', 1);
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Vista previa de la lección', $html);
+        $this->assertStringNotContainsString('<span class="estado estado-preview"', $html);
+        $this->assertStringNotContainsString('<div class="cover-preview-stamp"', $html);
+    }
+
+    public function test_print_in_preview_renders_section_mermaid_embed(): void
+    {
+        // Regresión del diagrama "Construyendo nuestra identidad": un embed
+        // HTML con código Mermaid vinculado a la 1ª sección debe imprimirse.
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publishAsPreview($activity);
+
+        $section = $this->createSection($activity, 'Sección con diagrama', 1);
+        $this->createEmbed(
+            $activity,
+            $section->id,
+            "graph TD\n    A[Inicio] --> B[Fin]",
+            ['title' => 'Diagrama de prueba']
+        );
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Diagrama de prueba', $html);
+        $this->assertStringContainsString('data-mermaid-code=', $html);
+        $this->assertStringContainsString('A[Inicio]', $html);
+    }
+
+    public function test_print_full_view_shows_unlinked_embed_at_end(): void
+    {
+        $activity = $this->createMinimalActivity();
+        $student = $this->createStudentIn($activity->pevaluacion->seccion_id);
+        $this->publish($activity);
+
+        $section = $this->createSection($activity, 'Última sección visible', 1);
+        $this->createContent($section, 'Contenido de la sección.');
+        $this->createEmbed($activity, null, '<p>Contenido embebido global al final</p>');
+
+        $html = $this->actingAs($student)
+            ->get(route('student.lms.activity.print', $activity))
+            ->assertOk()
+            ->getContent();
+
+        // El embed global (sin sección) aparece y se posiciona al final,
+        // después de las secciones renderizadas.
+        $this->assertStringContainsString('Contenido embebido global al final', $html);
+        $this->assertGreaterThan(
+            strpos($html, 'Última sección visible'),
+            strpos($html, 'Contenido embebido global al final')
+        );
+    }
+
     // ── Helpers (replican el patrón de StudentAccessTest) ─────────────
 
     private function publish(Activity $activity): void
@@ -220,6 +339,49 @@ class StudentLessonsPrintTest extends TestCase
             'activity_id' => $activity->id,
             'published_by' => User::factory(),
         ]);
+    }
+
+    /** Publica la lección con fecha futura → estado "vista previa" para el estudiante. */
+    private function publishAsPreview(Activity $activity, int $days = 3): void
+    {
+        LmsActivityPublication::factory()->published()->create([
+            'activity_id' => $activity->id,
+            'published_by' => User::factory(),
+            'publish_at' => now()->addDays($days),
+        ]);
+    }
+
+    private function createSection(Activity $activity, string $title, int $sortOrder, array $overrides = []): LmsActivitySection
+    {
+        return LmsActivitySection::create(array_merge([
+            'activity_id' => $activity->id,
+            'title' => $title,
+            'sort_order' => $sortOrder,
+            'is_visible' => true,
+        ], $overrides));
+    }
+
+    private function createContent(LmsActivitySection $section, string $body, string $type = 'TEXT', array $overrides = []): LmsActivityContent
+    {
+        return LmsActivityContent::create(array_merge([
+            'section_id' => $section->id,
+            'type' => $type,
+            'body' => $body,
+            'is_visible' => true,
+        ], $overrides));
+    }
+
+    private function createEmbed(Activity $activity, ?int $sectionId, string $htmlContent, array $overrides = []): LmsHtmlEmbed
+    {
+        return LmsHtmlEmbed::create(array_merge([
+            'activity_id' => $activity->id,
+            'section_id' => $sectionId,
+            'added_by' => User::factory()->create()->id,
+            'html_content' => $htmlContent,
+            'render_condition' => 'ALWAYS',
+            'sort_order' => 1,
+            'is_visible' => true,
+        ], $overrides));
     }
 
     private function createStudentIn(int $seccionId): User

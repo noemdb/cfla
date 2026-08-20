@@ -39,6 +39,8 @@ class PevaluacionList extends Component
     public $sort = 'pevaluacions.created_at';
     public $direction = 'desc';
 
+    public $paginate = 15;
+
     protected $profesor;
 
     public function mount()
@@ -80,6 +82,11 @@ class PevaluacionList extends Component
     }
 
     public function updatingFilterObservations()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPaginate()
     {
         $this->resetPage();
     }
@@ -155,7 +162,7 @@ class PevaluacionList extends Component
         $pevaluacions = $pevaluacionsQuery->with([
             'activities.achievements', 'pensum.asignatura',
             'pensum.grado.pestudio', 'seccion', 'lapso', 'grupoEstable',
-        ])->orderBy($sort, $direction)->paginate(10);
+        ])->orderBy($sort, $direction)->paginate($this->paginate);
 
         // ── Filter lists ──
         $list_pestudio = Pestudio::where('planning_module', true)

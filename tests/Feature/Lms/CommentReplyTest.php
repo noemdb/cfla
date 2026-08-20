@@ -507,6 +507,55 @@ class CommentReplyTest extends TestCase
     }
 
     /** @test */
+    public function student_view_counts_replies_per_thread(): void
+    {
+        $root = $this->createApprovedRootComment();
+        (new CommentModerationService($this->profesorUser))->reply($root, 'Primera réplica.');
+        (new CommentModerationService($this->profesorUser))->reply($root, 'Segunda réplica.');
+
+        Livewire::actingAs($this->studentUser)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $this->activity])
+            ->assertSee('2 respuestas')
+            ->assertSee('Primera réplica.')
+            ->assertSee('Segunda réplica.');
+    }
+
+    /** @test */
+    public function student_view_renders_professor_avatar_from_profile(): void
+    {
+        $this->profesorUser->profile()->create([
+            'firstname' => 'Carlos',
+            'lastname' => 'Méndez',
+            'url_img' => 'https://example.com/avatars/carlos.png',
+        ]);
+
+        $root = $this->createApprovedRootComment();
+        (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica con avatar.');
+
+        Livewire::actingAs($this->studentUser)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $this->activity])
+            ->assertSee('https://example.com/avatars/carlos.png');
+    }
+
+    /** @test */
+    public function student_view_falls_back_to_initial_without_profile_image(): void
+    {
+        $this->profesorUser->profile()->create([
+            'firstname' => 'Carlos',
+            'lastname' => 'Méndez',
+            'url_img' => null,
+        ]);
+
+        $root = $this->createApprovedRootComment();
+        (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica sin avatar.');
+
+        Livewire::actingAs($this->studentUser)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $this->activity])
+            ->assertDontSee('https://example.com/avatars/carlos.png')
+            ->assertSee('>C<', false);
+    }
+
+    /** @test */
     public function student_view_does_not_show_replies_of_rejected_roots(): void
     {
         $root = ActivityComment::create([
@@ -564,6 +613,190 @@ class CommentReplyTest extends TestCase
         $this->assertEquals($this->activity->id, $data['activity_id']);
         $this->assertStringContainsString('Respuesta del profesor', $data['reply_body']);
         $this->assertEquals(route('student.lms.activity', $this->activity->id), $data['url']);
+    }
+
+    // ─── Edición / borrado de réplicas (mejora #4) ────────────────
+
+    /** @test */
+    public function profesor_can_edit_own_reply(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Texto original.');
+
+        $updated = (new CommentModerationService($this->profesorUser))
+            ->updateReply($reply, 'Texto corregido.');
+
+        $this->assertEquals('Texto corregido.', $updated->body);
+        $this->assertEquals('Texto corregido.', $reply->fresh()->body);
+        // Mantiene el estado autoaprobado (no reingresa a la cola).
+        $this->assertTrue($reply->fresh()->is_approved);
+        $this->assertTrue($reply->fresh()->is_instructor_reply);
+    }
+
+    /** @test */
+    public function profesor_cannot_edit_other_profesor_reply(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica de Carlos.');
+
+        $this->expectException(AuthorizationException::class);
+
+        (new CommentModerationService($this->otherProfesorUser))
+            ->updateReply($reply, 'Intento de edición.');
+    }
+
+    /** @test */
+    public function admin_can_edit_any_reply(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica original.');
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $updated = (new CommentModerationService($admin))
+            ->updateReply($reply, 'Corrección del admin.');
+
+        $this->assertEquals('Corrección del admin.', $updated->body);
+    }
+
+    /** @test */
+    public function profesor_can_delete_own_reply_and_it_hides_from_student(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica a borrar.');
+
+        (new CommentModerationService($this->profesorUser))->deleteReply($reply);
+
+        $this->assertNotNull(ActivityComment::withTrashed()->find($reply->id)->deleted_at);
+        $this->assertDatabaseMissing('activity_comments', [
+            'id' => $reply->id,
+            'deleted_at' => null,
+        ]);
+
+        // Soft-delete → scopeApproved la oculta de la vista del estudiante.
+        Livewire::actingAs($this->studentUser)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $this->activity])
+            ->assertSee('Comentario del estudiante.')
+            ->assertDontSee('Réplica a borrar.');
+    }
+
+    /** @test */
+    public function profesor_cannot_delete_other_profesor_reply(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica de Carlos.');
+
+        $this->expectException(AuthorizationException::class);
+
+        (new CommentModerationService($this->otherProfesorUser))->deleteReply($reply);
+    }
+
+    /** @test */
+    public function cannot_edit_or_delete_a_root_comment(): void
+    {
+        $root = $this->createApprovedRootComment();
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new CommentModerationService($this->profesorUser))->updateReply($root, 'Nuevo cuerpo.');
+    }
+
+    /** @test */
+    public function edited_reply_is_reflected_in_student_view(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Texto a corregir.');
+
+        (new CommentModerationService($this->profesorUser))
+            ->updateReply($reply, 'Texto corregido definitivo.');
+
+        Livewire::actingAs($this->studentUser)
+            ->test(\App\Livewire\Student\Lms\ActivityView::class, ['activity' => $this->activity])
+            ->assertDontSee('Texto a corregir.')
+            ->assertSee('Texto corregido definitivo.');
+    }
+
+    /** @test */
+    public function moderation_component_can_edit_reply_via_livewire(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Versión uno.');
+
+        Livewire::actingAs($this->profesorUser)
+            ->test(\App\Livewire\Profesor\Lms\CommentModeration::class)
+            ->set('tab', 'approved')
+            ->call('openEditReply', $reply->id)
+            ->set('editReplyBody', 'Versión dos.')
+            ->call('saveEditReply')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('activity_comments', [
+            'id' => $reply->id,
+            'body' => 'Versión dos.',
+        ]);
+    }
+
+    /** @test */
+    public function moderation_component_can_delete_reply_via_livewire(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica a borrar.');
+
+        Livewire::actingAs($this->profesorUser)
+            ->test(\App\Livewire\Profesor\Lms\CommentModeration::class)
+            ->call('deleteReply', $reply->id)
+            ->assertHasNoErrors();
+
+        $this->assertNotNull(ActivityComment::withTrashed()->find($reply->id)->deleted_at);
+    }
+
+    /** @test */
+    public function moderation_edit_requires_body(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Versión uno.');
+
+        Livewire::actingAs($this->profesorUser)
+            ->test(\App\Livewire\Profesor\Lms\CommentModeration::class)
+            ->call('openEditReply', $reply->id)
+            ->set('editReplyBody', '')
+            ->call('saveEditReply')
+            ->assertHasErrors(['editReplyBody']);
+
+        $this->assertDatabaseHas('activity_comments', ['id' => $reply->id, 'body' => 'Versión uno.']);
+    }
+
+    /** @test */
+    public function activity_editor_can_edit_reply_inline(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Versión uno.');
+
+        Livewire::actingAs($this->profesorUser)
+            ->test(\App\Livewire\Profesor\Lms\ActivityEditor::class, ['activity' => $this->activity])
+            ->set('commentsTab', 'approved')
+            ->call('openActivityEditReply', $reply->id)
+            ->set('activityEditReplyBody', 'Versión corregida en el editor.')
+            ->call('saveActivityEditReply')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('activity_comments', [
+            'id' => $reply->id,
+            'body' => 'Versión corregida en el editor.',
+        ]);
+    }
+
+    /** @test */
+    public function activity_editor_can_delete_reply_inline(): void
+    {
+        $root = $this->createApprovedRootComment();
+        $reply = (new CommentModerationService($this->profesorUser))->reply($root, 'Réplica a borrar.');
+
+        Livewire::actingAs($this->profesorUser)
+            ->test(\App\Livewire\Profesor\Lms\ActivityEditor::class, ['activity' => $this->activity])
+            ->call('deleteActivityReply', $reply->id)
+            ->assertHasNoErrors();
+
+        $this->assertNotNull(ActivityComment::withTrashed()->find($reply->id)->deleted_at);
     }
 
     // ─── Rate limiting (anti-spam, mejora #9) ────────────────────

@@ -141,4 +141,32 @@ class LmsPdfExtractorServiceTest extends TestCase
             @unlink($pdfPath);
         }
     }
+
+    /** @test */
+    public function page_count_cuenta_las_paginas_de_un_pdf(): void
+    {
+        $html = '<html><body>';
+        for ($i = 1; $i <= 2; $i++) {
+            $html .= '<div style="page-break-after: always"><p>Página '.$i.' del documento de prueba para verificar el conteo de páginas del extractor del módulo LMS.</p></div>';
+        }
+        $html .= '</body></html>';
+
+        $pdfPath = $this->makePdf($html);
+
+        try {
+            $pages = app(LmsPdfExtractorService::class)->pageCount($pdfPath);
+
+            $this->assertSame(2, $pages);
+        } finally {
+            @unlink($pdfPath);
+        }
+    }
+
+    /** @test */
+    public function page_count_devuelve_cero_si_no_existe_el_archivo(): void
+    {
+        $pages = app(LmsPdfExtractorService::class)->pageCount('/tmp/no-existe-'.uniqid().'.pdf');
+
+        $this->assertSame(0, $pages);
+    }
 }

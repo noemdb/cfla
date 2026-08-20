@@ -2,8 +2,8 @@
 
     {{-- Grid Mode --}}
     <div x-show="mode === 'grid'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-        {{-- Masonry grid: Tailwind columns-{n} con responsive prefixes (ADR-001 compliant) --}}
-        <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-2.5">
+        {{-- Grid regular (no masonry): todas las tarjetas de la misma altura --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 items-stretch">
             @forelse($pevaluacions as $pevaluacion)
                 @php
                     $activities        = $pevaluacion->activities;
@@ -39,7 +39,7 @@
                     $hasEvaluative  = $activities->contains(fn($a) => !empty($a->description));
                     $allApproved    = $hasActivities && $activities->every(fn($a) => $a->status);
                 @endphp
-                <div class="break-inside-avoid mb-2.5 bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
+                <div class="break-inside-avoid h-full flex flex-col bg-gray-800/30 border border-white/5 rounded-lg hover:border-emerald-500/30 hover:bg-gray-800/50 transition-all duration-200 group">
 
                     {{-- Card Header --}}
                     <div class="px-3 pt-2.5 pb-1.5 border-b border-white/5">
@@ -172,7 +172,7 @@
                     @endif
 
                     {{-- Card Actions --}}
-                    <div class="px-3 pb-2.5 flex items-center gap-1.5">
+                    <div class="px-3 pb-2.5 mt-auto flex items-center gap-1.5">
                         <a href="{{ route('app.profesors.activities.create', $pevaluacion->id) }}"
                             title="Registrar Actividades"
                             class="inline-flex items-center justify-center flex-1 gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all duration-200 {{ $hasActivities ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20' : 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20 border border-white/5' }}">
@@ -209,7 +209,7 @@
                     </div>
                 </div>
             @empty
-                <div class="break-inside-avoid text-center py-12">
+                <div class="col-span-full text-center py-12">
                     <svg class="w-12 h-12 text-gray-700 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>

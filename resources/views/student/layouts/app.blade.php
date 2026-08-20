@@ -40,47 +40,114 @@
                           {{ request()->routeIs('student.lms.home') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
                     Inicio
                 </a>
-                <a href="{{ route('student.lms.profile') }}"
-                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
-                          {{ request()->routeIs('student.lms.profile') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
-                    Perfil
-                </a>
-                <a href="{{ route('student.lms.academic') }}"
-                   class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
-                          {{ request()->routeIs('student.lms.academic') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
-                    Académica
-                </a>
                 <a href="{{ route('student.lms.lessons') }}"
                    class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
                           {{ request()->routeIs('student.lms.lessons') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
                     Lecciones
                 </a>
-                <span class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
-                    Horario
-                </span>
                 <a href="{{ route('student.lms.resources') }}"
                    class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
                           {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-400 hover:text-emerald-300' }}">
                     Recursos
                 </a>
-                {{-- Items deshabilitados (por implementar) --}}
-                <span class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
-                    Diagnóstico
-                </span>
-                <span class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
-                    Competiciones
-                </span>
+                {{-- Próximamente: items por implementar, agrupados en un dropdown --}}
+                <div class="relative" x-data="{ dropOpen: false }">
+                    <button type="button"
+                            @click="dropOpen = !dropOpen"
+                            @click.outside="dropOpen = false"
+                            :aria-expanded="dropOpen"
+                            aria-haspopup="true"
+                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors text-gray-400 hover:text-emerald-300 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                        Próximamente
+                        <svg class="w-3 h-3 transition-transform duration-200" :class="dropOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="dropOpen"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-1"
+                         x-cloak
+                         class="absolute right-0 mt-1.5 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                        <span class="block px-3.5 py-2 text-sm text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                            Horario
+                        </span>
+                        <span class="block px-3.5 py-2 text-sm text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                            Diagnóstico
+                        </span>
+                        <span class="block px-3.5 py-2 text-sm text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                            Competiciones
+                        </span>
+                        <span class="block px-3.5 py-2 text-sm text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                            Kainos Lab Go
+                        </span>
+                    </div>
+                </div>
             </nav>
 
             {{-- Right section: user + hamburger --}}
-            <div class="flex items-center gap-2 ml-auto md:ml-0 ">
-                <span class="hidden sm:inline text-xs text-gray-400">{{ auth()->user()->name }}</span>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button class="text-xs text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors hidden sm:inline ">
-                        Salir
+            <div class="flex items-center gap-2 ml-auto md:ml-0">
+                {{-- Menú de usuario: avatar + Perfil/Académico/Salir --}}
+                <div class="relative" x-data="{ userOpen: false }">
+                    <button type="button"
+                            @click="userOpen = !userOpen"
+                            @click.outside="userOpen = false"
+                            :aria-expanded="userOpen"
+                            aria-haspopup="true"
+                            aria-label="Menú de usuario"
+                            class="flex items-center gap-2 rounded-full focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        <x-lms.user-avatar :user="auth()->user()" size="sm" :ring="'ring-2 ring-emerald-500/30'" />
+                        <span class="hidden sm:inline text-xs text-gray-400 max-w-[8rem] truncate">{{ auth()->user()->name }}</span>
+                        <svg class="hidden sm:inline w-3 h-3 text-gray-400 transition-transform duration-200" :class="userOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </button>
-                </form>
+
+                    <div x-show="userOpen"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-1"
+                         x-cloak
+                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                        <div class="px-3.5 py-2.5 border-b border-gray-100 dark:border-gray-700">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                            <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
+                        </div>
+                        <a href="{{ route('student.lms.profile') }}"
+                           class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Perfil
+                        </a>
+                        <a href="{{ route('student.lms.academic') }}"
+                           class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            Académico
+                        </a>
+                        <div class="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    Salir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Toggle modo claro/oscuro (E5) --}}
                 <button type="button" @click="
                     dark = !dark;
@@ -125,16 +192,6 @@
                       {{ request()->routeIs('student.lms.home') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                 Inicio
             </a>
-            <a href="{{ route('student.lms.profile') }}"
-               class="block px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                      {{ request()->routeIs('student.lms.profile') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
-                Perfil
-            </a>
-            <a href="{{ route('student.lms.academic') }}"
-               class="block px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                      {{ request()->routeIs('student.lms.academic') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
-                Académica
-            </a>
             <a href="{{ route('student.lms.lessons') }}"
                class="block px-3 py-2 text-sm font-medium rounded-lg transition-colors
                       {{ request()->routeIs('student.lms.lessons') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
@@ -145,13 +202,22 @@
                       {{ request()->routeIs('student.lms.resources') ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-emerald-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
                 Recursos
             </a>
-            {{-- Items deshabilitados (por implementar) --}}
-            <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
-                Diagnóstico
-            </span>
-            <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
-                Competiciones
-            </span>
+            {{-- Próximamente: items por implementar, agrupados --}}
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+                <p class="px-3 pb-1 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Próximamente</p>
+                <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Horario
+                </span>
+                <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Diagnóstico
+                </span>
+                <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Competiciones
+                </span>
+                <span class="block px-3 py-2 text-sm font-medium rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed select-none" aria-disabled="true" title="Próximamente">
+                    Kainos Lab Go
+                </span>
+            </div>
             <div class="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
                 <span class="block px-3 py-1.5 text-xs text-gray-400 sm:hidden">{{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}" class="sm:hidden">

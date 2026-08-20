@@ -75,62 +75,17 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
     $tabs = ['continuar', 'lecciones', 'distribucion', 'actividad'];
 @endphp
 
-{{-- D3: estado Alpine de la mini-barra sticky. updateNext() mide el fin del hero
-     (x-ref="heroSection") y muestra la barra sólo cuando el hero — y su CTA de
-     próxima lección — queda fuera de pantalla (detrás del navbar de h-14 = 56px).
-     (sin wire:poll en este panel; el refresco en vivo de la próxima lección llegará
-     con Reverb en otra sesión). FIX (1): NO usar this.$refs.heroSection — la raíz
-     x-data persiste entre morphs de Livewire, pero Livewire reemplaza la <section>
-     por un nodo nuevo y Alpine se queda apuntando al viejo (detached → rect 0 → la
-     barra se mostraba sola tras el morph). updateNext() re-consulta el DOM vivo
-     con querySelector.
-     FIX (5): los listeners de scroll/resize van manuales en init() con destroy()
-     (mismo patrón probado en activity-view/readingNav), NO con el decorativo
-     @scroll.window.passive. El decorativo no disparaba de forma fiable entre los
-     remounts de Alpine que hace Livewire (antes lo tapaba el wire:poll.10s, que
-     re-ejecutaba updateNext cada 10s); sin poll, la barra no aparecía al hacer
-     scroll. init() se re-ejecuta en cada setup de Alpine y destroy() limpia los
-     listeners en cada teardown (sin fugas entre morphs).
-     FIX (2): el atributo x-data va delimitado por comillas dobles, así
-     que TODO el JS de dentro DEBE evitar " (también activeTab); el selector usa valor
-     CSS sin comillas [x-ref=heroSection] y los strings JS van con comillas simples.
-     FIX (3): la barra full-bleed usaba 100vw en el -mx-[calc((100vw-100%)/2)], pero
-     100vw incluye el ancho del scrollbar vertical (~15px): al mostrar la barra el
-     exceso desbordaba el viewport y nacía un scrollbar horizontal. Medimos el ancho
-     seguro con document.documentElement.clientWidth (excluye el scrollbar) y lo usamos como
-     CSS var --bar-vw (measureVw + resize del init).
-     FIX (4): la pestaña activa del NavTabs se vincula con @entangle('activeTab').live
+{{-- FIX (4): la pestaña activa del NavTabs se vincula con @entangle('activeTab').live
      (binding bidireccional Livewire↔Alpine), NO con una siembra local + @this.set.
      Con la siembra + llamada manual, tras el morph del cambio de pestaña Alpine
      volvía a sembrar el valor previo y el :class del tab activo quedaba desfasado
      un clic (1er clic cambia el contenido, 2º pintaba el borde). Con @entangle el
      servidor y Alpine quedan en sync en cada morph y el border-b-2 emerald se pinta
-     desde el primer clic; el queryString sigue persistiendo la pestaña. --}}
+     desde el primer clic; el queryString sigue persistiendo la pestaña.
+     Nota: el atributo x-data va delimitado por comillas dobles, así que TODO el
+     JS de dentro DEBE evitar ". --}}
 <div class="max-w-4xl mx-auto py-8 px-4 space-y-8"
      x-data="{
-        nextOpen: false,
-        vw: document.documentElement.clientWidth,
-        onScroll: null,
-        onResize: null,
-        measureVw() {
-            this.vw = document.documentElement.clientWidth;
-        },
-        updateNext() {
-            const hero = document.querySelector('[x-ref=heroSection]');
-            this.nextOpen = !!hero && hero.getBoundingClientRect().bottom <= 56;
-        },
-        init() {
-            this.onScroll = () => this.updateNext();
-            this.onResize = () => { this.measureVw(); this.updateNext(); };
-            window.addEventListener('scroll', this.onScroll, { passive: true });
-            window.addEventListener('resize', this.onResize, { passive: true });
-            this.updateNext();
-            this.measureVw();
-        },
-        destroy() {
-            if (this.onScroll) window.removeEventListener('scroll', this.onScroll);
-            if (this.onResize) window.removeEventListener('resize', this.onResize);
-        },
         activeTab: @entangle('activeTab').live,
         tabs: ['continuar', 'lecciones', 'distribucion', 'actividad'],
         setActiveTab(tab) {
@@ -151,7 +106,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
     {{-- 0. Hero: saludo + progreso + siguiente lección.
          G1: todas las tarjetas del home comparten la misma receta de
          transición (transition-all duration-200 ease-out). --}}
-    <section x-ref="heroSection" class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 sm:p-6 shadow-sm transition-all duration-200 ease-out">
+    <section class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 sm:p-6 shadow-sm transition-all duration-200 ease-out">
         <div class="flex flex-col sm:flex-row sm:items-center gap-6">
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3">
@@ -164,7 +119,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     @endif
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Tu avance en un vistazo. Sigue aprendiendo sin perder el ritmo.
+                    Tu avance. Sigue aprendiendo sin perder el ritmo.
                 </p>
 
                 <div class="mt-4 flex flex-wrap items-center gap-2">
@@ -212,7 +167,7 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
                     </span>
                     @if($nextLesson->lmsPublication?->publish_at?->isFuture())
                         <span class="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400"
-                              x-data="{ target: '{{ $nextLesson->lmsPublication->publish_at->toIso8601String() }}', label: '', timer: null, tick() { const left = new Date(this.target) - new Date(); if (left <= 0) { this.label = 'Publicada ahora'; clearInterval(this.timer); return; } const h = Math.floor(left / 3.6e6); const m = Math.floor((left % 3.6e6) / 6e4); const s = Math.floor((left % 6e4) / 1e3); this.label = 'Comienza en ' + h + 'h ' + m + 'm ' + s + 's'; }, init() { this.tick(); this.timer = setInterval(() => this.tick(), 1000); } }"
+                              x-data="{ target: '{{ $nextLesson->lmsPublication->publish_at->toIso8601String() }}', label: '', timer: null, tick() { const left = new Date(this.target) - new Date(); if (left <= 0) { this.label = 'Publicada ahora'; clearInterval(this.timer); return; } const d = Math.floor(left / 8.64e7); const h = Math.floor((left % 8.64e7) / 3.6e6); const m = Math.floor((left % 3.6e6) / 6e4); const s = Math.floor((left % 6e4) / 1e3); if (d > 0) { this.label = 'Comienza en ' + d + 'd ' + h + 'h'; } else if (h > 0) { this.label = 'Comienza en ' + h + 'h ' + m + 'm'; } else if (m > 0) { this.label = 'Comienza en ' + m + 'm ' + s + 's'; } else { this.label = 'Comienza en ' + s + 's'; } }, init() { this.tick(); this.timer = setInterval(() => this.tick(), 1000); } }"
                               x-text="label">Comienza en…</span>
                     @else
                         <span class="inline-flex items-center gap-1.5">
@@ -252,50 +207,6 @@ $__scKey = static fn (?string $name): string => \App\Models\app\Academy\Asignatu
             </div>
         </div>
     </section>
-
-    @if($nextLesson)
-    {{-- D3: mini-barra sticky "Próxima lección". Mantiene la siguiente lección
-         visible al hacer scroll, cuando el hero y su CTA ya salieron de pantalla.
-         Reutiliza el color de materia (D2) para el punto y la etiqueta. La
-         animación x-transition se anula sola bajo prefers-reduced-motion (bloque
-         <style> al final de esta vista). sticky top-14 = justo debajo del navbar
-         (h-14). Pulido: flotante full-width con vidrio — rompe fuera del
-         max-w-4xl hacia el ancho real de la página (-mx/px con el pre-calc
-         (var(--bar-vw)-100%)/2) como el navbar; border-y (no border, para no dejar
-         líneas en los bordes de pantalla) + backdrop-blur + shadow-lg, y hueco de
-         vuelo !mt-2 que vence el margin-top del space-y-8 del contenedor. El ancho
-         seguro --bar-vw lo setea Alpine (measureVw) y evita el scrollbar horizontal
-         que causaba el 100vw (ver FIX (3) en la raíz x-data). --}}
-    <div x-show="nextOpen"
-         x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         aria-label="Próxima lección"
-         class="sticky top-14 z-20 !mt-2 -mx-[calc((var(--bar-vw)-100%)/2)] px-[calc((var(--bar-vw)-100%)/2)] py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-y border-gray-200/80 dark:border-gray-700/70 shadow-lg shadow-gray-300/20 dark:shadow-black/20"
-         :style="'--bar-vw: ' + vw + 'px'">
-        @php $nextKey = $__scKey($nextLesson->pevaluacion?->pensum?->asignatura?->name); @endphp
-        <div class="flex items-center gap-2">
-            <a href="{{ route('student.lms.activity', $nextLesson) }}"
-               class="flex items-center gap-2 min-w-0 flex-1 group"
-               aria-label="Ir a {{ $nextLesson->topic }}">
-                <span class="w-2 h-2 rounded-full {{ $__sc[$nextKey]['dot'] }} shrink-0" aria-hidden="true"></span>
-                <span class="hidden sm:inline text-xs font-semibold uppercase tracking-wider {{ $__sc[$nextKey]['text'] }} shrink-0">Próxima lección</span>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate min-w-0 group-hover:text-gray-900 dark:group-hover:text-white">{{ $nextLesson->topic }}</span>
-            </a>
-            <a href="{{ route('student.lms.activity', $nextLesson) }}"
-               class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 min-h-[36px] rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold font-display shadow-sm transition-colors focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
-                Continuar
-                <svg class="w-3.5 h-3.5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-    @endif
 
     {{-- 1. Stats Cards --}}
     {{-- F2: en modo lectura (5–8) una sola barra de progreso grande y simple
@@ -471,7 +382,11 @@ vive en Alpine (activeTab) sincronizado con Livewire vía el binding
                 @if(!$act) @continue @endif
                 @php $key = $__scKey($act->pevaluacion?->pensum?->asignatura?->name); @endphp
                 <a href="{{ route('student.lms.activity', $act) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                   @class([
+                       'group block bg-white dark:bg-gray-800/50 rounded-xl p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2',
+                       'border-2 border-emerald-500/40 dark:border-emerald-500/30' => $loop->first,
+                       'border border-gray-200 dark:border-gray-700 opacity-30 hover:opacity-100' => ! $loop->first,
+                   ])>
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div @class([
@@ -600,7 +515,11 @@ vive en Alpine (activeTab) sincronizado con Livewire vía el binding
                     $key = $__scKey($activity->pevaluacion?->pensum?->asignatura?->name);
                 @endphp
                 <a href="{{ route('student.lms.activity', $activity) }}"
-                   class="group block bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2">
+                   @class([
+                       'group block bg-white dark:bg-gray-800/50 rounded-xl p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-emerald-500/40 motion-reduce:transform-none motion-reduce:transition-none focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2',
+                       'border-2 border-emerald-500/40 dark:border-emerald-500/30' => $loop->first,
+                       'border border-gray-200 dark:border-gray-700 opacity-30 hover:opacity-100' => ! $loop->first,
+                   ])>
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 {{ $__sc[$key]['chip'] }}">

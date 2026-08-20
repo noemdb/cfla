@@ -795,9 +795,7 @@
 
                 {{-- Paginación --}}
                 @if($allLessons && $allLessons->hasPages())
-                    <div class="px-6 py-3 border-t border-white/5 bg-gray-800/20">
-                        {{ $allLessons->links('vendor.livewire.custom-tailwind') }}
-                    </div>
+                    <x-pagination-wrapper :paginator="$allLessons" />
                 @endif
 
                 {{-- Footer --}}

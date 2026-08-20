@@ -197,7 +197,7 @@ class StudentHome extends Component
             ->take(10)
             ->get()
             ->unique('activity_id')
-            ->take(5)
+            ->take(4)
             ->values();
 
         // ─── 2b. Fallback "Continuar Aprendiendo" ───────────────────
@@ -219,7 +219,7 @@ class StudentHome extends Component
                         ->limit(1),
                     'desc'
                 )
-                ->take(5)
+                ->take(4)
                 ->get()
             : collect();
 
@@ -240,7 +240,7 @@ class StudentHome extends Component
                     ->orderByDesc('publish_at')
                     ->limit(1)
             )
-            ->take(5)
+            ->take(4)
             ->get();
 
         // ─── 4. Todas las lecciones (búsqueda + filtro + paginación) ─

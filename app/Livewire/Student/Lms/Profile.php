@@ -8,6 +8,8 @@ use App\Models\app\Academy\Lms\LmsActivityLog;
 use App\Models\app\Academy\Lms\LmsActivityPublication;
 use App\Services\Estudiant\StudentScopeService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 use WireUi\Traits\WireUiActions;
 
@@ -24,6 +26,12 @@ class Profile extends Component
 
     /** ¿Mascota con énfasis (ojos de estrella)? (C4) — solo 5–8 años. */
     public bool $mascotEmphasis = false;
+
+    public string $current_password = '';
+
+    public string $password = '';
+
+    public string $password_confirmation = '';
 
     public function mount(): void
     {
@@ -81,6 +89,25 @@ class Profile extends Component
                     : 0,
             ];
         }
+    }
+
+    public function updatePassword(): void
+    {
+        $validated = $this->validate([
+            'current_password' => ['required', 'string', 'current_password'],
+            'password' => ['required', 'string', Password::min(6), 'confirmed'],
+        ]);
+
+        Auth::user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $this->reset('current_password', 'password', 'password_confirmation');
+
+        $this->notification()->success(
+            'Contraseña actualizada',
+            'Tu contraseña se cambió correctamente.'
+        );
     }
 
     public function render(): \Illuminate\View\View

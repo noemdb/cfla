@@ -79,6 +79,11 @@ class ActivityEditor extends Component
 
     public string $activityReplyBody = '';
 
+    // Edición inline de réplica (mejora #4)
+    public ?int $activityEditReplyId = null;
+
+    public string $activityEditReplyBody = '';
+
     protected function rules(): array
     {
         return [
@@ -384,6 +389,107 @@ class ActivityEditor extends Component
         $this->loadComments();
 
         $this->notification()->success(title: 'Réplica enviada');
+    }
+
+    public function openActivityEditReply(int $replyId): void
+    {
+        $reply = ActivityComment::findOrFail($replyId);
+        $this->activityEditReplyId = $replyId;
+        $this->activityEditReplyBody = $reply->body;
+    }
+
+    public function saveActivityEditReply(): void
+    {
+        $this->validate(['activityEditReplyBody' => 'required|string|min:1|max:1000']);
+
+        $reply = ActivityComment::findOrFail($this->activityEditReplyId);
+
+        try {
+            app(CommentModerationService::class, ['user' => auth()->user()])
+                ->updateReply($reply, $this->activityEditReplyBody);
+        } catch (\InvalidArgumentException $e) {
+            $this->notification()->error(
+                title: 'No se pudo editar la réplica',
+                description: $e->getMessage()
+            );
+
+            return;
+        } catch (\Throwable $e) {
+            Log::error('ActivityEditor::saveActivityEditReply inesperado', [
+                'reply_id' => $this->activityEditReplyId,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->notification()->error(
+                title: 'Ocurrió una situación inesperada',
+                description: 'Tu cambio no pudo guardarse. Por favor, inténtalo de nuevo.'
+            );
+
+            return;
+        }
+
+        $this->activityEditReplyId = null;
+        $this->activityEditReplyBody = '';
+        $this->loadComments();
+
+        $this->notification()->success(
+            title: 'Réplica actualizada',
+            description: 'El estudiante verá el texto corregido.'
+        );
+    }
+
+    public function confirmActivityDeleteReply(int $replyId): void
+    {
+        $this->dialog()->confirm([
+            'title' => '¿Borrar esta réplica?',
+            'description' => 'La réplica dejará de ser visible para los estudiantes. Esta acción puede revertirse restaurando el registro.',
+            'icon' => 'warning',
+            'accept' => [
+                'label' => 'Borrar',
+                'method' => 'deleteActivityReply',
+                'params' => [$replyId],
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Cancelar',
+            ],
+        ]);
+    }
+
+    public function deleteActivityReply(int $replyId): void
+    {
+        $reply = ActivityComment::findOrFail($replyId);
+
+        try {
+            app(CommentModerationService::class, ['user' => auth()->user()])
+                ->deleteReply($reply);
+        } catch (\InvalidArgumentException $e) {
+            $this->notification()->error(
+                title: 'No se pudo borrar la réplica',
+                description: $e->getMessage()
+            );
+
+            return;
+        } catch (\Throwable $e) {
+            Log::error('ActivityEditor::deleteActivityReply inesperado', [
+                'reply_id' => $replyId,
+                'error' => $e->getMessage(),
+            ]);
+
+            $this->notification()->error(
+                title: 'Ocurrió una situación inesperada',
+                description: 'La réplica no pudo borrarse. Por favor, inténtalo de nuevo.'
+            );
+
+            return;
+        }
+
+        $this->loadComments();
+
+        $this->notification()->success(
+            title: 'Réplica eliminada',
+            description: 'La réplica ya no es visible para los estudiantes.'
+        );
     }
 
     #[Layout('planning.layouts.app')]

@@ -70,7 +70,7 @@
                             <span class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-[10px] font-bold shrink-0">2</span>
                             <div>
                                 <strong class="text-gray-900 dark:text-white">Diapositivas (Secciones)</strong>
-                                <p class="leading-relaxed">Crea, reordena y edita las diapositivas de la lección. Genera texto, imágenes, ilustraciones o diagramas con IA para cada sección.</p>
+                                <p class="leading-relaxed">Crea, reordena y edita las diapositivas de la lección. Genera texto, imágenes, ilustraciones o diagramas con IA para cada sección, o sube un PDF para estructurar toda la lección automáticamente.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -127,6 +127,21 @@
                             <span class="text-yellow-500 mt-0.5 shrink-0">⚡</span>
                             <span><strong class="text-gray-900 dark:text-white">Generar lección completa</strong> — disponible en el Paso 1. Crea toda la lección desde un tema.</span>
                         </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-amber-500 mt-0.5 shrink-0">📄</span>
+                            <span><strong class="text-gray-900 dark:text-white">Estructurar desde PDF</strong> — sube un PDF en el Paso 2 y la IA lo desglosa en secciones (INICIO, desarrollo y CIERRE) conservando su contenido.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="rounded-xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 p-4">
+                    <h4 class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider mb-2">Estructurar lección desde PDF</h4>
+                    <p class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+                        En el Paso 2 puedes subir un PDF y la IA lo convierte en diapositivas
+                        (INICIO, desarrollo y CIERRE) conservando fielmente el contenido del documento.
+                    </p>
+                    <ul class="text-xs text-gray-500 dark:text-slate-500 space-y-1 mt-2">
+                        <li>• Tamaño máximo: <strong class="text-gray-700 dark:text-slate-300">10 MB</strong> y <strong class="text-gray-700 dark:text-slate-300">15 páginas</strong>.</li>
+                        <li>• Solo se toma en cuenta el <strong class="text-gray-700 dark:text-slate-300">texto</strong>; las imágenes y gráficos no se consideran.</li>
                     </ul>
                 </div>
                 <div class="rounded-xl border border-slate-200 dark:border-slate-600/30 bg-white dark:bg-slate-700/10 p-4">

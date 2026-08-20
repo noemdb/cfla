@@ -284,6 +284,43 @@
 
         <x-ui.divider class="my-6"/>
 
+        {{-- ════════════════ Seguridad / Contraseña ════════════════ --}}
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg px-6 py-5 shadow-sm transition-all duration-200 ease-out">
+            <header>
+                <h2 class="text-base font-display font-bold text-gray-900 dark:text-white">Cambiar Contraseña</h2>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Asegúrate de que tu cuenta use una contraseña larga y aleatoria para mantenerse segura.</p>
+            </header>
+
+            <form wire:submit="updatePassword" class="mt-6 space-y-6">
+                <div>
+                    <x-input-label for="current_password" value="Contraseña Actual" />
+                    <x-text-input wire:model="current_password" id="current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+                    <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="password" value="Nueva Contraseña" />
+                    <x-text-input wire:model="password" id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="password_confirmation" value="Confirmar Contraseña" />
+                    <x-text-input wire:model="password_confirmation" id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <x-primary-button wire:loading.attr="disabled" wire:target="updatePassword">
+                        Guardar
+                    </x-primary-button>
+                    <span wire:loading wire:target="updatePassword" class="text-sm text-gray-400">Guardando…</span>
+                </div>
+            </form>
+        </div>
+
+        <x-ui.divider class="my-6"/>
+
         <!-- ══════════════ Enlaces rápidos ══════════════ -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <a href="{{ route('student.lms.academic') }}"

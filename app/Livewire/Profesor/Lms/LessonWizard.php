@@ -95,6 +95,8 @@ class LessonWizard extends Component
 
     public string $allLessonsSortDirection = 'desc';
 
+    public int $paginate = 15;
+
     public string $detailActivityId = '';
 
     public bool $showDetailModal = false;
@@ -368,6 +370,11 @@ class LessonWizard extends Component
         $this->resetPage('allLessonsPage');
     }
 
+    public function updatingPaginate()
+    {
+        $this->resetPage('allLessonsPage');
+    }
+
     // ─── Detección de cambios sin guardar ────────────────────
     // Marca $saved = false cuando el usuario modifica datos desde el frontend
     public function updating($name, $value): void
@@ -475,7 +482,7 @@ class LessonWizard extends Component
 
         $query->orderBy($this->allLessonsSortField, $this->allLessonsSortDirection);
 
-        return $query->paginate(15, ['*'], 'allLessonsPage');
+        return $query->paginate($this->paginate, ['*'], 'allLessonsPage');
     }
 
     public function sortByAllLessons(string $field): void
@@ -3298,6 +3305,21 @@ PROMPT;
         $this->validate([
             'pdfFile' => ['required', 'file', 'max:10240', 'mimes:pdf'],
         ]);
+
+        // ─── Límite de páginas ────────────────────────────────
+        $maxPages = (int) config('lms.datalab.max_pages', 15);
+        $pageCount = $this->pdfExtractorService->pageCount($this->pdfFile->getRealPath());
+
+        if ($pageCount > $maxPages) {
+            $this->pdfFile = null;
+
+            $this->notification()->error(
+                'PDF demasiado largo',
+                "El PDF tiene {$pageCount} páginas y el máximo permitido es {$maxPages}. Divide el documento en partes de hasta {$maxPages} páginas y vuelve a intentarlo."
+            );
+
+            return;
+        }
 
         $pdfText = $this->pdfExtractorService->extract($this->pdfFile->getRealPath());
         $this->pdfFile = null;

@@ -73,7 +73,8 @@ class ActivityView extends Component
         $this->modoLectura = (bool) (auth()->user()?->estudiant?->modo_lectura ?? false);
 
         $this->activity = $activity;
-        $this->isPreview = $activity->lmsPublication?->isPreviewToStudents() ?? false;
+        $previewService = app(\App\Services\Lms\LmsPreviewService::class);
+        $this->isPreview = $previewService->isPreview($activity);
 
         $this->sections = $activity->lmsSections()
             ->where('is_visible', true)
@@ -89,31 +90,25 @@ class ActivityView extends Component
             ->where('is_visible', true)
             ->get();
 
-        $this->htmlEmbeds = $activity->lmsHtmlEmbeds()
-            ->where('is_visible', true)
-            ->get()
-            ->map(function ($embed) {
-                // Detección unificada de Mermaid (mismo pipeline que el wizard):
-                // keyword inicial, div.mermaid legacy y data-mermaid-code. Además
-                // normaliza html_content extrayendo el código plano.
-                $data = app(\App\Services\Lms\LmsContentRendererService::class)
-                    ->ensureMermaidWrapper($embed->toArray());
-                $embed->html_content = $data['html_content'];
-                $embed->is_mermaid = $data['is_mermaid'];
-
-                return $embed;
-            });
+        $this->htmlEmbeds = $previewService->normalizeEmbeds(
+            $activity->lmsHtmlEmbeds()
+                ->where('is_visible', true)
+                ->get()
+        );
 
         // Vista previa (now() < publish_at): solo la 1ª sección y sus adjuntos
         // vinculados. Los adjuntos globales (section_id vacío) quedan ocultos.
-        if ($this->isPreview) {
-            $firstSection = $this->sections->first();
-            $firstSectionId = $firstSection?->id;
-            $this->sections = $firstSection ? collect([$firstSection]) : collect();
-            $this->resources = $this->resources->filter(fn ($r) => $r->section_id === $firstSectionId);
-            $this->links = $this->links->filter(fn ($l) => $l->section_id === $firstSectionId);
-            $this->htmlEmbeds = $this->htmlEmbeds->filter(fn ($e) => $e->section_id === $firstSectionId);
-        }
+        $preview = $previewService->applyPreview(
+            $this->sections,
+            $this->resources,
+            $this->links,
+            $this->htmlEmbeds,
+            $this->isPreview
+        );
+        $this->sections = $preview['sections'];
+        $this->resources = $preview['resources'];
+        $this->links = $preview['links'];
+        $this->htmlEmbeds = $preview['htmlEmbeds'];
 
         $this->comments = ActivityComment::with([
             'user.profile',

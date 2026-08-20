@@ -92,12 +92,7 @@
                 @endif
 
                     <div class="flex gap-3 flex-1 min-w-0">
-                        {{-- Avatar --}}
-                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                            <span class="text-xs font-bold text-gray-400">
-                                {{ strtoupper(substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
-                            </span>
-                        </div>
+                        <x-lms.user-avatar :user="$comment->user" size="md" ring="ring-2 ring-white/10" fallback="bg-white/10 text-gray-400" />
 
                         <div class="flex-1 min-w-0">
                             {{-- Metadata --}}
@@ -112,6 +107,14 @@
                                 <span class="text-[10px] text-gray-400 px-1.5 py-0.5 rounded bg-white/5">
                                     {{ $comment->activity?->pevaluacion?->pensum?->asignatura?->name ?? '—' }}
                                 </span>
+                                @if($comment->replies->isNotEmpty())
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                        </svg>
+                                        {{ $comment->replies->count() }} {{ $comment->replies->count() === 1 ? 'respuesta' : 'respuestas' }}
+                                    </span>
+                                @endif
                             </div>
 
                             {{-- Actividad --}}
@@ -141,15 +144,51 @@
                             @if($comment->replies->isNotEmpty())
                                 <div class="mt-2 ml-2 pl-3 border-l-2 border-emerald-500/30 space-y-2">
                                     @foreach($comment->replies as $reply)
-                                        <div>
+                                        <div wire:key="reply-{{ $reply->id }}">
                                             <div class="flex items-center gap-2 flex-wrap">
+                                                <x-lms.user-avatar :user="$reply->user" size="xs" ring="ring-2 ring-emerald-500/20" fallback="bg-emerald-500/10 text-emerald-300" />
                                                 <span class="text-[10px] font-semibold text-emerald-300">
                                                     {{ $reply->user?->profile?->firstname ?? '—' }}
                                                 </span>
                                                 <span class="text-[9px] font-bold uppercase text-emerald-400/70 bg-emerald-500/10 px-1 rounded">Profesor</span>
                                                 <span class="text-[10px] text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+
+                                                {{-- Acciones del autor/admin (mejora #4) --}}
+                                                @if(auth()->id() === $reply->user_id || auth()->user()->is_admin)
+                                                    <span class="flex items-center gap-1.5">
+                                                        <button wire:click="openEditReply({{ $reply->id }})"
+                                                                class="text-[9px] font-semibold text-gray-400 hover:text-emerald-400 transition-colors">
+                                                            Editar
+                                                        </button>
+                                                        <button wire:click="confirmDeleteReply({{ $reply->id }})"
+                                                                class="text-[9px] font-semibold text-gray-400 hover:text-red-400 transition-colors">
+                                                            Borrar
+                                                        </button>
+                                                    </span>
+                                                @endif
                                             </div>
-                                            <p class="text-xs text-gray-300 mt-0.5">{{ $reply->body }}</p>
+
+                                            @if($editReplyId === $reply->id)
+                                                <div class="mt-1 space-y-1">
+                                                    <textarea wire:model="editReplyBody" rows="2" maxlength="1000"
+                                                              class="w-full bg-white/5 border border-white/10 text-gray-200 rounded-lg px-3 py-2 text-sm
+                                                                     focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none
+                                                                     placeholder:text-gray-600 resize-none transition-all"></textarea>
+                                                    @error('editReplyBody') <p class="text-xs text-red-400 mt-1">{{ $message }}</p> @enderror
+                                                    <div class="flex gap-2 justify-end">
+                                                        <button wire:click="$set('editReplyId', null)"
+                                                                class="px-2 py-1 text-[10px] text-gray-400 hover:text-gray-300 transition-colors">
+                                                            Cancelar
+                                                        </button>
+                                                        <button wire:click="saveEditReply" wire:loading.attr="disabled"
+                                                                class="px-3 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors">
+                                                            Guardar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <p class="text-xs text-gray-300 mt-0.5">{{ $reply->body }}</p>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>

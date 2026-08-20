@@ -527,15 +527,116 @@
                                                 Generar estructura con IA
                                             </button>
 
-                                            <input type="file" id="pdf-upload-input" accept="application/pdf" class="hidden"
-                                                   wire:model="pdfFile" @disabled($isPublished)">
+<input type="file" id="pdf-upload-input" accept="application/pdf" class="hidden"
+                                                   wire:model="pdfFile" @disabled($isPublished)>
+                                            @error('pdfFile')
+                                                <span class="text-[10px] text-red-500">{{ $message }}</span>
+                                            @enderror
                                             @if($pdfFile)
-                                                <button wire:click="generateStep2FromPdf"
-                                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium
-                                                               text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-all" @disabled($isPublished)>
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                    Procesar PDF
-                                                </button>
+                                                <div wire:key="pdf-file-loaded" class="contents" x-data="{ pdfModalOpen: false }" x-init="pdfModalOpen = true">
+                                                    {{-- Chip compacto: indica archivo cargado y reabre el modal --}}
+                                                    <div class="fade-in flex items-center gap-1.5 max-w-sm w-full rounded-xl border border-amber-500/40 bg-white/70 dark:bg-slate-800/70 p-1.5 pr-2 shadow-sm">
+                                                        <button type="button" @click="pdfModalOpen = true"
+                                                                class="flex items-center gap-2 flex-1 min-w-0 px-2 py-1.5 rounded-lg text-left hover:bg-amber-500/10 transition-colors">
+                                                            <svg class="w-4 h-4 text-amber-500 dark:text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 13H8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17H8"/></svg>
+                                                            <span class="min-w-0 flex-1">
+                                                                <span class="block text-[11px] font-semibold text-gray-900 dark:text-white truncate">{{ $pdfFile->getClientOriginalName() }}</span>
+                                                                <span class="block text-[9px] text-gray-500 dark:text-slate-400">PDF cargado · ver detalles</span>
+                                                            </span>
+                                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-semibold uppercase tracking-wide shrink-0">
+                                                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                                Listo
+                                                            </span>
+                                                        </button>
+                                                        <button type="button" wire:click="$set('pdfFile', null)"
+                                                                class="shrink-0 p-1.5 rounded-lg text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors" title="Quitar PDF" @disabled($isPublished)>
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </div>
+
+                                                    {{-- Backdrop --}}
+                                                    <div x-show="pdfModalOpen" x-transition:enter="transition-opacity duration-200" x-transition:leave="transition-opacity duration-150" class="fixed inset-0 z-[9998] bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm" @click="pdfModalOpen = false" style="display: none;"></div>
+
+                                                    {{-- Modal centrado (info del archivo) --}}
+                                                    <div x-show="pdfModalOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" @keydown.escape.window="pdfModalOpen = false" class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="display: none;">
+                                                        <div @click.stop class="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+                                                            <div class="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent"></div>
+
+                                                            <div class="flex items-center justify-between gap-3 px-5 pt-5 pb-4 border-b border-gray-100 dark:border-slate-700/50">
+                                                                <div class="flex items-center gap-3 min-w-0">
+                                                                    <div class="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/25 to-amber-500/10 ring-1 ring-amber-500/20 flex items-center justify-center">
+                                                                        <svg class="w-5 h-5 text-amber-500 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 13H8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17H8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9H8"/></svg>
+                                                                    </div>
+                                                                    <div class="min-w-0">
+                                                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Archivo PDF cargado</h3>
+                                                                        <p class="text-[10px] text-gray-500 dark:text-slate-400">Genera la estructura de la lección desde el documento</p>
+                                                                    </div>
+                                                                </div>
+                                                                <button @click="pdfModalOpen = false" class="shrink-0 p-1.5 rounded-lg text-gray-400 dark:text-slate-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors" title="Cerrar">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="p-5 space-y-4">
+                                                                <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5">
+                                                                    <div class="flex items-center gap-3">
+                                                                        <div class="shrink-0 w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                                                                            <svg class="w-5 h-5 text-amber-500 dark:text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 2v6h6"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 13H8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17H8"/></svg>
+                                                                        </div>
+                                                                        <div class="min-w-0 flex-1">
+                                                                            <p class="text-sm font-semibold text-gray-900 dark:text-white break-all leading-snug">{{ $pdfFile->getClientOriginalName() }}</p>
+                                                                            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                                                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 text-[9px] font-bold uppercase tracking-wide">.pdf</span>
+                                                                                <span class="text-[10px] text-gray-500 dark:text-slate-400">{{ number_format($pdfFile->getSize() / 1024, 0, ',', '.') }} KB</span>
+                                                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-semibold uppercase tracking-wide">
+                                                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                                                    Listo
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="rounded-lg bg-gray-50 dark:bg-slate-700/20 border border-gray-200 dark:border-slate-600/30 p-3 space-y-1">
+                                                                    <p class="text-[10px] text-gray-500 dark:text-slate-400 leading-relaxed">
+                                                                        El PDF se analiza con IA y se desglosa en secciones (INICIO, desarrollo y CIERRE) conservando su contenido.
+                                                                    </p>
+                                                                    <p class="text-[10px] text-amber-600 dark:text-amber-400 leading-relaxed">
+                                                                        Máx. 10 MB y 15 páginas. Solo se analiza el <strong class="font-semibold">texto</strong>; las imágenes y gráficos no se consideran.
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="flex items-center justify-between gap-2 px-5 py-4 bg-gray-50/50 dark:bg-slate-700/20 border-t border-gray-100 dark:border-slate-700/50">
+                                                                <button type="button" wire:click="$set('pdfFile', null)"
+                                                                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-semibold text-red-500/80 hover:text-red-500 hover:bg-red-500/10 transition-colors" @disabled($isPublished)>
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                    Quitar archivo
+                                                                </button>
+                                                                <div class="flex items-center gap-2">
+                                                                    <button type="button" onclick="document.getElementById('pdf-upload-input').click()"
+                                                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-medium text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700/50 border border-gray-200 dark:border-slate-600/50 transition-all" @disabled($isPublished)>
+                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 20v-5h-5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 9a8 8 0 0114.5-3M20 15a8 8 0 01-14.5 3"/></svg>
+                                                                        Cambiar archivo
+                                                                    </button>
+                                                                    <button wire:click="generateStep2FromPdf"
+                                                                            @click="pdfModalOpen = false"
+                                                                            wire:loading.attr="disabled"
+                                                                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-amber-500 hover:bg-amber-400 active:scale-[0.98] transition-all shadow-md shadow-amber-500/25 focus-visible:ring-2 ring-amber-500/50 focus-visible:ring-offset-2" @disabled($isPublished)>
+                                                                        <span wire:loading.remove wire:target="generateStep2FromPdf">
+                                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                                            Procesar PDF
+                                                                        </span>
+                                                                        <span wire:loading wire:target="generateStep2FromPdf" class="inline-flex items-center gap-1.5">
+                                                                            <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+                                                                            Procesando…
+                                                                        </span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @else
                                                 <button type="button"
                                                         onclick="document.getElementById('pdf-upload-input').click()"
@@ -546,7 +647,10 @@
                                                 </button>
                                             @endif
                                         </div>
-                                        <p class="text-[10px] text-gray-400 dark:text-slate-600">El PDF se analiza con IA para desglosarlo en secciones (INICIO, desarrollo y CIERRE).</p>
+                                        @if(! $pdfFile)
+                                            <p class="text-[10px] text-gray-400 dark:text-slate-600">El PDF se analiza con IA para desglosarlo en secciones (INICIO, desarrollo y CIERRE).</p>
+                                            <p class="text-[10px] text-amber-500/90 dark:text-amber-400/80">Límite: máximo 10 MB y 15 páginas. Solo se toma en cuenta el texto; las imágenes y gráficos no se consideran.</p>
+                                        @endif
                                     </div>
                                 </div>
                             @endif

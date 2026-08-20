@@ -83,10 +83,10 @@
             <div class="flex items-center justify-between gap-4 flex-wrap">
                 <h2 class="text-sm font-bold text-gray-900 dark:text-white shrink-0">Planificación Académica</h2>
                 <div class="flex items-center gap-0.5">
-                    <a href="{{ route('student.lms.home') }}"
+                    {{-- <a href="{{ route('student.lms.home') }}"
                        class="px-2.5 py-1.5 min-h-[36px] text-xs font-medium rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-500/10 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                         Actividades
-                    </a>
+                    </a> --}}
                     <a href="{{ route('student.lms.lessons') }}"
                        class="px-2.5 py-1.5 min-h-[36px] text-xs font-medium rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-300 hover:bg-emerald-500/10 focus-visible:ring-2 ring-emerald-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
                         Lecciones

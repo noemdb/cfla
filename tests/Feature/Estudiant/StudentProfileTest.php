@@ -11,6 +11,7 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Learner\Estudiant;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -126,6 +127,43 @@ class StudentProfileTest extends TestCase
             ->assertSet('stats.completed', 0)
             ->assertSet('stats.progress_pct', 0)
             ->assertSee('Sin actividades');
+    }
+
+    public function test_student_can_update_password_and_gets_toast(): void
+    {
+        $user = $this->createEnrolledStudentWithProfile();
+        $user->password = Hash::make('old-password');
+        $user->save();
+
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\Student\Lms\Profile::class)
+            ->set('current_password', 'old-password')
+            ->set('password', 'new-secret-123')
+            ->set('password_confirmation', 'new-secret-123')
+            ->call('updatePassword')
+            ->assertDispatched('wireui:notification')
+            ->assertSet('current_password', '')
+            ->assertSet('password', '')
+            ->assertSet('password_confirmation', '');
+
+        $this->assertTrue(Hash::check('new-secret-123', $user->fresh()->password));
+    }
+
+    public function test_student_password_change_rejects_wrong_current_password(): void
+    {
+        $user = $this->createEnrolledStudentWithProfile();
+        $user->password = Hash::make('old-password');
+        $user->save();
+
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\Student\Lms\Profile::class)
+            ->set('current_password', 'wrong-password')
+            ->set('password', 'new-secret-123')
+            ->set('password_confirmation', 'new-secret-123')
+            ->call('updatePassword')
+            ->assertHasErrors(['current_password']);
+
+        $this->assertTrue(Hash::check('old-password', $user->fresh()->password));
     }
 
     private function createActivityChainForSeccion(int $seccionId): int

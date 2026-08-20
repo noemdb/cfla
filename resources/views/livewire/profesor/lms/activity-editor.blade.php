@@ -287,17 +287,21 @@
         @forelse($activityComments as $comment)
             <div wire:key="ac-{{ $comment->id }}"
                  class="flex gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
-                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-                    <span class="text-xs font-bold text-slate-300">
-                        {{ strtoupper(substr($comment->user?->profile?->firstname ?? $comment->user?->name ?? '?', 0, 1)) }}
-                    </span>
-                </div>
+                <x-lms.user-avatar :user="$comment->user" size="md" ring="ring-2 ring-slate-600/60" fallback="bg-slate-700 text-slate-300" />
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-medium text-slate-200">
                             {{ $comment->user?->profile?->firstname ?? $comment->user?->name ?? '—' }}
                         </span>
                         <span class="text-[10px] text-slate-500">{{ $comment->created_at->diffForHumans() }}</span>
+                        @if($comment->replies->isNotEmpty())
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 text-[10px] font-semibold">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                </svg>
+                                {{ $comment->replies->count() }} {{ $comment->replies->count() === 1 ? 'respuesta' : 'respuestas' }}
+                            </span>
+                        @endif
                     </div>
                     <p class="text-sm text-slate-300 mt-1">{{ $comment->body }}</p>
 
@@ -305,15 +309,50 @@
                     @if($comment->replies->isNotEmpty())
                         <div class="mt-2 ml-2 pl-3 border-l-2 border-emerald-500/30 space-y-2">
                             @foreach($comment->replies as $reply)
-                                <div>
+                                <div wire:key="reply-{{ $reply->id }}">
                                     <div class="flex items-center gap-2">
+                                        <x-lms.user-avatar :user="$reply->user" size="xs" ring="ring-2 ring-emerald-500/20" fallback="bg-emerald-500/10 text-emerald-300" />
                                         <span class="text-[10px] font-semibold text-emerald-300">
                                             {{ $reply->user?->profile?->firstname ?? '—' }}
                                         </span>
                                         <span class="text-[9px] font-bold uppercase text-emerald-400/70 bg-emerald-500/10 px-1 rounded">Profesor</span>
                                         <span class="text-[10px] text-slate-500">{{ $reply->created_at->diffForHumans() }}</span>
+
+                                        {{-- Acciones del autor/admin (mejora #4) --}}
+                                        @if(auth()->id() === $reply->user_id || auth()->user()->is_admin)
+                                            <span class="flex items-center gap-1.5">
+                                                <button wire:click="openActivityEditReply({{ $reply->id }})"
+                                                        class="text-[9px] font-semibold text-slate-400 hover:text-emerald-400 transition-colors">
+                                                    Editar
+                                                </button>
+                                                <button wire:click="confirmActivityDeleteReply({{ $reply->id }})"
+                                                        class="text-[9px] font-semibold text-slate-400 hover:text-red-400 transition-colors">
+                                                    Borrar
+                                                </button>
+                                            </span>
+                                        @endif
                                     </div>
-                                    <p class="text-xs text-slate-300 mt-0.5">{{ $reply->body }}</p>
+
+                                    @if($activityEditReplyId === $reply->id)
+                                        <div class="mt-1 space-y-1">
+                                            <textarea wire:model="activityEditReplyBody" rows="2" maxlength="1000"
+                                                      class="w-full bg-slate-900 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm
+                                                             placeholder-slate-500 resize-none transition-all"></textarea>
+                                            @error('activityEditReplyBody') <p class="text-xs text-red-400">{{ $message }}</p> @enderror
+                                            <div class="flex gap-2 justify-end">
+                                                <button wire:click="$set('activityEditReplyId', null)"
+                                                        class="px-2 py-1 text-[10px] text-slate-400 hover:text-slate-300 transition-colors">
+                                                    Cancelar
+                                                </button>
+                                                <button wire:click="saveActivityEditReply" wire:loading.attr="disabled"
+                                                        class="px-3 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg">
+                                                    Guardar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <p class="text-xs text-slate-300 mt-0.5">{{ $reply->body }}</p>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>

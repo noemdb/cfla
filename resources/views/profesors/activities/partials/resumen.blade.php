@@ -14,6 +14,12 @@
         </span>
     </div>
 
+    {{-- Plan de Estudio --}}
+    <div>
+        <span class="block text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-1">Plan de Estudio</span>
+        <span class="text-gray-300 font-medium">{{ $pevaluacion->pensum?->pestudio?->name ?? '—' }}</span>
+    </div>
+
     {{-- Área de Formación --}}
     <div>
         <span class="block text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-1">Área de Formación</span>

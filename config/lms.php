@@ -24,6 +24,8 @@ return [
         'poll_interval' => (int) env('DATALAB_POLL_INTERVAL', 2),
         // Reintentos ante 429/5xx en el submit.
         'max_attempts' => (int) env('DATALAB_MAX_ATTEMPTS', 3),
+        // Máximo de páginas permitido para PDFs subidos en el paso 2.
+        'max_pages' => (int) env('LMS_PDF_MAX_PAGES', 15),
     ],
 
     /*

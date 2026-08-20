@@ -147,9 +147,7 @@
 
         {{-- Pagination --}}
         @if(method_exists($pevaluacions, 'links'))
-            <div class="mt-3 pt-3 border-t border-white/5">
-                {{ $pevaluacions->appends(request()->query())->links('vendor.pagination.custom-tailwind') }}
-            </div>
+            <x-pagination-wrapper :paginator="$pevaluacions" />
         @endif
     </div>
 </div>
