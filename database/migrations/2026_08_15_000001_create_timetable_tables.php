@@ -40,8 +40,11 @@ return new class extends Migration
                 // PLAN-TIMETABLE-002: columna generada que solo aporta clave si
                 // status='active' → N borradores/alternativas por lapso, máximo
                 // UNO activo (los NULL no colisionan en índice único).
+                // VIRTUAL (no STORED): MySQL/MariaDB < 10.5 y MySQL 8 rechazan FK
+                // sobre la columna base de una STORED generated column (#138);
+                // con VIRTUAL las FK de lapso_id/pescolar_id se crean en prod.
                 $table->string('active_lapso_key', 20)
-                    ->storedAs("IF(status = 'active', CONCAT('L', lapso_id), NULL)");
+                    ->virtualAs("IF(status = 'active', CONCAT('L', lapso_id), NULL)");
                 $table->unsignedSmallInteger('period_minutes')->default(45);
                 $table->unsignedInteger('version')->default(0);          // §15 bloqueo optimista
                 $table->decimal('quality_score', 8, 2)->nullable();      // §6.2
