@@ -1,9 +1,9 @@
 # Spec: Módulo de Diagramas de Flujo (`/app/planning/flow`)
 
-**Versión:** 1.3
+**Versión:** 1.4
 **Autor:** Codex / Agent Workspace
-**Fecha:** 2026-08-06
-**Estado:** AS-IS con mejoras de alta y media prioridad implementadas, mejora de baja prioridad (servicio+selector) y nueva infografía `activity-lesson-planning` (ver secciones 5A, 5B y 5C)
+**Fecha:** 2026-08-25
+**Estado:** AS-IS con mejoras de alta y media prioridad implementadas, mejora de baja prioridad (servicio+selector), infografía `activity-lesson-planning` (secciones 5A, 5B y 5C) y diagramas de coexistencia `docs/coexistencia` integrados al hub (sección 5D)
 
 ---
 
@@ -14,9 +14,9 @@ La interfaz **`/app/planning/flow`** es el *hub* del módulo **Diagramas de Fluj
 El módulo actual:
 
 - **No usa Livewire** — es un controlador HTTP estándar + vista Blade `@extends('planning.layouts.app')`.
-- **Se alimenta dinámicamente** de archivos estáticos en `docs/infografia/flujo{Studly}.html`. Cualquier archivo nuevo con prefijo `flujo` se publica automáticamente.
+- **Se alimenta dinámicamente** de archivos estáticos en `docs/infografia/flujo{Studly}.html` y de `docs/coexistencia/{slug}.html`. Cualquier archivo nuevo se publica automáticamente.
 - **Sirve cada infografía** como archivo estático (HTML completo con su propio `<html>`, Tailwind CDN, etc.) bajo `/app/planning/diagram/flow/{slug}`.
-- **Incluye cobertura de tests** en `tests/Feature/Planning/FlowDiagramTest.php` (10 tests).
+- **Incluye cobertura de tests** en `tests/Feature/Planning/FlowDiagramTest.php` (25 tests).
 - **Tiene una hoja de estilos propia** determinada por la vista Blade del hub y el layout `planning.layouts.app`.
 
 Dado que la ruta está protegida por el grupo `app/planning` (middleware `auth + isPlanner`), el contenido es **solo para planificadores autenticados**.
@@ -59,6 +59,8 @@ private const DIAGRAMS_PATH = 'docs/infografia';
 | `flujoActivityLesson.html` | `activity-lesson` | Flujo de Actividad y Lección (LMS) | Actividad → Lección | Recorrido completo de una actividad académica hasta convertirse en lección visible para los estudiantes: aprobación, programación y publicación. |
 | `flujoActivityLessonPlanning.html` | `activity-lesson-planning` | Planificación en el Flujo Actividad / Lección | Planning · Actividad → Lección | Casos de uso de Planning en el recorrido de una actividad académica: carga académica, aprobación de la actividad, monitorización LMS y publicación de la lección. |
 | `flujoConsejoDirectivo.html` | `consejo-directivo` | Informe al Consejo Directivo · CFLA 2026 | Consejo Directivo · 2026 | Puntos presentados ante el Consejo Directivo: propuestas tecnológicas (IA y correo institucional), continuidad de SAEF 25-26, renovación del dominio web y nuevos proyectos de innovación con el fundamento metodológico de Marco Lógico. |
+| `docs/coexistencia/dualidad-aula-virtual.html` | `dualidad-aula-virtual` | Dualidad de Funciones en el Aula Virtual | Coexistencia · SAE ↔ Planificación | Mapa de solapamiento entre SAE y el Módulo de Planificación: funciones exclusivas, zona de dualidad del aula virtual y resolución por audiencia canónica (estudiante, representante, docente). |
+| `docs/coexistencia/comparativo-aulas-virtuales.html` | `comparativo-aulas-virtuales` | Comparativo de Aulas Virtuales — SAE vs. Planificación | Coexistencia · Comparativo | Comparativa objetiva basada en hechos verificados: capacidades confirmadas, parciales o no evidenciadas de SAE WEB frente a las documentadas en el módulo de planificación. |
 
 ### 2.4 Vista Blade (`resources/views/planning/flow.blade.php`)
 
@@ -241,6 +243,42 @@ Los siguientes ítems de baja prioridad fueron implementados junto con la nueva 
 
 ---
 
+## 5D. Diagramas de Coexistencia — IMPLEMENTADOS (v1.4)
+
+Integración de los diagramas de coexistencia SAE ↔ Módulo Planificación al hub, manteniendo su fuente en `docs/coexistencia/` (sin mover archivos):
+
+12. **Descubrimiento multi-directorio** ✅
+    - `FlowDiagramService` añade la constante `COEXISTENCE_PATH = 'docs/coexistencia'`.
+    - `list()` fusiona el glob de `docs/infografia/flujo*.html` (slug = kebab tras `flujo`) con `docs/coexistencia/*.html` (slug = nombre del archivo), con `unique('slug')`.
+    - `resolveFile()` resuelve primero `docs/infografia/flujo{Studly}.html` y como fallback `docs/coexistencia/{slug}.html`. El regex estricto del slug evita traversal.
+
+13. **Metadatos de las nuevas tarjetas** ✅
+    - `dualidad-aula-virtual`: order=4, accent=`amber`, category=`Coexistencia`, badge «Coexistencia · SAE ↔ Planificación», status=`nuevo`.
+    - `comparativo-aulas-virtuales`: order=5, accent=`amber`, category=`Coexistencia`, badge «Coexistencia · Comparativo», status=`nuevo`.
+
+14. **Acento `amber` en el hub** ✅
+    - `flow.blade.php` reemplaza los ternarios cyan/emerald por un `match` que soporta tres acentos (`cyan`, `emerald`, `amber`) para texto/fondo/borde/top/icono/hover y líneas del mini-diagrama.
+
+15. **Nota de publicación actualizada** ✅
+    - La nota "¿Cómo se publican estos recursos?" menciona ambas fuentes: `docs/infografia/flujo{Nombre}.html` y `docs/coexistencia/{slug}.html`.
+
+16. **Cobertura de tests ampliada** ✅
+    - 3 tests nuevos en `FlowDiagramTest` (total 25): hub lista ambos diagramas de coexistencia, `dualidad-aula-virtual.html` servido por slug directo, `comparativo-aulas-virtuales.html` servido por slug directo.
+
+**Archivos tocados (coexistencia):**
+
+| Archivo | Cambio |
+|---|---|
+| `app/Services/Planning/FlowDiagramService.php` | `COEXISTENCE_PATH`, fusión de globs en `list()`, fallback en `resolveFile()`, metadatos de los 2 nuevos slugs. |
+| `resources/views/planning/flow.blade.php` | Acento `amber` vía `match`; nota de publicación con ambas fuentes. |
+| `tests/Feature/Planning/FlowDiagramTest.php` | 3 tests nuevos (hub + servido × 2). Total 25 tests. |
+| `docs/coexistencia/dualidad-aula-virtual.html` | Diagrama de dualidad del aula virtual (Venn + resolución por audiencia). |
+| `docs/coexistencia/comparativo-aulas-virtuales.html` | Comparativo objetivo de aulas virtuales (tabla agrupada). |
+| `docs/coexistencia/comparativa-sae-vs-planificacion.md` | Comparativa objetiva + conclusión + recomendación de coexistencia. |
+| `blueprint/flow/modulo-flow-as-is.md` | Esta sección 5D (v1.4). |
+
+---
+
 ## 5. Oportunidades de Mejora (listado ordenado por prioridad de impacto)
 
 > Los ítems están ordenados del mayor impacto/beneficio al menor, asumiendo esfuerzo razonable.
@@ -303,7 +341,7 @@ Los siguientes ítems de baja prioridad fueron implementados junto con la nueva 
 php artisan test --filter=FlowDiagramTest
 ```
 
-Deben pasar los **16 tests** existentes.
+Deben pasar los **25 tests** existentes.
 
 ---
 

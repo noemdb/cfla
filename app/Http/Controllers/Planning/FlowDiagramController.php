@@ -10,9 +10,7 @@ class FlowDiagramController extends Controller
     /**
      * Servicio de diagramas de flujo (descubrimiento, metadatos, servido).
      */
-    public function __construct(private readonly FlowDiagramService $diagramService)
-    {
-    }
+    public function __construct(private readonly FlowDiagramService $diagramService) {}
 
     /**
      * Hub: lista los diagramas de flujo disponibles.
@@ -31,6 +29,11 @@ class FlowDiagramController extends Controller
      * Sirve una infografía de flujo por slug.
      *
      * Ej.: /diagram/flow/activity-lesson → docs/infografia/flujoActivityLesson.html
+     *
+     * Se sirve con cabeceras anti-caché: los diagramas son documentos vivos que
+     * pueden actualizarse (p. ej. autor, fechas) y el navegador no debe
+     * mostrar versiones obsoletas (response()->file() emite Last-Modified/ETag
+     * que el navegador puede reutilizar).
      */
     public function show(string $diagram)
     {
@@ -40,6 +43,10 @@ class FlowDiagramController extends Controller
             abort(404);
         }
 
-        return response()->file($file);
+        return response()->file($file, [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, private, max-age=0',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+        ]);
     }
 }

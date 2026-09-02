@@ -72,6 +72,20 @@ class FlowDiagramTest extends TestCase
         $response->assertSee(route('app.planning.diagram.flow.show', 'activity-lesson-planning'), false);
     }
 
+    public function test_flow_hub_lists_coexistence_diagrams(): void
+    {
+        $planner = $this->makePlanner();
+
+        $response = $this->actingAs($planner)->get(route('app.planning.flow.index'));
+
+        $response->assertOk();
+        // Los diagramas de coexistencia (docs/coexistencia) aparecen en el hub.
+        $response->assertSee('Dualidad de Funciones en el Aula Virtual');
+        $response->assertSee(route('app.planning.diagram.flow.show', 'dualidad-aula-virtual'), false);
+        $response->assertSee('Comparativo de Aulas Virtuales — SAE vs. Planificación');
+        $response->assertSee(route('app.planning.diagram.flow.show', 'comparativo-aulas-virtuales'), false);
+    }
+
     public function test_flow_hub_opens_diagram_in_new_tab(): void
     {
         $planner = $this->makePlanner();
@@ -113,10 +127,10 @@ class FlowDiagramTest extends TestCase
         // la salta; solo el título consejo (ASCII) coincide dentro de la blob.
         // Medir sobre el h3 compara posiciones del mismo contexto (las tarjetas).
         $activityPos = strpos($html, '>Flujo de Actividad y Lección (LMS)<');
-        $consejoPos  = strpos($html, '>Informe al Consejo Directivo');
+        $consejoPos = strpos($html, '>Informe al Consejo Directivo');
 
         $this->assertNotFalse($activityPos, 'El diagrama Activity-Lesson debería estar presente');
-        $this->assertNotFalse($consejoPos,  'El diagrama Consejo Directivo debería estar presente');
+        $this->assertNotFalse($consejoPos, 'El diagrama Consejo Directivo debería estar presente');
         $this->assertLessThan($consejoPos, $activityPos);
     }
 
@@ -263,6 +277,35 @@ class FlowDiagramTest extends TestCase
         $file = $response->baseResponse->getFile();
         $this->assertNotNull($file);
         $this->assertSame('flujoActivityLessonPlanning.html', $file->getFilename());
+    }
+
+    public function test_dualidad_aula_virtual_diagram_is_served(): void
+    {
+        $planner = $this->makePlanner();
+
+        $response = $this->actingAs($planner)
+            ->get(route('app.planning.diagram.flow.show', 'dualidad-aula-virtual'));
+
+        $response->assertOk();
+
+        // Los diagramas de coexistencia se resuelven por slug directo en docs/coexistencia.
+        $file = $response->baseResponse->getFile();
+        $this->assertNotNull($file);
+        $this->assertSame('dualidad-aula-virtual.html', $file->getFilename());
+    }
+
+    public function test_comparativo_aulas_virtuales_diagram_is_served(): void
+    {
+        $planner = $this->makePlanner();
+
+        $response = $this->actingAs($planner)
+            ->get(route('app.planning.diagram.flow.show', 'comparativo-aulas-virtuales'));
+
+        $response->assertOk();
+
+        $file = $response->baseResponse->getFile();
+        $this->assertNotNull($file);
+        $this->assertSame('comparativo-aulas-virtuales.html', $file->getFilename());
     }
 
     public function test_unknown_diagram_returns_404(): void

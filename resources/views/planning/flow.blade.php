@@ -93,14 +93,12 @@
             @forelse ($diagrams as $diagram)
                 @php($diagramUrl = route('app.planning.diagram.flow.show', $diagram['slug']))
                 @php($accent = $diagram['accent'] ?? 'cyan')
-                @php($accentText = $accent === 'cyan' ? 'text-cyan-400' : 'text-emerald-400')
-                @php($accentBg = $accent === 'cyan' ? 'bg-cyan-500/10' : 'bg-emerald-500/10')
-                @php($accentBorder = $accent === 'cyan' ? 'border-cyan-500/20' : 'border-emerald-500/20')
-                @php($accentTop = $accent === 'cyan' ? 'border-t-cyan-500' : 'border-t-emerald-500')
-                @php($accentIcon = $accent === 'cyan' ? 'text-cyan-400' : 'text-emerald-400')
-                @php($accentHover = $accent === 'cyan' ? 'hover:bg-cyan-500/20' : 'hover:bg-emerald-500/20')
+                @php([$accentText, $accentBg, $accentBorder, $accentTop, $accentIcon, $accentHover, $hoverBorder] = match ($accent) {
+                    'amber'   => ['text-amber-300', 'bg-amber-500/10', 'border-amber-500/20', 'border-t-amber-500', 'text-amber-400', 'hover:bg-amber-500/20', 'hover:border-amber-500/30'],
+                    'emerald' => ['text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'border-t-emerald-500', 'text-emerald-400', 'hover:bg-emerald-500/20', 'hover:border-emerald-500/30'],
+                    default   => ['text-cyan-400', 'bg-cyan-500/10', 'border-cyan-500/20', 'border-t-cyan-500', 'text-cyan-400', 'hover:bg-cyan-500/20', 'hover:border-cyan-500/30'],
+                })
                 @php($diagramTags = $diagram['tags'] ?? [])
-                @php($hoverBorder = $accent === 'cyan' ? 'hover:border-cyan-500/30' : 'hover:border-emerald-500/30')
                 <div
                     x-show="filteredDiagrams.some(d => d.slug === '{{ $diagram['slug'] }}')"
                     class="diagnostic-card group relative bg-gray-900/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden transition-all duration-300 border-t-4 {{ $accentTop }} {{ $hoverBorder }}">
@@ -117,7 +115,7 @@
                         {{-- Mini-diagrama conceptual del flujo --}}
                         <div class="relative z-10 h-full w-full flex items-center justify-center gap-2 px-6">
                             @php($nodeClasses = "w-10 h-10 md:w-12 md:h-12 rounded-lg border flex items-center justify-center {{ $accentBg }} {{ $accentBorder }}")
-                            @php($lineClasses = "flex-1 h-px max-w-8 {{ $accent === 'cyan' ? 'bg-cyan-500/40' : 'bg-emerald-500/40' }}")
+                            @php($lineClasses = "flex-1 h-px max-w-8 {{ $accent === 'amber' ? 'bg-amber-500/40' : ($accent === 'emerald' ? 'bg-emerald-500/40' : 'bg-cyan-500/40') }}")
 
                             <div class="{{ $nodeClasses }}">
                                 <svg class="w-5 h-5 {{ $accentIcon }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
@@ -231,7 +229,7 @@
                 ¿Cómo se publican estos recursos?
             </h4>
             <p class="text-sm text-gray-400 leading-relaxed mb-3">
-                Cada infografía vive como un archivo estático en <code class="text-cyan-400 bg-cyan-500/10 px-1 py-0.5 rounded text-xs break-all inline-block max-w-full align-bottom">docs/infografia/flujo{{ '{' }}Nombre{{ '}' }}.html</code> y queda disponible automáticamente bajo la URL:
+                Cada infografía vive como un archivo estático en <code class="text-cyan-400 bg-cyan-500/10 px-1 py-0.5 rounded text-xs break-all inline-block max-w-full align-bottom">docs/infografia/flujo{{ '{' }}Nombre{{ '}' }}.html</code> o en <code class="text-amber-300 bg-amber-500/10 px-1 py-0.5 rounded text-xs break-all inline-block max-w-full align-bottom">docs/coexistencia/{{ '{' }}slug{{ '}' }}.html</code> y queda disponible automáticamente bajo la URL:
             </p>
             <div class="flex items-center gap-2 flex-wrap">
                 <code class="text-xs bg-black/40 border border-white/10 text-emerald-300 px-3 py-1.5 rounded-lg font-mono break-all">{{ url('app/planning/diagram/flow') }}/*</code>

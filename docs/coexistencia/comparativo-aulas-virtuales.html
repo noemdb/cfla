@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Comparativo de Aulas Virtuales — SAE vs. Módulo Planificación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: {
+                            100: '#E6F2DD',
+                            300: '#B1D3B9',
+                            400: '#88BDA4',
+                            500: '#659287',
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .glass { background: white !important; border: 1px solid #ccc !important; color: black !important; }
+            .shadow-2xl, .shadow-xl, .shadow-lg { box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased bg-grid min-h-screen">
+
+    <!-- Botón Flotante -->
+    <button onclick="window.print()" class="no-print fixed bottom-6 right-6 z-50 bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-full shadow-2xl transition-all hover:scale-110 flex items-center gap-2 font-semibold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Exportar PDF
+    </button>
+
+    <main class="max-w-6xl mx-auto px-4 py-12 space-y-16">
+
+        <!-- MEMBRETE INSTITUCIONAL -->
+        <section>
+            <div class="glass rounded-2xl px-6 py-6 md:py-8 text-center relative overflow-hidden shadow-lg">
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-sage-500 via-sage-400 to-sage-300"></div>
+                <h1 class="text-xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+                    UNIDAD EDUCATIVA COLEGIO FRAY LUIS AMIGÓ
+                </h1>
+                <div class="mt-3 flex items-center justify-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-sage-500 via-sage-400 to-sage-300 flex items-center justify-center text-white font-extrabold shadow-md">S</span>
+                    <span class="text-lg font-extrabold tracking-tight text-slate-800">SAEFL</span>
+                    <span class="w-1 h-6 bg-slate-200 rounded"></span>
+                    <span class="text-base font-semibold text-slate-600">Coexistencia de Sistemas · Comparativo</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- HEADER GRÁFICO -->
+        <header class="relative">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-sage-400/20 rounded-full blur-3xl -z-10"></div>
+            <div class="flex flex-col items-center text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4 border border-sage-300">
+                    <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
+                    Basado en hechos verificables · sin afirmaciones no evidenciadas
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-sage-500 to-slate-900 mb-4 leading-tight">
+                    Dos Aulas Virtuales,<br/>Dos Enfoques
+                </h1>
+                <p class="text-lg text-slate-500 max-w-3xl mx-auto font-medium">
+                    La capa de e-learning declarada por <strong class="text-slate-700">SAE WEB</strong> frente al
+                    <strong class="text-sage-500">Módulo de Planificación</strong> del SAEFL: qué confirma la evidencia pública,
+                    qué documenta cada blueprint y dónde termina el alcance de cada uno.
+                </p>
+            </div>
+        </header>
+
+        <!-- LEYENDA DE MARCAS -->
+        <section class="glass rounded-2xl p-5 shadow-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div class="flex items-start gap-3">
+                    <span class="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-lg bg-sage-100 text-sage-500 font-extrabold border border-sage-300">✓</span>
+                    <p class="text-slate-600"><strong class="text-slate-800">Confirmado / Documentado.</strong><br/><span class="text-xs text-slate-500">SAE: verificado en páginas públicas (dictamen). Planificación: documentado en esquema y specs.</span></p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-lg bg-amber-100 text-amber-600 font-extrabold border border-amber-300">◑</span>
+                    <p class="text-slate-600"><strong class="text-slate-800">Parcial o en esquema.</strong><br/><span class="text-xs text-slate-500">SAE: declarado por el proveedor sin detalle técnico. Planificación: previsto en esquema, alcance pedagógico.</span></p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-lg bg-slate-100 text-slate-400 font-extrabold border border-slate-200">✗</span>
+                    <p class="text-slate-600"><strong class="text-slate-800">No evidenciado / No disponible.</strong><br/><span class="text-xs text-slate-500">SAE: «no evidenciado públicamente» ≠ inexistente. Planificación: fuera del alcance actual.</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABLA COMPARATIVA -->
+        <section>
+            <div class="glass rounded-3xl shadow-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[720px]">
+                        <thead>
+                            <tr class="bg-slate-900 text-white">
+                                <th class="py-4 px-5 font-bold text-sm uppercase tracking-wider w-[38%]">Función del aula virtual</th>
+                                <th class="py-4 px-5 font-bold text-sm uppercase tracking-wider w-[31%] border-l border-white/10">
+                                    SAE WEB <span class="block text-[10px] font-semibold text-slate-300 normal-case tracking-normal mt-0.5">asistescolar.com · evidencia pública</span>
+                                </th>
+                                <th class="py-4 px-5 font-bold text-sm uppercase tracking-wider w-[31%] border-l border-white/10">
+                                    Módulo Planificación <span class="block text-[10px] font-semibold text-sage-200 normal-case tracking-normal mt-0.5">SAEFL · blueprints del proyecto</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <!-- CONTENIDOS -->
+                            <tr class="bg-sage-100/60">
+                                <td colspan="3" class="py-2.5 px-5 text-[11px] font-extrabold uppercase tracking-widest text-sage-500">Contenidos</td>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Lecciones estructuradas por secciones tipificadas</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-amber-600">◑</span> <span class="text-slate-600">«recursos educativos» declarados, sin estructura pública detallada</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">secciones + tipos de contenido, recursos, enlaces, embeds HTML</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Contenido técnico enriquecido (Mermaid/KaTeX, slideshow estudiante)</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no evidenciado</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">render en navegador + vista estudiante tipo presentación</span></td>
+                            </tr>
+
+                            <!-- TAREAS E INTERACCIÓN -->
+                            <tr class="bg-sage-100/60">
+                                <td colspan="3" class="py-2.5 px-5 text-[11px] font-extrabold uppercase tracking-widest text-sage-500">Tareas e interacción</td>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Tareas con recepción, corrección y feedback docente</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">confirmado: pendientes/entregadas, calificación, comentario, tiempo restante</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">assignments/submissions + comentarios por actividad</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Chat con representantes y foros de dudas</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">confirmado</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no construido (SAE lo cubre)</span></td>
+                            </tr>
+
+                            <!-- EVALUACIÓN Y SEGUIMIENTO -->
+                            <tr class="bg-sage-100/60">
+                                <td colspan="3" class="py-2.5 px-5 text-[11px] font-extrabold uppercase tracking-widest text-sage-500">Evaluación y seguimiento</td>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Evaluaciones interactivas autocalificables</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no evidenciado («actividades interactivas» sin especificar)</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-amber-600">◑</span> <span class="text-slate-600">assessments/questions/attempts definidos en esquema</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Progreso y completions del estudiante</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-amber-600">◑</span> <span class="text-slate-600">consulta de tareas/notas; analítica de aprendizaje no evidenciada</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-amber-600">◑</span> <span class="text-slate-600">activity/content progress + completions en esquema</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Notas oficiales y boletines MPPE</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">núcleo regulado (01–20, NC, P, Art.109, IN)</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">fuera de alcance → SAE lo cubre</span></td>
+                            </tr>
+
+                            <!-- PUBLICACIÓN Y GOBERNANZA -->
+                            <tr class="bg-sage-100/60">
+                                <td colspan="3" class="py-2.5 px-5 text-[11px] font-extrabold uppercase tracking-widest text-sage-500">Publicación y gobernanza</td>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Publicación programada automática (con despublicación)</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no evidenciado</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">DRAFT → SCHEDULED → PUBLISHED → ARCHIVED</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Aprobación formal y supervisión multi-rol</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no evidenciado</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">Candado 1 + monitores Planning/Liderazgo/Coordinación/Dirección</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Auditoría (logs) e impresión oficial</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">no evidenciado</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">activity_logs + vistas Ver/Imprimir por módulo</span></td>
+                            </tr>
+
+                            <!-- COMUNICACIÓN Y ACCESO -->
+                            <tr class="bg-sage-100/60">
+                                <td colspan="3" class="py-2.5 px-5 text-[11px] font-extrabold uppercase tracking-widest text-sage-500">Comunicación y acceso</td>
+                            </tr>
+                            <tr class="bg-white border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Notificaciones de publicaciones</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">push nativas (app móvil)</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">tiempo real web (Reverb/Echo) + dropdown de notificaciones DB</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70 border-b border-slate-100">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">App móvil nativa</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-amber-600">◑</span> <span class="text-slate-600">iOS/Android declarados; disponibilidad a validar por versión/módulo</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">web responsive</span></td>
+                            </tr>
+                            <tr class="bg-slate-50/70">
+                                <td class="py-3.5 px-5 font-semibold text-slate-700">Incidencias del estudiante</td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-sage-500">✓</span> <span class="text-slate-600">módulo reciente de la app</span></td>
+                                <td class="py-3.5 px-5 border-l border-slate-100"><span class="font-bold text-slate-400">✗</span> <span class="text-slate-400">fuera de alcance → SAE lo cubre</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SÍNTESIS -->
+        <section>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="rounded-2xl p-6 shadow-lg border-t-4 border-slate-500 bg-white">
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <h3 class="font-extrabold text-slate-900 mb-2">Fortaleza SAE</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed"><strong>Núcleo regulado + alcance familiar.</strong> Control de estudio MPPE completo, app móvil, chat, incidencias y portal de representante. Su capa e-learning es real pero genérica.</p>
+                </div>
+                <div class="rounded-2xl p-6 shadow-lg border-t-4 border-sage-500 bg-white">
+                    <div class="w-12 h-12 rounded-xl bg-sage-100 flex items-center justify-center text-sage-500 mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <h3 class="font-extrabold text-slate-900 mb-2">Fortaleza Planificación</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed"><strong>Gobernanza pedagógica + trazabilidad.</strong> Publicación programada, aprobación formal, supervisión multi-rol, auditoría y contenido estructurado más rico que lo evidenciado en SAE.</p>
+                </div>
+                <div class="rounded-2xl p-6 shadow-lg border-t-4 border-amber-400 bg-white">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 mb-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="font-extrabold text-slate-900 mb-2">Implicación práctica</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">El solape se limita al aula virtual. Con audiencias canónicas definidas, <strong>coexistir suma capacidades</strong>; sin ellas, duplica esfuerzo docente. Ver <em>dualidad-aula-virtual.html</em>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center border-t border-slate-200 pt-10 mt-12">
+            <div class="max-w-3xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sage-100 border border-sage-300 text-sage-500 text-xs font-bold tracking-wider uppercase mb-4">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Nota metodológica
+                </div>
+                <p class="text-sm text-slate-500 mb-4">
+                    Columna SAE: únicamente veredictos de <strong class="text-slate-800">analisisyValidacion.md</strong> (fuente de verdad).
+                    Columna Planificación: capacidades documentadas en los blueprints del proyecto.
+                </p>
+                <p class="text-xs text-slate-400">«No evidenciado públicamente» ≠ «inexistente»: la ausencia comercial no demuestra ausencia funcional. • Revisión: 2026-08-25</p>
+            </div>
+        </footer>
+
+    </main>
+</body>
+</html>

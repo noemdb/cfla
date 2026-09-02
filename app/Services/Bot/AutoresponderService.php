@@ -14,7 +14,7 @@ class AutoresponderService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(env('APP_URL_SAEFL', 'http://localhost:2526'), '/') . '/api/bot/autoresponder';
+        $this->baseUrl = config('bot.saefl.base_url') . config('bot.saefl.autoresponder_path');
     }
 
     /**
