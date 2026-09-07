@@ -23,6 +23,8 @@ final class LessonToSchedule
         public readonly bool $locked = false,
         /** @var array<int, int> Si locked=true, períodos ya fijados. */
         public readonly array $lockedPeriodIds = [],
+        /** Sub-grupo (componente de formación). null = lección de sección completa. */
+        public readonly ?int $grupoEstableId = null,
     ) {}
 
     public function blocksNeeded(): int

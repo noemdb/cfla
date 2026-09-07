@@ -6,6 +6,7 @@ use App\Jobs\Timetable\GenerateTimetableJob;
 use App\Jobs\Timetable\NotifyTimetableChangesJob;
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
@@ -13,6 +14,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
+use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableShift;
@@ -94,6 +96,36 @@ class GenerateTimetableJobTest extends TestCase
 
         $payload = $fixture['calendar']->fresh()->preview_payload;
         $this->assertNotEmpty($payload['unassigned']);
+    }
+
+    public function test_infeasible_non_dry_run_records_unassigned_conflict(): void
+    {
+        $fixture = $this->smallFeasibleFixture();
+        $this->addOverloadedLesson($fixture);
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: false);
+
+        $this->assertTrue(
+            TimetableConflict::query()
+                ->where('calendar_id', $fixture['calendar']->id)
+                ->where('type', 'unassigned')
+                ->exists(),
+            'La lección sobresaturada debe quedar registrada como conflicto sin asignar.',
+        );
+    }
+
+    public function test_job_schedules_parallel_subgroups_in_same_period(): void
+    {
+        $fixture = $this->parallelSubgroupFixture();
+
+        GenerateTimetableJob::dispatchSync($fixture['calendar']->id, dryRun: false);
+
+        $slots = TimetableSlot::query()->where('calendar_id', $fixture['calendar']->id)->get();
+
+        $this->assertCount(2, $slots);
+        // Ambos sub-grupos de la MISMA sección caen en el MISMO período (paralelo).
+        $this->assertSame($fixture['period']->id, $slots[0]->period_id);
+        $this->assertSame($fixture['period']->id, $slots[1]->period_id);
     }
 
     public function test_job_is_queued_not_run_inline(): void
@@ -252,6 +284,63 @@ class GenerateTimetableJobTest extends TestCase
         ]);
 
         return compact('calendar', 'shift', 'periods', 'lessonA', 'lessonB', 'profesorA', 'profesorB');
+    }
+
+    /**
+     * Misma sección + mismo pensum, divididos en dos sub-grupos (paralelo).
+     * Un único período disponible para forzar que ambos lo compartan.
+     */
+    private function parallelSubgroupFixture(): array
+    {
+        $user = User::factory()->create();
+        $profesorA = Profesor::create([
+            'user_id' => $user->id, 'name' => 'Ana', 'lastname' => 'López',
+            'ci_profesor' => '7001', 'status_active' => 'true',
+        ]);
+        $userB = User::factory()->create();
+        $profesorB = Profesor::create([
+            'user_id' => $userB->id, 'name' => 'Beto', 'lastname' => 'Pérez',
+            'ci_profesor' => '7002', 'status_active' => 'true',
+        ]);
+
+        $pestudio = Pestudio::factory()->create();
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id]);
+
+        $asignatura = Asignatura::factory()->create(['hour_t_week' => 1, 'hour_p_week' => 0]);
+        $pensum = Pensum::factory()->create([
+            'pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id,
+        ]);
+
+        $lapso = Lapso::factory()->create();
+        $grupoA = GrupoEstable::factory()->create(['name' => 'Grupo 1']);
+        $grupoB = GrupoEstable::factory()->create(['name' => 'Grupo 2']);
+        $pevA = Pevaluacion::factory()->create([
+            'profesor_id' => $profesorA->id, 'seccion_id' => $seccion->id,
+            'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id, 'grupo_estable_id' => $grupoA->id,
+        ]);
+        $pevB = Pevaluacion::factory()->create([
+            'profesor_id' => $profesorB->id, 'seccion_id' => $seccion->id,
+            'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id, 'grupo_estable_id' => $grupoB->id,
+        ]);
+
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shift = TimetableShift::factory()->create();
+        $period = TimetablePeriod::factory()->create([
+            'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
+            'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,
+        ]);
+
+        TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $pevA->id, 'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+        ]);
+        TimetableLesson::factory()->create([
+            'calendar_id' => $calendar->id, 'pevaluacion_id' => $pevB->id, 'shift_id' => $shift->id,
+            'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+        ]);
+
+        return compact('calendar', 'period');
     }
 
     /**

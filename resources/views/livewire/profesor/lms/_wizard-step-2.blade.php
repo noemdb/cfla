@@ -510,6 +510,31 @@
                                         </p>
                                     </div>
                                 @endif
+
+                                @if($generatingSection === null && $hasDeterministicFallback && $deterministicFallbackContext)
+                                    <div class="px-4 py-3 bg-amber-500/10 border-t border-amber-500/20 space-y-2">
+                                        <p class="text-xs text-amber-300 flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M10.29 3.86l-7.2 12.48A2 2 0 004.82 19h14.36a2 2 0 001.73-2.66l-7.2-12.48a2 2 0 00-3.42 0z"/></svg>
+                                            La IA no completó la operación. Se aplicó una plantilla local y el bloque quedó como borrador.
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button wire:click="saveDeterministicFallbackDraft"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="saveDeterministicFallbackDraft"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-amber-900 bg-amber-300 hover:bg-amber-200 disabled:opacity-50 transition-colors">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                Guardar como borrador
+                                            </button>
+                                            <button wire:click="downloadDeterministicFallbackContext"
+                                                    wire:loading.attr="disabled"
+                                                    wire:target="downloadDeterministicFallbackContext"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-amber-200 hover:text-white bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 disabled:opacity-50 transition-colors">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+                                                Descargar prompt y contexto
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
                             @else
                                 {{-- Empty State: No slides --}}
                                 <div class="p-8 text-center">

@@ -28,6 +28,8 @@ class TimetableEditor extends Component
 
     public ?string $conflictMessage = null;
 
+    public ?int $version = null; // §15 bloqueo optimista (versión del calendario)
+
     public bool $loading = false;
 
     protected ConflictValidator $validator;
@@ -59,6 +61,10 @@ class TimetableEditor extends Component
             return;
         }
 
+        if (! $this->assertEditableVersion($slot->calendar_id)) {
+            return;
+        }
+
         $result = $this->validator->validate(
             calendarId: $slot->calendar_id,
             lessonId: $slot->lesson_id,
@@ -67,6 +73,7 @@ class TimetableEditor extends Component
             seccionId: $slot->seccion_id,
             roomId: $slot->room_id,
             ignoreSlotId: $slot->id,
+            grupoEstableId: $slot->grupo_estable_id ? (int) $slot->grupo_estable_id : null,
         );
 
         if (! $result['valid']) {
@@ -80,6 +87,7 @@ class TimetableEditor extends Component
             'is_manual_override' => true,
         ]);
 
+        $this->bumpVersion($slot->calendar_id);
         $this->dispatch('timetable.slot-moved', slotId: $slotId, periodId: $newPeriodId);
     }
 
@@ -100,6 +108,10 @@ class TimetableEditor extends Component
             return;
         }
 
+        if (! $this->assertEditableVersion($calendar->id)) {
+            return;
+        }
+
         $result = $this->validator->validate(
             calendarId: $calendar->id,
             lessonId: $lesson->id,
@@ -107,6 +119,7 @@ class TimetableEditor extends Component
             profesorId: $lesson->pevaluacion->profesor_id,
             seccionId: $lesson->pevaluacion->seccion_id,
             roomId: null,
+            grupoEstableId: $lesson->pevaluacion->grupo_estable_id ? (int) $lesson->pevaluacion->grupo_estable_id : null,
         );
 
         if (! $result['valid']) {
@@ -121,11 +134,13 @@ class TimetableEditor extends Component
             'period_id' => $periodId,
             'profesor_id' => $lesson->pevaluacion->profesor_id,
             'seccion_id' => $lesson->pevaluacion->seccion_id,
+            'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id ? (int) $lesson->pevaluacion->grupo_estable_id : null,
             'room_id' => null,
             'is_manual_override' => true,
             'locked' => false,
         ]);
 
+        $this->bumpVersion($calendar->id);
         $this->dispatch('timetable.slot-created', lessonId: $lessonId, periodId: $periodId);
     }
 
@@ -144,8 +159,44 @@ class TimetableEditor extends Component
             return;
         }
 
+        if (! $this->assertEditableVersion($slot->calendar_id)) {
+            return;
+        }
+
         $slot->delete();
+        $this->bumpVersion($slot->calendar_id);
         $this->dispatch('timetable.slot-removed', slotId: $slotId);
+    }
+
+    /**
+     * §15 — Comprueba que el calendario no fue modificado por otro usuario.
+     */
+    private function assertEditableVersion(int $calendarId): bool
+    {
+        if ($this->version === null) {
+            return true;
+        }
+
+        $calendar = TimetableCalendar::query()->find($calendarId);
+        if (! $calendar || $calendar->version !== $this->version) {
+            $this->conflictMessage = 'Otro usuario modificó este horario. Recarga la página para continuar.';
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * §15 — Incrementa la versión del calendario tras una mutación del editor.
+     */
+    private function bumpVersion(int $calendarId): void
+    {
+        $calendar = TimetableCalendar::query()->find($calendarId);
+        if ($calendar) {
+            $calendar->increment('version');
+            $this->version = $calendar->version;
+        }
     }
 
     /**
@@ -173,6 +224,8 @@ class TimetableEditor extends Component
         $unplacedLessons = collect();
 
         if ($calendar) {
+            $this->version = $calendar->version;
+
             $periods = TimetablePeriod::query()
                 ->where('calendar_id', $calendar->id)
                 ->with('shift')

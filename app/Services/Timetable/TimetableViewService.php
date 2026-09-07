@@ -30,14 +30,16 @@ class TimetableViewService
     /**
      * Grilla día (col) × período (fila) para una sección.
      *
-     * @return Collection<int, Collection<int, TimetableSlot|null>>
+     * Una celda puede contener VARIOS slots (división por sub-grupos en paralelo).
+     *
+     * @return Collection<int, Collection<int, Collection<int, TimetableSlot>>>
      */
     public function gridForSection(TimetableCalendar $calendar, int $seccionId): Collection
     {
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('seccion_id', $seccionId)
-            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.profesor'])
+            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.profesor', 'lesson.pevaluacion.grupoEstable'])
             ->get();
 
         return $this->buildGrid($calendar, $slots);
@@ -48,7 +50,7 @@ class TimetableViewService
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('profesor_id', $profesorId)
-            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion'])
+            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.grupoEstable'])
             ->get();
 
         return $this->buildGrid($calendar, $slots);
@@ -59,14 +61,14 @@ class TimetableViewService
         $slots = TimetableSlot::query()
             ->where('calendar_id', $calendar->id)
             ->where('room_id', $roomId)
-            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.profesor'])
+            ->with(['lesson.pevaluacion.pensum.asignatura', 'lesson.pevaluacion.seccion', 'lesson.pevaluacion.profesor', 'lesson.pevaluacion.grupoEstable'])
             ->get();
 
         return $this->buildGrid($calendar, $slots);
     }
 
     /**
-     * @return Collection<int, Collection<int, TimetableSlot|null>>
+     * @return Collection<int, Collection<int, Collection<int, TimetableSlot>>>
      */
     private function buildGrid(TimetableCalendar $calendar, Collection $slots): Collection
     {
@@ -82,11 +84,12 @@ class TimetableViewService
             foreach (range(1, 5) as $day) {
                 $period = $group->first(fn ($p) => (int) $p->day_of_week === $day);
                 if (! $period) {
-                    $row->put($day, null);
+                    $row->put($day, collect());
 
                     continue;
                 }
-                $row->put($day, $slots->first(fn ($s) => (int) $s->period_id === (int) $period->id));
+                $cell = $slots->filter(fn ($s) => (int) $s->period_id === (int) $period->id);
+                $row->put($day, $cell->values());
             }
             $rows->put((int) $order, $row);
         }

@@ -15,12 +15,16 @@ class TimetableSlot extends Model
 
     protected $fillable = [
         'calendar_id', 'lesson_id', 'period_id', 'profesor_id', 'seccion_id',
-        'room_id', 'is_manual_override', 'locked',
+        'grupo_estable_id', 'room_id', 'is_manual_override', 'locked',
     ];
 
     protected $casts = [
         'is_manual_override' => 'boolean',
         'locked' => 'boolean',
+    ];
+
+    protected $hidden = [
+        'slot_section_key',
     ];
 
     public function calendar()
@@ -46,6 +50,11 @@ class TimetableSlot extends Model
     public function seccion()
     {
         return $this->belongsTo(Seccion::class, 'seccion_id');
+    }
+
+    public function grupoEstable()
+    {
+        return $this->belongsTo(\App\Models\app\Academy\GrupoEstable::class, 'grupo_estable_id');
     }
 
     public function room()

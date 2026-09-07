@@ -125,6 +125,10 @@ class TimetableCalendar extends Model
      */
     public function activate(): void
     {
+        if (! $this->slots()->exists()) {
+            throw new \DomainException('No se puede activar un calendario sin horario generado.');
+        }
+
         DB::transaction(function () {
             TimetableCalendar::query()
                 ->forLapso($this->lapso_id)

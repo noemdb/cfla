@@ -111,6 +111,29 @@ class TimetableEditorTest extends TestCase
         $this->assertDatabaseMissing('timetable_slots', ['id' => $fixture['slot']->id]);
     }
 
+    public function test_stale_version_blocks_mutation(): void
+    {
+        $fixture = $this->editorFixture();
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        // El editor se hidrata con version = N (render inicial).
+        $editor = Livewire::actingAs($user)
+            ->test(TimetableEditor::class, ['calendarId' => $fixture['calendar']->id])
+            ->assertSet('version', $fixture['calendar']->version);
+
+        // Otro usuario modifica el calendario → la versión de la BD avanza.
+        $fixture['calendar']->increment('version');
+
+        $freePeriod = $fixture['periods'][4];
+
+        // El editor (con version stale) debe rechazar el cambio.
+        $editor->call('moveSlot', $fixture['slot']->id, $freePeriod->id)
+            ->assertNotSet('conflictMessage', null);
+
+        $this->assertStringContainsString('Otro usuario', $editor->get('conflictMessage'));
+        $this->assertSame($fixture['periods'][0]->id, $fixture['slot']->fresh()->period_id);
+    }
+
     // ─── Fixtures ──────────────────────────────────────────────
 
     private function editorFixture(): array

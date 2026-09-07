@@ -45,10 +45,10 @@ class LessonsPrintController extends Controller
         // nombre de la ruta.
         $routeName = $request->route()?->getName() ?? '';
         $module = match (true) {
-            str_contains($routeName, 'leadership')   => 'leadership',
+            str_contains($routeName, 'leadership') => 'leadership',
             str_contains($routeName, 'coordinacion') => 'coordinacion',
-            str_contains($routeName, 'planning')     => 'planning',
-            default                                  => 'director',
+            str_contains($routeName, 'planning') => 'planning',
+            default => 'director',
         };
 
         // Scope: Dirección y Planificación supervisan TODA la institución;
@@ -56,7 +56,7 @@ class LessonsPrintController extends Controller
         // asignadas / peducativos gestionados). Los `with([...])` de abajo se
         // encadenan tras el scope.
         $query = match ($module) {
-            'leadership'   => app(LeadershipService::class, ['user' => $request->user()])
+            'leadership' => app(LeadershipService::class, ['user' => $request->user()])
                 ->scopeActivities(Activity::query()),
             'coordinacion' => app(CoordinacionScopeService::class, ['user' => $request->user()])
                 ->scopeActivities(Activity::query()),
@@ -111,6 +111,12 @@ class LessonsPrintController extends Controller
             $query->whereHas('lmsPublication', fn ($q) => $q->where('status', $request->string('status')));
         }
 
+        // Impresión de una actividad concreta (botón "Imprimir" por fila del
+        // monitor / listados). Acota la query a esa única actividad.
+        if ($request->filled('activity')) {
+            $query->whereKey($request->integer('activity'));
+        }
+
         if ($request->filled('search')) {
             $search = $request->string('search');
             $query->where(function ($q) use ($search) {
@@ -160,19 +166,19 @@ class LessonsPrintController extends Controller
             'filters',
             'filterLabels'
         ) + [
-            'fecha'    => now()->isoFormat('DD [de] MMMM [de] YYYY'),
+            'fecha' => now()->isoFormat('DD [de] MMMM [de] YYYY'),
             // Membrete según el módulo de origen (4 vías).
             'contexto' => match ($module) {
-                'leadership'   => 'Liderazgo · Seguimiento de lecciones',
+                'leadership' => 'Liderazgo · Seguimiento de lecciones',
                 'coordinacion' => 'Coordinación · Lecciones LMS',
-                'planning'     => 'Planificación · Monitor LMS',
-                default        => 'Dirección',
+                'planning' => 'Planificación · Monitor LMS',
+                default => 'Dirección',
             },
             'titulo' => match ($module) {
-                'leadership'   => 'LIDERAZGO · LECCIONES LMS · CONTENIDO COMPLETO',
+                'leadership' => 'LIDERAZGO · LECCIONES LMS · CONTENIDO COMPLETO',
                 'coordinacion' => 'COORDINACIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
-                'planning'     => 'PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
-                default        => 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+                'planning' => 'PLANIFICACIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
+                default => 'DIRECCIÓN · LECCIONES LMS · CONTENIDO COMPLETO',
             },
         ]);
     }

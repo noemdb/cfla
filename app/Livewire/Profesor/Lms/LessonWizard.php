@@ -19,6 +19,8 @@ use App\Models\app\Instrument\DiagReferent;
 use App\Services\Lms\HtmlTaggingService;
 use App\Services\Lms\LmsAiOrchestrationService;
 use App\Services\Lms\LmsContentRendererService;
+use App\Services\Lms\LmsDeterministicRepairService;
+use App\Services\Lms\LmsHtmlSanitizerService;
 use App\Services\Lms\LmsMediaUploadService;
 use App\Services\Lms\LmsPdfExtractorService;
 use App\Services\Lms\LmsPublicationService;
@@ -42,11 +44,14 @@ class LessonWizard extends Component
 
     protected LmsPdfExtractorService $pdfExtractorService;
 
+    protected LmsDeterministicRepairService $deterministicRepairService;
+
     public function boot(): void
     {
         $this->aiService ??= app(LmsAiOrchestrationService::class);
         $this->rendererService ??= app(LmsContentRendererService::class);
         $this->pdfExtractorService ??= app(LmsPdfExtractorService::class);
+        $this->deterministicRepairService ??= app(LmsDeterministicRepairService::class);
     }
 
     // ─── Mode: 'list' | 'wizard' ──────────────────────────────
@@ -149,6 +154,10 @@ class LessonWizard extends Component
     public bool $generatingStep2 = false;
 
     public ?string $generationError = null;
+
+    public bool $hasDeterministicFallback = false;
+
+    public ?array $deterministicFallbackContext = null;
 
     public ?string $debugRawContent = null;
 
@@ -698,6 +707,8 @@ class LessonWizard extends Component
         $this->generationType = null;
         $this->showFullPreview = false;
         $this->generationError = null;
+        $this->hasDeterministicFallback = false;
+        $this->deterministicFallbackContext = null;
         $this->lessonTitle = '';
         $this->lessonDescription = '';
         $this->reviewQuestions = '';
@@ -1667,6 +1678,8 @@ PROMPT;
 
         $this->generatingSection = $sectionIndex;
         $this->generationError = null;
+        $this->hasDeterministicFallback = false;
+        $this->deterministicFallbackContext = null;
 
         $blockType = $block['type'] ?? 'TEXT';
 
@@ -1713,6 +1726,99 @@ PROMPT;
         $this->dispatch('show-preview');
         $this->notification()->success($result['title'], $result['message']);
         $this->generatingSection = null;
+    }
+
+    /**
+     * Guarda el estado actual del wizard como borrador, sin modificar el
+     * estado de publicación de la actividad.
+     */
+    public function saveDeterministicFallbackDraft(): void
+    {
+        if ($this->publishedGuard()) {
+            return;
+        }
+
+        $this->saveStep2();
+        $this->notification()->success(
+            'Borrador guardado',
+            'El contenido quedó guardado como borrador y puede continuar editándose antes de publicar.'
+        );
+    }
+
+    /**
+     * Descarga el prompt y el contexto del último intento de IA para
+     * continuar el trabajo fuera del wizard.
+     */
+    public function downloadDeterministicFallbackContext()
+    {
+        if (empty($this->deterministicFallbackContext)) {
+            $this->notification()->warning(
+                'Sin contexto disponible',
+                'No hay un intento de IA fallido disponible para descargar.'
+            );
+
+            return null;
+        }
+
+        $context = $this->deterministicFallbackContext;
+        $filename = 'lms-ai-recovery-'.($this->selectedActivityId ?? 'draft').'-'.now()->format('Ymd-His').'.md';
+        $markdown = implode("\n", [
+            '# Recuperación de contenido LMS',
+            '',
+            '> Archivo generado para continuar manualmente una operación de IA fallida.',
+            '',
+            '## Estado',
+            '',
+            '- Actividad: '.($this->selectedActivityId ?? '—'),
+            '- Sección: '.($context['section_title'] ?? '—'),
+            '- Tipo de bloque: '.($context['block_type'] ?? 'TEXT'),
+            '- Motivo: '.($context['reason'] ?? 'Respuesta no disponible'),
+            '',
+            '## Contexto del sistema',
+            '',
+            '```text',
+            $context['system_prompt'] ?? '',
+            '```',
+            '',
+            '## Prompt de usuario',
+            '',
+            '```text',
+            $context['user_prompt'] ?? '',
+            '```',
+            '',
+            '## Contenido original',
+            '',
+            '```text',
+            $context['original_body'] ?? '',
+            '```',
+            '',
+        ]);
+
+        return response()->streamDownload(
+            static function () use ($markdown): void {
+                echo $markdown;
+            },
+            $filename,
+            ['Content-Type' => 'text/markdown; charset=UTF-8']
+        );
+    }
+
+    private function rememberDeterministicFallback(
+        int $sectionIndex,
+        int $contentIndex,
+        string $systemPrompt,
+        string $userPrompt,
+        string $reason,
+    ): void {
+        $this->hasDeterministicFallback = true;
+        $this->deterministicFallbackContext = [
+            'section_title' => $this->wizardSections[$sectionIndex]['title'] ?? 'Sección',
+            'block_type' => $this->wizardSections[$sectionIndex]['contents'][$contentIndex]['type'] ?? 'TEXT',
+            'system_prompt' => $systemPrompt,
+            'user_prompt' => $userPrompt,
+            'original_body' => $this->wizardSections[$sectionIndex]['contents'][$contentIndex]['body'] ?? '',
+            'reason' => $reason,
+        ];
     }
 
     /**
@@ -1812,12 +1918,42 @@ PROMPT;
         );
 
         if (! $result['success']) {
-            return ['ok' => false, 'message' => $result['error']];
+            $this->rememberDeterministicFallback(
+                $sectionIndex,
+                array_search($block, $this->wizardSections[$sectionIndex]['contents'], true) ?: 0,
+                $systemPrompt,
+                $userPrompt,
+                $result['error'] ?? 'La cadena de modelos no respondió.'
+            );
+            $content = $this->deterministicRepairService->fallbackText($rawBody, $ctx['sectionTitle'], $blockType);
+            $block['body'] = $content;
+            $block['type'] = $blockType;
+
+            return [
+                'ok' => true,
+                'title' => 'Bloque conservado localmente',
+                'message' => "La IA no respondió; se aplicó una reparación local en \"{$ctx['sectionTitle']}\".",
+            ];
         }
 
         $content = trim($result['content'] ?? '');
         if (empty($content)) {
-            return ['ok' => false, 'message' => 'La IA no generó contenido para reparar el bloque.'];
+            $this->rememberDeterministicFallback(
+                $sectionIndex,
+                array_search($block, $this->wizardSections[$sectionIndex]['contents'], true) ?: 0,
+                $systemPrompt,
+                $userPrompt,
+                'La cadena de modelos devolvió una respuesta vacía.'
+            );
+            $content = $this->deterministicRepairService->fallbackText($rawBody, $ctx['sectionTitle'], $blockType);
+            $block['body'] = $content;
+            $block['type'] = $blockType;
+
+            return [
+                'ok' => true,
+                'title' => 'Bloque conservado localmente',
+                'message' => "La IA devolvió una respuesta vacía; se aplicó una reparación local en \"{$ctx['sectionTitle']}\".",
+            ];
         }
 
         // Limpiar posibles wrappers markdown (```, ```markdown, ```md)
@@ -1825,8 +1961,14 @@ PROMPT;
         $content = preg_replace('/\n?```\s*$/s', '', $content);
         $content = trim($content);
 
+        // Limpiar fences y metacomentarios antes de guardar Markdown.
+        if ($blockType !== 'HTML') {
+            $content = $this->deterministicRepairService->cleanMarkdown($content);
+        } else {
+            $content = app(LmsHtmlSanitizerService::class)->sanitize($content);
+        }
+
         // Sanitizar y limitar longitud (mismo criterio que generateSlideText)
-        $content = $this->sanitizeText($content, 'basic');
         $content = $this->limitContentForSlide($content);
 
         // Reemplazar el body del bloque conservando su tipo
@@ -2040,15 +2182,45 @@ PROMPT;
         );
 
         if (! $result['success']) {
-            return ['ok' => false, 'message' => $result['error'] ?? 'Error al reparar las expresiones matemáticas.'];
+            $this->rememberDeterministicFallback(
+                $sectionIndex,
+                array_search($block, $this->wizardSections[$sectionIndex]['contents'], true) ?: 0,
+                $systemPrompt,
+                $userPrompt,
+                $result['error'] ?? 'La cadena de modelos no respondió.'
+            );
+            $block['body'] = $this->deterministicRepairService->repairMath($rawBody);
+            $block['type'] = 'MATH';
+            $this->dispatch('math-updated');
+
+            return [
+                'ok' => true,
+                'title' => 'Matemáticas normalizadas localmente',
+                'message' => "La IA no respondió; se normalizó la estructura matemática de \"{$ctx['sectionTitle']}\".",
+            ];
         }
 
         $content = trim($result['content'] ?? '');
         if (empty($content)) {
-            return ['ok' => false, 'message' => 'La IA no generó contenido matemático reparado.'];
+            $this->rememberDeterministicFallback(
+                $sectionIndex,
+                array_search($block, $this->wizardSections[$sectionIndex]['contents'], true) ?: 0,
+                $systemPrompt,
+                $userPrompt,
+                'La cadena de modelos devolvió una respuesta vacía.'
+            );
+            $block['body'] = $this->deterministicRepairService->repairMath($rawBody);
+            $block['type'] = 'MATH';
+            $this->dispatch('math-updated');
+
+            return [
+                'ok' => true,
+                'title' => 'Matemáticas normalizadas localmente',
+                'message' => "La IA devolvió una respuesta vacía; se normalizó la estructura matemática de \"{$ctx['sectionTitle']}\".",
+            ];
         }
 
-        $block['body'] = app(\App\Services\Lms\LmsHtmlSanitizerService::class)->sanitize($content);
+        $block['body'] = $this->deterministicRepairService->repairMath($content);
         $block['type'] = 'MATH';
         $this->dispatch('math-updated');
 
@@ -5893,6 +6065,10 @@ PROMPT;
      * Thin wrapper que delega la orquestación IA
      * a LmsAiOrchestrationService y maneja las notificaciones
      * WireUi y debug_raw_content a nivel de componente.
+     *
+     * $chainKey habilita el proveedor de EMERGENCIA (Nvidia) cuando TODA la
+     * cadena OpenRouter falla — solo operaciones de texto ('text').
+     * Diagramas/SVG/math/embed-card NO deben pasarlo (propuesta #1).
      */
     private function askWithCompaction(
         string $systemPrompt,
@@ -5900,7 +6076,8 @@ PROMPT;
         array $overrides = [],
         int $tokenBudget = 2000,
         ?callable $contentValidator = null,
-        ?array $customChain = null
+        ?array $customChain = null,
+        ?string $chainKey = null
     ): array {
         $result = $this->aiService->askWithCompaction(
             $systemPrompt,
@@ -5917,6 +6094,7 @@ PROMPT;
                     default => null,
                 };
             },
+            chainKey: $chainKey,
         );
 
         if (isset($result['debug_raw_content'])) {

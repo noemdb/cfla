@@ -249,6 +249,46 @@ class TimetableSolverTest extends TestCase
         $this->assertTrue($result->isComplete());
     }
 
+    public function test_parallel_subgroups_of_same_section_can_share_period(): void
+    {
+        // Misma sección, dos sub-grupos distintos, dos docentes distintos, un
+        // único período disponible: deben poder compartir el período (paralelo).
+        $l1 = new LessonToSchedule(lessonId: 1, seccionId: 500, profesorId: 101, shiftId: 10, blocksT: 1, blocksP: 0, grupoEstableId: 10);
+        $l2 = new LessonToSchedule(lessonId: 2, seccionId: 500, profesorId: 102, shiftId: 10, blocksT: 1, blocksP: 0, grupoEstableId: 20);
+
+        $result = (new TimetableSolver([$l1, $l2], [101 => [1], 102 => [1]], [], $this->periodMeta, 30))->solve();
+
+        $this->assertTrue($result->isComplete());
+        $this->assertCount(2, $result->assignment);
+        $this->assertSame(1, $result->assignment[1][0]->periodId);
+        $this->assertSame(1, $result->assignment[2][0]->periodId);
+    }
+
+    public function test_same_subgroup_of_same_section_cannot_share_period(): void
+    {
+        // Misma sección y MISMO sub-grupo en un único período → infactible.
+        $l1 = new LessonToSchedule(lessonId: 1, seccionId: 500, profesorId: 101, shiftId: 10, blocksT: 1, blocksP: 0, grupoEstableId: 10);
+        $l2 = new LessonToSchedule(lessonId: 2, seccionId: 500, profesorId: 102, shiftId: 10, blocksT: 1, blocksP: 0, grupoEstableId: 10);
+
+        $result = (new TimetableSolver([$l1, $l2], [101 => [1], 102 => [1]], [], $this->periodMeta, 30))->solve();
+
+        $this->assertFalse($result->isComplete());
+        $this->assertNotEmpty($result->unassigned);
+    }
+
+    public function test_whole_section_and_subgroup_cannot_share_period(): void
+    {
+        // Lección de sección completa (grupo null) + lección de sub-grupo de la
+        // MISMA sección en un único período → infactible (la completa ocupa todo).
+        $l1 = new LessonToSchedule(lessonId: 1, seccionId: 500, profesorId: 101, shiftId: 10, blocksT: 1, blocksP: 0);
+        $l2 = new LessonToSchedule(lessonId: 2, seccionId: 500, profesorId: 102, shiftId: 10, blocksT: 1, blocksP: 0, grupoEstableId: 10);
+
+        $result = (new TimetableSolver([$l1, $l2], [101 => [1], 102 => [1]], [], $this->periodMeta, 30))->solve();
+
+        $this->assertFalse($result->isComplete());
+        $this->assertNotEmpty($result->unassigned);
+    }
+
     public function test_lesson_with_more_blocks_than_base_pool_is_assignable(): void
     {
         // Una lección de 18 bloques T supera el tope base del pool (14).

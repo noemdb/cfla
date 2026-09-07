@@ -278,8 +278,11 @@ class TimetableWizard extends Component
             'shiftId' => 'required|integer|gt:0',
         ]);
 
-        if (TimetablePeriod::query()->where('calendar_id', $this->calendarId)->exists()) {
-            session()->flash('error', 'Los períodos ya están generados para este calendario.');
+        if (TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('shift_id', $this->shiftId)
+            ->exists()) {
+            session()->flash('error', 'Los períodos de este turno ya están generados.');
 
             return;
         }
@@ -304,8 +307,11 @@ class TimetableWizard extends Component
             'shiftId' => 'required|integer|gt:0',
         ]);
 
-        if (TimetablePeriod::query()->where('calendar_id', $this->calendarId)->exists()) {
-            session()->flash('error', 'Los períodos ya existen.');
+        if (TimetablePeriod::query()
+            ->where('calendar_id', $this->calendarId)
+            ->where('shift_id', $this->shiftId)
+            ->exists()) {
+            session()->flash('error', 'Los períodos de este turno ya existen.');
 
             return;
         }
@@ -403,19 +409,21 @@ class TimetableWizard extends Component
 
         $periodMinutes = max(1, (int) $calendar->period_minutes);
         $pevs = Pevaluacion::query()
-            ->with(['pensum.asignatura', 'seccion', 'profesor'])
+            ->with(['pensum.asignatura', 'seccion', 'profesor', 'grupoEstable'])
             ->where('lapso_id', $calendar->lapso_id)
             ->when($this->selectedPevs, fn ($q) => $q->whereIn('id', $this->selectedPevs))
             ->get();
 
         $this->lessons = $pevs->map(function ($pev) use ($periodMinutes) {
             $asignatura = $pev->pensum?->asignatura;
+            $grupo = $pev->grupoEstable?->name;
 
             return [
                 'pev_id' => $pev->id,
-                'name' => $asignatura?->name.' · '.($pev->seccion?->name ?? ''),
+                'name' => $asignatura?->name.' · '.($pev->seccion?->name ?? '').($grupo ? ' · '.$grupo : ''),
                 'seccion_id' => $pev->seccion_id,
                 'profesor_id' => $pev->profesor_id,
+                'grupo_estable_id' => $pev->grupo_estable_id,
                 'weekly_blocks_t' => (int) ceil(((int) ($asignatura?->hour_t_week ?? 0)) * 60 / $periodMinutes),
                 'weekly_blocks_p' => (int) ceil(((int) ($asignatura?->hour_p_week ?? 0)) * 60 / $periodMinutes),
                 'shift_id' => $this->defaultShiftId(),
@@ -654,7 +662,7 @@ class TimetableWizard extends Component
             $calendar = TimetableCalendar::find($this->calendarId);
             if ($calendar) {
                 $pevaluaciones = Pevaluacion::query()
-                    ->with(['pensum.asignatura', 'seccion', 'profesor'])
+                    ->with(['pensum.asignatura', 'seccion', 'profesor', 'grupoEstable'])
                     ->where('lapso_id', $calendar->lapso_id)
                     ->get();
 

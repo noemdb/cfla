@@ -51,6 +51,10 @@ class LessonsPrintController extends Controller
             'lmsLinks' => fn ($q) => $q->where('is_visible', true),
         ]);
 
+        if ($request->filled('activity')) {
+            $query->whereKey($request->integer('activity'));
+        }
+
         if ($request->filled('search')) {
             $search = $request->string('search');
             $query->where(function ($q) use ($search) {

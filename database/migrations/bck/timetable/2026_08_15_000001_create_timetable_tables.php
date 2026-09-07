@@ -137,13 +137,16 @@ return new class extends Migration
                 $table->unsignedBigInteger('period_id');
                 $table->unsignedInteger('profesor_id');   // profesors.id int unsigned (desnormalizado §3)
                 $table->unsignedInteger('seccion_id');    // seccions.id int unsigned (desnormalizado §3)
+                $table->unsignedBigInteger('grupo_estable_id')->nullable(); // sub-grupo (componente de formación)
+                $table->string('slot_section_key', 30)
+                    ->virtualAs("IF(grupo_estable_id IS NULL, CONCAT('S', seccion_id, ':0'), CONCAT('S', seccion_id, ':G', grupo_estable_id))");
                 $table->unsignedBigInteger('room_id')->nullable();
                 $table->boolean('is_manual_override')->default(false);
                 $table->boolean('locked')->default(false);
                 $table->timestamps();
 
                 $table->unique(['calendar_id', 'period_id', 'profesor_id'], 'uq_slot_teacher');
-                $table->unique(['calendar_id', 'period_id', 'seccion_id'], 'uq_slot_section');
+                $table->unique(['calendar_id', 'period_id', 'slot_section_key'], 'uq_slot_section');
                 $table->unique(['calendar_id', 'period_id', 'room_id'], 'uq_slot_room'); // NULL no colisiona en MySQL
                 $table->unique(['calendar_id', 'period_id', 'lesson_id'], 'uq_slot_lesson');
                 $table->foreign('calendar_id')->references('id')->on('timetable_calendars')->onDelete('cascade');
@@ -151,6 +154,7 @@ return new class extends Migration
                 $table->foreign('period_id')->references('id')->on('timetable_periods')->onDelete('cascade');
                 $table->foreign('profesor_id')->references('id')->on('profesors');
                 $table->foreign('seccion_id')->references('id')->on('seccions');
+                $table->foreign('grupo_estable_id')->references('id')->on('grupo_estables')->onDelete('set null');
                 $table->foreign('room_id')->references('id')->on('timetable_rooms');
             });
         }
@@ -161,9 +165,11 @@ return new class extends Migration
                 $table->bigIncrements('id');
                 $table->unsignedBigInteger('calendar_id');
                 $table->unsignedBigInteger('slot_id')->nullable();
+                $table->unsignedBigInteger('lesson_id')->nullable();
+                $table->unsignedBigInteger('period_id')->nullable();
                 $table->enum('type', [
                     'teacher_double_booked', 'room_double_booked', 'section_double_booked',
-                    'availability_violation', 'shift_mismatch',
+                    'availability_violation', 'shift_mismatch', 'unassigned',
                 ]);
                 $table->json('details')->nullable();
                 $table->boolean('resolved')->default(false);
@@ -171,6 +177,8 @@ return new class extends Migration
 
                 $table->foreign('calendar_id')->references('id')->on('timetable_calendars')->onDelete('cascade');
                 $table->foreign('slot_id')->references('id')->on('timetable_slots')->onDelete('set null');
+                $table->foreign('lesson_id')->references('id')->on('timetable_lessons')->onDelete('set null');
+                $table->foreign('period_id')->references('id')->on('timetable_periods')->onDelete('set null');
             });
         }
 

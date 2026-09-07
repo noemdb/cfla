@@ -127,6 +127,32 @@ class TimetableWizardTest extends TestCase
         $this->assertSame(30, TimetablePeriod::query()->where('calendar_id', $calendar->id)->count());
     }
 
+    public function test_step1_creates_periods_for_multiple_shifts(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $shiftM = TimetableShift::factory()->create(['code' => 'M', 'name' => 'Mañana']);
+        $shiftT = TimetableShift::factory()->afternoon()->create(['code' => 'T', 'name' => 'Tarde']);
+
+        $wizard = Livewire::actingAs($user)->test(TimetableWizard::class);
+
+        // Turno mañana: 5 días × 6 bloques = 30 períodos.
+        $wizard->set('calendarId', $calendar->id)
+            ->set('shiftId', $shiftM->id)
+            ->call('generatePeriods')
+            ->call('savePeriods')
+            ->assertHasNoErrors();
+        $this->assertSame(30, TimetablePeriod::query()->where('calendar_id', $calendar->id)->count());
+
+        // Turno tarde: el guard por-turno no bloquea; suma otros 30 períodos.
+        $wizard->set('shiftId', $shiftT->id)
+            ->call('generatePeriods')
+            ->call('savePeriods')
+            ->assertHasNoErrors();
+        $this->assertSame(60, TimetablePeriod::query()->where('calendar_id', $calendar->id)->count());
+    }
+
     public function test_step2_registers_room(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);

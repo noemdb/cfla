@@ -40,12 +40,13 @@
                     <td class="time">{{ $order }}º</td>
                     @foreach (range(1, 5) as $day)
                         <td>
-                            @php $slot = $row->get($day); @endphp
-                            @if ($slot)
+                            @forelse ($row->get($day) as $slot)
                                 <div class="subject">{{ $slot->lesson?->pevaluacion?->pensum?->asignatura?->name ?? '?' }}</div>
-                                <div class="section">{{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}</div>
+                                <div class="section">{{ $slot->lesson?->pevaluacion?->seccion?->name ?? '' }}{{ $slot->grupo_estable_id ? ' · '.($slot->lesson?->pevaluacion?->grupoEstable?->name ?? 'G'.$slot->grupo_estable_id) : '' }}</div>
                                 @if ($slot->room_id)<div class="section">Aula</div>@endif
-                            @endif
+                            @empty
+                                <span class="section">&nbsp;</span>
+                            @endforelse
                         </td>
                     @endforeach
                 </tr>

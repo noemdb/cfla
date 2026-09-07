@@ -188,3 +188,28 @@ La función y el servicio están bien estructurados; el defecto es de **escala t
 - [x] **F5** — Verificación: 215 tests verdes (Unit/Lms + Feature/Lms + Feature/Livewire/Profesor/Lms), `npm run build` ✓.
 
 Pendiente (fuera de alcance): verificación visual E2E comparativa en navegador con una diapositiva etiquetada junto a diapositivas TEXT (recomendado tras regenerar contenido real con el nuevo prompt).
+
+---
+
+## 8. Actualización 2026-09-07 — Armonía de libro impreso
+
+Además de la escala tipográfica, se reorientó el `SYSTEM_PROMPT` (y el `USER_PROMPT`) de
+`HtmlTaggingService` hacia la **armonía visual de un libro imprimible** (el contenido se
+publica en la vista de impresión a 2 columnas, `director/lessons-print.blade.php`):
+
+- **Nueva sección "ARMONÍA DE LIBRO IMPRESO"** al inicio del prompt: estilo editorial
+  limpio, monocromo con **UN SOLO acento** (verde esmeralda), sin adornos "web".
+- **Paleta restringida**: se eliminan los acentos secundarios (ámbar, sky, rosa, índigo);
+  solo esmeralda + grises. Antes el prompt prescribía 3 acentos.
+- **Sin sombras llamativas**: `shadow-sm` como máximo (antes permitía `shadow-md`/`shadow-lg`).
+- **Sin `hover:`/`transition`/`transform`**: no existen en papel (antes los exigía en listas y acordeones).
+- **Acordeones SIEMPRE `<details open>`**: en impresión un `<details>` cerrado pierde su contenido.
+- **Cards sobrias** (`rounded-lg p-4 border-gray-200` / `border-emerald-200`, sin sombra/hover)
+  en lugar de cards con hover-lift y glow.
+- **Stat cards sin sombra** y con borde esmeralda (antes usaban ámbar + `shadow-sm` + `rounded-xl`).
+- **Regla H3**: toda `<img>` debe llevar `style="max-width:100%;height:auto;"` (alinea con `print-prompt-rules.md` §H3).
+- El ejemplo completo (few-shot) se actualizó al estilo libro (sin hover, `<details open>`, stat card sobria).
+
+Se mantienen intactas las reglas estructurales: preservar el texto original, sin card raíz,
+sin fondos de color, sin SVG, escala tipográfica de `LmsDesignTokens`, y el clamp determinista
+de `LmsTypographyNormalizerService` (defensa en profundidad).

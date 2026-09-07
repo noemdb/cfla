@@ -34,6 +34,7 @@ abstract class TimetableRoleView extends Component
             'calendar' => $data['calendar'],
             'grid' => $data['grid'],
             'subjectLabel' => $data['label'],
+            'shareUrl' => $data['shareUrl'] ?? null,
         ])->layout($this->getLayout());
     }
 

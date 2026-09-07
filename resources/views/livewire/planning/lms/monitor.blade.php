@@ -327,6 +327,16 @@
                                     </svg>
                                 </button>
 
+                                {{-- Versión imprimible (PDF) — always visible --}}
+                                <a href="{{ route('app.planning.lms.print', ['activity' => $pub->id]) }}"
+                                   target="_blank"
+                                   title="Versión imprimible (PDF)"
+                                   class="min-w-[44px] min-h-[44px] p-1.5 rounded-lg text-sky-500 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5h-1M6 14h12v7H6v-7z"/>
+                                    </svg>
+                                </a>
+
                                 {{-- Publicar ahora (SCHEDULED) — primary, always visible --}}
                                 @if($pubStatus === 'SCHEDULED')
                                     <button wire:click="confirmPublish({{ $pub->id }})"
@@ -357,15 +367,25 @@
                                          x-transition:leave-end="opacity-0 scale-95"
                                          class="absolute right-0 z-50 mt-1 min-w-[190px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl py-1"
                                          @click="open = false">
-                                        {{-- Auditar --}}
-                                        <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
-                                           class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
-                                            <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                            Auditar
-                                        </a>
-                                        {{-- Actividad asociada (revisión / aprobación) --}}
+                                         {{-- Auditar --}}
+                                         <a href="{{ route('app.planning.lms.activity.audit', $pub) }}"
+                                            class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                             <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                             </svg>
+                                             Auditar
+                                         </a>
+                                         {{-- Imprimir (versión imprimible de esta lección) --}}
+                                         <a href="{{ route('app.planning.lms.print', ['activity' => $pub->id]) }}"
+                                            target="_blank"
+                                            title="Versión imprimible (PDF)"
+                                            class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                             <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5h-1M6 14h12v7H6v-7z"/>
+                                             </svg>
+                                             Versión imprimible (PDF)
+                                         </a>
+                                         {{-- Actividad asociada (revisión / aprobación) --}}
                                         <button wire:click="openActivityReview({{ $pub->id }})"
                                                 class="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors text-left">
                                             <svg class="w-4 h-4 {{ $pub->status ? 'text-emerald-500' : 'text-amber-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -634,6 +654,14 @@
                                class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
                                 <svg class="w-4 h-4 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 Auditar
+                            </a>
+                            {{-- Imprimir (versión imprimible de esta lección) --}}
+                            <a href="{{ route('app.planning.lms.print', ['activity' => $pub->id]) }}"
+                               target="_blank"
+                               title="Versión imprimible (PDF)"
+                               class="flex items-center gap-2 px-3 py-2.5 text-xs text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors">
+                                <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5h-1M6 14h12v7H6v-7z"/></svg>
+                                Versión imprimible (PDF)
                             </a>
                             {{-- Publicar / Programar --}}
                             @if(is_null($pubStatus) || $pubStatus === 'DRAFT' || $pubStatus === 'ARCHIVED')

@@ -5,12 +5,33 @@ namespace App\Services\Lms;
 class HtmlTaggingService
 {
     /**
-     * System prompt para transformar contenido educativo en HTML semántico visualmente enriquecido.
+     * System prompt para transformar contenido educativo en HTML semántico.
+     *
+     * Orientado a la ARMONÍA DE LIBRO IMPRESO: el contenido se publica en un
+     * libro de lecciones imprimibles (vista de impresión a 2 columnas) y
+     * también se ve en el preview del estudiante. La prioridad visual es un
+     * estilo editorial de libro (monocromo + un solo acento, sin sombras
+     * ni estados hover), NO una interfaz web.
      */
     private const SYSTEM_PROMPT = <<<'PROMPT'
-Eres un Staff Engineer especializado en HTML semántico, diseño visual educativo y Tailwind CSS.
+Eres un Staff Engineer especializado en HTML semántico, diseño editorial y Tailwind CSS, responsable del etiquetado de contenido de un LIBRO DE LECCIONES IMPRIMIBLE.
 
-INSTRUCCIÓN: Transforma el contenido educativo en HTML5 semántico ENRIQUECIDO visualmente con clases Tailwind CSS. El contenido debe ser rico visualmente pero SIN envoltorio/card raíz con fondo, borde o sombra — el contenedor exterior lo proporciona la plantilla.
+INSTRUCCIÓN: Transforma el contenido educativo en HTML5 semántico con clases Tailwind CSS. El contenido debe ser rico visualmente pero SIN envoltorio/card raíz con fondo, borde o sombra — el contenedor exterior lo proporciona la plantilla.
+
+═══ ARMONÍA DE LIBRO IMPRESO (prioridad visual) ═══
+Este contenido forma parte de un LIBRO DE LECCIONES que se imprime en 2 columnas.
+El estilo debe ser EDITORIAL de libro: limpio, monocromo con UN SOLO acento,
+tipografía jerárquica y sin adornos "web" que no sobreviven al papel.
+- El acento cromático es el VERDE ESMERALDA (teal) como color único de la marca;
+  NO uses acentos secundarios (ámbar, sky, rosa, índigo) para diferenciar bloques.
+- NADA de sombras llamativas: usa shadow-sm como máximo, y preferiblemente ninguna.
+- NADA de estados hover, transitions ni efectos al pasar el cursor (no existen en papel).
+- NADA de acordeones <details> colapsados: en impresión quedan cerrados y se pierde
+  el contenido. Si usas <details>, debe ir SIEMPRE con el atributo open.
+- Las tablas, listas y blockquotes son los vehículos naturales del libro:
+  úsalos en lugar de cards decorativas cuando el contenido lo permita.
+- Prefiere resaltar con tipografía (font-semibold/font-bold + color) en lugar de
+  badges, cajas con borde o stat-cards con sombra.
 
 ═══ PRIORIDAD ABSOLUTA: TEXTO ORIGINAL ═══
 Este contenido va DIRIGIDO AL ESTUDIANTE como material de enseñanza-aprendizaje.
@@ -26,21 +47,20 @@ escribió, no en lo que el asistente pueda inferir o desarrollar.
 - ❌ NO agregues "conclusiones", "reflexiones" ni "resúmenes" que el original no contenga.
 - ✅ Organiza el texto existente con la estructura HTML más adecuada (párrafos, listas, highlight box para la idea central, etc.).
 - ✅ Si el original tiene enumeraciones, conviértelas a listas con viñetas de texto (✓).
-- ✅ Si el original tiene datos numéricos, usa stat cards.
+- ✅ Si el original tiene datos numéricos, resáltalos tipográficamente (o stat card sobria, sin sombra).
 - ✅ Si el original tiene citas textuales, usa blockquote.
 - ✅ Solo extrae el título/heading del contenido del original o de $sectionTitle — no inventes headings.
 
-CONTEXTO visual — fondo blanco, texto oscuro, acentos esmeralda/verde, sombras suaves, bordes sutiles.
+CONTEXTO visual — fondo blanco, texto oscuro, acento verde esmeralda, sin sombras ni gradientes.
 
-═══ PALETA BASE (solo fondo blanco) ═══
+═══ PALETA (monocromo + un solo acento) ═══
 - Fondo:           bg-white (nunca otro bg-*)
-- Bordes:          border border-stone-200, border border-gray-200, border border-emerald-200
-- Sombras:         shadow-sm, shadow-md, shadow-lg (sin bg de color)
+- Bordes:          border border-gray-200, border border-stone-200, border border-emerald-200
+- Sombras:         shadow-sm como máximo (preferiblemente ninguna)
 - Texto principal: text-gray-900, text-slate-800
 - Texto secundario: text-gray-500, text-stone-500
-- Acento primario:  text-emerald-700 / border-emerald-200 / font-semibold
-- Acento cálido:    text-amber-700 / border-amber-200
-- Acento frío:      text-sky-700 / border-sky-200
+- Acento único:    text-emerald-700 / border-emerald-200 / font-semibold (VERDE ESMERALDA)
+- NO uses:         text-amber-*, text-sky-*, text-rose-*, text-indigo-*, text-purple-*
 
 ═══ ESTRATEGIAS DE ENRIQUECIMIENTO VISUAL ═══
 ⚠️  El HTML generado se inserta DENTRO de un contenedor de plantilla que ya tiene su
@@ -53,12 +73,11 @@ CRÍTICO — NADA DE FONDOS DE COLOR:
 El único bg permitido es `bg-white`. Prohibido usar bg-emerald-50, bg-amber-50,
 bg-sky-50, bg-stone-50, bg-gray-50, bg-gradient-to-r, bg-gradient-to-br, etc.
 Tampoco uses hover:bg-* ni bg-* en highlights, badges, stat cards, acordeones,
-blockquotes ni ningún otro elemento. Solo texto, bordes, sombras y opcionalmente
-drop-shadow para destacar.
+blockquotes ni ningún otro elemento. Solo texto, bordes y sombras opcionales.
 
     Todo el resto de la riqueza visual (tipografía variada, bordes decorativos,
-    listas con viñetas de texto, acordeones, progress bars) SÍ está permitida
-    DENTRO del contenido — pero SIN fondos de color.
+    listas con viñetas de texto) SÍ está permitida DENTRO del contenido — pero
+    SIN fondos de color y SIN sombras ni hover que solo se ven en web.
 
 Aplica AL MENOS 3 de estas estrategias en cada diapositiva. Combínalas para maximizar el impacto visual.
 
@@ -77,19 +96,19 @@ b) Subrayado decorativo (variante opcional, mismo tamaño):
    Título con subrayado
    </h3>
 
-── 2. TARJETAS / CARDS INTERNAS ──
+── 2. TARJETAS / CARDS INTERNAS (sobrias) ──
 
 ⚠️  Estas son cards INTERNAS, no el envoltorio raíz. Úsalas para destacar
     sub-bloques DENTRO del contenido (definiciones, citas, estadísticas).
-    SIN fondo de color — solo bordes y sombras.
+    SIN fondo de color, SIN sombra llamativa y SIN hover (no existen en papel).
 
-a) Card con hover lift (efecto al pasar el cursor):
-   <div class="rounded-xl p-4 shadow-sm border border-stone-200 transition transform hover:-translate-y-1">
+a) Card sobria con borde (estilo libro):
+   <div class="rounded-lg p-4 border border-gray-200">
      ...contenido...
    </div>
 
-b) Card con glow en borde:
-   <div class="rounded-xl p-4 border border-emerald-200 shadow-sm">
+b) Card con acento en el borde:
+   <div class="rounded-lg p-4 border border-emerald-200">
      ...contenido...
    </div>
 
@@ -102,9 +121,9 @@ Usa esta variante para frases textuales o reflexiones (sin fondo de color):
 
 ── 4. LISTAS ENRIQUECIDAS ──
 
-a) Lista con viñetas de texto (hover con color de texto, NO bg):
+a) Lista con viñetas de texto (sin hover):
    <ul class="space-y-2">
-     <li class="flex items-start gap-3 text-gray-700 rounded-lg px-2 py-1.5 transition hover:text-emerald-700">
+     <li class="flex items-start gap-3 text-gray-700 rounded-lg px-2 py-1.5">
        <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
        <span><strong>Concepto clave</strong> — explicación breve</span>
      </li>
@@ -118,11 +137,12 @@ b) Lista con badge por elemento (sin bg, solo texto):
      </li>
    </ul>
 
-── 5. COMPONENTES INTERACTIVOS (acordeón) ──
+── 5. CONTENIDO EXPANDIBLE (opcional, SIEMPRE abierto en impresión) ──
 
-Para contenido que puede expandirse/colapsarse (sin bg de color):
-   <details class="rounded-lg border border-stone-200 overflow-hidden transition-all duration-300">
-     <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 transition hover:text-emerald-700 list-none flex items-center justify-between">
+Para contenido que puede expandirse/colapsarse (sin bg de color). En un libro
+impreso todo el contenido debe ser visible: usa <details open>.
+   <details open class="rounded-lg border border-gray-200">
+     <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 list-none flex items-center justify-between">
        <span>Título del acordeón</span>
        <span class="text-gray-400">▼</span>
      </summary>
@@ -131,9 +151,9 @@ Para contenido que puede expandirse/colapsarse (sin bg de color):
      </div>
    </details>
 
-── 6. INDICADORES / PROGRESS BAR / BADGES ──
+── 6. DATOS NUMÉRICOS / PROGRESS / BADGES ──
 
-Para datos numéricos, progreso o métricas (sin fondos de color):
+Para datos numéricos, progreso o métricas (sin fondos de color, sin sombra):
 
 a) Progress bar (fondo gris claro de la barra de track permitido, pero sin bg de color en el contenedor):
    <div class="space-y-2">
@@ -149,42 +169,44 @@ b) Badge inline (sin bg, solo borde + texto):
    </span>
 
 c) Stat card CON progress bar (solo si el valor numérico es un porcentaje real 0–100%):
-   <div class="rounded-xl p-4 border border-amber-200 shadow-sm">
-     <p class="text-2xl font-extrabold text-amber-800">95%</p>
-     <p class="text-sm font-medium text-amber-600">Eficiencia del proceso</p>
-     <div class="mt-2 h-1.5 bg-gray-200 rounded-full"><div class="h-1.5 bg-amber-500 rounded-full" style="width:95%"></div></div>
+   <div class="rounded-lg p-4 border border-emerald-200">
+     <p class="text-2xl font-extrabold text-emerald-800">95%</p>
+     <p class="text-sm font-medium text-emerald-600">Eficiencia del proceso</p>
+     <div class="mt-2 h-1.5 bg-gray-200 rounded-full"><div class="h-1.5 bg-emerald-500 rounded-full" style="width:95%"></div></div>
    </div>
 
 d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectáreas, litros, etc. — números que NO son porcentajes):
-   <div class="rounded-xl p-4 border border-amber-200 shadow-sm">
-     <p class="text-2xl font-extrabold text-amber-800">10</p>
-     <p class="text-sm font-medium text-amber-600">Segundos en que el proyectil alcanza máxima altura</p>
+   <div class="rounded-lg p-4 border border-emerald-200">
+     <p class="text-2xl font-extrabold text-emerald-800">10</p>
+     <p class="text-sm font-medium text-emerald-600">Segundos en que el proyectil alcanza máxima altura</p>
    </div>
 
 ═══ REGLAS DE TRANSFORMACIÓN (síguelas siempre) ═══
-- ¿Título o encabezado? → Aplica estrategia tipográfica (color de acento, subrayado decorativo, o glow)
+- ¿Título o encabezado? → Aplica estrategia tipográfica (color de acento o subrayado decorativo)
 - ¿Definición o concepto central? → Highlight box con border-l-4 + texto destacado (sin bg-*)
-- ¿Enumeración de 2+ elementos? → Lista con viñetas de texto (✓) + hover:text color
-- ¿Dato numérico, porcentaje o métrica? → Stat card (border + shadow). Progress bar SOLO si el valor es un porcentaje real (0–100%); para números absolutos (tiempo, unidades, hectáreas, litros, segundos, etc.) usa stat card SIN progress bar, solo número + etiqueta.
+- ¿Enumeración de 2+ elementos? → Lista con viñetas de texto (✓)
+- ¿Dato numérico, porcentaje o métrica? → Stat card sobria (borde, sin sombra). Progress bar SOLO si el valor es un porcentaje real (0–100%); para números absolutos (tiempo, unidades, hectáreas, litros, segundos, etc.) usa stat card SIN progress bar, solo número + etiqueta.
 - ¿Término técnico importante? → Badge inline con border (sin bg-*)
 - ¿Frase textual o reflexión? → Blockquote con border-l-4
-- ¿El contenido cambia de tema? → Separador sutil entre bloques + acordeón &lt;details&gt;
-- ¿Hay sub-contenido que puede expandirse? → Acordeón &lt;details&gt;/&lt;summary&gt; con hover:text transition
+- ¿El contenido cambia de tema? → Separador sutil entre bloques + acordeón <details open>
+- ¿Hay sub-contenido que puede expandirse? → Acordeón <details open>/<summary> (SIEMPRE abierto para impresión)
 - NO repitas el título de la sección/diapositiva como h3 — la plantilla ya lo muestra; empieza directamente con el primer bloque de contenido (highlight box, lista, etc.)
 - Siempre usa AL MENOS 1 highlight box + 1 lista con viñetas por contenido (salvo que no haya enumeraciones)
-- Siempre aplica hover effects (transitions) en list items y acordeones
 - ❌ NO uses envoltorio/card raíz con fondo, gradiente, borde ni sombra
 - ❌ NO uses bg-* de ningún color excepto bg-white y bg-gray-200 para progress bar track
-- ❌ NO uses hover:bg-* en ningún elemento
+- ❌ NO uses hover:*, transition ni transform en ningún elemento (no existen en papel)
+- ❌ NO uses sombras mayores a shadow-sm (shadow-md, shadow-lg, shadow-xl, shadow-2xl)
+- ❌ NO uses acentos de color secundarios (ámbar, sky, rosa, índigo, purpura) — solo verde esmeralda
 - ❌ NO uses SVG, iconos ni elementos gráficos decorativos (usa texto: ✓, •, —, etc.)
-- ❌ NO uses detalles interactivos (<details>/<summary>) como contenedor raíz
+- ❌ NO uses <details> sin el atributo open (el contenido se perdería al imprimir)
 - ❌ NO añadas descripciones, ejemplos, aclaraciones ni elaboraciones que no estén en el texto original. Usa EXACTAMENTE las palabras del original. Si el texto original dice "identificación de variables", NO le agregues "— reconocer incógnitas y parámetros". El HTML debe estructurar y resaltar el texto existente, no expandirlo ni explicarlo.
 - ❌ NO desarrolles conceptos que el original solo menciona de pasada. Si solo dice "basado en el método de Pólya", NO expandas los 4 pasos. Preserva el texto original sin añadidos.
 - Preserva TODO el significado — no resumas, no parafrasees, no añadas.
+- Toda <img> DEBE llevar style="max-width:100%;height:auto;" (regla de impresión H3).
 
 ═══ TIPOGRAFÍA ═══
 - Título h3: text-lg font-bold (color de acento o subrayado decorativo) — NUNCA text-2xl ni text-3xl
-- Subtítulo h4: text-base font-semibold text-emerald-700 o text-sky-700
+- Subtítulo h4: text-base font-semibold text-emerald-700
 - Párrafo:   text-[15px] text-gray-700 leading-relaxed
 - <strong> para palabras clave dentro de párrafos
 - <span class="font-semibold text-emerald-700"> para resaltados inline sin fondo
@@ -198,7 +220,7 @@ d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectár
 ❌ NO uses ``` ni ```html ni ningún fence markdown
 ❌ NO incluyas texto ni explicaciones fuera del HTML
 ❌ NO uses <html>, <head>, <body>, <!DOCTYPE>
-❌ NO uses style="" — siempre clases Tailwind
+❌ NO uses style="" — siempre clases Tailwind (EXCEPCIÓN: style="max-width:100%;height:auto;" obligatorio en <img>)
 ❌ NO uses <br/> para separar párrafos
 ❌ NO uses dark mode (nada de text-white, bg-gray-900, border-white/5)
 ❌ NO uses SVG animados, degradados ni CSS interno
@@ -214,10 +236,9 @@ d) Stat card SIN progress bar (para valores absolutos: tiempo, unidades, hectár
    ni ningún otro bg-* excepto bg-gray-200 (solo para el track del progress bar).
 ❌ NO uses hover:bg-* en ningún elemento.
 ❌ NO uses bg-clip-text text-transparent para texto gradiente.
-✅ SÍ usa texto de color (text-emerald-700, text-amber-700, text-sky-700).
-✅ SÍ usa bordes decorativos (border-l-4, border-b-2, border-emerald-200).
-✅ SÍ usa sombras (shadow-sm, shadow-md, shadow-lg, shadow-xl, shadow-[...]).
-✅ SÍ usa drop-shadow en texto (drop-shadow-[...]).
+✅ SÍ usa texto de color, SOLO verde esmeralda (text-emerald-700, text-emerald-600, text-emerald-800).
+✅ SÍ usa bordes decorativos (border-l-4, border-b-2, border-emerald-200, border-gray-200).
+✅ SÍ usa sombras SUAVES (shadow-sm) o ninguna.
 ✅ SÍ usa list-style-disc o viñetas de texto Unicode: ✓, •, —, ◆.
 
 ═══ EJEMPLO COMPLETO ═══
@@ -240,22 +261,22 @@ OUTPUT:
 <h4 class="text-base font-semibold text-emerald-700 border-b border-emerald-200 pb-1 inline-block mb-3">Etapas del proceso</h4>
 
 <ul class="space-y-2 mb-4">
-  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5 transition hover:text-emerald-700">
+  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5">
     <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
     <span class="text-gray-700"><strong>Absorción de luz</strong> — los pigmentos capturan fotones en los tilacoides</span>
   </li>
-  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5 transition hover:text-emerald-700">
+  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5">
     <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
     <span class="text-gray-700"><strong>Fotólisis del agua</strong> — ruptura de moléculas de H₂O liberando oxígeno</span>
   </li>
-  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5 transition hover:text-emerald-700">
+  <li class="flex items-start gap-3 rounded-lg px-2 py-1.5">
     <span class="text-emerald-600 font-bold mt-0.5 shrink-0">✓</span>
     <span class="text-gray-700"><strong>Fijación de CO₂</strong> — ciclo de Calvin en el estroma del cloroplasto</span>
   </li>
 </ul>
 
-<details class="mb-4 rounded-lg border border-stone-200 overflow-hidden">
-  <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 transition hover:text-emerald-700 list-none flex items-center justify-between">
+<details open class="mb-4 rounded-lg border border-gray-200">
+  <summary class="font-semibold text-gray-800 cursor-pointer px-4 py-3 list-none flex items-center justify-between">
     <span>Fase luminosa vs fase oscura</span>
     <span class="text-gray-400">▼</span>
   </summary>
@@ -265,9 +286,9 @@ OUTPUT:
   </div>
 </details>
 
-<div class="rounded-xl p-5 border border-amber-200 shadow-sm">
-  <p class="text-3xl font-extrabold text-amber-800">~6%</p>
-  <p class="text-sm font-medium text-amber-600">Eficiencia máxima de conversión solar</p>
+<div class="rounded-lg p-5 border border-emerald-200">
+  <p class="text-3xl font-extrabold text-emerald-800">~6%</p>
+  <p class="text-sm font-medium text-emerald-600">Eficiencia máxima de conversión solar</p>
   <div class="mt-2 h-1.5 bg-gray-200 rounded-full">
     <div class="h-1.5 bg-emerald-500 rounded-full" style="width:6%"></div>
   </div>
@@ -281,18 +302,18 @@ PROMPT;
      */
     private static function systemPrompt(): string
     {
-        return self::SYSTEM_PROMPT . "\n\n" . LmsDesignTokens::promptRules();
+        return self::SYSTEM_PROMPT."\n\n".LmsDesignTokens::promptRules();
     }
 
     /**
      * Etiqueta contenido educativo con HTML semántico usando IA.
      *
-     * @param  string      $originalBody    Contenido plano original a etiquetar.
-     * @param  string      $sectionTitle    Título de la sección/diapositiva.
-     * @param  string      $gradeName       Nombre del grado (ej. "1er Grado").
-     * @param  string      $subjectName     Nombre de la asignatura.
-     * @param  callable    $aiCallback      Función que recibe (systemPrompt, userPrompt, overrides) y retorna array{success: bool, content: ?string, error: ?string}.
-     * @param  array|null  $activityContext Contexto opcional de la actividad: ['topic' => string, 'teaching' => string, 'learning' => string, 'description' => string].
+     * @param  string  $originalBody  Contenido plano original a etiquetar.
+     * @param  string  $sectionTitle  Título de la sección/diapositiva.
+     * @param  string  $gradeName  Nombre del grado (ej. "1er Grado").
+     * @param  string  $subjectName  Nombre de la asignatura.
+     * @param  callable  $aiCallback  Función que recibe (systemPrompt, userPrompt, overrides) y retorna array{success: bool, content: ?string, error: ?string}.
+     * @param  array|null  $activityContext  Contexto opcional de la actividad: ['topic' => string, 'teaching' => string, 'learning' => string, 'description' => string].
      * @return array{success: bool, html: ?string, error: ?string}
      */
     public function tag(
@@ -307,12 +328,12 @@ PROMPT;
 
         if ($activityContext) {
             $parts = array_filter([
-                !empty($activityContext['topic']) ? "**Tema generador:** {$activityContext['topic']}" : null,
-                !empty($activityContext['teaching']) ? "**Enseñanza:** {$activityContext['teaching']}" : null,
-                !empty($activityContext['description']) ? "**Actividad evaluativa:** {$activityContext['description']}" : null,
+                ! empty($activityContext['topic']) ? "**Tema generador:** {$activityContext['topic']}" : null,
+                ! empty($activityContext['teaching']) ? "**Enseñanza:** {$activityContext['teaching']}" : null,
+                ! empty($activityContext['description']) ? "**Actividad evaluativa:** {$activityContext['description']}" : null,
             ]);
             if ($parts) {
-                $activityInfo = "\n### Contexto de la actividad\n" . implode("\n", $parts) . "\n";
+                $activityInfo = "\n### Contexto de la actividad\n".implode("\n", $parts)."\n";
             }
         }
 
@@ -326,7 +347,7 @@ PROMPT;
 
 {$originalBody}
 
-Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS, pensando en un estudiante que va a aprender con este material. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card para datos numéricos (progress bar SOLO si el valor es un porcentaje real 0–100%; para números absolutos como tiempo, unidades, hectáreas, usa stat card SIN barra), acordeón para info expandible, y tipografía variada (color de acento en título, subrayado decorativo).
+Transforma este contenido en HTML semántico ENRIQUECIDO con Tailwind CSS, pensando en un estudiante que va a aprender con este material. Usa highlight box para el concepto central, lista con viñetas de texto (✓) para enumeraciones, stat card para datos numéricos (progress bar SOLO si el valor es un porcentaje real 0–100%; para números absolutos como tiempo, unidades, hectáreas, usa stat card SIN barra), acordeón <details open> para info expandible, y tipografía jerárquica (color de acento en título, subrayado decorativo).
 
 ⚠️  PRIORIDAD ABSOLUTA — PRESERVA EL TEXTO ORIGINAL:
 El contenido es material DIRIGIDO AL ESTUDIANTE para su proceso de enseñanza-aprendizaje.
@@ -337,25 +358,31 @@ visualmente. El valor educativo está en el texto del profesor, no en inferencia
 Si se proporcionó "Contexto de la actividad", puedes usarlo ÚNICAMENTE como referencia
 de contexto temático general, pero sin trasplantar texto de ese contexto al HTML generado.
 
-IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*.
+ARMONÍA DE LIBRO IMPRESO: este contenido forma parte de un libro de lecciones imprimible (2 columnas).
+Estilo editorial, limpio y monocromo con UN SOLO acento verde esmeralda. NO uses acentos secundarios
+(ámbar, sky, rosa, índigo). NADA de sombras mayores a shadow-sm, NADA de hover/transition/transform
+(no existen en papel), NADA de acordeones <details> sin el atributo open (se perdería el contenido
+al imprimir). Prefiere resaltar con tipografía (font-semibold/font-bold + color) en lugar de cards decorativas.
+
+IMPORTANTE: NO generes envoltorio/card raíz con fondo, borde o sombra — el contenido se inserta dentro de una plantilla que ya tiene su contenedor visual externo. NO uses SVG ni iconos decorativos (usa texto: ✓, •, —). CRUCIAL: NO uses NINGÚN fondo de color — solo texto, bordes y sombras suaves. Evita bg-emerald-50, bg-amber-50, bg-sky-50, bg-stone-50, bg-gradient-to-r, bg-gradient-to-br y cualquier bg-*. Toda <img> DEBE llevar style="max-width:100%;height:auto;".
 
 ESCALA TIPOGRÁFICA (obligatoria): títulos máx text-lg (18px), subtítulos text-base (16px), párrafos/listas text-[15px], números de stat card máx text-2xl (24px), padding de cards máx p-4, sombras máx shadow-sm. PROHIBIDO: text-3xl y text-2xl en títulos, p-5/p-6, shadow-lg/shadow-xl. NO repitas el título de la sección como heading — la plantilla ya lo muestra.
 PROMPT;
 
         $overrides = [
-            'max_tokens'  => 8192,
+            'max_tokens' => 8192,
             'temperature' => 0.20,
-            'timeout'     => 120,
+            'timeout' => 120,
         ];
 
         try {
             $aiResult = $aiCallback(self::systemPrompt(), $userPrompt, $overrides);
 
-            if (!$aiResult['success']) {
+            if (! $aiResult['success']) {
                 return [
                     'success' => false,
-                    'html'    => null,
-                    'error'   => $aiResult['error'] ?? 'Error desconocido del servicio IA.',
+                    'html' => null,
+                    'error' => $aiResult['error'] ?? 'Error desconocido del servicio IA.',
                 ];
             }
 
@@ -376,8 +403,8 @@ PROMPT;
             if (empty($html)) {
                 return [
                     'success' => false,
-                    'html'    => null,
-                    'error'   => 'El contenido generado está vacío tras la limpieza.',
+                    'html' => null,
+                    'error' => 'El contenido generado está vacío tras la limpieza.',
                 ];
             }
 
@@ -388,15 +415,15 @@ PROMPT;
 
             return [
                 'success' => true,
-                'html'    => $html,
-                'error'   => null,
+                'html' => $html,
+                'error' => null,
             ];
 
         } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'html'    => null,
-                'error'   => 'Error inesperado: ' . $e->getMessage(),
+                'html' => null,
+                'error' => 'Error inesperado: '.$e->getMessage(),
             ];
         }
     }

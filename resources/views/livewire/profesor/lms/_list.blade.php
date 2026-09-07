@@ -126,12 +126,12 @@
                     $isPublished = $pub?->status === 'PUBLISHED';
                 @endphp
                 <div wire:key="activity-card-{{ $item->id }}"
-                     class="relative {{ $isPublished ? 'bg-emerald-200 dark:bg-emerald-950' : 'bg-white dark:bg-slate-800/40' }} border border-gray-200 dark:border-slate-700/60 rounded-lg overflow-hidden mt-2
+                     class="relative {{ $isPublished ? 'bg-emerald-200 dark:bg-emerald-950' : 'bg-white dark:bg-slate-800/40' }} border border-gray-200 dark:border-slate-700/60 rounded-lg mt-2
                             transition-all duration-200 group
                             hover:bg-gray-50 dark:hover:bg-slate-800/60 hover:border-gray-300 dark:hover:border-slate-600/80 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/10
                             {{ $hasLmsContent ? 'ring-1 ring-emerald-500/15' : '' }}">
                     @if($hasLmsContent)
-                        <span class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
+                        <span class="absolute inset-x-0 top-0 h-0.5 rounded-t-lg bg-gradient-to-r from-emerald-500 to-emerald-400"></span>
                     @endif
 
                     {{-- Badge de estado + fecha --}}
@@ -274,20 +274,55 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                             </button>
 
-                            {{-- Vista estudiante --}}
+                            {{-- Acciones: dropdown (Vista estudiante / Imprimir / Eliminar) --}}
                             @if($hasLmsContent)
-                                <button wire:click="openListStudentPreview({{ $item->id }})"
-                                        title="Vista del estudiante"
-                                        class="p-2 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all duration-200">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </button>
+                                <div class="relative" x-data="{ moreOpen: false }">
+                                    <button type="button"
+                                            wire:key="more-menu-{{ $item->id }}"
+                                            @click="moreOpen = !moreOpen"
+                                            @click.outside="moreOpen = false"
+                                            :aria-expanded="moreOpen"
+                                            aria-haspopup="true"
+                                            title="Más acciones"
+                                            class="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                                    </button>
 
-                                {{-- Eliminar lección --}}
-                                <button wire:click="confirmDeleteLesson({{ $item->id }})"
-                                        title="Eliminar lección"
-                                        class="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200" @disabled($isPublished)>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
+                                    <div x-show="moreOpen"
+                                         x-transition:enter="transition ease-out duration-150"
+                                         x-transition:enter-start="opacity-0 -translate-y-1"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-100"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 -translate-y-1"
+                                         x-cloak
+                                         class="absolute right-0 mt-1.5 w-60 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-[60]">
+                                            <button type="button"
+                                                    wire:click="openListStudentPreview({{ $item->id }})"
+                                                    class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-amber-500/10 hover:text-amber-600 transition-colors text-left whitespace-nowrap">
+                                                <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                Vista del estudiante
+                                            </button>
+                                            <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                                            <button type="button"
+                                                    wire:click="confirmDeleteLesson({{ $item->id }})"
+                                                    @disabled($isPublished)
+                                                    @class([
+                                                        'w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors text-left whitespace-nowrap',
+                                                        'text-red-600 hover:bg-red-500/10' => !$isPublished,
+                                                        'text-slate-400 cursor-not-allowed' => $isPublished,
+                                                    ])>
+                                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                Eliminar lección
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('app.profesors.lms.lessons.print', ['activity' => $item->id]) }}"
+                                       target="_blank"
+                                       title="Versión imprimible (PDF)"
+                                       class="p-2 rounded-lg text-slate-500 hover:text-sky-400 hover:bg-sky-500/10 border border-transparent hover:border-sky-500/20 transition-all duration-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5h-1M6 14h12v7H6v-7z"/></svg>
+                                    </a>
                             @endif
                         </div>
                     </div>
@@ -439,16 +474,53 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                                     </button>
                                     @if($hasLmsContent)
-                                        <button wire:click="openListStudentPreview({{ $item->id }})"
-                                                title="Vista estudiante"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/20 transition-all duration-200">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </button>
-                                        <button wire:click="confirmDeleteLesson({{ $item->id }})"
-                                                title="Eliminar lección"
-                                                class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-200" @disabled($isPublished)>
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
+                                        <div class="relative" x-data="{ moreOpen: false }">
+                                            <button type="button"
+                                                    wire:key="more-menu-{{ $item->id }}"
+                                                    @click="moreOpen = !moreOpen"
+                                                    @click.outside="moreOpen = false"
+                                                    :aria-expanded="moreOpen"
+                                                    aria-haspopup="true"
+                                                    title="Más acciones"
+                                                    class="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                                            </button>
+
+                                            <div x-show="moreOpen"
+                                                 x-transition:enter="transition ease-out duration-150"
+                                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                                 x-transition:leave="transition ease-in duration-100"
+                                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                                 x-transition:leave-end="opacity-0 -translate-y-1"
+                                                 x-cloak
+                                                 class="absolute right-0 mt-1.5 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-[60]">
+                                                <button type="button"
+                                                        wire:click="openListStudentPreview({{ $item->id }})"
+                                                        class="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-700 dark:text-gray-300 hover:bg-amber-500/10 hover:text-amber-600 transition-colors text-left">
+                                                    <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    Vista del estudiante
+                                                </button>
+                                                <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+                                                <button type="button"
+                                                        wire:click="confirmDeleteLesson({{ $item->id }})"
+                                                        @disabled($isPublished)
+                                                        @class([
+                                                            'w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors text-left',
+                                                            'text-red-600 hover:bg-red-500/10' => !$isPublished,
+                                                            'text-slate-400 cursor-not-allowed' => $isPublished,
+                                                        ])>
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    Eliminar lección
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <a href="{{ route('app.profesors.lms.lessons.print', ['activity' => $item->id]) }}"
+                                           target="_blank"
+                                           title="Versión imprimible (PDF)"
+                                           class="p-1.5 rounded-lg text-slate-500 hover:text-sky-400 hover:bg-sky-500/10 border border-transparent hover:border-sky-500/20 transition-all duration-200">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H5a2 2 0 01-2-2v-5a2 2 0 012-2h14a2 2 0 012 2v5h-1M6 14h12v7H6v-7z"/></svg>
+                                        </a>
                                     @endif
                                 </div>
                             </td>

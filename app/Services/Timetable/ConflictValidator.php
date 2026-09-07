@@ -33,6 +33,7 @@ class ConflictValidator
         int $seccionId,
         ?int $roomId = null,
         ?int $ignoreSlotId = null,
+        ?int $grupoEstableId = null,
     ): array {
         $reasons = [];
 
@@ -67,9 +68,20 @@ class ConflictValidator
             $reasons[] = 'El docente ya tiene clase en ese período.';
         }
 
-        if ($conflictQuery($calendarId, $periodId, $ignoreSlotId)
-            ->where('seccion_id', $seccionId)
-            ->exists()) {
+        // Sección doble: una lección de sección completa choca con CUALQUIER
+        // actividad de la sección; una lección de sub-grupo solo choca con una
+        // lección de sección completa o con su mismo sub-grupo (paralelo OK).
+        $sectionQuery = $conflictQuery($calendarId, $periodId, $ignoreSlotId)
+            ->where('seccion_id', $seccionId);
+
+        $sectionConflict = $grupoEstableId === null
+            ? $sectionQuery->exists()
+            : $sectionQuery->where(function ($q) use ($grupoEstableId) {
+                $q->whereNull('grupo_estable_id')
+                    ->orWhere('grupo_estable_id', $grupoEstableId);
+            })->exists();
+
+        if ($sectionConflict) {
             $reasons[] = 'La sección ya tiene clase en ese período.';
         }
 

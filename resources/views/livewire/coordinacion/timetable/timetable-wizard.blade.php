@@ -261,7 +261,7 @@
                                         <input type="checkbox" wire:model.live="selectedPevs.{{ $pev->id }}"
                                             class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
                                     </td>
-                                    <td class="px-3 py-2 text-gray-900 dark:text-gray-200 font-medium">{{ $pev->pensum?->asignatura?->name }} · {{ $pev->seccion?->name }}</td>
+                                    <td class="px-3 py-2 text-gray-900 dark:text-gray-200 font-medium">{{ $pev->pensum?->asignatura?->name }} · {{ $pev->seccion?->name }}{{ $pev->grupoEstable?->name ? ' · '.$pev->grupoEstable->name : '' }}</td>
                                     <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ $pev->profesor?->lastname }}, {{ $pev->profesor?->name }}</td>
                                     <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ (int) ceil(((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60))) }}</td>
                                     <td class="px-3 py-2 text-gray-500 dark:text-gray-400">{{ (int) ceil(((int) ($pev->pensum?->asignatura?->hour_p_week ?? 0)) * 60 / max(1, (int) ($periodsList->count() ? $calendarPeriodMinutes ?? 60 : 60))) }}</td>

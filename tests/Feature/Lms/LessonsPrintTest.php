@@ -28,6 +28,8 @@ class LessonsPrintTest extends TestCase
     private int $gradoId;
     private int $seccionId;
 
+    private int $activityId;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -67,6 +69,7 @@ class LessonsPrintTest extends TestCase
             'pevaluacion_id' => $pevaluacion->id,
             'topic'          => 'Lección de prueba',
         ]);
+        $this->activityId = $activity->id;
 
         $section = LmsActivitySection::create([
             'activity_id' => $activity->id,
@@ -136,6 +139,16 @@ class LessonsPrintTest extends TestCase
             'sort_order'   => 2,
             'is_visible'   => true,
         ]);
+    }
+
+    /** @test */
+    public function print_page_can_be_limited_to_one_activity(): void
+    {
+        $this->actingAs($this->user)
+            ->get('/app/profesors/lms/lessons/print?activity='.$this->activityId)
+            ->assertOk()
+            ->assertSee('Lección de prueba')
+            ->assertSee('Diagrama');
     }
 
     /** @test */

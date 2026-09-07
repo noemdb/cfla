@@ -87,8 +87,8 @@ class TimetablePublicationTest extends TestCase
         $grid = $service->gridForSection($fixture['calendar'], $fixture['seccionA']->id);
 
         $this->assertTrue($grid->has(1));
-        $this->assertNotNull($grid->get(1)->get(1)); // lunes, primer bloque
-        $this->assertNull($grid->get(1)->get(2)); // martes, primer bloque (sin slot)
+        $this->assertCount(1, $grid->get(1)->get(1)); // lunes, primer bloque
+        $this->assertTrue($grid->get(1)->get(2)->isEmpty()); // martes, primer bloque (sin slot)
     }
 
     // ─── Fixtures ──────────────────────────────────────────────
@@ -140,6 +140,45 @@ class TimetablePublicationTest extends TestCase
             'room_id' => $room->id,
         ]);
 
-        return compact('calendar', 'shift', 'period', 'lesson', 'profesor', 'seccionA', 'seccionB', 'asignaturaA', 'room');
+        return compact('calendar', 'shift', 'period', 'lesson', 'profesor', 'seccionA', 'seccionB', 'asignaturaA', 'pensumA', 'lapso', 'pevA', 'grado', 'pestudio', 'room');
+    }
+
+    public function test_grid_shows_division_with_multiple_slots_in_cell(): void
+    {
+        $fixture = $this->publicationFixture();
+
+        // Segundo sub-grupo de la MISMA sección en el MISMO período (paralelo).
+        $userB = User::factory()->create();
+        $profesorB = Profesor::create([
+            'user_id' => $userB->id, 'name' => 'Beto', 'lastname' => 'Pérez',
+            'ci_profesor' => '9B', 'status_active' => 'true',
+        ]);
+        $grupoB = \App\Models\app\Academy\GrupoEstable::factory()->create(['name' => 'Grupo 2']);
+        $pevB = Pevaluacion::factory()->create([
+            'profesor_id' => $profesorB->id,
+            'pensum_id' => $fixture['pensumA']->id,
+            'seccion_id' => $fixture['seccionA']->id,
+            'lapso_id' => $fixture['lapso']->id,
+            'grupo_estable_id' => $grupoB->id,
+        ]);
+        $lessonB = TimetableLesson::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'pevaluacion_id' => $pevB->id,
+            'shift_id' => $fixture['shift']->id,
+            'weekly_blocks_t' => 1, 'weekly_blocks_p' => 0,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $lessonB->id,
+            'period_id' => $fixture['period']->id,
+            'profesor_id' => $profesorB->id,
+            'seccion_id' => $fixture['seccionA']->id,
+            'grupo_estable_id' => $grupoB->id,
+        ]);
+
+        $service = app(TimetableViewService::class);
+        $grid = $service->gridForSection($fixture['calendar'], $fixture['seccionA']->id);
+
+        $this->assertCount(2, $grid->get(1)->get(1)); // la celda muestra la división
     }
 }

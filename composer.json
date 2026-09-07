@@ -20,6 +20,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.8",
+        "maatwebsite/excel": "^3.1",
         "pusher/pusher-php-server": "^7.2",
         "rap2hpoutre/laravel-log-viewer": "^2.5",
         "resend/resend-laravel": "^0.19.0",

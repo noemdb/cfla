@@ -125,4 +125,40 @@ return [
     'model_math_primary'   => env('OPENROUTER_MODEL_MATH_PRIMARY',   'qwen/qwen3-coder-flash'),
     'model_math_fallback1' => env('OPENROUTER_MODEL_MATH_FALLBACK1', 'deepseek/deepseek-v4-flash'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Provider fallback (emergencia entre proveedores)
+    |--------------------------------------------------------------------------
+    |
+    | Cada cadena puede definir una entrada "emergency" que se prueba solo
+    | cuando TODOS los modelos OpenRouter de la cadena fallan. El proveedor
+    | "nvidia" usa NvidiaService (API directa build.nvidia.com) con la misma
+    | forma de respuesta {success, content, model, usage, error}.
+    |
+    | Reglas de uso (context/lms-ai-fallback-improvements.md, propuesta #1):
+    |   - Solo cadenas de TEXTO (default/text). NO diagramas, SVG, imagen,
+    |     ilustración ni math: los modelos Nvidia pequeños no rinden ahí.
+    |   - Si NVIDIA_API_KEY no está configurada, la entrada se omite sola.
+    |   - Los errores que NO son globales de OpenRouter (429 de un modelo,
+    |     404, respuesta vacía) NO deben agotar la emergencia: solo se
+    |     activa ante fallo de TODOS los modelos o error de plataforma.
+    |
+    */
+
+    'chains' => [
+        // Emergencia OPT-IN por operación: solo los call sites de TEXTO pasan
+        // chainKey: 'text' (generateSlideText, repairTextBlock, generateStep1Content,
+        // generateSectionContent, generateReviewQuestions, HtmlTaggingService).
+        // Diagramas/SVG/imagen/ilustración/math/embed-card NO la pasan y
+        // quedan sin emergencia, según la recomendación de este documento.
+        'text' => [
+            'emergency' => [
+                'provider' => 'nvidia',
+                'model'    => env('NVIDIA_EMERGENCY_MODEL', null), // null = config('nvidia.model')
+                'label'    => env('NVIDIA_EMERGENCY_LABEL', 'Nvidia GPT-OSS emergencia'),
+                'enabled'  => (bool) env('NVIDIA_EMERGENCY_ENABLED', true),
+            ],
+        ],
+    ],
+
 ];

@@ -45,4 +45,20 @@ return [
     // al siguiente modelo de la cadena (0 = desactivado).
     'repair_attempts' => (int) env('LMS_REPAIR_ATTEMPTS', 1),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Backoff (clasificación de errores P2/P3)
+    |--------------------------------------------------------------------------
+    */
+
+    // Tope máximo (ms) de la espera exponencial con jitter aplicada ante
+    // errores transitorios (429 / timeout / 5xx / caídas de conexión).
+    // Acotado para no mantener abierta una petición Livewire. 0 = no esperar.
+    'backoff_max_ms' => (int) env('LMS_BACKOFF_MAX_MS', 4000),
+
+    // Presupuesto GLOBAL (ms) de backoff acumulado por generación: la suma de
+    // todas las esperas (reintentos + saltos de modelo) no puede superarlo.
+    // Evita que una cadena 1-2-4-8-16 sobre 5 modelos cuelgue la petición.
+    'backoff_generation_max_ms' => (int) env('LMS_BACKOFF_GENERATION_MAX_MS', 8000),
+
 ];

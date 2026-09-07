@@ -4,6 +4,7 @@ namespace Tests\Feature\Timetable;
 
 use App\Models\app\Academy\Asignatura;
 use App\Models\app\Academy\Grado;
+use App\Models\app\Academy\GrupoEstable;
 use App\Models\app\Academy\Lapso;
 use App\Models\app\Academy\Pensum;
 use App\Models\app\Academy\Pestudio;
@@ -11,6 +12,7 @@ use App\Models\app\Academy\Pevaluacion;
 use App\Models\app\Academy\Profesor;
 use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
+use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
@@ -90,6 +92,86 @@ class TimetableModelsTest extends TestCase
         $this->assertSame('laboratorio', $room->type);
     }
 
+    public function test_conflict_table_supports_unassigned_type_and_lesson_period(): void
+    {
+        $fixture = $this->lessonFixture();
+
+        $conflict = TimetableConflict::create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $fixture['lesson']->id,
+            'period_id' => null,
+            'type' => 'unassigned',
+            'details' => ['reason' => 'Sin combinación viable (solver).'],
+        ]);
+
+        $this->assertDatabaseHas('timetable_conflicts', [
+            'id' => $conflict->id,
+            'lesson_id' => $fixture['lesson']->id,
+            'type' => 'unassigned',
+        ]);
+    }
+
+    public function test_activate_without_slots_throws(): void
+    {
+        $calendar = TimetableCalendar::factory()->create([
+            'lapso_id' => Lapso::factory(),
+        ]);
+
+        $this->expectException(\DomainException::class);
+        $calendar->activate();
+    }
+
+    public function test_db_allows_parallel_subgroups_in_same_period(): void
+    {
+        $fixture = $this->lessonFixture();
+        $second = $this->subgroupFixture($fixture, 'G2');
+
+        // Dos sub-grupos distintos de la MISMA sección en el MISMO período → OK.
+        TimetableSlot::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $fixture['lesson']->id,
+            'period_id' => $fixture['period']->id,
+            'profesor_id' => $fixture['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'grupo_estable_id' => $fixture['grupo']->id,
+        ]);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $second['lesson']->id,
+            'period_id' => $fixture['period']->id,
+            'profesor_id' => $second['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'grupo_estable_id' => $second['grupo']->id,
+        ]);
+
+        $this->assertDatabaseCount('timetable_slots', 2);
+    }
+
+    public function test_db_rejects_same_subgroup_in_same_period(): void
+    {
+        $fixture = $this->lessonFixture();
+        $second = $this->subgroupFixture($fixture, 'G2');
+
+        TimetableSlot::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $fixture['lesson']->id,
+            'period_id' => $fixture['period']->id,
+            'profesor_id' => $fixture['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'grupo_estable_id' => $fixture['grupo']->id,
+        ]);
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        TimetableSlot::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'lesson_id' => $second['lesson']->id,
+            'period_id' => $fixture['period']->id,
+            'profesor_id' => $second['profesor']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'grupo_estable_id' => $fixture['grupo']->id, // mismo sub-grupo
+        ]);
+    }
+
     public function test_duplicate_slot_for_same_teacher_in_same_period_is_rejected_by_db(): void
     {
         $fixture = $this->lessonFixture();
@@ -149,11 +231,13 @@ class TimetableModelsTest extends TestCase
             'asignatura_id' => $asignatura->id,
         ]);
         $lapso = Lapso::factory()->create();
+        $grupo = GrupoEstable::factory()->create(['name' => 'Grupo 1']);
         $pev = Pevaluacion::factory()->create([
             'profesor_id' => $profesor->id,
             'pensum_id' => $pensum->id,
             'seccion_id' => $seccion->id,
             'lapso_id' => $lapso->id,
+            'grupo_estable_id' => $grupo->id,
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
@@ -170,8 +254,41 @@ class TimetableModelsTest extends TestCase
 
         return compact(
             'user', 'profesor', 'pestudio', 'grado', 'seccion',
-            'asignatura', 'pensum', 'lapso', 'pev',
+            'asignatura', 'pensum', 'lapso', 'pev', 'grupo',
             'calendar', 'shift', 'period', 'lesson',
         );
+    }
+
+    /**
+     * Segundo sub-grupo (componente de formación) de la MISMA sección y pensum,
+     * con otro profesor. Devuelve profesor/pev/lesson/grupo.
+     */
+    private function subgroupFixture(array $fixture, string $suffix): array
+    {
+        $userB = User::factory()->create();
+        $profesorB = Profesor::create([
+            'user_id' => $userB->id,
+            'name' => 'Beto',
+            'lastname' => 'Pérez '.$suffix,
+            'ci_profesor' => '9'.$suffix,
+            'status_active' => 'true',
+        ]);
+
+        $grupoB = GrupoEstable::factory()->create(['name' => 'Grupo '.$suffix]);
+        $pevB = Pevaluacion::factory()->create([
+            'profesor_id' => $profesorB->id,
+            'pensum_id' => $fixture['pensum']->id,
+            'seccion_id' => $fixture['seccion']->id,
+            'lapso_id' => $fixture['lapso']->id,
+            'grupo_estable_id' => $grupoB->id,
+        ]);
+
+        $lessonB = TimetableLesson::factory()->create([
+            'calendar_id' => $fixture['calendar']->id,
+            'pevaluacion_id' => $pevB->id,
+            'shift_id' => $fixture['shift']->id,
+        ]);
+
+        return ['profesor' => $profesorB, 'pev' => $pevB, 'lesson' => $lessonB, 'grupo' => $grupoB];
     }
 }

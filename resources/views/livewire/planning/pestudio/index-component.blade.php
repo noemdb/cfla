@@ -298,7 +298,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
                 </div>{{-- /card --}}
             @if($loop->last)
             </div>{{-- /pestudio-grid --}}

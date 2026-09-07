@@ -13,7 +13,7 @@ class TimetableConflict extends Model
 
     protected $table = 'timetable_conflicts';
 
-    protected $fillable = ['calendar_id', 'slot_id', 'type', 'details', 'resolved'];
+    protected $fillable = ['calendar_id', 'slot_id', 'lesson_id', 'period_id', 'type', 'details', 'resolved'];
 
     protected $casts = [
         'details' => 'array',

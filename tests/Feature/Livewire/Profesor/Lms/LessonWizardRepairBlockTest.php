@@ -196,6 +196,20 @@ class LessonWizardRepairBlockTest extends TestCase
         });
     }
 
+    private function mockOpenRouterFailure(?string $error = 'HTTP 503'): void
+    {
+        $this->mock(OpenRouterService::class, function ($mock) use ($error) {
+            $mock->shouldReceive('ask')
+                ->andReturn([
+                    'success' => false,
+                    'content' => null,
+                    'model' => 'test-model',
+                    'usage' => null,
+                    'error' => $error,
+                ]);
+        });
+    }
+
     /** Abre el wizard y prepara una sección con un bloque de contenido. */
     private function wizardWithBlock(Activity $activity, string $body, string $type = 'TEXT')
     {
@@ -307,6 +321,83 @@ class LessonWizardRepairBlockTest extends TestCase
         $this->assertStringContainsString('math-block', $sections[0]['contents'][0]['body']);
         $this->assertStringContainsString('frac{2}{4}', $sections[0]['contents'][0]['body']);
         $this->assertSame('MATH', $sections[0]['contents'][0]['type']);
+    }
+
+    /** @test */
+    public function repair_slide_block_aplica_fallback_local_para_texto_si_la_ia_falla(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+        config()->set('openrouter.chains.default.emergency.enabled', false);
+        $this->mockOpenRouterFailure();
+
+        $component = $this->wizardWithBlock(
+            $activity,
+            "## Contenido original\n\nRespuesta:\n\nLa explicación conserva el ejemplo del bloque."
+        );
+
+        $component->call('repairSlideBlock', 0, 0);
+
+        $body = $component->get('wizardSections')[0]['contents'][0]['body'];
+        $this->assertStringContainsString('Contenido original', $body);
+        $this->assertStringContainsString('La explicación conserva el ejemplo del bloque.', $body);
+        $this->assertStringNotContainsString('Respuesta:', $body);
+        $this->assertStringContainsString('Contenido conservado como borrador', $body);
+    }
+
+    /** @test */
+    public function repair_slide_block_normaliza_matematicas_localmente_si_la_ia_devuelve_vacio(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+        $this->mock(OpenRouterService::class, function ($mock) {
+            $mock->shouldReceive('ask')->andReturn([
+                'success' => true,
+                'content' => '',
+                'model' => 'test-model',
+                'usage' => null,
+                'error' => null,
+            ]);
+        });
+
+        $component = $this->wizardWithBlock(
+            $activity,
+            '<div id="math-block"><p>Área: \\(A = \\pi r^2</p><script>alert(1)</script></div>',
+            'MATH'
+        );
+
+        $component->call('repairSlideBlock', 0, 0);
+
+        $body = $component->get('wizardSections')[0]['contents'][0]['body'];
+        $this->assertStringContainsString('<div id="math-block">', $body);
+        $this->assertStringContainsString('\\)', $body);
+        $this->assertStringNotContainsString('<script>', $body);
+        $this->assertSame('MATH', $component->get('wizardSections')[0]['contents'][0]['type']);
+    }
+
+    /** @test */
+    public function repair_slide_block_puede_guardar_el_fallback_como_borrador_sin_publicar(): void
+    {
+        $data = $this->createProfesorUser();
+        $activity = $this->createActivity($data['profesor_id']);
+        config()->set('openrouter.chains.default.emergency.enabled', false);
+        $this->mockOpenRouterFailure();
+
+        $component = $this->wizardWithBlock($activity, 'Contenido que debe conservarse como borrador.');
+        $component->call('repairSlideBlock', 0, 0);
+        $component->call('saveDeterministicFallbackDraft');
+
+        $this->assertTrue($component->get('saved'));
+        $this->assertTrue(
+            DB::table('lms_activity_contents')
+                ->where('section_id', DB::table('lms_activity_sections')->where('activity_id', $activity->id)->value('id'))
+                ->where('body', 'like', '%Contenido que debe conservarse como borrador.%')
+                ->exists()
+        );
+        $this->assertDatabaseMissing('lms_activity_publications', [
+            'activity_id' => $activity->id,
+            'status' => 'PUBLISHED',
+        ]);
     }
 
     /** @test */

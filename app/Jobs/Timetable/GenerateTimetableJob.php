@@ -117,6 +117,7 @@ class GenerateTimetableJob implements ShouldQueue
                 priority: (int) $lesson->priority,
                 locked: (bool) $lesson->locked,
                 lockedPeriodIds: $lockedPeriods,
+                grupoEstableId: $pev->grupo_estable_id ? (int) $pev->grupo_estable_id : null,
             );
         }
 
@@ -282,6 +283,7 @@ class GenerateTimetableJob implements ShouldQueue
                             'period_id' => $slot->periodId,
                             'profesor_id' => $lesson->pevaluacion->profesor_id,
                             'seccion_id' => $lesson->pevaluacion->seccion_id,
+                            'grupo_estable_id' => $lesson->pevaluacion->grupo_estable_id ? (int) $lesson->pevaluacion->grupo_estable_id : null,
                             'room_id' => $slot->roomId,
                             'locked' => $lesson->locked,
                             'is_manual_override' => false,
