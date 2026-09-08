@@ -74,6 +74,15 @@ class TimetableWizard extends Component
 
     public string $roomType = 'aula';
 
+    // Selección reactiva de sección para el alta de aula
+    public $roomPestudioId = null;
+
+    public $roomGradoId = null;
+
+    public $roomSeccionId = null;
+
+    public bool $showRoomSectionModal = false;
+
     // Edición de aula (dialog)
     public bool $roomEditOpen = false;
 
@@ -86,6 +95,8 @@ class TimetableWizard extends Component
     public int $editRoomCapacity = 30;
 
     public string $editRoomType = 'aula';
+
+    public $editRoomSeccionId = null;
 
     // ─── Paso 3 · Lecciones ────────────────────────────────────
     public array $selectedPevs = [];
@@ -401,6 +412,7 @@ class TimetableWizard extends Component
             'roomName' => 'required|string|max:80',
             'roomCapacity' => 'required|integer|min:1',
             'roomType' => 'required|in:'.implode(',', self::ROOM_TYPES),
+            'roomSeccionId' => 'nullable|integer|exists:seccions,id',
         ]);
 
         TimetableRoom::create([
@@ -408,6 +420,7 @@ class TimetableWizard extends Component
             'name' => $this->roomName,
             'capacity' => $this->roomCapacity,
             'type' => $this->roomType,
+            'seccion_id' => $this->roomSeccionId ? (int) $this->roomSeccionId : null,
             'status_active' => true,
         ]);
 
@@ -415,7 +428,165 @@ class TimetableWizard extends Component
         $this->roomName = '';
         $this->roomCapacity = 30;
         $this->roomType = 'aula';
+        $this->roomPestudioId = null;
+        $this->roomGradoId = null;
+        $this->roomSeccionId = null;
         $this->reloadRooms();
+    }
+
+    public function updatedRoomPestudioId($value): void
+    {
+        $this->roomGradoId = null;
+        $this->roomSeccionId = null;
+    }
+
+    public function updatedRoomGradoId($value): void
+    {
+        $this->roomSeccionId = null;
+    }
+
+    public function openRoomSectionModal(): void
+    {
+        $this->showRoomSectionModal = true;
+    }
+
+    public function closeRoomSectionModal(): void
+    {
+        $this->showRoomSectionModal = false;
+    }
+
+    /**
+     * Etiqueta legible del vínculo Pestudio → Grado → Sección seleccionado.
+     */
+    public function getRoomSectionLinkLabelProperty(): ?string
+    {
+        if (! $this->roomSeccionId) {
+            return null;
+        }
+
+        $seccion = \App\Models\app\Academy\Seccion::query()
+            ->with('grado.pestudio')
+            ->find($this->roomSeccionId);
+
+        if (! $seccion) {
+            return null;
+        }
+
+        $pestudio = $seccion->grado?->pestudio;
+
+        return trim(implode(' · ', array_filter([
+            $pestudio?->code.' '.$pestudio?->name,
+            $seccion->grado?->name,
+            'Sección '.$seccion->name,
+        ])));
+    }
+
+    /**
+     * Quita el vínculo de sección seleccionado.
+     */
+    public function clearRoomSection(): void
+    {
+        $this->roomSeccionId = null;
+        $this->roomGradoId = null;
+        $this->roomPestudioId = null;
+    }
+
+    /**
+     * Aulas ya vinculadas a la sección elegida en el modal de alta
+     * (aviso informativo no bloqueante: una sección puede tener varias aulas).
+     */
+    public function getRoomSectionLinkedRoomsProperty()
+    {
+        if (! $this->roomSeccionId) {
+            return collect();
+        }
+
+        return TimetableRoom::query()
+            ->where('seccion_id', (int) $this->roomSeccionId)
+            ->orderBy('code')
+            ->get(['id', 'code', 'name', 'type']);
+    }
+
+    /**
+     * Otras aulas (excluyendo la que se edita) ya vinculadas a la sección
+     * elegida en el dialog de edición — mismo aviso no bloqueante.
+     */
+    public function getEditRoomSectionLinkedRoomsProperty()
+    {
+        if (! $this->editRoomSeccionId) {
+            return collect();
+        }
+
+        return TimetableRoom::query()
+            ->where('seccion_id', (int) $this->editRoomSeccionId)
+            ->when($this->editingRoomId, fn ($query, $id) => $query->where('id', '!=', $id))
+            ->orderBy('code')
+            ->get(['id', 'code', 'name', 'type']);
+    }
+
+    /**
+     * Pestudios activos para la cascada de selección de sección.
+     */
+    private function loadRoomPestudios()
+    {
+        return \App\Models\app\Academy\Pestudio::query()
+            ->where('status_active', 'true')
+            ->orderBy('code')
+            ->get();
+    }
+
+    /**
+     * Grados del pestudio seleccionado (activos).
+     */
+    private function loadRoomGrados()
+    {
+        if (! $this->roomPestudioId) {
+            return collect();
+        }
+
+        return \App\Models\app\Academy\Grado::query()
+            ->where('pestudio_id', $this->roomPestudioId)
+            ->where('status_active', 'true')
+            ->orderBy('code_sm')
+            ->get();
+    }
+
+    /**
+     * Secciones del grado seleccionado (activas).
+     */
+    private function loadRoomSecciones()
+    {
+        if (! $this->roomGradoId) {
+            return collect();
+        }
+
+        return \App\Models\app\Academy\Seccion::query()
+            ->where('grado_id', $this->roomGradoId)
+            ->where('status_active', 'true')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Todas las secciones activas con etiqueta legible, para el selector del
+     * dialog de edición (Plan · Grado · Sección).
+     */
+    private function loadAllRoomSecciones(): array
+    {
+        return \App\Models\app\Academy\Seccion::query()
+            ->with('grado.pestudio')
+            ->where('status_active', 'true')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($seccion) => [
+                'id' => $seccion->id,
+                'label' => trim(implode(' · ', array_filter([
+                    $seccion->grado?->pestudio?->code.' '.$seccion->grado?->pestudio?->name,
+                    $seccion->grado?->name,
+                    'Sección '.$seccion->name,
+                ]))),
+            ])
+            ->all();
     }
 
     public function deleteRoom($roomId): void
@@ -439,6 +610,7 @@ class TimetableWizard extends Component
         $this->editRoomName = $room->name;
         $this->editRoomCapacity = (int) ($room->capacity ?? 30);
         $this->editRoomType = $room->type;
+        $this->editRoomSeccionId = $room->seccion_id ? (string) $room->seccion_id : null;
         $this->roomEditOpen = true;
     }
 
@@ -452,6 +624,7 @@ class TimetableWizard extends Component
             'editRoomName' => 'required|string|max:80',
             'editRoomCapacity' => 'required|integer|min:1',
             'editRoomType' => 'required|in:'.implode(',', self::ROOM_TYPES),
+            'editRoomSeccionId' => 'nullable|integer|exists:seccions,id',
         ]);
 
         $room = TimetableRoom::query()->find($this->editingRoomId);
@@ -464,6 +637,7 @@ class TimetableWizard extends Component
             'name' => $this->editRoomName,
             'capacity' => $this->editRoomCapacity,
             'type' => $this->editRoomType,
+            'seccion_id' => $this->editRoomSeccionId ? (int) $this->editRoomSeccionId : null,
         ]);
 
         $this->notification()->success('Aula actualizada', "Se actualizó el aula «{$room->name}».");
@@ -479,6 +653,7 @@ class TimetableWizard extends Component
         $this->editRoomName = '';
         $this->editRoomCapacity = 30;
         $this->editRoomType = 'aula';
+        $this->editRoomSeccionId = null;
     }
 
     /**
@@ -512,7 +687,7 @@ class TimetableWizard extends Component
      * con nombre asociado al grado y la sección (ej. "Aula 1er Grado A"). No
      * persiste: las aulas quedan pendientes en `pendingRooms` hasta pulsar
      * "Guardar todas". Omite las secciones que ya tienen aula asociada
-     * (seccion_id, índice único).
+     * (por seccion_id): el modo bulk no duplica vínculos existentes.
      */
     public function bulkCreateRooms(): void
     {
@@ -542,10 +717,10 @@ class TimetableWizard extends Component
         $skipped = 0;
 
         foreach ($seccions as $seccion) {
-            // Regla "uno y solo un aula por grado/sección": se omite si la
-            // sección ya tiene aula asociada (seccion_id, índice único). No se
-            // deduce por nombre porque dos secciones de pestudios distintos
-            // pueden compartir el mismo nombre de grado+sección.
+            // El modo bulk no duplica vínculos: se omite si la sección ya
+            // tiene aula asociada (por seccion_id). No se deduce por nombre
+            // porque dos secciones de pestudios distintos pueden compartir el
+            // mismo nombre de grado+sección.
             if (TimetableRoom::query()->where('seccion_id', $seccion->id)->exists()) {
                 $skipped++;
 
@@ -1425,6 +1600,13 @@ class TimetableWizard extends Component
             'profesores' => $profesores,
             'periodsList' => $periodsList,
             'calendarPeriodMinutes' => $calendarPeriodMinutes,
+            'roomPestudios' => $this->loadRoomPestudios(),
+            'roomGrados' => $this->loadRoomGrados(),
+            'roomSecciones' => $this->loadRoomSecciones(),
+            'allRoomSecciones' => $this->loadAllRoomSecciones(),
+            'roomSectionLinkLabel' => $this->roomSectionLinkLabel,
+            'roomSectionLinkedRooms' => $this->roomSectionLinkedRooms,
+            'editRoomSectionLinkedRooms' => $this->editRoomSectionLinkedRooms,
         ])->layout($this->getLayout());
     }
 

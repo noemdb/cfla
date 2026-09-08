@@ -201,20 +201,54 @@
         <div class="space-y-6">
             <div class="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-white/5 rounded-lg p-5">
                 <h2 class="text-sm font-extrabold text-gray-900 dark:text-white mb-4">2 · Aulas</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                    <input type="text" wire:model="roomCode" placeholder="Código (A-101)"
-                        class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                    <input type="text" wire:model="roomName" placeholder="Nombre (Aula 101)"
-                        class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                    <input type="number" wire:model="roomCapacity" min="1" placeholder="Capacidad"
-                        class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
-                    <select wire:model="roomType" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm">
-                        @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
-                            <option value="{{ $type }}">{{ ucfirst($type) }}</option>
-                        @endforeach
-                    </select>
+                {{-- Datos principales (requeridos) --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Código *</label>
+                        <input type="text" wire:model="roomCode" placeholder="A-101"
+                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                        @error('roomCode') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Nombre *</label>
+                        <input type="text" wire:model="roomName" placeholder="Aula 101"
+                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                        @error('roomName') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Capacidad *</label>
+                        <input type="number" wire:model="roomCapacity" min="1" placeholder="30"
+                            class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                        @error('roomCapacity') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Tipo *</label>
+                        <select wire:model="roomType" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                            @foreach (['aula', 'laboratorio', 'patio', 'cancha', 'taller', 'salon'] as $type)
+                                <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                            @endforeach
+                        </select>
+                        @error('roomType') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                    </div>
                 </div>
-                <button wire:click="saveRoom" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Registrar aula</button>
+                {{-- Vínculo a sección (opcional) --}}
+                @if ($roomSectionLinkLabel)
+                    <div class="mb-4 flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+                        <div class="flex items-center gap-2 text-sm text-gray-300">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-14a2 2 0 01-2-2v-6a2 2 0 012-2h2m4 0a2 2 0 110-4 2 2 0 010 4zm8 0a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                            <span class="text-xs"><span class="font-bold text-emerald-400">Sección vinculada:</span> {{ $roomSectionLinkLabel }}</span>
+                        </div>
+                        <button wire:click="clearRoomSection" class="text-xs text-red-400 hover:text-red-300 font-bold">Quitar</button>
+                    </div>
+                @endif
+                <div class="flex flex-wrap items-center gap-2">
+                    <button wire:click="saveRoom" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Registrar aula</button>
+                    <button wire:click="openRoomSectionModal"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Vincular a Grado/Sección</span>
+                    </button>
+                </div>
                 <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400">Registra automáticamente un aula/salón/ambiente por cada <strong>grado/sección</strong> de los pestudios activos (nombre asociado al grado y la sección).</p>
                     <button wire:click="confirmBulkCreateRooms"
@@ -312,6 +346,22 @@
                             @error('editRoomType') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Sección vinculada (opcional)</label>
+                        <select wire:model="editRoomSeccionId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                            <option value="">Sin sección vinculada</option>
+                            @foreach ($allRoomSecciones as $s)
+                                <option value="{{ $s['id'] }}">{{ $s['label'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('editRoomSeccionId') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+                        @if ($editRoomSectionLinkedRooms && $editRoomSectionLinkedRooms->isNotEmpty())
+                            <p class="mt-1.5 flex items-start gap-1.5 text-[11px] leading-snug text-amber-700 dark:text-amber-300">
+                                <svg class="w-3.5 h-3.5 shrink-0 mt-px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.19 19h13.62a2 2 0 001.64-3.14L13.64 5.14a2 2 0 00-3.28 0L3.55 15.86A2 2 0 005.19 19z"/></svg>
+                                <span>Otra(s) aula(s) ya vinculada(s) a esta sección: <strong>{{ $editRoomSectionLinkedRooms->pluck('code')->implode(', ') }}</strong></span>
+                            </p>
+                        @endif
+                    </div>
                 </div>
 
                 <x-slot name="footer">
@@ -321,6 +371,58 @@
                     </div>
                 </x-slot>
             </x-modal-card>
+
+            {{-- Modal: Vincular a Grado/Sección (opcional) --}}
+            @if ($showRoomSectionModal)
+                <x-modal-card title="Vincular a Grado/Sección" blur="lg" wire:model="showRoomSectionModal" max-width="lg" persistent>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Selecciona el plan de estudio, grado y sección que ocupará este aula.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Plan de estudio</label>
+                            <select wire:model.live="roomPestudioId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                <option value="">Selecciona un plan…</option>
+                                @foreach ($roomPestudios as $p)
+                                    <option value="{{ $p->id }}">{{ $p->code }} · {{ $p->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Grado</label>
+                            <select wire:model.live="roomGradoId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                <option value="">Selecciona un grado…</option>
+                                @foreach ($roomGrados as $g)
+                                    <option value="{{ $g->id }}">{{ $g->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Sección</label>
+                            <select wire:model.live="roomSeccionId" class="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 outline-none">
+                                <option value="">Selecciona una sección…</option>
+                                @foreach ($roomSecciones as $s)
+                                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @if ($roomSectionLinkedRooms && $roomSectionLinkedRooms->isNotEmpty())
+                            <div class="flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs">
+                                <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.19 19h13.62a2 2 0 001.64-3.14L13.64 5.14a2 2 0 00-3.28 0L3.55 15.86A2 2 0 005.19 19z"/></svg>
+                                <span>
+                                    Esta sección ya tiene {{ $roomSectionLinkedRooms->count() }} aula(s) vinculada(s):
+                                    <strong>{{ $roomSectionLinkedRooms->pluck('code')->implode(', ') }}</strong>.
+                                    Puedes vincular varias aulas a la misma sección.
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                    <x-slot name="footer">
+                        <div class="flex items-center justify-end gap-2">
+                            <button wire:click="closeRoomSectionModal" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-bold border border-white/10">Cancelar</button>
+                            <button wire:click="closeRoomSectionModal" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">Listo</button>
+                        </div>
+                    </x-slot>
+                </x-modal-card>
+            @endif
         </div>
     @endif
 
@@ -433,7 +535,7 @@
                 {{-- Resumen de la selección (bloques teóricos/prácticos) --}}
                 @if ($rows->isNotEmpty())
                     <div class="mb-3 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-xs text-emerald-600 dark:text-emerald-400">
-                        {{ $rows->count() }} materia(s) · {{ $sumT }} bloques teóricos · {{ $sumP }} bloques prácticos · {{ $sumT + $sumP }} bloques totales
+                        {{ $rows->count() }} área(s) de formación · {{ $sumT }} bloques teóricos · {{ $sumP }} bloques prácticos · {{ $sumT + $sumP }} bloques totales
                     </div>
                 @endif
 

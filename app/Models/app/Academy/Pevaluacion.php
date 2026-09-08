@@ -34,6 +34,19 @@ class Pevaluacion extends Model implements \App\Contracts\Auditable
         'escala_id', 'objetivo', 'description', 'observations', 'category',
     ];
 
+    /**
+     * Valores por defecto alineados al esquema (evita inserts con NULL en
+     * columnas NOT NULL cuando la creación no los especifica, p. ej.
+     * Planning\Pevaluacion\IndexComponent::save()).
+     */
+    protected $attributes = [
+        'status_baremo' => 'true',
+        'status_official' => '1',
+        'status_note_report' => '1',
+        'nota_type' => 'PROMEDIADA',
+        'escala_id' => 1,
+    ];
+
     protected $casts = [
         'status_official' => 'boolean',
         'status_note_report' => 'boolean',

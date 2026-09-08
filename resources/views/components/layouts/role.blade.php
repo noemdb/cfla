@@ -93,8 +93,8 @@
             animation: fadeIn 0.4s ease-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
             .fade-in { animation: none; }

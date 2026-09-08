@@ -10,24 +10,40 @@ class PevaluacionForm extends Form
     // ─── FORM FIELDS ─────────────────────────────────────────────
 
     public $pestudio_id;
+
     public $grado_id;
+
     public $seccion_id;
+
     public $lapso_id;
+
     public $pensum_id;
+
     public $profesor_id;
+
     public $grupo_estable_id;
+
     public $escala_id;
-    public $nota_type = 'ACUMULATIVA';
+
+    public $nota_type = 'PROMEDIADA';
+
     public $status_note_report = true;
+
     public $status_official = true;
-    public $status_baremo;
+
+    public $status_baremo = 'true';
+
     public $objetivo;
+
     public $description;
+
     public $observations;
+
     public $category;
 
     // Editing state
     public $isEditing = false;
+
     public $pevaluacion_id;
 
     protected function rules()
@@ -67,10 +83,10 @@ class PevaluacionForm extends Form
         $this->profesor_id = $pevaluacion->profesor_id;
         $this->grupo_estable_id = $pevaluacion->grupo_estable_id;
         $this->escala_id = $pevaluacion->escala_id;
-        $this->nota_type = $pevaluacion->nota_type ?? 'ACUMULATIVA';
+        $this->nota_type = $pevaluacion->nota_type ?? 'PROMEDIADA';
         $this->status_note_report = $pevaluacion->status_note_report ?? true;
         $this->status_official = $pevaluacion->status_official ?? true;
-        $this->status_baremo = $pevaluacion->status_baremo;
+        $this->status_baremo = $pevaluacion->status_baremo ?? 'true';
         $this->objetivo = $pevaluacion->objetivo;
         $this->description = $pevaluacion->description;
         $this->observations = $pevaluacion->observations;
@@ -87,7 +103,8 @@ class PevaluacionForm extends Form
         $this->pevaluacion_id = null;
         $this->status_note_report = true;
         $this->status_official = true;
-        $this->nota_type = 'ACUMULATIVA';
+        $this->nota_type = 'PROMEDIADA';
+        $this->status_baremo = 'true';
     }
 
     /**
@@ -105,7 +122,7 @@ class PevaluacionForm extends Form
             'nota_type' => $this->nota_type,
             'status_note_report' => filter_var($this->status_note_report, FILTER_VALIDATE_BOOLEAN),
             'status_official' => filter_var($this->status_official, FILTER_VALIDATE_BOOLEAN),
-            'status_baremo' => $this->status_baremo ?: null,
+            'status_baremo' => ($this->status_baremo !== null && $this->status_baremo !== '') ? $this->status_baremo : 'true',
             'objetivo' => $this->objetivo ?: null,
             'description' => $this->description ?: null,
             'observations' => $this->observations ?: null,

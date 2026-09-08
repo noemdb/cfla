@@ -179,6 +179,188 @@ class TimetableWizardTest extends TestCase
         $this->assertDatabaseHas('timetable_rooms', ['code' => 'LAB-01', 'type' => 'laboratorio']);
     }
 
+    public function test_register_room_with_reactivo_seccion_cascade(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['name' => 'Plan 1', 'status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('roomPestudioId', $pestudio->id)
+            ->set('roomGradoId', $grado->id)
+            ->set('roomSeccionId', $seccion->id)
+            ->set('roomCode', 'A-201')
+            ->set('roomName', 'Aula 201')
+            ->set('roomCapacity', 30)
+            ->set('roomType', 'aula')
+            ->call('saveRoom')
+            ->assertHasNoErrors();
+
+        $room = TimetableRoom::query()->where('code', 'A-201')->first();
+        $this->assertNotNull($room);
+        $this->assertSame($seccion->id, $room->seccion_id);
+    }
+
+    public function test_room_cascade_resets_lower_levels(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('roomPestudioId', $pestudio->id)
+            ->set('roomGradoId', $grado->id)
+            ->set('roomSeccionId', $seccion->id);
+
+        // Al cambiar el pestudio, se resetean grado y sección (hook automático).
+        $component->set('roomPestudioId', $pestudio->id + 1)
+            ->assertSet('roomGradoId', null)
+            ->assertSet('roomSeccionId', null);
+
+        // Al cambiar el grado, se resetea la sección.
+        $component->set('roomPestudioId', $pestudio->id)
+            ->set('roomGradoId', $grado->id)
+            ->set('roomSeccionId', $seccion->id)
+            ->set('roomGradoId', $grado->id + 1)
+            ->assertSet('roomSeccionId', null);
+    }
+
+    public function test_register_room_without_seccion_is_optional(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('roomCode', 'A-301')
+            ->set('roomName', 'Aula 301')
+            ->set('roomCapacity', 30)
+            ->set('roomType', 'aula')
+            ->call('saveRoom')
+            ->assertHasNoErrors();
+
+        $room = TimetableRoom::query()->where('code', 'A-301')->first();
+        $this->assertNotNull($room);
+        $this->assertNull($room->seccion_id);
+    }
+
+    public function test_register_room_allows_multiple_rooms_per_seccion(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        TimetableRoom::factory()->create(['code' => 'A-401', 'seccion_id' => $seccion->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('roomPestudioId', $pestudio->id)
+            ->set('roomGradoId', $grado->id)
+            ->set('roomSeccionId', $seccion->id)
+            ->set('roomCode', 'A-402')
+            ->set('roomName', 'Aula 402')
+            ->set('roomCapacity', 30)
+            ->set('roomType', 'aula')
+            ->call('saveRoom')
+            ->assertHasNoErrors();
+
+        $rooms = TimetableRoom::query()->where('seccion_id', $seccion->id)->orderBy('code')->get();
+        $this->assertCount(2, $rooms);
+        $this->assertSame(['A-401', 'A-402'], $rooms->pluck('code')->all());
+    }
+
+    public function test_update_room_can_link_seccion_already_used_by_other_room(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccionA = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+        $roomA = TimetableRoom::factory()->create(['code' => 'A-401', 'seccion_id' => $seccionA->id]);
+        $roomB = TimetableRoom::factory()->create(['code' => 'A-402', 'seccion_id' => null]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->call('editRoom', $roomB->id)
+            ->set('editRoomSeccionId', (string) $seccionA->id)
+            ->call('updateRoom')
+            ->assertHasNoErrors();
+
+        $this->assertSame($seccionA->id, $roomA->refresh()->seccion_id);
+        $this->assertSame($seccionA->id, $roomB->refresh()->seccion_id);
+    }
+
+    public function test_room_seccion_warning_lists_existing_rooms(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        TimetableRoom::factory()->create(['code' => 'A-401', 'seccion_id' => $seccion->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('roomSeccionId', $seccion->id)
+            ->assertSet('roomSectionLinkedRooms', fn ($rooms) => $rooms->count() === 1 && $rooms->first()->code === 'A-401');
+    }
+
+    public function test_edit_room_warning_excludes_room_being_edited(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+        $roomA = TimetableRoom::factory()->create(['code' => 'A-401', 'seccion_id' => $seccion->id]);
+        $roomB = TimetableRoom::factory()->create(['code' => 'A-402', 'seccion_id' => $seccion->id]);
+
+        // Al editar A-401, el aviso solo lista la otra aula (A-402).
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->call('editRoom', $roomA->id)
+            ->assertSet('editRoomSectionLinkedRooms', fn ($rooms) => $rooms->count() === 1 && $rooms->first()->code === 'A-402');
+    }
+
+    public function test_update_room_changes_seccion_link(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccionA = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+        $room = TimetableRoom::factory()->create(['code' => 'A-501', 'seccion_id' => $seccionA->id]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->call('editRoom', $room->id)
+            ->assertSet('editRoomSeccionId', (string) $seccionA->id)
+            ->set('editRoomSeccionId', null)
+            ->call('updateRoom')
+            ->assertHasNoErrors();
+
+        $room->refresh();
+        $this->assertNull($room->seccion_id);
+    }
+
     public function test_bulk_create_rooms_creates_one_per_active_seccion(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
