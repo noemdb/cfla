@@ -43,8 +43,8 @@ class Pevaluacion extends Model implements \App\Contracts\Auditable
         'status_baremo' => 'true',
         'status_official' => '1',
         'status_note_report' => '1',
-        'nota_type' => 'PROMEDIADA',
         'escala_id' => 1,
+        'nota_type' => 'PROMEDIADA',
     ];
 
     protected $casts = [

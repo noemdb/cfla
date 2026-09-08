@@ -23,7 +23,7 @@ class PevaluacionForm extends Form
 
     public $grupo_estable_id;
 
-    public $escala_id;
+    public $escala_id = 1;
 
     public $nota_type = 'PROMEDIADA';
 
@@ -82,7 +82,7 @@ class PevaluacionForm extends Form
         $this->pensum_id = $pevaluacion->pensum_id;
         $this->profesor_id = $pevaluacion->profesor_id;
         $this->grupo_estable_id = $pevaluacion->grupo_estable_id;
-        $this->escala_id = $pevaluacion->escala_id;
+        $this->escala_id = $pevaluacion->escala_id ?: 1;
         $this->nota_type = $pevaluacion->nota_type ?? 'PROMEDIADA';
         $this->status_note_report = $pevaluacion->status_note_report ?? true;
         $this->status_official = $pevaluacion->status_official ?? true;
@@ -105,6 +105,7 @@ class PevaluacionForm extends Form
         $this->status_official = true;
         $this->nota_type = 'PROMEDIADA';
         $this->status_baremo = 'true';
+        $this->escala_id = 1;
     }
 
     /**
@@ -118,7 +119,7 @@ class PevaluacionForm extends Form
             'seccion_id' => $this->seccion_id,
             'lapso_id' => $this->lapso_id,
             'grupo_estable_id' => $this->grupo_estable_id ?: null,
-            'escala_id' => $this->escala_id ?: null,
+            'escala_id' => $this->escala_id ?: 1,
             'nota_type' => $this->nota_type,
             'status_note_report' => filter_var($this->status_note_report, FILTER_VALIDATE_BOOLEAN),
             'status_official' => filter_var($this->status_official, FILTER_VALIDATE_BOOLEAN),
