@@ -858,10 +858,10 @@ class TimetableWizard extends Component
             $search = '%'.$this->step3Search.'%';
             $query->where(function ($q) use ($search) {
                 $q->whereHas('pensum.asignatura', fn ($a) => $a->where('asignaturas.name', 'like', $search))
-                  ->orWhereHas('profesor', fn ($p) => $p->where(function ($pp) use ($search) {
-                      $pp->where('profesors.lastname', 'like', $search)
-                         ->orWhere('profesors.name', 'like', $search);
-                  }));
+                    ->orWhereHas('profesor', fn ($p) => $p->where(function ($pp) use ($search) {
+                        $pp->where('profesors.lastname', 'like', $search)
+                            ->orWhere('profesors.name', 'like', $search);
+                    }));
             });
         }
 
@@ -869,14 +869,14 @@ class TimetableWizard extends Component
 
         $sortFn = function ($pev) {
             if ($this->step3Sort === 'profesor') {
-                return (($pev->profesor?->lastname ?? '').' '.($pev->profesor?->name ?? ''));
+                return ($pev->profesor?->lastname ?? '').' '.($pev->profesor?->name ?? '');
             }
 
             if ($this->step3Sort === 'blocks') {
-                return ((int) ($pev->pensum?->asignatura?->hour_t_week ?? 0) + (int) ($pev->pensum?->asignatura?->hour_p_week ?? 0));
+                return (int) ($pev->pensum?->asignatura?->hour_t_week ?? 0) + (int) ($pev->pensum?->asignatura?->hour_p_week ?? 0);
             }
 
-            return ($pev->pensum?->asignatura?->name ?? '');
+            return $pev->pensum?->asignatura?->name ?? '';
         };
 
         return $this->step3SortDir === 'desc'

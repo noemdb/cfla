@@ -27,11 +27,33 @@ return new class extends Migration
 
         $cols = Schema::getColumnListing('timetable_slots');
 
-        if (! in_array('grupo_estable_id', $cols, true)) {
+        // ---- A) Columna `grupo_estable_id` como INT UNSIGNED (mismo tipo que grupo_estables.id).
+        //      La migración base (bck/, no ejecutada por Artisan) la dejaba como BIGINT UNSIGNED;
+        //      un FK bigint→int lanza MySQL "errno 150: Foreign key constraint is incorrectly formed".
+        //      Si la columna ya existe como bigint (legacy), se normaliza a int unsigned: es seguro
+        //      porque todo valor proviene de grupo_estables.id (INT UNSIGNED) y cabe.
+        if (in_array('grupo_estable_id', $cols, true)) {
+            $dbName = DB::select('SELECT DATABASE() AS db')[0]?->db;
+            $type = DB::select(
+                "SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'timetable_slots' AND COLUMN_NAME = 'grupo_estable_id'",
+                [$dbName]
+            );
+            if (str_starts_with($type[0]?->COLUMN_TYPE ?? '', 'bigint')) {
+                DB::statement('ALTER TABLE timetable_slots MODIFY COLUMN grupo_estable_id INT UNSIGNED NULL DEFAULT NULL');
+            }
+        } else {
             Schema::table('timetable_slots', function (Blueprint $table) {
-                $table->unsignedBigInteger('grupo_estable_id')->nullable()->after('seccion_id');
-                $table->foreign('grupo_estable_id')->references('id')->on('grupo_estables')->onDelete('set null');
+                $table->unsignedInteger('grupo_estable_id')->nullable()->after('seccion_id');
             });
+        }
+
+        // ---- B) FK → grupo_estables (idempotente: solo si no existe ya un FK hacia esa tabla).
+        $ddl = DB::select('SHOW CREATE TABLE timetable_slots')[0]?->{'Create Table'} ?? '';
+        if (! str_contains($ddl, 'REFERENCES `grupo_estables`')) {
+            DB::statement('ALTER TABLE timetable_slots
+                ADD CONSTRAINT timetable_slots_grupo_estable_id_foreign
+                FOREIGN KEY (grupo_estable_id) REFERENCES grupo_estables (id) ON DELETE SET NULL');
         }
 
         if (! in_array('slot_section_key', $cols, true)) {
