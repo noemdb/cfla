@@ -449,12 +449,12 @@ class IndexComponent extends Component
 
         try {
             $service = app(ActivityImprovementService::class);
-            $result  = $service->improveSupplementText(
-                text:              $this->supplementText,
-                pensumId:          $this->pevaluacion->pensum_id,
-                profesorId:        $this->pevaluacion->profesor_id,
+            $result = $service->improveSupplementText(
+                text: $this->supplementText,
+                pensumId: $this->pevaluacion->pensum_id,
+                profesorId: $this->pevaluacion->profesor_id,
                 currentActivityId: $this->supplementActivityId,
-                mode:              $this->supplementFormatMode,
+                mode: $this->supplementFormatMode,
             );
 
             if (! $result['success']) {
@@ -469,31 +469,31 @@ class IndexComponent extends Component
             $this->supplementText = $result['content'];
 
             // C1: mostrar el modelo usado cuando esté disponible
-            $modelLabel = ! empty($result['model'] ?? '') ? ' · ' . $result['model'] : '';
+            $modelLabel = ! empty($result['model'] ?? '') ? ' · '.$result['model'] : '';
 
             $this->notification()->success(
                 'Texto formateado',
-                "Se generó un Markdown organizado (" . mb_strlen($result['content'] ?? '') . " caracteres).{$modelLabel}"
+                'Se generó un Markdown organizado ('.mb_strlen($result['content'] ?? '')." caracteres).{$modelLabel}"
             );
         } catch (\Throwable $e) {
             Log::error('Error generando texto complementario con IA', [
                 'exception' => $e::class,
-                'error'     => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-                'activity'  => $this->supplementActivityId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'activity' => $this->supplementActivityId,
             ]);
 
             $this->dialog()->confirm([
-                'title'       => 'No se pudo formatear el contenido',
+                'title' => 'No se pudo formatear el contenido',
                 'description' => 'Ocurrió una situación inesperada con el servicio de IA. '
-                    . 'Tu texto no se modificó. ¿Deseas intentar de nuevo?',
-                'icon'        => 'warning',
-                'accept'      => [
-                    'label'  => 'Reintentar',
+                    .'Tu texto no se modificó. ¿Deseas intentar de nuevo?',
+                'icon' => 'warning',
+                'accept' => [
+                    'label' => 'Reintentar',
                     'method' => 'generateSupplementText',
-                    'color'  => 'primary',
+                    'color' => 'primary',
                 ],
-                'reject'      => [
+                'reject' => [
                     'label' => 'Cerrar',
                 ],
             ]);
@@ -1078,6 +1078,14 @@ class IndexComponent extends Component
                 'activity' => $this->activity_id,
                 'pevaluacion' => $this->pevaluacion_id,
             ]);
+
+            // ── Notificación adecuada: todos los servicios de IA fallaron ──
+            $this->notification()->error(
+                'Servicio de IA no disponible',
+                'Todos los servicios de IA fallaron (OpenRouter → Nvidia → Kimi). '
+                .'Revisa la configuración de las claves de API en el servidor (config de OpenRouter/Nvidia/Kimi) '
+                .'o intenta de nuevo más tarde.'
+            );
 
             // ── Confirm amigable con reintento (NO exponer detalles
             //    técnicos al usuario — el profesor ve un toast claro) ──

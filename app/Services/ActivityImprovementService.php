@@ -32,14 +32,14 @@ class ActivityImprovementService
     /**
      * Mejora el contenido de una actividad usando IA.
      *
-     * @param  array<string, mixed> $currentData  Datos actuales del formulario
-     *                                            (description, topic, thematic, references,
+     * @param  array<string, mixed>  $currentData  Datos actuales del formulario
+     *                                             (description, topic, thematic, references,
      *                                             teachingStart, teachingContent, teachingEnd)
-     * @param  int                  $pensumId     ID del pensum (para contexto normativo)
-     * @param  int                  $profesorId   ID del profesor (para sus otras actividades)
-     * @param  int|null             $currentActivityId  ID de la actividad actual (para excluir)
-     * @return array<string, string>  Campos mejorados: description, topic, thematic, references,
-     *                                teachingStart, teachingContent, teachingEnd
+     * @param  int  $pensumId  ID del pensum (para contexto normativo)
+     * @param  int  $profesorId  ID del profesor (para sus otras actividades)
+     * @param  int|null  $currentActivityId  ID de la actividad actual (para excluir)
+     * @return array<string, string> Campos mejorados: description, topic, thematic, references,
+     *                               teachingStart, teachingContent, teachingEnd
      *
      * @throws \RuntimeException Si todos los servicios AI fallan
      */
@@ -57,14 +57,14 @@ class ActivityImprovementService
 
         // 3. Construir prompts
         $systemPrompt = $this->buildSystemPrompt();
-        $userPrompt   = $this->buildUserPrompt($currentData, $referentContext, $otherActivities);
+        $userPrompt = $this->buildUserPrompt($currentData, $referentContext, $otherActivities);
 
         // 4. Ejecutar cadena de servicios con fallback
         $result = $this->callWithFallback($systemPrompt, $userPrompt);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             throw new \RuntimeException(
-                'Todos los servicios AI fallaron. Último error: ' . ($result['error'] ?? 'desconocido')
+                'Todos los servicios AI fallaron. Último error: '.($result['error'] ?? 'desconocido')
             );
         }
 
@@ -74,13 +74,13 @@ class ActivityImprovementService
         // 6. Fusionar con datos actuales (solo reemplazar lo que vino en la respuesta)
         return array_merge(
             [
-                'description'      => $currentData['description'] ?? '',
-                'topic'            => $currentData['topic'] ?? '',
-                'thematic'         => $currentData['thematic'] ?? '',
-                'references'       => $currentData['references'] ?? '',
-                'teachingStart'    => $currentData['teachingStart'] ?? '',
-                'teachingContent'  => $currentData['teachingContent'] ?? '',
-                'teachingEnd'      => $currentData['teachingEnd'] ?? '',
+                'description' => $currentData['description'] ?? '',
+                'topic' => $currentData['topic'] ?? '',
+                'thematic' => $currentData['thematic'] ?? '',
+                'references' => $currentData['references'] ?? '',
+                'teachingStart' => $currentData['teachingStart'] ?? '',
+                'teachingContent' => $currentData['teachingContent'] ?? '',
+                'teachingEnd' => $currentData['teachingEnd'] ?? '',
             ],
             $parsed
         );
@@ -92,10 +92,10 @@ class ActivityImprovementService
      * presentación visual. Equivalente funcional de `generateSlideText` del
      * LessonWizard, pero sobre un único campo de texto plano.
      *
-     * @param  string $text  Texto original escrito por el profesor (Markdown crudo)
-     * @param  int    $pensumId   ID del pensum (para contexto normativo)
-     * @param  int    $profesorId ID del profesor (para sus otras actividades)
-     * @param  ?int   $currentActivityId ID de la actividad actual (para excluir)
+     * @param  string  $text  Texto original escrito por el profesor (Markdown crudo)
+     * @param  int  $pensumId  ID del pensum (para contexto normativo)
+     * @param  int  $profesorId  ID del profesor (para sus otras actividades)
+     * @param  ?int  $currentActivityId  ID de la actividad actual (para excluir)
      * @return array{content: string, model: ?string, success: bool, error: ?string}
      *
      * @throws \RuntimeException Si todos los servicios AI fallan
@@ -130,9 +130,9 @@ Tu tarea es REORDENAR y EMBELLECER un texto de "información complementaria" esc
 PROMPT;
 
         $modeInstruction = match ($mode) {
-            'breve'     => 'Extensión BREVE: comprime el texto original a lo esencial, usando listas - cortas y sin párrafos largos. Conserva todos los datos clave.',
+            'breve' => 'Extensión BREVE: comprime el texto original a lo esencial, usando listas - cortas y sin párrafos largos. Conserva todos los datos clave.',
             'detallado' => 'Extensión DETALLADA: amplía y enriquece el texto original con más desarrollo, ejemplos y contexto, siempre sin inventar información nueva. Párrafos más largos.',
-            default     => 'Extensión NORMAL: similar al original, ni mucho más largo ni resumido.',
+            default => 'Extensión NORMAL: similar al original, ni mucho más largo ni resumido.',
         };
 
         $userPrompt = <<<PROMPT
@@ -152,8 +152,8 @@ PROMPT;
             return [
                 'success' => false,
                 'content' => null,
-                'model'   => null,
-                'error'   => $e->getMessage(),
+                'model' => null,
+                'error' => $e->getMessage(),
             ];
         }
 
@@ -161,8 +161,8 @@ PROMPT;
             return [
                 'success' => false,
                 'content' => null,
-                'model'   => $result['model'] ?? null,
-                'error'   => $result['error'] ?? 'La IA no devolvió contenido.',
+                'model' => $result['model'] ?? null,
+                'error' => $result['error'] ?? 'La IA no devolvió contenido.',
             ];
         }
 
@@ -175,8 +175,8 @@ PROMPT;
         return [
             'success' => true,
             'content' => $content,
-            'model'   => $result['model'] ?? null,
-            'error'   => null,
+            'model' => $result['model'] ?? null,
+            'error' => null,
         ];
     }
 
@@ -196,7 +196,7 @@ PROMPT;
         if ($competencies->isEmpty()) {
             return [
                 'has_referents' => false,
-                'note'          => 'No se encontraron competencias/indicadores para este pensum.',
+                'note' => 'No se encontraron competencias/indicadores para este pensum.',
             ];
         }
 
@@ -205,19 +205,19 @@ PROMPT;
             ->filter()
             ->unique('id')
             ->values()
-            ->map(fn(DiagReferent $r) => [
-                'name'        => $r->name,
-                'code'        => $r->code,
+            ->map(fn (DiagReferent $r) => [
+                'name' => $r->name,
+                'code' => $r->code,
                 'description' => $r->description,
-                'version'     => $r->version,
+                'version' => $r->version,
             ]);
 
-        $competenciesData = $competencies->map(fn($c) => [
-            'name'        => $c->name,
+        $competenciesData = $competencies->map(fn ($c) => [
+            'name' => $c->name,
             'description' => $c->description,
-            'referent'    => $c->referent?->name,
-            'indicators'  => $c->indicators->map(fn($i) => [
-                'code'        => $i->code,
+            'referent' => $c->referent?->name,
+            'indicators' => $c->indicators->map(fn ($i) => [
+                'code' => $i->code,
                 'description' => $i->description,
                 'expected_level' => $i->expected_level,
             ])->toArray(),
@@ -225,8 +225,8 @@ PROMPT;
 
         return [
             'has_referents' => true,
-            'referents'     => $referents->toArray(),
-            'competencies'  => $competenciesData->toArray(),
+            'referents' => $referents->toArray(),
+            'competencies' => $competenciesData->toArray(),
         ];
     }
 
@@ -258,10 +258,10 @@ PROMPT;
         return $query->orderBy('finicial', 'desc')
             ->limit(10)
             ->get()
-            ->map(fn(Activity $a) => [
-                'topic'      => $a->topic,
-                'thematic'   => $a->thematic,
-                'teaching'   => Str::limit($a->teaching, 150),
+            ->map(fn (Activity $a) => [
+                'topic' => $a->topic,
+                'thematic' => $a->thematic,
+                'teaching' => Str::limit($a->teaching, 150),
                 'references' => Str::limit($a->references, 150),
                 'description' => Str::limit($a->description, 150),
             ])
@@ -325,13 +325,13 @@ PROMPT;
         // ── Datos actuales del formulario ──
         $parts[] = '=== ACTIVIDAD ACTUAL ===';
         $fields = [
-            'description'   => 'Actividad Evaluativa',
-            'topic'         => 'Tema generador y Énfasis',
-            'thematic'      => 'Tejido temático / Tema Indispensable',
-            'references'    => 'Referentes teórico-prácticos y éticos',
+            'description' => 'Actividad Evaluativa',
+            'topic' => 'Tema generador y Énfasis',
+            'thematic' => 'Tejido temático / Tema Indispensable',
+            'references' => 'Referentes teórico-prácticos y éticos',
             'teachingStart' => 'Enseñanza — INICIO',
             'teachingContent' => 'Enseñanza — DESARROLLO',
-            'teachingEnd'   => 'Enseñanza — CIERRE',
+            'teachingEnd' => 'Enseñanza — CIERRE',
         ];
         foreach ($fields as $key => $label) {
             $value = $currentData[$key] ?? '';
@@ -341,31 +341,31 @@ PROMPT;
         }
 
         // ── Contexto normativo ──
-        if (!empty($referentContext['has_referents'])) {
+        if (! empty($referentContext['has_referents'])) {
             $parts[] = '=== REFERENTE NORMATIVO (Contexto curricular) ===';
 
-            if (!empty($referentContext['referents'])) {
+            if (! empty($referentContext['referents'])) {
                 foreach ($referentContext['referents'] as $ref) {
                     $parts[] = "- Referente: {$ref['name']} ({$ref['code']})";
-                    if (!empty($ref['description'])) {
+                    if (! empty($ref['description'])) {
                         $parts[] = "  Descripción: {$ref['description']}";
                     }
                 }
             }
 
-            if (!empty($referentContext['competencies'])) {
+            if (! empty($referentContext['competencies'])) {
                 $parts[] = 'Competencias e Indicadores asociados:';
                 foreach ($referentContext['competencies'] as $comp) {
                     $parts[] = "- Competencia: {$comp['name']}";
-                    if (!empty($comp['description'])) {
+                    if (! empty($comp['description'])) {
                         $parts[] = "  {$comp['description']}";
                     }
-                    if (!empty($comp['indicators'])) {
+                    if (! empty($comp['indicators'])) {
                         foreach ($comp['indicators'] as $ind) {
                             $indDesc = $ind['description'];
                             $indCode = $ind['code'] ?? '';
-                            $level   = $ind['expected_level'] ?? '';
-                            $parts[] = "  • Indicador {$indCode}: {$indDesc}" . ($level ? " (Nivel: {$level})" : '');
+                            $level = $ind['expected_level'] ?? '';
+                            $parts[] = "  • Indicador {$indCode}: {$indDesc}".($level ? " (Nivel: {$level})" : '');
                         }
                     }
                 }
@@ -376,10 +376,10 @@ PROMPT;
         }
 
         // ── Otras actividades del profesor ──
-        if (!empty($otherActivities)) {
+        if (! empty($otherActivities)) {
             $parts[] = '=== OTRAS ACTIVIDADES DEL PROFESOR (para coherencia) ===';
             foreach ($otherActivities as $i => $act) {
-                $parts[] = 'Actividad ' . ($i + 1) . ':';
+                $parts[] = 'Actividad '.($i + 1).':';
                 $parts[] = "  Tema: {$act['topic']}";
                 $parts[] = "  Tejido: {$act['thematic']}";
                 $parts[] = '---';
@@ -408,41 +408,115 @@ PROMPT;
     {
         $overrides = [
             'temperature' => 0.5,  // Más determinista para mejora de contenido
-            'max_tokens'  => 4096,
+            'max_tokens' => 4096,
         ];
 
-        $chain = [
-            'OpenRouter' => fn() => $this->openRouter->ask($systemPrompt, $userPrompt, $overrides),
-            'Nvidia'     => fn() => $this->nvidia->ask($systemPrompt, $userPrompt, $overrides),
-            'Kimi'       => fn() => $this->kimi->ask($systemPrompt, $userPrompt, $overrides),
-        ];
+        $errors = [];
 
-        $lastError = null;
+        // ── 1) OpenRouter: cadena de modelos (primary + 4 fallbacks) ──
+        if (! empty(config('openrouter.api_key'))) {
+            foreach ($this->openRouterModels() as $model) {
+                $result = $this->safeCall(
+                    fn () => $this->openRouter->ask($systemPrompt, $userPrompt, $overrides + ['model' => $model]),
+                    "OpenRouter ({$model})",
+                    $errors,
+                );
 
-        foreach ($chain as $name => $callable) {
-            try {
-                $result = $callable();
-            } catch (\Throwable $e) {
-                Log::warning("ActivityImprovement: {$name} threw exception", [
-                    'error' => $e->getMessage(),
-                ]);
-                $lastError = "{$name}: {$e->getMessage()}";
-                continue;
+                if ($result !== null) {
+                    return $result;
+                }
             }
-
-            if ($result['success'] && !empty($result['content'])) {
-                return $result;
-            }
-
-            $lastError = "{$name}: " . ($result['error'] ?? 'respuesta vacía');
-            Log::info("ActivityImprovement: fallback desde {$lastError}");
+        } else {
+            $errors[] = 'OpenRouter: sin API key configurada';
+            Log::warning('ActivityImprovement: OpenRouter sin API key, se omite');
         }
 
-        return [
-            'success' => false,
-            'content' => null,
-            'error'   => $lastError ?? 'Todos los servicios fallaron sin error específico',
+        // ── 2) Nvidia ──
+        if (! empty(config('nvidia.api_key'))) {
+            $result = $this->safeCall(
+                fn () => $this->nvidia->ask($systemPrompt, $userPrompt, $overrides),
+                'Nvidia',
+                $errors,
+            );
+
+            if ($result !== null) {
+                return $result;
+            }
+        } else {
+            $errors[] = 'Nvidia: sin API key configurada';
+            Log::warning('ActivityImprovement: Nvidia sin API key, se omite');
+        }
+
+        // ── 3) Kimi ──
+        if (! empty(config('kimi.api_key'))) {
+            $result = $this->safeCall(
+                fn () => $this->kimi->ask($systemPrompt, $userPrompt, $overrides),
+                'Kimi',
+                $errors,
+            );
+
+            if ($result !== null) {
+                return $result;
+            }
+        } else {
+            $errors[] = 'Kimi: sin API key configurada';
+            Log::warning('ActivityImprovement: Kimi sin API key, se omite');
+        }
+
+        // Todo el fallback falló: mensaje claro con todos los errores.
+        $error = 'Todos los servicios de IA fallaron (OpenRouter → Nvidia → Kimi).';
+        if ($errors !== []) {
+            $error .= ' Detalle: '.implode(' | ', array_slice($errors, 0, 8));
+        }
+
+        Log::error('ActivityImprovement: fallback completo falló', ['errors' => $errors]);
+
+        return ['success' => false, 'content' => null, 'error' => $error];
+    }
+
+    /**
+     * Ejecuta una llamada segura: si tiene éxito retorna el resultado, si no
+     * registra el error y devuelve null (para continuar con el siguiente).
+     *
+     * @param  array<string, mixed>  $errors
+     */
+    private function safeCall(callable $call, string $label, array &$errors): ?array
+    {
+        try {
+            $result = $call();
+        } catch (\Throwable $e) {
+            $errors[] = "{$label}: {$e->getMessage()}";
+            Log::warning("ActivityImprovement: {$label} lanzó excepción", ['error' => $e->getMessage()]);
+
+            return null;
+        }
+
+        if ($result['success'] && ! empty($result['content'])) {
+            return $result;
+        }
+
+        $errors[] = "{$label}: ".($result['error'] ?? 'respuesta vacía');
+        Log::info("ActivityImprovement: fallback desde {$label}: ".($result['error'] ?? 'respuesta vacía'));
+
+        return null;
+    }
+
+    /**
+     * Cadena de modelos de OpenRouter a probar (primary + fallbacks).
+     *
+     * @return array<int, string>
+     */
+    private function openRouterModels(): array
+    {
+        $models = [
+            config('openrouter.model_primary'),
+            config('openrouter.model_fallback1'),
+            config('openrouter.model_fallback2'),
+            config('openrouter.model_fallback3'),
+            config('openrouter.model_fallback4'),
         ];
+
+        return array_values(array_filter(array_map('trim', $models), fn ($m) => $m !== ''));
     }
 
     // ─── PARSER DE RESPUESTA ────────────────────────────────────────
@@ -450,8 +524,8 @@ PROMPT;
     /**
      * Extrae y parsea el JSON de la respuesta del modelo.
      *
-     * @param  string $rawContent  Respuesta cruda del modelo
-     * @return array<string, string>  Campos parseados
+     * @param  string  $rawContent  Respuesta cruda del modelo
+     * @return array<string, string> Campos parseados
      */
     private function parseResponse(string $rawContent): array
     {
@@ -466,16 +540,17 @@ PROMPT;
 
         $decoded = json_decode($cleaned, true);
 
-        if (!is_array($decoded)) {
+        if (! is_array($decoded)) {
             Log::warning('ActivityImprovement: fallo al parsear JSON de la AI', [
                 'raw_head' => substr($rawContent, 0, 500),
             ]);
+
             return [];
         }
 
         // Mapeo de claves esperadas
         $allowed = ['description', 'topic', 'thematic', 'references', 'teachingStart', 'teachingContent', 'teachingEnd'];
-        $result  = [];
+        $result = [];
 
         foreach ($allowed as $key) {
             $value = $decoded[$key] ?? $decoded[lcfirst($key)] ?? null;
@@ -490,10 +565,10 @@ PROMPT;
             $teachingFull = $decoded['teaching'] ?? $decoded['Teaching'] ?? null;
             if (is_string($teachingFull) && trim($teachingFull) !== '') {
                 $segments = $this->parseTeachingString($teachingFull);
-                if (!empty($segments)) {
-                    $result['teachingStart']   = $segments['INICIO'] ?? '';
+                if (! empty($segments)) {
+                    $result['teachingStart'] = $segments['INICIO'] ?? '';
                     $result['teachingContent'] = $segments['DESARROLLO'] ?? '';
-                    $result['teachingEnd']     = $segments['CIERRE'] ?? '';
+                    $result['teachingEnd'] = $segments['CIERRE'] ?? '';
                 } else {
                     // No tiene estructura → ponerlo todo en DESARROLLO
                     $result['teachingContent'] = trim($teachingFull);
@@ -512,19 +587,19 @@ PROMPT;
     private function parseTeachingString(string $teaching): array
     {
         $pattern = '/\b(INICIO|DESARROLLO|CIERRE)\b\s*:?\s*/ui';
-        $parts   = preg_split($pattern, $teaching, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $parts = preg_split($pattern, $teaching, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
         if (count($parts) < 5) { // al menos 3 labels + 2 contenidos
             return [];
         }
 
         $sections = [];
-        $current  = null;
+        $current = null;
 
         foreach ($parts as $part) {
             $upper = mb_strtoupper(trim($part));
             if (in_array($upper, ['INICIO', 'DESARROLLO', 'CIERRE'], true)) {
-                $current     = $upper;
+                $current = $upper;
                 $sections[$current] = '';
             } elseif ($current !== null) {
                 $sections[$current] .= $part;
