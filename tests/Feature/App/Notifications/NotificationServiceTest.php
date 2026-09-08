@@ -69,6 +69,34 @@ class NotificationServiceTest extends TestCase
         $this->assertNull(Cache::get(NotificationService::UNREAD_PREFIX.$recipient->id));
     }
 
+    /**
+     * Regresión: notificaciones que solo definen toArray() (p. ej.
+     * SubstituteAssignedNotification) deben broadcastear igual — el servicio
+     * replica el fallback toDatabase() → toArray() de DatabaseChannel.
+     */
+    public function test_notify_users_broadcastea_notificaciones_solo_to_array(): void
+    {
+        Event::fake([NotificationReceived::class]);
+
+        $recipient = $this->makeRecipient();
+        $notification = new \App\Notifications\SubstituteAssignedNotification(
+            assignmentId: 1,
+            calendarName: 'Turno Mañana',
+            date: '08/09/2026',
+            periodLabel: '1er período',
+            subjectLabel: 'Matemática',
+        );
+
+        app(NotificationService::class)->notifyUsers([$recipient], $notification);
+
+        $this->assertSame(1, $recipient->notifications()->count());
+        Event::assertDispatched(NotificationReceived::class, function ($event) use ($recipient) {
+            return $event->userId === $recipient->id
+                && ($event->payload['assignment_id'] ?? null) === 1
+                && ($event->payload['event_type'] ?? null) === 'substitute_assigned';
+        });
+    }
+
     public function test_unread_count_for_devuelve_conteo_fresco_y_cacheado(): void
     {
         $recipient = $this->makeRecipient();

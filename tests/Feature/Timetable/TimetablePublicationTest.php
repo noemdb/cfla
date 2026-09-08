@@ -14,12 +14,12 @@ use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
 use App\Models\app\Timetable\TimetableRoom;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use App\Services\Timetable\TimetableViewService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -27,7 +27,7 @@ use Tests\TestCase;
  */
 class TimetablePublicationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_signed_public_section_view_works_without_auth(): void
     {
@@ -117,7 +117,7 @@ class TimetablePublicationTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'status' => 'active']);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         $period = TimetablePeriod::factory()->create([
             'calendar_id' => $calendar->id, 'shift_id' => $shift->id,

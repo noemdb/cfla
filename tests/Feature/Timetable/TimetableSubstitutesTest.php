@@ -16,12 +16,12 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use App\Services\Timetable\SubstituteService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -29,7 +29,7 @@ use Tests\TestCase;
  */
 class TimetableSubstitutesTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_coordinacion_can_register_absence(): void
     {
@@ -178,7 +178,7 @@ class TimetableSubstitutesTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         // Períodos: lunes (day 1) y martes (day 2) con 2 bloques cada uno.
         $periods = [];

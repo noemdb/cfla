@@ -170,6 +170,8 @@ class TimetableEditor extends Component
 
     /**
      * §15 — Comprueba que el calendario no fue modificado por otro usuario.
+     * Chequeo temprano (no atómico); la garantía real la da bumpVersion(),
+     * que condiciona el UPDATE a la versión esperada.
      */
     private function assertEditableVersion(int $calendarId): bool
     {
@@ -177,8 +179,10 @@ class TimetableEditor extends Component
             return true;
         }
 
-        $calendar = TimetableCalendar::query()->find($calendarId);
-        if (! $calendar || $calendar->version !== $this->version) {
+        $version = TimetableCalendar::query()
+            ->whereKey($calendarId)
+            ->value('version');
+        if ($version === null || (int) $version !== $this->version) {
             $this->conflictMessage = 'Otro usuario modificó este horario. Recarga la página para continuar.';
 
             return false;
@@ -189,14 +193,31 @@ class TimetableEditor extends Component
 
     /**
      * §15 — Incrementa la versión del calendario tras una mutación del editor.
+     * UPDATE condicional WHERE version = esperada (atómico, ADR-TT-002
+     * defensa en profundidad): si otro editor mutó en la ventana entre el
+     * chequeo temprano y este UPDATE, affected rows = 0 y se reporta el
+     * conflicto en vez de pisar el cambio ajeno.
      */
-    private function bumpVersion(int $calendarId): void
+    private function bumpVersion(int $calendarId): bool
     {
-        $calendar = TimetableCalendar::query()->find($calendarId);
-        if ($calendar) {
-            $calendar->increment('version');
-            $this->version = $calendar->version;
+        if ($this->version === null) {
+            return true;
         }
+
+        $updated = TimetableCalendar::query()
+            ->whereKey($calendarId)
+            ->where('version', $this->version)
+            ->update(['version' => $this->version + 1]);
+
+        if ($updated === 0) {
+            $this->conflictMessage = 'Otro usuario modificó este horario. Recarga la página para continuar.';
+
+            return false;
+        }
+
+        $this->version++;
+
+        return true;
     }
 
     /**

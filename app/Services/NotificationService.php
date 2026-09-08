@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Events\NotificationReceived;
+use App\Jobs\BroadcastNotificationReceived;
 use App\Models\User;
 use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 /**
  * Punto central para emitir notificaciones de base de datos (blueprint/
@@ -41,6 +43,14 @@ class NotificationService
      * optimista por usuario (crash-guard: si Reverb está caído, no rompe el
      * request; el poll del dropdown cubre la actualización).
      *
+     * Cada destinatario recibe una copia con UUID propio fijado de antemano:
+     * Laravel respeta el id ya asignado (NotificationSender::sendToNotifiable
+     * solo setea $notification->id si está vacío), así conocemos el id de
+     * cada fila persistida sin releer la tabla. Esto elimina la carrera del
+     * patrón orderByDesc('created_at')->first(), que con dos notificaciones
+     * casi simultáneas al mismo usuario podía emparejar el id de una con el
+     * payload de la otra.
+     *
      * @param  iterable|User[]  $recipients
      */
     public function notifyUsers(iterable $recipients, BaseNotification $notification): void
@@ -54,36 +64,61 @@ class NotificationService
             Cache::forget(self::UNREAD_PREFIX.$recipient->id);
         }
 
-        // Notificación en base de datos (siempre persistida, síncrona).
-        Notification::send($recipients->all(), $notification);
-
-        // Broadcast optimista por destinatario (hallazgo N5): el payload lleva
-        // el id real de la fila y los datos de presentación, de modo que el
-        // cliente puede insertar el item sin esperar el commit de la BD.
         foreach ($recipients as $recipient) {
-            $id = $recipient->notifications()
-                ->orderByDesc('created_at')
-                ->first()
-                ?->id;
+            // Copia por destinatario con UUID propio: el sender la persiste
+            // con ese id exacto (mismo UUID en objeto y fila).
+            $copy = clone $notification;
+            $copy->id = (string) Str::uuid();
 
-            if (! $id) {
-                continue;
-            }
+            // Notificación en base de datos (siempre persistida, síncrona).
+            // Fuera del crash-guard: un fallo aquí es un error real que debe
+            // propagar (p. ej. reintentar el job que la encoló).
+            Notification::send([$recipient], $copy);
+
+            // Armado del payload fuera del try: un error aquí (p. ej.
+            // toDatabase() roto) es un bug determinista; reintentar no lo
+            // arregla, así que no tiene sentido re-emitirlo.
+            $payload = $this->presentationData($copy, $recipient)
+                + ['created_at' => $sentAt->toIso8601String()];
 
             try {
-                $payload = $notification->toDatabase($recipient)
-                    + ['created_at' => $sentAt->toIso8601String()];
-
+                // Broadcast optimista (hallazgo N5): el payload lleva el id
+                // real de la fila y los datos de presentación, de modo que el
+                // cliente puede insertar el item sin esperar el commit de la BD.
+                //
                 // Dispatch POSICIONAL: Dispatchable::dispatch() es variádico y
                 // PHP rechaza argumentos nombrados (Unknown named parameter).
-                NotificationReceived::dispatch($id, $payload, $recipient->id);
+                NotificationReceived::dispatch($copy->id, $payload, $recipient->id);
             } catch (\Throwable $e) {
-                Log::warning('NotificationReceived falló (Reverb caído), cubre poll', [
+                // Fallo de entrega (Reverb caído): no romper el request — la
+                // fila ya está en la BD y el poll la cubre —, encolar
+                // re-emisión con backoff y registrar la causa.
+                Log::warning('NotificationReceived falló, cubre poll + reemisión', [
                     'user_id' => $recipient->id,
+                    'notification_id' => $copy->id,
+                    'exception' => $e::class,
                     'error' => $e->getMessage(),
                 ]);
+
+                BroadcastNotificationReceived::dispatch($copy->id, $payload, $recipient->id);
             }
         }
+    }
+
+    /**
+     * Datos de presentación para el broadcast: replica el fallback de
+     * DatabaseChannel::getData() — toDatabase() si existe, si no toArray() —
+     * para que toda notificación DB (defina uno u otro) pase por aquí.
+     *
+     * @return array<string, mixed>
+     */
+    private function presentationData(BaseNotification $notification, User $recipient): array
+    {
+        if (method_exists($notification, 'toDatabase')) {
+            return (array) $notification->toDatabase($recipient);
+        }
+
+        return (array) $notification->toArray($recipient);
     }
 
     /**

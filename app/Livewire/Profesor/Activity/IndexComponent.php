@@ -15,52 +15,123 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
 class IndexComponent extends Component
 {
-    use WireUiActions, WithPagination;
+    use WireUiActions, WithFileUploads, WithPagination;
 
     /** @var Activity */
     public $activity;
+
     public $achievement;
 
-    public $seccion_id, $activity_id, $pevaluacion, $pevaluacion_id, $achievement_id;
-    public $modeCreator, $modeEdit, $modeCreatorAchievement, $modeEditAchievement;
-    public $list_comment, $list_seccions;
-    public $grado_id, $lapso_id;
+    public $seccion_id;
+
+    public $activity_id;
+
+    public $pevaluacion;
+
+    public $pevaluacion_id;
+
+    public $achievement_id;
+
+    public $modeCreator;
+
+    public $modeEdit;
+
+    public $modeCreatorAchievement;
+
+    public $modeEditAchievement;
+
+    public $list_comment;
+
+    public $list_seccions;
+
+    public $grado_id;
+
+    public $lapso_id;
+
     public $enable_edit;
+
     public $showDetailModal = false;
+
     public $detailActivity;
+
     public $showAchievementModal = false;
+
+    // PLAN-ACTIVITIES-001: información complementaria
+    public $showSupplementModal = false;
+
+    public $supplementActivityId = null;
+
+    public $supplementText = null;
+
+    public $supplementImageUrl = null;
+
+    public $supplementImage = null;
+
+    /** @var string|null Imagen que había al abrir el modal (para limpiar huérfana al cambiar/borrar) */
+    public $supplementOriginalImageUrl = null;
+
+    /** @var string Tono/longitud para "Formatear texto": 'breve' | 'normal' | 'detallado' */
+    public $supplementFormatMode = 'normal';
+
+    /** @var bool Indicador de generación IA en curso del texto complementario */
+    public $generatingSupplementText = false;
+
+    /** @var bool Ya existe un registro de suplemento para la actividad (controla Eliminar) */
+    public $supplementExists = false;
+
+    /** @var string Pestaña activa del modal de suplemento: 'text' | 'image' | 'preview' */
+    public $supplementTab = 'text';
 
     // Clone preview
     public $showCloneDetailModal = false;
+
     public $clonePreview = [];
 
     // S2526: Actividades de periodo anterior
     public $showS2526Modal = false;
+
     public $s2526Activities = [];
+
     public $s2526PendingAchievements = [];
+
     public $showS2526DetailModal = false;
+
     public $s2526DetailActivity = [];
+
     public $s2526DetailAchievements = [];
+
     public $s2526Search = '';
+
     public $s2526Lapso = '';
+
     public $s2526SortField = 'finicial';
+
     public $s2526SortDir = 'asc';
+
     public $s2526Lapsos = [];
+
     public $s2526Page = 1;
+
     public $s2526PerPage = 15;
+
     public $s2526Total = 0;
+
     public $s2526LastPage = 1;
+
     public $s2526From = 0;
 
     // Filters & Pagination
     public $search = '';
+
     public $paginate = 10;
 
     /** @var ActivityForm Form Object para los campos del formulario de actividad */
@@ -70,7 +141,11 @@ class IndexComponent extends Component
     public AchievementForm $achievementForm;
 
     /** @var \Illuminate\Support\Collection */
-    public $list_grado, $list_seccion, $list_lapso;
+    public $list_grado;
+
+    public $list_seccion;
+
+    public $list_lapso;
 
     public function updatedGradoId($value)
     {
@@ -84,8 +159,8 @@ class IndexComponent extends Component
         $user_id = Auth::id();
         $user = User::findOrFail($user_id);
 
-        $this->activity = new Activity();
-        $this->achievement = new Achievement();
+        $this->activity = new Activity;
+        $this->achievement = new Achievement;
 
         $this->pevaluacion = Pevaluacion::with([
             'pensum.asignatura',
@@ -110,7 +185,7 @@ class IndexComponent extends Component
         // Listas para filtros
         $profesor = Profesor::where('user_id', $user_id)->first();
         $this->list_grado = $profesor
-            ? Grado::whereHas('pensums.pevaluacions', fn($q) => $q->where('profesor_id', $profesor->id))
+            ? Grado::whereHas('pensums.pevaluacions', fn ($q) => $q->where('profesor_id', $profesor->id))
                 ->pluck('name', 'id')
             : collect();
         $this->list_seccion = collect();
@@ -119,7 +194,7 @@ class IndexComponent extends Component
         // Bloqueo por precierre
         $lapso = $this->pevaluacion->lapso;
         if ($lapso && $lapso->date_preclosing && $lapso->time_preclosing) {
-            $preclosingDateTime = Carbon::parse($lapso->date_preclosing->format('Y-m-d') . ' ' . $lapso->time_preclosing);
+            $preclosingDateTime = Carbon::parse($lapso->date_preclosing->format('Y-m-d').' '.$lapso->time_preclosing);
             $this->enable_edit = now()->lt($preclosingDateTime);
         } else {
             $this->enable_edit = true;
@@ -128,9 +203,15 @@ class IndexComponent extends Component
 
     // ─── FILTER RESET PAGE ───────────────────────────────────────
 
-    public function updatingSearch() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
-    public function updatingPaginate() { $this->resetPage(); }
+    public function updatingPaginate()
+    {
+        $this->resetPage();
+    }
 
     public function render()
     {
@@ -139,17 +220,17 @@ class IndexComponent extends Component
         // Filtro: búsqueda por texto
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('topic', 'like', '%' . $this->search . '%')
-                  ->orWhere('thematic', 'like', '%' . $this->search . '%')
-                  ->orWhere('references', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%')
-                  ->orWhere('teaching', 'like', '%' . $this->search . '%')
-                  ->orWhere('learning', 'like', '%' . $this->search . '%')
-                  ->orWhere('observations', 'like', '%' . $this->search . '%');
+                $q->where('topic', 'like', '%'.$this->search.'%')
+                    ->orWhere('thematic', 'like', '%'.$this->search.'%')
+                    ->orWhere('references', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%')
+                    ->orWhere('teaching', 'like', '%'.$this->search.'%')
+                    ->orWhere('learning', 'like', '%'.$this->search.'%')
+                    ->orWhere('observations', 'like', '%'.$this->search.'%');
             });
         }
 
-        $activities = $query->orderBy('finicial')
+        $activities = $query->with('supplement')->orderBy('finicial')
             ->paginate($this->paginate);
 
         return view('livewire.profesor.activity.index-component', [
@@ -216,6 +297,211 @@ class IndexComponent extends Component
         $this->detailActivity = null;
     }
 
+    // ─── INFORMACIÓN COMPLEMENTARIA (PLAN-ACTIVITIES-001) ──────
+
+    public function openSupplementModal($activityId)
+    {
+        $this->supplementActivityId = (int) $activityId;
+        $supplement = \App\Models\app\Academy\ActivitySupplement::query()
+            ->where('activity_id', $this->supplementActivityId)
+            ->first();
+
+        $this->supplementText = $supplement?->text;
+        $this->supplementImageUrl = $supplement?->image_url;
+        $this->supplementOriginalImageUrl = $supplement?->image_url;
+        $this->supplementImage = null;
+        $this->supplementFormatMode = 'normal';
+        $this->supplementExists = ($supplement !== null);
+        $this->supplementTab = 'text';
+        $this->showSupplementModal = true;
+    }
+
+    public function updatedSupplementImage()
+    {
+        $this->validate([
+            'supplementImage' => 'nullable|image|mimes:jpeg,jpg|max:4096',
+        ]);
+
+        $this->supplementImageUrl = $this->supplementImage->store('activity-supplements', 'public');
+    }
+
+    /**
+     * Quita la imagen del suplemento actual (B5): borra el archivo local si
+     * procede y deja la URL a null.
+     */
+    public function removeSupplementImage(): void
+    {
+        $this->deleteSupplementStoredImage($this->supplementImageUrl);
+        $this->supplementImageUrl = null;
+        $this->supplementImage = null;
+    }
+
+    /**
+     * Borra del disco `public` una imagen local de suplemento si existe.
+     * Solo limpia archivos dentro de `activity-supplements/` (no URLs externas).
+     */
+    private function deleteSupplementStoredImage(?string $url): void
+    {
+        if (empty($url) || ! str_starts_with($url, 'activity-supplements/')) {
+            return;
+        }
+
+        try {
+            Storage::disk('public')->delete($url);
+        } catch (\Throwable $e) {
+            Log::warning('No se pudo eliminar archivo de suplemento', ['path' => $url, 'error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Cambia la pestaña activa del modal de suplemento ('text' | 'image' | 'preview').
+     */
+    public function setSupplementTab(string $tab): void
+    {
+        if (! in_array($tab, ['text', 'image', 'preview'], true)) {
+            return;
+        }
+        $this->supplementTab = $tab;
+    }
+
+    public function saveSupplement()
+    {
+        $this->validate([
+            'supplementActivityId' => 'required|integer|exists:activities,id',
+            'supplementText' => 'nullable|string',
+            'supplementImageUrl' => 'nullable|string|max:255',
+        ]);
+
+        // Si la imagen cambió, la anterior queda huérfana en el storage → borrarla (D2)
+        if ($this->supplementImageUrl !== $this->supplementOriginalImageUrl) {
+            $this->deleteSupplementStoredImage($this->supplementOriginalImageUrl);
+        }
+
+        \App\Models\app\Academy\ActivitySupplement::updateOrCreate(
+            ['activity_id' => $this->supplementActivityId],
+            [
+                'text' => $this->supplementText ?: null,
+                'image_url' => $this->supplementImageUrl ?: null,
+            ],
+        );
+
+        $this->supplementExists = true;
+
+        $this->notification()->success('Información complementaria', 'Se guardó la información de la actividad.');
+        $this->closeSupplementModal();
+    }
+
+    /**
+     * Elimina el registro de información complementaria de la actividad actual.
+     */
+    public function deleteSupplement()
+    {
+        // Borrar la imagen local del storage antes de quitar el registro (D2)
+        $this->deleteSupplementStoredImage($this->supplementOriginalImageUrl);
+        $this->deleteSupplementStoredImage($this->supplementImageUrl);
+
+        // Borrar por instancia para que dispare observers/bitácora (D3) —
+        // `where()->delete()` del query builder NO dispara eventos de modelo.
+        $existing = \App\Models\app\Academy\ActivitySupplement::query()
+            ->where('activity_id', $this->supplementActivityId)
+            ->get();
+        foreach ($existing as $row) {
+            $row->delete();
+        }
+
+        $this->notification()->success('Información complementaria', 'Se eliminó la información de la actividad.');
+        $this->closeSupplementModal();
+    }
+
+    public function closeSupplementModal()
+    {
+        $this->showSupplementModal = false;
+        $this->supplementActivityId = null;
+        $this->supplementText = null;
+        $this->supplementImageUrl = null;
+        $this->supplementOriginalImageUrl = null;
+        $this->supplementImage = null;
+        $this->supplementExists = false;
+        $this->supplementTab = 'text';
+        $this->supplementFormatMode = 'normal';
+    }
+
+    // ─── IA: GENERAR TEXTO COMPLEMENTARIO FORMATEADO (PLAN-ACTIVITIES-001) ──
+
+    /**
+     * Transforma el texto de información complementaria de la actividad
+     * (`supplementText`) en Markdown mejor formateado, más organizado y con
+     * mejor presentación, usando IA. Equivalente de `generateSlideText` del
+     * LessonWizard, delegando en `ActivityImprovementService::improveSupplementText`.
+     */
+    public function generateSupplementText(): void
+    {
+        if (empty(trim($this->supplementText ?? ''))) {
+            $this->notification()->warning(
+                'Texto vacío',
+                'Escribe algo antes de generar el contenido formateado.'
+            );
+
+            return;
+        }
+
+        $this->generatingSupplementText = true;
+
+        try {
+            $service = app(ActivityImprovementService::class);
+            $result  = $service->improveSupplementText(
+                text:              $this->supplementText,
+                pensumId:          $this->pevaluacion->pensum_id,
+                profesorId:        $this->pevaluacion->profesor_id,
+                currentActivityId: $this->supplementActivityId,
+                mode:              $this->supplementFormatMode,
+            );
+
+            if (! $result['success']) {
+                $this->notification()->error(
+                    'Error al generar',
+                    $result['error'] ?? 'No se pudo generar el contenido.'
+                );
+
+                return;
+            }
+
+            $this->supplementText = $result['content'];
+
+            // C1: mostrar el modelo usado cuando esté disponible
+            $modelLabel = ! empty($result['model'] ?? '') ? ' · ' . $result['model'] : '';
+
+            $this->notification()->success(
+                'Texto formateado',
+                "Se generó un Markdown organizado (" . mb_strlen($result['content'] ?? '') . " caracteres).{$modelLabel}"
+            );
+        } catch (\Throwable $e) {
+            Log::error('Error generando texto complementario con IA', [
+                'exception' => $e::class,
+                'error'     => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
+                'activity'  => $this->supplementActivityId,
+            ]);
+
+            $this->dialog()->confirm([
+                'title'       => 'No se pudo formatear el contenido',
+                'description' => 'Ocurrió una situación inesperada con el servicio de IA. '
+                    . 'Tu texto no se modificó. ¿Deseas intentar de nuevo?',
+                'icon'        => 'warning',
+                'accept'      => [
+                    'label'  => 'Reintentar',
+                    'method' => 'generateSupplementText',
+                    'color'  => 'primary',
+                ],
+                'reject'      => [
+                    'label' => 'Cerrar',
+                ],
+            ]);
+        } finally {
+            $this->generatingSupplementText = false;
+        }
+    }
+
     // ─── CRUD ──────────────────────────────────────────────
 
     public function save()
@@ -237,7 +523,7 @@ class IndexComponent extends Component
         $this->activity->save();
 
         // Crear achievements pendientes (copiados desde s2526)
-        if (!empty($this->s2526PendingAchievements)) {
+        if (! empty($this->s2526PendingAchievements)) {
             foreach ($this->s2526PendingAchievements as $ach) {
                 $ach['activity_id'] = $this->activity->id;
                 Achievement::create($ach);
@@ -269,7 +555,7 @@ class IndexComponent extends Component
         if ($this->achievement_id) {
             $achievement = Achievement::findOrFail($this->achievement_id);
         } else {
-            $achievement = new Achievement();
+            $achievement = new Achievement;
         }
 
         $this->achievementForm->applyToModel($achievement);
@@ -306,9 +592,9 @@ class IndexComponent extends Component
         if ($achievement) {
             $achievement->delete();
             $this->close();
-            $this->achievement = new Achievement();
+            $this->achievement = new Achievement;
             $this->achievement_id = null;
-            $this->activity = new Activity();
+            $this->activity = new Activity;
             $this->activity_id = null;
 
             $this->notification()->success(
@@ -327,6 +613,7 @@ class IndexComponent extends Component
                 '¡Ocurrieron errores!',
                 'NO se encontraron actividades para eliminar'
             );
+
             return;
         }
 
@@ -363,11 +650,12 @@ class IndexComponent extends Component
         $pevaluacion = Pevaluacion::findOrFail($this->pevaluacion_id);
         $seccion = Seccion::find($this->seccion_id);
 
-        if (!$seccion) {
+        if (! $seccion) {
             $this->notification()->error(
                 '¡Ocurrieron errores!',
                 'Seleccione una sección para previsualizar'
             );
+
             return;
         }
 
@@ -383,11 +671,12 @@ class IndexComponent extends Component
 
         $target = $target->with('activities.achievements')->first();
 
-        if (!$target) {
+        if (! $target) {
             $this->notification()->error(
                 '¡Ocurrieron errores!',
                 'No se encontró carga académica para la sección seleccionada'
             );
+
             return;
         }
 
@@ -397,8 +686,8 @@ class IndexComponent extends Component
             'asignatura_name' => $target->pensum?->asignatura?->name ?? '—',
             'lapso_name' => $target->lapso?->name ?? '—',
             'total_activities' => $target->activities->count(),
-            'total_achievements' => $target->activities->sum(fn($a) => $a->achievements->count()),
-            'activities' => $target->activities->map(fn($a) => [
+            'total_achievements' => $target->activities->sum(fn ($a) => $a->achievements->count()),
+            'activities' => $target->activities->map(fn ($a) => [
                 'id' => $a->id,
                 'name' => $a->name,
                 'finicial' => $a->finicial,
@@ -412,7 +701,7 @@ class IndexComponent extends Component
                 'references' => Str::limit($a->references, 60),
                 'status' => $a->status,
                 'achievements_count' => $a->achievements->count(),
-                'achievements' => $a->achievements->map(fn($ach) => [
+                'achievements' => $a->achievements->map(fn ($ach) => [
                     'id' => $ach->id,
                     'name' => $ach->name,
                 ])->toArray(),
@@ -433,11 +722,12 @@ class IndexComponent extends Component
         $pevaluacion = Pevaluacion::findOrFail($this->pevaluacion_id);
         $seccion = Seccion::find($this->seccion_id);
 
-        if (!$seccion) {
+        if (! $seccion) {
             $this->notification()->error(
                 '¡Ocurrieron errores!',
                 'Seleccione una sección que contenga actividades'
             );
+
             return;
         }
 
@@ -453,11 +743,12 @@ class IndexComponent extends Component
 
         $pevaluacion_new = $pevaluacion_new->first();
 
-        if (!$pevaluacion_new) {
+        if (! $pevaluacion_new) {
             $this->notification()->error(
                 '¡Ocurrieron errores!',
                 'NO se registró ninguna operación'
             );
+
             return;
         }
 
@@ -468,6 +759,7 @@ class IndexComponent extends Component
                 '¡Ocurrieron errores!',
                 'NO se registró ninguna operación'
             );
+
             return;
         }
 
@@ -558,9 +850,9 @@ class IndexComponent extends Component
         // Búsqueda por texto
         if ($this->s2526Search) {
             $query->where(function ($q) {
-                $q->where('activities.topic', 'like', '%' . $this->s2526Search . '%')
-                  ->orWhere('activities.teaching', 'like', '%' . $this->s2526Search . '%')
-                  ->orWhere('activities.description', 'like', '%' . $this->s2526Search . '%');
+                $q->where('activities.topic', 'like', '%'.$this->s2526Search.'%')
+                    ->orWhere('activities.teaching', 'like', '%'.$this->s2526Search.'%')
+                    ->orWhere('activities.description', 'like', '%'.$this->s2526Search.'%');
             });
         }
 
@@ -570,7 +862,7 @@ class IndexComponent extends Component
         }
 
         // Ordenamiento
-        $query->orderBy('activities.' . $this->s2526SortField, $this->s2526SortDir);
+        $query->orderBy('activities.'.$this->s2526SortField, $this->s2526SortDir);
 
         // Paginate manually to avoid Livewire serialization issues with stdClass
         $total = $query->count();
@@ -630,7 +922,7 @@ class IndexComponent extends Component
                 ->table('achievements')
                 ->where('activity_id', $this->s2526DetailActivity['id'])
                 ->get()
-                ->map(fn($item) => (array) $item)
+                ->map(fn ($item) => (array) $item)
                 ->toArray();
             $this->showS2526DetailModal = true;
         }
@@ -645,7 +937,7 @@ class IndexComponent extends Component
 
     public function s2526CopyToPlan($index)
     {
-        if (!isset($this->s2526Activities[$index])) {
+        if (! isset($this->s2526Activities[$index])) {
             return;
         }
 
@@ -673,7 +965,7 @@ class IndexComponent extends Component
             ->table('achievements')
             ->where('activity_id', $act['id'])
             ->get()
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'name' => $item->name,
                 'weighting' => $item->weighting,
                 'status_quantitative_weighting' => $item->status_quantitative_weighting ?? false,
@@ -717,7 +1009,7 @@ class IndexComponent extends Component
             ->table('achievements')
             ->where('activity_id', $act['id'])
             ->get()
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'name' => $item->name,
                 'weighting' => $item->weighting,
                 'status_quantitative_weighting' => $item->status_quantitative_weighting ?? false,
@@ -738,39 +1030,40 @@ class IndexComponent extends Component
      */
     public function improveActivity(): void
     {
-        if (!$this->enable_edit) {
+        if (! $this->enable_edit) {
             $this->notification()->error('Error', 'No se puede editar en este momento.');
+
             return;
         }
 
         try {
             // Reunir datos actuales del formulario
             $currentData = [
-                'description'      => $this->activityForm->description ?? '',
-                'topic'            => $this->activityForm->topic ?? '',
-                'thematic'         => $this->activityForm->thematic ?? '',
-                'references'       => $this->activityForm->references ?? '',
-                'teachingStart'    => $this->activityForm->teachingStart ?? '',
-                'teachingContent'  => $this->activityForm->teachingContent ?? '',
-                'teachingEnd'      => $this->activityForm->teachingEnd ?? '',
+                'description' => $this->activityForm->description ?? '',
+                'topic' => $this->activityForm->topic ?? '',
+                'thematic' => $this->activityForm->thematic ?? '',
+                'references' => $this->activityForm->references ?? '',
+                'teachingStart' => $this->activityForm->teachingStart ?? '',
+                'teachingContent' => $this->activityForm->teachingContent ?? '',
+                'teachingEnd' => $this->activityForm->teachingEnd ?? '',
             ];
 
             $service = app(ActivityImprovementService::class);
-            $result  = $service->improve(
-                currentData:       $currentData,
-                pensumId:          $this->pevaluacion->pensum_id,
-                profesorId:        $this->pevaluacion->profesor_id,
+            $result = $service->improve(
+                currentData: $currentData,
+                pensumId: $this->pevaluacion->pensum_id,
+                profesorId: $this->pevaluacion->profesor_id,
                 currentActivityId: $this->activity_id,
             );
 
             // Poblar el formulario con el contenido mejorado
-            $this->activityForm->description     = $result['description']     ?? $this->activityForm->description;
-            $this->activityForm->topic           = $result['topic']           ?? $this->activityForm->topic;
-            $this->activityForm->thematic        = $result['thematic']        ?? $this->activityForm->thematic;
-            $this->activityForm->references      = $result['references']      ?? $this->activityForm->references;
-            $this->activityForm->teachingStart   = $result['teachingStart']   ?? $this->activityForm->teachingStart;
+            $this->activityForm->description = $result['description'] ?? $this->activityForm->description;
+            $this->activityForm->topic = $result['topic'] ?? $this->activityForm->topic;
+            $this->activityForm->thematic = $result['thematic'] ?? $this->activityForm->thematic;
+            $this->activityForm->references = $result['references'] ?? $this->activityForm->references;
+            $this->activityForm->teachingStart = $result['teachingStart'] ?? $this->activityForm->teachingStart;
             $this->activityForm->teachingContent = $result['teachingContent'] ?? $this->activityForm->teachingContent;
-            $this->activityForm->teachingEnd     = $result['teachingEnd']     ?? $this->activityForm->teachingEnd;
+            $this->activityForm->teachingEnd = $result['teachingEnd'] ?? $this->activityForm->teachingEnd;
 
             $this->notification()->success(
                 '¡Contenido mejorado!',
@@ -780,25 +1073,25 @@ class IndexComponent extends Component
             // ── Log técnico completo (para depuración) ──
             Log::error('Error mejorando actividad con IA', [
                 'exception' => $e::class,
-                'error'     => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
-                'activity'  => $this->activity_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'activity' => $this->activity_id,
                 'pevaluacion' => $this->pevaluacion_id,
             ]);
 
             // ── Confirm amigable con reintento (NO exponer detalles
             //    técnicos al usuario — el profesor ve un toast claro) ──
             $this->dialog()->confirm([
-                'title'       => 'No se pudo mejorar el contenido',
+                'title' => 'No se pudo mejorar el contenido',
                 'description' => 'Ocurrió una situación inesperada con el servicio de IA. '
-                    . 'Tu actividad no se modificó. ¿Deseas intentar de nuevo?',
-                'icon'        => 'warning',
-                'accept'      => [
-                    'label'  => 'Reintentar',
+                    .'Tu actividad no se modificó. ¿Deseas intentar de nuevo?',
+                'icon' => 'warning',
+                'accept' => [
+                    'label' => 'Reintentar',
                     'method' => 'improveActivity',
-                    'color'  => 'primary',
+                    'color' => 'primary',
                 ],
-                'reject'      => [
+                'reject' => [
                     'label' => 'Cerrar',
                 ],
             ]);
@@ -807,7 +1100,7 @@ class IndexComponent extends Component
 
     public function resetModel()
     {
-        $this->activity = new Activity();
+        $this->activity = new Activity;
 
         $this->achievement_id = null;
         $this->activityForm->reset();

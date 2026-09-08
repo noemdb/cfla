@@ -20,6 +20,7 @@ use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -27,7 +28,7 @@ use Tests\TestCase;
  */
 class TimetableModelsTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_calendar_has_expected_schema_columns(): void
     {
@@ -47,8 +48,10 @@ class TimetableModelsTest extends TestCase
 
     public function test_shift_factory_creates_morning_and_afternoon(): void
     {
-        $morning = TimetableShift::factory()->create();
-        $afternoon = TimetableShift::factory()->afternoon()->create();
+        // make() no inserta en BD → no colisiona con turnos preexistentes;
+        // solo valida los códigos que produce el factory.
+        $morning = TimetableShift::factory()->make();
+        $afternoon = TimetableShift::factory()->afternoon()->make();
 
         $this->assertSame('M', $morning->code);
         $this->assertSame('T', $afternoon->code);
@@ -241,7 +244,7 @@ class TimetableModelsTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
         $period = TimetablePeriod::factory()->create([
             'calendar_id' => $calendar->id,
             'shift_id' => $shift->id,

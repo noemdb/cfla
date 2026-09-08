@@ -4,13 +4,23 @@ namespace Tests\Feature\Timetable;
 
 use App\Livewire\Coordinacion\Timetable\TimetableWizard;
 use App\Livewire\Planning\Timetable\TimetableWizard as PlanningTimetableWizard;
+use App\Models\app\Academy\Asignatura;
+use App\Models\app\Academy\Grado;
 use App\Models\app\Academy\Lapso;
+use App\Models\app\Academy\Peducativo;
+use App\Models\app\Academy\Pensum;
+use App\Models\app\Academy\Pestudio;
+use App\Models\app\Academy\Pevaluacion;
+use App\Models\app\Academy\Profesor;
+use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
+use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -110,10 +120,10 @@ class TimetableWizardTest extends TestCase
             ->set('shiftCode', 'M')
             ->set('shiftName', 'Mañana')
             ->call('createShift')
-            ->assertSet('shiftId', TimetableShift::query()->orderByDesc('id')->first()->id)
+            ->assertSet('shiftId', TimetableShift::query()->where('code', 'M')->value('id'))
             ->assertHasNoErrors();
 
-        $shift = TimetableShift::query()->orderByDesc('id')->first();
+        $shift = TimetableShift::query()->where('code', 'M')->first();
 
         Livewire::actingAs($user)
             ->test(TimetableWizard::class)
@@ -132,8 +142,8 @@ class TimetableWizardTest extends TestCase
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shiftM = TimetableShift::factory()->create(['code' => 'M', 'name' => 'Mañana']);
-        $shiftT = TimetableShift::factory()->afternoon()->create(['code' => 'T', 'name' => 'Tarde']);
+        $shiftM = $this->shift('M', 'Mañana');
+        $shiftT = $this->shift('T', 'Tarde', '13:00:00', '18:15:00');
 
         $wizard = Livewire::actingAs($user)->test(TimetableWizard::class);
 
@@ -169,12 +179,292 @@ class TimetableWizardTest extends TestCase
         $this->assertDatabaseHas('timetable_rooms', ['code' => 'LAB-01', 'type' => 'laboratorio']);
     }
 
+    public function test_bulk_create_rooms_creates_one_per_active_seccion(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $this->assertCount(1, $component->get('pendingRooms'));
+
+        // El staging no persiste: la sección aún no tiene aula.
+        $this->assertDatabaseMissing('timetable_rooms', ['seccion_id' => $seccion->id]);
+
+        // Guardar todas → persiste.
+        $component->call('saveAllRooms');
+
+        $room = TimetableRoom::query()->where('seccion_id', $seccion->id)->first();
+        $this->assertNotNull($room);
+        $this->assertSame('Aula 1er Grado A', $room->name);
+        $this->assertSame('aula', $room->type);
+        $this->assertSame($seccion->amount_student, $room->capacity);
+    }
+
+    public function test_bulk_create_rooms_skips_seccion_with_existing_room(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+
+        TimetableRoom::create([
+            'code' => 'AULA-001', 'name' => 'Aula 1er Grado A',
+            'type' => 'aula', 'seccion_id' => $seccion->id, 'status_active' => true,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $this->assertSame(1, TimetableRoom::query()->where('seccion_id', $seccion->id)->count());
+    }
+
+    public function test_bulk_create_rooms_ignores_inactive_seccion(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'false']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $this->assertSame(0, TimetableRoom::query()->where('seccion_id', $seccion->id)->count());
+    }
+
+    public function test_edit_room_updates_room(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $room = TimetableRoom::create([
+            'code' => 'A-101', 'name' => 'Aula 101', 'capacity' => 30,
+            'type' => 'aula', 'status_active' => true,
+        ]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('editRoom', $room->id)
+            ->assertSet('roomEditOpen', true)
+            ->assertSet('editRoomCode', 'A-101')
+            ->assertSet('editRoomName', 'Aula 101')
+            ->set('editRoomName', 'Aula 101 (nueva)')
+            ->set('editRoomCapacity', 40)
+            ->call('updateRoom');
+
+        $this->assertSame('Aula 101 (nueva)', $room->fresh()->name);
+        $this->assertSame(40, $room->fresh()->capacity);
+        $this->assertFalse($component->get('roomEditOpen'));
+    }
+
+    public function test_edit_room_rejects_duplicate_code(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        TimetableRoom::create(['code' => 'A-101', 'name' => 'Aula 101', 'type' => 'aula', 'status_active' => true]);
+        $room = TimetableRoom::create(['code' => 'A-102', 'name' => 'Aula 102', 'type' => 'aula', 'status_active' => true]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('editRoom', $room->id)
+            ->set('editRoomCode', 'A-101')
+            ->call('updateRoom')
+            ->assertHasErrors('editRoomCode');
+
+        $this->assertSame('A-102', $room->fresh()->code);
+    }
+
+    public function test_rooms_grouped_by_peducativo(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $peducativo = Peducativo::factory()->create(['name' => 'Proyecto A']);
+        $pestudio = Pestudio::factory()->create(['peducativo_id' => $peducativo->id, 'status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $groups = $component->get('roomsByPeducativo');
+        $matching = collect($groups)->first(fn ($g) => $g['name'] === 'Proyecto A');
+
+        $this->assertNotNull($matching);
+        $this->assertContains($seccion->id, array_column($matching['rooms'], 'seccion_id'));
+    }
+
+    public function test_save_all_rooms_persists_and_clears_pending(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $this->assertCount(1, $component->get('pendingRooms'));
+
+        $component->call('saveAllRooms');
+
+        $this->assertCount(0, $component->get('pendingRooms'));
+        $this->assertDatabaseHas('timetable_rooms', ['seccion_id' => $seccion->id]);
+    }
+
+    public function test_remove_pending_room(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'status_active' => 'true']);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('bulkCreateRooms');
+
+        $pendingId = $component->get('pendingRooms')[0]['id'];
+
+        $component->call('removePendingRoom', $pendingId);
+
+        $this->assertCount(0, $component->get('pendingRooms'));
+        $this->assertDatabaseMissing('timetable_rooms', ['seccion_id' => $seccion->id]);
+    }
+
+    public function test_delete_all_rooms(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        TimetableRoom::create(['code' => 'A-101', 'name' => 'Aula 101', 'type' => 'aula', 'status_active' => true]);
+        TimetableRoom::create(['code' => 'A-102', 'name' => 'Aula 102', 'type' => 'aula', 'status_active' => true]);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->call('deleteAllRooms');
+
+        $this->assertSame(0, TimetableRoom::query()->count());
+        $this->assertCount(0, $component->get('rooms'));
+    }
+
+    public function test_step3_pevaluaciones_grouped_by_pestudio_grado_seccion(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $peducativo = Peducativo::factory()->create(['name' => 'Proyecto A']);
+        $pestudio = Pestudio::factory()->create(['peducativo_id' => $peducativo->id, 'name' => 'Plan 1', 'status_active' => 'true']);
+        $grado = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccion = Seccion::factory()->create(['grado_id' => $grado->id, 'name' => 'A', 'status_active' => 'true']);
+        $asignatura = Asignatura::factory()->create(['hour_t_week' => 3, 'hour_p_week' => 0]);
+        $pensum = Pensum::factory()->create(['pestudio_id' => $pestudio->id, 'grado_id' => $grado->id, 'asignatura_id' => $asignatura->id]);
+        $profesor = Profesor::create([
+            'user_id' => User::factory()->create()->id, 'name' => 'Ana', 'lastname' => 'López',
+            'ci_profesor' => '30001', 'status_active' => 'true',
+        ]);
+        $pev = Pevaluacion::factory()->create([
+            'profesor_id' => $profesor->id, 'seccion_id' => $seccion->id,
+            'pensum_id' => $pensum->id, 'lapso_id' => $lapso->id,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('currentStep', 3)
+            ->set('calendarId', $calendar->id)
+            ->assertSee('Plan 1')
+            ->assertSee('1er Grado')
+            ->assertSee('Sección A')
+            ->assertSee($asignatura->name);
+    }
+
+    public function test_step3_excludes_pevaluaciones_of_inactive_grado(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+
+        $pestudio = Pestudio::factory()->create(['name' => 'Plan 1', 'status_active' => 'true']);
+
+        // Grado activo con asignatura "Matemáticas".
+        $gradoActive = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '1er Grado', 'status_active' => 'true']);
+        $seccionActive = Seccion::factory()->create(['grado_id' => $gradoActive->id, 'name' => 'A', 'status_active' => 'true']);
+        $asigActive = Asignatura::factory()->create(['name' => 'Matemáticas', 'hour_t_week' => 3, 'hour_p_week' => 0]);
+        $pensumActive = Pensum::factory()->create(['pestudio_id' => $pestudio->id, 'grado_id' => $gradoActive->id, 'asignatura_id' => $asigActive->id]);
+        $profesorA = Profesor::create([
+            'user_id' => User::factory()->create()->id, 'name' => 'Ana', 'lastname' => 'López',
+            'ci_profesor' => '40001', 'status_active' => 'true',
+        ]);
+        Pevaluacion::factory()->create([
+            'profesor_id' => $profesorA->id, 'seccion_id' => $seccionActive->id,
+            'pensum_id' => $pensumActive->id, 'lapso_id' => $lapso->id,
+        ]);
+
+        // Grado inactivo con asignatura "Química" → NO debe aparecer.
+        $gradoInactive = Grado::factory()->create(['pestudio_id' => $pestudio->id, 'name' => '2do Grado', 'status_active' => 'false']);
+        $seccionInactive = Seccion::factory()->create(['grado_id' => $gradoInactive->id, 'name' => 'B', 'status_active' => 'true']);
+        $asigInactive = Asignatura::factory()->create(['name' => 'Química', 'hour_t_week' => 3, 'hour_p_week' => 0]);
+        $pensumInactive = Pensum::factory()->create(['pestudio_id' => $pestudio->id, 'grado_id' => $gradoInactive->id, 'asignatura_id' => $asigInactive->id]);
+        $profesorB = Profesor::create([
+            'user_id' => User::factory()->create()->id, 'name' => 'Beto', 'lastname' => 'Pérez',
+            'ci_profesor' => '40002', 'status_active' => 'true',
+        ]);
+        Pevaluacion::factory()->create([
+            'profesor_id' => $profesorB->id, 'seccion_id' => $seccionInactive->id,
+            'pensum_id' => $pensumInactive->id, 'lapso_id' => $lapso->id,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('currentStep', 3)
+            ->set('calendarId', $calendar->id)
+            ->assertSee('Matemáticas')
+            ->assertDontSee('Química');
+    }
+
     public function test_step3_derives_blocks_from_asignatura_hours(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'period_minutes' => 60]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->shift();
 
         $fixture = $this->pevaluacionFixture($lapso->id);
         $pev = $fixture['pev'];
@@ -186,8 +476,9 @@ class TimetableWizardTest extends TestCase
 
         $lessons = $wizard->get('lessons');
         $this->assertCount(1, $lessons);
-        $this->assertSame(3, $lessons[0]['weekly_blocks_t']); // 3 h semanales → 3 bloques de 60'
-        $this->assertSame(2, $lessons[0]['weekly_blocks_p']); // 2 h semanales → 2 bloques
+        $lesson = $lessons[$pev->id];
+        $this->assertSame(3, $lesson['weekly_blocks_t']); // 3 h semanales → 3 bloques de 60'
+        $this->assertSame(2, $lesson['weekly_blocks_p']); // 2 h semanales → 2 bloques
     }
 
     public function test_step3_saves_lessons(): void
@@ -195,7 +486,7 @@ class TimetableWizardTest extends TestCase
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->shift();
         $fixture = $this->pevaluacionFixture($lapso->id);
 
         Livewire::actingAs($user)
@@ -210,12 +501,90 @@ class TimetableWizardTest extends TestCase
         $this->assertSame(1, TimetableLesson::query()->where('calendar_id', $calendar->id)->count());
     }
 
+    public function test_import_lessons_from_csv(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'period_minutes' => 60]);
+        $shiftM = $this->shift('M', 'Mañana');
+        $fixture = $this->pevaluacionFixture($lapso->id);
+
+        $csv = "pevaluacion_id,turno,bloques_t,bloques_p,aula,prioridad\n";
+        $csv .= "{$fixture['pev']->id},M,3,1,,\n";
+        $file = UploadedFile::fake()->createWithContent('lecciones.csv', $csv);
+
+        Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('importFile', $file)
+            ->call('importLessons')
+            ->assertSet('importMessage', '1 lección(es) importada(s).')
+            ->assertCount('lessons', 1);
+
+        $lessons = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('importFile', $file)
+            ->call('importLessons')
+            ->get('lessons');
+
+        $lesson = $lessons[$fixture['pev']->id];
+        $this->assertSame($shiftM->id, $lesson['shift_id']);
+        $this->assertSame(3, $lesson['weekly_blocks_t']);
+        $this->assertSame(1, $lesson['weekly_blocks_p']);
+    }
+
+    public function test_import_rejects_duplicate_rows(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $this->shift('M', 'Mañana');
+        $fixture = $this->pevaluacionFixture($lapso->id);
+
+        $csv = "pevaluacion_id,turno\n";
+        $csv .= "{$fixture['pev']->id},M\n";
+        $csv .= "{$fixture['pev']->id},M\n";
+        $file = UploadedFile::fake()->createWithContent('lecciones.csv', $csv);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('importFile', $file)
+            ->call('importLessons');
+
+        $component->assertCount('lessons', 1);
+        $this->assertNotEmpty($component->get('importErrors'));
+        $this->assertStringContainsString('duplicada', implode(' ', $component->get('importErrors')));
+    }
+
+    public function test_import_rejects_invalid_turno(): void
+    {
+        $user = User::factory()->create(['is_coordinacion' => true]);
+        $lapso = Lapso::factory()->create();
+        $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
+        $fixture = $this->pevaluacionFixture($lapso->id);
+
+        $csv = "pevaluacion_id,turno\n";
+        $csv .= "{$fixture['pev']->id},Z\n";
+        $file = UploadedFile::fake()->createWithContent('lecciones.csv', $csv);
+
+        $component = Livewire::actingAs($user)
+            ->test(TimetableWizard::class)
+            ->set('calendarId', $calendar->id)
+            ->set('importFile', $file)
+            ->call('importLessons');
+
+        $this->assertEmpty($component->get('lessons'));
+        $this->assertStringContainsString('turno inválido', implode(' ', $component->get('importErrors')));
+    }
+
     public function test_step5_runs_dry_run_and_shows_preview(): void
     {
         $user = User::factory()->create(['is_coordinacion' => true]);
         $lapso = Lapso::factory()->create();
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->shift();
 
         // Períodos para el solver.
         for ($day = 1; $day <= 5; $day++) {
@@ -248,6 +617,18 @@ class TimetableWizardTest extends TestCase
     }
 
     // ─── Fixtures ──────────────────────────────────────────────
+
+    /**
+     * Turno reutilizable (catálogo compartido con code único): firstOrCreate
+     * para tolerar turnos 'M'/'T' preexistentes en la BD de tests.
+     */
+    private function shift($code = 'M', $name = 'Mañana', $start = '07:00:00', $end = '12:15:00'): TimetableShift
+    {
+        return TimetableShift::query()->firstOrCreate(
+            ['code' => $code],
+            ['name' => $name, 'start_time' => $start, 'end_time' => $end],
+        );
+    }
 
     private function pevaluacionFixture($lapsoId): array
     {

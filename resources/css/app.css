@@ -241,3 +241,33 @@ span.text-negative-600,
     color: #ff0000 !important; /* Rojo Puro */
     display: block !important;
 }
+
+/* ============================================================
+   Scroll horizontal estilizado — suplemento preview (PLAN-ACTIVITIES-001)
+   Tablas/desbordes dentro de .supplement-preview y contenedores con
+   overflow-x: keep nicely visible + scrollbar fina y discreta en ambos temas.
+   ============================================================ */
+.supplement-preview { overflow-x: auto; }
+.supplement-preview table { display: block; width: max-content; max-width: 100%; white-space: nowrap; }
+.supplement-preview table th,
+.supplement-preview table td { white-space: normal; }
+
+/* Scrollbar fina y adaptativa (WebKit/Blink) */
+.supplement-preview::-webkit-scrollbar,
+.modal-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.supplement-preview::-webkit-scrollbar-thumb,
+.modal-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.6);
+    border-radius: 8px;
+}
+.supplement-preview::-webkit-scrollbar-track,
+.modal-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+html.dark .supplement-preview::-webkit-scrollbar-thumb,
+html.dark .modal-scroll::-webkit-scrollbar-thumb {
+    background: rgba(71, 85, 105, 0.6);
+}

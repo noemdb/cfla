@@ -15,10 +15,10 @@ use App\Models\app\Learner\Estudiant;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -27,7 +27,7 @@ use Tests\TestCase;
  */
 class TimetableRoleViewTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_student_sees_only_own_section_timetable(): void
     {
@@ -179,7 +179,7 @@ class TimetableRoleViewTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id, 'status' => 'active']);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         $period = TimetablePeriod::factory()->create([
             'calendar_id' => $calendar->id, 'shift_id' => $shift->id,

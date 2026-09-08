@@ -14,11 +14,11 @@ use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -26,7 +26,7 @@ use Tests\TestCase;
  */
 class TimetableEditorTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_editor_renders_grid_for_active_calendar(): void
     {
@@ -134,6 +134,39 @@ class TimetableEditorTest extends TestCase
         $this->assertSame($fixture['periods'][0]->id, $fixture['slot']->fresh()->period_id);
     }
 
+    public function test_bump_version_is_atomic_and_reports_conflict(): void
+    {
+        $fixture = $this->editorFixture();
+        $user = User::factory()->create(['is_coordinacion' => true]);
+
+        $editor = Livewire::actingAs($user)
+            ->test(TimetableEditor::class, ['calendarId' => $fixture['calendar']->id]);
+
+        // Simula la carrera: entre el chequeo temprano y el bump, otro editor
+        // muta el calendario y la versión de BD avanza (v+1). El UPDATE
+        // condicional del bump debe reportar conflicto en vez de pisar.
+        $fixture['calendar']->increment('version');
+
+        // Fuerza que assertEditableVersion pase (la versión del componente
+        // aún coincide con la BD) y muta para llegar al bump. Primero
+        // re-sincroniza la versión del componente con la BD actual.
+        $editor->set('version', $fixture['calendar']->version);
+        // Otro editor avanza la versión DESPUÉS del chequeo temprano del
+        // componente — ventana de carrera que solo el bump atómico detecta.
+        $fixture['calendar']->increment('version');
+
+        $editor->call('removeSlot', $fixture['slot']->id)
+            ->assertNotSet('conflictMessage', null);
+
+        $this->assertStringContainsString('Otro usuario', $editor->get('conflictMessage'));
+        // El bump condicional no aplicó: la versión de BD quedó en la del
+        // otro editor, no avanzó de nuevo por el editor "perdedor".
+        $this->assertSame(
+            $fixture['calendar']->version,
+            $fixture['calendar']->fresh()->version,
+        );
+    }
+
     // ─── Fixtures ──────────────────────────────────────────────
 
     private function editorFixture(): array
@@ -165,7 +198,7 @@ class TimetableEditorTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         $periods = [];
         for ($i = 0; $i < 6; $i++) {

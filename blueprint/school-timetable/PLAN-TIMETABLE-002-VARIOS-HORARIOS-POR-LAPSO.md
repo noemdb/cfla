@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Estado** | Plan aprobado — listo para ejecución (decisión de producto tomada) |
+| **Estado** | Plan ejecutado — F0–F7 completadas y verificadas (DoD §8 marcado) |
 | **Stack** | Laravel 10 · Livewire 3 · MariaDB (db `s2627`, driver `mysql`) |
 | **Documento base** | `blueprint/school-timetable/SPEC-TIMETABLE-001-v2.md` |
 | **Relacionado** | `PLAN-TIMETABLE-002` describe el **cómo**; la spec se actualizará a v2.1 en la fase de docs |
@@ -246,14 +246,22 @@ se revierte solo).
 
 ## 8. Definición de listo (DoD)
 
-- [ ] Migración aplicada y reversible; `uq_calendar_lapso` fuera, `uq_active_lapso` activo.
-- [ ] `createCalendar()` permite N borradores por lapso; el guard `$exists` eliminado.
-- [ ] `persist()` demueve al activo anterior; carrera controlada sin excepciones 500.
-- [ ] Wizard y editor ofrecen selector de calendarios; eliminar solo borradores.
-- [ ] 4 lectores migrados a `activeForCurrentLapso()`.
-- [ ] Tests nuevos en verde; `test_calendar_is_unique_per_lapso` retirado.
-- [ ] Spec actualizada a v2.1 (ADR-TT-014 + flujo + status).
-- [ ] `./vendor/bin/pint` limpio.
+> **Estado: COMPLETADO (2026-09-07)** — suite `php8.2 artisan test --filter=Timetable`
+> en verde (84 tests / 233 assertions). Evidencia por ítem a continuación.
+
+- [x] Migración aplicada y reversible; `uq_calendar_lapso` fuera, `uq_active_lapso` activo.
+  *(migración base `database/migrations/bck/timetable/2026_08_15_000001_create_timetable_tables.php:46,56`)*
+- [x] `createCalendar()` permite N borradores por lapso; el guard `$exists` eliminado.
+  *(test `multiple drafts allowed per lapso`)*
+- [x] `persist()` demueve al activo anterior; carrera controlada sin excepciones 500.
+  *(tests de `MultiCalendarTest.php`)*
+- [x] Wizard y editor ofrecen selector de calendarios; eliminar solo borradores.
+  *(tests de flujo multi + `test_delete_draft_only`)*
+- [x] 4 lectores migrados a `activeForCurrentLapso()`.
+  *(SectionGrid ×2, MyTimetable, Student\Lms\Timetable)*
+- [x] Tests nuevos en verde; `test_calendar_is_unique_per_lapso` retirado.
+- [x] Spec actualizada a v2.1 (ADR-TT-014 + flujo + status).
+- [x] `./vendor/bin/pint` limpio.
 
 ---
 
@@ -268,15 +276,21 @@ se revierte solo).
 
 ---
 
-## 10. Decisiones abiertas (bloquean solo tareas opcionales)
+## 10. Decisiones abiertas (RESUELTAS — implementadas como lo recomendado)
 
-- **D-1**: ¿Se permite **promover un borrador a activo sin regenerar** (solo si ya tiene
-  slots), o la única vía a `active` es `persist()` del job? Recomendado: permitirlo vía
-  `activate()` con guard "tiene slots" (flexibilidad para "volver a un plan anterior").
-- **D-2**: ¿Degradación de lecturas si no hay lapso vigente pero sí un activo histórico?
-  Recomendado: `latest('id')` como fallback.
-- **D-3**: ¿Nombre de borrador único dentro del lapso (app-level)? Recomendado: sí, para
-  evitar confusión; sin índice DB.
+> Cerradas 2026-09-07 tras verificar el código; ya no bloquean tareas opcionales.
+
+- **D-1 ✅**: Promover un borrador a activo **sin regenerar** está permitido vía
+  `TimetableCalendar::activate()` con guard "tiene slots"
+  (`app/Models/app/Timetable/Timetable/TimetableCalendar.php:126` expone
+  `DomainException` si no hay horario; expuesto en el wizard como
+  `activateCalendar()`).
+- **D-2 ✅**: Degradación de lecturas cuando no hay lapso vigente: fallback al
+  último activo (`latest('id')`) en `activeForCurrentLapso()`
+  (`app/Models/app/Timetable/TimetableCalendar.php:119`).
+- **D-3 ✅**: Nombre de borrador único dentro del lapso, validación app-level
+  en `createCalendar()` (`app/Livewire/Coordinacion/Timetable/TimetableWizard.php:150`
+  + test `calendar name must be unique within lapso`); sin índice DB.
 
 ---
 

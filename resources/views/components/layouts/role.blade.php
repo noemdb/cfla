@@ -110,6 +110,13 @@
             z-index: 9999 !important;
         }
 
+        /* Dialog de confirmación: fondo más oscuro + desenfoque para destacar el modal */
+        .dialog-backdrop {
+            background: rgba(2, 6, 23, 0.78) !important;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
         .progress-bar-sm {
             height: 4px;
             border-radius: 2px;

@@ -86,6 +86,100 @@ class ActivityImprovementService
         );
     }
 
+    /**
+     * Transforma un texto libre (Markdown) de la información complementaria de
+     * una actividad en una versión mejor formateada, más organizada y con mejor
+     * presentación visual. Equivalente funcional de `generateSlideText` del
+     * LessonWizard, pero sobre un único campo de texto plano.
+     *
+     * @param  string $text  Texto original escrito por el profesor (Markdown crudo)
+     * @param  int    $pensumId   ID del pensum (para contexto normativo)
+     * @param  int    $profesorId ID del profesor (para sus otras actividades)
+     * @param  ?int   $currentActivityId ID de la actividad actual (para excluir)
+     * @return array{content: string, model: ?string, success: bool, error: ?string}
+     *
+     * @throws \RuntimeException Si todos los servicios AI fallan
+     */
+    public function improveSupplementText(
+        string $text,
+        int $pensumId,
+        int $profesorId,
+        ?int $currentActivityId = null,
+        string $mode = 'normal',
+    ): array {
+        $referentContext = $this->gatherReferentContext($pensumId);
+
+        $systemPrompt = <<<'PROMPT'
+Eres un Staff Engineer especializado en diseño curricular del Sistema Educativo Bolivariano de Venezuela.
+
+Tu tarea es REORDENAR y EMBELLECER un texto de "información complementaria" escrito por un docente, convirtiéndolo en Markdown bien formado, organizado y con mejor presentación visual, PRESERVANDO TODO el significado y los datos originales.
+
+### Reglas cardinales:
+1. **Conserva el contenido**: no inventes información nueva. Preserva todos los datos, nombres, fechas, citas y ejemplos que aparezcan en el texto original.
+2. **Organización**: estructura lógica con títulos `##`, secciones y, si tiene sentido, listas `-` o tablas `| |` para agrupar información comparable.
+3. **Mejor presentación**: usa **negritas** para términos clave, *cursivas* para énfasis, y párrafos cortos y legibles.
+4. **Jerarquía clara**: si el texto tiene más de un tema, sepáralo en secciones con `##` descriptivos.
+5. **Tono profesional**: formal, pedagógico y claro.
+6. **Extensión**: similar al original (ni mucho más largo ni resumido). No lo inventes ni lo acortes artificialmente.
+
+### Formato de salida:
+- SOLO Markdown plano (títulos `##`, listas `-`, tablas `| |`, **negritas**, *cursivas*).
+- ⚠️ PROHIBIDO usar HTML de cualquier tipo (<h2>, <p>, <strong>, <ul>, <li>, etc.).
+- Nada de bloques de código ``` ni fences.
+- Responde ÚNICAMENTE con el Markdown transformado, sin explicaciones ni introducciones del tipo "aquí está".
+PROMPT;
+
+        $modeInstruction = match ($mode) {
+            'breve'     => 'Extensión BREVE: comprime el texto original a lo esencial, usando listas - cortas y sin párrafos largos. Conserva todos los datos clave.',
+            'detallado' => 'Extensión DETALLADA: amplía y enriquece el texto original con más desarrollo, ejemplos y contexto, siempre sin inventar información nueva. Párrafos más largos.',
+            default     => 'Extensión NORMAL: similar al original, ni mucho más largo ni resumido.',
+        };
+
+        $userPrompt = <<<PROMPT
+=== TEXTO ORIGINAL (información complementaria) ===
+
+{$text}
+
+=== INSTRUCCIÓN ===
+Reorganiza el texto anterior en Markdown bien formateado y con mejor presentación visual, preservando todo el contenido. Devuelve SOLO el Markdown transformado, sin fences ni HTML.
+
+{$modeInstruction}
+PROMPT;
+
+        try {
+            $result = $this->callWithFallback($systemPrompt, $userPrompt);
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'content' => null,
+                'model'   => null,
+                'error'   => $e->getMessage(),
+            ];
+        }
+
+        if (! $result['success'] || empty($result['content'] ?? '')) {
+            return [
+                'success' => false,
+                'content' => null,
+                'model'   => $result['model'] ?? null,
+                'error'   => $result['error'] ?? 'La IA no devolvió contenido.',
+            ];
+        }
+
+        // Limpiar posibles wrappers markdown (```, ```markdown, ```md)
+        $content = trim($result['content'] ?? '');
+        $content = preg_replace('/^```(?:markdown|md)?\s*\n?/i', '', $content);
+        $content = preg_replace('/\n?```\s*$/s', '', $content);
+        $content = trim($content);
+
+        return [
+            'success' => true,
+            'content' => $content,
+            'model'   => $result['model'] ?? null,
+            'error'   => null,
+        ];
+    }
+
     // ─── CONTEXTO: REFERENTE NORMATIVO ──────────────────────────────
 
     /**

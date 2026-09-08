@@ -17,11 +17,11 @@ use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableConflict;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Queue;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -30,7 +30,7 @@ use Tests\TestCase;
  */
 class GenerateTimetableJobTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_dry_run_stores_preview_payload_without_persisting_slots(): void
     {
@@ -258,7 +258,7 @@ class GenerateTimetableJobTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         // 5 días × 3 períodos = 15 períodos (60 min c/u, sin recreos).
         $periods = [];
@@ -325,7 +325,7 @@ class GenerateTimetableJobTest extends TestCase
         ]);
 
         $calendar = TimetableCalendar::factory()->create(['lapso_id' => $lapso->id]);
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
         $period = TimetablePeriod::factory()->create([
             'calendar_id' => $calendar->id, 'shift_id' => $shift->id,
             'day_of_week' => 1, 'order_in_day' => 1, 'is_break' => false,

@@ -61,6 +61,11 @@ class Activity extends Model implements \App\Contracts\Auditable
         return $this->hasMany(Achievement::class, 'activity_id');
     }
 
+    public function supplement()
+    {
+        return $this->hasOne(ActivitySupplement::class, 'activity_id');
+    }
+
     public function pevaluacion()
     {
         return $this->belongsTo(Pevaluacion::class, 'pevaluacion_id');

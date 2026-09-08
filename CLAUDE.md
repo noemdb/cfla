@@ -10,6 +10,19 @@ This is a **school management system** (Colegio...) built with Laravel 10, Livew
 
 > **Siempre se usa `php8.2` para cualquier tarea PHP en este proyecto.** El binario por defecto del sistema (`/usr/bin/php`) es **PHP 7.4.33**, que **NO** sirve (falla con `?->` y no cumple el requisito `"php": "^8.2"` de `composer.json`). También existe `php8.3`, pero la versión canónica y exigida es **`php8.2`**. Toda ejecución de lint (`php -l`), comandos Artisan (`artisan`), pruebas (`phpunit`/`pest`) o tarea PHP debe resolverse con `/usr/bin/php8.2`. Nunca usar el `php` plano (7.4).
 
+# 🚫 REGLA ABSOLUTA: JAMÁS eliminar ni vaciar la base de datos
+
+> **PROHIBIDO ejecutar cualquier comando que dropee, borre, trunque o reconstruya desde cero la base de datos** (p. ej. `s2627` u otra que use el proyecto). Esto incluye —sin excepción—:
+>
+> - `php8.2 artisan migrate:fresh` (con o sin `--seed`, `--force`, o cualquier flag/combinación de flags, **incluido `--path=`**: `fresh` **SIEMPRE dropea TODAS las tablas primero**, sea cual sea el path indicado).
+> - `php8.2 artisan schema:dump --prune` y `db:wipe`.
+> - SQL directo: `DROP DATABASE`, `DROP TABLE`, `TRUNCATE` (`DB::statement`, tinker, `mysql` CLI, etc.) sobre tablas del negocio.
+> - `php8.2 artisan migrate:rollback` de más de un batch sin confirmación explícita del usuario.
+>
+> **Comandos seguros:** `php8.2 artisan migrate` (solo agrega), `php8.2 artisan test` / `--filter` (los tests usan `DatabaseTransactions` sobre la BD real, sin borrar nada), `php8.2 artisan config:clear`.
+>
+> Si una tarea parece requerir dropear la BD, detenerse y preguntar al usuario. Nunca "restaurar" reconstruyendo el schema con `migrate:fresh`: el schema no es reconstruible en su totalidad desde las migraciones (la migración base de timetable y otras históricas viven en `database/migrations/bck/`, no descubrible por Artisan). Ante pérdida de datos, la restauración se hace **solo** desde un dump SQL provisto por el usuario.
+
 ## Build & Dev Commands
 
 > Todos los comandos PHP usan `php8.2` (no `php`, que en el CLI del sistema es 7.4):

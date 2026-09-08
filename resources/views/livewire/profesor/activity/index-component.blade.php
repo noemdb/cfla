@@ -225,9 +225,19 @@
                                             Aprobada
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
+                                        <span title="Pendiente de aprobación" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                            En revisión
+                                            Rev.
+                                        </span>
+                                    @endif
+                                    {{-- Suplemento: badges T (texto) / IMG (imagen) — E1 --}}
+                                    @if($item->supplement && !empty(trim($item->supplement->text ?? '')))
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/25" title="Tiene texto complementario">T</span>
+                                    @endif
+                                    @if($item->supplement && !empty($item->supplement->image_url))
+                                        <span class="inline-flex items-center justify-center min-w-[30px] px-1 rounded-md text-[9px] font-bold bg-violet-500/15 text-violet-400 border border-violet-500/25" title="Tiene imagen complementaria">
+                                            <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span>IMG</span>
                                         </span>
                                     @endif
                                     <span class="text-[11px] text-gray-500 font-mono">
@@ -402,7 +412,16 @@
                                             : 'border-l-amber-500/70';
                                     @endphp
                                     <tr class="border-b border-white/5 hover:bg-gray-700/20 transition-colors group">
-                                        <td class="px-2 py-2.5 text-gray-500 text-[10px] font-medium border-l-4 {{ $statusBorder }}">{{ $activities->firstItem() + $loop->index }}</td>
+                                        <td class="px-2 py-2.5 text-gray-500 text-[10px] font-medium border-l-4 {{ $statusBorder }}">
+                                            {{ $activities->firstItem() + $loop->index }}
+                                            {{-- Suplemento: badges T / IMG — E1 --}}
+                                            @if($item->supplement && !empty(trim($item->supplement->text ?? '')))
+                                                <span class="inline-flex items-center justify-center w-5 h-5 rounded text-[8px] font-bold bg-cyan-500/15 text-cyan-400" title="Tiene texto complementario">T</span>
+                                            @endif
+                                            @if($item->supplement && !empty($item->supplement->image_url))
+                                                <span class="inline-flex items-center justify-center min-w-[26px] px-0.5 rounded text-[8px] font-bold bg-violet-500/15 text-violet-400" title="Tiene imagen complementaria">IMG</span>
+                                            @endif
+                                        </td>
                                         <td class="px-2 py-2.5">
                                             <p class="text-xs text-white font-medium leading-tight max-w-[250px] truncate" title="{{ $item->topic }}">{{ $item->topic }}</p>
                                         </td>
@@ -425,7 +444,7 @@
                                             </span>
                                         </td>
                                         <td class="px-2 py-2.5">
-                                            <div class="flex flex-col items-center gap-1">
+                                            <div class="flex flex-col items-start gap-1">
                                                 {{-- Approval badge --}}
                                                 @if($isApproved)
                                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm shadow-emerald-500/10">
@@ -433,9 +452,9 @@
                                                         Aprobada
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
+                                                    <span title="En revisión" class="text-nowrap inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 shadow-sm shadow-amber-500/10">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                                        En revisión
+                                                        Rev.
                                                     </span>
                                                 @endif
                                                 @if($item->status_resume)
@@ -1535,6 +1554,206 @@
             </div>
         </div>
     @endif
+
+    {{-- SUPPLEMENT MODAL (PLAN-ACTIVITIES-001) --}}
+    @if($showSupplementModal)
+        <div class="fixed inset-0 z-[9998] overflow-y-auto" wire:key="supplement-modal-{{ $supplementActivityId }}">
+                    {{-- Backdrop --}}
+                    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeSupplementModal"></div>
+
+                    {{-- Modal panel: altura máxima disponible con scroll interno --}}
+                    <div class="fixed inset-0 z-[9997] flex items-center justify-center p-4 sm:p-6">
+                        <div class="relative w-full max-w-6xl bg-gray-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden" style="height: calc(100vh - 3rem); display: flex; flex-direction: column;">
+
+                            {{-- Header --}}
+                            <div class="flex shrink-0 items-center justify-between px-6 py-2 border-b border-white/5 bg-gray-800/50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Información complementaria</h3>
+                                        <p class="text-xs text-gray-500">Markdown + imagen local (JPG)</p>
+                                    </div>
+                                </div>
+                                <button wire:click="closeSupplementModal" class="text-gray-400 hover:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                    {{-- Body --}}
+                                        <div class="modal-scroll flex-1 overflow-y-auto p-6 space-y-5">
+                                            {{-- Tabs: Texto / Imagen / Vista previa (estilo stepper timetable) --}}
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <button wire:click="setSupplementTab('text')"
+                                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $supplementTab === 'text' ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400 hover:text-gray-200' }}">
+                                                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                                    1. Texto
+                                                </button>
+                                                <button wire:click="setSupplementTab('image')"
+                                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $supplementTab === 'image' ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400 hover:text-gray-200' }}">
+                                                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    2. Imagen
+                                                </button>
+                                                <button wire:click="setSupplementTab('preview')"
+                                                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $supplementTab === 'preview' ? 'bg-emerald-600 text-white' : 'bg-white/5 text-gray-400 hover:text-gray-200' }}">
+                                                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    3. Vista previa
+                                                </button>
+                                            </div>
+
+                                            {{-- Panel TEXTO --}}
+                                            @if($supplementTab === 'text')
+                                            <div>
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Texto (Markdown)</label>
+                                                    <div class="flex items-center gap-2">
+                                                        {{-- Tono/longitud (C3) --}}
+                                                        <select wire:model="supplementFormatMode"
+                                                            class="bg-gray-800/50 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-gray-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200">
+                                                            <option value="breve">Breve</option>
+                                                            <option value="normal">Normal</option>
+                                                            <option value="detallado">Detallado</option>
+                                                        </select>
+                                                        {{-- Generar texto con IA --}}
+                                                        <button type="button" wire:click="generateSupplementText"
+                                                            wire:loading.attr="disabled" wire:target="generateSupplementText"
+                                                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-200 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 active:scale-[0.97]">
+                                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                            <span wire:loading wire:target="generateSupplementText" class="w-3.5 h-3.5 animate-spin">⟳</span>
+                                                            <span wire:loading.remove wire:target="generateSupplementText">Formatear texto</span>
+                                                            <span wire:loading wire:target="generateSupplementText">Formateando...</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <textarea wire:model="supplementText" rows="8"
+                                                    class="w-full bg-gray-800/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all duration-200"
+                                                    placeholder="Escribe el contenido complementario en Markdown..." {{ $generatingSupplementText ? 'disabled' : '' }}></textarea>
+                                            </div>
+                                            @endif
+
+                                            {{-- Panel IMAGEN --}}
+                                            @if($supplementTab === 'image')
+                                            <div class="space-y-4">
+                                                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Imagen (JPG)</label>
+
+                                                {{-- Dropzone visual: label clicable + input oculto + drag & drop real (B4) --}}
+                                                <label for="supplement_image_input"
+                                                    x-data="{ over: false }"
+                                                    @dragover.prevent="over = true"
+                                                    @dragleave.prevent="over = false"
+                                                    @drop.prevent="over = false; handleSupplementImageDrop($event)"
+                                                    class="group flex flex-col items-center justify-center gap-2.5 w-full min-h-[120px] rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200
+                                                        {{ $supplementImageUrl ? 'border-emerald-500/40 bg-emerald-500/5 dark:border-emerald-500/30' : 'border-cyan-500/30 dark:border-cyan-500/20' }}"
+                                                    :class="over ? 'border-cyan-500 bg-cyan-500/10 dark:border-cyan-500/60' : ''">
+                                                    <template x-if="over">
+                                                        <svg class="w-9 h-9 shrink-0 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </template>
+                                                    <template x-if="!over">
+                                                        <svg class="w-10 h-10 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </template>
+                                                    <span x-text="over ? 'Suelta la imagen aquí' : '{{ $supplementImageUrl ? 'Cambiar imagen (JPG)' : 'Subir imagen (JPG)' }}'" class="text-xs font-bold"></span>
+                                                    <span class="text-[10px] text-gray-500 dark:text-gray-400">Arrastra y suelta o haz clic para seleccionar · Máx 4 MB</span>
+                                                    <input id="supplement_image_input" type="file" wire:model="supplementImage" accept="image/jpeg,image/jpg" class="sr-only">
+                                                </label>
+                                                @error('supplementImage') <span class="text-xs text-red-400">{{ $message }}</span> @enderror
+
+                                                {{-- Vista de la imagen cargada --}}
+                                                @if($supplementImageUrl)
+                                                    <div class="rounded-xl border border-gray-200 dark:border-white/10 bg-gray-100/50 dark:bg-gray-800/40 p-3 flex flex-col items-center gap-2">
+                                                        <img src="{{ asset('storage/'.$supplementImageUrl) }}" alt="Imagen complementaria"
+                                                            class="block h-auto w-auto max-w-full max-h-[60vh] rounded-lg shadow-sm border border-gray-300 dark:border-white/10">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[10px] text-gray-500">Imagen cargada</span>
+                                                            <button type="button" wire:click="removeSupplementImage"
+                                                                wire:confirm="¿Quitar la imagen? Esto eliminará el archivo. El texto se conserva."
+                                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold text-red-500 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
+                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                Quitar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <p class="text-xs text-gray-600">No hay imagen cargada todavía.</p>
+                                                @endif
+                                            </div>
+                                            @endif
+
+                                            {{-- Panel VISTA PREVIA (markdown + imagen) --}}
+                                            @if($supplementTab === 'preview')
+                                            <div>
+                                                @if(empty(trim($supplementText ?? '')) && empty($supplementImageUrl ?? ''))
+                                                    <p class="text-xs text-gray-600 mt-2">No hay contenido para previsualizar.</p>
+                                                @else
+                                                    <div class="supplement-preview prose prose-sm max-w-none rounded-lg border px-4 py-3 text-[17px] leading-7 bg-white dark:prose-invert dark:bg-gray-800/50 border-gray-200 dark:border-white/10">
+                                                        @if(!empty(trim($supplementText ?? '')))
+                                                            {!! \Illuminate\Support\Str::markdown($supplementText ?? '') !!}
+                                                        @endif
+                                                        @if($supplementImageUrl)
+                                                            <img src="{{ asset('storage/'.$supplementImageUrl) }}" alt="Imagen complementaria"
+                                                                class="mx-auto block h-auto w-auto max-w-full max-h-[60vh] rounded-lg border border-gray-200 dark:border-white/10">
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            @endif
+                                        </div>
+
+                    {{-- Footer --}}
+                    <div class="flex shrink-0 items-center justify-end gap-2 px-6 py-4 border-t border-white/5 bg-gray-800/30">
+                        @if($supplementExists)
+                            <button wire:click="deleteSupplement"
+                                wire:confirm="¿Eliminar la información complementaria de esta actividad?"
+                                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all duration-200">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                Eliminar
+                            </button>
+                        @endif
+                        <button wire:click="closeSupplementModal"
+                            class="px-4 py-2 rounded-lg text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-700 border border-white/10 transition-all duration-200">
+                            Cancelar
+                        </button>
+                        <button wire:click="saveSupplement"
+                            class="px-5 py-2 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-200">
+                            Guardar información
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Overlay de carga IA (patrón wizard) — se muestra al formatear --}}
+            <div wire:loading.flex wire:target="generateSupplementText"
+                class="fixed inset-0 z-[9999] items-center justify-center bg-white/95 dark:bg-slate-900/90 backdrop-blur-md">
+                <div class="max-w-xl py-8 mx-auto px-6 text-center space-y-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border-2 border-cyan-500/30 mx-auto relative">
+                        <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        <svg class="absolute inset-0 w-full h-full animate-spin text-cyan-400/40" viewBox="0 0 64 64" fill="none">
+                            <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="3" stroke-dasharray="44 132" stroke-linecap="round" class="opacity-80"/>
+                        </svg>
+                    </div>
+                    <p class="text-lg font-bold text-cyan-600 dark:text-cyan-300">Formateando texto con IA</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">Reordenando el contenido en Markdown organizado. Esto puede tomar unos segundos…</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @script
+        window.handleSupplementImageDrop = function (event) {
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const dt = new DataTransfer();
+                dt.items.add(files[0]);
+                const el = document.getElementById('supplement_image_input');
+                el.files = dt.files;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+    @endscript
 
     {{-- Create Activity Modal (root level) --}}
     @if($modeCreator)

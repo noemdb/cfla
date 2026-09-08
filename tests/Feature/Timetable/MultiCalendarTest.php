@@ -8,12 +8,12 @@ use App\Models\app\Academy\Lapso;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Livewire\Livewire;
+use Tests\Concerns\TimetableShiftHelper;
 use Tests\TestCase;
 
 /**
@@ -23,7 +23,7 @@ use Tests\TestCase;
  */
 class MultiCalendarTest extends TestCase
 {
-    use DatabaseTransactions;
+    use DatabaseTransactions, TimetableShiftHelper;
 
     public function test_wizard_lists_calendars_of_lapso(): void
     {
@@ -208,7 +208,7 @@ class MultiCalendarTest extends TestCase
 
     private function seedSolverFixture(TimetableCalendar $calendar): void
     {
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
 
         for ($day = 1; $day <= 5; $day++) {
             for ($order = 1; $order <= 3; $order++) {
@@ -234,7 +234,7 @@ class MultiCalendarTest extends TestCase
      */
     private function makeSlotFor(TimetableCalendar $calendar): void
     {
-        $shift = TimetableShift::factory()->create();
+        $shift = $this->makeShift();
         [$profesor, $pev] = $this->pevaluacionFixture($calendar->lapso_id);
 
         $lesson = TimetableLesson::factory()->create([

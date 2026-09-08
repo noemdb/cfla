@@ -120,9 +120,12 @@ class BinnacleReport extends Command
             ->where('is_active', 'enable')
             ->get();
 
-        if ($users->isNotEmpty()) {
-            Notification::send($users, new BinnacleDailyReportNotification($data));
-        }
+        // Canal database centralizado (broadcast Reverb + invalidación de la
+        // caché del badge, blueprint/notifications regla de oro).
+        app(\App\Services\NotificationService::class)->notifyUsers(
+            $users,
+            new BinnacleDailyReportNotification($data),
+        );
 
         // Meta-auditoría: el envío queda registrado en la propia bitácora.
         Binnacle::log('binnacle_report_sent', [

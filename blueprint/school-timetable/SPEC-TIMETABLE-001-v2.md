@@ -663,7 +663,7 @@ broadcast `NotificationReceived`, tabla `notifications` existente).
 | **`SPEC-TIMETABLE-001d`** | Editor drag-and-drop Alpine con validación de reglas duras | Soltar un slot conflictivo muestra error inline y no persiste |
 | **`SPEC-TIMETABLE-001e`** | Ausencias/suplencias + notificaciones | Ausencia → slots afectados identificados → suplente sugerido → notificación DB al suplente |
 | **`SPEC-TIMETABLE-001f`** | PDF + vista pública firmada + vistas por rol | PDF por sección/docente/aula; enlace firmado sin login; estudiante ve solo su sección |
-| **`SPEC-TIMETABLE-001g`** (opcional) | Importación CSV/Excel de lecciones | Requiere añadir `maatwebsite/excel`; import falla limpio ante filas duplicadas |
+| **`SPEC-TIMETABLE-001g`** (opcional) | Importación CSV/Excel de lecciones | Requiere añadir `maatwebsite/excel`; import falla limpio ante filas duplicadas. **Estado: APLAZADO (2026-09-07)** — la dependencia sigue sin instalarse en `cfla` y la carga masiva vía selector de pevaluacions del módulo Planning cubre el caso v1. No hay demanda del usuario; se reabre si aparece institución con carga masiva real |
 | **`SPEC-TIMETABLE-001h`** | Modo dry-run + diff + bloqueo optimista (§6.3, §14, §15) | Regenerar un calendario `active` nunca persiste sin confirmación; `version` desactualizada rechaza el `UPDATE` |
 | **`SPEC-TIMETABLE-001i`** | Observabilidad (§17) + seeder de dataset sintético (§18) | Canal `timetable` loggea cada corrida del job; `TimetableTestSeeder` reproducible con seed fijo |
 

@@ -13,13 +13,18 @@ class TimetableRoom extends Model
 
     protected $table = 'timetable_rooms';
 
-    protected $fillable = ['code', 'name', 'capacity', 'type', 'features', 'status_active'];
+    protected $fillable = ['code', 'name', 'capacity', 'type', 'features', 'status_active', 'seccion_id'];
 
     protected $casts = [
         'capacity' => 'integer',
         'features' => 'array',
         'status_active' => 'boolean',
     ];
+
+    public function seccion()
+    {
+        return $this->belongsTo(\App\Models\app\Academy\Seccion::class, 'seccion_id');
+    }
 
     public function scopeActive($query, $flag = true)
     {

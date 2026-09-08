@@ -128,8 +128,11 @@ class BinnacleAnchor extends Command
             ->where('is_active', 'enable')
             ->get();
 
-        if ($users->isNotEmpty()) {
-            Notification::send($users, new BinnacleAnchorNotification($last, $path));
-        }
+        // Canal database centralizado (broadcast Reverb + invalidación de la
+        // caché del badge, blueprint/notifications regla de oro).
+        app(\App\Services\NotificationService::class)->notifyUsers(
+            $users,
+            new BinnacleAnchorNotification($last, $path),
+        );
     }
 }
