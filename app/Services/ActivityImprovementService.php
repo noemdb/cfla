@@ -27,6 +27,7 @@ class ActivityImprovementService
         private OpenRouterService $openRouter,
         private NvidiaService $nvidia,
         private KimiService $kimi,
+        private TokenRouterService $tokenRouter,
     ) {}
 
     /**
@@ -463,8 +464,24 @@ PROMPT;
             Log::warning('ActivityImprovement: Kimi sin API key, se omite');
         }
 
+        // ── 4) TokenRouter: gateway multi-modelo (primary + fallbacks) ──
+        if (! empty(config('tokenrouter.api_key'))) {
+            $result = $this->safeCall(
+                fn () => $this->tokenRouter->ask($systemPrompt, $userPrompt, $overrides),
+                'TokenRouter',
+                $errors,
+            );
+
+            if ($result !== null) {
+                return $result;
+            }
+        } else {
+            $errors[] = 'TokenRouter: sin API key configurada';
+            Log::warning('ActivityImprovement: TokenRouter sin API key, se omite');
+        }
+
         // Todo el fallback falló: mensaje claro con todos los errores.
-        $error = 'Todos los servicios de IA fallaron (OpenRouter → Nvidia → Kimi).';
+        $error = 'Todos los servicios de IA fallaron (OpenRouter → Nvidia → Kimi → TokenRouter).';
         if ($errors !== []) {
             $error .= ' Detalle: '.implode(' | ', array_slice($errors, 0, 8));
         }

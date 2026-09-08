@@ -171,6 +171,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\OpenRouterServiceProvider::class,
         App\Providers\NvidiaServiceProvider::class,
+        App\Providers\TokenRouterServiceProvider::class,
         Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
     ])->toArray(),
 

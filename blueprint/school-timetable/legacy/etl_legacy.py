@@ -428,6 +428,44 @@ def extract_carga():
     return len(rows)
 
 
+# ─────────────────────────────────────────────────────────────
+# 5. Tabla ÁREA → DOCENTE al pie de cada hoja de año (MEDIA)
+#    Fuente de firma para el mapeo materia legacy → pev BD.
+# ─────────────────────────────────────────────────────────────
+
+def extract_area_docente():
+    rows = []
+    wb = load_workbook(LEGACY / "HORARIOS MEDIA GENERAL.xlsx", data_only=True)
+    for year in MEDIA_YEARS:
+        sh = wb[year]
+        # Pie de hoja: 'ÁREA' en A/D (sección A) y H/K (sección B), tras la
+        # última grilla (filas ~20-34).
+        r = 1
+        while r <= sh.max_row:
+            a = norm(sh[f"A{r}"].value)
+            h = norm(sh[f"H{r}"].value)
+            if a == "AREA" or h == "AREA":
+                # tabla encontrada: consumir filas hasta agotar
+                rr = r + 1
+                while rr <= sh.max_row:
+                    a_, d_ = clean(sh[f"A{rr}"].value), clean(sh[f"D{rr}"].value)
+                    h_, k_ = clean(sh[f"H{rr}"].value), clean(sh[f"K{rr}"].value)
+                    if not (a_ or h_):
+                        break
+                    if a_ and d_:
+                        rows.append([year, "A", a_, d_])
+                    if h_ and k_:
+                        rows.append([year, "B", h_, k_])
+                    rr += 1
+                break
+            r += 1
+    with open(OUT / "legacy_area_docente.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["grado", "seccion", "area", "docente"])
+        w.writerows(rows)
+    return len(rows)
+
+
 def main():
     media_rows, media_blocks = extract_media_secciones()
     prim_rows, prim_blocks = extract_primaria_secciones()
@@ -443,10 +481,11 @@ def main():
 
     n_docentes = extract_docentes()
     n_carga = extract_carga()
+    n_area = extract_area_docente()
 
     print(f"estructura={n_estructura} bloques | secciones={len(all_sec)} slots "
           f"({len(media_rows)} media + {len(prim_rows)} primaria) | "
-          f"docentes={n_docentes} slots | carga={n_carga} filas")
+          f"docentes={n_docentes} slots | carga={n_carga} filas | area_docente={n_area} filas")
     for w_ in warn:
         print(f"WARN: {w_}")
     print(f"outdir={OUT}")
