@@ -2,44 +2,36 @@
 
 namespace App\Console\Commands;
 
-use App\Models\app\Academy\Pevaluacion;
-use App\Models\app\Academy\Profesor;
-use App\Models\app\Academy\Seccion;
 use App\Models\app\Timetable\TimetableCalendar;
 use App\Models\app\Timetable\TimetableLesson;
 use App\Models\app\Timetable\TimetablePeriod;
-use App\Models\app\Timetable\TimetableRoom;
 use App\Models\app\Timetable\TimetableShift;
 use App\Models\app\Timetable\TimetableSlot;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
 /**
  * Opción 3 (multi-calendario híbrido, PLAN-TIMETABLE-002): importa el horario
  * legacy 2025-2026 (CSVs normalizados por etl_legacy.py) como un calendario
- * BORRADOR con slots locked=true (ADR-TT-007), base editable para el editor
+ * BORRADOR con slots locked=true (ADR-TT-007): base editable en el editor
  * drag-and-drop y comparable contra un borrador generado por el solver.
  *
  * Fuentes (blueprint/school-timetable/legacy/csv/):
  *   legacy_horario_secciones.csv  slots por sección (575)
- *   legacy_estructura_horaria.csv franjas/bloques (17)
- *   legacy_area_docente.csv       firma área→docente para desambiguar pevs
+ *   legacy_estructura_horaria.csv franjas/bloques (17, referencia)
+ *   legacy_area_docente.csv       firma área→docente (132) para desambiguar
  *
- * Reglas de mapeo (supuestos documentados, ver --dry-run):
- *   - PRIMARIA: 'NRO A/B' → grados PRIMARIA 1G..6G (A/B); 'INICIAL N°' →
- *     INICIAL por grado (sección única 'U').
- *   - MEDIA: 'N AÑO X' → pestudio con pevs: 1ER→CyT, 2DO→CyT, 3ER→CyT
- *     (13/14 pevs) ó MG (4 pevs) — se elige por firma de docentes del área;
- *     4TO/5TO→MG si la firma calza, CyT como fallback.
- *   - Materia → pev de la sección cuya asignatura matchea por nombre
- *     normalizado (alias legacy→BD documentados) Y, si hay varias candidatas,
- *     la firma del docente del área desambigua.
- *   - GRUPO 1/2 (paralelos): slot con grupo_estable del pev cuando el pev lo
- *     tiene; sin grupo → slot normal de sección completa.
- *   - Los bloques legacy (80min = 2 franjas) generan periodos de 40min L-V;
- *     el turno T legacy (13:05-14:55) crea períodos del shift T existente.
+ * Estrategia de mapeo (ver --dry-run para el audit):
+ *   1. Grupo de slots por sección legacy → secciones BD candidatas (mismo
+ *      grado+letra; MEDIA 3ER/4TO/5TO existe en MG y CyT → ambas candidatas).
+ *   2. Se elige la sección con mejor score: +2 por slot mapeado con firma de
+ *      docente, +1 por slot mapeado sin firma, 0 si no mapea.
+ *   3. Dentro de la sección: pev por alias de asignatura; si hay varios,
+ *      preferencia por grupo_estable que contenga la materia y desempate por
+ *      firma de docente del área.
+ *
+ * Estructura de períodos: franjas legacy (40/80min) descompuestas en períodos
+ * de 40min por día L-V, shift M (07:xx) y T (13:xx) existentes.
  *
  * Uso:
  *   php8.2 artisan timetable:import-legacy --lapso=1 --dry-run
@@ -56,55 +48,69 @@ class TimetableImportLegacy extends Command
 
     protected $description = 'Importa el horario legacy 2025-2026 (CSVs del ETL) como calendario borrador con slots locked (opción 3)';
 
-    private const DIA_NOMBRE = [1 => 'Lun', 2 => 'Mar', 3 => 'Mié', 4 => 'Jue', 5 => 'Vie'];
-
-    /** Alias materia legacy → asignatura BD (nombre normalizado). */
+    /** Alias materia legacy → asignaturas BD (se normalizan ambas partes). */
     private const ALIAS_ASIGNATURA = [
         'LENGUA Y LITERATURA' => ['LENGUA Y LITERATURA', 'CASTELLANO'],
         'INGLES' => ['INGLES Y OTRAS LENGUAS EXTRANJERAS', 'IDIOMAS', 'AREAS COMPLEMENTARIA INGLES', 'AREA COMPLEMENTARIA INGLES'],
         'MATEMATICA' => ['MATEMATICAS', 'MATEMATICA'],
         'MATEMATICAS' => ['MATEMATICAS', 'MATEMATICA'],
-        'EDUCACION FISICA' => ['EDUCACION FISICA', 'EDUCACION FISICA'],
-        'BIOLOGIA, AMBIENTE Y TECNOLOGIA' => ['BIOLOGIA, AMBIENTE Y TECNOLOGIA', 'BIOLOGIA, AMBIENTE Y TECNOLOGIA'],
+        'EDUCACION FISICA' => ['EDUCACION FISICA'],
+        'BIOLOGIA, AMBIENTE Y TECNOLOGIA' => ['BIOLOGIA, AMBIENTE Y TECNOLOGIA'],
         'BIOLOGIA' => ['BIOLOGIA'],
-        'FISICA' => ['FISICA', 'FISICA'],
-        'QUIMICA' => ['QUIMICA', 'QUIMICA'],
+        'FISICA' => ['FISICA'],
+        'QUIMICA' => ['QUIMICA'],
         'GEOGRAFIA, HISTORIA Y SOBERANIA NACIONAL' => [
             'GEOGRAFIA HISTORIA Y SOBERANIA NACIONAL', 'GEOGRAFIA HISTORIA Y CIUDADANIA',
-            'GEOGRAFIA HISTORIA Y CIUDADANIA', 'FORMACION PARA LA SOBERANIA NACIONAL',
+            'GEOGRAFIA  HISTORIA Y CIUDADANIA', 'FORMACION PARA LA SOBERANIA NACIONAL',
         ],
-        'GEOGRAFIA, HISTORIA Y CIUDADANIA' => ['GEOGRAFIA HISTORIA Y CIUDADANIA', 'GEOGRAFIA  HISTORIA Y CIUDADANIA'],
+        'GEOGRAFIA, HISTORIA Y CIUDADANIA' => ['GEOGRAFIA HISTORIA Y CIUDADANIA', 'GEOGRAFIA  HISTORIA Y CIUDADANIA', 'GEOGRAFIA HISTORIA Y SOBERANIA NACIONAL'],
         'ORIENTACION VOCACIONAL' => ['ORIENTACION VOCACIONAL', 'ORIENTACION Y CONVIVENCIA'],
         'ORIENTACION Y CONVIVENCIA' => ['ORIENTACION Y CONVIVENCIA', 'ORIENTACION VOCACIONAL'],
         'FORMACION HUMANO CRISTIANA' => ['FORMACION HUMANO CRISTIANA', 'AREA COMPLEMENTARIA FORMACION HUMANO CRISTIANA', 'AREA COMPLEMENTARIA  FORMACION HUMANO CRISTIANA'],
-        'INNOVACION TECNOLOGICA Y PRODUCTIVA' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA', 'INNOVACION TECNOLOGICA Y PRODUCTIVA'],
+        'INNOVACION TECNOLOGICA Y PRODUCTIVA' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA'],
+        'INNOVACION TECNOLOGICA' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA'],
         'INNOVACIONES TECNOLOGICAS' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA'],
-        'ROBOTICA' => ['AREAS COMPLEMENTARIA ROBOTICA 1G', 'AREAS COMPLEMENTARIA ROBOTICA 2G', 'AREAS COMPLEMENTARIA ROBOTICA 3G', 'AREAS COMPLEMENTARIA ROBOTICA 4G', 'AREAS COMPLEMENTARIA ROBOTICA 5G', 'AREAS COMPLEMENTARIA ROBOTICA 6G', 'ROBOTICA', 'PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION'],
-        'FINANZAS' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA'],
+        // Los paralelos de ITP (ROBÓTICA/FINANZAS/INFORMÁTICA/SEMINARIO) son
+        // grupos de INNOVACION... o PARTICIPACION... en la BD: se desambiguan
+        // por grupo_estable.
+        'ROBOTICA' => ['ROBOTICA', 'AREAS COMPLEMENTARIA ROBOTICA 1G', 'AREAS COMPLEMENTARIA ROBOTICA 2G', 'AREAS COMPLEMENTARIA ROBOTICA 3G', 'AREAS COMPLEMENTARIA ROBOTICA 4G', 'AREAS COMPLEMENTARIA ROBOTICA 5G', 'AREAS COMPLEMENTARIA ROBOTICA 6G', 'PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION', 'INNOVACION TECNOLOGICA Y PRODUCTIVA'],
+        'FINANZAS' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA', 'PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION'],
         'INFORMATICA' => ['INNOVACION TECNOLOGICA Y PRODUCTIVA', 'PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION'],
-        'SEMINARIO DE INVESTIGACION' => ['PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION'],
+        'SEMINARIO DE INVESTIGACION' => ['PARTICIPACION EN GRUPOS DE CREACION RECREACION Y PRODUCCION', 'INNOVACION TECNOLOGICA Y PRODUCTIVA'],
         'CIENCIAS DE LA TIERRA' => ['CIENCIAS DE LA TIERRA'],
+        // Celda legacy multilínea "CIENCIAS DE LA TIERRA\nFORMACIÓN DE LA
+        // SOBERANIA NACIONAL" (block de 80min): la segunda parte equivale a la
+        // asignatura BD. El ETL unió ambas líneas en una sola materia.
+        'FORMACION DE LA SOBERANIA NACIONAL' => ['FORMACION PARA LA SOBERANIA NACIONAL', 'GEOGRAFIA HISTORIA Y SOBERANIA NACIONAL'],
         'LENGUA' => ['LENGUA'],
         'CIENCIAS NATURALES' => ['CIENCIAS NATURALES'],
         'CIENCIAS SOCIALES' => ['CIENCIAS SOCIALES'],
-        'EDUCACION ESTETICA' => ['EDUCACION ESTETICA', 'EDUCACION ESTETICA'],
-        'MUSICA' => ['AREA COMPLEMENTARIA MUSICA', 'MUSICA'],
+        'EDUCACION ESTETICA' => ['EDUCACION ESTETICA'],
+        'MUSICA' => ['MUSICA', 'AREA COMPLEMENTARIA MUSICA'],
         'SOCIO EMOCIONAL' => ['AREA COMPLEMENTARIA INTEGRAL 1G', 'AREA COMPLEMENTARIA INTEGRAL 2G', 'AREA COMPLEMENTARIA INTEGRAL 3G', 'AREA COMPLEMENTARIA INTEGRAL 4G', 'AREA COMPLEMENTARIA INTEGRAL 5G', 'AREA COMPLEMENTARIA INTEGRAL 6G'],
         'COMUNICACION Y REPRESENTACION' => ['COMUNICACION Y REPRESENTACION'],
         'FORMACION PERSONAL Y SOCIAL' => ['FORMACION PERSONAL Y SOCIAL'],
         'RELACION CON EL AMBIENTE' => ['RELACION CON EL AMBIENTE'],
     ];
 
-    /** Mapeo sección legacy → [pestudio, grado_code] para la consulta de secciones BD. */
-    private const SECCION_LEGACY = [
-        'MEDIA' => [
-            '1ER AÑO' => ['EDUCACION MEDIA GENERAL CIENCIA Y TECNOLOGIA', '1A'],
-            '2DO AÑO' => ['EDUCACION MEDIA GENERAL CIENCIA Y TECNOLOGIA', '2DO'],
-            '3ER AÑO' => null, // ambiguo MG/CyT: resolver por firma de docentes
-            '4TO AÑO' => null, // ambiguo MG/CyT
-            '5TO AÑO' => null, // ambiguo MG/CyT
-        ],
+    /** Materia legacy → keyword del grupo_estable BD que la aloja. */
+    private const MATERIA_GRUPO = [
+        'ROBOTICA' => 'ROBOTICA',
+        'ROBOTICA 1' => 'ROBOTICA',
+        'ROBOTICA 2' => 'ROBOTICA',
+        'FINANZAS' => 'FINANZAS',
+        'INFORMATICA' => 'INFORMATICA',
+        'SEMINARIO DE INVESTIGACION' => 'SEMINARIO',
+        'INGLES' => 'INGLES',
     ];
+
+    private array $allPevs = [];
+
+    private ?array $aliasNorm = null;
+
+    private ?array $firmaIndex = null;
+
+    private ?array $knownSubjects = null;
 
     public function handle(): int
     {
@@ -119,28 +125,20 @@ class TimetableImportLegacy extends Command
             return self::FAILURE;
         }
 
-        // 1. Cargar CSVs
         $slots = $this->readCsv($slotsFile);
         $areaDocente = $this->readCsv("$csvDir/legacy_area_docente.csv");
         $this->info('CSVs: '.count($slots).' slots · '.count($areaDocente).' firmas área→docente');
 
-        // 2. Preparar consultas BD
         $pevs = $this->loadPevs($lapsoId);
         $this->allPevs = $pevs;
         $this->info('Pevs lapso '.$lapsoId.': '.count($pevs).' en '.count(array_unique(array_column($pevs, 'seccion_id'))).' secciones');
 
-        // 3. Resolver mapeos
-        $audit = $this->resolveMappings($slots, $pevs, $areaDocente);
+        $audit = $this->resolveMappings($slots, $areaDocente);
 
         $okCount = count($audit['ok']);
         $errCount = count($audit['errors']);
         $this->info("Mapeo: {$okCount} slots OK · {$errCount} con error");
-
-        // 4. Reporte audit
-        $this->table(
-            ['Tipo', 'Detalle'],
-            $this->auditTable($audit)
-        );
+        $this->table(['Tipo', 'Detalle'], $this->auditTable($audit));
 
         if ($dryRun) {
             $this->info('--dry-run: no se persiste nada.');
@@ -154,9 +152,10 @@ class TimetableImportLegacy extends Command
             return self::FAILURE;
         }
 
-        // 5. Persistir
-        $calendar = $this->persistCalendar($lapsoId, $audit, $pevs);
+        $calendar = $this->persistCalendar($lapsoId, $audit);
         $this->info('Calendario creado: id '.$calendar->id.' · '.$calendar->name);
+        $this->info('Lecciones: '.TimetableLesson::where('calendar_id', $calendar->id)->count());
+        $this->info('Slots: '.TimetableSlot::where('calendar_id', $calendar->id)->count());
 
         return self::SUCCESS;
     }
@@ -171,6 +170,9 @@ class TimetableImportLegacy extends Command
         $h = fopen($path, 'r');
         $header = fgetcsv($h);
         while (($r = fgetcsv($h)) !== false) {
+            if (count($r) !== count($header)) {
+                continue; // fila malformada
+            }
             $rows[] = array_combine($header, $r);
         }
         fclose($h);
@@ -178,13 +180,13 @@ class TimetableImportLegacy extends Command
         return $rows;
     }
 
-    /** Pevs del lapso con todo el contexto (sección, grado, pestudio, asignatura, docente). */
     private function loadPevs(int $lapsoId): array
     {
         $rows = DB::select(
             "SELECT pe.id, pe.seccion_id, pe.profesor_id, pe.grupo_estable_id,
                     s.name sec_nombre, g.code_sm grado, p2.name pestudio,
                     a.name asig, ge.name grupo_estable,
+                    a.hour_t_week hour_t_week, a.hour_p_week hour_p_week,
                     CONCAT(pr.name,' ',pr.lastname) docente
              FROM pevaluacions pe
              JOIN seccions s ON s.id = pe.seccion_id
@@ -213,94 +215,142 @@ class TimetableImportLegacy extends Command
     // Mapeo
     // ─────────────────────────────────────────────────────────────
 
-    private function resolveMappings(array $slots, array $pevs, array $areaDocente): array
+    private function resolveMappings(array $slots, array $areaDocente): array
     {
-        // índices: por sección BD, por asignatura normalizada
-        $bySeccion = [];
-        foreach ($pevs as $p) {
-            $bySeccion[$p->seccion_id][] = $p;
-        }
-        // firma: (grado_legacy, sec, area_norm) => docente legacy norm
         $firma = [];
         foreach ($areaDocente as $ad) {
             $firma[$this->norm($ad['grado']).'|'.$this->norm($ad['seccion']).'|'.$this->norm($ad['area'])] = $this->norm($ad['docente']);
         }
+        $this->firmaIndex = $firma;
 
-        $audit = ['ok' => [], 'errors' => [], 'stats' => []];
+        // agrupar slots por sección legacy
+        $groups = [];
         foreach ($slots as $i => $slot) {
-            $seccionBD = $this->resolveSeccion($slot, $bySeccion, $pevs);
-            if (! $seccionBD) {
-                $audit['errors'][] = "slot#{$i}: sección legacy '{$slot['seccion']}' ({$slot['nivel']}) sin sección BD";
+            $groups[$slot['nivel'].'|'.$slot['seccion']][] = $i;
+        }
+
+        $audit = ['ok' => [], 'errors' => [], 'seccion_map' => []];
+        foreach ($groups as $key => $idxs) {
+            $first = $slots[$idxs[0]];
+            $candidates = $this->candidateSecciones($first);
+            if (! $candidates) {
+                foreach ($idxs as $i) {
+                    $audit['errors'][] = "slot#{$i}: sección legacy '{$first['seccion']}' ({$first['nivel']}) sin sección BD";
+                }
+
                 continue;
             }
-            $pev = $this->resolvePev($slot, $seccionBD, $firma);
-            if (! $pev) {
-                $audit['errors'][] = "slot#{$i}: materia '{$slot['materia']}' sin pev en {$slot['seccion']} (docente firma: ".($firma[$this->norm($slot['grado']).'|'.$this->norm($this->secLetter($slot)).'|'.$this->norm($slot['materia'])] ?? '?').')';
-                continue;
+
+            // elegir mejor sección por score de firma sobre TODOS los slots
+            $best = null;
+            $bestScore = -1;
+            $tied = false;
+            foreach ($candidates as $sid) {
+                $score = 0;
+                foreach ($idxs as $i) {
+                    $score += $this->slotScore($slots[$i], $sid);
+                }
+                if ($score > $bestScore) {
+                    $bestScore = $score;
+                    $best = $sid;
+                    $tied = false;
+                } elseif ($score === $bestScore) {
+                    $tied = true;
+                }
             }
-            $audit['ok'][] = [
-                'slot' => $slot,
-                'seccion_id' => $seccionBD,
-                'pev' => $pev,
-                'periodo' => $this->resolvePeriodo($slot),
-            ];
+            $audit['seccion_map'][$key] = $best.($tied ? ' (empate!)' : '');
+
+            foreach ($idxs as $i) {
+                $slot = $slots[$i];
+                $mapped = $this->resolvePevsForSlot($slot, $best);
+                if ($mapped === []) {
+                    $audit['errors'][] = "slot#{$i}: materia '{$slot['materia']}' sin pev en {$slot['seccion']} (sección BD {$best})";
+
+                    continue;
+                }
+                $periodo = $this->resolvePeriodo($slot);
+                foreach ($mapped as $m) {
+                    $audit['ok'][] = [
+                        'slot' => $slot,
+                        'seccion_id' => $best,
+                        'pev' => $m['pev'],
+                        'periodo' => $periodo,
+                        'sub_index' => $m['sub_index'],
+                        'compound' => $m['compound'],
+                    ];
+                }
+            }
         }
 
         return $audit;
     }
 
-    /** Resuelve la sección BD para un slot legacy. Devuelve seccion_id o null. */
-    private function resolveSeccion(array $slot, array $bySeccion, array $pevs)
+    private function slotScore(array $slot, int $seccionId): int
+    {
+        [$pev, $firmaUsed] = $this->resolvePevWithFirma($slot, $seccionId);
+        if ($pev === null) {
+            return 0;
+        }
+
+        return $firmaUsed ? 2 : 1;
+    }
+
+    /** Secciones BD candidatas (grado+letra) para una sección legacy. */
+    private function candidateSecciones(array $slot): array
     {
         $nivel = $slot['nivel'];
         $seccion = $this->norm($slot['seccion']);
 
         if ($nivel === 'PRIMARIA') {
-            // '1RO A' → PRIMARIA 1G A · 'INICIAL N°' → INICIAL grado N
             if (preg_match('/^INICIAL (\d)/', $seccion, $m)) {
-                $gradoCode = $m[1] === '1' ? '1GR' : ($m[1] === '2' ? '2GP' : '3GP');
+                $gradoCode = ['1' => '1GR', '2' => '2GP', '3' => '3GP'][$m[1]] ?? null;
+                $sid = $this->findSeccionIdBy('EDUCACION INICIAL', $gradoCode, 'U');
 
-                return $this->findSeccionId($pevs, 'EDUCACION INICIAL', $gradoCode, 'U');
+                return $sid ? [$sid] : [];
             }
             if (preg_match('/^(\d+)(RO|DO|TO) ([A-C])$/', $seccion, $m)) {
-                $num = (int) $m[1];
+                $sid = $this->findSeccionIdBy('EDUCACION PRIMARIA', ((int) $m[1]).'G', $m[3]);
 
-                return $this->findSeccionId($pevs, 'EDUCACION PRIMARIA', $num.'G', $m[3]);
+                return $sid ? [$sid] : [];
             }
 
-            return null;
+            return [];
         }
 
-        // MEDIA
-        $gradoLegacy = $this->norm($slot['grado']);   // '1ER AÑO'
-        $letra = $this->secLetter($slot);              // 'A' | 'B'
-        if (preg_match('/^(\d+)(ER|DO|TO)/', $gradoLegacy, $m)) {
-            $num = (int) $m[1];
-            $mapping = self::SECCION_LEGACY['MEDIA'][$gradoLegacy] ?? null;
-            if ($mapping) {
-                return $this->findSeccionId($pevs, $mapping[0], $mapping[1], $letra);
+        // MEDIA: todas las secciones (pevs) de ese año+letra, cualquier pestudio
+        $gradoLegacy = $this->norm($slot['grado']);
+        if (! preg_match('/^(\d+)/', $gradoLegacy, $m)) {
+            return [];
+        }
+        $num = (int) $m[1];
+        $letra = $this->secLetter($slot);
+        $out = [];
+        foreach ($this->allPevs as $p) {
+            if ($this->gradoNum($p->grado) === $num && $p->sec_nombre === $letra) {
+                $out[(int) $p->seccion_id] = true;
             }
-            // 3ER/4TO/5TO ambigüos MG vs CyT: elegir el pestudio con pevs que
-            // calce la firma del docente del área; fallback: el que tenga pevs.
-            $candidatos = [
-                ['EDUCACION MEDIA GENERAL', $num === 3 ? '3A' : ($num === 4 ? '4A' : '5A')],
-                ['EDUCACION MEDIA GENERAL CIENCIA Y TECNOLOGIA', $num === 3 ? '3ER' : ($num === 4 ? '4TO' : '5TO')],
-            ];
-            $conPevs = [];
-            foreach ($candidatos as $c) {
-                $sid = $this->findSeccionId($pevs, $c[0], $c[1], $letra);
-                if ($sid && isset($bySeccion[$sid])) {
-                    $conPevs[] = [$sid, $c[0]];
-                }
-            }
-            if (count($conPevs) === 1) {
-                return $conPevs[0][0];
-            }
-            // ambos con pevs: desempatar por firma (se hace en resolvePev vía
-            // candidato múltiple); devolvemos el primero (MG) y el pev null
-            // forzará el error de firma.
-            if ($conPevs) {
-                return $conPevs[0][0];
+        }
+
+        return array_keys($out);
+    }
+
+    private function gradoNum(string $codeSm): ?int
+    {
+        if (preg_match('/^(\d+)/', trim($codeSm), $m)) {
+            return (int) $m[1];
+        }
+
+        return null;
+    }
+
+    private function findSeccionIdBy(string $pestudio, ?string $gradoCode, string $letra): ?int
+    {
+        if (! $gradoCode) {
+            return null;
+        }
+        foreach ($this->allPevs as $p) {
+            if ($p->pestudio === $pestudio && $p->grado === $gradoCode && $p->sec_nombre === $letra) {
+                return (int) $p->seccion_id;
             }
         }
 
@@ -316,26 +366,29 @@ class TimetableImportLegacy extends Command
         return 'A';
     }
 
-    private function findSeccionId(array $pevs, string $pestudio, string $gradoCode, string $letra): ?int
+    private function resolvePev(array $slot, int $seccionId): ?object
     {
-        foreach ($pevs as $p) {
-            if ($p->pestudio === $pestudio && $p->grado === $gradoCode && $p->sec_nombre === $letra) {
-                return (int) $p->seccion_id;
-            }
-        }
+        [$pev] = $this->resolvePevWithFirma($slot, $seccionId);
 
-        return null;
+        return $pev;
     }
 
-    /** Resuelve el pev para un slot: por alias de asignatura + firma de docente. */
-    private function resolvePev(array $slot, int $seccionId, array $firma): ?object
+    /** @return array{0: ?object, 1: bool} [pev, usó_firma] */
+    private function resolvePevWithFirma(array $slot, int $seccionId): array
     {
-        $materia = $this->norm($slot['materia']);
-        $aliases = array_map(fn ($a) => $this->norm($a), self::ALIAS_ASIGNATURA[$materia] ?? [$materia]);
-        $grado = $this->norm($slot['grado']);
-        $letra = $this->norm($this->secLetter($slot));
+        return $this->resolvePevForMateria(
+            $this->norm($slot['materia']),
+            $seccionId,
+            $this->norm($slot['grado']),
+            $this->norm($this->secLetter($slot)),
+        );
+    }
 
-        // candidatos por alias (comparación en espacio normalizado)
+    /** @return array{0: ?object, 1: bool} [pev, usó_firma] para una materia normalizada */
+    private function resolvePevForMateria(string $materia, int $seccionId, string $grado, string $letra): array
+    {
+        $aliases = $this->aliasesFor($materia);
+
         $candidatos = [];
         foreach ($this->pevsForSeccion($seccionId) as $p) {
             if (in_array($p->asig_norm, $aliases, true)) {
@@ -343,42 +396,151 @@ class TimetableImportLegacy extends Command
             }
         }
         if (! $candidatos) {
-            return null;
-        }
-        if (count($candidatos) === 1) {
-            return $candidatos[0];
+            return [null, false];
         }
 
-        // varios: desambiguar por firma de docente
-        $docenteFirma = $firma[$grado.'|'.$letra.'|'.$materia] ?? null;
+        // preferencia por grupo_estable (paralelos ITP)
+        $needle = self::MATERIA_GRUPO[$materia] ?? null;
+        if ($needle) {
+            $porGrupo = array_filter($candidatos, fn ($p) => $p->grupo_norm !== '' && str_contains($p->grupo_norm, $needle));
+            if ($porGrupo) {
+                $candidatos = array_values($porGrupo);
+            }
+        }
+
+        if (count($candidatos) === 1) {
+            return [$candidatos[0], false];
+        }
+
+        $docenteFirma = $this->firmaIndex[$grado.'|'.$letra.'|'.$materia] ?? null;
         if ($docenteFirma) {
             foreach ($candidatos as $p) {
                 if ($p->docente_norm === $docenteFirma) {
-                    return $p;
+                    return [$p, true];
                 }
             }
         }
 
-        return $candidatos[0]; // primera coincidencia
+        return [$candidatos[0], false];
     }
 
-    private $pevsIndex = [];
+    /**
+     * Resuelve un slot legacy a UNA o VARIAS lecciones. Las celdas legacy con
+     * dos asignaturas sin etiqueta de grupo (p. ej. "CIENCIAS DE LA TIERRA\n
+     * FORMACIÓN DE LA SOBERANIA NACIONAL" en un bloque de 80min) se dividen en
+     * sus componentes, cada uno con su pev y sub-período del bloque.
+     *
+     * @return array<int, array{pev: object, sub_index: int, compound: bool}>
+     */
+    private function resolvePevsForSlot(array $slot, int $seccionId): array
+    {
+        $whole = $this->norm($slot['materia']);
+        $grado = $this->norm($slot['grado']);
+        $letra = $this->norm($this->secLetter($slot));
+
+        $single = $this->resolvePevForMateria($whole, $seccionId, $grado, $letra);
+        if ($single[0]) {
+            return [['pev' => $single[0], 'sub_index' => 0, 'compound' => false]];
+        }
+
+        $parts = $this->splitCompoundMateria($whole);
+        if (count($parts) < 2) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($parts as $idx => $part) {
+            $r = $this->resolvePevForMateria($part, $seccionId, $grado, $letra);
+            if ($r[0]) {
+                $out[] = ['pev' => $r[0], 'sub_index' => $idx, 'compound' => true];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Divide una materia que es la concatenación de dos asignaturas conocidas
+     * (unidas por el ETL a partir de un bloque de celda combinado). Devuelve
+     * las partes si se reconocen >= 2 sujetos consecutivos; [] si no encaja.
+     *
+     * @return list<string>
+     */
+    private function splitCompoundMateria(string $materiaNorm): array
+    {
+        $known = $this->allKnownSubjects();
+        $parts = [];
+        $rest = $materiaNorm;
+
+        while ($rest !== '') {
+            $matched = null;
+            $matchedLen = 0;
+            foreach ($known as $subject) {
+                $len = strlen($subject);
+                if ($len <= $matchedLen) {
+                    continue;
+                }
+                if ($subject === $rest || strncmp($rest, $subject, $len) === 0) {
+                    $matched = $subject;
+                    $matchedLen = $len;
+                }
+            }
+            if ($matchedLen === 0) {
+                return []; // no es una concatenación reconocible
+            }
+            $parts[] = $matched;
+            $rest = trim(substr($rest, $matchedLen));
+        }
+
+        return count($parts) >= 2 ? $parts : [];
+    }
+
+    /** @return list<string> todas las asignaturas conocidas (alias), ordenadas por longitud desc */
+    private function allKnownSubjects(): array
+    {
+        if ($this->knownSubjects === null) {
+            $set = [];
+            foreach (self::ALIAS_ASIGNATURA as $key => $values) {
+                $set[] = $this->norm($key);
+                foreach ($values as $v) {
+                    $set[] = $this->norm($v);
+                }
+            }
+            $set = array_values(array_unique(array_filter($set)));
+            usort($set, fn ($a, $b) => strlen($b) <=> strlen($a));
+            $this->knownSubjects = $set;
+        }
+
+        return $this->knownSubjects;
+    }
+
+    private function aliasesFor(string $materiaNorm): array
+    {
+        if ($this->aliasNorm === null) {
+            $map = [];
+            foreach (self::ALIAS_ASIGNATURA as $key => $values) {
+                $map[$this->norm($key)] = array_map(fn ($v) => $this->norm($v), $values);
+            }
+            $this->aliasNorm = $map;
+        }
+        $aliases = $this->aliasNorm[$materiaNorm] ?? [];
+
+        return array_unique(array_merge([$materiaNorm], $aliases));
+    }
 
     private function pevsForSeccion(int $seccionId): array
     {
-        if (! isset($this->pevsIndex[$seccionId])) {
-            $this->pevsIndex[$seccionId] = array_values(array_filter(
-                $this->allPevs,
-                fn ($p) => (int) $p->seccion_id === $seccionId
-            ));
+        static $idx = null;
+        if ($idx === null) {
+            $idx = [];
+            foreach ($this->allPevs as $p) {
+                $idx[(int) $p->seccion_id][] = $p;
+            }
         }
 
-        return $this->pevsIndex[$seccionId];
+        return $idx[$seccionId] ?? [];
     }
 
-    private $allPevs = [];
-
-    /** Turno y bloque horario del slot. */
     private function resolvePeriodo(array $slot): array
     {
         $h1 = $slot['hora_inicio'];
@@ -394,14 +556,12 @@ class TimetableImportLegacy extends Command
     private function auditTable(array $audit): array
     {
         $rows = [];
-        $errores = array_slice($audit['errors'], 0, 30);
-        foreach ($errores as $e) {
+        foreach (array_slice($audit['errors'], 0, 30) as $e) {
             $rows[] = ['ERROR', $e];
         }
         if (count($audit['errors']) > 30) {
             $rows[] = ['ERROR', '... '.(count($audit['errors']) - 30).' más'];
         }
-        // resumen por sección
         $porSeccion = [];
         foreach ($audit['ok'] as $m) {
             $porSeccion[$m['slot']['seccion']] = ($porSeccion[$m['slot']['seccion']] ?? 0) + 1;
@@ -418,12 +578,11 @@ class TimetableImportLegacy extends Command
     // Persistencia
     // ─────────────────────────────────────────────────────────────
 
-    private function persistCalendar(int $lapsoId, array $audit, array $pevs): TimetableCalendar
+    private function persistCalendar(int $lapsoId, array $audit): TimetableCalendar
     {
         $name = $this->option('calendar-name') ?: 'Horario 2025-2026 (legacy)';
 
         return DB::transaction(function () use ($lapsoId, $name, $audit) {
-            // 1. Calendario borrador
             $calendar = TimetableCalendar::create([
                 'lapso_id' => $lapsoId,
                 'name' => $name,
@@ -432,44 +591,83 @@ class TimetableImportLegacy extends Command
                 'version' => 0,
             ]);
 
-            // 2. Períodos: franjas legacy de 40min por día y turno
             $shiftM = TimetableShift::where('code', 'M')->first();
             $shiftT = TimetableShift::where('code', 'T')->first();
             $periods = $this->buildPeriods($calendar, $shiftM, $shiftT, $audit);
 
-            // 3. Lecciones (1 por pev distinto) + slots locked
             $lessonByPev = [];
+            $skipped = 0;
+            $conflicts = [];
+            $periodMinutes = max(1, (int) $calendar->period_minutes);
             foreach ($audit['ok'] as $m) {
                 $pev = $m['pev'];
+                $turno = $m['periodo']['turno'];
                 if (! isset($lessonByPev[$pev->id])) {
+                    $shift = $turno === 'T' ? $shiftT : $shiftM;
+                    if (! $shift) {
+                        $skipped++;
+
+                        continue;
+                    }
                     $lessonByPev[$pev->id] = TimetableLesson::create([
                         'calendar_id' => $calendar->id,
                         'pevaluacion_id' => $pev->id,
-                        'shift_id' => ($m['periodo']['turno'] === 'T' ? $shiftT : $shiftM)->id,
-                        'weekly_blocks_t' => 0,
-                        'weekly_blocks_p' => 0,
+                        'shift_id' => $shift->id,
+                        // Bloques derivados de Asignatura.hour_t_week/hour_p_week
+                        // (§4: ceil(horas × 60 / period_minutes)) para que la base
+                        // sea coherente con la carga del pensum y pueda regenerarse.
+                        'weekly_blocks_t' => (int) ceil(((int) ($pev->hour_t_week ?? 0)) * 60 / $periodMinutes),
+                        'weekly_blocks_p' => (int) ceil(((int) ($pev->hour_p_week ?? 0)) * 60 / $periodMinutes),
                         'room_type_required' => null,
                         'priority' => 0,
                         'locked' => true,
                     ]);
                 }
-                $periodKey = $m['periodo']['turno'].'|'.$m['periodo']['inicio'].'|'.$m['periodo']['fin'];
-                $periodId = $periods[$periodKey]['ids'][$m['periodo']['dia']] ?? null;
+                $periodKey = $turno.'|'.$m['periodo']['inicio'].'-'.$m['periodo']['fin'];
+                // Los bloques legacy con 2 asignaturas (compound) ocupan sub-períodos
+                // distintos del bloque; el resto usa el período por defecto de la franja.
+                $dia = $m['periodo']['dia'];
+                $periodId = ! empty($m['compound'])
+                    ? ($periods[$periodKey]['subPeriods'][$m['sub_index']][$dia] ?? null)
+                    : ($periods[$periodKey]['ids'][$dia] ?? null);
                 if (! $periodId) {
                     $this->warn('slot sin período: '.$m['slot']['seccion'].' '.$m['slot']['materia'].' '.$m['periodo']['inicio']);
+                    $skipped++;
+
                     continue;
                 }
-                TimetableSlot::create([
-                    'calendar_id' => $calendar->id,
-                    'lesson_id' => $lessonByPev[$pev->id]->id,
-                    'period_id' => $periodId,
-                    'profesor_id' => $pev->profesor_id,
-                    'seccion_id' => $pev->seccion_id,
-                    'grupo_estable_id' => $pev->grupo_estable_id,
-                    'room_id' => $this->roomForSeccion($pev->seccion_id),
-                    'locked' => true,
-                    'is_manual_override' => true,
-                ]);
+                try {
+                    TimetableSlot::create([
+                        'calendar_id' => $calendar->id,
+                        'lesson_id' => $lessonByPev[$pev->id]->id,
+                        'period_id' => $periodId,
+                        'profesor_id' => $pev->profesor_id,
+                        'seccion_id' => $pev->seccion_id,
+                        'grupo_estable_id' => $pev->grupo_estable_id,
+                        // El legacy no define aulas: se importa sin aula dedicada
+                        // (room_id=NULL no colisiona en uq_slot_room y no bloquea
+                        // la gestión de aulas). La coordinación asigna aula en el editor.
+                        'room_id' => null,
+                        'locked' => true,
+                        'is_manual_override' => true,
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Regla dura a nivel BD (docente/aula/sección doble): el slot
+                    // legacy entra en conflicto -> se omite y se reporta para
+                    // resolverlo a mano en el editor (opción 3 = base editable).
+                    $skipped++;
+                    $conflictKey = str_contains((string) $e->getMessage(), 'uq_slot_teacher')
+                        ? 'docente doble'
+                        : (str_contains((string) $e->getMessage(), 'uq_slot_room')
+                            ? 'aula doble'
+                            : (str_contains((string) $e->getMessage(), 'uq_slot_section') ? 'sección doble' : 'conflicto'));
+                    $conflicts[$conflictKey] = ($conflicts[$conflictKey] ?? 0) + 1;
+                    $this->warn("slot omitido ($conflictKey): {$m['slot']['seccion']} {$m['slot']['materia']} {$m['periodo']['inicio']}");
+                }
+            }
+            if ($skipped) {
+                $detalle = array_map(fn ($k, $v) => "{$k}×{$v}", array_keys($conflicts), $conflicts);
+                $this->warn("{$skipped} slots omitidos (".(implode(', ', $detalle) ?: 'sin shift/período').'). Revisa en el editor.');
             }
 
             return $calendar;
@@ -477,71 +675,65 @@ class TimetableImportLegacy extends Command
     }
 
     /**
-     * Franjas legacy agrupadas: cada franja de 40min es un período; las de
-     * 80min se descomponen en dos períodos.
+     * Franjas legacy únicas por turno, descompuestas en períodos de 40min
+     * por día L-V. Un bloque legacy de 80min produce DOS períodos y el slot
+     * se asigna al PRIMERO (la lección cubre el bloque completo).
      */
     private function buildPeriods(TimetableCalendar $calendar, ?TimetableShift $shiftM, ?TimetableShift $shiftT, array $audit): array
     {
-        // franjas únicas por turno desde los slots mapeados
         $franjas = [];
         foreach ($audit['ok'] as $m) {
             $p = $m['periodo'];
             $franjas[$p['turno']][$p['inicio'].'-'.$p['fin']] = true;
         }
-        // descomponer 80→2×40 dentro del turno
         $periods = [];
         foreach (['M' => $shiftM, 'T' => $shiftT] as $turno => $shift) {
             if (! $shift) {
                 continue;
             }
             $list = array_keys($franjas[$turno] ?? []);
-            sort($list);
+            usort($list, fn ($a, $b) => strcmp(explode('-', $a)[0], explode('-', $b)[0]));
+            $ordenGlobal = 1;
             foreach ($list as $rango) {
                 [$h1, $h2] = explode('-', $rango);
-                $periods[$turno.'|'.$h1.'-'.$h2] = ['ids' => $this->createPeriodRows($calendar, $shift, $h1, $h2)];
+                $min1 = $this->toMin($h1);
+                $min2 = $this->toMin($h2);
+                for ($start = $min1, $orden = $ordenGlobal; $start < $min2; $start += 40, $orden++) {
+                    $end = min($start + 40, $min2);
+                    $ids = [];
+                    foreach (range(1, 5) as $dia) {
+                        $ids[$dia] = TimetablePeriod::create([
+                            'calendar_id' => $calendar->id,
+                            'shift_id' => $shift->id,
+                            'day_of_week' => $dia,
+                            'order_in_day' => $orden,
+                            'start_time' => $this->fmt($start),
+                            'end_time' => $this->fmt($end),
+                            'is_break' => false,
+                        ])->id;
+                    }
+                    $periods[$turno.'|'.$h1.'-'.$h2]['ids'] = $ids;
+                    $periods[$turno.'|'.$h1.'-'.$h2]['sub'][$orden] = $ids; // sub-períodos de la franja
+                    $periods[$turno.'|'.$h1.'-'.$h2]['subPeriods'][] = $ids; // en orden (0..n-1)
+                }
+                $ordenGlobal = $orden; // continúa el orden entre franjas contiguas
             }
         }
 
         return $periods;
     }
 
-    private function createPeriodRows(TimetableCalendar $calendar, TimetableShift $shift, string $h1, string $h2): array
+    private function toMin(string $h): int
     {
-        $ids = [];
-        [$i1, $i2] = [explode(':', $h1), explode(':', $h2)];
-        $min1 = (int) $i1[0] * 60 + (int) $i1[1];
-        $min2 = (int) $i2[0] * 60 + (int) $i2[1];
-        $orden = 1;
-        // cada período legacy (40/80min) se materializa en franjas de 40
-        for ($start = $min1; $start < $min2; $start += 40) {
-            $end = min($start + 40, $min2);
-            foreach (range(1, 5) as $dia) {
-                $ids[$dia] = TimetablePeriod::create([
-                    'calendar_id' => $calendar->id,
-                    'shift_id' => $shift->id,
-                    'day_of_week' => $dia,
-                    'order_in_day' => $orden,
-                    'start_time' => sprintf('%02d:%02d', intdiv($start, 60), $start % 60),
-                    'end_time' => sprintf('%02d:%02d', intdiv($end, 60), $end % 60),
-                    'is_break' => false,
-                ])->id;
-            }
-            $orden++;
-        }
+        [$hh, $mm] = explode(':', $h);
 
-        return $ids;
+        return ((int) $hh) * 60 + ((int) $mm);
     }
 
-    private function roomForSeccion(int $seccionId): ?int
+    private function fmt(int $min): string
     {
-        $room = TimetableRoom::where('seccion_id', $seccionId)->first();
-
-        return $room?->id;
+        return sprintf('%02d:%02d:00', intdiv($min, 60), $min % 60);
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Utilidades
-    // ─────────────────────────────────────────────────────────────
 
     private function norm(?string $s): string
     {
@@ -550,6 +742,7 @@ class TimetableImportLegacy extends Command
         }
         $s = iconv('UTF-8', 'ASCII//TRANSLIT', $s) ?: $s;
         $s = preg_replace('/\s+/', ' ', trim($s)) ?? '';
+        $s = str_replace("'", '', $s);
 
         return mb_strtoupper($s);
     }

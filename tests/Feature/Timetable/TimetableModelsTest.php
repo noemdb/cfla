@@ -147,7 +147,12 @@ class TimetableModelsTest extends TestCase
             'grupo_estable_id' => $second['grupo']->id,
         ]);
 
-        $this->assertDatabaseCount('timetable_slots', 2);
+        // Scope al calendario del fixture: la BD real puede contener horarios
+        // cargados (opción 3), así que un conteo global sería frágil.
+        $this->assertSame(
+            2,
+            TimetableSlot::query()->where('calendar_id', $fixture['calendar']->id)->count(),
+        );
     }
 
     public function test_db_rejects_same_subgroup_in_same_period(): void

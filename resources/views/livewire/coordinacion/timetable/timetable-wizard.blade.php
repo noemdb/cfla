@@ -694,25 +694,39 @@
                 @foreach ($profesores as $profesor)
                     <div class="mb-6 rounded-lg border border-gray-200 dark:border-white/10 p-4">
                         <div class="text-sm font-extrabold text-gray-900 dark:text-white mb-3">{{ $profesor->lastname }}, {{ $profesor->name }}</div>
-                        <div class="grid grid-cols-6 gap-1">
-                            <div class="text-[10px] font-bold text-gray-400">Período</div>
-                            @foreach (['Lun', 'Mar', 'Mié', 'Jue', 'Vie'] as $dayLabel)
-                                <div class="text-[10px] font-bold text-gray-400 text-center">{{ $dayLabel }}</div>
-                            @endforeach
+                        @foreach ($periodsList->groupBy('shift_id') as $shiftId => $shiftPeriods)
+                            @php $shift = $shifts->firstWhere('id', $shiftId); @endphp
+                            <div class="mb-4 last:mb-0">
+                                <div class="text-[10px] font-bold text-gray-400 mb-1">
+                                    {{ $shift?->name ?? ('Turno '.$shiftId) }}
+                                    {{ $shift?->start_time ? '· '.substr((string) $shift->start_time, 0, 5).'–'.substr((string) $shift->end_time, 0, 5) : '' }}
+                                </div>
+                                <div class="grid grid-cols-6 gap-1">
+                                    <div class="text-[10px] font-bold text-gray-400">Período</div>
+                                    @foreach (['Lun', 'Mar', 'Mié', 'Jue', 'Vie'] as $dayLabel)
+                                        <div class="text-[10px] font-bold text-gray-400 text-center">{{ $dayLabel }}</div>
+                                    @endforeach
 
-                            @foreach ($periodsList->groupBy('order_in_day') as $order => $group)
-                                <div class="contents">
-                                    <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ $order }}º</div>
-                                    @foreach ($group as $period)
-                                        <div class="flex justify-center">
-                                            <input type="checkbox"
-                                                wire:model.live="availability.{{ $profesor->id }}.{{ $period->id }}"
-                                                class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                    @foreach ($shiftPeriods->groupBy('order_in_day') as $order => $group)
+                                        <div class="contents">
+                                            <div class="text-[10px] font-bold text-gray-400 flex items-center">{{ $order }}º</div>
+                                            @for ($day = 1; $day <= 5; $day++)
+                                                @php $period = $group->firstWhere('day_of_week', $day); @endphp
+                                                <div class="flex justify-center">
+                                                    @if ($period)
+                                                        <input type="checkbox"
+                                                            wire:model.live="availability.{{ $profesor->id }}.{{ $period->id }}"
+                                                            class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                                                    @else
+                                                        <span class="text-[10px] text-gray-300">–</span>
+                                                    @endif
+                                                </div>
+                                            @endfor
                                         </div>
                                     @endforeach
                                 </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endforeach
 

@@ -95,6 +95,15 @@ Estadísticas                                     app/Services/EducationStatsSer
 | Vistas `inicials/` | ~90 | ~7,030 |
 | Vistas perspectivas (evaluación/planning/académico) | ~12 | ~1,010 |
 
+## 7. Estado en cfla (verificado 2026-09-08)
+
+- **BD principal (s2627):** las **19 tablas `ei*` ya existen clonadas con DDL idéntico** al legacy (verificado con `SHOW TABLES`/`SHOW CREATE TABLE`) — pero están **vacías (0 filas)**. El clon se hizo por SQL directo, no por migraciones: en `s2627.migrations` no hay ninguna migración `ei*`. La migración de **datos** reales (en `s2526` viva: 274 planificaciones semanales, 1,630 estrategias, 19 proyectos, 24 evaluaciones, 98 posiciones…) debe hacerse con dumps/INSERT…SELECT desde la conexión `s2526` definida en `config/database.php` de cfla.
+- **Código cfla:** no existe nada del módulo (ni modelos `Ei*`, ni rutas, ni middleware `is_inicial`) — todo el código es nuevo, aunque **no así el schema**.
+- **Ecosistema dependiente:** cfla ya tiene `Academy\{Pestudio,Grado,Seccion,Lapso,Profesor,Pensum,Pevaluacion,AreaConocimiento}`, `Entity\{Institucion,Autoridad}` y `Learner\Estudiant` — y el **`pestudio` id 6 = "EDUCACION INICIAL" coincide con el legacy** (mismo id en ambas BDs).
+- Mapeo de namespaces legacy→cfla: `App\Models\app\Pescolar\*` → `App\Models\app\Academy\*` · `App\Models\app\Institucion\*` → `App\Models\app\Entity\*` · `App\Models\app\Estudiant` → `App\Models\app\Learner\Estudiant`.
+
+Ver detalle en [`08-adaptacion-cfla.md`](08-adaptacion-cfla.md).
+
 ---
 
 *Blueprint generado por análisis estático del código en `saefl/s2526/`. Cada documento cita archivos y líneas verificadas del legacy.*
