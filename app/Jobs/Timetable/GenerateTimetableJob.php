@@ -130,14 +130,23 @@ class GenerateTimetableJob implements ShouldQueue
             // Lecciones locked: sus períodos ya fijados (slots locked).
             // Las lecciones legacy marcadas como medio grupo deben poder
             // reubicarse para formar parejas en una misma celda.
+            $lockedPeriodIds = $lesson->slots()
+                ->where('locked', true)
+                ->pluck('period_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all();
+            $hasCompleteLockedAssignment = $lesson->weekly_blocks_t + $lesson->weekly_blocks_p > 0
+                && count($lockedPeriodIds) === $lesson->weekly_blocks_t + $lesson->weekly_blocks_p;
+
             $isLocked = (bool) $lesson->locked
+                && $hasCompleteLockedAssignment
                 && (
                     ($calendar->strategy ?? TimetableCalendar::STRATEGY_OPTIMIZED) === TimetableCalendar::STRATEGY_LEGACY
                     || ! (bool) $lesson->is_half_group
                 );
-            $lockedPeriods = $isLocked
-                ? $lesson->slots()->where('locked', true)->pluck('period_id')->map(fn ($v) => (int) $v)->all()
-                : [];
+            $lockedPeriods = $isLocked ? $lockedPeriodIds : [];
 
             $dto[] = new LessonToSchedule(
                 lessonId: $lesson->id,
@@ -298,6 +307,7 @@ class GenerateTimetableJob implements ShouldQueue
 
     private function storeDryRunPreview(TimetableCalendar $calendar, SolverResult $result): void
     {
+        $assignment = $this->serializeAssignment($result);
         $calendar->update([
             'preview_payload' => [
                 'generated_at' => now()->toIso8601String(),
@@ -308,11 +318,39 @@ class GenerateTimetableJob implements ShouldQueue
                 'max_subjects_per_period' => max(1, (int) ($calendar->max_subjects_per_period ?? 2)),
                 'timed_out' => $result->timedOut,
                 'elapsed_seconds' => round($result->elapsedSeconds, 2),
-                'assignment' => $this->serializeAssignment($result),
+                'assignment' => $assignment,
                 'unassigned' => $result->unassigned,
+                'assignment_diagnostics' => $this->assignmentDiagnostics($calendar, $assignment),
             ],
             'status' => 'draft',
         ]);
+    }
+
+    /**
+     * Keeps the preview honest when a legacy or manual assignment has fewer
+     * periods than the lesson requires.
+     *
+     * @param  array<string, list<array{period_id:int, room_id:int|null, is_practical:bool}>>  $assignment
+     * @return list<array<string, int>>
+     */
+    private function assignmentDiagnostics(TimetableCalendar $calendar, array $assignment): array
+    {
+        return $calendar->lessons()
+            ->get(['id', 'weekly_blocks_t', 'weekly_blocks_p'])
+            ->map(function (TimetableLesson $lesson) use ($assignment): ?array {
+                $required = (int) $lesson->weekly_blocks_t + (int) $lesson->weekly_blocks_p;
+                $assigned = collect($assignment[(string) $lesson->id] ?? [])->pluck('period_id')->unique()->count();
+
+                return $assigned === $required ? null : [
+                    'lesson_id' => (int) $lesson->id,
+                    'required_blocks' => $required,
+                    'assigned_blocks' => $assigned,
+                    'missing_blocks' => max(0, $required - $assigned),
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function hasLegacySlots(TimetableCalendar $calendar): bool

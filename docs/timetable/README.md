@@ -140,6 +140,10 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
    las lecciones de todas las `Pevaluacion` del pestudio aunque no tengan un
    slot legacy mapeado; esas lecciones quedan en `unassigned` para poder
    agregarlas manualmente desde una celda vacía.
+   Una lección `locked` solo se considera fijada si sus slots cubren exactamente
+   todos sus bloques T/P requeridos. En estrategia optimizada, una fijación
+   parcial se libera para que el solver la recalcule; en Legacy se conserva la
+   posición importada y se reporta como incompleta.
 3. **Confirmar y publicar**: persiste slots, demueve al activo anterior del lapso
    a `archived` y activa este (invariante DB `uq_active_lapso`).
 4. En la grilla del preview, cada lección asignada se puede arrastrar a otro
@@ -147,6 +151,16 @@ Ruta: `/app/planning/timetable` (o `/app/coordinacion/timetable`).
    excluye recreos y conserva el cambio al confirmar la publicación.
 5. Con lecciones sin asignar queda en `draft` con conflictos `type='unassigned'`
    para resolver a mano en el editor.
+
+Para auditar un calendario sin modificar datos:
+
+```bash
+php8.2 artisan timetable:diagnose --calendar=4
+php8.2 artisan timetable:diagnose --calendar=4 --json
+```
+
+El diagnóstico informa bloques requeridos/asignados/faltantes, fijaciones
+parciales, duplicados y slots inválidos.
 
 ---
 

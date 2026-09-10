@@ -185,6 +185,20 @@ class TimetableSolverTest extends TestCase
         }
     }
 
+    public function test_incomplete_locked_lesson_is_recomputed_instead_of_accepted_as_complete(): void
+    {
+        $lesson = $this->lesson(20, 120, blocksT: 3, locked: true, lockedPeriods: [1]);
+
+        $result = $this->solver([$lesson])->solve();
+
+        $this->assertTrue($result->isComplete());
+        $this->assertCount(3, $result->assignment[20]);
+        $this->assertNotSame([1], array_map(
+            fn (SlotCandidate $slot): int => $slot->periodId,
+            $result->assignment[20],
+        ));
+    }
+
     public function test_shift_mismatch_is_respected(): void
     {
         // Docente 101 solo disponible en períodos del turno mañana (1-30),

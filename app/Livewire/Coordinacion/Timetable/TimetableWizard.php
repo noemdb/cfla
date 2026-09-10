@@ -2310,28 +2310,9 @@ class TimetableWizard extends Component
         $maxSubjectsPerPeriod = max(1, (int) (TimetableCalendar::find($this->calendarId)?->max_subjects_per_period ?? 2));
         $cellLoad = [];
 
-        // Solo el modo optimizado puede usar slots bloqueados como respaldo
-        // visual. En Legacy, un slot excluido por el límite debe permanecer
-        // fuera del preview y aparecer como no asignado.
-        $lockedSlotsByLesson = (($this->preview['strategy'] ?? null) !== TimetableCalendar::STRATEGY_LEGACY)
-            ? TimetableSlot::query()
-                ->where('calendar_id', $this->calendarId)
-                ->whereIn('lesson_id', $lessons->pluck('id'))
-                ->where('locked', true)
-                ->whereHas('lesson', fn ($query) => $query->where('is_half_group', false))
-                ->get(['lesson_id', 'period_id'])
-                ->groupBy('lesson_id')
-            : collect();
-
         $grid = [];
         foreach ($lessons as $lesson) {
             $slots = $assignment[(string) $lesson->id] ?? [];
-            $previewPeriodIds = collect($slots)->pluck('period_id')->map(fn ($id) => (int) $id);
-            foreach ($lockedSlotsByLesson->get($lesson->id, collect()) as $lockedSlot) {
-                if (! $previewPeriodIds->contains((int) $lockedSlot->period_id)) {
-                    $slots[] = ['period_id' => (int) $lockedSlot->period_id];
-                }
-            }
 
             foreach ($slots as $slot) {
                 $period = $periodMap->get($slot['period_id']);
@@ -2837,17 +2818,19 @@ class TimetableWizard extends Component
                         $sectionBlocked++;
                     }
 
-                    if ((int) $lesson->weekly_blocks_p > 0) {
+                    $roomConflict = false;
+                    if ((int) $lesson->weekly_blocks_p > 0 && $lesson->room_type_required) {
                         $roomIds = $roomsByType[$lesson->room_type_required] ?? [];
                         $hasFreeRoom = collect($roomIds)->contains(
                             fn ($roomId) => ! isset($roomBusy[$periodId.':'.(int) $roomId])
                         );
                         if (! $hasFreeRoom) {
                             $roomUnavailable++;
+                            $roomConflict = true;
                         }
                     }
 
-                    if (! $teacherConflict && ! $sectionConflict) {
+                    if (! $teacherConflict && ! $sectionConflict && ! $roomConflict) {
                         $freePeriods++;
                     }
                 }
@@ -3325,7 +3308,11 @@ class TimetableWizard extends Component
         $activeGrado = collect($activePestudio['grados'] ?? [])->firstWhere('grado_id', $this->activeGradoId)
             ?? collect($activePestudio['grados'] ?? [])->first();
 
-        $tabSeccionOptions = collect($activeGrado['secciones'] ?? [])->map(fn ($s) => ['id' => $s['seccion_id'], 'name' => $s['seccion_name']])->values()->all();
+        $tabSeccionOptions = collect($activeGrado['secciones'] ?? [])->map(fn ($s) => [
+            'id' => $s['seccion_id'],
+            'name' => $s['seccion_name'],
+            'label' => 'Sección '.$s['seccion_name'].' · '.($activeGrado['grado_name'] ?? 'Grado').' · #'.$s['seccion_id'],
+        ])->values()->all();
 
         if ($tabSeccionOptions !== [] && $this->activeSeccionId === null) {
             $this->activeSeccionId = $tabSeccionOptions[0]['id'];

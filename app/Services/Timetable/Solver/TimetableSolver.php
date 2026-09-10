@@ -59,13 +59,18 @@ final class TimetableSolver
 
         // ADR-TT-007: reservar primero las locked.
         foreach ($this->lessons as $lesson) {
-            if (! $lesson->locked) {
+            $lockedPeriods = array_values(array_unique(array_map('intval', $lesson->lockedPeriodIds)));
+            $hasCompleteLock = $lesson->locked
+                && $lesson->blocksNeeded() > 0
+                && count($lockedPeriods) === $lesson->blocksNeeded();
+
+            if (! $hasCompleteLock) {
                 continue;
             }
 
             $combo = [];
             $conflict = false;
-            foreach ($lesson->lockedPeriodIds as $pId) {
+            foreach ($lockedPeriods as $pId) {
                 if (! $ctx->isFree($pId, $lesson->profesorId, $lesson->seccionId, null, $lesson->grupoEstableId, $lesson->isHalfGroup)) {
                     $conflict = true;
                     break;
@@ -84,7 +89,9 @@ final class TimetableSolver
         // Lecciones libres por grado de restricción (ADR-TT-003).
         $free = array_values(array_filter(
             $this->lessons,
-            fn (LessonToSchedule $l) => ! $l->locked,
+            fn (LessonToSchedule $l) => ! $l->locked
+                || $l->blocksNeeded() <= 0
+                || count(array_unique(array_map('intval', $l->lockedPeriodIds))) !== $l->blocksNeeded(),
         ));
         usort($free, fn (LessonToSchedule $a, LessonToSchedule $b) => $b->constraintDegree() <=> $a->constraintDegree()
         );

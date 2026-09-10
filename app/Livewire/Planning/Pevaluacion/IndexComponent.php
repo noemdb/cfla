@@ -28,7 +28,7 @@ class IndexComponent extends Component
     // Form Object
     public PevaluacionForm $form;
 
-    // Select lists (cascading)
+    // Select lists del formulario (cascading)
     public $pestudios;
     public $grados = [];
     public $secciones = [];
@@ -46,6 +46,10 @@ class IndexComponent extends Component
     public $filter_grado = '';
     public $filter_seccion = '';
     public $filter_lapso = '';
+
+    // Opciones de los selects de filtro (independientes de las del formulario)
+    public $filter_grados = [];
+    public $filter_secciones = [];
 
     // Sorting
     public $sortField = 'pevaluacions.created_at';
@@ -207,17 +211,17 @@ class IndexComponent extends Component
     {
         $this->filter_grado = '';
         $this->filter_seccion = '';
+        $this->filter_secciones = [];
 
         if ($value) {
-            $this->grados = Grado::where('pestudio_id', $value)
+            $this->filter_grados = Grado::where('pestudio_id', $value)
                 ->where('status_active', 'true')
                 ->orderBy('name')
                 ->get()
                 ->pluck('full_name', 'id')
                 ->toArray();
         } else {
-            $this->grados = [];
-            $this->secciones = [];
+            $this->filter_grados = [];
         }
     }
 
@@ -226,15 +230,50 @@ class IndexComponent extends Component
         $this->filter_seccion = '';
 
         if ($value && $this->filter_pestudio) {
-            $this->secciones = Seccion::where('grado_id', $value)
+            $this->filter_secciones = Seccion::where('grado_id', $value)
                 ->where('status_active', true)
                 ->orderBy('name')
                 ->get()
                 ->pluck('full_name', 'id')
                 ->toArray();
         } else {
-            $this->secciones = [];
+            $this->filter_secciones = [];
         }
+    }
+
+    /**
+     * Restaura el estado de filtros desde localStorage en un único round-trip,
+     * reconstruyendo las cascadas dependientes (grados/secciones). Evita la
+     * carrera que producía hacer $wire.set() por cada clave.
+     */
+    public function restoreFilters(array $filters): void
+    {
+        $this->search = (string) ($filters['search'] ?? '');
+        $this->filter_pestudio = $filters['filter_pestudio'] ?? '';
+        $this->filter_profesor = $filters['filter_profesor'] ?? '';
+        $this->filter_grado = $filters['filter_grado'] ?? '';
+        $this->filter_seccion = $filters['filter_seccion'] ?? '';
+        $this->filter_lapso = $filters['filter_lapso'] ?? '';
+
+        $this->filter_grados = $this->filter_pestudio
+            ? Grado::where('pestudio_id', $this->filter_pestudio)
+                ->where('status_active', 'true')
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray()
+            : [];
+
+        $this->filter_secciones = ($this->filter_grado && $this->filter_pestudio)
+            ? Seccion::where('grado_id', $this->filter_grado)
+                ->where('status_active', true)
+                ->orderBy('name')
+                ->get()
+                ->pluck('full_name', 'id')
+                ->toArray()
+            : [];
+
+        $this->resetPage();
     }
 
     // ─── SORTING ────────────────────────────────────────────────
@@ -310,10 +349,22 @@ class IndexComponent extends Component
     {
         $this->validate();
 
-        // Validar unicidad compuesta (lapso_id + seccion_id + pensum_id)
+        // Validar unicidad compuesta
+        // (lapso_id + seccion_id + pensum_id + grupo_estable_id)
+        // El grupo estable forma parte de la clave: un mismo pensum puede
+        // dictarse en la misma sección y lapso bajo distintos grupos estables
+        // (p. ej. talleres electivos con distintos profesores).
+        $grupoEstableId = $this->form->grupo_estable_id ?: null;
+
         $exists = Pevaluacion::where('lapso_id', $this->form->lapso_id)
             ->where('seccion_id', $this->form->seccion_id)
             ->where('pensum_id', $this->form->pensum_id);
+
+        if ($grupoEstableId) {
+            $exists->where('grupo_estable_id', $grupoEstableId);
+        } else {
+            $exists->whereNull('grupo_estable_id');
+        }
 
         if ($this->form->isEditing) {
             $exists->where('id', '!=', $this->form->pevaluacion_id);
@@ -322,7 +373,7 @@ class IndexComponent extends Component
         if ($exists->exists()) {
             $this->notification()->error(
                 title: 'Carga Académica Duplicada',
-                description: 'Ya existe una asignación para esta área de formación, sección y lapso.'
+                description: 'Ya existe una asignación para esta área de formación, sección, lapso y grupo estable.'
             );
             return;
         }
@@ -409,6 +460,7 @@ class IndexComponent extends Component
         $this->reset([
             'search', 'filter_pestudio', 'filter_profesor',
             'filter_grado', 'filter_seccion', 'filter_lapso',
+            'filter_grados', 'filter_secciones',
         ]);
     }
 

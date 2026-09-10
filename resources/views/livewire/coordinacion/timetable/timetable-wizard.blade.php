@@ -766,7 +766,7 @@
                                 <button wire:click="$set('activeSeccionId', {{ $opt['id'] === 'general' ? "'general'" : $opt['id'] }})"
                                     class="flex-1 text-center px-3 py-2 text-[11px] font-bold uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200
                                     {{ (string) $activeSeccionId === (string) $opt['id'] ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500' : 'text-gray-400 dark:text-gray-500 border-transparent hover:text-gray-600 dark:hover:text-gray-300' }}">
-                                    Sección {{ $opt['name'] }}
+                                    {{ $opt['label'] ?? 'Sección '.$opt['name'] }}
                                 </button>
                             @endforeach
                         </nav>

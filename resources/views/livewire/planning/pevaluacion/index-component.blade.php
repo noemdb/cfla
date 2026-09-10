@@ -1,18 +1,16 @@
 <div class="fade-in"
      x-data="{
+        restored: false,
         init() {
+          if (this.restored) return;
+          this.restored = true;
           const saved = localStorage.getItem('pevaluacion_filters');
           if (saved) {
             try {
               const parsed = JSON.parse(saved);
-              const keys = ['search', 'filter_pestudio', 'filter_profesor', 'filter_grado', 'filter_seccion', 'filter_lapso'];
-              keys.forEach(key => {
-                if (parsed.hasOwnProperty(key)) {
-                  if ($wire) {
-                    $wire.set(key, parsed[key]);
-                  }
-                }
-              });
+              if ($wire && parsed && typeof parsed === 'object') {
+                $wire.restoreFilters(parsed);
+              }
             } catch (e) {
               console.error('Failed to parse filters from localStorage', e);
             }
@@ -31,8 +29,7 @@
           localStorage.setItem('pevaluacion_filters', JSON.stringify(data));
         }
       }"
-     x-init="init()"
-     x-on:change.window="saveFilters()"
+     x-init="init()">
     <!-- Header -->
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
@@ -65,7 +62,8 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8">
+    <div class="bg-gray-900/40 backdrop-blur-md border border-white/5 p-5 rounded-lg mb-8"
+         @change="saveFilters()">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Plan de Estudio</label>
@@ -79,20 +77,20 @@
             </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Grado</label>
-                <select wire:model.live="filter_grado"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($grados as $id => $name)
+                <select wire:model.live="filter_grado" @disabled(!$filter_pestudio)
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    <option value="">{{ $filter_pestudio ? 'Todos' : 'Elija un plan' }}</option>
+                    @foreach($filter_grados as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Sección</label>
-                <select wire:model.live="filter_seccion"
-                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all">
-                    <option value="">Todos</option>
-                    @foreach($secciones as $id => $name)
+                <select wire:model.live="filter_seccion" @disabled(!$filter_grado)
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    <option value="">{{ $filter_grado ? 'Todos' : 'Elija un grado' }}</option>
+                    @foreach($filter_secciones as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
@@ -124,6 +122,7 @@
             </div>
             <div class="flex items-end">
                 <button wire:click="resetFilters"
+                    @click="localStorage.removeItem('pevaluacion_filters')"
                     class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/20 transition-all duration-300 text-sm font-bold">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
