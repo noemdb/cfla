@@ -45,11 +45,13 @@ class IndexComponent extends Component
     public $filter_profesor = '';
     public $filter_grado = '';
     public $filter_seccion = '';
+    public $filter_asignatura = '';
     public $filter_lapso = '';
 
     // Opciones de los selects de filtro (independientes de las del formulario)
     public $filter_grados = [];
     public $filter_secciones = [];
+    public $filter_asignaturas = [];
 
     // Sorting
     public $sortField = 'pevaluacions.created_at';
@@ -129,6 +131,9 @@ class IndexComponent extends Component
         if ($this->filter_seccion) {
             $query->where('seccion_id', $this->filter_seccion);
         }
+        if ($this->filter_asignatura) {
+            $query->whereHas('pensum', fn($q) => $q->where('asignatura_id', $this->filter_asignatura));
+        }
         if ($this->filter_lapso) {
             $query->where('lapso_id', $this->filter_lapso);
         }
@@ -204,6 +209,7 @@ class IndexComponent extends Component
     public function updatingFilterProfesor() { $this->resetPage(); }
     public function updatingFilterGrado() { $this->resetPage(); $this->filter_seccion = ''; }
     public function updatingFilterSeccion() { $this->resetPage(); }
+    public function updatingFilterAsignatura() { $this->resetPage(); }
     public function updatingFilterLapso() { $this->resetPage(); }
     public function updatingPaginate() { $this->resetPage(); }
 
@@ -212,6 +218,7 @@ class IndexComponent extends Component
         $this->filter_grado = '';
         $this->filter_seccion = '';
         $this->filter_secciones = [];
+        $this->filter_asignatura = '';
 
         if ($value) {
             $this->filter_grados = Grado::where('pestudio_id', $value)
@@ -223,6 +230,8 @@ class IndexComponent extends Component
         } else {
             $this->filter_grados = [];
         }
+
+        $this->loadFilterAsignaturas();
     }
 
     public function updatedFilterGrado($value)
@@ -239,6 +248,38 @@ class IndexComponent extends Component
         } else {
             $this->filter_secciones = [];
         }
+
+        $this->loadFilterAsignaturas();
+
+        // Si la asignatura elegida ya no aplica al grado seleccionado, se limpia.
+        if ($this->filter_asignatura && ! array_key_exists($this->filter_asignatura, $this->filter_asignaturas)) {
+            $this->filter_asignatura = '';
+        }
+    }
+
+    /**
+     * Carga las asignaturas disponibles para filtrar, acotadas por el plan de
+     * estudio y (si hay) el grado seleccionados. Se obtienen a través de los
+     * pensums activos: pevaluacion → pensum → asignatura.
+     */
+    private function loadFilterAsignaturas(): void
+    {
+        if (! $this->filter_pestudio) {
+            $this->filter_asignaturas = [];
+
+            return;
+        }
+
+        $this->filter_asignaturas = Pensum::query()
+            ->where('pestudio_id', $this->filter_pestudio)
+            ->when($this->filter_grado, fn($q) => $q->where('grado_id', $this->filter_grado))
+            ->where('status_active', true)
+            ->with('asignatura')
+            ->get()
+            ->pluck('asignatura.full_name', 'asignatura.id')
+            ->filter()
+            ->sort()
+            ->toArray();
     }
 
     /**
@@ -253,6 +294,7 @@ class IndexComponent extends Component
         $this->filter_profesor = $filters['filter_profesor'] ?? '';
         $this->filter_grado = $filters['filter_grado'] ?? '';
         $this->filter_seccion = $filters['filter_seccion'] ?? '';
+        $this->filter_asignatura = $filters['filter_asignatura'] ?? '';
         $this->filter_lapso = $filters['filter_lapso'] ?? '';
 
         $this->filter_grados = $this->filter_pestudio
@@ -272,6 +314,12 @@ class IndexComponent extends Component
                 ->pluck('full_name', 'id')
                 ->toArray()
             : [];
+
+        $this->loadFilterAsignaturas();
+
+        if ($this->filter_asignatura && ! array_key_exists($this->filter_asignatura, $this->filter_asignaturas)) {
+            $this->filter_asignatura = '';
+        }
 
         $this->resetPage();
     }
@@ -459,8 +507,8 @@ class IndexComponent extends Component
     {
         $this->reset([
             'search', 'filter_pestudio', 'filter_profesor',
-            'filter_grado', 'filter_seccion', 'filter_lapso',
-            'filter_grados', 'filter_secciones',
+            'filter_grado', 'filter_seccion', 'filter_asignatura', 'filter_lapso',
+            'filter_grados', 'filter_secciones', 'filter_asignaturas',
         ]);
     }
 

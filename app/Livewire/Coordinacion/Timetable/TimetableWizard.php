@@ -2292,9 +2292,6 @@ class TimetableWizard extends Component
         }
 
         $assignment = $this->preview['assignment'] ?? [];
-        if ($assignment === []) {
-            return [];
-        }
 
         $lessons = TimetableLesson::query()
             ->where('calendar_id', $this->calendarId)

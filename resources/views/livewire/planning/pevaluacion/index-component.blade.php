@@ -24,6 +24,7 @@
             filter_profesor: $wire.filter_profesor,
             filter_grado: $wire.filter_grado,
             filter_seccion: $wire.filter_seccion,
+            filter_asignatura: $wire.filter_asignatura,
             filter_lapso: $wire.filter_lapso
           };
           localStorage.setItem('pevaluacion_filters', JSON.stringify(data));
@@ -91,6 +92,16 @@
                     class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     <option value="">{{ $filter_grado ? 'Todos' : 'Elija un grado' }}</option>
                     @foreach($filter_secciones as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Asignatura</label>
+                <select wire:model.live="filter_asignatura" @disabled(!$filter_pestudio)
+                    class="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    <option value="">{{ $filter_pestudio ? 'Todas' : 'Elija un plan' }}</option>
+                    @foreach($filter_asignaturas as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>

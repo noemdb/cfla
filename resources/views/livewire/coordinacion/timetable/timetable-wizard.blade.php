@@ -1364,7 +1364,7 @@
                         @endif
 
                         @php $secGrid = $sectionPreviewGrid ?? []; @endphp
-                        @if ($secGrid !== [])
+                        @if ($preview && $periodsList->isNotEmpty())
                             <div class="flex items-center justify-end">
                                 <a href="{{ route($moduleRoutePrefix.'.timetable.pdf.preview', ['calendar' => $calendarId, 'seccion' => (int) $activeSeccionId]) }}"
                                     target="_blank" rel="noopener"
